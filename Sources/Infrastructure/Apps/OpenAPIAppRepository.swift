@@ -1,68 +1,36 @@
+@preconcurrency import AppStoreConnect_Swift_SDK
 import Domain
-import OpenAPIRuntime
 
-public struct OpenAPIAppRepository: AppRepository {
-    private let client: Client
+public struct SDKAppRepository: AppRepository, @unchecked Sendable {
+    private let provider: APIProvider
 
-    public init(client: Client) {
-        self.client = client
+    public init(provider: APIProvider) {
+        self.provider = provider
     }
 
-    public func listApps(limit: Int?) async throws -> PaginatedResponse<App> {
-        let response = try await client.apps_hyphen_get_collection(
-            query: .init(limit: limit)
+    public func listApps(limit: Int?) async throws -> PaginatedResponse<Domain.App> {
+        let request = APIEndpoint.v1.apps.get(parameters: .init(
+            limit: limit
+        ))
+        let response = try await provider.request(request)
+        let apps = response.data.map { mapApp($0) }
+        let nextCursor = response.links.next
+        return PaginatedResponse(data: apps, nextCursor: nextCursor)
+    }
+
+    public func getApp(id: String) async throws -> Domain.App {
+        let request = APIEndpoint.v1.apps.id(id).get()
+        let response = try await provider.request(request)
+        return mapApp(response.data)
+    }
+
+    private func mapApp(_ sdkApp: AppStoreConnect_Swift_SDK.App) -> Domain.App {
+        Domain.App(
+            id: sdkApp.id,
+            name: sdkApp.attributes?.name ?? "",
+            bundleId: sdkApp.attributes?.bundleID ?? "",
+            sku: sdkApp.attributes?.sku,
+            primaryLocale: sdkApp.attributes?.primaryLocale
         )
-
-        switch response {
-        case .ok(let okResponse):
-            let body = try okResponse.body.json
-            let apps = body.data.map { item in
-                App(
-                    id: item.id,
-                    name: item.attributes?.name ?? "",
-                    bundleId: item.attributes?.bundleId ?? "",
-                    sku: item.attributes?.sku,
-                    primaryLocale: item.attributes?.primaryLocale
-                )
-            }
-            let nextCursor = body.links.next
-            return PaginatedResponse(data: apps, nextCursor: nextCursor)
-
-        case .badRequest:
-            throw APIError.unknown("Bad request")
-        case .forbidden:
-            throw APIError.forbidden
-        case .unauthorized:
-            throw APIError.unauthorized
-        case .undocumented(let statusCode, _):
-            throw APIError.serverError(statusCode)
-        }
-    }
-
-    public func getApp(id: String) async throws -> App {
-        let response = try await client.apps_hyphen_get_instance(path: .init(id: id))
-
-        switch response {
-        case .ok(let okResponse):
-            let body = try okResponse.body.json
-            return App(
-                id: body.data.id,
-                name: body.data.attributes?.name ?? "",
-                bundleId: body.data.attributes?.bundleId ?? "",
-                sku: body.data.attributes?.sku,
-                primaryLocale: body.data.attributes?.primaryLocale
-            )
-
-        case .badRequest:
-            throw APIError.unknown("Bad request")
-        case .forbidden:
-            throw APIError.forbidden
-        case .unauthorized:
-            throw APIError.unauthorized
-        case .notFound:
-            throw APIError.notFound("App with id \(id) not found")
-        case .undocumented(let statusCode, _):
-            throw APIError.serverError(statusCode)
-        }
     }
 }

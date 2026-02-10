@@ -1,4 +1,5 @@
 import ArgumentParser
+import Domain
 import Infrastructure
 
 struct AuthCommand: AsyncParsableCommand {

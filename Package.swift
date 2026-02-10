@@ -8,12 +8,8 @@ let package = Package(
         .executable(name: "asc", targets: ["ASCCommand"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-openapi-generator", from: "1.6.0"),
-        .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.7.0"),
-        .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.0.0"),
-        .package(url: "https://github.com/apple/swift-http-types", from: "1.0.2"),
+        .package(url: "https://github.com/AvdLee/appstoreconnect-swift-sdk.git", from: "4.0.0"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0"),
-        .package(url: "https://github.com/apple/swift-crypto", "1.0.0" ..< "5.0.0"),
         .package(url: "https://github.com/Kolos65/Mockable", from: "0.6.0"),
     ],
     targets: [
@@ -28,13 +24,7 @@ let package = Package(
             name: "Infrastructure",
             dependencies: [
                 "Domain",
-                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
-                .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
-                .product(name: "HTTPTypes", package: "swift-http-types"),
-                .product(name: "Crypto", package: "swift-crypto"),
-            ],
-            plugins: [
-                .plugin(name: "OpenAPIGenerator", package: "swift-openapi-generator"),
+                .product(name: "AppStoreConnect-Swift-SDK", package: "appstoreconnect-swift-sdk"),
             ]
         ),
         .executableTarget(

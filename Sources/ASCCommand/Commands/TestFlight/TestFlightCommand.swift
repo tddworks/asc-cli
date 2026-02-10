@@ -24,8 +24,8 @@ struct BetaGroupsList: AsyncParsableCommand {
     var limit: Int?
 
     func run() async throws {
-        let repos = try ClientProvider.makeRepositories()
-        let response = try await repos.testFlight.listBetaGroups(appId: app, limit: limit)
+        let repo = try ClientProvider.makeTestFlightRepository()
+        let response = try await repo.listBetaGroups(appId: app, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
 
         let output = try formatter.formatItems(
@@ -54,8 +54,8 @@ struct BetaTestersList: AsyncParsableCommand {
     var limit: Int?
 
     func run() async throws {
-        let repos = try ClientProvider.makeRepositories()
-        let response = try await repos.testFlight.listBetaTesters(groupId: group, limit: limit)
+        let repo = try ClientProvider.makeTestFlightRepository()
+        let response = try await repo.listBetaTesters(groupId: group, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
 
         let output = try formatter.formatItems(

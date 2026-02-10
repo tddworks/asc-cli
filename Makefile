@@ -1,4 +1,4 @@
-.PHONY: build test lint format clean download-spec dev run
+.PHONY: build test lint format clean dev run
 
 build:
 	swift build
@@ -16,9 +16,6 @@ format:
 clean:
 	swift package clean
 	rm -rf .build
-
-download-spec:
-	bash Scripts/download-spec.sh
 
 dev: build
 	.build/debug/asc --help

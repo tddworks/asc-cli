@@ -1,93 +1,64 @@
+@preconcurrency import AppStoreConnect_Swift_SDK
 import Domain
-import OpenAPIRuntime
 
-public struct OpenAPITestFlightRepository: TestFlightRepository {
-    private let client: Client
+public struct SDKTestFlightRepository: TestFlightRepository, @unchecked Sendable {
+    private let provider: APIProvider
 
-    public init(client: Client) {
-        self.client = client
+    public init(provider: APIProvider) {
+        self.provider = provider
     }
 
-    public func listBetaGroups(appId: String?, limit: Int?) async throws -> PaginatedResponse<BetaGroup> {
+    public func listBetaGroups(appId: String?, limit: Int?) async throws -> PaginatedResponse<Domain.BetaGroup> {
         var filterApp: [String]?
         if let appId {
             filterApp = [appId]
         }
 
-        let response = try await client.betaGroups_hyphen_get_collection(
-            query: .init(
-                filter_lbrack_app_rbrack_: filterApp,
-                limit: limit
-            )
+        let request = APIEndpoint.v1.betaGroups.get(parameters: .init(
+            filterApp: filterApp,
+            limit: limit
+        ))
+        let response = try await provider.request(request)
+        let groups = response.data.map { mapBetaGroup($0) }
+        let nextCursor = response.links.next
+        return PaginatedResponse(data: groups, nextCursor: nextCursor)
+    }
+
+    public func listBetaTesters(groupId: String?, limit: Int?) async throws -> PaginatedResponse<Domain.BetaTester> {
+        let request = APIEndpoint.v1.betaTesters.get(parameters: .init(
+            limit: limit
+        ))
+        let response = try await provider.request(request)
+        let testers = response.data.map { mapBetaTester($0) }
+        let nextCursor = response.links.next
+        return PaginatedResponse(data: testers, nextCursor: nextCursor)
+    }
+
+    private func mapBetaGroup(_ sdkGroup: AppStoreConnect_Swift_SDK.BetaGroup) -> Domain.BetaGroup {
+        Domain.BetaGroup(
+            id: sdkGroup.id,
+            name: sdkGroup.attributes?.name ?? "",
+            isInternalGroup: sdkGroup.attributes?.isInternalGroup ?? false,
+            publicLinkEnabled: sdkGroup.attributes?.isPublicLinkEnabled ?? false,
+            createdDate: sdkGroup.attributes?.createdDate
         )
-
-        switch response {
-        case .ok(let okResponse):
-            let body = try okResponse.body.json
-            let groups = body.data.map { item in
-                BetaGroup(
-                    id: item.id,
-                    name: item.attributes?.name ?? "",
-                    isInternalGroup: item.attributes?.isInternalGroup ?? false,
-                    publicLinkEnabled: item.attributes?.publicLinkEnabled ?? false,
-                    createdDate: item.attributes?.createdDate.flatMap { parseDate($0) }
-                )
-            }
-            let nextCursor = body.links.next
-            return PaginatedResponse(data: groups, nextCursor: nextCursor)
-
-        case .badRequest:
-            throw APIError.unknown("Bad request")
-        case .forbidden:
-            throw APIError.forbidden
-        case .unauthorized:
-            throw APIError.unauthorized
-        case .undocumented(let statusCode, _):
-            throw APIError.serverError(statusCode)
-        }
     }
 
-    public func listBetaTesters(groupId: String?, limit: Int?) async throws -> PaginatedResponse<BetaTester> {
-        let response = try await client.betaTesters_hyphen_get_collection(
-            query: .init(limit: limit)
+    private func mapBetaTester(_ sdkTester: AppStoreConnect_Swift_SDK.BetaTester) -> Domain.BetaTester {
+        Domain.BetaTester(
+            id: sdkTester.id,
+            firstName: sdkTester.attributes?.firstName,
+            lastName: sdkTester.attributes?.lastName,
+            email: sdkTester.attributes?.email,
+            inviteType: mapInviteType(sdkTester.attributes?.inviteType)
         )
-
-        switch response {
-        case .ok(let okResponse):
-            let body = try okResponse.body.json
-            let testers = body.data.map { item in
-                BetaTester(
-                    id: item.id,
-                    firstName: item.attributes?.firstName,
-                    lastName: item.attributes?.lastName,
-                    email: item.attributes?.email,
-                    inviteType: mapInviteType(item.attributes?.inviteType)
-                )
-            }
-            let nextCursor = body.links.next
-            return PaginatedResponse(data: testers, nextCursor: nextCursor)
-
-        case .badRequest:
-            throw APIError.unknown("Bad request")
-        case .forbidden:
-            throw APIError.forbidden
-        case .unauthorized:
-            throw APIError.unauthorized
-        case .undocumented(let statusCode, _):
-            throw APIError.serverError(statusCode)
-        }
     }
 
-    private func parseDate(_ dateString: String) -> Date? {
-        let formatter = ISO8601DateFormatter()
-        return formatter.date(from: dateString)
-    }
-
-    private func mapInviteType(_ type: Components.Schemas.BetaTesterAttributes.inviteTypePayload?) -> BetaTester.InviteType? {
+    private func mapInviteType(_ type: AppStoreConnect_Swift_SDK.BetaInviteType?) -> Domain.BetaTester.InviteType? {
         guard let type else { return nil }
         switch type {
-        case .EMAIL: return .email
-        case .PUBLIC_LINK: return .publicLink
+        case .email: return .email
+        case .publicLink: return .publicLink
         }
     }
 }

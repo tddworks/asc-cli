@@ -13,8 +13,8 @@ struct AppsList: AsyncParsableCommand {
     var limit: Int?
 
     func run() async throws {
-        let repos = try ClientProvider.makeRepositories()
-        let response = try await repos.apps.listApps(limit: limit)
+        let repo = try ClientProvider.makeAppRepository()
+        let response = try await repo.listApps(limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
 
         let output = try formatter.formatItems(

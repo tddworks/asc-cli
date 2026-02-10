@@ -16,8 +16,8 @@ struct BuildsList: AsyncParsableCommand {
     var limit: Int?
 
     func run() async throws {
-        let repos = try ClientProvider.makeRepositories()
-        let response = try await repos.builds.listBuilds(appId: app, limit: limit)
+        let repo = try ClientProvider.makeBuildRepository()
+        let response = try await repo.listBuilds(appId: app, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
 
         let output = try formatter.formatItems(

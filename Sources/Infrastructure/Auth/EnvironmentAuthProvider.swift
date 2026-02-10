@@ -1,16 +1,12 @@
+import AppStoreConnect_Swift_SDK
 import Domain
 import Foundation
 
 public struct EnvironmentAuthProvider: AuthProvider {
     private let environment: [String: String]
-    private let keyLoader: PrivateKeyLoader
 
-    public init(
-        environment: [String: String] = ProcessInfo.processInfo.environment,
-        keyLoader: PrivateKeyLoader = PrivateKeyLoader()
-    ) {
+    public init(environment: [String: String] = ProcessInfo.processInfo.environment) {
         self.environment = environment
-        self.keyLoader = keyLoader
     }
 
     public func resolve() throws -> AuthCredentials {
@@ -24,9 +20,15 @@ public struct EnvironmentAuthProvider: AuthProvider {
         let privateKeyPEM: String
 
         if let keyPath = environment["ASC_PRIVATE_KEY_PATH"], !keyPath.isEmpty {
-            privateKeyPEM = try keyLoader.loadFromFile(path: keyPath)
+            let expandedPath = NSString(string: keyPath).expandingTildeInPath
+            let url = URL(fileURLWithPath: expandedPath)
+            privateKeyPEM = try String(contentsOf: url, encoding: .utf8)
         } else if let keyBase64 = environment["ASC_PRIVATE_KEY_B64"], !keyBase64.isEmpty {
-            privateKeyPEM = try keyLoader.loadFromBase64(keyBase64)
+            guard let data = Data(base64Encoded: keyBase64),
+                  let pem = String(data: data, encoding: .utf8) else {
+                throw AuthError.invalidPrivateKey("Invalid base64 encoding")
+            }
+            privateKeyPEM = pem
         } else if let keyDirect = environment["ASC_PRIVATE_KEY"], !keyDirect.isEmpty {
             privateKeyPEM = keyDirect
         } else {
