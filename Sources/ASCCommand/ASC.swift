@@ -12,6 +12,7 @@ struct ASC: AsyncParsableCommand {
             TestFlightCommand.self,
             AuthCommand.self,
             VersionCommand.self,
+            TUICommand.self,
         ]
     )
 }

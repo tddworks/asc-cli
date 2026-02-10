@@ -11,6 +11,7 @@ let package = Package(
         .package(url: "https://github.com/AvdLee/appstoreconnect-swift-sdk.git", from: "4.0.0"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0"),
         .package(url: "https://github.com/Kolos65/Mockable", from: "0.6.0"),
+        .package(url: "https://github.com/steipete/TauTUI.git", from: "0.1.5"),
     ],
     targets: [
         .target(
@@ -33,6 +34,7 @@ let package = Package(
                 "Domain",
                 "Infrastructure",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "TauTUI", package: "TauTUI"),
             ]
         ),
         .testTarget(
