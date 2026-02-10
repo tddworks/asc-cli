@@ -23,10 +23,17 @@ public struct ClientFactory: Sendable {
 
     private func makeProvider(authProvider: any AuthProvider) throws -> APIProvider {
         let credentials = try authProvider.resolve()
+        let strippedKey = credentials.privateKeyPEM
+            .replacingOccurrences(of: "-----BEGIN PRIVATE KEY-----", with: "")
+            .replacingOccurrences(of: "-----END PRIVATE KEY-----", with: "")
+            .replacingOccurrences(of: "-----BEGIN EC PRIVATE KEY-----", with: "")
+            .replacingOccurrences(of: "-----END EC PRIVATE KEY-----", with: "")
+            .replacingOccurrences(of: "\n", with: "")
+            .trimmingCharacters(in: .whitespaces)
         let configuration = try APIConfiguration(
             issuerID: credentials.issuerID,
             privateKeyID: credentials.keyID,
-            privateKey: credentials.privateKeyPEM
+            privateKey: strippedKey
         )
         return APIProvider(configuration: configuration)
     }
