@@ -17,10 +17,6 @@ struct TUICommand: AsyncParsableCommand {
         app.navigate(to: .mainMenu)
 
         try tui.start()
-
-        // Keep the process alive until TUI exits (via exit(0) in TUIApp)
-        await withCheckedContinuation { (_: CheckedContinuation<Void, Never>) in
-            // Never resumes — TUIApp calls exit(0) when user quits
-        }
+        await app.waitForExit()
     }
 }

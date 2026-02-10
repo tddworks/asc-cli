@@ -19,9 +19,23 @@ final class TUIApp {
     private let tui: TUI
     private var currentComponent: Component?
     private var navigationStack: [Screen] = []
+    private var exitContinuation: CheckedContinuation<Void, Never>?
 
     init(tui: TUI) {
         self.tui = tui
+    }
+
+    /// Blocks until the user quits the TUI.
+    func waitForExit() async {
+        await withCheckedContinuation { continuation in
+            self.exitContinuation = continuation
+        }
+    }
+
+    private func quit() {
+        tui.stop()
+        exitContinuation?.resume()
+        exitContinuation = nil
     }
 
     func navigate(to screen: Screen) {
@@ -35,8 +49,8 @@ final class TUIApp {
 
     func goBack() {
         guard navigationStack.count > 1 else {
-            tui.stop()
-            exit(0)
+            quit()
+            return
         }
         navigationStack.removeLast()
         if let previous = navigationStack.last {
@@ -92,6 +106,7 @@ final class TUIApp {
         currentComponent = component
         tui.addChild(component)
         tui.setFocus(component)
+        tui.requestRender()
     }
 
     // MARK: - Main Menu
@@ -114,15 +129,13 @@ final class TUIApp {
             case "testflight":
                 self.navigate(to: .testFlightMenu)
             case "quit":
-                self.tui.stop()
-                exit(0)
+                self.quit()
             default:
                 break
             }
         }
         list.onCancel = { [weak self] in
-            self?.tui.stop()
-            exit(0)
+            self?.quit()
         }
         return list
     }
