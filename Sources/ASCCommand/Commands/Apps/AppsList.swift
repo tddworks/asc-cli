@@ -17,7 +17,7 @@ struct AppsList: AsyncParsableCommand {
         let response = try await repo.listApps(limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
 
-        let output = try formatter.formatItems(
+        let output = try formatter.formatAgentItems(
             response.data,
             headers: ["ID", "Name", "Bundle ID", "SKU"],
             rowMapper: { app in

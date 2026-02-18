@@ -10,3 +10,12 @@ public struct AppStoreVersionLocalization: Sendable, Equatable, Identifiable, Co
         self.locale = locale
     }
 }
+
+extension AppStoreVersionLocalization: AffordanceProviding {
+    public var affordances: [String: String] {
+        [
+            "listScreenshotSets": "asc screenshot-sets list --localization-id \(id)",
+            "listLocalizations": "asc localizations list --version-id \(versionId)",
+        ]
+    }
+}

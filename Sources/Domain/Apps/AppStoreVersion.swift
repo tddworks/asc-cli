@@ -32,6 +32,19 @@ public struct AppStoreVersion: Sendable, Equatable, Identifiable, Codable {
     public var displayName: String { "\(platform.displayName) \(versionString)" }
 }
 
+extension AppStoreVersion: AffordanceProviding {
+    public var affordances: [String: String] {
+        var cmds: [String: String] = [
+            "listLocalizations": "asc localizations list --version-id \(id)",
+            "listVersions": "asc versions list --app-id \(appId)",
+        ]
+        if isEditable {
+            cmds["submitForReview"] = "asc versions submit --version-id \(id)"
+        }
+        return cmds
+    }
+}
+
 public enum AppStorePlatform: String, Sendable, Equatable, Codable, CaseIterable {
     case iOS = "IOS"
     case macOS = "MAC_OS"

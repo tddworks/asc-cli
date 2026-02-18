@@ -23,3 +23,9 @@ public struct App: Sendable, Codable, Equatable, Identifiable {
         name.isEmpty ? bundleId : name
     }
 }
+
+extension App: AffordanceProviding {
+    public var affordances: [String: String] {
+        ["listVersions": "asc versions list --app-id \(id)"]
+    }
+}

@@ -1,6 +1,32 @@
 import Domain
 import Foundation
 
+// MARK: - Agent-first encoding helpers
+
+/// Wraps a list in {"data": [...]} for agent-first JSON responses.
+private struct DataResponse<T: Encodable>: Encodable {
+    let data: [T]
+}
+
+/// Merges affordances into the JSON encoding of any AffordanceProviding + Encodable item.
+private struct WithAffordances<T: Encodable & AffordanceProviding>: Encodable {
+    private let item: T
+
+    init(_ item: T) { self.item = item }
+
+    func encode(to encoder: any Encoder) throws {
+        try item.encode(to: encoder)
+        var container = encoder.container(keyedBy: AffordanceCodingKey.self)
+        try container.encode(item.affordances, forKey: .affordances)
+    }
+
+    private enum AffordanceCodingKey: String, CodingKey {
+        case affordances
+    }
+}
+
+// MARK: - OutputFormatter
+
 struct OutputFormatter {
     let format: OutputFormat
     let pretty: Bool
@@ -25,6 +51,22 @@ struct OutputFormatter {
         switch format {
         case .json:
             return try formatJSON(items)
+        case .table:
+            return renderTable(headers: headers, rows: items.map(rowMapper))
+        case .markdown:
+            return renderMarkdownTable(headers: headers, rows: items.map(rowMapper))
+        }
+    }
+
+    /// Agent-first format: {"data": [...]} with affordances merged into each item.
+    func formatAgentItems<T: Encodable & AffordanceProviding>(
+        _ items: [T],
+        headers: [String],
+        rowMapper: (T) -> [String]
+    ) throws -> String {
+        switch format {
+        case .json:
+            return try formatJSON(DataResponse(data: items.map(WithAffordances.init)))
         case .table:
             return renderTable(headers: headers, rows: items.map(rowMapper))
         case .markdown:

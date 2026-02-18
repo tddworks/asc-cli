@@ -21,3 +21,12 @@ public struct AppScreenshotSet: Sendable, Codable, Equatable, Identifiable {
     public var deviceCategory: ScreenshotDisplayType.DeviceCategory { screenshotDisplayType.deviceCategory }
     public var displayTypeName: String { screenshotDisplayType.displayName }
 }
+
+extension AppScreenshotSet: AffordanceProviding {
+    public var affordances: [String: String] {
+        [
+            "listScreenshots": "asc screenshots list --set-id \(id)",
+            "listScreenshotSets": "asc screenshot-sets list --localization-id \(localizationId)",
+        ]
+    }
+}

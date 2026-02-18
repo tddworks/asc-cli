@@ -5,35 +5,8 @@ struct ScreenshotsCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "screenshots",
         abstract: "Manage App Store screenshots",
-        subcommands: [ScreenshotSetsList.self, ScreenshotsList.self]
+        subcommands: [ScreenshotsList.self]
     )
-}
-
-struct ScreenshotSetsList: AsyncParsableCommand {
-    static let configuration = CommandConfiguration(
-        commandName: "sets",
-        abstract: "List screenshot sets for an App Store version localization"
-    )
-
-    @OptionGroup var globals: GlobalOptions
-
-    @Option(name: .long, help: "App Store version localization ID")
-    var localization: String
-
-    func run() async throws {
-        let repo = try ClientProvider.makeScreenshotRepository()
-        let sets = try await repo.listScreenshotSets(localizationId: localization)
-        let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-
-        let output = try formatter.formatItems(
-            sets,
-            headers: ["ID", "Display Type", "Device", "Count"],
-            rowMapper: { set in
-                [set.id, set.displayTypeName, set.deviceCategory.rawValue, "\(set.screenshotsCount)"]
-            }
-        )
-        print(output)
-    }
 }
 
 struct ScreenshotsList: AsyncParsableCommand {
@@ -45,11 +18,11 @@ struct ScreenshotsList: AsyncParsableCommand {
     @OptionGroup var globals: GlobalOptions
 
     @Option(name: .long, help: "Screenshot set ID")
-    var set: String
+    var setId: String
 
     func run() async throws {
         let repo = try ClientProvider.makeScreenshotRepository()
-        let screenshots = try await repo.listScreenshots(setId: set)
+        let screenshots = try await repo.listScreenshots(setId: setId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
 
         let output = try formatter.formatItems(

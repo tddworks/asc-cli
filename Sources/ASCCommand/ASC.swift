@@ -8,9 +8,12 @@ struct ASC: AsyncParsableCommand {
         version: "0.1.0",
         subcommands: [
             AppsCommand.self,
+            VersionsCommand.self,
+            LocalizationsCommand.self,
+            ScreenshotSetsCommand.self,
+            ScreenshotsCommand.self,
             BuildsCommand.self,
             TestFlightCommand.self,
-            ScreenshotsCommand.self,
             AuthCommand.self,
             VersionCommand.self,
             TUICommand.self,
