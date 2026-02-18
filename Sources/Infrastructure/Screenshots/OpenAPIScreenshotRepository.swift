@@ -8,37 +8,28 @@ public struct SDKScreenshotRepository: ScreenshotRepository, @unchecked Sendable
         self.provider = provider
     }
 
+    public func listLocalizations(versionId: String) async throws -> [Domain.AppStoreVersionLocalization] {
+        let request = APIEndpoint.v1.appStoreVersions.id(versionId).appStoreVersionLocalizations.get()
+        let response = try await provider.request(request)
+        return response.data.map { mapLocalization($0) }
+    }
+
     public func listScreenshotSets(localizationId: String) async throws -> [Domain.AppScreenshotSet] {
         let request = APIEndpoint.v1.appStoreVersionLocalizations.id(localizationId).appScreenshotSets.get()
         let response = try await provider.request(request)
         return response.data.map { mapScreenshotSet($0) }
     }
 
-    public func listScreenshotSets(appId: String) async throws -> [Domain.AppScreenshotSet] {
-        // Fetch all platform versions (iOS, macOS, tvOS, watchOS, visionOS may each be separate)
-        let versionsRequest = APIEndpoint.v1.apps.id(appId).appStoreVersions.get()
-        let versionsResponse = try await provider.request(versionsRequest)
-        guard !versionsResponse.data.isEmpty else { return [] }
-
-        // For each platform version, get its first localization and collect all screenshot sets
-        var allSets: [Domain.AppScreenshotSet] = []
-        for version in versionsResponse.data {
-            let locRequest = APIEndpoint.v1.appStoreVersions.id(version.id).appStoreVersionLocalizations.get(
-                parameters: .init(limit: 1)
-            )
-            guard let locResponse = try? await provider.request(locRequest),
-                  let locId = locResponse.data.first?.id else { continue }
-
-            let sets = try await listScreenshotSets(localizationId: locId)
-            allSets.append(contentsOf: sets)
-        }
-        return allSets
-    }
-
     public func listScreenshots(setId: String) async throws -> [Domain.AppScreenshot] {
         let request = APIEndpoint.v1.appScreenshotSets.id(setId).appScreenshots.get()
         let response = try await provider.request(request)
         return response.data.map { mapScreenshot($0) }
+    }
+
+    private func mapLocalization(
+        _ sdkLoc: AppStoreConnect_Swift_SDK.AppStoreVersionLocalization
+    ) -> Domain.AppStoreVersionLocalization {
+        Domain.AppStoreVersionLocalization(id: sdkLoc.id, locale: sdkLoc.attributes?.locale ?? "")
     }
 
     private func mapScreenshotSet(

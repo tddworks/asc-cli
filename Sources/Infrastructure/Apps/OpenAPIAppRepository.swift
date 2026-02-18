@@ -24,6 +24,25 @@ public struct SDKAppRepository: AppRepository, @unchecked Sendable {
         return mapApp(response.data)
     }
 
+    public func listVersions(appId: String) async throws -> [Domain.AppStoreVersion] {
+        let request = APIEndpoint.v1.apps.id(appId).appStoreVersions.get()
+        let response = try await provider.request(request)
+        return response.data.compactMap { mapVersion($0) }
+    }
+
+    private func mapVersion(
+        _ sdkVersion: AppStoreConnect_Swift_SDK.AppStoreVersion
+    ) -> Domain.AppStoreVersion? {
+        guard let platform = Domain.AppStorePlatform(
+            rawValue: sdkVersion.attributes?.platform?.rawValue ?? ""
+        ) else { return nil }
+        return Domain.AppStoreVersion(
+            id: sdkVersion.id,
+            versionString: sdkVersion.attributes?.versionString ?? "",
+            platform: platform
+        )
+    }
+
     private func mapApp(_ sdkApp: AppStoreConnect_Swift_SDK.App) -> Domain.App {
         Domain.App(
             id: sdkApp.id,

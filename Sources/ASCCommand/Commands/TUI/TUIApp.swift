@@ -10,8 +10,9 @@ final class TUIApp {
         case appsList
         case appMenu(App)
         case appInfo(App)
-        case platformPicker(App)
-        case screenshotSetsForPlatform(ScreenshotDisplayType.DeviceCategory, [AppScreenshotSet])
+        case versionsList(App)
+        case localizationsList(AppStoreVersion)
+        case screenshotSetsList(AppStoreVersionLocalization)
         case screenshotsList(AppScreenshotSet)
         case buildsList
         case buildDetail(Build)
@@ -81,13 +82,21 @@ final class TUIApp {
             component = makeAppMenu(app)
         case .appInfo(let app):
             component = makeAppInfo(app)
-        case .platformPicker(let app):
-            let loader = makeLoadingView(title: "Loading screenshots...")
+        case .versionsList(let app):
+            let loader = makeLoadingView(title: "Loading versions...")
             showComponent(loader)
-            Task { @MainActor in await self.loadPlatformPicker(for: app) }
+            Task { @MainActor in await self.loadVersions(for: app) }
             return
-        case .screenshotSetsForPlatform(let category, let sets):
-            component = makeScreenshotSetsView(category: category, sets: sets)
+        case .localizationsList(let version):
+            let loader = makeLoadingView(title: "Loading localizations...")
+            showComponent(loader)
+            Task { @MainActor in await self.loadLocalizations(for: version) }
+            return
+        case .screenshotSetsList(let localization):
+            let loader = makeLoadingView(title: "Loading screenshot sets...")
+            showComponent(loader)
+            Task { @MainActor in await self.loadScreenshotSets(for: localization) }
+            return
         case .screenshotsList(let set):
             let loader = makeLoadingView(title: "Loading screenshots...")
             showComponent(loader)
@@ -194,7 +203,7 @@ final class TUIApp {
             case "info":
                 self.navigate(to: .appInfo(app))
             case "screenshots":
-                self.navigate(to: .platformPicker(app))
+                self.navigate(to: .versionsList(app))
             default:
                 break
             }
@@ -222,46 +231,30 @@ final class TUIApp {
 
     // MARK: - Screenshots
 
-    private func loadPlatformPicker(for app: App) async {
+    private func loadVersions(for app: App) async {
         do {
-            let repo = try ClientProvider.makeScreenshotRepository()
-            let sets = try await repo.listScreenshotSets(appId: app.id)
+            let repo = try ClientProvider.makeAppRepository()
+            let versions = try await repo.listVersions(appId: app.id)
 
-            guard !sets.isEmpty else {
+            guard !versions.isEmpty else {
                 showComponent(makeTextView(lines: [
-                    "No Screenshot Sets",
+                    "No Versions",
                     String(repeating: "─", count: 40),
-                    "No screenshot sets found for \(app.displayName).",
-                    "Upload screenshots in App Store Connect first.",
+                    "No App Store versions found for \(app.displayName).",
                     "",
                     "Press Escape to go back",
                 ]))
                 return
             }
 
-            // Collect available platforms in stable order (preserving first-seen order)
-            var seen = Set<ScreenshotDisplayType.DeviceCategory>()
-            var platforms: [ScreenshotDisplayType.DeviceCategory] = []
-            for set in sets {
-                if seen.insert(set.deviceCategory).inserted {
-                    platforms.append(set.deviceCategory)
-                }
-            }
-
-            let items = platforms.map { category in
-                let count = sets.filter { $0.deviceCategory == category }.count
-                return SelectItem(
-                    value: category.rawValue,
-                    label: category.displayName,
-                    description: "\(count) set\(count == 1 ? "" : "s")"
-                )
+            let items = versions.map { version in
+                SelectItem(value: version.id, label: version.displayName, description: nil)
             }
             let list = SelectList(items: items)
             list.onSelect = { [weak self] item in
-                guard let self,
-                      let category = ScreenshotDisplayType.DeviceCategory(rawValue: item.value) else { return }
-                let filtered = sets.filter { $0.deviceCategory == category }
-                self.navigate(to: .screenshotSetsForPlatform(category, filtered))
+                if let version = versions.first(where: { $0.id == item.value }) {
+                    self?.navigate(to: .localizationsList(version))
+                }
             }
             list.onCancel = { [weak self] in
                 self?.goBack()
@@ -272,24 +265,80 @@ final class TUIApp {
         }
     }
 
-    private func makeScreenshotSetsView(
-        category: ScreenshotDisplayType.DeviceCategory,
-        sets: [AppScreenshotSet]
-    ) -> Component {
-        let items = sets.map { set in
-            let count = set.screenshotsCount == 0 ? "empty" : "\(set.screenshotsCount) screenshot\(set.screenshotsCount == 1 ? "" : "s")"
-            return SelectItem(value: set.id, label: set.displayTypeName, description: count)
-        }
-        let list = SelectList(items: items)
-        list.onSelect = { [weak self] item in
-            if let set = sets.first(where: { $0.id == item.value }) {
-                self?.navigate(to: .screenshotsList(set))
+    private func loadLocalizations(for version: AppStoreVersion) async {
+        do {
+            let repo = try ClientProvider.makeScreenshotRepository()
+            let localizations = try await repo.listLocalizations(versionId: version.id)
+
+            guard !localizations.isEmpty else {
+                showComponent(makeTextView(lines: [
+                    "No Localizations",
+                    String(repeating: "─", count: 40),
+                    "No localizations found for \(version.displayName).",
+                    "",
+                    "Press Escape to go back",
+                ]))
+                return
             }
+
+            // If there's only one localization, skip the picker and go straight to sets.
+            if localizations.count == 1 {
+                navigate(to: .screenshotSetsList(localizations[0]))
+                return
+            }
+
+            let items = localizations.map { loc in
+                SelectItem(value: loc.id, label: loc.locale, description: nil)
+            }
+            let list = SelectList(items: items)
+            list.onSelect = { [weak self] item in
+                if let loc = localizations.first(where: { $0.id == item.value }) {
+                    self?.navigate(to: .screenshotSetsList(loc))
+                }
+            }
+            list.onCancel = { [weak self] in
+                self?.goBack()
+            }
+            showComponent(list)
+        } catch {
+            showComponent(makeErrorView(error: error))
         }
-        list.onCancel = { [weak self] in
-            self?.goBack()
+    }
+
+    private func loadScreenshotSets(for localization: AppStoreVersionLocalization) async {
+        do {
+            let repo = try ClientProvider.makeScreenshotRepository()
+            let sets = try await repo.listScreenshotSets(localizationId: localization.id)
+
+            guard !sets.isEmpty else {
+                showComponent(makeTextView(lines: [
+                    "No Screenshot Sets",
+                    String(repeating: "─", count: 40),
+                    "No screenshot sets for \(localization.locale).",
+                    "Upload screenshots in App Store Connect first.",
+                    "",
+                    "Press Escape to go back",
+                ]))
+                return
+            }
+
+            let items = sets.map { set in
+                let count = set.screenshotsCount == 0 ? "empty" : "\(set.screenshotsCount) screenshot\(set.screenshotsCount == 1 ? "" : "s")"
+                return SelectItem(value: set.id, label: set.displayTypeName, description: count)
+            }
+            let list = SelectList(items: items)
+            list.onSelect = { [weak self] item in
+                if let set = sets.first(where: { $0.id == item.value }) {
+                    self?.navigate(to: .screenshotsList(set))
+                }
+            }
+            list.onCancel = { [weak self] in
+                self?.goBack()
+            }
+            showComponent(list)
+        } catch {
+            showComponent(makeErrorView(error: error))
         }
-        return list
     }
 
     private func loadScreenshots(for set: AppScreenshotSet) async {

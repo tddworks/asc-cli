@@ -6,6 +6,30 @@ import Testing
 struct ScreenshotRepositoryTests {
 
     @Test
+    func `list localizations returns localizations for version`() async throws {
+        let mock = MockScreenshotRepository()
+        let localizations = [
+            MockRepositoryFactory.makeLocalization(id: "loc-1", locale: "en-US"),
+            MockRepositoryFactory.makeLocalization(id: "loc-2", locale: "zh-Hans"),
+        ]
+        given(mock).listLocalizations(versionId: .any).willReturn(localizations)
+
+        let result = try await mock.listLocalizations(versionId: "v1")
+        #expect(result.count == 2)
+        #expect(result[0].locale == "en-US")
+        #expect(result[1].locale == "zh-Hans")
+    }
+
+    @Test
+    func `list localizations returns empty when version has no localizations`() async throws {
+        let mock = MockScreenshotRepository()
+        given(mock).listLocalizations(versionId: .any).willReturn([])
+
+        let result = try await mock.listLocalizations(versionId: "v1")
+        #expect(result.isEmpty)
+    }
+
+    @Test
     func `list screenshot sets returns sets for localization`() async throws {
         let mock = MockScreenshotRepository()
         let sets = [
@@ -41,31 +65,6 @@ struct ScreenshotRepositoryTests {
         given(mock).listScreenshots(setId: .any).willReturn([])
 
         let result = try await mock.listScreenshots(setId: "empty-set")
-        #expect(result.isEmpty)
-    }
-
-    @Test
-    func `list screenshot sets for app returns sets`() async throws {
-        let mock = MockScreenshotRepository()
-        let sets = [
-            MockRepositoryFactory.makeScreenshotSet(id: "s1", displayType: .iphone67, screenshotsCount: 5),
-            MockRepositoryFactory.makeScreenshotSet(id: "s2", displayType: .ipadPro3gen129, screenshotsCount: 3),
-        ]
-        given(mock).listScreenshotSets(appId: .any).willReturn(sets)
-
-        let result = try await mock.listScreenshotSets(appId: "app-abc")
-        #expect(result.count == 2)
-        #expect(result[0].screenshotDisplayType == .iphone67)
-        #expect(result[0].screenshotsCount == 5)
-        #expect(result[1].screenshotDisplayType == .ipadPro3gen129)
-    }
-
-    @Test
-    func `list screenshot sets for app returns empty when app has no versions`() async throws {
-        let mock = MockScreenshotRepository()
-        given(mock).listScreenshotSets(appId: .any).willReturn([])
-
-        let result = try await mock.listScreenshotSets(appId: "new-app")
         #expect(result.isEmpty)
     }
 }

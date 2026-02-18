@@ -54,6 +54,21 @@ struct MockRepositoryFactory {
         BetaTester(id: id, firstName: firstName, lastName: lastName, email: email)
     }
 
+    static func makeVersion(
+        id: String = "1",
+        versionString: String = "1.0.0",
+        platform: AppStorePlatform = .iOS
+    ) -> AppStoreVersion {
+        AppStoreVersion(id: id, versionString: versionString, platform: platform)
+    }
+
+    static func makeLocalization(
+        id: String = "1",
+        locale: String = "en-US"
+    ) -> AppStoreVersionLocalization {
+        AppStoreVersionLocalization(id: id, locale: locale)
+    }
+
     static func makeScreenshotSet(
         id: String = "1",
         displayType: ScreenshotDisplayType = .iphone67,
