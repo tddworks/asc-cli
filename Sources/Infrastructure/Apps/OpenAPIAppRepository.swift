@@ -2,17 +2,17 @@
 import Domain
 
 public struct SDKAppRepository: AppRepository, @unchecked Sendable {
-    private let provider: APIProvider
+    private let client: any APIClient
 
-    public init(provider: APIProvider) {
-        self.provider = provider
+    public init(client: any APIClient) {
+        self.client = client
     }
 
     public func listApps(limit: Int?) async throws -> PaginatedResponse<Domain.App> {
         let request = APIEndpoint.v1.apps.get(parameters: .init(
             limit: limit
         ))
-        let response = try await provider.request(request)
+        let response = try await client.request(request)
         let apps = response.data.map { mapApp($0) }
         let nextCursor = response.links.next
         return PaginatedResponse(data: apps, nextCursor: nextCursor)
@@ -20,13 +20,13 @@ public struct SDKAppRepository: AppRepository, @unchecked Sendable {
 
     public func getApp(id: String) async throws -> Domain.App {
         let request = APIEndpoint.v1.apps.id(id).get()
-        let response = try await provider.request(request)
+        let response = try await client.request(request)
         return mapApp(response.data)
     }
 
     public func listVersions(appId: String) async throws -> [Domain.AppStoreVersion] {
         let request = APIEndpoint.v1.apps.id(appId).appStoreVersions.get()
-        let response = try await provider.request(request)
+        let response = try await client.request(request)
         return response.data.compactMap { mapVersion($0, appId: appId) }
     }
 

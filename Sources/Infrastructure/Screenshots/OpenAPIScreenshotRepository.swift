@@ -2,27 +2,27 @@
 import Domain
 
 public struct SDKScreenshotRepository: ScreenshotRepository, @unchecked Sendable {
-    private let provider: APIProvider
+    private let client: any APIClient
 
-    public init(provider: APIProvider) {
-        self.provider = provider
+    public init(client: any APIClient) {
+        self.client = client
     }
 
     public func listLocalizations(versionId: String) async throws -> [Domain.AppStoreVersionLocalization] {
         let request = APIEndpoint.v1.appStoreVersions.id(versionId).appStoreVersionLocalizations.get()
-        let response = try await provider.request(request)
+        let response = try await client.request(request)
         return response.data.map { mapLocalization($0, versionId: versionId) }
     }
 
     public func listScreenshotSets(localizationId: String) async throws -> [Domain.AppScreenshotSet] {
         let request = APIEndpoint.v1.appStoreVersionLocalizations.id(localizationId).appScreenshotSets.get()
-        let response = try await provider.request(request)
+        let response = try await client.request(request)
         return response.data.map { mapScreenshotSet($0, localizationId: localizationId) }
     }
 
     public func listScreenshots(setId: String) async throws -> [Domain.AppScreenshot] {
         let request = APIEndpoint.v1.appScreenshotSets.id(setId).appScreenshots.get()
-        let response = try await provider.request(request)
+        let response = try await client.request(request)
         return response.data.map { mapScreenshot($0, setId: setId) }
     }
 

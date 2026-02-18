@@ -2,10 +2,10 @@
 import Domain
 
 public struct SDKTestFlightRepository: TestFlightRepository, @unchecked Sendable {
-    private let provider: APIProvider
+    private let client: any APIClient
 
-    public init(provider: APIProvider) {
-        self.provider = provider
+    public init(client: any APIClient) {
+        self.client = client
     }
 
     public func listBetaGroups(appId: String?, limit: Int?) async throws -> PaginatedResponse<Domain.BetaGroup> {
@@ -18,7 +18,7 @@ public struct SDKTestFlightRepository: TestFlightRepository, @unchecked Sendable
             filterApp: filterApp,
             limit: limit
         ))
-        let response = try await provider.request(request)
+        let response = try await client.request(request)
         let groups = response.data.map { mapBetaGroup($0) }
         let nextCursor = response.links.next
         return PaginatedResponse(data: groups, nextCursor: nextCursor)
@@ -28,7 +28,7 @@ public struct SDKTestFlightRepository: TestFlightRepository, @unchecked Sendable
         let request = APIEndpoint.v1.betaTesters.get(parameters: .init(
             limit: limit
         ))
-        let response = try await provider.request(request)
+        let response = try await client.request(request)
         let testers = response.data.map { mapBetaTester($0) }
         let nextCursor = response.links.next
         return PaginatedResponse(data: testers, nextCursor: nextCursor)

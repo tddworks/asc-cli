@@ -2,10 +2,10 @@
 import Domain
 
 public struct SDKBuildRepository: BuildRepository, @unchecked Sendable {
-    private let provider: APIProvider
+    private let client: any APIClient
 
-    public init(provider: APIProvider) {
-        self.provider = provider
+    public init(client: any APIClient) {
+        self.client = client
     }
 
     public func listBuilds(appId: String?, limit: Int?) async throws -> PaginatedResponse<Domain.Build> {
@@ -18,7 +18,7 @@ public struct SDKBuildRepository: BuildRepository, @unchecked Sendable {
             filterApp: filterApp,
             limit: limit
         ))
-        let response = try await provider.request(request)
+        let response = try await client.request(request)
         let builds = response.data.map { mapBuild($0) }
         let nextCursor = response.links.next
         return PaginatedResponse(data: builds, nextCursor: nextCursor)
@@ -26,7 +26,7 @@ public struct SDKBuildRepository: BuildRepository, @unchecked Sendable {
 
     public func getBuild(id: String) async throws -> Domain.Build {
         let request = APIEndpoint.v1.builds.id(id).get()
-        let response = try await provider.request(request)
+        let response = try await client.request(request)
         return mapBuild(response.data)
     }
 

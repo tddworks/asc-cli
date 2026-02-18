@@ -8,22 +8,22 @@ public struct ClientFactory: Sendable {
 
     public func makeAppRepository(authProvider: any AuthProvider) throws -> any AppRepository {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKAppRepository(provider: provider)
+        return SDKAppRepository(client: provider)
     }
 
     public func makeBuildRepository(authProvider: any AuthProvider) throws -> any BuildRepository {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKBuildRepository(provider: provider)
+        return SDKBuildRepository(client: provider)
     }
 
     public func makeTestFlightRepository(authProvider: any AuthProvider) throws -> any TestFlightRepository {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKTestFlightRepository(provider: provider)
+        return SDKTestFlightRepository(client: provider)
     }
 
     public func makeScreenshotRepository(authProvider: any AuthProvider) throws -> any ScreenshotRepository {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKScreenshotRepository(provider: provider)
+        return SDKScreenshotRepository(client: provider)
     }
 
     private func makeProvider(authProvider: any AuthProvider) throws -> APIProvider {
