@@ -77,8 +77,15 @@ App → AppStoreVersion → AppStoreVersionLocalization → AppScreenshotSet →
 
 ## Testing
 
-Chicago School TDD — state-based, not interaction-based. Tests verify what domain objects return and compute, not how they call collaborators.
-- If code can't be tested, that's a design problem, not a testing exception.
+We follow the Chicago School of TDD — state-based, not interaction-based. Tests should verify what domain objects return and compute, rather than how they call their collaborators.
+
+- If code is difficult to test, treat that as a design problem, not an exception to testing.
+- The proper TDD workflow:
+    1. **Think**: What should `execute()` return in JSON mode? For example: raw field values like `"IOS"`, `"READY_FOR_SALE"`, `"expired": true`.
+    2. **Write the test**: Assert those exact output values.
+    3. **Run the test**: It should fail (red) if the functionality is not yet implemented.
+    4. **Implement**: Write just enough code to make the test pass (green).
+- Changing a test after it fails means the specification was wrong, which means step 1 (thinking) was skipped.
 - Framework: Apple's `@Testing` macro (not XCTest)
 - Mocking: `@Mockable` annotation on protocols + `given().willReturn()` in tests
 - Test naming: backtick style — `` func `version is live when state is readyForSale`() ``
