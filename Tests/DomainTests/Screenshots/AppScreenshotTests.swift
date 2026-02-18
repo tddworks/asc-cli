@@ -6,50 +6,50 @@ struct AppScreenshotTests {
 
     @Test
     func `complete asset state is complete`() {
-        let screenshot = AppScreenshot(id: "1", fileName: "screen.png", fileSize: 1024, assetState: .complete)
-        #expect(screenshot.isComplete == true)
+        let s = MockRepositoryFactory.makeScreenshot(id: "1", assetState: .complete)
+        #expect(s.isComplete == true)
     }
 
     @Test
     func `non-complete asset state is not complete`() {
-        let screenshot = AppScreenshot(id: "1", fileName: "screen.png", fileSize: 1024, assetState: .awaitingUpload)
-        #expect(screenshot.isComplete == false)
+        let s = MockRepositoryFactory.makeScreenshot(id: "1", assetState: .awaitingUpload)
+        #expect(s.isComplete == false)
     }
 
     @Test
     func `nil asset state is not complete`() {
-        let screenshot = AppScreenshot(id: "1", fileName: "screen.png", fileSize: 1024)
-        #expect(screenshot.isComplete == false)
+        let s = MockRepositoryFactory.makeScreenshot(id: "1", assetState: nil)
+        #expect(s.isComplete == false)
     }
 
     @Test
     func `file size description formats bytes`() {
-        let screenshot = AppScreenshot(id: "1", fileName: "s.png", fileSize: 512)
-        #expect(screenshot.fileSizeDescription == "512 B")
+        let s = MockRepositoryFactory.makeScreenshot(id: "1", fileSize: 512)
+        #expect(s.fileSizeDescription == "512 B")
     }
 
     @Test
     func `file size description formats kilobytes`() {
-        let screenshot = AppScreenshot(id: "1", fileName: "s.png", fileSize: 2048)
-        #expect(screenshot.fileSizeDescription == "2.0 KB")
+        let s = MockRepositoryFactory.makeScreenshot(id: "1", fileSize: 2048)
+        #expect(s.fileSizeDescription == "2.0 KB")
     }
 
     @Test
     func `file size description formats megabytes`() {
-        let screenshot = AppScreenshot(id: "1", fileName: "s.png", fileSize: 3_145_728)
-        #expect(screenshot.fileSizeDescription == "3.0 MB")
+        let s = MockRepositoryFactory.makeScreenshot(id: "1", fileSize: 3_145_728)
+        #expect(s.fileSizeDescription == "3.0 MB")
     }
 
     @Test
     func `dimensions description returns formatted string when both dimensions present`() {
-        let screenshot = AppScreenshot(id: "1", fileName: "s.png", fileSize: 1024, imageWidth: 2796, imageHeight: 1290)
-        #expect(screenshot.dimensionsDescription == "2796 × 1290")
+        let s = MockRepositoryFactory.makeScreenshot(id: "1", imageWidth: 2796, imageHeight: 1290)
+        #expect(s.dimensionsDescription == "2796 × 1290")
     }
 
     @Test
     func `dimensions description returns nil when dimensions missing`() {
-        let screenshot = AppScreenshot(id: "1", fileName: "s.png", fileSize: 1024)
-        #expect(screenshot.dimensionsDescription == nil)
+        let s = MockRepositoryFactory.makeScreenshot(id: "1", imageWidth: nil, imageHeight: nil)
+        #expect(s.dimensionsDescription == nil)
     }
 
     @Test
@@ -72,9 +72,15 @@ struct AppScreenshotTests {
     }
 
     @Test
+    func `screenshot carries parent setId`() {
+        let s = MockRepositoryFactory.makeScreenshot(id: "img-1", setId: "set-99")
+        #expect(s.setId == "set-99")
+    }
+
+    @Test
     func `screenshot is equatable`() {
-        let a = AppScreenshot(id: "1", fileName: "s.png", fileSize: 1024)
-        let b = AppScreenshot(id: "1", fileName: "s.png", fileSize: 1024)
+        let a = MockRepositoryFactory.makeScreenshot(id: "1")
+        let b = MockRepositoryFactory.makeScreenshot(id: "1")
         #expect(a == b)
     }
 }

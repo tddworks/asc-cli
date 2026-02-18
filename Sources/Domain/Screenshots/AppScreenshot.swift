@@ -1,5 +1,7 @@
 public struct AppScreenshot: Sendable, Codable, Equatable, Identifiable {
     public let id: String
+    /// Parent screenshot set identifier — always present so agents can correlate responses.
+    public let setId: String
     public let fileName: String
     public let fileSize: Int
     public let assetState: AssetDeliveryState?
@@ -8,6 +10,7 @@ public struct AppScreenshot: Sendable, Codable, Equatable, Identifiable {
 
     public init(
         id: String,
+        setId: String,
         fileName: String,
         fileSize: Int,
         assetState: AssetDeliveryState? = nil,
@@ -15,6 +18,7 @@ public struct AppScreenshot: Sendable, Codable, Equatable, Identifiable {
         imageHeight: Int? = nil
     ) {
         self.id = id
+        self.setId = setId
         self.fileName = fileName
         self.fileSize = fileSize
         self.assetState = assetState

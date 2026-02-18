@@ -11,29 +11,35 @@ public struct SDKScreenshotRepository: ScreenshotRepository, @unchecked Sendable
     public func listLocalizations(versionId: String) async throws -> [Domain.AppStoreVersionLocalization] {
         let request = APIEndpoint.v1.appStoreVersions.id(versionId).appStoreVersionLocalizations.get()
         let response = try await provider.request(request)
-        return response.data.map { mapLocalization($0) }
+        return response.data.map { mapLocalization($0, versionId: versionId) }
     }
 
     public func listScreenshotSets(localizationId: String) async throws -> [Domain.AppScreenshotSet] {
         let request = APIEndpoint.v1.appStoreVersionLocalizations.id(localizationId).appScreenshotSets.get()
         let response = try await provider.request(request)
-        return response.data.map { mapScreenshotSet($0) }
+        return response.data.map { mapScreenshotSet($0, localizationId: localizationId) }
     }
 
     public func listScreenshots(setId: String) async throws -> [Domain.AppScreenshot] {
         let request = APIEndpoint.v1.appScreenshotSets.id(setId).appScreenshots.get()
         let response = try await provider.request(request)
-        return response.data.map { mapScreenshot($0) }
+        return response.data.map { mapScreenshot($0, setId: setId) }
     }
 
     private func mapLocalization(
-        _ sdkLoc: AppStoreConnect_Swift_SDK.AppStoreVersionLocalization
+        _ sdkLoc: AppStoreConnect_Swift_SDK.AppStoreVersionLocalization,
+        versionId: String
     ) -> Domain.AppStoreVersionLocalization {
-        Domain.AppStoreVersionLocalization(id: sdkLoc.id, locale: sdkLoc.attributes?.locale ?? "")
+        Domain.AppStoreVersionLocalization(
+            id: sdkLoc.id,
+            versionId: versionId,
+            locale: sdkLoc.attributes?.locale ?? ""
+        )
     }
 
     private func mapScreenshotSet(
-        _ sdkSet: AppStoreConnect_Swift_SDK.AppScreenshotSet
+        _ sdkSet: AppStoreConnect_Swift_SDK.AppScreenshotSet,
+        localizationId: String
     ) -> Domain.AppScreenshotSet {
         let displayType = Domain.ScreenshotDisplayType(
             rawValue: sdkSet.attributes?.screenshotDisplayType?.rawValue ?? ""
@@ -41,17 +47,20 @@ public struct SDKScreenshotRepository: ScreenshotRepository, @unchecked Sendable
         let count = sdkSet.relationships?.appScreenshots?.data?.count ?? 0
         return Domain.AppScreenshotSet(
             id: sdkSet.id,
+            localizationId: localizationId,
             screenshotDisplayType: displayType,
             screenshotsCount: count
         )
     }
 
     private func mapScreenshot(
-        _ sdkScreenshot: AppStoreConnect_Swift_SDK.AppScreenshot
+        _ sdkScreenshot: AppStoreConnect_Swift_SDK.AppScreenshot,
+        setId: String
     ) -> Domain.AppScreenshot {
         let state = mapAssetState(sdkScreenshot.attributes?.assetDeliveryState?.state)
         return Domain.AppScreenshot(
             id: sdkScreenshot.id,
+            setId: setId,
             fileName: sdkScreenshot.attributes?.fileName ?? "",
             fileSize: sdkScreenshot.attributes?.fileSize ?? 0,
             assetState: state,

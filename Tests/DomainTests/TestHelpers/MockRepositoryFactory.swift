@@ -56,29 +56,39 @@ struct MockRepositoryFactory {
 
     static func makeVersion(
         id: String = "1",
+        appId: String = "app-1",
         versionString: String = "1.0.0",
-        platform: AppStorePlatform = .iOS
+        platform: AppStorePlatform = .iOS,
+        state: AppStoreVersionState = .readyForSale
     ) -> AppStoreVersion {
-        AppStoreVersion(id: id, versionString: versionString, platform: platform)
+        AppStoreVersion(id: id, appId: appId, versionString: versionString, platform: platform, state: state)
     }
 
     static func makeLocalization(
         id: String = "1",
+        versionId: String = "version-1",
         locale: String = "en-US"
     ) -> AppStoreVersionLocalization {
-        AppStoreVersionLocalization(id: id, locale: locale)
+        AppStoreVersionLocalization(id: id, versionId: versionId, locale: locale)
     }
 
     static func makeScreenshotSet(
         id: String = "1",
+        localizationId: String = "loc-1",
         displayType: ScreenshotDisplayType = .iphone67,
         screenshotsCount: Int = 0
     ) -> AppScreenshotSet {
-        AppScreenshotSet(id: id, screenshotDisplayType: displayType, screenshotsCount: screenshotsCount)
+        AppScreenshotSet(
+            id: id,
+            localizationId: localizationId,
+            screenshotDisplayType: displayType,
+            screenshotsCount: screenshotsCount
+        )
     }
 
     static func makeScreenshot(
         id: String = "1",
+        setId: String = "set-1",
         fileName: String = "screenshot.png",
         fileSize: Int = 1_048_576,
         assetState: AppScreenshot.AssetDeliveryState? = .complete,
@@ -87,6 +97,7 @@ struct MockRepositoryFactory {
     ) -> AppScreenshot {
         AppScreenshot(
             id: id,
+            setId: setId,
             fileName: fileName,
             fileSize: fileSize,
             assetState: assetState,

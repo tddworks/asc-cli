@@ -1,14 +1,18 @@
 public struct AppScreenshotSet: Sendable, Codable, Equatable, Identifiable {
     public let id: String
+    /// Parent localization identifier — always present so agents can correlate responses.
+    public let localizationId: String
     public let screenshotDisplayType: ScreenshotDisplayType
     public let screenshotsCount: Int
 
     public init(
         id: String,
+        localizationId: String,
         screenshotDisplayType: ScreenshotDisplayType,
         screenshotsCount: Int = 0
     ) {
         self.id = id
+        self.localizationId = localizationId
         self.screenshotDisplayType = screenshotDisplayType
         self.screenshotsCount = screenshotsCount
     }
