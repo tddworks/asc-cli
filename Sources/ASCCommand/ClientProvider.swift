@@ -19,4 +19,10 @@ struct ClientProvider {
         let factory = ClientFactory()
         return try factory.makeTestFlightRepository(authProvider: authProvider)
     }
+
+    static func makeScreenshotRepository() throws -> any ScreenshotRepository {
+        let authProvider = EnvironmentAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeScreenshotRepository(authProvider: authProvider)
+    }
 }

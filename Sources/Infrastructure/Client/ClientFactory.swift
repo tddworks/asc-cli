@@ -21,6 +21,11 @@ public struct ClientFactory: Sendable {
         return SDKTestFlightRepository(provider: provider)
     }
 
+    public func makeScreenshotRepository(authProvider: any AuthProvider) throws -> any ScreenshotRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKScreenshotRepository(provider: provider)
+    }
+
     private func makeProvider(authProvider: any AuthProvider) throws -> APIProvider {
         let credentials = try authProvider.resolve()
         let strippedKey = credentials.privateKeyPEM
