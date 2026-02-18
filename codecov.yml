@@ -1,0 +1,30 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 2%
+    patch:
+      default:
+        target: 70%
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: false
+
+ignore:
+  - "Tests/**/*"
+
+  # TUI — terminal UI framework, not unit-testable
+  - "Sources/ASCCommand/Commands/TUI/**/*"
+
+  # Composition roots — wire real SDK clients, not unit-testable
+  - "Sources/ASCCommand/ClientProvider.swift"
+  - "Sources/Infrastructure/Client/ClientFactory.swift"
+
+  # Auth command — reads live environment credentials, not unit-testable
+  - "Sources/ASCCommand/Commands/Auth/AuthCommand.swift"
+
+  # Version command — prints a constant, no logic to test
+  - "Sources/ASCCommand/Commands/Version/VersionCommand.swift"
