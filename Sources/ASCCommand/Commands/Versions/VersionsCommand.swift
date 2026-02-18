@@ -22,22 +22,22 @@ struct VersionsList: AsyncParsableCommand {
 
     func run() async throws {
         let repo = try ClientProvider.makeAppRepository()
+        print(try await execute(repo: repo))
+    }
+
+    func execute(repo: any AppRepository) async throws -> String {
         let versions = try await repo.listVersions(appId: appId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-
-        let output = try formatter.formatAgentItems(
+        return try formatter.formatAgentItems(
             versions,
             headers: ["ID", "Platform", "Version", "State", "Live"],
-            rowMapper: { version in
-                [
-                    version.id,
-                    version.platform.displayName,
-                    version.versionString,
-                    version.state.displayName,
-                    version.isLive ? "yes" : "no",
-                ]
-            }
+            rowMapper: { [
+                $0.id,
+                $0.platform.displayName,
+                $0.versionString,
+                $0.state.displayName,
+                $0.isLive ? "yes" : "no",
+            ] }
         )
-        print(output)
     }
 }

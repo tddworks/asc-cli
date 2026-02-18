@@ -25,17 +25,17 @@ struct BetaGroupsList: AsyncParsableCommand {
 
     func run() async throws {
         let repo = try ClientProvider.makeTestFlightRepository()
+        print(try await execute(repo: repo))
+    }
+
+    func execute(repo: any TestFlightRepository) async throws -> String {
         let response = try await repo.listBetaGroups(appId: app, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-
-        let output = try formatter.formatItems(
+        return try formatter.formatItems(
             response.data,
             headers: ["ID", "Name", "Internal", "Public Link"],
-            rowMapper: { group in
-                [group.id, group.name, group.isInternalGroup ? "Yes" : "No", group.publicLinkEnabled ? "Yes" : "No"]
-            }
+            rowMapper: { [$0.id, $0.name, $0.isInternalGroup ? "Yes" : "No", $0.publicLinkEnabled ? "Yes" : "No"] }
         )
-        print(output)
     }
 }
 
@@ -55,16 +55,16 @@ struct BetaTestersList: AsyncParsableCommand {
 
     func run() async throws {
         let repo = try ClientProvider.makeTestFlightRepository()
+        print(try await execute(repo: repo))
+    }
+
+    func execute(repo: any TestFlightRepository) async throws -> String {
         let response = try await repo.listBetaTesters(groupId: group, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-
-        let output = try formatter.formatItems(
+        return try formatter.formatItems(
             response.data,
             headers: ["ID", "Name", "Email", "Invite Type"],
-            rowMapper: { tester in
-                [tester.id, tester.displayName, tester.email ?? "-", tester.inviteType?.rawValue ?? "-"]
-            }
+            rowMapper: { [$0.id, $0.displayName, $0.email ?? "-", $0.inviteType?.rawValue ?? "-"] }
         )
-        print(output)
     }
 }

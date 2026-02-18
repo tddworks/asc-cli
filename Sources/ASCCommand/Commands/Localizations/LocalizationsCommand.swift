@@ -22,16 +22,16 @@ struct LocalizationsList: AsyncParsableCommand {
 
     func run() async throws {
         let repo = try ClientProvider.makeScreenshotRepository()
+        print(try await execute(repo: repo))
+    }
+
+    func execute(repo: any ScreenshotRepository) async throws -> String {
         let localizations = try await repo.listLocalizations(versionId: versionId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-
-        let output = try formatter.formatAgentItems(
+        return try formatter.formatAgentItems(
             localizations,
             headers: ["ID", "Locale"],
-            rowMapper: { loc in
-                [loc.id, loc.locale]
-            }
+            rowMapper: { [$0.id, $0.locale] }
         )
-        print(output)
     }
 }

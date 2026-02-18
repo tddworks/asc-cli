@@ -17,16 +17,16 @@ struct BuildsList: AsyncParsableCommand {
 
     func run() async throws {
         let repo = try ClientProvider.makeBuildRepository()
+        print(try await execute(repo: repo))
+    }
+
+    func execute(repo: any BuildRepository) async throws -> String {
         let response = try await repo.listBuilds(appId: app, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-
-        let output = try formatter.formatItems(
+        return try formatter.formatItems(
             response.data,
             headers: ["ID", "Version", "State", "Expired"],
-            rowMapper: { build in
-                [build.id, build.version, build.processingState.rawValue, build.expired ? "Yes" : "No"]
-            }
+            rowMapper: { [$0.id, $0.version, $0.processingState.rawValue, $0.expired ? "Yes" : "No"] }
         )
-        print(output)
     }
 }
