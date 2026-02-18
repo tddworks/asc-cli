@@ -26,9 +26,18 @@ JSON is the default output format. Every response is complete: parent IDs, full 
 }
 ```
 
-### Command Affordances
+### CAEOAS — Commands As the Engine Of Application State
 
-The CLI equivalent of REST HATEOAS. Every response includes an `affordances` field with ready-to-run commands for the next step — agents navigate without memorising the command tree.
+REST has **HATEOAS**: responses embed URLs so clients navigate without knowing the API upfront.
+This CLI has **CAEOAS**: responses embed ready-to-run commands so agents navigate without memorising the command tree.
+
+| | REST HATEOAS | CLI CAEOAS |
+|---|---|---|
+| Embed | `_links` with URLs | `affordances` with CLI commands |
+| Client action | Follow a URL | Execute a command |
+| Drives | HTTP state transitions | CLI navigation |
+
+Every response includes an `affordances` field. Agents read it and execute — no API knowledge required:
 
 ```json
 {
@@ -45,12 +54,12 @@ The CLI equivalent of REST HATEOAS. Every response includes an `affordances` fie
 }
 ```
 
-The agent reads `affordances.listLocalizations` and executes it. No API knowledge required. State-aware: affordances only appear when valid (e.g. `submit` only when `isEditable == true`).
+**State-aware**: affordances reflect current state. `submitForReview` only appears when `isEditable == true` — the response itself tells the agent what's valid right now.
 
 ## Features
 
 - **Agent-first JSON output** — complete models with parent IDs and semantic booleans
-- **Command Affordances** — HATEOAS for CLI: responses tell agents what to run next
+- **CAEOAS** — Commands As the Engine Of Application State: responses tell agents what to run next
 - **Full resource hierarchy** — Apps → Versions → Localizations → Screenshot Sets → Screenshots
 - **TUI mode** — interactive terminal UI for human browsing
 - **Swift 6.2** — strict concurrency, async/await throughout
@@ -140,7 +149,7 @@ Navigate interactively: **arrow keys** to move, **Enter** to drill in, **Escape*
 
 ```bash
 swift build          # Build
-swift test           # Run tests (95 tests, Chicago School TDD)
+swift test           # Run tests (100 tests, Chicago School TDD)
 ```
 
 ## Architecture
@@ -152,7 +161,7 @@ Sources/
 └── ASCCommand/   # CLI commands + TUI
 ```
 
-See [docs/desgin.md](docs/desgin.md) for full architecture documentation including the Command Affordances pattern.
+See [docs/desgin.md](docs/desgin.md) for full architecture documentation including the CAEOAS pattern.
 
 ## Dependencies
 
