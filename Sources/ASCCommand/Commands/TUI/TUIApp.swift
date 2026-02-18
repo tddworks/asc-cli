@@ -8,7 +8,10 @@ final class TUIApp {
     enum Screen {
         case mainMenu
         case appsList
-        case appDetail(App)
+        case appMenu(App)
+        case appInfo(App)
+        case screenshotSetsList(App)
+        case screenshotsList(AppScreenshotSet)
         case buildsList
         case buildDetail(Build)
         case testFlightMenu
@@ -73,8 +76,20 @@ final class TUIApp {
             showComponent(loader)
             Task { @MainActor in await self.loadApps() }
             return
-        case .appDetail(let app):
-            component = makeAppDetail(app)
+        case .appMenu(let app):
+            component = makeAppMenu(app)
+        case .appInfo(let app):
+            component = makeAppInfo(app)
+        case .screenshotSetsList(let app):
+            let loader = makeLoadingView(title: "Loading screenshot sets...")
+            showComponent(loader)
+            Task { @MainActor in await self.loadScreenshotSets(for: app) }
+            return
+        case .screenshotsList(let set):
+            let loader = makeLoadingView(title: "Loading screenshots...")
+            showComponent(loader)
+            Task { @MainActor in await self.loadScreenshots(for: set) }
+            return
         case .buildsList:
             let loader = makeLoadingView(title: "Loading builds...")
             showComponent(loader)
@@ -152,7 +167,7 @@ final class TUIApp {
             let list = SelectList(items: items)
             list.onSelect = { [weak self] item in
                 if let app = response.data.first(where: { $0.id == item.value }) {
-                    self?.navigate(to: .appDetail(app))
+                    self?.navigate(to: .appMenu(app))
                 }
             }
             list.onCancel = { [weak self] in
@@ -164,9 +179,32 @@ final class TUIApp {
         }
     }
 
-    private func makeAppDetail(_ app: App) -> Component {
+    private func makeAppMenu(_ app: App) -> Component {
+        let items = [
+            SelectItem(value: "info", label: "Info", description: "App details"),
+            SelectItem(value: "screenshots", label: "Screenshots", description: "Browse screenshot sets"),
+        ]
+        let list = SelectList(items: items)
+        list.onSelect = { [weak self] item in
+            guard let self else { return }
+            switch item.value {
+            case "info":
+                self.navigate(to: .appInfo(app))
+            case "screenshots":
+                self.navigate(to: .screenshotSetsList(app))
+            default:
+                break
+            }
+        }
+        list.onCancel = { [weak self] in
+            self?.goBack()
+        }
+        return list
+    }
+
+    private func makeAppInfo(_ app: App) -> Component {
         let lines = [
-            "App Detail",
+            "App Info",
             String(repeating: "─", count: 40),
             "ID:      \(app.id)",
             "Name:    \(app.displayName)",
@@ -177,6 +215,75 @@ final class TUIApp {
             "Press Escape to go back",
         ]
         return makeTextView(lines: lines)
+    }
+
+    // MARK: - Screenshots
+
+    private func loadScreenshotSets(for app: App) async {
+        do {
+            let repo = try ClientProvider.makeScreenshotRepository()
+            let sets = try await repo.listScreenshotSets(appId: app.id)
+
+            guard !sets.isEmpty else {
+                showComponent(makeTextView(lines: [
+                    "No Screenshot Sets",
+                    String(repeating: "─", count: 40),
+                    "No screenshot sets found for \(app.displayName).",
+                    "Upload screenshots in App Store Connect first.",
+                    "",
+                    "Press Escape to go back",
+                ]))
+                return
+            }
+
+            let items = sets.map { set in
+                let count = set.screenshotsCount == 0 ? "empty" : "\(set.screenshotsCount) screenshot\(set.screenshotsCount == 1 ? "" : "s")"
+                return SelectItem(
+                    value: set.id,
+                    label: set.displayTypeName,
+                    description: "\(set.deviceCategory.rawValue)  ·  \(count)"
+                )
+            }
+            let list = SelectList(items: items)
+            list.onSelect = { [weak self] item in
+                if let set = sets.first(where: { $0.id == item.value }) {
+                    self?.navigate(to: .screenshotsList(set))
+                }
+            }
+            list.onCancel = { [weak self] in
+                self?.goBack()
+            }
+            showComponent(list)
+        } catch {
+            showComponent(makeErrorView(error: error))
+        }
+    }
+
+    private func loadScreenshots(for set: AppScreenshotSet) async {
+        do {
+            let repo = try ClientProvider.makeScreenshotRepository()
+            let screenshots = try await repo.listScreenshots(setId: set.id)
+
+            let header = [
+                "\(set.displayTypeName) — Screenshots",
+                String(repeating: "─", count: 40),
+            ]
+
+            let rows: [String]
+            if screenshots.isEmpty {
+                rows = ["No screenshots in this set.", "", "Press Escape to go back"]
+            } else {
+                rows = screenshots.flatMap { s -> [String] in
+                    let dims = s.dimensionsDescription ?? "unknown size"
+                    let state = s.assetState?.displayName ?? "Unknown"
+                    return ["\(s.fileName)  (\(s.fileSizeDescription), \(dims))  [\(state)]"]
+                } + ["", "Press Escape to go back"]
+            }
+
+            showComponent(makeTextView(lines: header + rows))
+        } catch {
+            showComponent(makeErrorView(error: error))
+        }
     }
 
     // MARK: - Builds

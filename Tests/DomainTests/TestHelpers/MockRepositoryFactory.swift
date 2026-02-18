@@ -53,4 +53,30 @@ struct MockRepositoryFactory {
     ) -> BetaTester {
         BetaTester(id: id, firstName: firstName, lastName: lastName, email: email)
     }
+
+    static func makeScreenshotSet(
+        id: String = "1",
+        displayType: ScreenshotDisplayType = .iphone67,
+        screenshotsCount: Int = 0
+    ) -> AppScreenshotSet {
+        AppScreenshotSet(id: id, screenshotDisplayType: displayType, screenshotsCount: screenshotsCount)
+    }
+
+    static func makeScreenshot(
+        id: String = "1",
+        fileName: String = "screenshot.png",
+        fileSize: Int = 1_048_576,
+        assetState: AppScreenshot.AssetDeliveryState? = .complete,
+        imageWidth: Int? = 2796,
+        imageHeight: Int? = 1290
+    ) -> AppScreenshot {
+        AppScreenshot(
+            id: id,
+            fileName: fileName,
+            fileSize: fileSize,
+            assetState: assetState,
+            imageWidth: imageWidth,
+            imageHeight: imageHeight
+        )
+    }
 }

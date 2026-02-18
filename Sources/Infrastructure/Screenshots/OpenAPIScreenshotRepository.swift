@@ -14,6 +14,22 @@ public struct SDKScreenshotRepository: ScreenshotRepository, @unchecked Sendable
         return response.data.map { mapScreenshotSet($0) }
     }
 
+    public func listScreenshotSets(appId: String) async throws -> [Domain.AppScreenshotSet] {
+        let versionsRequest = APIEndpoint.v1.apps.id(appId).appStoreVersions.get(
+            parameters: .init(limit: 1)
+        )
+        let versionsResponse = try await provider.request(versionsRequest)
+        guard let versionId = versionsResponse.data.first?.id else { return [] }
+
+        let locRequest = APIEndpoint.v1.appStoreVersions.id(versionId).appStoreVersionLocalizations.get(
+            parameters: .init(limit: 1)
+        )
+        let locResponse = try await provider.request(locRequest)
+        guard let locId = locResponse.data.first?.id else { return [] }
+
+        return try await listScreenshotSets(localizationId: locId)
+    }
+
     public func listScreenshots(setId: String) async throws -> [Domain.AppScreenshot] {
         let request = APIEndpoint.v1.appScreenshotSets.id(setId).appScreenshots.get()
         let response = try await provider.request(request)
