@@ -40,7 +40,7 @@ jobs:
           xcrun llvm-cov export "$XCTEST" \
             -instr-profile "$PROFDATA" \
             -format=lcov \
-            -ignore-filename-regex=".build|Tests" \
+            -ignore-filename-regex=".build|Tests|Commands/TUI|Commands/Auth|Commands/Version/|ClientProvider|ClientFactory" \
             > coverage.lcov
 
       - name: Upload coverage to Codecov
