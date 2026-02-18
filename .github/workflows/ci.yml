@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  SWIFT_VERSION: "6.2"
+
+jobs:
+  test:
+    name: Build & Test
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Swift
+        uses: SwiftyLab/setup-swift@latest
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
+      - name: Swift version
+        run: swift --version
+
+      - name: Build
+        run: swift build -c release
+
+      - name: Test with coverage
+        run: swift test --enable-code-coverage
+
+      - name: Generate lcov report
+        run: |
+          BIN_PATH=$(swift build --show-bin-path)
+          XCTEST="$BIN_PATH/asc-swiftPackageTests.xctest/Contents/MacOS/asc-swiftPackageTests"
+          PROFDATA="$BIN_PATH/codecov/default.profdata"
+          xcrun llvm-cov export "$XCTEST" \
+            -instr-profile "$PROFDATA" \
+            -format=lcov \
+            -ignore-filename-regex=".build|Tests" \
+            > coverage.lcov
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.lcov
+          fail_ci_if_error: true

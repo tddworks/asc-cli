@@ -1,5 +1,10 @@
 # asc-swift
 
+[![CI](https://github.com/tddworks/asc-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/tddworks/asc-cli/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/tddworks/asc-cli/graph/badge.svg?token=v0k1Vzubrx)](https://codecov.io/gh/tddworks/asc-cli)
+[![Swift](https://img.shields.io/badge/Swift-6.2-orange)](https://swift.org)
+[![Platform](https://img.shields.io/badge/macOS-15%2B-blue)](https://www.apple.com/macos/)
+
 A Swift CLI and interactive TUI for [App Store Connect](https://appstoreconnect.apple.com), designed **agent-first** — structured for AI agents and automation, usable by humans too.
 
 ## Design Principles
