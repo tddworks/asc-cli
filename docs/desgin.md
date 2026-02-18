@@ -23,6 +23,7 @@ Pure value types and `@Mockable` protocols. No networking, no frameworks.
 | `Apps/` | `App` model (id, name, bundleId, sku, locale), `AppRepository` protocol |
 | `Builds/` | `Build` model (version, state, expired), `BuildRepository` protocol |
 | `TestFlight/` | `BetaGroup`, `BetaTester` models, `TestFlightRepository` protocol |
+| `Screenshots/` | `AppScreenshotSet`, `AppScreenshot`, `ScreenshotDisplayType` (32 display types), `ScreenshotRepository` protocol |
 | `Shared/` | `PaginatedResponse<T>`, `OutputFormat` enum, `APIError` |
 
 All repository protocols return `PaginatedResponse<T>` for list operations and throw on failure.
@@ -37,6 +38,7 @@ Implements Domain protocols using [appstoreconnect-swift-sdk](https://github.com
 | `Apps/OpenAPIAppRepository.swift` | `AppRepository` implementation |
 | `Builds/OpenAPIBuildRepository.swift` | `BuildRepository` implementation |
 | `TestFlight/OpenAPITestFlightRepository.swift` | `TestFlightRepository` implementation |
+| `Screenshots/OpenAPIScreenshotRepository.swift` | `ScreenshotRepository` implementation |
 | `Client/ClientFactory.swift` | Wires authenticated client from `AuthProvider` |
 
 ### ASCCommand Layer (CLI + TUI)
@@ -45,14 +47,17 @@ Implements Domain protocols using [appstoreconnect-swift-sdk](https://github.com
 
 ```
 asc
-├── apps list       # List apps (--output json|table|markdown, --pretty, --limit)
-├── builds list     # List builds (--app, --limit)
+├── apps list           # List apps (--output json|table|markdown, --pretty, --limit)
+├── builds list         # List builds (--app, --limit)
 ├── testflight
-│   ├── groups      # List beta groups (--app, --limit)
-│   └── testers     # List beta testers (--group, --limit)
-├── auth check      # Verify credentials
-├── version         # Print version
-└── tui             # Launch interactive TUI
+│   ├── groups          # List beta groups (--app, --limit)
+│   └── testers         # List beta testers (--group, --limit)
+├── screenshots
+│   ├── sets            # List screenshot sets for a localization (--localization)
+│   └── list            # List screenshots in a set (--set)
+├── auth check          # Verify credentials
+├── version             # Print version
+└── tui                 # Launch interactive TUI
 ```
 
 Key files:
@@ -112,6 +117,7 @@ Tests/
 │   ├── Builds/       # BuildTests
 │   ├── Auth/         # AuthCredentialsTests
 │   ├── Shared/       # PaginatedResponseTests
+│   ├── Screenshots/  # ScreenshotDisplayTypeTests, AppScreenshotSetTests, AppScreenshotTests, ScreenshotRepositoryTests
 │   └── TestHelpers/  # MockRepositoryFactory
 ├── InfrastructureTests/
 │   └── Auth/         # EnvironmentAuthProviderTests
