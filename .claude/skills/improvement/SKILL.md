@@ -80,12 +80,16 @@ Enhance CLI output formatting:
 ```
 Examples:
 - Better table column widths or alignment
-- Richer JSON output fields
+- Richer JSON output fields (switch formatItems → formatAgentItems for affordances)
 - More useful error messages with suggestions
 - Improved markdown formatting for apps/builds
+- Add AffordanceProviding to existing model missing it
 ```
 
-**Test approach**: `OutputFormatterTests` with known domain model inputs
+JSON output shape for agent-first commands: `{"data":[{...fields..., "affordances":{...cmds...}}]}`
+Use `formatter.formatAgentItems()` (not `formatItems`) for commands that should include affordances.
+
+**Test approach**: `OutputFormatterTests` with known domain model inputs; affordance tests in `AffordancesTests.swift`
 
 ### 3. Infrastructure Improvements
 

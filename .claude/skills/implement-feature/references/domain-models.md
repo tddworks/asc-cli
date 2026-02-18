@@ -1,204 +1,180 @@
 # Rich Domain Model Patterns
 
-## User's Mental Model
+## Model Requirements
 
-Domain models should match how users think about App Store Connect data:
+Every domain model must be:
 
 ```swift
-// User thinks: "What apps do I have on App Store Connect?"
-public struct App: Sendable, Equatable {
+public struct MyModel: Sendable, Equatable, Identifiable, Codable {
     public let id: String
-    public let name: String
-    public let bundleId: String
-    public let sku: String?
-    public let primaryLocale: String
-
-    // User asks: "What's a short identifier for this app?"
-    public var shortIdentifier: String {
-        bundleId.components(separatedBy: ".").last ?? name
-    }
+    public let parentId: String  // always carry parent ID
+    // ...
 }
+```
 
-// User thinks: "What's the status of this build?"
-public struct Build: Sendable, Equatable {
-    public let id: String
-    public let version: String
-    public let uploadedDate: Date
-    public let processingState: ProcessingState
+Required conformances:
+- `Sendable` — safe to pass across concurrency boundaries
+- `Equatable` — testable with `#expect(a == b)`
+- `Identifiable` — TUI navigation uses this
+- `Codable` — the JSON encoding IS the public API schema
+- `AffordanceProviding` — embed navigation commands (see command-affordances.md)
 
-    // User asks: "Is this build ready to test?"
-    public var isReady: Bool { processingState == .valid }
+## Parent IDs (Critical)
 
-    // User asks: "How old is this build?"
-    public var ageDescription: String {
-        let interval = Date().timeIntervalSince(uploadedDate)
-        // Return human-readable relative time
-    }
+The ASC API never includes parent IDs in response bodies. The infrastructure mapper must inject them:
+
+```swift
+// Infrastructure: inject parentId from the request parameter
+private func mapLocalization(
+    _ sdk: AppStoreVersionLocalization,
+    versionId: String            // ← comes from the request, not the response
+) -> Domain.AppStoreVersionLocalization {
+    Domain.AppStoreVersionLocalization(
+        id: sdk.id,
+        versionId: versionId,    // ← injected
+        locale: sdk.attributes?.locale ?? ""
+    )
 }
+```
+
+Resource hierarchy and required parent IDs:
+```
+App                                    (no parent)
+└── AppStoreVersion      .appId        (parent: App.id)
+    └── AppStoreVersionLocalization .versionId  (parent: AppStoreVersion.id)
+        └── AppScreenshotSet  .localizationId  (parent: Localization.id)
+            └── AppScreenshot .setId           (parent: ScreenshotSet.id)
+```
+
+## Semantic Booleans on State Enums
+
+Agents use computed booleans for decisions without extra round-trips:
+
+```swift
+public enum AppStoreVersionState: String, Sendable, Equatable, Codable {
+    case readyForSale      = "READY_FOR_SALE"
+    case prepareForSubmission = "PREPARE_FOR_SUBMISSION"
+    case inReview          = "IN_REVIEW"
+    case waitingForReview  = "WAITING_FOR_REVIEW"
+    // ... all 15 cases
+
+    public var isLive: Bool     { self == .readyForSale }
+    public var isEditable: Bool { [.prepareForSubmission, .developerRejected, .rejected, .metadataRejected].contains(self) }
+    public var isPending: Bool  { [.waitingForReview, .inReview, .pendingDeveloperRelease, ...].contains(self) }
+    public var displayName: String { /* human-readable */ }
+}
+```
+
+Delegate from the model to the state:
+```swift
+public var isLive: Bool     { state.isLive }
+public var isEditable: Bool { state.isEditable }
+public var isPending: Bool  { state.isPending }
 ```
 
 ## Behavior Over Data
 
-Encapsulate domain rules in the model, not in commands or formatters:
-
 ```swift
-public enum ProcessingState: String, Sendable, CaseIterable, Equatable {
-    case processing = "PROCESSING"
-    case failed = "FAILED"
-    case invalid = "INVALID"
-    case valid = "VALID"
+public struct AppScreenshot: Sendable, Equatable, Identifiable, Codable {
+    public let id: String
+    public let setId: String
+    public let fileName: String
+    public let fileSize: Int
+    public let assetState: AssetDeliveryState?
 
-    // Domain rule: ready for TestFlight distribution
-    public var isReady: Bool { self == .valid }
+    // Domain behavior — not in formatters
+    public var isComplete: Bool { assetState == .complete }
 
-    // Domain rule: terminal failure state (no recovery)
-    public var hasFailed: Bool { self == .failed || self == .invalid }
+    public var fileSizeDescription: String {
+        let bytes = Double(fileSize)
+        if bytes < 1024 { return "\(fileSize) B" }
+        if bytes < 1_048_576 { return String(format: "%.1f KB", bytes / 1024) }
+        return String(format: "%.1f MB", bytes / 1_048_576)
+    }
 
-    // Domain rule: human-readable display name
-    public var displayName: String {
-        switch self {
-        case .processing: return "Processing"
-        case .failed:     return "Failed"
-        case .invalid:    return "Invalid"
-        case .valid:      return "Valid"
-        }
+    public var dimensionsDescription: String? {
+        guard let w = imageWidth, let h = imageHeight else { return nil }
+        return "\(w) × \(h)"
     }
 }
 ```
 
-## Repository Protocols as DI Boundaries
-
-Define protocols in Domain for all external data access. These are the seams for testing:
+## Repository Protocols
 
 ```swift
 @Mockable
 public protocol AppRepository: Sendable {
-    func fetchApps(limit: Int?) async throws -> [App]
+    func listApps(limit: Int?) async throws -> PaginatedResponse<App>
+    func listVersions(appId: String) async throws -> [AppStoreVersion]
 }
 
 @Mockable
-public protocol BuildRepository: Sendable {
-    func fetchBuilds(appId: String?, limit: Int?) async throws -> [Build]
-}
-
-@Mockable
-public protocol TestFlightRepository: Sendable {
-    func fetchBetaGroups(appId: String) async throws -> [BetaGroup]
-    func fetchBetaTesters(groupId: String) async throws -> [BetaTester]
+public protocol ScreenshotRepository: Sendable {
+    func listLocalizations(versionId: String) async throws -> [AppStoreVersionLocalization]
+    func listScreenshotSets(localizationId: String) async throws -> [AppScreenshotSet]
+    func listScreenshots(setId: String) async throws -> [AppScreenshot]
 }
 ```
 
-## Value Types for Data
+Method naming convention: `list` prefix (not `fetch`).
 
-Use structs for immutable domain data. Never use classes for domain models:
+## MockRepositoryFactory (Test Helper)
+
+All tests use `MockRepositoryFactory` with sensible defaults — never construct models inline:
 
 ```swift
-public struct BetaTester: Sendable, Equatable {
-    public let id: String
-    public let firstName: String?
-    public let lastName: String?
-    public let email: String
-    public let inviteType: InviteType
+// Tests/DomainTests/TestHelpers/MockRepositoryFactory.swift
+enum MockRepositoryFactory {
+    static func makeVersion(
+        id: String = "v1",
+        appId: String = "app-1",
+        versionString: String = "1.0",
+        platform: AppStorePlatform = .iOS,
+        state: AppStoreVersionState = .prepareForSubmission
+    ) -> AppStoreVersion { ... }
 
-    // Computed display property - encapsulated in the model
-    public var displayName: String {
-        [firstName, lastName].compactMap { $0 }.joined(separator: " ")
-    }
+    static func makeLocalization(
+        id: String = "loc-1",
+        versionId: String = "v-1",
+        locale: String = "en-US"
+    ) -> AppStoreVersionLocalization { ... }
 }
 
-public enum InviteType: String, Sendable {
-    case email = "EMAIL"
-    case publicLink = "PUBLIC_LINK"
-
-    public var displayName: String {
-        switch self {
-        case .email: return "Email Invitation"
-        case .publicLink: return "Public Link"
-        }
-    }
-}
+// Usage in tests:
+let version = MockRepositoryFactory.makeVersion(state: .readyForSale)
+let loc = MockRepositoryFactory.makeLocalization(versionId: "v-99")
 ```
 
-## Paginated Responses
+Add new `make*` methods to `MockRepositoryFactory` whenever you add a new domain model.
 
-Use generics for the common pagination wrapper:
+## Infrastructure Mapper Pattern
 
-```swift
-public struct PaginatedResponse<T: Sendable>: Sendable {
-    public let data: [T]
-    public let total: Int?
-    public let nextCursor: String?
-
-    public var hasMore: Bool { nextCursor != nil }
-    public var isEmpty: Bool { data.isEmpty }
-}
-```
-
-## Error Types
-
-Domain-specific error types with user-facing messages:
+Use private mapper functions (not static factory methods on the domain type):
 
 ```swift
-public enum APIError: Error, Sendable {
-    case unauthorized
-    case notFound(resource: String)
-    case rateLimited
-    case serverError(statusCode: Int)
-    case decodingFailed(underlying: Error)
-
-    // Domain rule: what to tell the user
-    public var userFacingMessage: String {
-        switch self {
-        case .unauthorized:
-            return "Authentication failed. Check ASC_KEY_ID, ASC_ISSUER_ID, ASC_PRIVATE_KEY_PATH."
-        case .notFound(let resource):
-            return "\(resource) not found."
-        case .rateLimited:
-            return "Rate limit exceeded. Please wait before retrying."
-        case .serverError(let code):
-            return "Server error (\(code)). Try again later."
-        case .decodingFailed:
-            return "Failed to parse API response."
-        }
-    }
-}
-```
-
-## Factory / Mapping Methods
-
-Use static factory methods to construct domain models from SDK types:
-
-```swift
-extension App {
-    // Adapter mapping: SDK type → domain type (lives in Infrastructure, not Domain)
-    static func from(_ sdkApp: AppStoreConnectSwiftSDK.App) -> App {
-        App(
-            id: sdkApp.id,
-            name: sdkApp.attributes?.name ?? "",
-            bundleId: sdkApp.attributes?.bundleId ?? "",
-            sku: sdkApp.attributes?.sku,
-            primaryLocale: sdkApp.attributes?.primaryLocale ?? "en-US"
-        )
-    }
-}
-
-extension Build {
-    static func from(_ sdkBuild: AppStoreConnectSwiftSDK.Build) -> Build {
-        Build(
-            id: sdkBuild.id,
-            version: sdkBuild.attributes?.version ?? "",
-            uploadedDate: sdkBuild.attributes?.uploadedDate ?? .distantPast,
-            processingState: ProcessingState(
-                rawValue: sdkBuild.attributes?.processingState?.rawValue ?? ""
-            ) ?? .processing
-        )
-    }
+// In OpenAPIXxxRepository.swift (Infrastructure layer)
+private func mapVersion(
+    _ sdkVersion: AppStoreConnect_Swift_SDK.AppStoreVersion,
+    appId: String
+) -> Domain.AppStoreVersion {
+    let state = Domain.AppStoreVersionState(
+        rawValue: sdkVersion.attributes?.appStoreState?.rawValue ?? ""
+    ) ?? .prepareForSubmission
+    return Domain.AppStoreVersion(
+        id: sdkVersion.id,
+        appId: appId,
+        versionString: sdkVersion.attributes?.versionString ?? "",
+        platform: Domain.AppStorePlatform(rawValue: sdkVersion.attributes?.platform?.rawValue ?? "") ?? .iOS,
+        state: state,
+        createdDate: sdkVersion.attributes?.createdDate
+    )
 }
 ```
 
 ## What NOT to Put in Domain Models
 
-- No import of `appstoreconnect-swift-sdk` (Infrastructure concern)
-- No formatting logic for CLI output (ASCCommand concern)
-- No URLSession or network code
-- No `@Observable` or SwiftUI types (this is a CLI, not a GUI app)
+- No `import AppStoreConnect_Swift_SDK` (Infrastructure concern)
+- No CLI output formatting (ASCCommand concern)
+- No network code or `URLSession`
+- No SwiftUI or `@Observable` (this is a CLI, not a GUI app)
+- No injected repositories (use free functions or navigator classes for composition)
