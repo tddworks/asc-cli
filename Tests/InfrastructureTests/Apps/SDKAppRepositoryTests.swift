@@ -53,6 +53,27 @@ struct SDKAppRepositoryTests {
         #expect(result[0].platform == .iOS)
     }
 
+    // MARK: - getApp
+
+    @Test func `getApp maps single app from SDK response`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(AppResponse(
+            data: App(
+                type: .apps,
+                id: "app-99",
+                attributes: .init(name: "Single App", bundleID: "com.single", sku: "S1")
+            ),
+            links: .init(this: "")
+        ))
+
+        let repo = SDKAppRepository(client: stub)
+        let result = try await repo.getApp(id: "app-99")
+
+        #expect(result.id == "app-99")
+        #expect(result.displayName == "Single App")
+        #expect(result.bundleId == "com.single")
+    }
+
     // MARK: - listApps
 
     @Test func `listApps maps name bundleId and sku from SDK attributes`() async throws {

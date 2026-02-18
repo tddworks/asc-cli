@@ -62,4 +62,88 @@ struct AppStoreVersionStateTests {
     func `unknown raw value returns nil`() {
         #expect(AppStoreVersionState(rawValue: "UNKNOWN_STATE") == nil)
     }
+
+    // MARK: - isEditable (all states)
+
+    @Test(arguments: [
+        AppStoreVersionState.prepareForSubmission,
+        .developerRejected,
+        .rejected,
+        .metadataRejected,
+    ])
+    func `editable states are editable`(state: AppStoreVersionState) {
+        #expect(state.isEditable == true)
+    }
+
+    @Test(arguments: [
+        AppStoreVersionState.waitingForReview,
+        .inReview,
+        .pendingDeveloperRelease,
+        .pendingAppleRelease,
+        .processingForAppStore,
+        .readyForSale,
+        .removedFromSale,
+        .developerRemovedFromSale,
+        .invalidBinary,
+        .waitingForExportCompliance,
+        .pendingContract,
+    ])
+    func `non-editable states are not editable`(state: AppStoreVersionState) {
+        #expect(state.isEditable == false)
+    }
+
+    // MARK: - isPending (all states)
+
+    @Test(arguments: [
+        AppStoreVersionState.waitingForReview,
+        .inReview,
+        .pendingDeveloperRelease,
+        .pendingAppleRelease,
+        .processingForAppStore,
+        .waitingForExportCompliance,
+    ])
+    func `pending states are pending`(state: AppStoreVersionState) {
+        #expect(state.isPending == true)
+    }
+
+    @Test(arguments: [
+        AppStoreVersionState.prepareForSubmission,
+        .readyForSale,
+        .developerRejected,
+        .rejected,
+        .metadataRejected,
+        .removedFromSale,
+        .developerRemovedFromSale,
+        .invalidBinary,
+        .pendingContract,
+    ])
+    func `non-pending states are not pending`(state: AppStoreVersionState) {
+        #expect(state.isPending == false)
+    }
+
+    // MARK: - displayName
+
+    @Test(arguments: zip(
+        AppStoreVersionState.allCases,
+        [
+            "Prepare for Submission",
+            "Waiting for Review",
+            "In Review",
+            "Pending Developer Release",
+            "Pending Apple Release",
+            "Processing for App Store",
+            "Ready for Sale",
+            "Developer Rejected",
+            "Rejected",
+            "Metadata Rejected",
+            "Removed from Sale",
+            "Developer Removed from Sale",
+            "Invalid Binary",
+            "Waiting for Export Compliance",
+            "Pending Contract",
+        ]
+    ))
+    func `displayName returns human readable string`(state: AppStoreVersionState, expected: String) {
+        #expect(state.displayName == expected)
+    }
 }
