@@ -15,19 +15,24 @@ public struct SDKScreenshotRepository: ScreenshotRepository, @unchecked Sendable
     }
 
     public func listScreenshotSets(appId: String) async throws -> [Domain.AppScreenshotSet] {
-        let versionsRequest = APIEndpoint.v1.apps.id(appId).appStoreVersions.get(
-            parameters: .init(limit: 1)
-        )
+        // Fetch all platform versions (iOS, macOS, tvOS, watchOS, visionOS may each be separate)
+        let versionsRequest = APIEndpoint.v1.apps.id(appId).appStoreVersions.get()
         let versionsResponse = try await provider.request(versionsRequest)
-        guard let versionId = versionsResponse.data.first?.id else { return [] }
+        guard !versionsResponse.data.isEmpty else { return [] }
 
-        let locRequest = APIEndpoint.v1.appStoreVersions.id(versionId).appStoreVersionLocalizations.get(
-            parameters: .init(limit: 1)
-        )
-        let locResponse = try await provider.request(locRequest)
-        guard let locId = locResponse.data.first?.id else { return [] }
+        // For each platform version, get its first localization and collect all screenshot sets
+        var allSets: [Domain.AppScreenshotSet] = []
+        for version in versionsResponse.data {
+            let locRequest = APIEndpoint.v1.appStoreVersions.id(version.id).appStoreVersionLocalizations.get(
+                parameters: .init(limit: 1)
+            )
+            guard let locResponse = try? await provider.request(locRequest),
+                  let locId = locResponse.data.first?.id else { continue }
 
-        return try await listScreenshotSets(localizationId: locId)
+            let sets = try await listScreenshotSets(localizationId: locId)
+            allSets.append(contentsOf: sets)
+        }
+        return allSets
     }
 
     public func listScreenshots(setId: String) async throws -> [Domain.AppScreenshot] {

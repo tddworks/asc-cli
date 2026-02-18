@@ -39,6 +39,18 @@ public enum ScreenshotDisplayType: String, Sendable, Equatable, Hashable, CaseIt
 
     public enum DeviceCategory: String, Sendable, Equatable {
         case iPhone, iPad, mac, watch, appleTV, appleVisionPro, iMessage
+
+        public var displayName: String {
+            switch self {
+            case .iPhone: return "iPhone"
+            case .iPad: return "iPad"
+            case .mac: return "Mac"
+            case .watch: return "Apple Watch"
+            case .appleTV: return "Apple TV"
+            case .appleVisionPro: return "Apple Vision Pro"
+            case .iMessage: return "iMessage"
+            }
+        }
     }
 
     public var deviceCategory: DeviceCategory {

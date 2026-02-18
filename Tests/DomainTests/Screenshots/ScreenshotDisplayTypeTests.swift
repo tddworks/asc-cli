@@ -66,4 +66,19 @@ struct ScreenshotDisplayTypeTests {
         let type = ScreenshotDisplayType(rawValue: "UNKNOWN_DEVICE")
         #expect(type == nil)
     }
+
+    @Test
+    func `appleTV category display name is Apple TV`() {
+        #expect(ScreenshotDisplayType.DeviceCategory.appleTV.displayName == "Apple TV")
+    }
+
+    @Test
+    func `appleVisionPro category display name is Apple Vision Pro`() {
+        #expect(ScreenshotDisplayType.DeviceCategory.appleVisionPro.displayName == "Apple Vision Pro")
+    }
+
+    @Test
+    func `iMessage category display name is iMessage`() {
+        #expect(ScreenshotDisplayType.DeviceCategory.iMessage.displayName == "iMessage")
+    }
 }

@@ -10,7 +10,8 @@ final class TUIApp {
         case appsList
         case appMenu(App)
         case appInfo(App)
-        case screenshotSetsList(App)
+        case platformPicker(App)
+        case screenshotSetsForPlatform(ScreenshotDisplayType.DeviceCategory, [AppScreenshotSet])
         case screenshotsList(AppScreenshotSet)
         case buildsList
         case buildDetail(Build)
@@ -80,11 +81,13 @@ final class TUIApp {
             component = makeAppMenu(app)
         case .appInfo(let app):
             component = makeAppInfo(app)
-        case .screenshotSetsList(let app):
-            let loader = makeLoadingView(title: "Loading screenshot sets...")
+        case .platformPicker(let app):
+            let loader = makeLoadingView(title: "Loading screenshots...")
             showComponent(loader)
-            Task { @MainActor in await self.loadScreenshotSets(for: app) }
+            Task { @MainActor in await self.loadPlatformPicker(for: app) }
             return
+        case .screenshotSetsForPlatform(let category, let sets):
+            component = makeScreenshotSetsView(category: category, sets: sets)
         case .screenshotsList(let set):
             let loader = makeLoadingView(title: "Loading screenshots...")
             showComponent(loader)
@@ -191,7 +194,7 @@ final class TUIApp {
             case "info":
                 self.navigate(to: .appInfo(app))
             case "screenshots":
-                self.navigate(to: .screenshotSetsList(app))
+                self.navigate(to: .platformPicker(app))
             default:
                 break
             }
@@ -219,7 +222,7 @@ final class TUIApp {
 
     // MARK: - Screenshots
 
-    private func loadScreenshotSets(for app: App) async {
+    private func loadPlatformPicker(for app: App) async {
         do {
             let repo = try ClientProvider.makeScreenshotRepository()
             let sets = try await repo.listScreenshotSets(appId: app.id)
@@ -236,19 +239,29 @@ final class TUIApp {
                 return
             }
 
-            let items = sets.map { set in
-                let count = set.screenshotsCount == 0 ? "empty" : "\(set.screenshotsCount) screenshot\(set.screenshotsCount == 1 ? "" : "s")"
+            // Collect available platforms in stable order (preserving first-seen order)
+            var seen = Set<ScreenshotDisplayType.DeviceCategory>()
+            var platforms: [ScreenshotDisplayType.DeviceCategory] = []
+            for set in sets {
+                if seen.insert(set.deviceCategory).inserted {
+                    platforms.append(set.deviceCategory)
+                }
+            }
+
+            let items = platforms.map { category in
+                let count = sets.filter { $0.deviceCategory == category }.count
                 return SelectItem(
-                    value: set.id,
-                    label: set.displayTypeName,
-                    description: "\(set.deviceCategory.rawValue)  ·  \(count)"
+                    value: category.rawValue,
+                    label: category.displayName,
+                    description: "\(count) set\(count == 1 ? "" : "s")"
                 )
             }
             let list = SelectList(items: items)
             list.onSelect = { [weak self] item in
-                if let set = sets.first(where: { $0.id == item.value }) {
-                    self?.navigate(to: .screenshotsList(set))
-                }
+                guard let self,
+                      let category = ScreenshotDisplayType.DeviceCategory(rawValue: item.value) else { return }
+                let filtered = sets.filter { $0.deviceCategory == category }
+                self.navigate(to: .screenshotSetsForPlatform(category, filtered))
             }
             list.onCancel = { [weak self] in
                 self?.goBack()
@@ -257,6 +270,26 @@ final class TUIApp {
         } catch {
             showComponent(makeErrorView(error: error))
         }
+    }
+
+    private func makeScreenshotSetsView(
+        category: ScreenshotDisplayType.DeviceCategory,
+        sets: [AppScreenshotSet]
+    ) -> Component {
+        let items = sets.map { set in
+            let count = set.screenshotsCount == 0 ? "empty" : "\(set.screenshotsCount) screenshot\(set.screenshotsCount == 1 ? "" : "s")"
+            return SelectItem(value: set.id, label: set.displayTypeName, description: count)
+        }
+        let list = SelectList(items: items)
+        list.onSelect = { [weak self] item in
+            if let set = sets.first(where: { $0.id == item.value }) {
+                self?.navigate(to: .screenshotsList(set))
+            }
+        }
+        list.onCancel = { [weak self] in
+            self?.goBack()
+        }
+        return list
     }
 
     private func loadScreenshots(for set: AppScreenshotSet) async {
