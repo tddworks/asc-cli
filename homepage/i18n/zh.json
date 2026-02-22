@@ -1,0 +1,101 @@
+{
+  "lang": "zh",
+  "appName": "asc",
+  "meta": {
+    "title": "asc — App Store Connect 命令行工具",
+    "description": "开源的 App Store Connect 命令行工具。提交应用、管理版本、上传截图——全部在终端完成。内置 CAEOAS 可供 AI 智能体调用。",
+    "keywords": "App Store Connect 命令行, asc, Swift CLI, 提交应用, Homebrew, 开源",
+    "ogImage": "static/og-image.png"
+  },
+  "nav": {
+    "features": "功能",
+    "howItWorks": "快速开始",
+    "download": "安装",
+    "github": "GitHub",
+    "getApp": "安装"
+  },
+  "hero": {
+    "badge": "开源 · MIT 许可证",
+    "titleLine1": "在终端管理",
+    "titleAccent": "App Store Connect。",
+    "subtitle": "用于管理 iOS 和 macOS 应用的 Swift 命令行工具。提交版本、管理截图、追踪构建——同时内置完整的 CAEOAS 可供 AI 智能体调用。",
+    "installLabel": "通过 Homebrew 安装",
+    "installCmd": "brew install asccli",
+    "githubLabel": "在 GitHub 上查看",
+    "stats": {
+      "stat1Value": "8+",
+      "stat1Label": "命令",
+      "stat2Value": "CAEOAS",
+      "stat2Label": "AI 智能体就绪",
+      "stat3Value": "MIT",
+      "stat3Label": "开源许可"
+    }
+  },
+  "features": {
+    "eyebrow": "功能特性",
+    "title": "所需功能，一应俱全",
+    "subtitle": "基于官方 App Store Connect API，采用清晰的三层架构，并提供完整的 Affordance 输出，专为 AI 智能体工作流设计。",
+    "feature1": {
+      "icon": "🤖",
+      "title": "AI 智能体就绪（CAEOAS）",
+      "description": "每条响应都内嵌可直接运行的下一步命令，存储在 affordances 字段中。智能体无需了解完整命令树，只需跟随链接即可。"
+    },
+    "feature2": {
+      "icon": "🗂️",
+      "title": "完整资源层级",
+      "description": "管理完整的 App Store Connect 资源树：应用 → 版本 → 本地化 → 截图集 → 截图。同时支持构建和 TestFlight。"
+    },
+    "feature3": {
+      "icon": "📤",
+      "title": "一键提交审核",
+      "description": "一条命令即可将任意 iOS 或 macOS 版本提交审核。CLI 自动处理完整的多步骤审核提交流程。"
+    },
+    "feature4": {
+      "icon": "🔧",
+      "title": "多种输出格式",
+      "description": "专为人类和机器设计。支持 JSON（默认）、表格或 Markdown 格式输出，轻松接入 jq、脚本或 AI 智能体。"
+    }
+  },
+  "howItWorks": {
+    "eyebrow": "快速开始",
+    "title": "数分钟内快速上手",
+    "step1": {
+      "title": "通过 Homebrew 安装",
+      "description": "一条命令即可安装最新版本，无需 Xcode 或 Swift 工具链。"
+    },
+    "step2": {
+      "title": "配置 API 密钥",
+      "description": "从 App Store Connect 的 API 密钥中设置三个环境变量，CLI 将自动读取。"
+    },
+    "step3": {
+      "title": "开始管理您的应用",
+      "description": "列出应用、查看版本、上传截图、提交审核——一切尽在终端，也可由 AI 智能体自动完成。"
+    }
+  },
+  "cta": {
+    "badge": "准备好试用 asc 了吗？",
+    "title": "自动化您的 App Store Connect 工作流",
+    "install": "通过 Homebrew 安装",
+    "github": "在 GitHub 上查看源码"
+  },
+  "footer": {
+    "description": "开源的 App Store Connect 命令行工具，使用 Swift 构建。",
+    "copyright": "© 2025 asc 贡献者。MIT 许可证。",
+    "columns": {
+      "project": "项目",
+      "resources": "资源",
+      "legal": "法律"
+    },
+    "links": {
+      "github": "GitHub",
+      "releases": "发布记录",
+      "issues": "问题反馈",
+      "contributing": "贡献指南",
+      "docs": "文档",
+      "commands": "命令参考",
+      "changelog": "更新日志",
+      "license": "MIT 许可证",
+      "privacy": "隐私政策"
+    }
+  }
+}

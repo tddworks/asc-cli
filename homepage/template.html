@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="{{HTML_LANG}}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{meta.title}}</title>
+  <meta name="description" content="{{meta.description}}">
+  <link rel="canonical" href="{{CANONICAL_URL}}">
+  <link rel="icon" type="image/svg+xml" href="static/favicon.svg">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{CANONICAL_URL}}">
+  <meta property="og:title" content="{{meta.title}}">
+  <meta property="og:description" content="{{meta.description}}">
+  <meta property="og:image" content="{{meta.ogImage}}">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{meta.title}}">
+  <meta name="twitter:description" content="{{meta.description}}">
+  <meta name="twitter:image" content="{{meta.ogImage}}">
+
+  <meta name="keywords" content="{{meta.keywords}}">
+  <meta name="robots" content="index, follow">
+  {{HREFLANG_LINKS}}
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?{{EXTRA_FONTS}}family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/animations.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="styles/animations.css"></noscript>
+
+  <style>
+    body { font-family: {{FONT_FAMILY}}; }
+    .site-nav { opacity: 0; }
+    .site-nav.is-loaded { opacity: 1; }
+  </style>
+</head>
+<body>
+  <!-- Ambient Effects -->
+  <div class="ambient-glow glow-accent" style="top:-300px;right:-200px;"></div>
+  <div class="ambient-glow glow-blue" style="bottom:20%;left:-200px;"></div>
+  <div class="ambient-glow glow-purple" style="top:50%;right:-150px;"></div>
+  <div class="orb" style="top:25%;left:15%;"></div>
+  <div class="orb" style="bottom:30%;right:12%;animation-direction:reverse;"></div>
+  <div class="noise-overlay"></div>
+
+  <!-- Navigation -->
+  <nav class="site-nav">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon">asc</div>
+      <span class="nav-logo-text">asc<span class="nav-logo-suffix">-swift</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">{{nav.features}}</a></li>
+      <li><a href="#how-it-works">{{nav.howItWorks}}</a></li>
+      <li><a href="#install">{{nav.download}}</a></li>
+    </ul>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <!-- Language Dropdown -->
+      <div class="lang-dropdown">
+        <button class="lang-dropdown-toggle" aria-expanded="false" aria-haspopup="true">
+          <svg class="lang-globe-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+          <span class="lang-current">{{CURRENT_LANG_LABEL}}</span>
+          <svg class="lang-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="lang-dropdown-menu">{{LANG_DROPDOWN_ITEMS}}</div>
+      </div>
+      <a href="https://github.com/onegai/asc-swift" class="btn btn-github" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+        </svg>
+        GitHub
+      </a>
+      <a href="#install" class="btn btn-primary">{{nav.getApp}}</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="dot-pattern"></div>
+    <div class="hero-content">
+      <div class="hero-text">
+        <div class="hero-badge" data-animate="fade-up">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          {{hero.badge}}
+        </div>
+        <h1 class="hero-title" data-animate="fade-up" data-delay="1">
+          {{hero.titleLine1}}<br><em>{{hero.titleAccent}}</em>
+        </h1>
+        <p class="hero-subtitle" data-animate="fade-up" data-delay="2">{{hero.subtitle}}</p>
+        <div class="hero-actions" data-animate="fade-up" data-delay="3">
+          <!-- Brew Install Box -->
+          <div class="install-box" id="install-box" onclick="copyInstall(this)">
+            <span class="prompt">$</span>
+            <span class="cmd">{{hero.installCmd}}</span>
+            <button class="copy-btn" id="copy-btn">copy</button>
+          </div>
+          <div class="hero-action-row">
+            <a href="https://github.com/onegai/asc-swift" class="btn btn-github" target="_blank" rel="noopener">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+              {{hero.githubLabel}}
+            </a>
+          </div>
+        </div>
+        <div class="hero-stats" data-animate="fade-up" data-delay="4">
+          <div>
+            <div class="hero-stat-value">{{hero.stats.stat1Value}}</div>
+            <div class="hero-stat-label">{{hero.stats.stat1Label}}</div>
+          </div>
+          <div>
+            <div class="hero-stat-value">{{hero.stats.stat2Value}}</div>
+            <div class="hero-stat-label">{{hero.stats.stat2Label}}</div>
+          </div>
+          <div>
+            <div class="hero-stat-value">{{hero.stats.stat3Value}}</div>
+            <div class="hero-stat-label">{{hero.stats.stat3Label}}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terminal Mockup -->
+      <div class="hero-visual" data-animate="scale-up" data-delay="2">
+        <div class="terminal-window">
+          <div class="terminal-titlebar">
+            <div class="terminal-dot red"></div>
+            <div class="terminal-dot yellow"></div>
+            <div class="terminal-dot green"></div>
+            <span class="terminal-title">zsh — 80×24</span>
+          </div>
+          <div class="terminal-body">
+            <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">asc apps list</span></div>
+            <div class="t-line t-indent"><span class="t-dim">{"data":[{</span></div>
+            <div class="t-line t-indent"><span class="t-dim">&nbsp;&nbsp;</span><span class="t-key">"name"</span><span class="t-dim">:</span> <span class="t-str">"AppNexus for App Store Connect"</span><span class="t-dim">,</span></div>
+            <div class="t-line t-indent"><span class="t-dim">&nbsp;&nbsp;</span><span class="t-key">"affordances"</span><span class="t-dim">: {</span></div>
+            <div class="t-line t-indent"><span class="t-dim">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="t-key">"listVersions"</span><span class="t-dim">:</span> <span class="t-val">"asc versions list --app-id 674..."</span></div>
+            <div class="t-line t-indent"><span class="t-dim">&nbsp;&nbsp;}</span></div>
+            <div class="t-line t-indent"><span class="t-dim">}]}</span></div>
+            <div class="t-blank"></div>
+            <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">asc versions list --app-id 6748760927</span></div>
+            <div class="t-line t-indent"><span class="t-key">"versionString"</span><span class="t-dim">:</span> <span class="t-str">"1.0.0"</span><span class="t-dim">,</span> <span class="t-key">"platform"</span><span class="t-dim">:</span> <span class="t-str">"IOS"</span></div>
+            <div class="t-line t-indent"><span class="t-key">"state"</span><span class="t-dim">:</span> <span class="t-val">"PREPARE_FOR_SUBMISSION"</span></div>
+            <div class="t-line t-indent"><span class="t-key">"affordances"</span><span class="t-dim">: {</span> <span class="t-val">"submitForReview"</span><span class="t-dim">: "asc versions submit ..."</span> <span class="t-dim">}</span></div>
+            <div class="t-blank"></div>
+            <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">asc versions submit --version-id a965...</span></div>
+            <div class="t-line"><span class="t-success">✓</span> <span class="t-dim">Submitted for review</span></div>
+            <div class="t-blank"></div>
+            <div class="t-line"><span class="t-prompt">$</span><span class="t-cursor"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section" id="features">
+    <div class="gradient-line" style="position:absolute;top:0;left:8%;right:8%;"></div>
+    <div class="section-header">
+      <p class="section-eyebrow" data-animate="fade-up">{{features.eyebrow}}</p>
+      <h2 class="section-title" data-animate="fade-up" data-delay="1">{{features.title}}</h2>
+      <p class="section-subtitle" data-animate="fade-up" data-delay="2">{{features.subtitle}}</p>
+    </div>
+    <div class="feature-grid">
+      <!-- Feature 1: CAEOAS -->
+      <div class="feature-card" data-animate="fade-up" data-delay="1">
+        <div class="feature-card-preview">
+          <div style="font-size:40px;margin-bottom:20px;">{{features.feature1.icon}}</div>
+          <div class="affordances-demo">
+            <div class="t-line"><span class="t-dim">// response includes next commands</span></div>
+            <div class="t-line"><span class="t-key">"affordances"</span><span class="t-dim">: {</span></div>
+            <div class="t-line t-indent"><span class="t-key">"listVersions"</span><span class="t-dim">:</span></div>
+            <div class="t-line t-indent"><span class="t-dim">&nbsp;</span><span class="t-val">"asc versions list --app-id 674..."</span><span class="t-dim">,</span></div>
+            <div class="t-line t-indent"><span class="t-key">"submitForReview"</span><span class="t-dim">:</span></div>
+            <div class="t-line t-indent"><span class="t-dim">&nbsp;</span><span class="t-val">"asc versions submit --version-id ..."</span></div>
+            <div class="t-line"><span class="t-dim">}</span></div>
+          </div>
+        </div>
+        <div class="feature-card-content">
+          <h3 class="feature-card-title">{{features.feature1.title}}</h3>
+          <p class="feature-card-description">{{features.feature1.description}}</p>
+        </div>
+      </div>
+
+      <!-- Feature 2: Full hierarchy -->
+      <div class="feature-card" data-animate="fade-up" data-delay="2">
+        <div class="feature-card-preview">
+          <div style="font-size:40px;margin-bottom:20px;">{{features.feature2.icon}}</div>
+          <div class="code-snippet">
+            <div class="t-line"><span class="t-success">App</span></div>
+            <div class="t-line"><span class="t-dim">└─</span> <span class="t-val">AppStoreVersion</span></div>
+            <div class="t-line"><span class="t-dim">&nbsp;&nbsp;&nbsp;└─</span> <span class="t-key">Localization</span></div>
+            <div class="t-line"><span class="t-dim">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─</span> <span class="t-str">ScreenshotSet</span></div>
+            <div class="t-line"><span class="t-dim">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─</span> <span class="t-dim">Screenshot</span></div>
+            <div class="t-blank"></div>
+            <div class="t-line"><span class="t-success">App</span></div>
+            <div class="t-line"><span class="t-dim">├─</span> <span class="t-val">Build</span></div>
+            <div class="t-line"><span class="t-dim">└─</span> <span class="t-key">TestFlight</span></div>
+          </div>
+        </div>
+        <div class="feature-card-content">
+          <h3 class="feature-card-title">{{features.feature2.title}}</h3>
+          <p class="feature-card-description">{{features.feature2.description}}</p>
+        </div>
+      </div>
+
+      <!-- Feature 3: Submit -->
+      <div class="feature-card" data-animate="fade-up" data-delay="3">
+        <div class="feature-card-preview">
+          <div style="font-size:40px;margin-bottom:20px;">{{features.feature3.icon}}</div>
+          <div class="code-snippet">
+            <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc versions submit \</span></div>
+            <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--version-id a9657737</span></div>
+            <div class="t-blank"></div>
+            <div class="t-line"><span class="t-dim">// 4 API calls, 1 command:</span></div>
+            <div class="t-line"><span class="t-dim">1. GET  /appStoreVersions/{id}</span></div>
+            <div class="t-line"><span class="t-dim">2. POST /reviewSubmissions</span></div>
+            <div class="t-line"><span class="t-dim">3. POST /reviewSubmissionItems</span></div>
+            <div class="t-line"><span class="t-dim">4. PATCH /reviewSubmissions/{id}</span></div>
+            <div class="t-blank"></div>
+            <div class="t-line"><span class="t-success">✓</span> <span class="t-dim">state: WAITING_FOR_REVIEW</span></div>
+          </div>
+        </div>
+        <div class="feature-card-content">
+          <h3 class="feature-card-title">{{features.feature3.title}}</h3>
+          <p class="feature-card-description">{{features.feature3.description}}</p>
+        </div>
+      </div>
+
+      <!-- Feature 4: Output formats -->
+      <div class="feature-card" data-animate="fade-up" data-delay="4">
+        <div class="feature-card-preview">
+          <div style="font-size:40px;margin-bottom:20px;">{{features.feature4.icon}}</div>
+          <div class="code-snippet">
+            <div class="t-line"><span class="t-dim"># default: machine-readable JSON</span></div>
+            <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc apps list</span></div>
+            <div class="t-blank"></div>
+            <div class="t-line"><span class="t-dim"># human-readable table</span></div>
+            <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc apps list --output table</span></div>
+            <div class="t-blank"></div>
+            <div class="t-line"><span class="t-dim"># for docs / AI agents</span></div>
+            <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc apps list --output markdown</span></div>
+            <div class="t-blank"></div>
+            <div class="t-line"><span class="t-dim"># pipe-friendly</span></div>
+            <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc apps list | jq '.data[0].id'</span></div>
+          </div>
+        </div>
+        <div class="feature-card-content">
+          <h3 class="feature-card-title">{{features.feature4.title}}</h3>
+          <p class="feature-card-description">{{features.feature4.description}}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Start / How It Works -->
+  <section class="section" id="how-it-works">
+    <div class="section-header">
+      <p class="section-eyebrow" data-animate="fade-up">{{howItWorks.eyebrow}}</p>
+      <h2 class="section-title" data-animate="fade-up" data-delay="1">{{howItWorks.title}}</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card" data-animate="fade-up" data-delay="1">
+        <div class="step-number">1</div>
+        <div class="step-preview">
+          <div class="code-snippet">
+            <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">brew install asccli</span></div>
+            <div class="t-blank"></div>
+            <div class="t-line"><span class="t-dim">🍺 Pouring asc...</span></div>
+            <div class="t-line"><span class="t-success">✓</span> <span class="t-dim">asc installed</span></div>
+            <div class="t-blank"></div>
+            <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc --version</span></div>
+            <div class="t-line"><span class="t-dim">asc 1.0.0</span></div>
+          </div>
+        </div>
+        <h3 class="step-title">{{howItWorks.step1.title}}</h3>
+        <p class="step-description">{{howItWorks.step1.description}}</p>
+      </div>
+
+      <div class="step-card" data-animate="fade-up" data-delay="2">
+        <div class="step-number">2</div>
+        <div class="step-preview">
+          <div class="code-snippet">
+            <div class="t-line"><span class="t-dim"># ~/.zshrc or ~/.bashrc</span></div>
+            <div class="t-line"><span class="t-key">export</span> <span class="t-val">ASC_KEY_ID</span><span class="t-dim">="YOUR_KEY_ID"</span></div>
+            <div class="t-line"><span class="t-key">export</span> <span class="t-val">ASC_ISSUER_ID</span><span class="t-dim">="YOUR_ISSUER"</span></div>
+            <div class="t-line"><span class="t-key">export</span> <span class="t-val">ASC_PRIVATE_KEY_PATH</span></div>
+            <div class="t-line"><span class="t-dim">&nbsp;&nbsp;="~/.asc/AuthKey.p8"</span></div>
+            <div class="t-blank"></div>
+            <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc auth</span></div>
+            <div class="t-line"><span class="t-success">✓</span> <span class="t-dim">Authentication OK</span></div>
+          </div>
+        </div>
+        <h3 class="step-title">{{howItWorks.step2.title}}</h3>
+        <p class="step-description">{{howItWorks.step2.description}}</p>
+      </div>
+
+      <div class="step-card" data-animate="fade-up" data-delay="3">
+        <div class="step-number">3</div>
+        <div class="step-preview">
+          <div class="code-snippet">
+            <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc apps list</span></div>
+            <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc versions list --app-id &lt;id&gt;</span></div>
+            <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc screenshots upload \</span></div>
+            <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--set-id &lt;id&gt; --file shot.png</span></div>
+            <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc versions submit \</span></div>
+            <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--version-id &lt;id&gt;</span></div>
+            <div class="t-blank"></div>
+            <div class="t-line"><span class="t-success">✓</span> <span class="t-dim">Submitted for review</span></div>
+          </div>
+        </div>
+        <h3 class="step-title">{{howItWorks.step3.title}}</h3>
+        <p class="step-description">{{howItWorks.step3.description}}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA / Install -->
+  <section class="cta" id="install">
+    <div class="cta-card" data-animate="fade-up">
+      <div class="cta-glow"></div>
+      <div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--color-bg-elevated);border:1px solid var(--color-border);border-radius:100px;font-size:12px;color:var(--color-text-secondary);margin-bottom:24px;font-family:var(--font-mono);">
+        {{cta.badge}}
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+      <h2 class="cta-title">{{cta.title}}</h2>
+      <div class="cta-buttons">
+        <div class="install-box" id="cta-install-box" onclick="copyInstallCTA(this)" style="max-width:420px;">
+          <span class="prompt">$</span>
+          <span class="cmd">brew install asccli</span>
+          <button class="copy-btn" id="cta-copy-btn">copy</button>
+        </div>
+      </div>
+      <div class="cta-buttons" style="margin-top:20px;">
+        <a href="https://github.com/onegai/asc-swift" class="btn btn-secondary" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          {{cta.github}}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo">
+          <div class="nav-logo-icon">asc</div>
+          <span class="nav-logo-text">asc<span class="nav-logo-suffix">-swift</span></span>
+        </a>
+        <p class="footer-description">{{footer.description}}</p>
+      </div>
+      <div class="footer-column">
+        <h4>{{footer.columns.project}}</h4>
+        <ul class="footer-links">
+          <li><a href="https://github.com/onegai/asc-swift" target="_blank" rel="noopener">{{footer.links.github}}</a></li>
+          <li><a href="https://github.com/onegai/asc-swift/releases" target="_blank" rel="noopener">{{footer.links.releases}}</a></li>
+          <li><a href="https://github.com/onegai/asc-swift/issues" target="_blank" rel="noopener">{{footer.links.issues}}</a></li>
+          <li><a href="https://github.com/onegai/asc-swift/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">{{footer.links.contributing}}</a></li>
+        </ul>
+      </div>
+      <div class="footer-column">
+        <h4>{{footer.columns.resources}}</h4>
+        <ul class="footer-links">
+          <li><a href="https://github.com/onegai/asc-swift#readme" target="_blank" rel="noopener">{{footer.links.docs}}</a></li>
+          <li><a href="https://github.com/onegai/asc-swift#commands" target="_blank" rel="noopener">{{footer.links.commands}}</a></li>
+          <li><a href="https://github.com/onegai/asc-swift/blob/main/CHANGELOG.md" target="_blank" rel="noopener">{{footer.links.changelog}}</a></li>
+        </ul>
+      </div>
+      <div class="footer-column">
+        <h4>{{footer.columns.legal}}</h4>
+        <ul class="footer-links">
+          <li><a href="https://github.com/onegai/asc-swift/blob/main/LICENSE" target="_blank" rel="noopener">{{footer.links.license}}</a></li>
+          <li><a href="#" >{{footer.links.privacy}}</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copyright">{{footer.copyright}}</p>
+      <span class="footer-open-source">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        Built with <a href="https://swift.org" target="_blank" rel="noopener">Swift</a>
+      </span>
+    </div>
+  </footer>
+
+  <script>
+    // Copy install command
+    function copyInstall(box) {
+      const cmd = box.querySelector('.cmd').textContent;
+      const btn = box.querySelector('.copy-btn');
+      navigator.clipboard.writeText(cmd).then(() => {
+        btn.textContent = 'copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 2000);
+      });
+    }
+    function copyInstallCTA(box) { copyInstall(box); }
+
+    // Scroll animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('is-visible'); });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    document.querySelectorAll('[data-animate], .gradient-line').forEach(el => observer.observe(el));
+
+    // Navbar
+    const nav = document.querySelector('.site-nav');
+    setTimeout(() => nav.classList.add('is-loaded'), 300);
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // Parallax glows
+    const glows = document.querySelectorAll('.ambient-glow');
+    window.addEventListener('scroll', () => {
+      const s = window.pageYOffset;
+      glows.forEach((g, i) => { g.style.transform = `translateY(${s * (0.06 + i * 0.03)}px)`; });
+    });
+
+    // Card mouse tracking
+    document.querySelectorAll('.feature-card, .step-card').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mouse-x', ((e.clientX - r.left) / r.width) * 100 + '%');
+        card.style.setProperty('--mouse-y', ((e.clientY - r.top) / r.height) * 100 + '%');
+      });
+    });
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    // Language dropdown
+    const langDropdown = document.querySelector('.lang-dropdown');
+    const langToggle = document.querySelector('.lang-dropdown-toggle');
+    if (langToggle && langDropdown) {
+      langToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        langDropdown.classList.toggle('open');
+        langToggle.setAttribute('aria-expanded', langDropdown.classList.contains('open'));
+      });
+      document.addEventListener('click', (e) => {
+        if (!langDropdown.contains(e.target)) {
+          langDropdown.classList.remove('open');
+          langToggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { langDropdown.classList.remove('open'); langToggle.setAttribute('aria-expanded', 'false'); }
+      });
+    }
+  </script>
+</body>
+</html>

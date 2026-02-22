@@ -1,0 +1,101 @@
+{
+  "lang": "en",
+  "appName": "asc",
+  "meta": {
+    "title": "asc — App Store Connect CLI",
+    "description": "Open-source command-line tool for App Store Connect. Submit apps, manage versions, upload screenshots, and more — all from your terminal. AI-agent ready with CAEOAS affordances.",
+    "keywords": "app store connect cli, asc, swift cli, appstoreconnect, submit app, homebrew, open source",
+    "ogImage": "static/og-image.png"
+  },
+  "nav": {
+    "features": "Features",
+    "howItWorks": "Quick Start",
+    "download": "Install",
+    "github": "GitHub",
+    "getApp": "Install"
+  },
+  "hero": {
+    "badge": "Open Source · MIT License",
+    "titleLine1": "App Store Connect,",
+    "titleAccent": "from your terminal.",
+    "subtitle": "A Swift CLI for managing your iOS and macOS apps on App Store Connect. Submit versions, manage screenshots, track builds — with full AI-agent support via CAEOAS affordances.",
+    "installLabel": "Install via Homebrew",
+    "installCmd": "brew install asccli",
+    "githubLabel": "View on GitHub",
+    "stats": {
+      "stat1Value": "8+",
+      "stat1Label": "Commands",
+      "stat2Value": "CAEOAS",
+      "stat2Label": "AI-Agent Ready",
+      "stat3Value": "MIT",
+      "stat3Label": "Open Source"
+    }
+  },
+  "features": {
+    "eyebrow": "Features",
+    "title": "Everything you need, nothing you don't",
+    "subtitle": "Built on the official App Store Connect API, with a clean three-layer architecture and full affordance output for AI agent workflows.",
+    "feature1": {
+      "icon": "🤖",
+      "title": "AI-Agent Ready (CAEOAS)",
+      "description": "Every response embeds ready-to-run next commands in an affordances field. No agent needs to know the full command tree — it just follows the links."
+    },
+    "feature2": {
+      "icon": "🗂️",
+      "title": "Full Resource Hierarchy",
+      "description": "Manage the complete App Store Connect resource tree: Apps → Versions → Localizations → Screenshot Sets → Screenshots. Plus Builds and TestFlight."
+    },
+    "feature3": {
+      "icon": "📤",
+      "title": "One-Command Submission",
+      "description": "Submit any iOS or macOS version for App Store review with a single command. The CLI handles the full multi-step review submission flow automatically."
+    },
+    "feature4": {
+      "icon": "🔧",
+      "title": "Multiple Output Formats",
+      "description": "Designed for both humans and machines. Output as JSON (default), table, or markdown. Pipe into jq, scripts, or AI agents with ease."
+    }
+  },
+  "howItWorks": {
+    "eyebrow": "Quick Start",
+    "title": "Up and running in minutes",
+    "step1": {
+      "title": "Install via Homebrew",
+      "description": "One command installs the latest release. No Xcode or Swift toolchain required."
+    },
+    "step2": {
+      "title": "Configure your API key",
+      "description": "Set three environment variables from your App Store Connect API key. The CLI picks them up automatically."
+    },
+    "step3": {
+      "title": "Start managing your apps",
+      "description": "List apps, inspect versions, upload screenshots, and submit for review — all from your terminal or from an AI agent."
+    }
+  },
+  "cta": {
+    "badge": "Ready to try asc?",
+    "title": "Automate your App Store Connect workflow",
+    "install": "Install via Homebrew",
+    "github": "View Source on GitHub"
+  },
+  "footer": {
+    "description": "Open-source CLI tool for App Store Connect. Built with Swift.",
+    "copyright": "© 2025 asc contributors. MIT License.",
+    "columns": {
+      "project": "Project",
+      "resources": "Resources",
+      "legal": "Legal"
+    },
+    "links": {
+      "github": "GitHub",
+      "releases": "Releases",
+      "issues": "Issues",
+      "contributing": "Contributing",
+      "docs": "Documentation",
+      "commands": "Commands",
+      "changelog": "Changelog",
+      "license": "MIT License",
+      "privacy": "Privacy"
+    }
+  }
+}
