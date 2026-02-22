@@ -22,7 +22,19 @@ public struct OpenAPISubmissionRepository: SubmissionRepository, @unchecked Send
             throw APIError.unknown("Failed to extract appId and platform from version \(versionId)")
         }
 
-        // Step 2: Create review submission for the app + platform
+        // Step 2: Check for an existing open submission (UNRESOLVED_ISSUES or READY_FOR_REVIEW)
+        let filterPlatform = APIEndpoint.V1.ReviewSubmissions.GetParameters.FilterPlatform(rawValue: sdkPlatform.rawValue)
+        let listReq = APIEndpoint.v1.reviewSubmissions.get(parameters: .init(
+            filterPlatform: filterPlatform.map { [$0] },
+            filterState: [.unresolvedIssues, .readyForReview],
+            filterApp: [appId]
+        ))
+        let listResp = try await client.request(listReq)
+        if let existing = listResp.data.first {
+            return try await patchSubmitted(id: existing.id, appId: appId, platform: platform)
+        }
+
+        // Step 3: Create new review submission
         let createReq = APIEndpoint.v1.reviewSubmissions.post(
             ReviewSubmissionCreateRequest(
                 data: .init(
@@ -37,7 +49,7 @@ public struct OpenAPISubmissionRepository: SubmissionRepository, @unchecked Send
         let submissionResp = try await client.request(createReq)
         let submissionId = submissionResp.data.id
 
-        // Step 3: Add the version as a review submission item
+        // Step 4: Add the version as a review submission item
         let itemReq = APIEndpoint.v1.reviewSubmissionItems.post(
             ReviewSubmissionItemCreateRequest(
                 data: .init(
@@ -51,18 +63,25 @@ public struct OpenAPISubmissionRepository: SubmissionRepository, @unchecked Send
         )
         _ = try await client.request(itemReq)
 
-        // Step 4: Submit for review
-        let submitReq = APIEndpoint.v1.reviewSubmissions.id(submissionId).patch(
+        // Step 5: Submit for review
+        return try await patchSubmitted(id: submissionId, appId: appId, platform: platform)
+    }
+
+    private func patchSubmitted(
+        id: String,
+        appId: String,
+        platform: Domain.AppStorePlatform
+    ) async throws -> Domain.ReviewSubmission {
+        let submitReq = APIEndpoint.v1.reviewSubmissions.id(id).patch(
             ReviewSubmissionUpdateRequest(
                 data: .init(
                     type: .reviewSubmissions,
-                    id: submissionId,
+                    id: id,
                     attributes: .init(isSubmitted: true)
                 )
             )
         )
         let finalResp = try await client.request(submitReq)
-
         return mapSubmission(finalResp.data, appId: appId, platform: platform)
     }
 
