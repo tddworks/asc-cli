@@ -24,13 +24,16 @@ jobs:
           TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
           VERSION: ${{ inputs.version }}
         run: |
-          SHA256=$(curl -sL "https://github.com/tddworks/asc-cli/releases/download/${VERSION}/asc_${VERSION}_macOS_universal" | shasum -a 256 | cut -d ' ' -f 1)
+          BASE_URL="https://github.com/tddworks/asc-cli/releases/download/${VERSION}"
+          SHA256_ARM64=$(curl -sL "${BASE_URL}/asc_${VERSION}_macOS_arm64" | shasum -a 256 | cut -d ' ' -f 1)
+          SHA256_X86=$(curl -sL "${BASE_URL}/asc_${VERSION}_macOS_x86_64" | shasum -a 256 | cut -d ' ' -f 1)
 
           git clone https://x-access-token:${TAP_GITHUB_TOKEN}@github.com/tddworks/homebrew-tap.git homebrew-tap
 
           mkdir -p homebrew-tap/Formula
           sed -e "s/__VERSION__/${VERSION}/g" \
-              -e "s/__SHA256__/${SHA256}/g" \
+              -e "s/__SHA256_ARM64__/${SHA256_ARM64}/g" \
+              -e "s/__SHA256_X86__/${SHA256_X86}/g" \
               .github/homebrew/asc.rb.template > homebrew-tap/Formula/asc.rb
 
           cd homebrew-tap
