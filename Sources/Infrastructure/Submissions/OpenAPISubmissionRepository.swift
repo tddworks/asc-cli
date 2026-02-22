@@ -10,7 +10,9 @@ public struct OpenAPISubmissionRepository: SubmissionRepository, @unchecked Send
 
     public func submitVersion(versionId: String) async throws -> Domain.ReviewSubmission {
         // Step 1: Fetch the version to extract appId and platform
-        let versionReq = APIEndpoint.v1.appStoreVersions.id(versionId).get()
+        let versionReq = APIEndpoint.v1.appStoreVersions.id(versionId).get(
+            parameters: .init(include: [.app])
+        )
         let versionResp = try await client.request(versionReq)
         guard
             let appId = versionResp.data.relationships?.app?.data?.id,
