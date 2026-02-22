@@ -61,19 +61,17 @@ public struct OpenAPISubmissionRepository: SubmissionRepository, @unchecked Send
         )
         let finalResp = try await client.request(submitReq)
 
-        return mapSubmission(finalResp.data, appId: appId)
+        return mapSubmission(finalResp.data, appId: appId, platform: platform)
     }
 
     private func mapSubmission(
         _ sdkSubmission: AppStoreConnect_Swift_SDK.ReviewSubmission,
-        appId: String
+        appId: String,
+        platform: Domain.AppStorePlatform
     ) -> Domain.ReviewSubmission {
         let state = sdkSubmission.attributes?.state.flatMap {
             Domain.ReviewSubmissionState(rawValue: $0.rawValue)
         } ?? .readyForReview
-        let platform = sdkSubmission.attributes?.platform.flatMap {
-            Domain.AppStorePlatform(rawValue: $0.rawValue)
-        } ?? .iOS
         return Domain.ReviewSubmission(
             id: sdkSubmission.id,
             appId: appId,
