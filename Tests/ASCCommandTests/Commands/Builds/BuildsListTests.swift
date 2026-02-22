@@ -6,33 +6,49 @@ import Testing
 @Suite
 struct BuildsListTests {
 
-    @Test func `execute json output contains version and raw processing state`() async throws {
+    @Test func `execute json output`() async throws {
         let mockRepo = MockBuildRepository()
         given(mockRepo).listBuilds(appId: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
-                Build(id: "b-1", version: "42", expired: false, processingState: .valid, buildNumber: nil),
+                Build(id: "b-1", version: "42", expired: false, processingState: .valid),
             ], nextCursor: nil)
         )
 
-        let cmd = try BuildsList.parse([])
+        let cmd = try BuildsList.parse(["--pretty"])
         let output = try await cmd.execute(repo: mockRepo)
 
-        #expect(output.contains("\"version\":\"42\""))
-        #expect(output.contains("VALID"))
-        #expect(output.contains("\"expired\":false"))
+        #expect(output == """
+        [
+          {
+            "expired" : false,
+            "id" : "b-1",
+            "processingState" : "VALID",
+            "version" : "42"
+          }
+        ]
+        """)
     }
 
-    @Test func `execute json output shows expired true for expired build`() async throws {
+    @Test func `execute json output for expired build`() async throws {
         let mockRepo = MockBuildRepository()
         given(mockRepo).listBuilds(appId: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
-                Build(id: "b-1", version: "1", expired: true, processingState: .valid, buildNumber: nil),
+                Build(id: "b-1", version: "1", expired: true, processingState: .valid),
             ], nextCursor: nil)
         )
 
-        let cmd = try BuildsList.parse([])
+        let cmd = try BuildsList.parse(["--pretty"])
         let output = try await cmd.execute(repo: mockRepo)
 
-        #expect(output.contains("\"expired\":true"))
+        #expect(output == """
+        [
+          {
+            "expired" : true,
+            "id" : "b-1",
+            "processingState" : "VALID",
+            "version" : "1"
+          }
+        ]
+        """)
     }
 }

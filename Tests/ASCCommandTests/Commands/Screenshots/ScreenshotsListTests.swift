@@ -6,29 +6,49 @@ import Testing
 @Suite
 struct ScreenshotsListTests {
 
-    @Test func `execute returns filename in output`() async throws {
+    @Test func `execute json output`() async throws {
         let mockRepo = MockScreenshotRepository()
         given(mockRepo).listScreenshots(setId: .any).willReturn([
             AppScreenshot(id: "img-1", setId: "set-1", fileName: "hero.png", fileSize: 2_048_000, assetState: .complete, imageWidth: 1290, imageHeight: 2796),
         ])
 
-        let cmd = try ScreenshotsList.parse(["--set-id", "set-1"])
+        let cmd = try ScreenshotsList.parse(["--set-id", "set-1", "--pretty"])
         let output = try await cmd.execute(repo: mockRepo)
 
-        #expect(output.contains("hero.png"))
-        #expect(output.contains("img-1"))
+        #expect(output == """
+        [
+          {
+            "assetState" : "COMPLETE",
+            "fileName" : "hero.png",
+            "fileSize" : 2048000,
+            "id" : "img-1",
+            "imageHeight" : 2796,
+            "imageWidth" : 1290,
+            "setId" : "set-1"
+          }
+        ]
+        """)
     }
 
-    @Test func `execute shows dash for missing dimensions`() async throws {
+    @Test func `execute json output with nil dimensions`() async throws {
         let mockRepo = MockScreenshotRepository()
         given(mockRepo).listScreenshots(setId: .any).willReturn([
             AppScreenshot(id: "img-1", setId: "set-1", fileName: "screen.png", fileSize: 100, assetState: nil, imageWidth: nil, imageHeight: nil),
         ])
 
-        let cmd = try ScreenshotsList.parse(["--set-id", "set-1"])
+        let cmd = try ScreenshotsList.parse(["--set-id", "set-1", "--pretty"])
         let output = try await cmd.execute(repo: mockRepo)
 
-        #expect(output.contains("-"))
+        #expect(output == """
+        [
+          {
+            "fileName" : "screen.png",
+            "fileSize" : 100,
+            "id" : "img-1",
+            "setId" : "set-1"
+          }
+        ]
+        """)
     }
 
     @Test func `execute passes setId to repository`() async throws {

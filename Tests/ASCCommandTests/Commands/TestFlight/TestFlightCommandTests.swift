@@ -6,7 +6,7 @@ import Testing
 @Suite
 struct BetaGroupsListTests {
 
-    @Test func `execute json output contains group names and internal flag`() async throws {
+    @Test func `execute json output`() async throws {
         let mockRepo = MockTestFlightRepository()
         given(mockRepo).listBetaGroups(appId: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
@@ -15,20 +15,32 @@ struct BetaGroupsListTests {
             ], nextCursor: nil)
         )
 
-        let cmd = try BetaGroupsList.parse([])
+        let cmd = try BetaGroupsList.parse(["--pretty"])
         let output = try await cmd.execute(repo: mockRepo)
 
-        #expect(output.contains("External Testers"))
-        #expect(output.contains("Internal Team"))
-        #expect(output.contains("\"isInternalGroup\":false"))
-        #expect(output.contains("\"isInternalGroup\":true"))
+        #expect(output == """
+        [
+          {
+            "id" : "g-1",
+            "isInternalGroup" : false,
+            "name" : "External Testers",
+            "publicLinkEnabled" : false
+          },
+          {
+            "id" : "g-2",
+            "isInternalGroup" : true,
+            "name" : "Internal Team",
+            "publicLinkEnabled" : false
+          }
+        ]
+        """)
     }
 }
 
 @Suite
 struct BetaTestersListTests {
 
-    @Test func `execute json output contains tester name and email`() async throws {
+    @Test func `execute json output`() async throws {
         let mockRepo = MockTestFlightRepository()
         given(mockRepo).listBetaTesters(groupId: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
@@ -36,14 +48,23 @@ struct BetaTestersListTests {
             ], nextCursor: nil)
         )
 
-        let cmd = try BetaTestersList.parse([])
+        let cmd = try BetaTestersList.parse(["--pretty"])
         let output = try await cmd.execute(repo: mockRepo)
 
-        #expect(output.contains("Jane"))
-        #expect(output.contains("jane@example.com"))
+        #expect(output == """
+        [
+          {
+            "email" : "jane@example.com",
+            "firstName" : "Jane",
+            "id" : "t-1",
+            "inviteType" : "EMAIL",
+            "lastName" : "Doe"
+          }
+        ]
+        """)
     }
 
-    @Test func `execute json output shows null for missing email`() async throws {
+    @Test func `execute json output with missing optional fields`() async throws {
         let mockRepo = MockTestFlightRepository()
         given(mockRepo).listBetaTesters(groupId: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
@@ -51,9 +72,16 @@ struct BetaTestersListTests {
             ], nextCursor: nil)
         )
 
-        let cmd = try BetaTestersList.parse([])
+        let cmd = try BetaTestersList.parse(["--pretty"])
         let output = try await cmd.execute(repo: mockRepo)
 
-        #expect(output.contains("Unknown"))
+        #expect(output == """
+        [
+          {
+            "firstName" : "Unknown",
+            "id" : "t-1"
+          }
+        ]
+        """)
     }
 }
