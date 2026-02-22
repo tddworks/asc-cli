@@ -22,7 +22,10 @@ struct SDKSubmissionRepositoryTests {
             links: .init(this: "")
         ))
 
-        // Step 2: create submission response
+        // Step 2: no existing open submissions
+        stub.enqueue(ReviewSubmissionsResponse(data: [], links: .init(this: "")))
+
+        // Step 3: create submission response
         stub.enqueue(ReviewSubmissionResponse(
             data: ReviewSubmission(
                 type: .reviewSubmissions,
@@ -32,7 +35,7 @@ struct SDKSubmissionRepositoryTests {
             links: .init(this: "")
         ))
 
-        // Step 3: add item response
+        // Step 4: add item response
         stub.enqueue(ReviewSubmissionItemResponse(
             data: ReviewSubmissionItem(
                 type: .reviewSubmissionItems,
@@ -41,7 +44,7 @@ struct SDKSubmissionRepositoryTests {
             links: .init(this: "")
         ))
 
-        // Step 4: patch (submitted) response
+        // Step 5: patch (submitted) response
         stub.enqueue(ReviewSubmissionResponse(
             data: ReviewSubmission(
                 type: .reviewSubmissions,
@@ -74,6 +77,7 @@ struct SDKSubmissionRepositoryTests {
             ),
             links: .init(this: "")
         ))
+        stub.enqueue(ReviewSubmissionsResponse(data: [], links: .init(this: "")))
         stub.enqueue(ReviewSubmissionResponse(
             data: ReviewSubmission(
                 type: .reviewSubmissions,
@@ -101,5 +105,49 @@ struct SDKSubmissionRepositoryTests {
         #expect(result.platform == .macOS)
         #expect(result.state == .inReview)
         #expect(result.isPending == true)
+    }
+
+    @Test func `submitVersion reuses existing UNRESOLVED_ISSUES submission`() async throws {
+        let stub = SequencedStubAPIClient()
+
+        // Step 1: version response
+        stub.enqueue(AppStoreVersionResponse(
+            data: AppStoreVersion(
+                type: .appStoreVersions,
+                id: "v-3",
+                attributes: .init(platform: .ios, versionString: "1.0.0"),
+                relationships: .init(
+                    app: .init(data: .init(type: .apps, id: "app-42"))
+                )
+            ),
+            links: .init(this: "")
+        ))
+
+        // Step 2: existing submission with UNRESOLVED_ISSUES
+        stub.enqueue(ReviewSubmissionsResponse(
+            data: [ReviewSubmission(
+                type: .reviewSubmissions,
+                id: "sub-existing",
+                attributes: .init(state: .unresolvedIssues)
+            )],
+            links: .init(this: "")
+        ))
+
+        // Step 3: patch (resubmit) response — skips create + add item
+        stub.enqueue(ReviewSubmissionResponse(
+            data: ReviewSubmission(
+                type: .reviewSubmissions,
+                id: "sub-existing",
+                attributes: .init(state: .waitingForReview)
+            ),
+            links: .init(this: "")
+        ))
+
+        let repo = OpenAPISubmissionRepository(client: stub)
+        let result = try await repo.submitVersion(versionId: "v-3")
+
+        #expect(result.id == "sub-existing")
+        #expect(result.appId == "app-42")
+        #expect(result.state == .waitingForReview)
     }
 }
