@@ -1,0 +1,21 @@
+# typed: false
+# frozen_string_literal: true
+
+class Asc < Formula
+  desc "App Store Connect CLI — manage apps, versions, and screenshots from your terminal"
+  homepage "https://github.com/tddworks/asc-cli"
+  url "https://github.com/tddworks/asc-cli/releases/download/__VERSION__/asc___VERSION___macOS_universal"
+  version "__VERSION__"
+  sha256 "__SHA256__"
+  license "MIT"
+
+  depends_on :macos
+
+  def install
+    bin.install "asc___VERSION___macOS_universal" => "asc"
+  end
+
+  test do
+    assert_match version.to_s, shell_output("#{bin}/asc --version")
+  end
+end
