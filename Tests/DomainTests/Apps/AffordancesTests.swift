@@ -38,6 +38,14 @@ struct AffordancesTests {
         #expect(loc.affordances["listLocalizations"] == "asc localizations list --version-id v1")
     }
 
+    // MARK: - ReviewSubmission affordances
+
+    @Test
+    func `review submission affordances include listVersions command`() {
+        let submission = MockRepositoryFactory.makeReviewSubmission(id: "sub-1", appId: "app-abc")
+        #expect(submission.affordances["listVersions"] == "asc versions list --app-id app-abc")
+    }
+
     // MARK: - AppScreenshotSet affordances
 
     @Test

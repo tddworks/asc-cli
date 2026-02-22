@@ -1,3 +1,4 @@
+import Foundation
 import Mockable
 @testable import Domain
 
@@ -84,6 +85,16 @@ struct MockRepositoryFactory {
             screenshotDisplayType: displayType,
             screenshotsCount: screenshotsCount
         )
+    }
+
+    static func makeReviewSubmission(
+        id: String = "sub-1",
+        appId: String = "app-1",
+        platform: AppStorePlatform = .iOS,
+        state: ReviewSubmissionState = .waitingForReview,
+        submittedDate: Date? = nil
+    ) -> ReviewSubmission {
+        ReviewSubmission(id: id, appId: appId, platform: platform, state: state, submittedDate: submittedDate)
     }
 
     static func makeScreenshot(
