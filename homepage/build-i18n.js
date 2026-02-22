@@ -15,7 +15,7 @@ const TEMPLATE_FILE = path.join(HOMEPAGE_DIR, 'template.html');
 
 const config = {
   defaultLang: 'en',
-  baseUrl: 'https://asc-swift.onegai.dev',
+  baseUrl: 'https://tddworks.github.io/asc-cli/homepage',
   languages: {
     en: {
       output: 'index.html',
