@@ -8,11 +8,16 @@ struct OutputFormatterTests {
 
     @Test
     func `formats json output`() throws {
-        let formatter = OutputFormatter(format: .json, pretty: false)
+        let formatter = OutputFormatter(format: .json, pretty: true)
         let app = App(id: "1", name: "Test", bundleId: "com.test")
         let output = try formatter.format(app)
-        #expect(output.contains("\"id\":\"1\""))
-        #expect(output.contains("\"name\":\"Test\""))
+        #expect(output == """
+        {
+          "bundleId" : "com.test",
+          "id" : "1",
+          "name" : "Test"
+        }
+        """)
     }
 
     @Test
@@ -63,28 +68,52 @@ struct OutputFormatterTests {
 
     @Test
     func `formatAgentItems wraps json output in data array`() throws {
-        let formatter = OutputFormatter(format: .json, pretty: false)
+        let formatter = OutputFormatter(format: .json, pretty: true)
         let apps = [App(id: "1", name: "Test App", bundleId: "com.test")]
         let output = try formatter.formatAgentItems(
             apps,
             headers: ["ID", "Name"],
             rowMapper: { [$0.id, $0.name] }
         )
-        #expect(output.contains("\"data\""))
-        #expect(output.contains("\"id\":\"1\""))
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "listVersions" : "asc versions list --app-id 1"
+              },
+              "bundleId" : "com.test",
+              "id" : "1",
+              "name" : "Test App"
+            }
+          ]
+        }
+        """)
     }
 
     @Test
     func `formatAgentItems merges affordances into each json item`() throws {
-        let formatter = OutputFormatter(format: .json, pretty: false)
+        let formatter = OutputFormatter(format: .json, pretty: true)
         let apps = [App(id: "app-1", name: "Test", bundleId: "com.test")]
         let output = try formatter.formatAgentItems(
             apps,
             headers: ["ID", "Name"],
             rowMapper: { [$0.id, $0.name] }
         )
-        #expect(output.contains("\"affordances\""))
-        #expect(output.contains("asc versions list --app-id app-1"))
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "listVersions" : "asc versions list --app-id app-1"
+              },
+              "bundleId" : "com.test",
+              "id" : "app-1",
+              "name" : "Test"
+            }
+          ]
+        }
+        """)
     }
 
     @Test
