@@ -1,0 +1,106 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: macos-15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Swift
+        uses: SwiftyLab/setup-swift@latest
+        with:
+          swift-version: "6.2"
+
+      - name: Create release directory
+        run: mkdir -p release
+
+      - name: Build arm64
+        run: |
+          swift build -c release --arch arm64 --disable-sandbox
+          cp .build/arm64-apple-macosx/release/asc release/asc_${GITHUB_REF_NAME}_macOS_arm64
+
+      - name: Build x86_64
+        run: |
+          swift build -c release --arch x86_64 --disable-sandbox
+          cp .build/x86_64-apple-macosx/release/asc release/asc_${GITHUB_REF_NAME}_macOS_x86_64
+
+      - name: Create universal binary
+        run: |
+          lipo -create -output release/asc_${GITHUB_REF_NAME}_macOS_universal \
+            release/asc_${GITHUB_REF_NAME}_macOS_arm64 \
+            release/asc_${GITHUB_REF_NAME}_macOS_x86_64
+
+      - name: Create checksums
+        run: |
+          cd release
+          shasum -a 256 * > asc_${GITHUB_REF_NAME}_checksums.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/**
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Homebrew tap
+        env:
+          TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+          VERSION: ${{ github.ref_name }}
+        run: |
+          if [ -z "$TAP_GITHUB_TOKEN" ]; then
+            echo "TAP_GITHUB_TOKEN not set, skipping"
+            exit 0
+          fi
+
+          export SHA256=$(shasum -a 256 release/asc_${VERSION}_macOS_universal | cut -d ' ' -f 1)
+
+          git clone https://x-access-token:${TAP_GITHUB_TOKEN}@github.com/tddworks/homebrew-tap.git homebrew-tap || {
+            echo "Clone failed. Skipping."
+            exit 0
+          }
+          cd homebrew-tap
+          mkdir -p Formula
+
+          # Use Python to write the formula — avoids heredoc indentation issues in YAML
+          python3 - << 'PYEOF'
+import os
+v = os.environ['VERSION']
+s = os.environ['SHA256']
+formula = (
+    "# typed: false\n"
+    "# frozen_string_literal: true\n\n"
+    "class Asc < Formula\n"
+    f'  desc "App Store Connect CLI — manage apps, versions, and screenshots from your terminal"\n'
+    f'  homepage "https://github.com/tddworks/asc-cli"\n'
+    f'  url "https://github.com/tddworks/asc-cli/releases/download/{v}/asc_{v}_macOS_universal"\n'
+    f'  version "{v}"\n'
+    f'  sha256 "{s}"\n'
+    '  license "MIT"\n\n'
+    '  depends_on :macos\n\n'
+    '  def install\n'
+    f'    bin.install "asc_{v}_macOS_universal" => "asc"\n'
+    '  end\n\n'
+    '  test do\n'
+    '    assert_match version.to_s, shell_output("#{bin}/asc --version")\n'
+    '  end\n'
+    'end\n'
+)
+with open('Formula/asc.rb', 'w') as f:
+    f.write(formula)
+print('Formula/asc.rb written')
+PYEOF
+
+          git config user.name "itshan"
+          git config user.email "itshan@tddworks.com"
+          git add Formula/asc.rb
+          git commit -m "Update asc to ${VERSION}" || echo "No changes to commit"
+          git push || echo "Push failed. Skipping."
