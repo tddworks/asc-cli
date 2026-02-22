@@ -51,32 +51,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate app token for tap update
-        uses: actions/create-github-app-token@v1
-        id: app-token
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-          owner: tddworks
-          repositories: homebrew-tap
-
-      - name: Update Homebrew tap
-        env:
-          TAP_GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          VERSION: ${{ github.ref_name }}
-        run: |
-          SHA256=$(shasum -a 256 release/asc_${VERSION}_macOS_universal | cut -d ' ' -f 1)
-
-          git clone https://x-access-token:${TAP_GITHUB_TOKEN}@github.com/tddworks/homebrew-tap.git homebrew-tap
-
-          mkdir -p homebrew-tap/Formula
-          sed -e "s/__VERSION__/${VERSION}/g" \
-              -e "s/__SHA256__/${SHA256}/g" \
-              .github/homebrew/asc.rb.template > homebrew-tap/Formula/asc.rb
-
-          cd homebrew-tap
-          git config user.name "asc-bot[bot]"
-          git config user.email "asc-bot[bot]@users.noreply.github.com"
-          git add Formula/asc.rb
-          git commit -m "Update asc to ${VERSION}" || echo "No changes to commit"
-          git push
+  update-tap:
+    needs: release
+    uses: ./.github/workflows/update-homebrew-tap.yml
+    with:
+      version: ${{ github.ref_name }}
+    secrets: inherit
