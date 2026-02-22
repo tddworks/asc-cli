@@ -5,7 +5,7 @@ struct LocalizationsCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "localizations",
         abstract: "Manage App Store version localizations",
-        subcommands: [LocalizationsList.self]
+        subcommands: [LocalizationsList.self, LocalizationsCreate.self]
     )
 }
 

@@ -30,6 +30,24 @@ public struct SDKAppRepository: AppRepository, @unchecked Sendable {
         return response.data.compactMap { mapVersion($0, appId: appId) }
     }
 
+    public func createVersion(appId: String, versionString: String, platform: Domain.AppStorePlatform) async throws -> Domain.AppStoreVersion {
+        guard let sdkPlatform = AppStoreConnect_Swift_SDK.Platform(rawValue: platform.rawValue) else {
+            throw Domain.APIError.unknown("Unsupported platform for create: \(platform.rawValue)")
+        }
+        let body = AppStoreVersionCreateRequest(
+            data: .init(
+                type: .appStoreVersions,
+                attributes: .init(platform: sdkPlatform, versionString: versionString),
+                relationships: .init(app: .init(data: .init(type: .apps, id: appId)))
+            )
+        )
+        let response = try await client.request(APIEndpoint.v1.appStoreVersions.post(body))
+        guard let version = mapVersion(response.data, appId: appId) else {
+            throw Domain.APIError.unknown("Failed to map created version")
+        }
+        return version
+    }
+
     private func mapVersion(
         _ sdkVersion: AppStoreConnect_Swift_SDK.AppStoreVersion,
         appId: String

@@ -61,4 +61,16 @@ public enum AppStorePlatform: String, Sendable, Equatable, Codable, CaseIterable
         case .visionOS: return "visionOS"
         }
     }
+
+    /// Accepts lowercase CLI argument strings (e.g. "ios", "macos").
+    public init?(cliArgument: String) {
+        switch cliArgument.lowercased() {
+        case "ios": self = .iOS
+        case "macos": self = .macOS
+        case "tvos": self = .tvOS
+        case "watchos": self = .watchOS
+        case "visionos": self = .visionOS
+        default: return nil
+        }
+    }
 }
