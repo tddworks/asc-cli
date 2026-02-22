@@ -5,20 +5,30 @@ struct TestFlightCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "testflight",
         abstract: "Manage TestFlight beta testing",
-        subcommands: [BetaGroupsList.self, BetaTestersList.self]
+        subcommands: [BetaGroupsCommand.self, BetaTestersCommand.self]
+    )
+}
+
+// MARK: - Beta Groups
+
+struct BetaGroupsCommand: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "groups",
+        abstract: "Manage beta groups",
+        subcommands: [BetaGroupsList.self]
     )
 }
 
 struct BetaGroupsList: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-        commandName: "groups",
+        commandName: "list",
         abstract: "List beta groups"
     )
 
     @OptionGroup var globals: GlobalOptions
 
     @Option(name: .long, help: "Filter by app ID")
-    var app: String?
+    var appId: String?
 
     @Option(name: .long, help: "Maximum number of groups to return")
     var limit: Int?
@@ -29,7 +39,7 @@ struct BetaGroupsList: AsyncParsableCommand {
     }
 
     func execute(repo: any TestFlightRepository) async throws -> String {
-        let response = try await repo.listBetaGroups(appId: app, limit: limit)
+        let response = try await repo.listBetaGroups(appId: appId, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatItems(
             response.data,
@@ -39,16 +49,26 @@ struct BetaGroupsList: AsyncParsableCommand {
     }
 }
 
-struct BetaTestersList: AsyncParsableCommand {
+// MARK: - Beta Testers
+
+struct BetaTestersCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "testers",
+        abstract: "Manage beta testers",
+        subcommands: [BetaTestersList.self]
+    )
+}
+
+struct BetaTestersList: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "list",
         abstract: "List beta testers"
     )
 
     @OptionGroup var globals: GlobalOptions
 
     @Option(name: .long, help: "Filter by beta group ID")
-    var group: String?
+    var groupId: String?
 
     @Option(name: .long, help: "Maximum number of testers to return")
     var limit: Int?
@@ -59,7 +79,7 @@ struct BetaTestersList: AsyncParsableCommand {
     }
 
     func execute(repo: any TestFlightRepository) async throws -> String {
-        let response = try await repo.listBetaTesters(groupId: group, limit: limit)
+        let response = try await repo.listBetaTesters(groupId: groupId, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatItems(
             response.data,

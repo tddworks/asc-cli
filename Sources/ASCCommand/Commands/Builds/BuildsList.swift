@@ -10,7 +10,7 @@ struct BuildsList: AsyncParsableCommand {
     @OptionGroup var globals: GlobalOptions
 
     @Option(name: .long, help: "Filter by app ID")
-    var app: String?
+    var appId: String?
 
     @Option(name: .long, help: "Maximum number of builds to return")
     var limit: Int?
@@ -21,7 +21,7 @@ struct BuildsList: AsyncParsableCommand {
     }
 
     func execute(repo: any BuildRepository) async throws -> String {
-        let response = try await repo.listBuilds(appId: app, limit: limit)
+        let response = try await repo.listBuilds(appId: appId, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatItems(
             response.data,
