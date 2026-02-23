@@ -1,3 +1,5 @@
+import Foundation
+import Mockable
 import Testing
 @testable import Domain
 
@@ -47,5 +49,57 @@ struct AppScreenshotSetTests {
         let a = MockRepositoryFactory.makeScreenshotSet(id: "1")
         let b = MockRepositoryFactory.makeScreenshotSet(id: "1")
         #expect(a == b)
+    }
+
+    @Test
+    func `set is equatable regardless of injected repo`() {
+        let a = MockRepositoryFactory.makeScreenshotSet(id: "1", repo: MockScreenshotRepository())
+        let b = MockRepositoryFactory.makeScreenshotSet(id: "1", repo: MockScreenshotRepository())
+        #expect(a == b)
+    }
+
+    @Test
+    func `importScreenshots uses own id as setId`() async throws {
+        let mockRepo = MockScreenshotRepository()
+        given(mockRepo).uploadScreenshot(setId: .value("set-42"), fileURL: .any)
+            .willReturn(MockRepositoryFactory.makeScreenshot(setId: "set-42"))
+
+        let set = MockRepositoryFactory.makeScreenshotSet(id: "set-42", repo: mockRepo)
+        let results = try await set.importScreenshots(
+            entries: [ScreenshotManifest.ScreenshotEntry(order: 1, file: "en-US/1.png")],
+            imageURLs: ["en-US/1.png": URL(fileURLWithPath: "/fake/1.png")]
+        )
+        #expect(results.count == 1)
+        #expect(results[0].setId == "set-42")
+    }
+
+    @Test
+    func `importScreenshots uploads entries sorted by order`() async throws {
+        let mockRepo = MockScreenshotRepository()
+        given(mockRepo).uploadScreenshot(setId: .any, fileURL: .any)
+            .willReturn(MockRepositoryFactory.makeScreenshot(id: "img-1"))
+
+        let set = MockRepositoryFactory.makeScreenshotSet(id: "set-1", repo: mockRepo)
+        let results = try await set.importScreenshots(
+            entries: [
+                ScreenshotManifest.ScreenshotEntry(order: 2, file: "en-US/2.png"),
+                ScreenshotManifest.ScreenshotEntry(order: 1, file: "en-US/1.png"),
+            ],
+            imageURLs: [
+                "en-US/1.png": URL(fileURLWithPath: "/fake/1.png"),
+                "en-US/2.png": URL(fileURLWithPath: "/fake/2.png"),
+            ]
+        )
+        #expect(results.count == 2)
+    }
+
+    @Test
+    func `importScreenshots skips entries with no matching imageURL`() async throws {
+        let set = MockRepositoryFactory.makeScreenshotSet(id: "set-1", repo: MockScreenshotRepository())
+        let results = try await set.importScreenshots(
+            entries: [ScreenshotManifest.ScreenshotEntry(order: 1, file: "missing.png")],
+            imageURLs: [:]
+        )
+        #expect(results.isEmpty)
     }
 }

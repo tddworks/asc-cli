@@ -14,5 +14,4 @@ public protocol ScreenshotRepository: Sendable {
     func createLocalization(versionId: String, locale: String) async throws -> AppStoreVersionLocalization
     func createScreenshotSet(localizationId: String, displayType: ScreenshotDisplayType) async throws -> AppScreenshotSet
     func uploadScreenshot(setId: String, fileURL: URL) async throws -> AppScreenshot
-    func importScreenshots(versionId: String, manifest: ScreenshotManifest, zipDirectory: URL) async throws -> [AppScreenshot]
 }

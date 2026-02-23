@@ -57,43 +57,6 @@ public struct SDKScreenshotRepository: ScreenshotRepository, @unchecked Sendable
         return mapScreenshotSet(response.data, localizationId: localizationId)
     }
 
-    public func importScreenshots(versionId: String, manifest: Domain.ScreenshotManifest, zipDirectory: URL) async throws -> [Domain.AppScreenshot] {
-        var allResults: [Domain.AppScreenshot] = []
-
-        for (locale, locManifest) in manifest.localizations {
-            // Find or create localization
-            let localizations = try await listLocalizations(versionId: versionId)
-            let localization: Domain.AppStoreVersionLocalization
-            if let existing = localizations.first(where: { $0.locale == locale }) {
-                localization = existing
-            } else {
-                localization = try await createLocalization(versionId: versionId, locale: locale)
-            }
-
-            // Find or create screenshot set
-            let sets = try await listScreenshotSets(localizationId: localization.id)
-            let screenshotSet: Domain.AppScreenshotSet
-            if let existing = sets.first(where: { $0.screenshotDisplayType == locManifest.displayType }) {
-                screenshotSet = existing
-            } else {
-                screenshotSet = try await createScreenshotSet(
-                    localizationId: localization.id,
-                    displayType: locManifest.displayType
-                )
-            }
-
-            // Upload each screenshot
-            for entry in locManifest.screenshots.sorted(by: { $0.order < $1.order }) {
-                let fileURL = zipDirectory.appendingPathComponent(entry.file)
-                fputs("  Uploading \(entry.file)...\n", stderr)
-                let screenshot = try await uploadScreenshot(setId: screenshotSet.id, fileURL: fileURL)
-                allResults.append(screenshot)
-            }
-        }
-
-        return allResults
-    }
-
     public func uploadScreenshot(setId: String, fileURL: URL) async throws -> Domain.AppScreenshot {
         let fileData = try Data(contentsOf: fileURL)
         let fileName = fileURL.lastPathComponent
@@ -163,7 +126,8 @@ public struct SDKScreenshotRepository: ScreenshotRepository, @unchecked Sendable
             id: sdkSet.id,
             localizationId: localizationId,
             screenshotDisplayType: displayType,
-            screenshotsCount: count
+            screenshotsCount: count,
+            repo: self
         )
     }
 
