@@ -6,84 +6,110 @@
 <title>Screenshot Studio — ASC</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        void:    '#0a0a0f',
+        deep:    '#0e0e18',
+        surface: '#13131a',
+        accent:  '#38bdf8',
+      },
+      fontFamily: {
+        sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+      },
+    }
+  }
+}
+</script>
 <link rel="stylesheet" href="styles/editor.css">
 </head>
-<body>
+<body class="font-sans">
 
 <!-- ═══════════════════════════════════════════════════════
      GALLERY VIEW
 ═══════════════════════════════════════════════════════ -->
 <div id="galleryView" class="view-screen">
-  <header class="app-topbar">
-    <div class="topbar-left">
-      <div class="brand-mark">✦</div>
-      <div class="topbar-title-group">
-        <h1 class="topbar-title">Screenshots</h1>
-        <span id="galleryStats" class="topbar-stats"></span>
+
+  <!-- Top bar -->
+  <header class="flex items-center justify-between px-4 md:px-8 flex-shrink-0 border-b border-white/[0.08]" style="height:52px">
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 rounded-[7px] bg-gradient-to-br from-[#38bdf8] to-[#6366f1] flex items-center justify-center text-xs text-white flex-shrink-0">✦</div>
+      <div class="flex flex-col gap-px">
+        <h1 class="text-[15px] font-semibold text-white/[0.92] tracking-tight leading-tight">Screenshots</h1>
+        <span id="galleryStats" class="text-[11px] text-white/[0.28] leading-none"></span>
       </div>
     </div>
-    <div class="topbar-right">
-      <button id="addLocaleTopbarBtn" class="btn-topbar-add">+ Add Locale</button>
-      <button id="galleryExportBtn" class="btn-primary-action">Export ZIP</button>
+    <div class="flex items-center gap-2">
+      <button id="addLocaleTopbarBtn" class="px-[14px] py-[6px] bg-transparent text-white/50 border border-white/[0.08] rounded-lg text-xs font-medium cursor-pointer transition-all hover:text-white/[0.92] hover:border-white/[0.14] hover:bg-white/[0.07]">+ Add Locale</button>
+      <button id="galleryExportBtn" class="px-[14px] py-[6px] bg-white/[0.07] text-white/[0.92] border border-white/[0.14] rounded-lg text-xs font-medium cursor-pointer transition-all hover:bg-white/10 hover:border-white/20">Export ZIP</button>
     </div>
   </header>
 
-  <main class="gallery-main">
+  <!-- Main scroll area -->
+  <main class="flex-1 overflow-y-auto px-4 md:px-8 pb-12 flex flex-col">
+
     <!-- Empty state (shown when no locales) -->
-    <div id="galleryEmpty" class="gallery-empty hidden">
-      <div class="gallery-empty-icon">
+    <div id="galleryEmpty" class="hidden flex-1 flex flex-col items-center justify-center gap-3 py-20 text-center">
+      <div class="w-16 h-16 bg-white/[0.07] border border-white/[0.08] rounded-[18px] flex items-center justify-center text-white/[0.28] mb-1">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
           <rect x="2" y="3" width="20" height="14" rx="2"/>
           <path d="M8 21h8M12 17v4"/>
           <circle cx="12" cy="10" r="3"/>
         </svg>
       </div>
-      <h2 class="gallery-empty-title">No Screenshots Yet</h2>
-      <p class="gallery-empty-desc">Add your first locale to start creating<br>App Store screenshots.</p>
-      <button class="gallery-empty-btn" id="galleryEmptyAddBtn">+ Add Your First Locale</button>
+      <h2 class="text-lg font-semibold text-white/[0.92] tracking-tight">No Screenshots Yet</h2>
+      <p class="text-[13px] text-white/[0.28] leading-relaxed">Add your first locale to start creating<br>App Store screenshots.</p>
+      <button id="galleryEmptyAddBtn" class="mt-2 px-[22px] py-[9px] bg-[#38bdf8] text-[#0a0a0f] border-none rounded-lg text-[13px] font-semibold cursor-pointer transition-all hover:bg-[#7dd3fc] hover:shadow-[0_0_20px_rgba(56,189,248,0.18)]">+ Add Your First Locale</button>
     </div>
 
     <!-- Locale sections (shown when locales exist) -->
-    <div id="galleryLocalesContainer" class="gallery-locales-container"></div>
-    <div id="galleryFooter" class="gallery-footer hidden">
-      <button id="addLocaleGalleryBtn" class="add-locale-btn">+ Add Locale</button>
+    <div id="galleryLocalesContainer" class="flex flex-col"></div>
+    <div id="galleryFooter" class="hidden pt-6">
+      <button id="addLocaleGalleryBtn" class="p-0 bg-transparent border-none text-white/[0.28] text-[13px] cursor-pointer transition-colors hover:text-white/50">+ Add Locale</button>
     </div>
+
   </main>
 </div>
+
 
 <!-- ═══════════════════════════════════════════════════════
      EDITOR VIEW
 ═══════════════════════════════════════════════════════ -->
 <div id="editorView" class="view-screen hidden">
-  <div class="app-shell">
 
-    <!-- Left Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <button id="backToGalleryBtn" class="btn-back">← Gallery</button>
-        <div class="sidebar-header-row">
-          <h2>Localizations</h2>
-          <button id="addLocaleBtn" class="btn-icon" title="Add locale">+</button>
+  <!-- 3-panel shell — grid on desktop, single-panel-at-a-time on mobile -->
+  <div class="app-shell grid md:grid-cols-[220px_1fr_264px] h-full overflow-hidden">
+
+    <!-- ── Left Sidebar ── -->
+    <aside id="editorSidebar" class="editor-panel bg-deep border-r border-white/[0.08] flex flex-col overflow-hidden">
+      <div class="px-3 pt-3 pb-[10px] border-b border-white/[0.08] flex flex-col gap-[10px] flex-shrink-0">
+        <button id="backToGalleryBtn" class="inline-flex items-center gap-1 px-[11px] py-[5px] bg-transparent border border-white/[0.08] rounded-full text-white/50 text-xs font-medium cursor-pointer transition-all hover:border-[rgba(56,189,248,0.3)] hover:text-[#38bdf8] hover:bg-[rgba(56,189,248,0.08)]">← Gallery</button>
+        <div class="flex items-center justify-between">
+          <h2 class="text-[10px] font-semibold uppercase tracking-[0.07em] text-white/[0.28]">Localizations</h2>
+          <button id="addLocaleBtn" class="w-6 h-6 bg-white/[0.04] border border-white/[0.08] rounded-[6px] text-white/50 cursor-pointer text-base flex items-center justify-center flex-shrink-0 transition-all hover:bg-white/[0.07] hover:border-white/[0.14] hover:text-white/[0.92]" title="Add locale">+</button>
         </div>
       </div>
-      <div id="localeTabs" class="locale-tabs"></div>
-      <div class="sidebar-section">
-        <h3>Screenshots</h3>
-        <div id="screenshotSlots" class="screenshot-slots"></div>
-        <button id="addScreenshotBtn" class="btn-secondary">+ Add Screenshot</button>
+      <div id="localeTabs" class="p-2 flex flex-col gap-0.5 border-b border-white/[0.08] flex-shrink-0 overflow-y-auto"></div>
+      <div class="flex-1 flex flex-col overflow-hidden p-2">
+        <h3 class="text-[10px] font-semibold uppercase tracking-[0.07em] text-white/[0.28] mb-2 px-1.5">Screenshots</h3>
+        <div id="screenshotSlots" class="flex-1 overflow-y-auto flex flex-col gap-0.5 mb-2"></div>
+        <button id="addScreenshotBtn" class="w-full py-[7px] px-[10px] bg-white/[0.04] text-white/50 border border-white/[0.08] rounded-lg text-xs cursor-pointer transition-all hover:bg-white/[0.07] hover:text-white/[0.92] hover:border-white/[0.14]">+ Add Screenshot</button>
       </div>
     </aside>
 
-    <!-- Center Canvas -->
-    <main class="canvas-area">
-      <div class="canvas-toolbar">
+    <!-- ── Center Canvas ── -->
+    <main id="editorCanvas" class="editor-panel flex flex-col overflow-hidden bg-void">
+      <div class="flex items-center justify-between px-4 py-[10px] border-b border-white/[0.08] text-xs text-white/50 bg-deep flex-shrink-0">
         <span id="canvasInfo" class="canvas-info">No screenshot selected</span>
-        <label class="zoom-label">Bezel
-          <input type="range" id="zoomSlider" min="20" max="120" value="75">
+        <label class="flex items-center gap-1.5 cursor-pointer">Bezel
+          <input type="range" id="zoomSlider" min="20" max="120" value="75" class="w-20">
           <span id="zoomValue">75%</span>
         </label>
       </div>
-      <div class="canvas-viewport" id="canvasViewport">
+      <div class="canvas-viewport flex-1 overflow-hidden flex items-start justify-center p-6 transition-[background]" id="canvasViewport">
         <div class="canvas-wrapper" id="canvasWrapper">
           <canvas id="mainCanvas"></canvas>
           <div id="bezelLayer">
@@ -91,7 +117,6 @@
             <img id="frameImg" alt="">
           </div>
           <div id="textLayerOverlay" class="text-layer-overlay">
-            <!-- Alignment guides — shown during drag when snapping to center -->
             <div class="align-guide align-guide-h" id="canvasGuideH"></div>
             <div class="align-guide align-guide-v" id="canvasGuideV"></div>
           </div>
@@ -99,10 +124,11 @@
       </div>
     </main>
 
-    <!-- Right Inspector -->
-    <aside class="inspector">
-      <div class="inspector-section">
-        <h3>Canvas Size</h3>
+    <!-- ── Right Inspector ── -->
+    <aside id="editorInspector" class="editor-panel bg-deep border-l border-white/[0.08] overflow-y-auto flex flex-col">
+
+      <div class="p-[14px] border-b border-white/[0.08]">
+        <h3 class="text-[10px] font-semibold uppercase tracking-[0.07em] text-white/[0.28] mb-[10px]">Canvas Size</h3>
         <select id="displayTypeSelect">
           <option value="APP_IPHONE_67">iPhone 6.7" (App Store)</option>
           <option value="APP_IPHONE_65">iPhone 6.5" (App Store)</option>
@@ -118,90 +144,120 @@
           <option value="IMESSAGE_APP_IPHONE_67">iMessage iPhone 6.7"</option>
         </select>
       </div>
-      <div class="inspector-section">
-        <h3>Device Frame</h3>
+
+      <div class="p-[14px] border-b border-white/[0.08]">
+        <h3 class="text-[10px] font-semibold uppercase tracking-[0.07em] text-white/[0.28] mb-[10px]">Device Frame</h3>
         <select id="deviceSelect">
           <option value="">None (no bezel)</option>
         </select>
       </div>
-      <div class="inspector-section">
-        <h3>Screenshot Image</h3>
-        <label class="upload-btn">
+
+      <div class="p-[14px] border-b border-white/[0.08]">
+        <h3 class="text-[10px] font-semibold uppercase tracking-[0.07em] text-white/[0.28] mb-[10px]">Screenshot Image</h3>
+        <label class="block px-3 py-[10px] bg-white/[0.04] border border-dashed border-white/[0.14] rounded-lg text-white/50 text-xs cursor-pointer text-center transition-all hover:border-[#38bdf8] hover:bg-[rgba(56,189,248,0.08)] hover:text-[#38bdf8]">
           Upload Image
           <input type="file" id="screenshotFileInput" accept="image/*">
         </label>
       </div>
-      <div class="inspector-section">
-        <h3>Background</h3>
-        <div class="bg-tabs">
-          <button class="bg-tab active" data-type="solid">Solid</button>
-          <button class="bg-tab" data-type="gradient">Gradient</button>
+
+      <div class="p-[14px] border-b border-white/[0.08]">
+        <h3 class="text-[10px] font-semibold uppercase tracking-[0.07em] text-white/[0.28] mb-[10px]">Background</h3>
+        <div class="bg-tabs flex gap-1 mb-[10px]">
+          <button class="bg-tab flex-1 py-[5px] bg-white/[0.04] border border-white/[0.08] rounded-lg text-white/50 text-xs cursor-pointer transition-all hover:bg-white/[0.07] hover:text-white/[0.92] active" data-type="solid">Solid</button>
+          <button class="bg-tab flex-1 py-[5px] bg-white/[0.04] border border-white/[0.08] rounded-lg text-white/50 text-xs cursor-pointer transition-all hover:bg-white/[0.07] hover:text-white/[0.92]" data-type="gradient">Gradient</button>
         </div>
         <div id="bgSolid" class="bg-panel">
           <input type="color" id="bgSolidColor" value="#1a1a2e">
         </div>
         <div id="bgGradient" class="bg-panel hidden">
-          <div class="gradient-row">
+          <div class="flex gap-2 items-center mb-2">
             <input type="color" id="bgGradColor1" value="#1a1a2e">
             <input type="color" id="bgGradColor2" value="#0f3460">
           </div>
-          <label>Angle
+          <label class="flex items-center gap-1.5 text-xs text-white/50">Angle
             <input type="range" id="bgGradAngle" min="0" max="360" value="135">
             <span id="bgGradAngleVal">135°</span>
           </label>
         </div>
-        <div class="bg-presets">
-          <div class="preset-swatch" style="background:linear-gradient(135deg,#1a1a2e,#0f3460)" data-gradient='{"colors":["#1a1a2e","#0f3460"],"angle":135}'></div>
-          <div class="preset-swatch" style="background:linear-gradient(135deg,#0f0c29,#302b63)" data-gradient='{"colors":["#0f0c29","#302b63"],"angle":135}'></div>
-          <div class="preset-swatch" style="background:linear-gradient(135deg,#1c1c1e,#2c2c2e)" data-gradient='{"colors":["#1c1c1e","#2c2c2e"],"angle":135}'></div>
-          <div class="preset-swatch" style="background:linear-gradient(135deg,#0a0a0a,#1a1a1a)" data-gradient='{"colors":["#0a0a0a","#1a1a1a"],"angle":135}'></div>
-          <div class="preset-swatch" style="background:linear-gradient(135deg,#003973,#E5E5BE)" data-gradient='{"colors":["#003973","#E5E5BE"],"angle":135}'></div>
-          <div class="preset-swatch" style="background:linear-gradient(135deg,#5C258D,#4389A2)" data-gradient='{"colors":["#5C258D","#4389A2"],"angle":135}'></div>
+        <div class="flex flex-wrap gap-1.5 mt-[10px]">
+          <div class="preset-swatch w-8 h-8 rounded-[6px] cursor-pointer border-2 border-transparent transition-all hover:border-[#38bdf8] hover:scale-110" style="background:linear-gradient(135deg,#1a1a2e,#0f3460)" data-gradient='{"colors":["#1a1a2e","#0f3460"],"angle":135}'></div>
+          <div class="preset-swatch w-8 h-8 rounded-[6px] cursor-pointer border-2 border-transparent transition-all hover:border-[#38bdf8] hover:scale-110" style="background:linear-gradient(135deg,#0f0c29,#302b63)" data-gradient='{"colors":["#0f0c29","#302b63"],"angle":135}'></div>
+          <div class="preset-swatch w-8 h-8 rounded-[6px] cursor-pointer border-2 border-transparent transition-all hover:border-[#38bdf8] hover:scale-110" style="background:linear-gradient(135deg,#1c1c1e,#2c2c2e)" data-gradient='{"colors":["#1c1c1e","#2c2c2e"],"angle":135}'></div>
+          <div class="preset-swatch w-8 h-8 rounded-[6px] cursor-pointer border-2 border-transparent transition-all hover:border-[#38bdf8] hover:scale-110" style="background:linear-gradient(135deg,#0a0a0a,#1a1a1a)" data-gradient='{"colors":["#0a0a0a","#1a1a1a"],"angle":135}'></div>
+          <div class="preset-swatch w-8 h-8 rounded-[6px] cursor-pointer border-2 border-transparent transition-all hover:border-[#38bdf8] hover:scale-110" style="background:linear-gradient(135deg,#003973,#E5E5BE)" data-gradient='{"colors":["#003973","#E5E5BE"],"angle":135}'></div>
+          <div class="preset-swatch w-8 h-8 rounded-[6px] cursor-pointer border-2 border-transparent transition-all hover:border-[#38bdf8] hover:scale-110" style="background:linear-gradient(135deg,#5C258D,#4389A2)" data-gradient='{"colors":["#5C258D","#4389A2"],"angle":135}'></div>
         </div>
       </div>
-      <div class="inspector-section">
-        <h3>Text Layers <button id="addTextBtn" class="btn-icon">+</button></h3>
-        <div id="textLayersList" class="text-layers-list"></div>
-      </div>
-      <div class="inspector-section">
-        <button id="exportBtn" class="btn-primary">Export ZIP</button>
-      </div>
-    </aside>
 
+      <div class="p-[14px] border-b border-white/[0.08]">
+        <h3 class="text-[10px] font-semibold uppercase tracking-[0.07em] text-white/[0.28] mb-[10px] flex items-center gap-1.5">
+          Text Layers
+          <button id="addTextBtn" class="w-6 h-6 bg-white/[0.04] border border-white/[0.08] rounded-[6px] text-white/50 cursor-pointer text-base flex items-center justify-center flex-shrink-0 transition-all hover:bg-white/[0.07] hover:border-white/[0.14] hover:text-white/[0.92]">+</button>
+        </h3>
+        <div id="textLayersList"></div>
+      </div>
+
+      <div class="p-[14px]">
+        <button id="exportBtn" class="w-full py-[10px] bg-[#38bdf8] text-[#0a0a0f] border-none rounded-lg text-[13px] font-semibold cursor-pointer transition-all hover:bg-[#7dd3fc] hover:shadow-[0_0_20px_rgba(56,189,248,0.18)]">Export ZIP</button>
+      </div>
+
+    </aside>
   </div>
+
+  <!-- Mobile bottom tab bar (hidden on md+) -->
+  <nav id="mobileTabBar" class="md:hidden fixed bottom-0 inset-x-0 z-50 flex bg-deep border-t border-white/[0.08]" style="padding-bottom: env(safe-area-inset-bottom)">
+    <button data-tab="shots" class="mobile-tab flex-1 flex flex-col items-center justify-center py-3 gap-1 transition-colors" onclick="selectMobileTab('shots')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+      </svg>
+      <span class="text-[10px]">Shots</span>
+    </button>
+    <button data-tab="canvas" class="mobile-tab flex-1 flex flex-col items-center justify-center py-3 gap-1 transition-colors" onclick="selectMobileTab('canvas')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+      </svg>
+      <span class="text-[10px]">Canvas</span>
+    </button>
+    <button data-tab="inspector" class="mobile-tab flex-1 flex flex-col items-center justify-center py-3 gap-1 transition-colors" onclick="selectMobileTab('inspector')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+      </svg>
+      <span class="text-[10px]">Inspector</span>
+    </button>
+  </nav>
+
 </div>
+
 
 <!-- ═══════════════════════════════════════════════════════
      LOCALE PICKER MODAL
 ═══════════════════════════════════════════════════════ -->
-<div id="localeModal" class="modal-overlay hidden">
-  <div class="modal-sheet" role="dialog" aria-modal="true">
+<div id="localeModal" class="hidden fixed inset-0 bg-black/65 backdrop-blur-[10px] flex items-center justify-center z-[1000]">
+  <div class="w-[460px] max-w-[calc(100vw-32px)] max-h-[78vh] bg-[#12121a] border border-white/[0.14] rounded-[20px] flex flex-col overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.7)]" style="animation: sheetIn 0.22s cubic-bezier(0.22, 1, 0.36, 1)" role="dialog" aria-modal="true">
 
     <!-- Header -->
-    <div class="modal-header">
-      <div class="modal-header-icon">
+    <div class="flex items-start gap-3.5 p-[22px] pb-[18px] flex-shrink-0">
+      <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-[#38bdf8] to-[#6366f1] flex items-center justify-center text-white flex-shrink-0">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
           <circle cx="12" cy="13" r="4"/>
         </svg>
       </div>
-      <div class="modal-header-text">
-        <h2 class="modal-title">Add Language</h2>
-        <p class="modal-subtitle">Select languages for your App Store listing</p>
+      <div class="flex-1">
+        <h2 class="text-base font-bold text-white/[0.92] tracking-tight leading-snug">Add Language</h2>
+        <p class="text-xs text-white/[0.28] mt-0.5 leading-snug">Select languages for your App Store listing</p>
       </div>
-      <button class="modal-close" id="localeModalClose">✕</button>
+      <button id="localeModalClose" class="w-[30px] h-[30px] bg-white/[0.07] border border-white/[0.08] rounded-full text-white/50 text-xs cursor-pointer flex items-center justify-center flex-shrink-0 transition-all hover:bg-white/10 hover:text-white/[0.92]">✕</button>
     </div>
 
-    <!-- Locale list -->
-    <div class="modal-section-label">LOCALE</div>
-    <div class="modal-locale-list" id="localeModalList">
-      <!-- Rendered by JS -->
-    </div>
+    <div class="px-[22px] pb-2 text-[10px] font-bold tracking-[0.1em] text-white/[0.28] flex-shrink-0">LOCALE</div>
 
-    <!-- Footer actions -->
-    <div class="modal-footer">
-      <button class="modal-btn-ghost" id="localeModalCancel">Cancel</button>
-      <button class="modal-btn-primary" id="localeModalConfirm" disabled>Add Selected</button>
+    <div class="modal-locale-list flex-1 overflow-y-auto border-t border-white/[0.08]" id="localeModalList"></div>
+
+    <!-- Footer -->
+    <div class="flex items-center justify-end gap-2 px-[22px] py-4 border-t border-white/[0.08] flex-shrink-0">
+      <button id="localeModalCancel" class="px-4 py-[7px] bg-transparent border border-white/[0.08] rounded-lg text-white/50 text-[13px] font-medium cursor-pointer transition-all hover:bg-white/[0.07] hover:text-white/[0.92]">Cancel</button>
+      <button id="localeModalConfirm" class="px-[18px] py-[7px] bg-[#38bdf8] text-[#0a0a0f] border-none rounded-lg text-[13px] font-semibold cursor-pointer transition-all hover:bg-[#7dd3fc] disabled:opacity-35 disabled:cursor-default" disabled>Add Selected</button>
     </div>
 
   </div>

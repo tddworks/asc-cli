@@ -14,6 +14,7 @@ const ui = {
   view:         'gallery',  // 'gallery' | 'editor'
   activeLocale: null,       // locale code open in editor
   activeShotId: null,       // screenshot id selected in editor
+  mobileTab:    'canvas',   // 'shots' | 'canvas' | 'inspector' — active tab on mobile
 };
 
 // ── Active-state helpers (used by inspector, editor, and event handlers) ──────
@@ -45,7 +46,32 @@ function showEditor(localeCode, shotId) {
   ui.activeShotId = shotId ?? null;
   document.getElementById('galleryView').classList.add('hidden');
   document.getElementById('editorView').classList.remove('hidden');
+  selectMobileTab(ui.mobileTab);  // restore last tab (or default 'canvas')
   requestAnimationFrame(() => renderEditor());
+}
+
+// ── Mobile tab bar ────────────────────────────────────────────────────────────
+// No-op on desktop (≥768 px) — CSS grid keeps all three panels visible.
+// On mobile, shows one panel at a time by toggling .mobile-active.
+
+function selectMobileTab(tab) {
+  ui.mobileTab = tab;
+
+  // On desktop all panels are always visible via the CSS grid — nothing to do.
+  if (window.innerWidth >= 768) return;
+
+  const panels = {
+    shots:     document.getElementById('editorSidebar'),
+    canvas:    document.getElementById('editorCanvas'),
+    inspector: document.getElementById('editorInspector'),
+  };
+  Object.entries(panels).forEach(([key, el]) => {
+    el.classList.toggle('mobile-active', key === tab);
+  });
+
+  document.querySelectorAll('.mobile-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
 }
 
 // ── Gallery buttons ───────────────────────────────────────────────────────────
