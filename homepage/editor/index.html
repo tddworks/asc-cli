@@ -204,10 +204,21 @@
 </div>
 
 <script src="js/vendor/jszip.min.js"></script>
+<!-- Layer 1: pure data + canvas utilities (no domain dependency) -->
 <script src="js/devices.js"></script>
-<script src="js/compositor.js"></script>
 <script src="js/texts.js"></script>
+<script src="js/compositor.js"></script>
+<!-- Layer 2: domain model + reference data -->
+<script src="js/domain.js"></script>
+<script src="js/locales.js"></script>
+<!-- Layer 3: export -->
 <script src="js/export.js"></script>
+<!-- Layer 4: view components -->
+<script src="js/gallery.js"></script>
+<script src="js/locale-picker.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/inspector.js"></script>
+<!-- Layer 5: app shell (defines project + ui, wires all events, inits) -->
 <script src="js/app.js"></script>
 </body>
 </html>
