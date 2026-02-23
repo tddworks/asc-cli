@@ -3,114 +3,149 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Screenshot Editor — ASC</title>
+<title>Screenshot Studio — ASC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles/editor.css">
 </head>
 <body>
-<div class="app-shell">
-  <!-- Left Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <h2>Localizations</h2>
-      <button id="addLocaleBtn" class="btn-icon" title="Add locale">+</button>
-    </div>
-    <div id="localeTabs" class="locale-tabs"></div>
-    <div class="sidebar-section">
-      <h3>Screenshots</h3>
-      <div id="screenshotSlots" class="screenshot-slots"></div>
-      <button id="addScreenshotBtn" class="btn-secondary">+ Add Screenshot</button>
-    </div>
-  </aside>
 
-  <!-- Center Canvas -->
-  <main class="canvas-area">
-    <div class="canvas-toolbar">
-      <span id="canvasInfo" class="canvas-info">No screenshot selected</span>
-      <label class="zoom-label">Bezel
-        <input type="range" id="zoomSlider" min="20" max="120" value="75">
-        <span id="zoomValue">75%</span>
-      </label>
+<!-- ═══════════════════════════════════════════════════════
+     GALLERY VIEW  (default landing screen)
+═══════════════════════════════════════════════════════ -->
+<div id="galleryView" class="view-screen">
+  <header class="app-topbar">
+    <div class="topbar-left">
+      <div class="brand-mark">✦</div>
+      <h1 class="topbar-title">Screenshot Studio</h1>
     </div>
-    <div class="canvas-viewport" id="canvasViewport">
-      <div class="canvas-wrapper" id="canvasWrapper">
-        <canvas id="mainCanvas"></canvas>
-        <div id="bezelLayer">
-          <canvas id="screenCanvas"></canvas>
-          <img id="frameImg" alt="">
-        </div>
-        <div id="textLayerOverlay" class="text-layer-overlay"></div>
-      </div>
+    <div class="topbar-right">
+      <button id="galleryExportBtn" class="btn-primary-action">Export ZIP</button>
+    </div>
+  </header>
+
+  <main class="gallery-main">
+    <div id="galleryLocalesContainer" class="gallery-locales-container"></div>
+    <div class="gallery-footer">
+      <button id="addLocaleGalleryBtn" class="add-locale-btn">+ Add Locale</button>
     </div>
   </main>
+</div>
 
-  <!-- Right Inspector -->
-  <aside class="inspector">
-    <div class="inspector-section">
-      <h3>Canvas Size</h3>
-      <select id="displayTypeSelect">
-        <option value="APP_IPHONE_67">iPhone 6.7" (App Store)</option>
-        <option value="APP_IPHONE_65">iPhone 6.5" (App Store)</option>
-        <option value="APP_IPHONE_61">iPhone 6.1" (App Store)</option>
-        <option value="APP_IPHONE_55">iPhone 5.5" (App Store)</option>
-        <option value="APP_IPHONE_47">iPhone 4.7" (App Store)</option>
-        <option value="APP_IPAD_PRO_3GEN_129">iPad Pro 12.9" Gen 3+ (App Store)</option>
-        <option value="APP_IPAD_PRO_3GEN_11">iPad Pro 11" (App Store)</option>
-        <option value="APP_IPAD_PRO_129">iPad Pro 12.9" Gen 1-2 (App Store)</option>
-        <option value="APP_IPAD_105">iPad 10.5" (App Store)</option>
-        <option value="APP_IPAD_97">iPad 9.7" (App Store)</option>
-        <option value="APP_WATCH_ULTRA">Apple Watch Ultra (App Store)</option>
-        <option value="IMESSAGE_APP_IPHONE_67">iMessage iPhone 6.7"</option>
-      </select>
-    </div>
-    <div class="inspector-section">
-      <h3>Device Frame</h3>
-      <select id="deviceSelect">
-        <option value="">None (no bezel)</option>
-      </select>
-    </div>
-    <div class="inspector-section">
-      <h3>Screenshot Image</h3>
-      <label class="upload-btn">
-        Upload Image
-        <input type="file" id="screenshotFileInput" accept="image/*">
-      </label>
-    </div>
-    <div class="inspector-section">
-      <h3>Background</h3>
-      <div class="bg-tabs">
-        <button class="bg-tab active" data-type="solid">Solid</button>
-        <button class="bg-tab" data-type="gradient">Gradient</button>
-      </div>
-      <div id="bgSolid" class="bg-panel">
-        <input type="color" id="bgSolidColor" value="#1a1a2e">
-      </div>
-      <div id="bgGradient" class="bg-panel hidden">
-        <div class="gradient-row">
-          <input type="color" id="bgGradColor1" value="#1a1a2e">
-          <input type="color" id="bgGradColor2" value="#0f3460">
+<!-- ═══════════════════════════════════════════════════════
+     EDITOR VIEW  (navigate here via "Edit" on a card)
+═══════════════════════════════════════════════════════ -->
+<div id="editorView" class="view-screen hidden">
+  <div class="app-shell">
+
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <button id="backToGalleryBtn" class="btn-back">← Gallery</button>
+        <div class="sidebar-header-row">
+          <h2>Localizations</h2>
+          <button id="addLocaleBtn" class="btn-icon" title="Add locale">+</button>
         </div>
-        <label>Angle
-          <input type="range" id="bgGradAngle" min="0" max="360" value="135">
-          <span id="bgGradAngleVal">135°</span>
+      </div>
+      <div id="localeTabs" class="locale-tabs"></div>
+      <div class="sidebar-section">
+        <h3>Screenshots</h3>
+        <div id="screenshotSlots" class="screenshot-slots"></div>
+        <button id="addScreenshotBtn" class="btn-secondary">+ Add Screenshot</button>
+      </div>
+    </aside>
+
+    <!-- Center Canvas -->
+    <main class="canvas-area">
+      <div class="canvas-toolbar">
+        <span id="canvasInfo" class="canvas-info">No screenshot selected</span>
+        <label class="zoom-label">Bezel
+          <input type="range" id="zoomSlider" min="20" max="120" value="75">
+          <span id="zoomValue">75%</span>
         </label>
       </div>
-      <div class="bg-presets">
-        <div class="preset-swatch" style="background:linear-gradient(135deg,#1a1a2e,#0f3460)" data-gradient='{"colors":["#1a1a2e","#0f3460"],"angle":135}'></div>
-        <div class="preset-swatch" style="background:linear-gradient(135deg,#0f0c29,#302b63)" data-gradient='{"colors":["#0f0c29","#302b63"],"angle":135}'></div>
-        <div class="preset-swatch" style="background:linear-gradient(135deg,#1c1c1e,#2c2c2e)" data-gradient='{"colors":["#1c1c1e","#2c2c2e"],"angle":135}'></div>
-        <div class="preset-swatch" style="background:linear-gradient(135deg,#0a0a0a,#1a1a1a)" data-gradient='{"colors":["#0a0a0a","#1a1a1a"],"angle":135}'></div>
-        <div class="preset-swatch" style="background:linear-gradient(135deg,#003973,#E5E5BE)" data-gradient='{"colors":["#003973","#E5E5BE"],"angle":135}'></div>
-        <div class="preset-swatch" style="background:linear-gradient(135deg,#5C258D,#4389A2)" data-gradient='{"colors":["#5C258D","#4389A2"],"angle":135}'></div>
+      <div class="canvas-viewport" id="canvasViewport">
+        <div class="canvas-wrapper" id="canvasWrapper">
+          <canvas id="mainCanvas"></canvas>
+          <div id="bezelLayer">
+            <canvas id="screenCanvas"></canvas>
+            <img id="frameImg" alt="">
+          </div>
+          <div id="textLayerOverlay" class="text-layer-overlay"></div>
+        </div>
       </div>
-    </div>
-    <div class="inspector-section">
-      <h3>Text Layers <button id="addTextBtn" class="btn-icon">+</button></h3>
-      <div id="textLayersList" class="text-layers-list"></div>
-    </div>
-    <div class="inspector-section">
-      <button id="exportBtn" class="btn-primary">Export ZIP</button>
-    </div>
-  </aside>
+    </main>
+
+    <!-- Right Inspector -->
+    <aside class="inspector">
+      <div class="inspector-section">
+        <h3>Canvas Size</h3>
+        <select id="displayTypeSelect">
+          <option value="APP_IPHONE_67">iPhone 6.7" (App Store)</option>
+          <option value="APP_IPHONE_65">iPhone 6.5" (App Store)</option>
+          <option value="APP_IPHONE_61">iPhone 6.1" (App Store)</option>
+          <option value="APP_IPHONE_55">iPhone 5.5" (App Store)</option>
+          <option value="APP_IPHONE_47">iPhone 4.7" (App Store)</option>
+          <option value="APP_IPAD_PRO_3GEN_129">iPad Pro 12.9" Gen 3+ (App Store)</option>
+          <option value="APP_IPAD_PRO_3GEN_11">iPad Pro 11" (App Store)</option>
+          <option value="APP_IPAD_PRO_129">iPad Pro 12.9" Gen 1-2 (App Store)</option>
+          <option value="APP_IPAD_105">iPad 10.5" (App Store)</option>
+          <option value="APP_IPAD_97">iPad 9.7" (App Store)</option>
+          <option value="APP_WATCH_ULTRA">Apple Watch Ultra (App Store)</option>
+          <option value="IMESSAGE_APP_IPHONE_67">iMessage iPhone 6.7"</option>
+        </select>
+      </div>
+      <div class="inspector-section">
+        <h3>Device Frame</h3>
+        <select id="deviceSelect">
+          <option value="">None (no bezel)</option>
+        </select>
+      </div>
+      <div class="inspector-section">
+        <h3>Screenshot Image</h3>
+        <label class="upload-btn">
+          Upload Image
+          <input type="file" id="screenshotFileInput" accept="image/*">
+        </label>
+      </div>
+      <div class="inspector-section">
+        <h3>Background</h3>
+        <div class="bg-tabs">
+          <button class="bg-tab active" data-type="solid">Solid</button>
+          <button class="bg-tab" data-type="gradient">Gradient</button>
+        </div>
+        <div id="bgSolid" class="bg-panel">
+          <input type="color" id="bgSolidColor" value="#1a1a2e">
+        </div>
+        <div id="bgGradient" class="bg-panel hidden">
+          <div class="gradient-row">
+            <input type="color" id="bgGradColor1" value="#1a1a2e">
+            <input type="color" id="bgGradColor2" value="#0f3460">
+          </div>
+          <label>Angle
+            <input type="range" id="bgGradAngle" min="0" max="360" value="135">
+            <span id="bgGradAngleVal">135°</span>
+          </label>
+        </div>
+        <div class="bg-presets">
+          <div class="preset-swatch" style="background:linear-gradient(135deg,#1a1a2e,#0f3460)" data-gradient='{"colors":["#1a1a2e","#0f3460"],"angle":135}'></div>
+          <div class="preset-swatch" style="background:linear-gradient(135deg,#0f0c29,#302b63)" data-gradient='{"colors":["#0f0c29","#302b63"],"angle":135}'></div>
+          <div class="preset-swatch" style="background:linear-gradient(135deg,#1c1c1e,#2c2c2e)" data-gradient='{"colors":["#1c1c1e","#2c2c2e"],"angle":135}'></div>
+          <div class="preset-swatch" style="background:linear-gradient(135deg,#0a0a0a,#1a1a1a)" data-gradient='{"colors":["#0a0a0a","#1a1a1a"],"angle":135}'></div>
+          <div class="preset-swatch" style="background:linear-gradient(135deg,#003973,#E5E5BE)" data-gradient='{"colors":["#003973","#E5E5BE"],"angle":135}'></div>
+          <div class="preset-swatch" style="background:linear-gradient(135deg,#5C258D,#4389A2)" data-gradient='{"colors":["#5C258D","#4389A2"],"angle":135}'></div>
+        </div>
+      </div>
+      <div class="inspector-section">
+        <h3>Text Layers <button id="addTextBtn" class="btn-icon">+</button></h3>
+        <div id="textLayersList" class="text-layers-list"></div>
+      </div>
+      <div class="inspector-section">
+        <button id="exportBtn" class="btn-primary">Export ZIP</button>
+      </div>
+    </aside>
+
+  </div>
 </div>
 
 <script src="js/vendor/jszip.min.js"></script>
