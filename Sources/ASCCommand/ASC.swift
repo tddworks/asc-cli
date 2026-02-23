@@ -12,6 +12,8 @@ struct ASC: AsyncParsableCommand {
             LocalizationsCommand.self,
             ScreenshotSetsCommand.self,
             ScreenshotsCommand.self,
+            AppInfosCommand.self,
+            AppInfoLocalizationsCommand.self,
             BuildsCommand.self,
             TestFlightCommand.self,
             AuthCommand.self,

@@ -26,6 +26,9 @@ public struct App: Sendable, Codable, Equatable, Identifiable {
 
 extension App: AffordanceProviding {
     public var affordances: [String: String] {
-        ["listVersions": "asc versions list --app-id \(id)"]
+        [
+            "listVersions": "asc versions list --app-id \(id)",
+            "listAppInfos": "asc app-infos list --app-id \(id)",
+        ]
     }
 }

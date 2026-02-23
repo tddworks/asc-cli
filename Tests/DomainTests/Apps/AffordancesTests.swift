@@ -46,6 +46,32 @@ struct AffordancesTests {
         #expect(submission.affordances["listVersions"] == "asc versions list --app-id app-abc")
     }
 
+    // MARK: - App affordances (extended)
+
+    @Test
+    func `app affordances include listAppInfos command`() {
+        let app = App(id: "app-1", name: "My App", bundleId: "com.example")
+        #expect(app.affordances["listAppInfos"] == "asc app-infos list --app-id app-1")
+    }
+
+    // MARK: - AppInfo affordances
+
+    @Test
+    func `app info affordances include listLocalizations and listAppInfos`() {
+        let info = MockRepositoryFactory.makeAppInfo(id: "info-1", appId: "app-abc")
+        #expect(info.affordances["listLocalizations"] == "asc app-info-localizations list --app-info-id info-1")
+        #expect(info.affordances["listAppInfos"] == "asc app-infos list --app-id app-abc")
+    }
+
+    // MARK: - AppInfoLocalization affordances
+
+    @Test
+    func `app info localization affordances include listLocalizations and updateLocalization`() {
+        let loc = MockRepositoryFactory.makeAppInfoLocalization(id: "loc-1", appInfoId: "info-abc")
+        #expect(loc.affordances["listLocalizations"] == "asc app-info-localizations list --app-info-id info-abc")
+        #expect(loc.affordances["updateLocalization"] == "asc app-info-localizations update --localization-id loc-1")
+    }
+
     // MARK: - AppScreenshotSet affordances
 
     @Test

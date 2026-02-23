@@ -26,6 +26,12 @@ struct ClientProvider {
         return try factory.makeScreenshotRepository(authProvider: authProvider)
     }
 
+    static func makeAppInfoRepository() throws -> any AppInfoRepository {
+        let authProvider = EnvironmentAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeAppInfoRepository(authProvider: authProvider)
+    }
+
     static func makeSubmissionRepository() throws -> any SubmissionRepository {
         let authProvider = EnvironmentAuthProvider()
         let factory = ClientFactory()

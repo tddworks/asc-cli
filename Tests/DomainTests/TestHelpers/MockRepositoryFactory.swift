@@ -97,6 +97,31 @@ struct MockRepositoryFactory {
         ReviewSubmission(id: id, appId: appId, platform: platform, state: state, submittedDate: submittedDate)
     }
 
+    static func makeAppInfo(
+        id: String = "info-1",
+        appId: String = "app-1"
+    ) -> AppInfo {
+        AppInfo(id: id, appId: appId)
+    }
+
+    static func makeAppInfoLocalization(
+        id: String = "loc-1",
+        appInfoId: String = "info-1",
+        locale: String = "en-US",
+        name: String? = "My App",
+        subtitle: String? = nil,
+        privacyPolicyUrl: String? = nil
+    ) -> AppInfoLocalization {
+        AppInfoLocalization(
+            id: id,
+            appInfoId: appInfoId,
+            locale: locale,
+            name: name,
+            subtitle: subtitle,
+            privacyPolicyUrl: privacyPolicyUrl
+        )
+    }
+
     static func makeScreenshot(
         id: String = "1",
         setId: String = "set-1",

@@ -1,0 +1,41 @@
+import Mockable
+import Testing
+@testable import ASCCommand
+@testable import Domain
+
+@Suite
+struct AppInfosListTests {
+
+    @Test func `execute json output includes affordances`() async throws {
+        let mockRepo = MockAppInfoRepository()
+        given(mockRepo).listAppInfos(appId: .any).willReturn([
+            AppInfo(id: "info-1", appId: "app-1"),
+        ])
+
+        let cmd = try AppInfosList.parse(["--app-id", "app-1", "--pretty"])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "listAppInfos" : "asc app-infos list --app-id app-1",
+                "listLocalizations" : "asc app-info-localizations list --app-info-id info-1"
+              },
+              "appId" : "app-1",
+              "id" : "info-1"
+            }
+          ]
+        }
+        """)
+    }
+
+    @Test func `execute passes appId to repository`() async throws {
+        let mockRepo = MockAppInfoRepository()
+        given(mockRepo).listAppInfos(appId: .value("app-42")).willReturn([])
+
+        let cmd = try AppInfosList.parse(["--app-id", "app-42"])
+        _ = try await cmd.execute(repo: mockRepo)
+    }
+}
