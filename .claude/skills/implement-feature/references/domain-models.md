@@ -171,10 +171,101 @@ private func mapVersion(
 }
 ```
 
+## Domain Operations (Rich Domain Model — Active Object Pattern)
+
+When a domain model owns an operation scoped to itself, use a **`final class`** and inject the repository at construction time. The class holds the repo as a stored property; methods call it without threading the dependency through every signature.
+
+```swift
+public final class AppScreenshotSet: Sendable, Equatable, Identifiable, Codable {
+    public let id: String
+    public let localizationId: String
+    public let screenshotDisplayType: ScreenshotDisplayType
+    public let screenshotsCount: Int
+
+    private let repo: any ScreenshotRepository
+
+    public init(
+        id: String,
+        localizationId: String,
+        screenshotDisplayType: ScreenshotDisplayType,
+        screenshotsCount: Int = 0,
+        repo: any ScreenshotRepository
+    ) {
+        self.id = id
+        self.localizationId = localizationId
+        self.screenshotDisplayType = screenshotDisplayType
+        self.screenshotsCount = screenshotsCount
+        self.repo = repo
+    }
+
+    // Equatable — compare value fields only, ignore repo
+    public static func == (lhs: AppScreenshotSet, rhs: AppScreenshotSet) -> Bool {
+        lhs.id == rhs.id &&
+        lhs.localizationId == rhs.localizationId &&
+        lhs.screenshotDisplayType == rhs.screenshotDisplayType &&
+        lhs.screenshotsCount == rhs.screenshotsCount
+    }
+
+    // Codable — encode/decode value fields only, repo excluded from schema
+    enum CodingKeys: String, CodingKey {
+        case id, localizationId, screenshotDisplayType, screenshotsCount
+    }
+
+    // Domain operation — clean call site, no repo parameter needed
+    public func importScreenshots(
+        entries: [ScreenshotManifest.ScreenshotEntry],
+        imageURLs: [String: URL]
+    ) async throws -> [AppScreenshot] {
+        var results: [AppScreenshot] = []
+        for entry in entries.sorted(by: { $0.order < $1.order }) {
+            guard let url = imageURLs[entry.file] else { continue }
+            let screenshot = try await repo.uploadScreenshot(setId: id, fileURL: url)
+            results.append(screenshot)
+        }
+        return results
+    }
+}
+```
+
+**When to use `final class` (active object):**
+- The model owns an operation that uses `self.id` internally
+- Multiple operations on the same model share the same repo dependency
+- The logic expresses a business rule (ordering, find-or-create, state-driven flow)
+
+**When to keep `struct` (passive data):**
+- The model is pure data: no operations beyond affordances and computed display properties
+- Majority of domain models remain structs
+
+**TDD for domain operations — mock is injected at construction:**
+
+```swift
+@Test func `importScreenshots uploads entries sorted by order`() async throws {
+    let mockRepo = MockScreenshotRepository()
+    given(mockRepo).uploadScreenshot(setId: .value("set-1"), fileURL: .any)
+        .willReturn(MockRepositoryFactory.makeScreenshot(id: "img-1"))
+
+    let set = MockRepositoryFactory.makeScreenshotSet(id: "set-1", repo: mockRepo)
+
+    let entries = [ScreenshotManifest.ScreenshotEntry(order: 1, file: "en-US/1.png")]
+    let results = try await set.importScreenshots(
+        entries: entries,
+        imageURLs: ["en-US/1.png": URL(fileURLWithPath: "/fake")]
+    )
+    #expect(results.count == 1)
+    #expect(results[0].id == "img-1")
+}
+```
+
+The mock ignores the URL value — no real filesystem needed. `MockRepositoryFactory.makeScreenshotSet` gains a `repo:` parameter with a default no-op mock.
+
+**Repository stays primitive.** The class owns the business logic; the repository only wraps individual API endpoints.
+
+---
+
 ## What NOT to Put in Domain Models
 
 - No `import AppStoreConnect_Swift_SDK` (Infrastructure concern)
 - No CLI output formatting (ASCCommand concern)
 - No network code or `URLSession`
 - No SwiftUI or `@Observable` (this is a CLI, not a GUI app)
-- No injected repositories (use free functions or navigator classes for composition)
+- Do not use `struct` when the model needs an injected repo — use `final class` with custom `Equatable` and `Codable` that exclude the repo field

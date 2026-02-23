@@ -69,6 +69,7 @@ See [domain-models.md](references/domain-models.md) for complete patterns includ
 - Parent ID injection in infrastructure mappers
 - Semantic booleans on state enums
 - `MockRepositoryFactory` usage
+- **Domain operations** — extension methods that take `repo: some Protocol` to express what a model can do with its own ID (e.g. `set.importScreenshots(entries:imageURLs:repo:)`)
 
 See [command-affordances.md](references/command-affordances.md) for:
 - `AffordanceProviding` protocol
@@ -185,13 +186,14 @@ Use `docs/features/screenshots.md` as the canonical reference example.
 - [ ] **User approval received**
 
 ### Phase 1: Domain
-- [ ] `XModel.swift` — struct + `Sendable, Equatable, Identifiable, Codable`
+- [ ] `XModel.swift` — `struct` (passive data) or `final class` (active object with injected repo) — see domain-models.md
 - [ ] Carries `parentId`
 - [ ] `AffordanceProviding` implemented (navigation + state-aware actions)
 - [ ] State enum with semantic booleans (`isX`, `hasFailed`, etc.)
-- [ ] `XRepository.swift` — `@Mockable` protocol with `listX(parentId:)` methods
+- [ ] If `final class`: custom `Equatable` + `Codable` exclude the repo field; `MockRepositoryFactory.makeX` gains a `repo:` parameter
+- [ ] `XRepository.swift` — `@Mockable` protocol with primitive methods only (one API call each)
 - [ ] `make*` factory added to `MockRepositoryFactory.swift`
-- [ ] Domain tests written and passing
+- [ ] Domain tests written and passing (including domain operation tests)
 
 ### Phase 2: Infrastructure
 - [ ] `SDKXRepository.swift` — implements protocol, injects parent IDs in mappers
