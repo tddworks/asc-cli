@@ -107,7 +107,15 @@ function renderGallery() {
   const localeEntries = Object.entries(state.locales);
   if (localeEntries.length === 0) return;
 
-  // Update topbar stats
+  // Empty / populated state
+  const emptyEl   = document.getElementById('galleryEmpty');
+  const footerEl  = document.getElementById('galleryFooter');
+  const isEmpty   = localeEntries.length === 0;
+  emptyEl.classList.toggle('hidden', !isEmpty);
+  footerEl.classList.toggle('hidden', isEmpty);
+  if (isEmpty) return;
+
+  // Topbar stats
   const totalShots   = localeEntries.reduce((n, [, d]) => n + d.screenshots.length, 0);
   const statsEl      = document.getElementById('galleryStats');
   if (statsEl) statsEl.textContent = `${localeEntries.length} locale${localeEntries.length > 1 ? 's' : ''} · ${totalShots} capture${totalShots !== 1 ? 's' : ''}`;
@@ -421,7 +429,6 @@ function selectLocale(locale) {
 }
 
 function deleteLocale(locale) {
-  if (Object.keys(state.locales).length <= 1) return;
   delete state.locales[locale];
   if (state.currentLocale === locale) {
     state.currentLocale = Object.keys(state.locales)[0];
@@ -468,26 +475,104 @@ function addScreenshotToLocale(locale) {
   showEditor(locale, ss.id);
 }
 
-function addLocale() {
-  const input = prompt('Locale code (e.g. ja, zh-Hans, fr, de):');
-  if (!input || !input.trim()) return;
-  const code = input.trim();
-  if (state.locales[code]) { alert('Locale already exists'); return; }
+// ─── Locale picker modal ──────────────────────────────────────────────────────
 
-  // Inherit display type from the primary locale (first one added)
+const ALL_LOCALES = [
+  { code:'en-US', name:'English (US)',            flag:'🇺🇸' },
+  { code:'en-GB', name:'English (UK)',            flag:'🇬🇧' },
+  { code:'ja',    name:'Japanese',                flag:'🇯🇵' },
+  { code:'zh-Hans',name:'Chinese (Simplified)',   flag:'🇨🇳' },
+  { code:'zh-Hant',name:'Chinese (Traditional)',  flag:'🇹🇼' },
+  { code:'ko',    name:'Korean',                  flag:'🇰🇷' },
+  { code:'fr',    name:'French',                  flag:'🇫🇷' },
+  { code:'de',    name:'German',                  flag:'🇩🇪' },
+  { code:'es',    name:'Spanish',                 flag:'🇪🇸' },
+  { code:'es-MX', name:'Spanish (Mexico)',        flag:'🇲🇽' },
+  { code:'it',    name:'Italian',                 flag:'🇮🇹' },
+  { code:'pt-BR', name:'Portuguese (Brazil)',     flag:'🇧🇷' },
+  { code:'pt-PT', name:'Portuguese (Portugal)',   flag:'🇵🇹' },
+  { code:'ru',    name:'Russian',                 flag:'🇷🇺' },
+  { code:'ar',    name:'Arabic',                  flag:'🇸🇦' },
+  { code:'hi',    name:'Hindi',                   flag:'🇮🇳' },
+  { code:'tr',    name:'Turkish',                 flag:'🇹🇷' },
+  { code:'nl',    name:'Dutch',                   flag:'🇳🇱' },
+  { code:'sv',    name:'Swedish',                 flag:'🇸🇪' },
+  { code:'da',    name:'Danish',                  flag:'🇩🇰' },
+  { code:'fi',    name:'Finnish',                 flag:'🇫🇮' },
+  { code:'nb',    name:'Norwegian',               flag:'🇳🇴' },
+  { code:'pl',    name:'Polish',                  flag:'🇵🇱' },
+  { code:'cs',    name:'Czech',                   flag:'🇨🇿' },
+  { code:'hu',    name:'Hungarian',               flag:'🇭🇺' },
+  { code:'el',    name:'Greek',                   flag:'🇬🇷' },
+  { code:'th',    name:'Thai',                    flag:'🇹🇭' },
+  { code:'id',    name:'Indonesian',              flag:'🇮🇩' },
+  { code:'uk',    name:'Ukrainian',               flag:'🇺🇦' },
+  { code:'vi',    name:'Vietnamese',              flag:'🇻🇳' },
+];
+
+let pickerSelected = new Set();
+
+function openLocalePicker() {
+  pickerSelected.clear();
+  const list    = document.getElementById('localeModalList');
+  const confirm = document.getElementById('localeModalConfirm');
+  list.innerHTML = '';
+
+  for (const loc of ALL_LOCALES) {
+    const alreadyAdded = !!state.locales[loc.code];
+    const item = document.createElement('div');
+    item.className = 'locale-list-item' + (alreadyAdded ? ' locale-list-item-added' : '');
+    item.dataset.code = loc.code;
+    item.innerHTML = `
+      <span class="locale-list-flag">${loc.flag}</span>
+      <span class="locale-list-name">${loc.name}</span>
+      <span class="locale-list-code">${loc.code.replace('-', '_')}</span>
+      <span class="locale-list-check">
+        ${alreadyAdded
+          ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'
+          : ''}
+      </span>
+    `;
+    if (!alreadyAdded) {
+      item.addEventListener('click', () => {
+        const sel = pickerSelected.has(loc.code);
+        if (sel) { pickerSelected.delete(loc.code); item.classList.remove('selected'); }
+        else     { pickerSelected.add(loc.code);    item.classList.add('selected'); }
+        confirm.disabled = pickerSelected.size === 0;
+      });
+    }
+    list.appendChild(item);
+  }
+
+  confirm.disabled = true;
+  document.getElementById('localeModal').classList.remove('hidden');
+}
+
+function closeLocalePicker() {
+  document.getElementById('localeModal').classList.add('hidden');
+  pickerSelected.clear();
+}
+
+function confirmAddLocales() {
+  if (pickerSelected.size === 0) return;
+
   const primaryKey  = Object.keys(state.locales)[0];
   const primaryData = state.locales[primaryKey];
   const displayType = primaryData ? primaryData.displayType : 'APP_IPHONE_67';
+  const count       = primaryData ? primaryData.screenshots.length : 1;
 
-  // Mirror the same number of empty slots as primary
-  const count = primaryData ? primaryData.screenshots.length : 1;
-  const screenshots = Array.from({ length: count }, (_, i) => makeScreenshot(i + 1));
+  for (const code of pickerSelected) {
+    if (state.locales[code]) continue;
+    const screenshots = Array.from({ length: count }, (_, i) => makeScreenshot(i + 1));
+    state.locales[code] = { displayType, screenshots };
+  }
 
-  state.locales[code] = { displayType, screenshots };
-
+  closeLocalePicker();
   if (state.view === 'gallery') renderGallery();
-  else selectLocale(code);
+  else rerender();
 }
+
+function addLocale() { openLocalePicker(); }
 
 function makeScreenshot(order) {
   return {
@@ -505,8 +590,18 @@ function makeScreenshot(order) {
 // ─── Event listeners ──────────────────────────────────────────────────────────
 
 document.getElementById('backToGalleryBtn').addEventListener('click', showGallery);
-document.getElementById('addLocaleGalleryBtn').addEventListener('click', addLocale);
 document.getElementById('galleryExportBtn').addEventListener('click', () => exportToZip(state));
+document.getElementById('addLocaleGalleryBtn').addEventListener('click', addLocale);
+document.getElementById('addLocaleTopbarBtn').addEventListener('click', addLocale);
+document.getElementById('galleryEmptyAddBtn').addEventListener('click', addLocale);
+
+// Modal
+document.getElementById('localeModalClose').addEventListener('click', closeLocalePicker);
+document.getElementById('localeModalCancel').addEventListener('click', closeLocalePicker);
+document.getElementById('localeModalConfirm').addEventListener('click', confirmAddLocales);
+document.getElementById('localeModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('localeModal')) closeLocalePicker();
+});
 
 addLocaleBtn.addEventListener('click', addLocale);
 addScreenshotBtn.addEventListener('click', addScreenshot);
@@ -631,9 +726,5 @@ canvasWrapper.addEventListener('pointerup', () => {
 
 initDevices().then(() => {
   populateDeviceDropdown(deviceSelect);
-  state.locales['en-US'] = {
-    displayType: 'APP_IPHONE_67',
-    screenshots: [makeScreenshot(1)],
-  };
-  showGallery();
+  showGallery(); // starts empty — user picks locales via modal
 });

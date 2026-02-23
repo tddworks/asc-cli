@@ -11,7 +11,7 @@
 <body>
 
 <!-- ═══════════════════════════════════════════════════════
-     GALLERY VIEW  (default landing screen)
+     GALLERY VIEW
 ═══════════════════════════════════════════════════════ -->
 <div id="galleryView" class="view-screen">
   <header class="app-topbar">
@@ -23,20 +23,36 @@
       </div>
     </div>
     <div class="topbar-right">
+      <button id="addLocaleTopbarBtn" class="btn-topbar-add">+ Add Locale</button>
       <button id="galleryExportBtn" class="btn-primary-action">Export ZIP</button>
     </div>
   </header>
 
   <main class="gallery-main">
+    <!-- Empty state (shown when no locales) -->
+    <div id="galleryEmpty" class="gallery-empty hidden">
+      <div class="gallery-empty-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <path d="M8 21h8M12 17v4"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+      </div>
+      <h2 class="gallery-empty-title">No Screenshots Yet</h2>
+      <p class="gallery-empty-desc">Add your first locale to start creating<br>App Store screenshots.</p>
+      <button class="gallery-empty-btn" id="galleryEmptyAddBtn">+ Add Your First Locale</button>
+    </div>
+
+    <!-- Locale sections (shown when locales exist) -->
     <div id="galleryLocalesContainer" class="gallery-locales-container"></div>
-    <div class="gallery-footer">
+    <div id="galleryFooter" class="gallery-footer hidden">
       <button id="addLocaleGalleryBtn" class="add-locale-btn">+ Add Locale</button>
     </div>
   </main>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
-     EDITOR VIEW  (navigate here via "Edit" on a card)
+     EDITOR VIEW
 ═══════════════════════════════════════════════════════ -->
 <div id="editorView" class="view-screen hidden">
   <div class="app-shell">
@@ -147,6 +163,42 @@
         <button id="exportBtn" class="btn-primary">Export ZIP</button>
       </div>
     </aside>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     LOCALE PICKER MODAL
+═══════════════════════════════════════════════════════ -->
+<div id="localeModal" class="modal-overlay hidden">
+  <div class="modal-sheet" role="dialog" aria-modal="true">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-header-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+      </div>
+      <div class="modal-header-text">
+        <h2 class="modal-title">New Capture Session</h2>
+        <p class="modal-subtitle">Configure your screenshot capture settings</p>
+      </div>
+      <button class="modal-close" id="localeModalClose">✕</button>
+    </div>
+
+    <!-- Locale list -->
+    <div class="modal-section-label">LOCALE</div>
+    <div class="modal-locale-list" id="localeModalList">
+      <!-- Rendered by JS -->
+    </div>
+
+    <!-- Footer actions -->
+    <div class="modal-footer">
+      <button class="modal-btn-ghost" id="localeModalCancel">Cancel</button>
+      <button class="modal-btn-primary" id="localeModalConfirm" disabled>Add Selected</button>
+    </div>
 
   </div>
 </div>
