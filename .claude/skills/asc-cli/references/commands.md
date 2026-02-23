@@ -98,6 +98,46 @@ asc screenshots upload --set-id <id> --file ./path/to/screenshot.png
 ```
 Supports PNG and JPEG. File must match display type dimensions.
 
+### import
+```bash
+asc screenshots import --version-id <id> --from <path/to/export.zip>
+```
+Reads an `export.zip` produced by the browser-based screenshot editor. For each locale in `manifest.json`, finds or creates the localization and screenshot set, then uploads each PNG in `order` sequence.
+
+Options: `--output`, `--pretty`
+
+---
+
+## app-infos
+
+### list
+```bash
+asc app-infos list --app-id <id>
+```
+Returns AppInfo records for an app (typically one per active state). Each AppInfo has an affordance for `listLocalizations`.
+
+---
+
+## app-info-localizations
+
+### list
+```bash
+asc app-info-localizations list --app-info-id <id>
+```
+Returns per-locale metadata (name, subtitle, privacy URLs) for a given AppInfo.
+
+### create
+```bash
+asc app-info-localizations create --app-info-id <id> --locale en-US --name "My App"
+```
+Creates a new locale entry. `--name` is required (up to 30 characters).
+
+### update
+```bash
+asc app-info-localizations update --localization-id <id> [--name <n>] [--subtitle <s>] [--privacy-policy-url <url>]
+```
+All fields are optional — only provided fields are changed.
+
 ---
 
 ## builds
