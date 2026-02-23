@@ -59,3 +59,9 @@ public struct AppScreenshot: Sendable, Codable, Equatable, Identifiable {
         }
     }
 }
+
+extension AppScreenshot: AffordanceProviding {
+    public var affordances: [String: String] {
+        ["listScreenshots": "asc screenshots list --set-id \(setId)"]
+    }
+}

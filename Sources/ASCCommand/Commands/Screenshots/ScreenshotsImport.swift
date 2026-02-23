@@ -51,7 +51,7 @@ struct ScreenshotsImport: AsyncParsableCommand {
         )
 
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatItems(
+        return try formatter.formatAgentItems(
             results,
             headers: ["ID", "File Name", "Size", "State"],
             rowMapper: { [
