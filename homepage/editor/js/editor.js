@@ -192,6 +192,13 @@ function initCanvasDrag() {
     let newOffX = bezelDrag.ox + (e.clientX - bezelDrag.px) / displayScale;
     let newOffY = bezelDrag.oy + (e.clientY - bezelDrag.py) / displayScale;
 
+    // ── Clamp: keep bezel center inside the canvas ────────────────────────
+    const outSize = activeOutSize();
+    const maxX = outSize.width  / 2;
+    const maxY = outSize.height / 2;
+    newOffX = Math.max(-maxX, Math.min(maxX, newOffX));
+    newOffY = Math.max(-maxY, Math.min(maxY, newOffY));
+
     // ── Snap to center (offset = 0 means perfectly centered) ─────────────
     const snapZone = BEZEL_SNAP_CSS / displayScale;   // CSS px → full-res px
     let snapH = false, snapV = false;

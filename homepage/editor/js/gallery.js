@@ -115,6 +115,10 @@ async function generateComposedThumbnails() {
     const thumbSize = { width: CARD_W, height: Math.round(CARD_W / ar) };
 
     for (const shot of locale.screenshots) {
+      // Don't generate (or inject) a thumbnail for empty shots — the camera-icon
+      // placeholder must remain visible so the user knows to add an image.
+      if (shot.isEmpty) continue;
+
       const canvas = await composeShotThumbnail(shot, outSize, thumbSize, bezelZoom);
       const url    = canvas.toDataURL('image/jpeg', 0.88);
       shot._thumbnailUrl = url;
