@@ -1,0 +1,629 @@
+{
+  "_comment": "Merged device metadata. Key = PNG filename (without .png). screenInsetX/Y = pixels from frame edge to screen content (horizontal / vertical).",
+
+  "iPhone 8 and 2020 SE": {
+    "category": "iPhone", "displayType": "APP_IPHONE_47",
+    "outputWidth": 750, "outputHeight": 1334,
+    "screenInsetX": 125, "screenInsetY": 334
+  },
+
+  "iPhone 11 Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 828, "outputHeight": 1792,
+    "screenInsetX": 86, "screenInsetY": 104
+  },
+  "iPhone 11 Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 1792, "outputHeight": 828,
+    "screenInsetX": 104, "screenInsetY": 86
+  },
+  "iPhone 11 Pro Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_58",
+    "outputWidth": 1125, "outputHeight": 2436,
+    "screenInsetX": 238, "screenInsetY": 182
+  },
+  "iPhone 11 Pro Max Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_65",
+    "outputWidth": 1242, "outputHeight": 2688,
+    "screenInsetX": 179, "screenInsetY": 155
+  },
+  "iPhone 11 Pro Max Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_65",
+    "outputWidth": 2688, "outputHeight": 1242,
+    "screenInsetX": 155, "screenInsetY": 179
+  },
+
+  "iPhone 12-13 mini Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_55",
+    "outputWidth": 1080, "outputHeight": 2340,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 12-13 mini Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_55",
+    "outputWidth": 2340, "outputHeight": 1080,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 12-13 Pro Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 1170, "outputHeight": 2532,
+    "screenInsetX": 115, "screenInsetY": 84
+  },
+  "iPhone 12-13 Pro Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 2532, "outputHeight": 1170,
+    "screenInsetX": 84, "screenInsetY": 115
+  },
+  "iPhone 12-13 Pro Max Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1284, "outputHeight": 2778,
+    "screenInsetX": 108, "screenInsetY": 111
+  },
+  "iPhone 12-13 Pro Max Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2778, "outputHeight": 1284,
+    "screenInsetX": 111, "screenInsetY": 108
+  },
+
+  "iPhone 14 Pro Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 1179, "outputHeight": 2556,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 14 Pro Portrait_frame_no_island": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 1179, "outputHeight": 2556,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 14 Pro Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 2556, "outputHeight": 1179,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 14 Pro Landscape_frame_no_island": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 2556, "outputHeight": 1179,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 14 Pro Max Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1290, "outputHeight": 2796,
+    "screenInsetX": 80, "screenInsetY": 70
+  },
+  "iPhone 14 Pro Max Portrait_frame_no_island": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1290, "outputHeight": 2796,
+    "screenInsetX": 80, "screenInsetY": 70
+  },
+  "iPhone 14 Pro Max Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2796, "outputHeight": 1290,
+    "screenInsetX": 70, "screenInsetY": 80
+  },
+  "iPhone 14 Pro Max Landscape_frame_no_island": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2796, "outputHeight": 1290,
+    "screenInsetX": 70, "screenInsetY": 80
+  },
+
+  "iPhone 15 - Black - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 1179, "outputHeight": 2556,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 - Black - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 2556, "outputHeight": 1179,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 - Blue - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 1179, "outputHeight": 2556,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 - Blue - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 2556, "outputHeight": 1179,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 - Green - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 1179, "outputHeight": 2556,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 - Green - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 2556, "outputHeight": 1179,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 - Pink - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 1179, "outputHeight": 2556,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 - Pink - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 2556, "outputHeight": 1179,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 - Yellow - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 1179, "outputHeight": 2556,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 - Yellow - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 2556, "outputHeight": 1179,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+
+  "iPhone 15 Pro - Natural Titanium - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1290, "outputHeight": 2796,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 Pro - Natural Titanium - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2796, "outputHeight": 1290,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 Pro - Black Titanium - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1290, "outputHeight": 2796,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 Pro - Black Titanium - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2796, "outputHeight": 1290,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 Pro - Blue Titanium - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1290, "outputHeight": 2796,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 Pro - Blue Titanium - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2796, "outputHeight": 1290,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 Pro - White Titanium - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1290, "outputHeight": 2796,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 Pro - White Titanium - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2796, "outputHeight": 1290,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+
+  "iPhone 15 Pro Max - Natural Titanium - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1320, "outputHeight": 2868,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 Pro Max - Natural Titanium - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2868, "outputHeight": 1320,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 Pro Max - Black Titanium - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1320, "outputHeight": 2868,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 Pro Max - Black Titanium - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2868, "outputHeight": 1320,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 Pro Max - Blue Titanium - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1320, "outputHeight": 2868,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 Pro Max - Blue Titanium - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2868, "outputHeight": 1320,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 Pro Max - White Titanium - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1320, "outputHeight": 2868,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 15 Pro Max - White Titanium - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2868, "outputHeight": 1320,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+
+  "iPhone 16 - White - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 1179, "outputHeight": 2556,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 - White - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 2556, "outputHeight": 1179,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 - Black - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 1179, "outputHeight": 2556,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 - Black - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 2556, "outputHeight": 1179,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 - Pink - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 1179, "outputHeight": 2556,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 - Pink - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 2556, "outputHeight": 1179,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 - Teal - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 1179, "outputHeight": 2556,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 - Teal - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 2556, "outputHeight": 1179,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 - Ultramarine - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 1179, "outputHeight": 2556,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 - Ultramarine - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_61",
+    "outputWidth": 2556, "outputHeight": 1179,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+
+  "iPhone 16 Pro - Natural Titanium - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1320, "outputHeight": 2868,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 Pro - Natural Titanium - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2868, "outputHeight": 1320,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 Pro - Black Titanium - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1320, "outputHeight": 2868,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 Pro - Black Titanium - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2868, "outputHeight": 1320,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 Pro - White Titanium - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1320, "outputHeight": 2868,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 Pro - White Titanium - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2868, "outputHeight": 1320,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 Pro - Desert Titanium - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1320, "outputHeight": 2868,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 Pro - Desert Titanium - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2868, "outputHeight": 1320,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+
+  "iPhone 16 Pro Max - Natural Titanium - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1320, "outputHeight": 2868,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 Pro Max - Natural Titanium - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2868, "outputHeight": 1320,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 Pro Max - Black Titanium - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1320, "outputHeight": 2868,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 Pro Max - Black Titanium - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2868, "outputHeight": 1320,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 Pro Max - White Titanium - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1320, "outputHeight": 2868,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 Pro Max - White Titanium - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2868, "outputHeight": 1320,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 Pro Max - Desert Titanium - Portrait": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 1320, "outputHeight": 2868,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+  "iPhone 16 Pro Max - Desert Titanium - Landscape": {
+    "category": "iPhone", "displayType": "APP_IPHONE_67",
+    "outputWidth": 2868, "outputHeight": 1320,
+    "screenInsetX": 80, "screenInsetY": 80
+  },
+
+  "iPad - Silver - Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_97",
+    "outputWidth": 1620, "outputHeight": 2160,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad - Silver - Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_97",
+    "outputWidth": 2160, "outputHeight": 1620,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+
+  "iPad mini 2021 Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_97",
+    "outputWidth": 1488, "outputHeight": 2266,
+    "screenInsetX": 146, "screenInsetY": 142
+  },
+  "iPad mini 2021 Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_97",
+    "outputWidth": 2266, "outputHeight": 1488,
+    "screenInsetX": 142, "screenInsetY": 146
+  },
+  "iPad mini - Starlight - Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_97",
+    "outputWidth": 1488, "outputHeight": 2266,
+    "screenInsetX": 146, "screenInsetY": 142
+  },
+  "iPad mini - Starlight - Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_97",
+    "outputWidth": 2266, "outputHeight": 1488,
+    "screenInsetX": 142, "screenInsetY": 146
+  },
+
+  "iPad 2021 Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_105",
+    "outputWidth": 1620, "outputHeight": 2160,
+    "screenInsetX": 110, "screenInsetY": 250
+  },
+  "iPad 2021 Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_105",
+    "outputWidth": 2160, "outputHeight": 1620,
+    "screenInsetX": 250, "screenInsetY": 110
+  },
+
+  "iPad Air 2020 Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_11",
+    "outputWidth": 1668, "outputHeight": 2388,
+    "screenInsetX": 139, "screenInsetY": 140
+  },
+  "iPad Air 2020 Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_11",
+    "outputWidth": 2388, "outputHeight": 1668,
+    "screenInsetX": 140, "screenInsetY": 139
+  },
+
+  "iPad Air 11\" - M2 - Blue - Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_11",
+    "outputWidth": 1668, "outputHeight": 2388,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Air 11\" - M2 - Blue - Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_11",
+    "outputWidth": 2388, "outputHeight": 1668,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Air 11\" - M2 - Purple - Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_11",
+    "outputWidth": 1668, "outputHeight": 2388,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Air 11\" - M2 - Purple - Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_11",
+    "outputWidth": 2388, "outputHeight": 1668,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Air 11\" - M2 - Space Gray - Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_11",
+    "outputWidth": 1668, "outputHeight": 2388,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Air 11\" - M2 - Space Gray - Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_11",
+    "outputWidth": 2388, "outputHeight": 1668,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Air 11\" - M2 - Stardust - Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_11",
+    "outputWidth": 1668, "outputHeight": 2388,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Air 11\" - M2 - Stardust - Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_11",
+    "outputWidth": 2388, "outputHeight": 1668,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+
+  "iPad Air 13\" - M2 - Blue - Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_129",
+    "outputWidth": 2048, "outputHeight": 2732,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Air 13\" - M2 - Blue - Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_129",
+    "outputWidth": 2732, "outputHeight": 2048,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Air 13\" - M2 - Purple - Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_129",
+    "outputWidth": 2048, "outputHeight": 2732,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Air 13\" - M2 - Purple - Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_129",
+    "outputWidth": 2732, "outputHeight": 2048,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Air 13\" - M2 - Space Gray - Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_129",
+    "outputWidth": 2048, "outputHeight": 2732,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Air 13\" - M2 - Space Gray - Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_129",
+    "outputWidth": 2732, "outputHeight": 2048,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Air 13\" - M2 - Stardust - Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_129",
+    "outputWidth": 2048, "outputHeight": 2732,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Air 13\" - M2 - Stardust - Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_129",
+    "outputWidth": 2732, "outputHeight": 2048,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+
+  "iPad Pro 2018-2021 11 Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_11",
+    "outputWidth": 1668, "outputHeight": 2388,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Pro 2018-2021 11 Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_11",
+    "outputWidth": 2388, "outputHeight": 1668,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Pro 2018-2021 Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_129",
+    "outputWidth": 2048, "outputHeight": 2732,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Pro 2018-2021 Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_129",
+    "outputWidth": 2732, "outputHeight": 2048,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+
+  "iPad Pro 11 - M4 - Silver - Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_11",
+    "outputWidth": 1668, "outputHeight": 2388,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Pro 11 - M4 - Silver - Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_11",
+    "outputWidth": 2388, "outputHeight": 1668,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Pro 11 - M4 - Space Gray - Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_11",
+    "outputWidth": 1668, "outputHeight": 2388,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Pro 11 - M4 - Space Gray - Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_11",
+    "outputWidth": 2388, "outputHeight": 1668,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+
+  "iPad Pro 13 - M4 - Silver - Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_129",
+    "outputWidth": 2064, "outputHeight": 2752,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Pro 13 - M4 - Silver - Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_129",
+    "outputWidth": 2752, "outputHeight": 2064,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Pro 13 - M4 - Space Gray - Portrait": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_129",
+    "outputWidth": 2064, "outputHeight": 2752,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+  "iPad Pro 13 - M4 - Space Gray - Landscape": {
+    "category": "iPad", "displayType": "APP_IPAD_PRO_3GEN_129",
+    "outputWidth": 2752, "outputHeight": 2064,
+    "screenInsetX": 120, "screenInsetY": 120
+  },
+
+  "MacBook Air 2020": {
+    "category": "Mac", "displayType": "APP_DESKTOP",
+    "outputWidth": 2560, "outputHeight": 1664,
+    "screenInsetX": 620, "screenInsetY": 652
+  },
+  "MacBook Air 2022": {
+    "category": "Mac", "displayType": "APP_DESKTOP",
+    "outputWidth": 2560, "outputHeight": 1664,
+    "screenInsetX": 330, "screenInsetY": 218
+  },
+  "MacBook Pro 2021 14": {
+    "category": "Mac", "displayType": "APP_DESKTOP",
+    "outputWidth": 3024, "outputHeight": 1964,
+    "screenInsetX": 460, "screenInsetY": 300
+  },
+  "MacBook Pro 2021 16": {
+    "category": "Mac", "displayType": "APP_DESKTOP",
+    "outputWidth": 3456, "outputHeight": 2234,
+    "screenInsetX": 442, "screenInsetY": 313
+  },
+  "iMac 2021": {
+    "category": "Mac", "displayType": "APP_DESKTOP",
+    "outputWidth": 4480, "outputHeight": 2520,
+    "screenInsetX": 141, "screenInsetY": 161
+  },
+  "iMac 24\" - Silver": {
+    "category": "Mac", "displayType": "APP_DESKTOP",
+    "outputWidth": 4480, "outputHeight": 2520,
+    "screenInsetX": 141, "screenInsetY": 161
+  },
+
+  "Watch Ultra 2022": {
+    "category": "Watch", "displayType": "APP_WATCH_ULTRA",
+    "outputWidth": 410, "outputHeight": 502,
+    "screenInsetX": 95, "screenInsetY": 219
+  },
+  "Watch Series 4 44": {
+    "category": "Watch", "displayType": "APP_WATCH_SERIES_4",
+    "outputWidth": 368, "outputHeight": 448,
+    "screenInsetX": 66, "screenInsetY": 222
+  },
+  "Watch Series 4 40": {
+    "category": "Watch", "displayType": "APP_WATCH_SERIES_4",
+    "outputWidth": 324, "outputHeight": 394,
+    "screenInsetX": 114, "screenInsetY": 308
+  },
+  "Watch Series 7 45 Midnight": {
+    "category": "Watch", "displayType": "APP_WATCH_SERIES_7",
+    "outputWidth": 396, "outputHeight": 484,
+    "screenInsetX": 72, "screenInsetY": 188
+  },
+  "Watch Series 7 45 Starlight": {
+    "category": "Watch", "displayType": "APP_WATCH_SERIES_7",
+    "outputWidth": 396, "outputHeight": 484,
+    "screenInsetX": 72, "screenInsetY": 188
+  }
+}
