@@ -192,26 +192,12 @@ function initCanvasDrag() {
     let newOffX = bezelDrag.ox + (e.clientX - bezelDrag.px) / displayScale;
     let newOffY = bezelDrag.oy + (e.clientY - bezelDrag.py) / displayScale;
 
-    // ── Clamp: keep bezel entirely within the canvas ──────────────────────
-    // frameOffset is stored in full-res output pixels.
-    // halfRange = |canvasDim - frameDim_fullRes| / 2 works for both cases:
-    //   frame < canvas → limits edges to canvas boundary
-    //   frame > canvas → limits panning so canvas stays covered by frame
-    const outSize    = activeOutSize();
-    const frameImg   = shot.device ? frameImageCache.get(shot.device) : null;
-    if (frameImg) {
-      const baseSF = Math.min(outSize.width / frameImg.width, outSize.height / frameImg.height);
-      const fwFull = frameImg.width  * baseSF * (zoom / 100);
-      const fhFull = frameImg.height * baseSF * (zoom / 100);
-      const maxX   = Math.abs(outSize.width  - fwFull) / 2;
-      const maxY   = Math.abs(outSize.height - fhFull) / 2;
-      newOffX = Math.max(-maxX, Math.min(maxX, newOffX));
-      newOffY = Math.max(-maxY, Math.min(maxY, newOffY));
-    } else {
-      // Frame not loaded yet — fall back to center-within-canvas
-      newOffX = Math.max(-outSize.width  / 2, Math.min(outSize.width  / 2, newOffX));
-      newOffY = Math.max(-outSize.height / 2, Math.min(outSize.height / 2, newOffY));
-    }
+    // ── Clamp: loose bound prevents unbounded drift; visual clipping is via
+    //    overflow:hidden on .canvas-wrapper so the frame can move freely but
+    //    the part outside the canvas rectangle is simply not rendered.
+    const outSize = activeOutSize();
+    newOffX = Math.max(-outSize.width,  Math.min(outSize.width,  newOffX));
+    newOffY = Math.max(-outSize.height, Math.min(outSize.height, newOffY));
 
     // ── Snap to center (offset = 0 means perfectly centered) ─────────────
     const snapZone = BEZEL_SNAP_CSS / displayScale;   // CSS px → full-res px
