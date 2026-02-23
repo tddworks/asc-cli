@@ -163,6 +163,9 @@ function selectLocale(code) {
 }
 
 // ── Bezel drag — wired once on the persistent canvasWrapper element ───────────
+// Snaps to center (offset = 0) with a guide line indicator.
+
+const BEZEL_SNAP_CSS = 10;   // snap zone in CSS pixels
 
 function initCanvasDrag() {
   const canvasWrapper = document.getElementById('canvasWrapper');
@@ -185,8 +188,26 @@ function initCanvasDrag() {
     const locale = project.localeByCode(ui.activeLocale);
     const shot   = locale?.screenshotById(ui.activeShotId);
     if (!shot) return;
-    shot.frameOffsetX = bezelDrag.ox + (e.clientX - bezelDrag.px) / displayScale;
-    shot.frameOffsetY = bezelDrag.oy + (e.clientY - bezelDrag.py) / displayScale;
+
+    let newOffX = bezelDrag.ox + (e.clientX - bezelDrag.px) / displayScale;
+    let newOffY = bezelDrag.oy + (e.clientY - bezelDrag.py) / displayScale;
+
+    // ── Snap to center (offset = 0 means perfectly centered) ─────────────
+    const snapZone = BEZEL_SNAP_CSS / displayScale;   // CSS px → full-res px
+    let snapH = false, snapV = false;
+    if (Math.abs(newOffX) < snapZone) { newOffX = 0; snapV = true; }
+    if (Math.abs(newOffY) < snapZone) { newOffY = 0; snapH = true; }
+
+    shot.frameOffsetX = newOffX;
+    shot.frameOffsetY = newOffY;
+
+    // Show / hide center guides
+    const overlay = canvasWrapper.querySelector('#textLayerOverlay');
+    const guideH  = overlay?.querySelector('#canvasGuideH');
+    const guideV  = overlay?.querySelector('#canvasGuideV');
+    if (guideH) { guideH.classList.toggle('visible', snapH); guideH.style.top  = '50%'; }
+    if (guideV) { guideV.classList.toggle('visible', snapV); guideV.style.left = '50%'; }
+
     if (!rafPending) {
       rafPending = true;
       requestAnimationFrame(async () => { rafPending = false; await renderCanvas(); });
@@ -197,6 +218,9 @@ function initCanvasDrag() {
     if (!bezelDrag) return;
     bezelDrag = null;
     canvasWrapper.classList.remove('dragging');
+    const overlay = canvasWrapper.querySelector('#textLayerOverlay');
+    overlay?.querySelector('#canvasGuideH')?.classList.remove('visible');
+    overlay?.querySelector('#canvasGuideV')?.classList.remove('visible');
     renderCanvas();
   });
 }

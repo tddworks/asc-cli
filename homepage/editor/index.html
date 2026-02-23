@@ -90,7 +90,11 @@
             <canvas id="screenCanvas"></canvas>
             <img id="frameImg" alt="">
           </div>
-          <div id="textLayerOverlay" class="text-layer-overlay"></div>
+          <div id="textLayerOverlay" class="text-layer-overlay">
+            <!-- Alignment guides — shown during drag when snapping to center -->
+            <div class="align-guide align-guide-h" id="canvasGuideH"></div>
+            <div class="align-guide align-guide-v" id="canvasGuideV"></div>
+          </div>
         </div>
       </div>
     </main>

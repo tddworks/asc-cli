@@ -78,13 +78,20 @@ function renderTextLayersList(shot) {
 
     item.querySelector('.text-layer-delete').addEventListener('click', () => {
       shot.removeTextLayer(t.id);
-      renderEditor();
+      renderEditor();   // full rebuild — layer removed from the list
     });
-    item.querySelector('.txt-content').addEventListener('input',  e => { t.content    = e.target.value;                 renderEditor(); });
-    item.querySelector('.txt-size').addEventListener('change',    e => { t.fontSize   = parseInt(e.target.value) || 52; renderEditor(); });
-    item.querySelector('.txt-color').addEventListener('change',   e => { t.color      = e.target.value;                 renderEditor(); });
-    item.querySelector('.txt-weight').addEventListener('change',  e => { t.fontWeight = e.target.value;                 renderEditor(); });
-    item.querySelector('.txt-align').addEventListener('change',   e => { t.align      = e.target.value;                 renderEditor(); });
+
+    // For live edits: update data + redraw canvas only.
+    // Do NOT call renderEditor() here — that would rebuild the DOM and lose focus.
+    item.querySelector('.txt-content').addEventListener('input', e => {
+      t.content = e.target.value;
+      item.querySelector('.text-layer-preview').textContent = t.content || '(empty)';
+      renderCanvas();
+    });
+    item.querySelector('.txt-size').addEventListener('change',   e => { t.fontSize   = parseInt(e.target.value) || 52; renderCanvas(); });
+    item.querySelector('.txt-color').addEventListener('change',  e => { t.color      = e.target.value;                 renderCanvas(); });
+    item.querySelector('.txt-weight').addEventListener('change', e => { t.fontWeight = e.target.value;                 renderCanvas(); });
+    item.querySelector('.txt-align').addEventListener('change',  e => { t.align      = e.target.value;                 renderCanvas(); });
 
     list.appendChild(item);
   });
