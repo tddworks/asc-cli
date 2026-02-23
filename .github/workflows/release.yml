@@ -46,12 +46,12 @@ jobs:
           shasum -a 256 * > asc_${GITHUB_REF_NAME}_checksums.txt
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: release/**
-          generate_release_notes: true
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --generate-notes \
+            release/*
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   update-tap:
     needs: release
