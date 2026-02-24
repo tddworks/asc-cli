@@ -1,7 +1,7 @@
 # typed: false
 # frozen_string_literal: true
 
-class Asc < Formula
+class Asccli < Formula
   desc "App Store Connect CLI — manage apps, versions, and screenshots from your terminal"
   homepage "https://github.com/tddworks/asc-cli"
   version "__VERSION__"

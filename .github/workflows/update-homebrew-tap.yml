@@ -40,11 +40,12 @@ jobs:
           sed -e "s/__VERSION__/${VERSION}/g" \
               -e "s/__SHA256_ARM64__/${SHA256_ARM64}/g" \
               -e "s/__SHA256_X86__/${SHA256_X86}/g" \
-              .github/homebrew/asc.rb.template > homebrew-tap/Formula/asc.rb
+              .github/homebrew/asccli.rb.template > homebrew-tap/Formula/asccli.rb
 
           cd homebrew-tap
           git config user.name "itshan"
           git config user.email "itshan@tddworks.com"
-          git add Formula/asc.rb
-          git commit -m "Update asc to ${VERSION}" || echo "No changes to commit"
+          git rm --ignore-unmatch Formula/asc.rb
+          git add Formula/asccli.rb
+          git commit -m "Update asccli to ${VERSION}" || echo "No changes to commit"
           git push
