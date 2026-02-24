@@ -4,6 +4,14 @@ import Mockable
 
 struct MockRepositoryFactory {
 
+    static func makeAuthStatus(
+        keyID: String = "TEST_KEY_ID",
+        issuerID: String = "TEST_ISSUER_ID",
+        source: CredentialSource = .file
+    ) -> AuthStatus {
+        AuthStatus(keyID: keyID, issuerID: issuerID, source: source)
+    }
+
     static func makeAuthCredentials(
         keyID: String = "TEST_KEY_ID",
         issuerID: String = "TEST_ISSUER_ID",

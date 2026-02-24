@@ -1,4 +1,4 @@
-public struct AuthCredentials: Sendable, Equatable {
+public struct AuthCredentials: Sendable, Equatable, Codable {
     public let keyID: String
     public let issuerID: String
     public let privateKeyPEM: String

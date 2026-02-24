@@ -5,27 +5,43 @@ import Infrastructure
 struct AuthCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "auth",
-        abstract: "Check authentication status",
-        subcommands: [AuthCheck.self]
+        abstract: "Manage App Store Connect authentication",
+        subcommands: [AuthCheck.self, AuthLogin.self, AuthLogout.self]
     )
 }
 
 struct AuthCheck: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "check",
-        abstract: "Verify authentication credentials"
+        abstract: "Verify authentication credentials and show status"
     )
 
+    @OptionGroup var globals: GlobalOptions
+
     func run() async throws {
-        let provider = EnvironmentAuthProvider()
-        do {
-            let creds = try provider.resolve()
-            print("Authentication OK")
-            print("  Key ID: \(creds.keyID)")
-            print("  Issuer ID: \(creds.issuerID)")
-        } catch {
-            print("Authentication failed: \(error)")
-            throw ExitCode.failure
+        let fileProvider = FileAuthProvider()
+        let envProvider = EnvironmentAuthProvider()
+        print(try await execute(fileProvider: fileProvider, envProvider: envProvider))
+    }
+
+    func execute(fileProvider: any AuthProvider, envProvider: any AuthProvider) async throws -> String {
+        let credentials: AuthCredentials
+        let source: CredentialSource
+
+        if let creds = try? fileProvider.resolve() {
+            credentials = creds
+            source = .file
+        } else {
+            credentials = try envProvider.resolve()
+            source = .environment
         }
+
+        let status = AuthStatus(keyID: credentials.keyID, issuerID: credentials.issuerID, source: source)
+        let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
+        return try formatter.formatAgentItems(
+            [status],
+            headers: ["Key ID", "Issuer ID", "Source"],
+            rowMapper: { [$0.keyID, $0.issuerID, $0.source.rawValue] }
+        )
     }
 }

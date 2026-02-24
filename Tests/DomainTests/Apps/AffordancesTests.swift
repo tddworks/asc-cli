@@ -78,6 +78,16 @@ struct AffordancesTests {
         #expect(loc.affordances["updateLocalization"] == "asc app-info-localizations update --localization-id loc-1")
     }
 
+    // MARK: - AuthStatus affordances
+
+    @Test
+    func `auth status affordances include check login and logout`() {
+        let status = MockRepositoryFactory.makeAuthStatus(keyID: "KEY123")
+        #expect(status.affordances["check"] == "asc auth check")
+        #expect(status.affordances["login"] == "asc auth login --key-id <id> --issuer-id <id> --private-key-path <path>")
+        #expect(status.affordances["logout"] == "asc auth logout")
+    }
+
     // MARK: - AppScreenshotSet affordances
 
     @Test
