@@ -1,0 +1,110 @@
+{
+  "lang": "ru",
+  "appName": "asc",
+  "meta": {
+    "title": "asc — CLI для App Store Connect",
+    "description": "Инструмент командной строки с открытым исходным кодом для App Store Connect. Отправляйте приложения, управляйте версиями, загружайте скриншоты — всё из терминала. Поддержка ИИ-агентов через CAEOAS.",
+    "keywords": "app store connect cli, asc, swift cli, отправка приложений, homebrew, открытый исходный код",
+    "ogImage": "static/og-image.png"
+  },
+  "nav": {
+    "features": "Возможности",
+    "howItWorks": "Быстрый старт",
+    "download": "Установить",
+    "github": "GitHub",
+    "getApp": "Установить"
+  },
+  "hero": {
+    "badge": "Открытый исходный код · Лицензия MIT",
+    "titleLine1": "App Store Connect",
+    "titleAccent": "из вашего терминала.",
+    "subtitle": "Swift CLI для управления iOS и macOS приложениями в App Store Connect. Отправляйте версии, управляйте скриншотами, отслеживайте сборки — с полной поддержкой ИИ-агентов через CAEOAS.",
+    "installLabel": "Установить через Homebrew",
+    "installCmd": "brew install tddworks/tap/asccli",
+    "githubLabel": "Смотреть на GitHub",
+    "stats": {
+      "stat1Value": "8+",
+      "stat1Label": "Команд",
+      "stat2Value": "CAEOAS",
+      "stat2Label": "Поддержка ИИ",
+      "stat3Value": "MIT",
+      "stat3Label": "Открытый код"
+    }
+  },
+  "features": {
+    "eyebrow": "Возможности",
+    "title": "Всё необходимое, ничего лишнего",
+    "subtitle": "Построен на официальном App Store Connect API с чистой трёхуровневой архитектурой и полным выводом affordances для рабочих процессов ИИ-агентов.",
+    "feature1": {
+      "icon": "🤖",
+      "title": "Поддержка ИИ-агентов (CAEOAS)",
+      "description": "Каждый ответ содержит готовые к выполнению команды в поле affordances. Агентам не нужно знать всё дерево команд — они просто следуют ссылкам."
+    },
+    "feature2": {
+      "icon": "🔑",
+      "title": "Постоянная аутентификация",
+      "description": "Войдите один раз с помощью asc auth login. Учётные данные сохраняются в ~/.asc/credentials.json и автоматически используются всеми командами. Переменные окружения не нужны.",
+      "comment1": "# однократная настройка",
+      "savedMsg": "сохранено в ~/.asc/credentials.json",
+      "comment2": "# переменные окружения больше не нужны"
+    },
+    "feature3": {
+      "icon": "🗂️",
+      "title": "Полная иерархия ресурсов",
+      "description": "Управляйте всем деревом ресурсов App Store Connect: Приложения → Версии → Локализации → Наборы скриншотов → Скриншоты. Плюс сборки и TestFlight."
+    },
+    "feature4": {
+      "icon": "📤",
+      "title": "Отправка одной командой",
+      "description": "Отправьте любую версию iOS или macOS на проверку одной командой. CLI автоматически выполняет весь многоэтапный процесс отправки на проверку."
+    },
+    "feature5": {
+      "icon": "🔧",
+      "title": "Несколько форматов вывода",
+      "description": "Разработан для людей и машин. Вывод в JSON (по умолчанию), таблице или markdown. Легко передаётся в jq, скрипты или ИИ-агенты."
+    }
+  },
+  "howItWorks": {
+    "eyebrow": "Быстрый старт",
+    "title": "Готов к работе за несколько минут",
+    "step1": {
+      "title": "Установить через Homebrew",
+      "description": "Одна команда устанавливает последнюю версию. Xcode и Swift toolchain не нужны."
+    },
+    "step2": {
+      "title": "Войдите один раз — используйте всегда",
+      "description": "Сохраните ваш API-ключ с помощью asc auth login. Учётные данные хранятся в ~/.asc/credentials.json — переменные окружения для каждой сессии не нужны.",
+      "savedComment": "# сохранено в ~/.asc/credentials.json"
+    },
+    "step3": {
+      "title": "Начните управлять своими приложениями",
+      "description": "Список приложений, проверка версий, загрузка скриншотов, отправка на проверку — всё из вашего терминала или через ИИ-агента."
+    }
+  },
+  "cta": {
+    "badge": "Готовы попробовать asc?",
+    "title": "Автоматизируйте рабочий процесс App Store Connect",
+    "install": "Установить через Homebrew",
+    "github": "Исходный код на GitHub"
+  },
+  "footer": {
+    "description": "CLI-инструмент с открытым исходным кодом для App Store Connect. Создан на Swift.",
+    "copyright": "© 2025 участники проекта asc. Лицензия MIT.",
+    "columns": {
+      "project": "Проект",
+      "resources": "Ресурсы",
+      "legal": "Правовая информация"
+    },
+    "links": {
+      "github": "GitHub",
+      "releases": "Релизы",
+      "issues": "Задачи",
+      "contributing": "Участие в разработке",
+      "docs": "Документация",
+      "commands": "Команды",
+      "changelog": "Список изменений",
+      "license": "Лицензия MIT",
+      "privacy": "Конфиденциальность"
+    }
+  }
+}

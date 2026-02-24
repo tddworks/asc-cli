@@ -27,13 +27,77 @@ const config = {
       htmlLang: 'zh-Hans',
       fontFamily: "'JetBrains Mono', 'Outfit', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif",
       extraFonts: 'family=Noto+Sans+SC:wght@300;400;500;600;700&'
+    },
+    'zh-TW': {
+      output: 'zh-TW/index.html',
+      htmlLang: 'zh-Hant',
+      fontFamily: "'JetBrains Mono', 'Outfit', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif",
+      extraFonts: 'family=Noto+Sans+TC:wght@300;400;500;600;700&'
+    },
+    ja: {
+      output: 'ja/index.html',
+      htmlLang: 'ja',
+      fontFamily: "'JetBrains Mono', 'Outfit', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif",
+      extraFonts: 'family=Noto+Sans+JP:wght@300;400;500;600;700&'
+    },
+    ko: {
+      output: 'ko/index.html',
+      htmlLang: 'ko',
+      fontFamily: "'JetBrains Mono', 'Outfit', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif",
+      extraFonts: 'family=Noto+Sans+KR:wght@300;400;500;600;700&'
+    },
+    es: {
+      output: 'es/index.html',
+      htmlLang: 'es',
+      fontFamily: "'JetBrains Mono', 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif"
+    },
+    fr: {
+      output: 'fr/index.html',
+      htmlLang: 'fr',
+      fontFamily: "'JetBrains Mono', 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif"
+    },
+    it: {
+      output: 'it/index.html',
+      htmlLang: 'it',
+      fontFamily: "'JetBrains Mono', 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif"
+    },
+    pt: {
+      output: 'pt/index.html',
+      htmlLang: 'pt',
+      fontFamily: "'JetBrains Mono', 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif"
+    },
+    ru: {
+      output: 'ru/index.html',
+      htmlLang: 'ru',
+      fontFamily: "'JetBrains Mono', 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif"
+    },
+    vi: {
+      output: 'vi/index.html',
+      htmlLang: 'vi',
+      fontFamily: "'JetBrains Mono', 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif"
+    },
+    th: {
+      output: 'th/index.html',
+      htmlLang: 'th',
+      fontFamily: "'JetBrains Mono', 'Outfit', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, sans-serif",
+      extraFonts: 'family=Noto+Sans+Thai:wght@300;400;500;600;700&'
     }
   }
 };
 
 const langLabels = {
   en: 'EN',
-  zh: '简体中文'
+  zh: '简体中文',
+  'zh-TW': '繁體中文',
+  ja: '日本語',
+  ko: '한국어',
+  es: 'Español',
+  fr: 'Français',
+  it: 'Italiano',
+  pt: 'Português',
+  ru: 'Русский',
+  vi: 'Tiếng Việt',
+  th: 'ไทย'
 };
 
 function get(obj, keyPath, defaultValue = '') {

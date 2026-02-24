@@ -1,0 +1,110 @@
+{
+  "lang": "zh-TW",
+  "appName": "asc",
+  "meta": {
+    "title": "asc — App Store Connect 命令列工具",
+    "description": "開源的 App Store Connect 命令列工具。提交應用程式、管理版本、上傳截圖——全部在終端機完成。內建 CAEOAS 可供 AI 智能體調用。",
+    "keywords": "App Store Connect 命令列, asc, Swift CLI, 提交應用程式, Homebrew, 開源",
+    "ogImage": "static/og-image.png"
+  },
+  "nav": {
+    "features": "功能",
+    "howItWorks": "快速開始",
+    "download": "安裝",
+    "github": "GitHub",
+    "getApp": "安裝"
+  },
+  "hero": {
+    "badge": "開源 · MIT 授權",
+    "titleLine1": "在終端機管理",
+    "titleAccent": "App Store Connect。",
+    "subtitle": "用於管理 iOS 和 macOS 應用程式的 Swift 命令列工具。提交版本、管理截圖、追蹤建構——同時內建完整的 CAEOAS 可供 AI 智能體調用。",
+    "installLabel": "透過 Homebrew 安裝",
+    "installCmd": "brew install tddworks/tap/asccli",
+    "githubLabel": "在 GitHub 上查看",
+    "stats": {
+      "stat1Value": "8+",
+      "stat1Label": "命令",
+      "stat2Value": "CAEOAS",
+      "stat2Label": "AI 智能體就緒",
+      "stat3Value": "MIT",
+      "stat3Label": "開源授權"
+    }
+  },
+  "features": {
+    "eyebrow": "功能特性",
+    "title": "所需功能，一應俱全",
+    "subtitle": "基於官方 App Store Connect API，採用清晰的三層架構，並提供完整的 Affordance 輸出，專為 AI 智能體工作流設計。",
+    "feature1": {
+      "icon": "🤖",
+      "title": "AI 智能體就緒（CAEOAS）",
+      "description": "每條回應都內嵌可直接執行的下一步命令，存儲在 affordances 欄位中。智能體無需了解完整命令樹，只需跟隨連結即可。"
+    },
+    "feature2": {
+      "icon": "🔑",
+      "title": "持久化登入認證",
+      "description": "使用 asc auth login 一次性儲存 API 金鑰，憑證存儲於 ~/.asc/credentials.json，每條命令自動讀取，無需每次配置環境變數。",
+      "comment1": "# 一次設定，永久使用",
+      "savedMsg": "已儲存至 ~/.asc/credentials.json",
+      "comment2": "# 無需環境變數，直接使用"
+    },
+    "feature3": {
+      "icon": "🗂️",
+      "title": "完整資源層級",
+      "description": "管理完整的 App Store Connect 資源樹：應用程式 → 版本 → 本地化 → 截圖集 → 截圖。同時支援建構和 TestFlight。"
+    },
+    "feature4": {
+      "icon": "📤",
+      "title": "一鍵提交審核",
+      "description": "一條命令即可將任意 iOS 或 macOS 版本提交審核。CLI 自動處理完整的多步驟審核提交流程。"
+    },
+    "feature5": {
+      "icon": "🔧",
+      "title": "多種輸出格式",
+      "description": "專為人類和機器設計。支援 JSON（預設）、表格或 Markdown 格式輸出，輕鬆接入 jq、腳本或 AI 智能體。"
+    }
+  },
+  "howItWorks": {
+    "eyebrow": "快速開始",
+    "title": "數分鐘內快速上手",
+    "step1": {
+      "title": "透過 Homebrew 安裝",
+      "description": "一條命令即可安裝最新版本，無需 Xcode 或 Swift 工具鏈。"
+    },
+    "step2": {
+      "title": "一次登入，永久使用",
+      "description": "使用 asc auth login 儲存 API 金鑰，憑證存儲於 ~/.asc/credentials.json，之後無需每次配置環境變數。",
+      "savedComment": "# 憑證已儲存至 ~/.asc/credentials.json"
+    },
+    "step3": {
+      "title": "開始管理您的應用程式",
+      "description": "列出應用程式、查看版本、上傳截圖、提交審核——一切盡在終端機，也可由 AI 智能體自動完成。"
+    }
+  },
+  "cta": {
+    "badge": "準備好試用 asc 了嗎？",
+    "title": "自動化您的 App Store Connect 工作流",
+    "install": "透過 Homebrew 安裝",
+    "github": "在 GitHub 上查看原始碼"
+  },
+  "footer": {
+    "description": "開源的 App Store Connect 命令列工具，使用 Swift 建構。",
+    "copyright": "© 2025 asc 貢獻者。MIT 授權。",
+    "columns": {
+      "project": "專案",
+      "resources": "資源",
+      "legal": "法律"
+    },
+    "links": {
+      "github": "GitHub",
+      "releases": "發布記錄",
+      "issues": "問題回饋",
+      "contributing": "貢獻指南",
+      "docs": "文件",
+      "commands": "命令參考",
+      "changelog": "更新日誌",
+      "license": "MIT 授權",
+      "privacy": "隱私政策"
+    }
+  }
+}

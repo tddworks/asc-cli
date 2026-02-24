@@ -1,0 +1,110 @@
+{
+  "lang": "it",
+  "appName": "asc",
+  "meta": {
+    "title": "asc — CLI per App Store Connect",
+    "description": "Strumento da riga di comando open source per App Store Connect. Invia app, gestisci versioni, carica screenshot — tutto dal terminale. Pronto per agenti AI con CAEOAS.",
+    "keywords": "app store connect cli, asc, swift cli, inviare app, homebrew, open source",
+    "ogImage": "static/og-image.png"
+  },
+  "nav": {
+    "features": "Funzionalità",
+    "howItWorks": "Avvio rapido",
+    "download": "Installa",
+    "github": "GitHub",
+    "getApp": "Installa"
+  },
+  "hero": {
+    "badge": "Open Source · Licenza MIT",
+    "titleLine1": "App Store Connect,",
+    "titleAccent": "dal tuo terminale.",
+    "subtitle": "Una CLI Swift per gestire le tue app iOS e macOS su App Store Connect. Invia versioni, gestisci screenshot, monitora i build — con pieno supporto per agenti AI tramite CAEOAS.",
+    "installLabel": "Installa con Homebrew",
+    "installCmd": "brew install tddworks/tap/asccli",
+    "githubLabel": "Vedi su GitHub",
+    "stats": {
+      "stat1Value": "8+",
+      "stat1Label": "Comandi",
+      "stat2Value": "CAEOAS",
+      "stat2Label": "Pronto per agenti AI",
+      "stat3Value": "MIT",
+      "stat3Label": "Open Source"
+    }
+  },
+  "features": {
+    "eyebrow": "Funzionalità",
+    "title": "Tutto quello che ti serve, niente di superfluo",
+    "subtitle": "Basato sull'API ufficiale di App Store Connect, con un'architettura pulita a tre livelli e output completo di affordance per i workflow degli agenti AI.",
+    "feature1": {
+      "icon": "🤖",
+      "title": "Pronto per agenti AI (CAEOAS)",
+      "description": "Ogni risposta incorpora comandi pronti per l'esecuzione in un campo affordances. Nessun agente deve conoscere l'intero albero dei comandi — basta seguire i link."
+    },
+    "feature2": {
+      "icon": "🔑",
+      "title": "Autenticazione persistente",
+      "description": "Accedi una volta con asc auth login. Le credenziali vengono salvate in ~/.asc/credentials.json e utilizzate automaticamente da ogni comando. Nessuna variabile d'ambiente per sessione.",
+      "comment1": "# configurazione una-tantum",
+      "savedMsg": "salvato in ~/.asc/credentials.json",
+      "comment2": "# niente variabili d'ambiente da ora in poi"
+    },
+    "feature3": {
+      "icon": "🗂️",
+      "title": "Gerarchia completa delle risorse",
+      "description": "Gestisci l'intero albero delle risorse di App Store Connect: App → Versioni → Localizzazioni → Set di screenshot → Screenshot. Più Build e TestFlight."
+    },
+    "feature4": {
+      "icon": "📤",
+      "title": "Invio con un solo comando",
+      "description": "Invia qualsiasi versione iOS o macOS per la revisione con un singolo comando. La CLI gestisce automaticamente l'intero flusso di invio multi-step."
+    },
+    "feature5": {
+      "icon": "🔧",
+      "title": "Formati di output multipli",
+      "description": "Progettato per umani e macchine. Output in JSON (predefinito), tabella o markdown. Pipe facile verso jq, script o agenti AI."
+    }
+  },
+  "howItWorks": {
+    "eyebrow": "Avvio rapido",
+    "title": "Operativo in pochi minuti",
+    "step1": {
+      "title": "Installa con Homebrew",
+      "description": "Un comando installa l'ultima versione. Non è richiesto Xcode o la toolchain Swift."
+    },
+    "step2": {
+      "title": "Accedi una volta, usa sempre",
+      "description": "Salva la tua chiave API con asc auth login. Le credenziali vengono memorizzate in ~/.asc/credentials.json — nessuna variabile d'ambiente per sessione.",
+      "savedComment": "# salvato in ~/.asc/credentials.json"
+    },
+    "step3": {
+      "title": "Inizia a gestire le tue app",
+      "description": "Elenca le app, ispeziona le versioni, carica screenshot e invia per la revisione — tutto dal tuo terminale o tramite un agente AI."
+    }
+  },
+  "cta": {
+    "badge": "Pronto a provare asc?",
+    "title": "Automatizza il tuo workflow App Store Connect",
+    "install": "Installa con Homebrew",
+    "github": "Vedi il sorgente su GitHub"
+  },
+  "footer": {
+    "description": "Strumento CLI open source per App Store Connect. Costruito con Swift.",
+    "copyright": "© 2025 contributor asc. Licenza MIT.",
+    "columns": {
+      "project": "Progetto",
+      "resources": "Risorse",
+      "legal": "Note legali"
+    },
+    "links": {
+      "github": "GitHub",
+      "releases": "Release",
+      "issues": "Issues",
+      "contributing": "Contribuire",
+      "docs": "Documentazione",
+      "commands": "Comandi",
+      "changelog": "Changelog",
+      "license": "Licenza MIT",
+      "privacy": "Privacy"
+    }
+  }
+}

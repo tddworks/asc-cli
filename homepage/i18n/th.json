@@ -1,0 +1,110 @@
+{
+  "lang": "th",
+  "appName": "asc",
+  "meta": {
+    "title": "asc — CLI สำหรับ App Store Connect",
+    "description": "เครื่องมือบรรทัดคำสั่งโอเพนซอร์สสำหรับ App Store Connect ส่งแอป จัดการเวอร์ชัน อัปโหลดภาพหน้าจอ — ทั้งหมดจาก terminal รองรับ AI agent ด้วย CAEOAS",
+    "keywords": "app store connect cli, asc, swift cli, ส่งแอป, homebrew, โอเพนซอร์ส",
+    "ogImage": "static/og-image.png"
+  },
+  "nav": {
+    "features": "คุณสมบัติ",
+    "howItWorks": "เริ่มต้นด่วน",
+    "download": "ติดตั้ง",
+    "github": "GitHub",
+    "getApp": "ติดตั้ง"
+  },
+  "hero": {
+    "badge": "โอเพนซอร์ส · สัญญาอนุญาต MIT",
+    "titleLine1": "App Store Connect,",
+    "titleAccent": "จาก terminal ของคุณ",
+    "subtitle": "Swift CLI สำหรับจัดการแอป iOS และ macOS บน App Store Connect ส่งเวอร์ชัน จัดการภาพหน้าจอ ติดตาม build — พร้อมรองรับ AI agent อย่างสมบูรณ์ผ่าน CAEOAS",
+    "installLabel": "ติดตั้งผ่าน Homebrew",
+    "installCmd": "brew install tddworks/tap/asccli",
+    "githubLabel": "ดูบน GitHub",
+    "stats": {
+      "stat1Value": "8+",
+      "stat1Label": "คำสั่ง",
+      "stat2Value": "CAEOAS",
+      "stat2Label": "พร้อมใช้กับ AI",
+      "stat3Value": "MIT",
+      "stat3Label": "โอเพนซอร์ส"
+    }
+  },
+  "features": {
+    "eyebrow": "คุณสมบัติ",
+    "title": "ทุกสิ่งที่ต้องการ ไม่มีสิ่งที่ไม่จำเป็น",
+    "subtitle": "สร้างบน App Store Connect API อย่างเป็นทางการ พร้อมสถาปัตยกรรมสามชั้นที่สะอาดและการส่งออก affordance เต็มรูปแบบสำหรับ workflow ของ AI agent",
+    "feature1": {
+      "icon": "🤖",
+      "title": "พร้อมใช้กับ AI Agent (CAEOAS)",
+      "description": "ทุกการตอบสนองมีคำสั่งพร้อมรันในฟิลด์ affordances ไม่จำเป็นต้องรู้ต้นไม้คำสั่งทั้งหมด — แค่ติดตามลิงก์"
+    },
+    "feature2": {
+      "icon": "🔑",
+      "title": "การยืนยันตัวตนถาวร",
+      "description": "เข้าสู่ระบบครั้งเดียวด้วย asc auth login ข้อมูลรับรองจะถูกบันทึกใน ~/.asc/credentials.json และใช้โดยอัตโนมัติทุกคำสั่ง ไม่ต้องตั้งค่า environment variable ทุกครั้ง",
+      "comment1": "# ตั้งค่าครั้งเดียว",
+      "savedMsg": "บันทึกใน ~/.asc/credentials.json แล้ว",
+      "comment2": "# ไม่ต้องใช้ environment variable อีกต่อไป"
+    },
+    "feature3": {
+      "icon": "🗂️",
+      "title": "ลำดับชั้นทรัพยากรครบถ้วน",
+      "description": "จัดการต้นไม้ทรัพยากร App Store Connect ทั้งหมด: แอป → เวอร์ชัน → การแปลภาษา → ชุดภาพหน้าจอ → ภาพหน้าจอ พร้อม Build และ TestFlight"
+    },
+    "feature4": {
+      "icon": "📤",
+      "title": "ส่งด้วยคำสั่งเดียว",
+      "description": "ส่งเวอร์ชัน iOS หรือ macOS ใดก็ได้เพื่อรีวิว App Store ด้วยคำสั่งเดียว CLI จัดการกระบวนการส่งรีวิวหลายขั้นตอนโดยอัตโนมัติ"
+    },
+    "feature5": {
+      "icon": "🔧",
+      "title": "รูปแบบการส่งออกหลายแบบ",
+      "description": "ออกแบบสำหรับทั้งมนุษย์และเครื่องจักร ส่งออกเป็น JSON (ค่าเริ่มต้น) ตาราง หรือ markdown เชื่อมต่อกับ jq สคริปต์ หรือ AI agent ได้ง่าย"
+    }
+  },
+  "howItWorks": {
+    "eyebrow": "เริ่มต้นด่วน",
+    "title": "ใช้งานได้ภายในไม่กี่นาที",
+    "step1": {
+      "title": "ติดตั้งผ่าน Homebrew",
+      "description": "คำสั่งเดียวติดตั้งเวอร์ชันล่าสุด ไม่ต้องใช้ Xcode หรือ Swift toolchain"
+    },
+    "step2": {
+      "title": "เข้าสู่ระบบครั้งเดียว ใช้ตลอดไป",
+      "description": "บันทึก API key ด้วย asc auth login ข้อมูลรับรองจะถูกเก็บใน ~/.asc/credentials.json ไม่ต้องตั้งค่า environment variable ทุก session",
+      "savedComment": "# บันทึกใน ~/.asc/credentials.json แล้ว"
+    },
+    "step3": {
+      "title": "เริ่มจัดการแอปของคุณ",
+      "description": "แสดงรายการแอป ตรวจสอบเวอร์ชัน อัปโหลดภาพหน้าจอ และส่งเพื่อรีวิว — ทั้งหมดจาก terminal หรือผ่าน AI agent"
+    }
+  },
+  "cta": {
+    "badge": "พร้อมลอง asc แล้วหรือยัง?",
+    "title": "ทำให้ workflow App Store Connect ของคุณเป็นอัตโนมัติ",
+    "install": "ติดตั้งผ่าน Homebrew",
+    "github": "ดูซอร์สโค้ดบน GitHub"
+  },
+  "footer": {
+    "description": "เครื่องมือ CLI โอเพนซอร์สสำหรับ App Store Connect สร้างด้วย Swift",
+    "copyright": "© 2025 ผู้มีส่วนร่วม asc สัญญาอนุญาต MIT",
+    "columns": {
+      "project": "โปรเจกต์",
+      "resources": "ทรัพยากร",
+      "legal": "กฎหมาย"
+    },
+    "links": {
+      "github": "GitHub",
+      "releases": "รีลีส",
+      "issues": "ปัญหา",
+      "contributing": "การมีส่วนร่วม",
+      "docs": "เอกสาร",
+      "commands": "คำสั่ง",
+      "changelog": "บันทึกการเปลี่ยนแปลง",
+      "license": "สัญญาอนุญาต MIT",
+      "privacy": "ความเป็นส่วนตัว"
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "lang": "vi",
+  "appName": "asc",
+  "meta": {
+    "title": "asc — CLI cho App Store Connect",
+    "description": "Công cụ dòng lệnh mã nguồn mở cho App Store Connect. Gửi ứng dụng, quản lý phiên bản, tải ảnh chụp màn hình — tất cả từ terminal. Sẵn sàng cho tác nhân AI với CAEOAS.",
+    "keywords": "app store connect cli, asc, swift cli, gửi ứng dụng, homebrew, mã nguồn mở",
+    "ogImage": "static/og-image.png"
+  },
+  "nav": {
+    "features": "Tính năng",
+    "howItWorks": "Bắt đầu nhanh",
+    "download": "Cài đặt",
+    "github": "GitHub",
+    "getApp": "Cài đặt"
+  },
+  "hero": {
+    "badge": "Mã nguồn mở · Giấy phép MIT",
+    "titleLine1": "App Store Connect,",
+    "titleAccent": "từ terminal của bạn.",
+    "subtitle": "CLI Swift để quản lý ứng dụng iOS và macOS trên App Store Connect. Gửi phiên bản, quản lý ảnh chụp màn hình, theo dõi bản build — với hỗ trợ tác nhân AI đầy đủ qua CAEOAS.",
+    "installLabel": "Cài đặt qua Homebrew",
+    "installCmd": "brew install tddworks/tap/asccli",
+    "githubLabel": "Xem trên GitHub",
+    "stats": {
+      "stat1Value": "8+",
+      "stat1Label": "Lệnh",
+      "stat2Value": "CAEOAS",
+      "stat2Label": "Sẵn sàng cho AI",
+      "stat3Value": "MIT",
+      "stat3Label": "Mã nguồn mở"
+    }
+  },
+  "features": {
+    "eyebrow": "Tính năng",
+    "title": "Mọi thứ bạn cần, không hơn không kém",
+    "subtitle": "Xây dựng trên API App Store Connect chính thức, với kiến trúc ba tầng rõ ràng và đầu ra affordance đầy đủ cho quy trình làm việc của tác nhân AI.",
+    "feature1": {
+      "icon": "🤖",
+      "title": "Sẵn sàng cho tác nhân AI (CAEOAS)",
+      "description": "Mỗi phản hồi nhúng các lệnh sẵn sàng chạy trong trường affordances. Tác nhân không cần biết toàn bộ cây lệnh — chỉ cần theo các liên kết."
+    },
+    "feature2": {
+      "icon": "🔑",
+      "title": "Xác thực bền vững",
+      "description": "Đăng nhập một lần với asc auth login. Thông tin đăng nhập được lưu vào ~/.asc/credentials.json và được mọi lệnh sử dụng tự động — không cần biến môi trường mỗi phiên.",
+      "comment1": "# thiết lập một lần",
+      "savedMsg": "đã lưu vào ~/.asc/credentials.json",
+      "comment2": "# không cần biến môi trường từ giờ"
+    },
+    "feature3": {
+      "icon": "🗂️",
+      "title": "Hệ thống phân cấp tài nguyên đầy đủ",
+      "description": "Quản lý toàn bộ cây tài nguyên App Store Connect: Ứng dụng → Phiên bản → Bản địa hóa → Bộ ảnh chụp → Ảnh chụp. Cộng thêm Builds và TestFlight."
+    },
+    "feature4": {
+      "icon": "📤",
+      "title": "Gửi bằng một lệnh",
+      "description": "Gửi bất kỳ phiên bản iOS hoặc macOS nào để xem xét App Store bằng một lệnh duy nhất. CLI tự động xử lý toàn bộ quy trình gửi xem xét nhiều bước."
+    },
+    "feature5": {
+      "icon": "🔧",
+      "title": "Nhiều định dạng đầu ra",
+      "description": "Thiết kế cho cả con người và máy móc. Đầu ra dạng JSON (mặc định), bảng hoặc markdown. Dễ dàng pipe vào jq, script hoặc tác nhân AI."
+    }
+  },
+  "howItWorks": {
+    "eyebrow": "Bắt đầu nhanh",
+    "title": "Hoạt động trong vài phút",
+    "step1": {
+      "title": "Cài đặt qua Homebrew",
+      "description": "Một lệnh cài đặt phiên bản mới nhất. Không cần Xcode hoặc chuỗi công cụ Swift."
+    },
+    "step2": {
+      "title": "Đăng nhập một lần, sử dụng mãi",
+      "description": "Lưu khóa API của bạn với asc auth login. Thông tin đăng nhập được lưu trữ trong ~/.asc/credentials.json — không cần biến môi trường mỗi phiên.",
+      "savedComment": "# đã lưu vào ~/.asc/credentials.json"
+    },
+    "step3": {
+      "title": "Bắt đầu quản lý ứng dụng của bạn",
+      "description": "Liệt kê ứng dụng, kiểm tra phiên bản, tải ảnh chụp màn hình và gửi để xem xét — tất cả từ terminal hoặc qua tác nhân AI."
+    }
+  },
+  "cta": {
+    "badge": "Sẵn sàng thử asc?",
+    "title": "Tự động hóa quy trình App Store Connect của bạn",
+    "install": "Cài đặt qua Homebrew",
+    "github": "Xem mã nguồn trên GitHub"
+  },
+  "footer": {
+    "description": "Công cụ CLI mã nguồn mở cho App Store Connect. Được xây dựng bằng Swift.",
+    "copyright": "© 2025 cộng tác viên asc. Giấy phép MIT.",
+    "columns": {
+      "project": "Dự án",
+      "resources": "Tài nguyên",
+      "legal": "Pháp lý"
+    },
+    "links": {
+      "github": "GitHub",
+      "releases": "Phiên bản",
+      "issues": "Vấn đề",
+      "contributing": "Đóng góp",
+      "docs": "Tài liệu",
+      "commands": "Lệnh",
+      "changelog": "Nhật ký thay đổi",
+      "license": "Giấy phép MIT",
+      "privacy": "Quyền riêng tư"
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "lang": "ko",
+  "appName": "asc",
+  "meta": {
+    "title": "asc — App Store Connect CLI",
+    "description": "App Store Connect용 오픈소스 커맨드라인 도구. 앱 제출, 버전 관리, 스크린샷 업로드를 터미널에서. CAEOAS로 AI 에이전트 지원.",
+    "keywords": "App Store Connect CLI, asc, Swift CLI, 앱 제출, Homebrew, 오픈소스",
+    "ogImage": "static/og-image.png"
+  },
+  "nav": {
+    "features": "기능",
+    "howItWorks": "빠른 시작",
+    "download": "설치",
+    "github": "GitHub",
+    "getApp": "설치"
+  },
+  "hero": {
+    "badge": "오픈소스 · MIT 라이선스",
+    "titleLine1": "터미널에서",
+    "titleAccent": "App Store Connect를 관리하세요.",
+    "subtitle": "iOS 및 macOS 앱을 App Store Connect에서 관리하는 Swift CLI. 버전 제출, 스크린샷 관리, 빌드 추적 — CAEOAS를 통한 완전한 AI 에이전트 지원.",
+    "installLabel": "Homebrew로 설치",
+    "installCmd": "brew install tddworks/tap/asccli",
+    "githubLabel": "GitHub에서 보기",
+    "stats": {
+      "stat1Value": "8+",
+      "stat1Label": "명령어",
+      "stat2Value": "CAEOAS",
+      "stat2Label": "AI 에이전트 지원",
+      "stat3Value": "MIT",
+      "stat3Label": "오픈소스"
+    }
+  },
+  "features": {
+    "eyebrow": "기능",
+    "title": "필요한 모든 기능을 갖췄습니다",
+    "subtitle": "공식 App Store Connect API 기반으로, 깔끔한 3레이어 아키텍처와 AI 에이전트 워크플로우를 위한 완전한 Affordance 출력을 제공합니다.",
+    "feature1": {
+      "icon": "🤖",
+      "title": "AI 에이전트 지원 (CAEOAS)",
+      "description": "모든 응답에 affordances 필드로 바로 실행 가능한 다음 명령어가 포함됩니다. 에이전트는 전체 명령 트리를 알 필요 없이 링크만 따라가면 됩니다."
+    },
+    "feature2": {
+      "icon": "🔑",
+      "title": "영구 로그인 인증",
+      "description": "asc auth login으로 한 번 로그인하면 인증 정보가 ~/.asc/credentials.json에 저장되어 모든 명령에서 자동으로 사용됩니다. 환경변수 설정이 필요 없습니다.",
+      "comment1": "# 최초 한 번만 설정",
+      "savedMsg": "~/.asc/credentials.json에 저장됨",
+      "comment2": "# 이후 환경변수 불필요"
+    },
+    "feature3": {
+      "icon": "🗂️",
+      "title": "완전한 리소스 계층",
+      "description": "전체 App Store Connect 리소스 트리 관리: 앱 → 버전 → 현지화 → 스크린샷 세트 → 스크린샷. 빌드와 TestFlight도 지원."
+    },
+    "feature4": {
+      "icon": "📤",
+      "title": "원클릭 심사 제출",
+      "description": "단 하나의 명령으로 iOS 또는 macOS 버전을 App Store 심사에 제출합니다. CLI가 복잡한 다단계 심사 제출 흐름을 자동으로 처리합니다."
+    },
+    "feature5": {
+      "icon": "🔧",
+      "title": "다양한 출력 형식",
+      "description": "사람과 기계 모두를 위한 설계. JSON(기본값), 테이블, Markdown 형식으로 출력. jq, 스크립트, AI 에이전트로 손쉽게 파이프 연결."
+    }
+  },
+  "howItWorks": {
+    "eyebrow": "빠른 시작",
+    "title": "몇 분 만에 시작하기",
+    "step1": {
+      "title": "Homebrew로 설치",
+      "description": "명령어 하나로 최신 버전 설치. Xcode나 Swift 툴체인이 필요 없습니다."
+    },
+    "step2": {
+      "title": "한 번 로그인, 계속 사용",
+      "description": "asc auth login으로 API 키를 저장하세요. 인증 정보는 ~/.asc/credentials.json에 저장되어 매 세션마다 환경변수를 설정할 필요가 없습니다.",
+      "savedComment": "# ~/.asc/credentials.json에 저장됨"
+    },
+    "step3": {
+      "title": "앱 관리 시작",
+      "description": "앱 목록 조회, 버전 확인, 스크린샷 업로드, 심사 제출 — 터미널에서 또는 AI 에이전트를 통해."
+    }
+  },
+  "cta": {
+    "badge": "asc를 사용해 보실 준비가 되셨나요?",
+    "title": "App Store Connect 워크플로우를 자동화하세요",
+    "install": "Homebrew로 설치",
+    "github": "GitHub에서 소스 보기"
+  },
+  "footer": {
+    "description": "App Store Connect용 오픈소스 CLI 도구. Swift로 빌드됨.",
+    "copyright": "© 2025 asc 기여자. MIT 라이선스.",
+    "columns": {
+      "project": "프로젝트",
+      "resources": "리소스",
+      "legal": "법적 정보"
+    },
+    "links": {
+      "github": "GitHub",
+      "releases": "릴리스",
+      "issues": "이슈",
+      "contributing": "기여하기",
+      "docs": "문서",
+      "commands": "명령어",
+      "changelog": "변경 로그",
+      "license": "MIT 라이선스",
+      "privacy": "개인정보처리방침"
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "lang": "ja",
+  "appName": "asc",
+  "meta": {
+    "title": "asc — App Store Connect CLI",
+    "description": "App Store Connect 用オープンソース CLI ツール。ターミナルからアプリの提出、バージョン管理、スクリーンショットのアップロードが可能。CAEOAS で AI エージェントにも対応。",
+    "keywords": "App Store Connect CLI, asc, Swift CLI, アプリ提出, Homebrew, オープンソース",
+    "ogImage": "static/og-image.png"
+  },
+  "nav": {
+    "features": "機能",
+    "howItWorks": "クイックスタート",
+    "download": "インストール",
+    "github": "GitHub",
+    "getApp": "インストール"
+  },
+  "hero": {
+    "badge": "オープンソース · MIT ライセンス",
+    "titleLine1": "ターミナルから",
+    "titleAccent": "App Store Connect を管理。",
+    "subtitle": "iOS・macOS アプリを App Store Connect で管理するための Swift CLI。バージョン提出、スクリーンショット管理、ビルド追跡 — CAEOAS による完全な AI エージェントサポート付き。",
+    "installLabel": "Homebrew でインストール",
+    "installCmd": "brew install tddworks/tap/asccli",
+    "githubLabel": "GitHub で見る",
+    "stats": {
+      "stat1Value": "8+",
+      "stat1Label": "コマンド",
+      "stat2Value": "CAEOAS",
+      "stat2Label": "AI エージェント対応",
+      "stat3Value": "MIT",
+      "stat3Label": "オープンソース"
+    }
+  },
+  "features": {
+    "eyebrow": "機能",
+    "title": "必要な機能をすべて揃えています",
+    "subtitle": "公式 App Store Connect API をベースに、クリーンな三層アーキテクチャと AI エージェントワークフロー向けの完全な Affordance 出力を備えています。",
+    "feature1": {
+      "icon": "🤖",
+      "title": "AI エージェント対応（CAEOAS）",
+      "description": "すべてのレスポンスに affordances フィールドとして次に実行できるコマンドが埋め込まれています。コマンドツリー全体を知らなくてもリンクを辿るだけで操作できます。"
+    },
+    "feature2": {
+      "icon": "🔑",
+      "title": "永続ログイン認証",
+      "description": "asc auth login で一度ログインするだけで、認証情報が ~/.asc/credentials.json に保存され、以降はすべてのコマンドで自動的に使用されます。環境変数の設定は不要です。",
+      "comment1": "# 初回のみ設定",
+      "savedMsg": "~/.asc/credentials.json に保存しました",
+      "comment2": "# 以降は環境変数不要"
+    },
+    "feature3": {
+      "icon": "🗂️",
+      "title": "完全なリソース階層",
+      "description": "App Store Connect のリソースツリー全体を管理：App → バージョン → ローカリゼーション → スクリーンショットセット → スクリーンショット。ビルドと TestFlight もサポート。"
+    },
+    "feature4": {
+      "icon": "📤",
+      "title": "ワンコマンド提出",
+      "description": "1 つのコマンドで任意の iOS・macOS バージョンを App Store レビューに提出できます。CLI が複数ステップのレビュー提出フロー全体を自動処理します。"
+    },
+    "feature5": {
+      "icon": "🔧",
+      "title": "複数の出力形式",
+      "description": "人間にも機械にも対応した設計。JSON（デフォルト）、テーブル、Markdown 形式で出力。jq、スクリプト、AI エージェントへのパイプも簡単です。"
+    }
+  },
+  "howItWorks": {
+    "eyebrow": "クイックスタート",
+    "title": "数分で使い始められます",
+    "step1": {
+      "title": "Homebrew でインストール",
+      "description": "1 つのコマンドで最新版をインストール。Xcode や Swift ツールチェーンは不要です。"
+    },
+    "step2": {
+      "title": "一度ログインして使い続ける",
+      "description": "asc auth login で API キーを保存。認証情報は ~/.asc/credentials.json に保存され、セッションごとに環境変数を設定する必要はありません。",
+      "savedComment": "# ~/.asc/credentials.json に保存済み"
+    },
+    "step3": {
+      "title": "アプリの管理を始める",
+      "description": "アプリの一覧表示、バージョン確認、スクリーンショットのアップロード、レビュー提出 — ターミナルから、または AI エージェントを通じて。"
+    }
+  },
+  "cta": {
+    "badge": "asc を試してみますか？",
+    "title": "App Store Connect のワークフローを自動化",
+    "install": "Homebrew でインストール",
+    "github": "GitHub でソースを見る"
+  },
+  "footer": {
+    "description": "App Store Connect 向けオープンソース CLI ツール。Swift で構築。",
+    "copyright": "© 2025 asc コントリビューター。MIT ライセンス。",
+    "columns": {
+      "project": "プロジェクト",
+      "resources": "リソース",
+      "legal": "法的情報"
+    },
+    "links": {
+      "github": "GitHub",
+      "releases": "リリース",
+      "issues": "Issues",
+      "contributing": "コントリビューション",
+      "docs": "ドキュメント",
+      "commands": "コマンド一覧",
+      "changelog": "変更履歴",
+      "license": "MIT ライセンス",
+      "privacy": "プライバシーポリシー"
+    }
+  }
+}

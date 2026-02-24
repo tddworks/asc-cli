@@ -1,51 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>asc — App Store Connect CLI</title>
-  <meta name="description" content="Open-source command-line tool for App Store Connect. Submit apps, manage versions, upload screenshots, and more — all from your terminal. AI-agent ready with CAEOAS affordances.">
-  <link rel="canonical" href="https://asccli.app/">
-  <link rel="icon" type="image/svg+xml" href="static/favicon.svg">
+  <title>asc — CLI для App Store Connect</title>
+  <meta name="description" content="Инструмент командной строки с открытым исходным кодом для App Store Connect. Отправляйте приложения, управляйте версиями, загружайте скриншоты — всё из терминала. Поддержка ИИ-агентов через CAEOAS.">
+  <link rel="canonical" href="https://asccli.app/ru/">
+  <link rel="icon" type="image/svg+xml" href="../static/favicon.svg">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://asccli.app/">
-  <meta property="og:title" content="asc — App Store Connect CLI">
-  <meta property="og:description" content="Open-source command-line tool for App Store Connect. Submit apps, manage versions, upload screenshots, and more — all from your terminal. AI-agent ready with CAEOAS affordances.">
+  <meta property="og:url" content="https://asccli.app/ru/">
+  <meta property="og:title" content="asc — CLI для App Store Connect">
+  <meta property="og:description" content="Инструмент командной строки с открытым исходным кодом для App Store Connect. Отправляйте приложения, управляйте версиями, загружайте скриншоты — всё из терминала. Поддержка ИИ-агентов через CAEOAS.">
   <meta property="og:image" content="static/og-image.png">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="asc — App Store Connect CLI">
-  <meta name="twitter:description" content="Open-source command-line tool for App Store Connect. Submit apps, manage versions, upload screenshots, and more — all from your terminal. AI-agent ready with CAEOAS affordances.">
+  <meta name="twitter:title" content="asc — CLI для App Store Connect">
+  <meta name="twitter:description" content="Инструмент командной строки с открытым исходным кодом для App Store Connect. Отправляйте приложения, управляйте версиями, загружайте скриншоты — всё из терминала. Поддержка ИИ-агентов через CAEOAS.">
   <meta name="twitter:image" content="static/og-image.png">
 
-  <meta name="keywords" content="app store connect cli, asc, swift cli, appstoreconnect, submit app, homebrew, open source">
+  <meta name="keywords" content="app store connect cli, asc, swift cli, отправка приложений, homebrew, открытый исходный код">
   <meta name="robots" content="index, follow">
-  <link rel="alternate" hreflang="en" href="index.html">
-  <link rel="alternate" hreflang="zh-Hans" href="zh/index.html">
-  <link rel="alternate" hreflang="zh-Hant" href="zh-TW/index.html">
-  <link rel="alternate" hreflang="ja" href="ja/index.html">
-  <link rel="alternate" hreflang="ko" href="ko/index.html">
-  <link rel="alternate" hreflang="es" href="es/index.html">
-  <link rel="alternate" hreflang="fr" href="fr/index.html">
-  <link rel="alternate" hreflang="it" href="it/index.html">
-  <link rel="alternate" hreflang="pt" href="pt/index.html">
-  <link rel="alternate" hreflang="ru" href="ru/index.html">
-  <link rel="alternate" hreflang="vi" href="vi/index.html">
-  <link rel="alternate" hreflang="th" href="th/index.html">
-  <link rel="alternate" hreflang="x-default" href="index.html">
+  <link rel="alternate" hreflang="en" href="../index.html">
+  <link rel="alternate" hreflang="zh-Hans" href="../zh/index.html">
+  <link rel="alternate" hreflang="zh-Hant" href="../zh-TW/index.html">
+  <link rel="alternate" hreflang="ja" href="../ja/index.html">
+  <link rel="alternate" hreflang="ko" href="../ko/index.html">
+  <link rel="alternate" hreflang="es" href="../es/index.html">
+  <link rel="alternate" hreflang="fr" href="../fr/index.html">
+  <link rel="alternate" hreflang="it" href="../it/index.html">
+  <link rel="alternate" hreflang="pt" href="../pt/index.html">
+  <link rel="alternate" hreflang="ru" href="../ru/index.html">
+  <link rel="alternate" hreflang="vi" href="../vi/index.html">
+  <link rel="alternate" hreflang="th" href="../th/index.html">
+  <link rel="alternate" hreflang="x-default" href="../index.html">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="styles/base.css">
-  <link rel="stylesheet" href="styles/layout.css">
-  <link rel="stylesheet" href="styles/animations.css" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="styles/animations.css"></noscript>
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/layout.css">
+  <link rel="stylesheet" href="../styles/animations.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="../styles/animations.css"></noscript>
 
   <style>
     body { font-family: 'JetBrains Mono', 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif; }
@@ -69,9 +69,9 @@
       <span class="nav-logo-text">asc<span class="nav-logo-suffix">-cli</span></span>
     </a>
     <ul class="nav-links">
-      <li><a href="#features">Features</a></li>
-      <li><a href="#how-it-works">Quick Start</a></li>
-      <li><a href="#install">Install</a></li>
+      <li><a href="#features">Возможности</a></li>
+      <li><a href="#how-it-works">Быстрый старт</a></li>
+      <li><a href="#install">Установить</a></li>
     </ul>
     <div style="display:flex;align-items:center;gap:12px;">
       <!-- Language Dropdown -->
@@ -81,21 +81,21 @@
             <circle cx="12" cy="12" r="10"/>
             <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
           </svg>
-          <span class="lang-current">EN</span>
+          <span class="lang-current">Русский</span>
           <svg class="lang-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
-        <div class="lang-dropdown-menu"><a href="index.html" class="lang-dropdown-item active"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>EN</span></a>
-          <a href="zh/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>简体中文</span></a>
-          <a href="zh-TW/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>繁體中文</span></a>
-          <a href="ja/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>日本語</span></a>
-          <a href="ko/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>한국어</span></a>
-          <a href="es/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Español</span></a>
-          <a href="fr/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Français</span></a>
-          <a href="it/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Italiano</span></a>
-          <a href="pt/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Português</span></a>
-          <a href="ru/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Русский</span></a>
-          <a href="vi/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Tiếng Việt</span></a>
-          <a href="th/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>ไทย</span></a></div>
+        <div class="lang-dropdown-menu"><a href="../index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>EN</span></a>
+          <a href="../zh/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>简体中文</span></a>
+          <a href="../zh-TW/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>繁體中文</span></a>
+          <a href="../ja/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>日本語</span></a>
+          <a href="../ko/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>한국어</span></a>
+          <a href="../es/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Español</span></a>
+          <a href="../fr/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Français</span></a>
+          <a href="../it/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Italiano</span></a>
+          <a href="../pt/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Português</span></a>
+          <a href="../ru/index.html" class="lang-dropdown-item active"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Русский</span></a>
+          <a href="../vi/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Tiếng Việt</span></a>
+          <a href="../th/index.html" class="lang-dropdown-item"><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>ไทย</span></a></div>
       </div>
       <a href="https://github.com/tddworks/asc-cli" class="btn btn-github" target="_blank" rel="noopener">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -103,7 +103,7 @@
         </svg>
         GitHub
       </a>
-      <a href="#install" class="btn btn-primary">Install</a>
+      <a href="#install" class="btn btn-primary">Установить</a>
     </div>
   </nav>
 
@@ -114,12 +114,12 @@
       <div class="hero-text">
         <div class="hero-badge" data-animate="fade-up">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          Open Source · MIT License
+          Открытый исходный код · Лицензия MIT
         </div>
         <h1 class="hero-title" data-animate="fade-up" data-delay="1">
-          App Store Connect,<br><em>from your terminal.</em>
+          App Store Connect<br><em>из вашего терминала.</em>
         </h1>
-        <p class="hero-subtitle" data-animate="fade-up" data-delay="2">A Swift CLI for managing your iOS and macOS apps on App Store Connect. Submit versions, manage screenshots, track builds — with full AI-agent support via CAEOAS affordances.</p>
+        <p class="hero-subtitle" data-animate="fade-up" data-delay="2">Swift CLI для управления iOS и macOS приложениями в App Store Connect. Отправляйте версии, управляйте скриншотами, отслеживайте сборки — с полной поддержкой ИИ-агентов через CAEOAS.</p>
         <div class="hero-actions" data-animate="fade-up" data-delay="3">
           <!-- Brew Install Box -->
           <div class="install-box" id="install-box" onclick="copyInstall(this)">
@@ -130,22 +130,22 @@
           <div class="hero-action-row">
             <a href="https://github.com/tddworks/asc-cli" class="btn btn-github" target="_blank" rel="noopener">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
-              View on GitHub
+              Смотреть на GitHub
             </a>
           </div>
         </div>
         <div class="hero-stats" data-animate="fade-up" data-delay="4">
           <div>
             <div class="hero-stat-value">8+</div>
-            <div class="hero-stat-label">Commands</div>
+            <div class="hero-stat-label">Команд</div>
           </div>
           <div>
             <div class="hero-stat-value">CAEOAS</div>
-            <div class="hero-stat-label">AI-Agent Ready</div>
+            <div class="hero-stat-label">Поддержка ИИ</div>
           </div>
           <div>
             <div class="hero-stat-value">MIT</div>
-            <div class="hero-stat-label">Open Source</div>
+            <div class="hero-stat-label">Открытый код</div>
           </div>
         </div>
       </div>
@@ -187,9 +187,9 @@
   <section class="section" id="features">
     <div class="gradient-line" style="position:absolute;top:0;left:8%;right:8%;"></div>
     <div class="section-header">
-      <p class="section-eyebrow" data-animate="fade-up">Features</p>
-      <h2 class="section-title" data-animate="fade-up" data-delay="1">Everything you need, nothing you don't</h2>
-      <p class="section-subtitle" data-animate="fade-up" data-delay="2">Built on the official App Store Connect API, with a clean three-layer architecture and full affordance output for AI agent workflows.</p>
+      <p class="section-eyebrow" data-animate="fade-up">Возможности</p>
+      <h2 class="section-title" data-animate="fade-up" data-delay="1">Всё необходимое, ничего лишнего</h2>
+      <p class="section-subtitle" data-animate="fade-up" data-delay="2">Построен на официальном App Store Connect API с чистой трёхуровневой архитектурой и полным выводом affordances для рабочих процессов ИИ-агентов.</p>
     </div>
     <div class="feature-grid">
       <!-- Feature 1: CAEOAS -->
@@ -207,8 +207,8 @@
           </div>
         </div>
         <div class="feature-card-content">
-          <h3 class="feature-card-title">AI-Agent Ready (CAEOAS)</h3>
-          <p class="feature-card-description">Every response embeds ready-to-run next commands in an affordances field. No agent needs to know the full command tree — it just follows the links.</p>
+          <h3 class="feature-card-title">Поддержка ИИ-агентов (CAEOAS)</h3>
+          <p class="feature-card-description">Каждый ответ содержит готовые к выполнению команды в поле affordances. Агентам не нужно знать всё дерево команд — они просто следуют ссылкам.</p>
         </div>
       </div>
 
@@ -217,20 +217,20 @@
         <div class="feature-card-preview">
           <div style="font-size:40px;margin-bottom:20px;">🔑</div>
           <div class="code-snippet">
-            <div class="t-line"><span class="t-dim"># one-time setup</span></div>
+            <div class="t-line"><span class="t-dim"># однократная настройка</span></div>
             <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc auth login \</span></div>
             <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--key-id KEY \</span></div>
             <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--private-key-path ~/.asc/Key.p8</span></div>
             <div class="t-blank"></div>
-            <div class="t-line"><span class="t-success">✓</span> <span class="t-dim">saved to ~/.asc/credentials.json</span></div>
+            <div class="t-line"><span class="t-success">✓</span> <span class="t-dim">сохранено в ~/.asc/credentials.json</span></div>
             <div class="t-blank"></div>
-            <div class="t-line"><span class="t-dim"># no env vars needed from now on</span></div>
+            <div class="t-line"><span class="t-dim"># переменные окружения больше не нужны</span></div>
             <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc apps list</span></div>
           </div>
         </div>
         <div class="feature-card-content">
-          <h3 class="feature-card-title">Persistent Auth Login</h3>
-          <p class="feature-card-description">Log in once with asc auth login. Credentials are saved to ~/.asc/credentials.json and picked up automatically by every command — no environment variables required per session.</p>
+          <h3 class="feature-card-title">Постоянная аутентификация</h3>
+          <p class="feature-card-description">Войдите один раз с помощью asc auth login. Учётные данные сохраняются в ~/.asc/credentials.json и автоматически используются всеми командами. Переменные окружения не нужны.</p>
         </div>
       </div>
 
@@ -251,8 +251,8 @@
           </div>
         </div>
         <div class="feature-card-content">
-          <h3 class="feature-card-title">Full Resource Hierarchy</h3>
-          <p class="feature-card-description">Manage the complete App Store Connect resource tree: Apps → Versions → Localizations → Screenshot Sets → Screenshots. Plus Builds and TestFlight.</p>
+          <h3 class="feature-card-title">Полная иерархия ресурсов</h3>
+          <p class="feature-card-description">Управляйте всем деревом ресурсов App Store Connect: Приложения → Версии → Локализации → Наборы скриншотов → Скриншоты. Плюс сборки и TestFlight.</p>
         </div>
       </div>
 
@@ -274,8 +274,8 @@
           </div>
         </div>
         <div class="feature-card-content">
-          <h3 class="feature-card-title">One-Command Submission</h3>
-          <p class="feature-card-description">Submit any iOS or macOS version for App Store review with a single command. The CLI handles the full multi-step review submission flow automatically.</p>
+          <h3 class="feature-card-title">Отправка одной командой</h3>
+          <p class="feature-card-description">Отправьте любую версию iOS или macOS на проверку одной командой. CLI автоматически выполняет весь многоэтапный процесс отправки на проверку.</p>
         </div>
       </div>
 
@@ -298,8 +298,8 @@
           </div>
         </div>
         <div class="feature-card-content">
-          <h3 class="feature-card-title">Multiple Output Formats</h3>
-          <p class="feature-card-description">Designed for both humans and machines. Output as JSON (default), table, or markdown. Pipe into jq, scripts, or AI agents with ease.</p>
+          <h3 class="feature-card-title">Несколько форматов вывода</h3>
+          <p class="feature-card-description">Разработан для людей и машин. Вывод в JSON (по умолчанию), таблице или markdown. Легко передаётся в jq, скрипты или ИИ-агенты.</p>
         </div>
       </div>
     </div>
@@ -308,8 +308,8 @@
   <!-- Quick Start / How It Works -->
   <section class="section" id="how-it-works">
     <div class="section-header">
-      <p class="section-eyebrow" data-animate="fade-up">Quick Start</p>
-      <h2 class="section-title" data-animate="fade-up" data-delay="1">Up and running in minutes</h2>
+      <p class="section-eyebrow" data-animate="fade-up">Быстрый старт</p>
+      <h2 class="section-title" data-animate="fade-up" data-delay="1">Готов к работе за несколько минут</h2>
     </div>
     <div class="steps-grid">
       <div class="step-card" data-animate="fade-up" data-delay="1">
@@ -325,8 +325,8 @@
             <div class="t-line"><span class="t-dim">asc 1.0.0</span></div>
           </div>
         </div>
-        <h3 class="step-title">Install via Homebrew</h3>
-        <p class="step-description">One command installs the latest release. No Xcode or Swift toolchain required.</p>
+        <h3 class="step-title">Установить через Homebrew</h3>
+        <p class="step-description">Одна команда устанавливает последнюю версию. Xcode и Swift toolchain не нужны.</p>
       </div>
 
       <div class="step-card" data-animate="fade-up" data-delay="2">
@@ -341,11 +341,11 @@
             <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc auth check</span></div>
             <div class="t-line"><span class="t-success">✓</span> <span class="t-dim">source: "file" · key: YOUR_KEY_ID</span></div>
             <div class="t-blank"></div>
-            <div class="t-line"><span class="t-dim"># saved to ~/.asc/credentials.json</span></div>
+            <div class="t-line"><span class="t-dim"># сохранено в ~/.asc/credentials.json</span></div>
           </div>
         </div>
-        <h3 class="step-title">Log in once, run forever</h3>
-        <p class="step-description">Save your API key with asc auth login. Credentials are stored in ~/.asc/credentials.json — no environment variables needed per session.</p>
+        <h3 class="step-title">Войдите один раз — используйте всегда</h3>
+        <p class="step-description">Сохраните ваш API-ключ с помощью asc auth login. Учётные данные хранятся в ~/.asc/credentials.json — переменные окружения для каждой сессии не нужны.</p>
       </div>
 
       <div class="step-card" data-animate="fade-up" data-delay="3">
@@ -362,8 +362,8 @@
             <div class="t-line"><span class="t-success">✓</span> <span class="t-dim">Submitted for review</span></div>
           </div>
         </div>
-        <h3 class="step-title">Start managing your apps</h3>
-        <p class="step-description">List apps, inspect versions, upload screenshots, and submit for review — all from your terminal or from an AI agent.</p>
+        <h3 class="step-title">Начните управлять своими приложениями</h3>
+        <p class="step-description">Список приложений, проверка версий, загрузка скриншотов, отправка на проверку — всё из вашего терминала или через ИИ-агента.</p>
       </div>
     </div>
   </section>
@@ -373,10 +373,10 @@
     <div class="cta-card" data-animate="fade-up">
       <div class="cta-glow"></div>
       <div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--color-bg-elevated);border:1px solid var(--color-border);border-radius:100px;font-size:12px;color:var(--color-text-secondary);margin-bottom:24px;font-family:var(--font-mono);">
-        Ready to try asc?
+        Готовы попробовать asc?
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </div>
-      <h2 class="cta-title">Automate your App Store Connect workflow</h2>
+      <h2 class="cta-title">Автоматизируйте рабочий процесс App Store Connect</h2>
       <div class="cta-buttons">
         <div class="install-box" id="cta-install-box" onclick="copyInstallCTA(this)" style="max-width:420px;">
           <span class="prompt">$</span>
@@ -387,7 +387,7 @@
       <div class="cta-buttons" style="margin-top:20px;">
         <a href="https://github.com/tddworks/asc-cli" class="btn btn-secondary" target="_blank" rel="noopener">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
-          View Source on GitHub
+          Исходный код на GitHub
         </a>
       </div>
     </div>
@@ -401,35 +401,35 @@
           <div class="nav-logo-icon">asc</div>
           <span class="nav-logo-text">asc<span class="nav-logo-suffix">-cli</span></span>
         </a>
-        <p class="footer-description">Open-source CLI tool for App Store Connect. Built with Swift.</p>
+        <p class="footer-description">CLI-инструмент с открытым исходным кодом для App Store Connect. Создан на Swift.</p>
       </div>
       <div class="footer-column">
-        <h4>Project</h4>
+        <h4>Проект</h4>
         <ul class="footer-links">
           <li><a href="https://github.com/tddworks/asc-cli" target="_blank" rel="noopener">GitHub</a></li>
-          <li><a href="https://github.com/tddworks/asc-cli/releases" target="_blank" rel="noopener">Releases</a></li>
-          <li><a href="https://github.com/tddworks/asc-cli/issues" target="_blank" rel="noopener">Issues</a></li>
-          <li><a href="https://github.com/tddworks/asc-cli/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+          <li><a href="https://github.com/tddworks/asc-cli/releases" target="_blank" rel="noopener">Релизы</a></li>
+          <li><a href="https://github.com/tddworks/asc-cli/issues" target="_blank" rel="noopener">Задачи</a></li>
+          <li><a href="https://github.com/tddworks/asc-cli/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Участие в разработке</a></li>
         </ul>
       </div>
       <div class="footer-column">
-        <h4>Resources</h4>
+        <h4>Ресурсы</h4>
         <ul class="footer-links">
-          <li><a href="https://github.com/tddworks/asc-cli#readme" target="_blank" rel="noopener">Documentation</a></li>
-          <li><a href="https://github.com/tddworks/asc-cli#commands" target="_blank" rel="noopener">Commands</a></li>
-          <li><a href="https://github.com/tddworks/asc-cli/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a></li>
+          <li><a href="https://github.com/tddworks/asc-cli#readme" target="_blank" rel="noopener">Документация</a></li>
+          <li><a href="https://github.com/tddworks/asc-cli#commands" target="_blank" rel="noopener">Команды</a></li>
+          <li><a href="https://github.com/tddworks/asc-cli/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Список изменений</a></li>
         </ul>
       </div>
       <div class="footer-column">
-        <h4>Legal</h4>
+        <h4>Правовая информация</h4>
         <ul class="footer-links">
-          <li><a href="https://github.com/tddworks/asc-cli/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a></li>
-          <li><a href="#" >Privacy</a></li>
+          <li><a href="https://github.com/tddworks/asc-cli/blob/main/LICENSE" target="_blank" rel="noopener">Лицензия MIT</a></li>
+          <li><a href="#" >Конфиденциальность</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <p class="footer-copyright">© 2025 asc contributors. MIT License.</p>
+      <p class="footer-copyright">© 2025 участники проекта asc. Лицензия MIT.</p>
       <span class="footer-open-source">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         Built with <a href="https://swift.org" target="_blank" rel="noopener">Swift</a>
