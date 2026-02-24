@@ -104,6 +104,18 @@ The codebase has two distinct localization concepts with separate repositories:
 
 ## Authentication
 
+**Option A — Persistent login (recommended):**
+
+```bash
+asc auth login --key-id <id> --issuer-id <id> --private-key-path ~/.asc/AuthKey_XXXXXX.p8
+asc auth logout   # remove saved credentials
+asc auth check    # verify credentials; shows source: "file" or "environment"
+```
+
+Credentials saved to `~/.asc/credentials.json`.
+
+**Option B — Environment variables:**
+
 ```bash
 export ASC_KEY_ID="YOUR_KEY_ID"
 export ASC_ISSUER_ID="YOUR_ISSUER_ID"
@@ -111,4 +123,4 @@ export ASC_PRIVATE_KEY_PATH="~/.asc/AuthKey_XXXXXX.p8"
 # OR use ASC_PRIVATE_KEY with the PEM content directly
 ```
 
-Resolved by `EnvironmentAuthProvider` in Infrastructure.
+**Resolution order:** `~/.asc/credentials.json` → environment variables, handled by `CompositeAuthProvider` in Infrastructure. `EnvironmentAuthProvider` is the fallback.
