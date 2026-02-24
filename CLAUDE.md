@@ -78,21 +78,22 @@ App → Build
 App → TestFlight (BetaGroup → BetaTester)
 ```
 
-Domain folders map one-to-one to hierarchy levels:
+Domain folders are nested to mirror the resource hierarchy:
 ```
 Domain/
-├── Apps/           → App, AppRepository
-├── Versions/       → AppStoreVersion, AppStoreVersionState
-├── Localizations/  → AppStoreVersionLocalization, VersionLocalizationRepository
-├── ScreenshotSets/ → AppScreenshotSet, ScreenshotDisplayType, ScreenshotImport, ScreenshotRepository
-├── Screenshots/    → AppScreenshot
-├── AppInfos/       → AppInfo, AppInfoLocalization, AppInfoRepository
-├── Builds/         → Build, BuildRepository
-├── Submissions/    → ReviewSubmission, ReviewSubmissionState, SubmissionRepository
-├── TestFlight/     → BetaGroup, BetaTester, TestFlightRepository
-├── Auth/           → AuthCredentials, AuthProvider, AuthStatus, AuthStorage, CredentialSource, AuthError
-└── Shared/         → AffordanceProviding, APIError, OutputFormat, PaginatedResponse
+├── Apps/                          → App, AppRepository
+│   ├── Versions/                  → AppStoreVersion, AppStoreVersionState, VersionRepository
+│   │   └── Localizations/         → AppStoreVersionLocalization, VersionLocalizationRepository
+│   │       └── ScreenshotSets/    → AppScreenshotSet, ScreenshotDisplayType, ScreenshotImport, ScreenshotRepository
+│   │           └── Screenshots/   → AppScreenshot
+│   ├── AppInfos/                  → AppInfo, AppInfoLocalization, AppInfoRepository
+│   ├── Builds/                    → Build, BuildRepository
+│   └── TestFlight/                → BetaGroup, BetaTester, TestFlightRepository
+├── Submissions/                   → ReviewSubmission, ReviewSubmissionState, SubmissionRepository
+├── Auth/                          → AuthCredentials, AuthProvider, AuthStatus, AuthStorage, CredentialSource, AuthError
+└── Shared/                        → AffordanceProviding, APIError, OutputFormat, PaginatedResponse
 ```
+Infrastructure and test folders mirror this exact structure.
 
 ## Testing
 
