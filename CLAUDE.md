@@ -35,7 +35,7 @@ Sources/
 
 ### Domain Layer
 
-All models are `public struct` + `Sendable` + `Equatable` + `Codable`. The JSON encoding is the public schema.
+All models are `public struct` + `Sendable` + `Equatable` + `Codable`. The JSON encoding is the public schema. Models with optional text fields use custom `Codable` with `encodeIfPresent` to omit nil values from JSON output.
 
 **Design rules:**
 - Every model carries its **parent ID** (e.g. `AppStoreVersion.appId`, `AppScreenshot.setId`) — the App Store Connect API doesn't return parent IDs, so Infrastructure injects them
@@ -90,6 +90,17 @@ We follow the Chicago School of TDD — state-based, not interaction-based. Test
 - Mocking: `@Mockable` annotation on protocols + `given().willReturn()` in tests
 - Test naming: backtick style — `` func `version is live when state is readyForSale`() ``
 - `Tests/DomainTests/TestHelpers/MockRepositoryFactory.swift` — shared test data factory
+
+## Two Localization Types
+
+The codebase has two distinct localization concepts with separate repositories:
+
+| Type | Domain folder | Repository | Commands | Data |
+|------|--------------|------------|----------|------|
+| `AppStoreVersionLocalization` | `Domain/Localizations/` | `VersionLocalizationRepository` | `asc localizations *` | whatsNew, description, keywords, screenshots |
+| `AppInfoLocalization` | `Domain/AppInfos/` | `AppInfoRepository` | `asc app-info-localizations *` | name, subtitle, privacyPolicyUrl |
+
+`ScreenshotRepository` handles only screenshot sets and screenshot images — **no localization methods**.
 
 ## Authentication
 
