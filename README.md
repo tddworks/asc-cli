@@ -81,7 +81,7 @@ Every response includes an `affordances` field. Agents read it and execute — n
 ### Homebrew (recommended)
 
 ```bash
-brew install tddworks/tap/asc
+brew install tddworks/tap/asccli
 ```
 
 ### Build from source
