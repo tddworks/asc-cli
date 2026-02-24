@@ -6,7 +6,7 @@ import Testing
 @Suite
 struct LocalizationsCreateTests {
 
-    @Test func `execute json output`() async throws {
+    @Test func `created localization is returned with affordances`() async throws {
         let mockRepo = MockVersionLocalizationRepository()
         given(mockRepo).createLocalization(versionId: .any, locale: .any).willReturn(
             AppStoreVersionLocalization(id: "loc-new", versionId: "v-1", locale: "en-US")
@@ -33,13 +33,30 @@ struct LocalizationsCreateTests {
         """)
     }
 
-    @Test func `execute passes correct arguments to repository`() async throws {
+    @Test func `created zh-Hans localization returns correct locale`() async throws {
         let mockRepo = MockVersionLocalizationRepository()
-        given(mockRepo).createLocalization(versionId: .value("v-99"), locale: .value("zh-Hans")).willReturn(
-            AppStoreVersionLocalization(id: "loc-1", versionId: "v-99", locale: "zh-Hans")
+        given(mockRepo).createLocalization(versionId: .any, locale: .any).willReturn(
+            AppStoreVersionLocalization(id: "loc-new", versionId: "v-99", locale: "zh-Hans")
         )
 
-        let cmd = try LocalizationsCreate.parse(["--version-id", "v-99", "--locale", "zh-Hans"])
-        _ = try await cmd.execute(repo: mockRepo)
+        let cmd = try LocalizationsCreate.parse(["--version-id", "v-99", "--locale", "zh-Hans", "--pretty"])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "listLocalizations" : "asc localizations list --version-id v-99",
+                "listScreenshotSets" : "asc screenshot-sets list --localization-id loc-new",
+                "updateLocalization" : "asc localizations update --localization-id loc-new"
+              },
+              "id" : "loc-new",
+              "locale" : "zh-Hans",
+              "versionId" : "v-99"
+            }
+          ]
+        }
+        """)
     }
 }

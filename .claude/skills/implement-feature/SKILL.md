@@ -151,11 +151,14 @@ See [tdd-patterns.md](references/tdd-patterns.md) for complete patterns includin
 4. Register in `ASC.swift` subcommands array
 5. Run `swift test` — all must pass
 
-**Command tests use exact JSON assertions, not `output.contains`:**
+**Three mandatory rules for every command test:**
+1. **Behavior-focused name** — describe what the user sees, not how the code works
+2. **Always `#expect()`** — every test must have an assertion; `_ = try await cmd.execute(...)` with no `#expect` is not a test
+3. **Exact JSON assertion** — assert the complete output string, never `output.contains(...)`
 
 ```swift
-// ✅ CORRECT — exact JSON string comparison
-@Test func `execute json output`() async throws {
+// ✅ CORRECT — behavior name, exact JSON assertion
+@Test func `listed my models include parent id and affordances`() async throws {
     let mockRepo = MockMyRepository()
     given(mockRepo).listMyModels(parentId: .any).willReturn([
         MockRepositoryFactory.makeMyModel(id: "m-1", parentId: "p-1")
@@ -240,7 +243,7 @@ Use `docs/features/screenshots.md` as the canonical reference example.
 - [ ] `ClientProvider.swift` — static factory method
 - [ ] Registered in `ASC.swift`
 - [ ] Affordance tests added to `AffordancesTests.swift`
-- [ ] Command tests use **exact JSON string assertions** (not `output.contains`)
+- [ ] Command tests: **behavior-focused names**, **always `#expect()`**, **exact JSON string** (not `output.contains`)
 - [ ] `swift test` — all 100+ tests pass
 
 ### Phase 4: Feature Doc

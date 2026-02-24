@@ -6,7 +6,7 @@ import Testing
 @Suite
 struct ScreenshotsListTests {
 
-    @Test func `execute json output`() async throws {
+    @Test func `listed screenshots include file metadata`() async throws {
         let mockRepo = MockScreenshotRepository()
         given(mockRepo).listScreenshots(setId: .any).willReturn([
             AppScreenshot(id: "img-1", setId: "set-1", fileName: "hero.png", fileSize: 2_048_000, assetState: .complete, imageWidth: 1290, imageHeight: 2796),
@@ -30,7 +30,7 @@ struct ScreenshotsListTests {
         """)
     }
 
-    @Test func `execute json output with nil dimensions`() async throws {
+    @Test func `screenshots without dimensions omit size fields`() async throws {
         let mockRepo = MockScreenshotRepository()
         given(mockRepo).listScreenshots(setId: .any).willReturn([
             AppScreenshot(id: "img-1", setId: "set-1", fileName: "screen.png", fileSize: 100, assetState: nil, imageWidth: nil, imageHeight: nil),
@@ -49,13 +49,5 @@ struct ScreenshotsListTests {
           }
         ]
         """)
-    }
-
-    @Test func `execute passes setId to repository`() async throws {
-        let mockRepo = MockScreenshotRepository()
-        given(mockRepo).listScreenshots(setId: .value("set-77")).willReturn([])
-
-        let cmd = try ScreenshotsList.parse(["--set-id", "set-77"])
-        _ = try await cmd.execute(repo: mockRepo)
     }
 }

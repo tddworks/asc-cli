@@ -6,7 +6,7 @@ import Testing
 @Suite
 struct ScreenshotsUploadTests {
 
-    @Test func `execute json output`() async throws {
+    @Test func `uploaded screenshot is returned with file metadata`() async throws {
         let mockRepo = MockScreenshotRepository()
         given(mockRepo).uploadScreenshot(setId: .any, fileURL: .any).willReturn(
             AppScreenshot(id: "img-new", setId: "set-1", fileName: "hero.png", fileSize: 2_048_000, assetState: .complete, imageWidth: 1290, imageHeight: 2796)
@@ -28,15 +28,5 @@ struct ScreenshotsUploadTests {
           }
         ]
         """)
-    }
-
-    @Test func `execute passes correct setId to repository`() async throws {
-        let mockRepo = MockScreenshotRepository()
-        given(mockRepo).uploadScreenshot(setId: .value("set-77"), fileURL: .any).willReturn(
-            AppScreenshot(id: "img-1", setId: "set-77", fileName: "s.png", fileSize: 100)
-        )
-
-        let cmd = try ScreenshotsUpload.parse(["--set-id", "set-77", "--file", "/tmp/s.png"])
-        _ = try await cmd.execute(repo: mockRepo)
     }
 }

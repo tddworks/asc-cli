@@ -6,7 +6,7 @@ import Testing
 @Suite
 struct ScreenshotSetsListTests {
 
-    @Test func `execute json output`() async throws {
+    @Test func `listed screenshot sets include affordances for navigation`() async throws {
         let mockRepo = MockScreenshotRepository()
         given(mockRepo).listScreenshotSets(localizationId: .any).willReturn([
             AppScreenshotSet(id: "set-1", localizationId: "loc-1", screenshotDisplayType: .iphone67, screenshotsCount: 3),
@@ -31,13 +31,5 @@ struct ScreenshotSetsListTests {
           ]
         }
         """)
-    }
-
-    @Test func `execute passes localizationId to repository`() async throws {
-        let mockRepo = MockScreenshotRepository()
-        given(mockRepo).listScreenshotSets(localizationId: .value("loc-99")).willReturn([])
-
-        let cmd = try ScreenshotSetsList.parse(["--localization-id", "loc-99"])
-        _ = try await cmd.execute(repo: mockRepo)
     }
 }

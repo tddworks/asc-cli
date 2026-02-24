@@ -6,7 +6,7 @@ import Testing
 @Suite
 struct AppsListTests {
 
-    @Test func `execute returns app name and bundle id in output`() async throws {
+    @Test func `listed apps include name bundleId and affordances`() async throws {
         let mockRepo = MockAppRepository()
         given(mockRepo).listApps(limit: .any).willReturn(
             PaginatedResponse(data: [
@@ -14,40 +14,52 @@ struct AppsListTests {
             ], nextCursor: nil)
         )
 
-        let cmd = try AppsList.parse([])
+        let cmd = try AppsList.parse(["--pretty"])
         let output = try await cmd.execute(repo: mockRepo)
 
-        #expect(output.contains("My App"))
-        #expect(output.contains("com.example.app"))
-        #expect(output.contains("SKU1"))
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "listAppInfos" : "asc app-infos list --app-id app-1",
+                "listVersions" : "asc versions list --app-id app-1"
+              },
+              "bundleId" : "com.example.app",
+              "id" : "app-1",
+              "name" : "My App",
+              "sku" : "SKU1"
+            }
+          ]
+        }
+        """)
     }
 
-    @Test func `execute uses dash for missing sku`() async throws {
+    @Test func `sku is omitted from output when not set`() async throws {
         let mockRepo = MockAppRepository()
         given(mockRepo).listApps(limit: .any).willReturn(
             PaginatedResponse(data: [
-                App(id: "app-1", name: "No SKU App", bundleId: "com.example", sku: nil),
+                App(id: "app-1", name: "No SKU App", bundleId: "com.example"),
             ], nextCursor: nil)
         )
 
-        let cmd = try AppsList.parse([])
+        let cmd = try AppsList.parse(["--pretty"])
         let output = try await cmd.execute(repo: mockRepo)
 
-        #expect(output.contains("-"))
-    }
-
-    @Test func `execute json output contains affordances`() async throws {
-        let mockRepo = MockAppRepository()
-        given(mockRepo).listApps(limit: .any).willReturn(
-            PaginatedResponse(data: [
-                App(id: "app-42", name: "Test", bundleId: "com.test"),
-            ], nextCursor: nil)
-        )
-
-        let cmd = try AppsList.parse([])
-        let output = try await cmd.execute(repo: mockRepo)
-
-        #expect(output.contains("affordances"))
-        #expect(output.contains("app-42"))
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "listAppInfos" : "asc app-infos list --app-id app-1",
+                "listVersions" : "asc versions list --app-id app-1"
+              },
+              "bundleId" : "com.example",
+              "id" : "app-1",
+              "name" : "No SKU App"
+            }
+          ]
+        }
+        """)
     }
 }

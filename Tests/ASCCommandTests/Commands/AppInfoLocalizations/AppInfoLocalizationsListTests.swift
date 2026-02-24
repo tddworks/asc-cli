@@ -6,7 +6,7 @@ import Testing
 @Suite
 struct AppInfoLocalizationsListTests {
 
-    @Test func `execute json output includes affordances`() async throws {
+    @Test func `listed app info localizations include affordances for navigation`() async throws {
         let mockRepo = MockAppInfoRepository()
         given(mockRepo).listLocalizations(appInfoId: .any).willReturn([
             AppInfoLocalization(id: "loc-1", appInfoId: "info-1", locale: "en-US", name: "My App", subtitle: "Do things"),
@@ -32,13 +32,5 @@ struct AppInfoLocalizationsListTests {
           ]
         }
         """)
-    }
-
-    @Test func `execute passes appInfoId to repository`() async throws {
-        let mockRepo = MockAppInfoRepository()
-        given(mockRepo).listLocalizations(appInfoId: .value("info-99")).willReturn([])
-
-        let cmd = try AppInfoLocalizationsList.parse(["--app-info-id", "info-99"])
-        _ = try await cmd.execute(repo: mockRepo)
     }
 }

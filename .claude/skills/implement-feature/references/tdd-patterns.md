@@ -9,6 +9,48 @@ We follow **Chicago school TDD** (state-based testing):
 | Focus on "what" (outcomes)            | Focus on "how" (behavior)                |
 | Design emerges from tests             | Design upfront, tests verify design      |
 
+
+## Command Test Rules (Phase 3)
+
+**Three mandatory rules for every command test:**
+
+1. **Behavior-focused name** — describe what the user observes, not the implementation
+2. **Always assert** — every test must have `#expect(output == "...")` or equivalent; tests without assertions are not tests
+3. **Exact JSON assertion** — assert the complete output string, never `output.contains(...)`
+
+Anti-pattern examples:
+┌────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────────┐
+│           ❌ Implementation-focused            │            ✅ Behavior-focused (user's mental model)            │
+├────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────┤
+│ `execute json output`                          │ `listed apps include name bundleId and affordances`             │
+├────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────┤
+│ `execute json output omits sku when nil`       │ `sku is omitted from output when not set`                       │
+├────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────┤
+│ `execute json output includes affordances`     │ `listed app infos include affordances for navigation`           │
+├────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────┤
+│ `execute passes whatsNew to repository`        │ (delete — no `#expect()`, interaction test)                     │
+├────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────┤
+│ `execute formats uploaded screenshots as JSON` │ `import uploads screenshots and returns results`                │
+└────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────┘
+
+**When to delete vs convert an interaction test:**
+
+- **Delete** if the scenario is identical to the primary test (just a different ID/value) — behaviour already proven
+- **Convert** if the scenario is genuinely different (different platform, different field set, different locale) — rewrite as a state test with `#expect(output == "...")`
+
+**URL encoding gotcha:** Swift's `JSONSerialization` escapes forward slashes as `\/` by default. In expected strings, write `\\/` for each `/` in URLs:
+
+```swift
+// ✅ Correct — matches actual JSON output
+#expect(output.contains("\"marketingUrl\" : \"https:\\/\\/example.com\""))
+
+// In exact multi-line assertion:
+"""
+"marketingUrl" : "https:\\/\\/example.com",
+"""
+```
+
+
 ## Swift Testing Framework
 
 Use `@Test` and `@Suite` with backtick test names:

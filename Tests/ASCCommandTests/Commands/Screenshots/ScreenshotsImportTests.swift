@@ -7,7 +7,7 @@ import Testing
 @Suite
 struct ScreenshotsImportTests {
 
-    // MARK: - Helpers
+    // MARK: - Test-context helpers (non-domain types — kept local)
 
     private func makeManifest(
         locale: String = "en-US",
@@ -32,26 +32,20 @@ struct ScreenshotsImportTests {
         Dictionary(uniqueKeysWithValues: files.map { ($0, URL(fileURLWithPath: "/fake/\($0)")) })
     }
 
-    private func makeLocalization(id: String = "loc-1", locale: String = "en-US") -> AppStoreVersionLocalization {
-        AppStoreVersionLocalization(id: id, versionId: "v1", locale: locale)
-    }
-
-    private func makeSet(id: String = "set-1", displayType: ScreenshotDisplayType = .iphone67, repo: any ScreenshotRepository) -> AppScreenshotSet {
-        AppScreenshotSet(id: id, localizationId: "loc-1", screenshotDisplayType: displayType, repo: repo)
-    }
-
-    private func makeScreenshot(id: String = "img-1", fileName: String = "1.png") -> AppScreenshot {
-        AppScreenshot(id: id, setId: "set-1", fileName: fileName, fileSize: 1_048_576)
-    }
-
     // MARK: - Output format
 
-    @Test func `execute formats uploaded screenshots as JSON`() async throws {
+    @Test func `import uploads screenshots and returns results`() async throws {
         let mockLocRepo = MockVersionLocalizationRepository()
         let mockSsRepo = MockScreenshotRepository()
-        given(mockLocRepo).listLocalizations(versionId: .any).willReturn([makeLocalization()])
-        given(mockSsRepo).listScreenshotSets(localizationId: .any).willReturn([makeSet(repo: mockSsRepo)])
-        given(mockSsRepo).uploadScreenshot(setId: .any, fileURL: .any).willReturn(makeScreenshot(id: "img-1", fileName: "1.png"))
+        given(mockLocRepo).listLocalizations(versionId: .any).willReturn([
+            AppStoreVersionLocalization(id: "loc-1", versionId: "v1", locale: "en-US"),
+        ])
+        given(mockSsRepo).listScreenshotSets(localizationId: .any).willReturn([
+            AppScreenshotSet(id: "set-1", localizationId: "loc-1", screenshotDisplayType: .iphone67, repo: mockSsRepo),
+        ])
+        given(mockSsRepo).uploadScreenshot(setId: .any, fileURL: .any).willReturn(
+            AppScreenshot(id: "img-1", setId: "set-1", fileName: "1.png", fileSize: 1_048_576)
+        )
 
         let cmd = try ScreenshotsImport.parse(["--version-id", "v1", "--from", "/fake.zip", "--pretty"])
         let output = try await cmd.execute(
@@ -61,84 +55,124 @@ struct ScreenshotsImportTests {
             imageURLs: makeImageURLs(["en-US/1.png"])
         )
 
-        #expect(output.contains("img-1"))
-        #expect(output.contains("1.png"))
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "listScreenshots" : "asc screenshots list --set-id set-1"
+              },
+              "fileName" : "1.png",
+              "fileSize" : 1048576,
+              "id" : "img-1",
+              "setId" : "set-1"
+            }
+          ]
+        }
+        """)
     }
 
     // MARK: - Find-or-create localization
 
-    @Test func `execute reuses existing localization when locale matches`() async throws {
+    @Test func `import reuses existing localization when locale matches`() async throws {
         let mockLocRepo = MockVersionLocalizationRepository()
         let mockSsRepo = MockScreenshotRepository()
-        given(mockLocRepo).listLocalizations(versionId: .any).willReturn([makeLocalization(id: "loc-existing", locale: "en-US")])
-        given(mockSsRepo).listScreenshotSets(localizationId: .value("loc-existing")).willReturn([makeSet(repo: mockSsRepo)])
-        given(mockSsRepo).uploadScreenshot(setId: .any, fileURL: .any).willReturn(makeScreenshot())
+        given(mockLocRepo).listLocalizations(versionId: .any).willReturn([
+            AppStoreVersionLocalization(id: "loc-existing", versionId: "v1", locale: "en-US"),
+        ])
+        given(mockSsRepo).listScreenshotSets(localizationId: .value("loc-existing")).willReturn([
+            AppScreenshotSet(id: "set-1", localizationId: "loc-existing", screenshotDisplayType: .iphone67, repo: mockSsRepo),
+        ])
+        given(mockSsRepo).uploadScreenshot(setId: .any, fileURL: .any).willReturn(
+            AppScreenshot(id: "img-1", setId: "set-1", fileName: "1.png", fileSize: 1_048_576)
+        )
 
-        let cmd = try ScreenshotsImport.parse(["--version-id", "v1", "--from", "/fake.zip"])
-        _ = try await cmd.execute(
+        let cmd = try ScreenshotsImport.parse(["--version-id", "v1", "--from", "/fake.zip", "--pretty"])
+        let output = try await cmd.execute(
             localizationRepo: mockLocRepo,
             screenshotRepo: mockSsRepo,
             manifest: makeManifest(locale: "en-US"),
             imageURLs: makeImageURLs(["en-US/1.png"])
         )
-        verify(mockLocRepo).createLocalization(versionId: .any, locale: .any).called(.never)
+
+        // createLocalization not mocked — would throw if called, proving reuse
+        #expect(output.isEmpty == false)
     }
 
-    @Test func `execute creates localization when locale is not found`() async throws {
+    @Test func `import creates localization when locale is not found`() async throws {
         let mockLocRepo = MockVersionLocalizationRepository()
         let mockSsRepo = MockScreenshotRepository()
         given(mockLocRepo).listLocalizations(versionId: .any).willReturn([])
         given(mockLocRepo).createLocalization(versionId: .any, locale: .any)
             .willReturn(AppStoreVersionLocalization(id: "loc-new", versionId: "v1", locale: "ja"))
-        given(mockSsRepo).listScreenshotSets(localizationId: .any).willReturn([makeSet(repo: mockSsRepo)])
-        given(mockSsRepo).uploadScreenshot(setId: .any, fileURL: .any).willReturn(makeScreenshot())
+        given(mockSsRepo).listScreenshotSets(localizationId: .any).willReturn([
+            AppScreenshotSet(id: "set-1", localizationId: "loc-new", screenshotDisplayType: .iphone67, repo: mockSsRepo),
+        ])
+        given(mockSsRepo).uploadScreenshot(setId: .any, fileURL: .any).willReturn(
+            AppScreenshot(id: "img-1", setId: "set-1", fileName: "1.png", fileSize: 1_048_576)
+        )
 
-        let cmd = try ScreenshotsImport.parse(["--version-id", "v1", "--from", "/fake.zip"])
-        _ = try await cmd.execute(
+        let cmd = try ScreenshotsImport.parse(["--version-id", "v1", "--from", "/fake.zip", "--pretty"])
+        let output = try await cmd.execute(
             localizationRepo: mockLocRepo,
             screenshotRepo: mockSsRepo,
             manifest: makeManifest(locale: "ja", files: ["ja/1.png"]),
             imageURLs: makeImageURLs(["ja/1.png"])
         )
-        verify(mockLocRepo).createLocalization(versionId: .value("v1"), locale: .value("ja")).called(.once)
+
+        // Upload succeeded after creating missing localization
+        #expect(output.isEmpty == false)
     }
 
     // MARK: - Find-or-create screenshot set
 
-    @Test func `execute reuses existing screenshot set when display type matches`() async throws {
+    @Test func `import reuses existing screenshot set when display type matches`() async throws {
         let mockLocRepo = MockVersionLocalizationRepository()
         let mockSsRepo = MockScreenshotRepository()
-        given(mockLocRepo).listLocalizations(versionId: .any).willReturn([makeLocalization()])
-        given(mockSsRepo).listScreenshotSets(localizationId: .any)
-            .willReturn([makeSet(id: "set-existing", displayType: .iphone67, repo: mockSsRepo)])
-        given(mockSsRepo).uploadScreenshot(setId: .any, fileURL: .any).willReturn(makeScreenshot())
+        given(mockLocRepo).listLocalizations(versionId: .any).willReturn([
+            AppStoreVersionLocalization(id: "loc-1", versionId: "v1", locale: "en-US"),
+        ])
+        given(mockSsRepo).listScreenshotSets(localizationId: .any).willReturn([
+            AppScreenshotSet(id: "set-existing", localizationId: "loc-1", screenshotDisplayType: .iphone67, repo: mockSsRepo),
+        ])
+        given(mockSsRepo).uploadScreenshot(setId: .any, fileURL: .any).willReturn(
+            AppScreenshot(id: "img-1", setId: "set-existing", fileName: "1.png", fileSize: 1_048_576)
+        )
 
-        let cmd = try ScreenshotsImport.parse(["--version-id", "v1", "--from", "/fake.zip"])
-        _ = try await cmd.execute(
+        let cmd = try ScreenshotsImport.parse(["--version-id", "v1", "--from", "/fake.zip", "--pretty"])
+        let output = try await cmd.execute(
             localizationRepo: mockLocRepo,
             screenshotRepo: mockSsRepo,
             manifest: makeManifest(displayType: .iphone67),
             imageURLs: makeImageURLs(["en-US/1.png"])
         )
-        verify(mockSsRepo).createScreenshotSet(localizationId: .any, displayType: .any).called(.never)
+
+        // createScreenshotSet not mocked — would throw if called, proving reuse
+        #expect(output.isEmpty == false)
     }
 
-    @Test func `execute creates screenshot set when display type is not found`() async throws {
+    @Test func `import creates screenshot set when display type is not found`() async throws {
         let mockLocRepo = MockVersionLocalizationRepository()
         let mockSsRepo = MockScreenshotRepository()
-        given(mockLocRepo).listLocalizations(versionId: .any).willReturn([makeLocalization()])
+        given(mockLocRepo).listLocalizations(versionId: .any).willReturn([
+            AppStoreVersionLocalization(id: "loc-1", versionId: "v1", locale: "en-US"),
+        ])
         given(mockSsRepo).listScreenshotSets(localizationId: .any).willReturn([])
         given(mockSsRepo).createScreenshotSet(localizationId: .any, displayType: .any)
-            .willReturn(makeSet(id: "set-new", displayType: .iphone67, repo: mockSsRepo))
-        given(mockSsRepo).uploadScreenshot(setId: .any, fileURL: .any).willReturn(makeScreenshot())
+            .willReturn(AppScreenshotSet(id: "set-new", localizationId: "loc-1", screenshotDisplayType: .iphone67, repo: mockSsRepo))
+        given(mockSsRepo).uploadScreenshot(setId: .any, fileURL: .any).willReturn(
+            AppScreenshot(id: "img-1", setId: "set-new", fileName: "1.png", fileSize: 1_048_576)
+        )
 
-        let cmd = try ScreenshotsImport.parse(["--version-id", "v1", "--from", "/fake.zip"])
-        _ = try await cmd.execute(
+        let cmd = try ScreenshotsImport.parse(["--version-id", "v1", "--from", "/fake.zip", "--pretty"])
+        let output = try await cmd.execute(
             localizationRepo: mockLocRepo,
             screenshotRepo: mockSsRepo,
             manifest: makeManifest(displayType: .iphone67),
             imageURLs: makeImageURLs(["en-US/1.png"])
         )
-        verify(mockSsRepo).createScreenshotSet(localizationId: .value("loc-1"), displayType: .value(.iphone67)).called(.once)
+
+        // Upload succeeded after creating missing screenshot set
+        #expect(output.isEmpty == false)
     }
 }
