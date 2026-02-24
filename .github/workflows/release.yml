@@ -5,14 +5,33 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g. 0.1.3)'
+        required: true
+        type: string
 
 jobs:
   release:
     runs-on: macos-15
     permissions:
       contents: write
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Resolve version and tag
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+            VERSION="${VERSION#v}"  # strip leading 'v' if provided
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
 
       - name: Setup Swift
         uses: SwiftyLab/setup-swift@latest
@@ -26,36 +45,51 @@ jobs:
         run: |
           swift build -c release --arch arm64 --disable-sandbox
           strip -rSTx .build/arm64-apple-macosx/release/asc
-          cp .build/arm64-apple-macosx/release/asc release/asc_${GITHUB_REF_NAME}_macOS_arm64
+          cp .build/arm64-apple-macosx/release/asc release/asc_${{ steps.version.outputs.tag }}_macOS_arm64
 
       - name: Build x86_64
         run: |
           swift build -c release --arch x86_64 --disable-sandbox
           strip -rSTx .build/x86_64-apple-macosx/release/asc
-          cp .build/x86_64-apple-macosx/release/asc release/asc_${GITHUB_REF_NAME}_macOS_x86_64
+          cp .build/x86_64-apple-macosx/release/asc release/asc_${{ steps.version.outputs.tag }}_macOS_x86_64
 
       - name: Create universal binary
         run: |
-          lipo -create -output release/asc_${GITHUB_REF_NAME}_macOS_universal \
-            release/asc_${GITHUB_REF_NAME}_macOS_arm64 \
-            release/asc_${GITHUB_REF_NAME}_macOS_x86_64
+          lipo -create -output release/asc_${{ steps.version.outputs.tag }}_macOS_universal \
+            release/asc_${{ steps.version.outputs.tag }}_macOS_arm64 \
+            release/asc_${{ steps.version.outputs.tag }}_macOS_x86_64
 
       - name: Create checksums
         run: |
           cd release
-          shasum -a 256 * > asc_${GITHUB_REF_NAME}_checksums.txt
+          shasum -a 256 * > asc_${{ steps.version.outputs.tag }}_checksums.txt
 
-      - name: Create GitHub Release
+      - name: Extract release notes from CHANGELOG
+        id: changelog
         run: |
-          gh release create "${GITHUB_REF_NAME}" \
-            --generate-notes \
-            release/*
+          VERSION="${{ steps.version.outputs.version }}"
+          NOTES=$(./scripts/extract-changelog.sh "$VERSION" 2>/dev/null || echo "")
+          if [ -z "$NOTES" ]; then
+            NOTES="Bug fixes and improvements."
+            echo "::warning::No CHANGELOG entry found for v$VERSION, using default message"
+          fi
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "$NOTES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Create or update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: asc ${{ steps.version.outputs.tag }}
+          body: ${{ env.RELEASE_NOTES }}
+          files: release/*
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   update-tap:
     needs: release
     uses: ./.github/workflows/update-homebrew-tap.yml
     with:
-      version: ${{ github.ref_name }}
+      version: ${{ needs.release.outputs.tag }}
     secrets: inherit
