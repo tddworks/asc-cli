@@ -111,8 +111,8 @@ struct SDKLocalizationRepositoryTests {
                 id: "loc-1",
                 attributes: .init(
                     description: "应用描述",
-                    keywords: "关键词",
                     locale: "zh-Hans",
+                    keywords: "关键词",
                     marketingURL: URL(string: "https://example.com"),
                     promotionalText: "促销文本",
                     supportURL: URL(string: "https://support.example.com"),
