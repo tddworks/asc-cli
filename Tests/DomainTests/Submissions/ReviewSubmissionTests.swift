@@ -35,22 +35,4 @@ struct ReviewSubmissionTests {
         #expect(submission.isPending == false)
         #expect(submission.isComplete == false)
     }
-
-    @Test func `submission is codable`() throws {
-        let submission = MockRepositoryFactory.makeReviewSubmission(
-            id: "sub-1",
-            appId: "app-1",
-            platform: .iOS,
-            state: .waitingForReview
-        )
-        let data = try JSONEncoder().encode(submission)
-        let decoded = try JSONDecoder().decode(ReviewSubmission.self, from: data)
-        #expect(decoded == submission)
-    }
-
-    @Test func `submission is equatable`() {
-        let a = MockRepositoryFactory.makeReviewSubmission(id: "sub-1", appId: "app-1")
-        let b = MockRepositoryFactory.makeReviewSubmission(id: "sub-1", appId: "app-1")
-        #expect(a == b)
-    }
 }

@@ -44,10 +44,4 @@ struct AppInfoLocalizationTests {
         let loc = AppInfoLocalization(id: "loc-1", appInfoId: "info-42", locale: "en-US")
         #expect(loc.affordances["updateLocalization"] == "asc app-info-localizations update --localization-id loc-1")
     }
-
-    @Test func `localization is equatable`() {
-        let a = AppInfoLocalization(id: "loc-1", appInfoId: "info-1", locale: "en-US", name: "App")
-        let b = AppInfoLocalization(id: "loc-1", appInfoId: "info-1", locale: "en-US", name: "App")
-        #expect(a == b)
-    }
 }

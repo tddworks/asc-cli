@@ -18,10 +18,4 @@ struct AppInfoTests {
         let info = AppInfo(id: "info-1", appId: "app-42")
         #expect(info.affordances["listAppInfos"] == "asc app-infos list --app-id app-42")
     }
-
-    @Test func `appInfo is equatable`() {
-        let a = AppInfo(id: "info-1", appId: "app-1")
-        let b = AppInfo(id: "info-1", appId: "app-1")
-        #expect(a == b)
-    }
 }

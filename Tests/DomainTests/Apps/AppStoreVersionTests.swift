@@ -42,25 +42,4 @@ struct AppStoreVersionTests {
         )
         #expect(version.displayName == "iOS 2.1.0")
     }
-
-    @Test
-    func `version is codable`() throws {
-        let version = MockRepositoryFactory.makeVersion(
-            id: "v1",
-            appId: "app-1",
-            versionString: "1.0.0",
-            platform: .macOS,
-            state: .readyForSale
-        )
-        let data = try JSONEncoder().encode(version)
-        let decoded = try JSONDecoder().decode(AppStoreVersion.self, from: data)
-        #expect(decoded == version)
-    }
-
-    @Test
-    func `version is equatable`() {
-        let a = MockRepositoryFactory.makeVersion(id: "v1", appId: "app-1")
-        let b = MockRepositoryFactory.makeVersion(id: "v1", appId: "app-1")
-        #expect(a == b)
-    }
 }

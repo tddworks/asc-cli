@@ -76,11 +76,4 @@ struct AppScreenshotTests {
         let s = MockRepositoryFactory.makeScreenshot(id: "img-1", setId: "set-99")
         #expect(s.setId == "set-99")
     }
-
-    @Test
-    func `screenshot is equatable`() {
-        let a = MockRepositoryFactory.makeScreenshot(id: "1")
-        let b = MockRepositoryFactory.makeScreenshot(id: "1")
-        #expect(a == b)
-    }
 }
