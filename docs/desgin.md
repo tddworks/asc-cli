@@ -46,7 +46,7 @@ Each level has its own command:
 ```
 asc apps list
 asc versions list --app-id <id>
-asc localizations list --version-id <id>
+asc version-localizations list --version-id <id>
 asc screenshot-sets list --localization-id <id>
 asc screenshots list --set-id <id>
 ```
@@ -82,7 +82,7 @@ An agent calls `asc versions list --app-id app-abc` and receives:
       "isEditable": false,
       "isPending": false,
       "affordances": {
-        "listLocalizations": "asc localizations list --version-id v1",
+        "listLocalizations": "asc version-localizations list --version-id v1",
         "listVersions":      "asc versions list --app-id app-abc"
       }
     }
@@ -110,7 +110,7 @@ protocol AffordanceProviding {
 extension AppStoreVersion: AffordanceProviding {
     var affordances: [String: String] {
         var cmds = [
-            "listLocalizations": "asc localizations list --version-id \(id)",
+            "listLocalizations": "asc version-localizations list --version-id \(id)",
             "listVersions":      "asc versions list --app-id \(appId)",
         ]
         if isEditable {

@@ -146,7 +146,7 @@ asc apps list --output table
 asc versions list --app <APP_ID> --output table
 
 # 3. List localizations for the version
-asc localizations list --version-id <VERSION_ID> --output table
+asc version-localizations list --version-id <VERSION_ID> --output table
 
 # 4. List screenshot sets for a localization
 asc screenshot-sets list --localization-id <LOCALIZATION_ID> --output table
@@ -242,7 +242,7 @@ public struct AppStoreVersionLocalization: Sendable, Equatable, Identifiable, Co
 
     // Affordances
     "listScreenshotSets": "asc screenshot-sets list --localization-id <id>"
-    "listLocalizations":  "asc localizations list --version-id <versionId>"
+    "listLocalizations":  "asc version-localizations list --version-id <versionId>"
 }
 ```
 

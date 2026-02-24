@@ -9,7 +9,7 @@ Manage per-locale content for an App Store version — What's New text, descript
 List all locale entries for a given App Store version.
 
 ```bash
-asc localizations list --version-id <VERSION_ID>
+asc version-localizations list --version-id <VERSION_ID>
 ```
 
 **Options:**
@@ -23,7 +23,7 @@ asc localizations list --version-id <VERSION_ID>
 **Example:**
 
 ```bash
-asc localizations list --version-id 74ed4466-8dc4-4ec7-b2ce-3c1bbe620964 --pretty
+asc version-localizations list --version-id 74ed4466-8dc4-4ec7-b2ce-3c1bbe620964 --pretty
 ```
 
 **JSON output:**
@@ -36,9 +36,9 @@ asc localizations list --version-id 74ed4466-8dc4-4ec7-b2ce-3c1bbe620964 --prett
       "versionId": "74ed4466-8dc4-4ec7-b2ce-3c1bbe620964",
       "locale": "en-US",
       "affordances": {
-        "listLocalizations": "asc localizations list --version-id 74ed4466-...",
+        "listLocalizations": "asc version-localizations list --version-id 74ed4466-...",
         "listScreenshotSets": "asc screenshot-sets list --localization-id 9584409e-...",
-        "updateLocalization": "asc localizations update --localization-id 9584409e-..."
+        "updateLocalization": "asc version-localizations update --localization-id 9584409e-..."
       }
     }
   ]
@@ -61,7 +61,7 @@ b1c2d3e4-...                          zh-Hans
 Add a new locale entry to a version.
 
 ```bash
-asc localizations create --version-id <VERSION_ID> --locale <LOCALE>
+asc version-localizations create --version-id <VERSION_ID> --locale <LOCALE>
 ```
 
 **Options:**
@@ -76,7 +76,7 @@ asc localizations create --version-id <VERSION_ID> --locale <LOCALE>
 **Example:**
 
 ```bash
-asc localizations create --version-id 74ed4466-... --locale fr-FR
+asc version-localizations create --version-id 74ed4466-... --locale fr-FR
 ```
 
 ---
@@ -86,7 +86,7 @@ asc localizations create --version-id 74ed4466-... --locale fr-FR
 Update the What's New text, description, keywords, or URLs for an existing localization. All content fields are optional — only provided fields are sent to the API.
 
 ```bash
-asc localizations update --localization-id <LOCALIZATION_ID> \
+asc version-localizations update --localization-id <LOCALIZATION_ID> \
   [--whats-new <text>] \
   [--description <text>] \
   [--keywords <text>] \
@@ -113,12 +113,12 @@ asc localizations update --localization-id <LOCALIZATION_ID> \
 
 ```bash
 # Set What's New text for the English locale
-asc localizations update \
+asc version-localizations update \
   --localization-id 9584409e-... \
   --whats-new "Bug fixes and performance improvements"
 
 # Update multiple fields at once
-asc localizations update \
+asc version-localizations update \
   --localization-id 9584409e-... \
   --whats-new "Bug fixes" \
   --keywords "productivity,tasks,calendar"
@@ -135,9 +135,9 @@ asc localizations update \
       "locale": "en-US",
       "whatsNew": "Bug fixes and performance improvements",
       "affordances": {
-        "listLocalizations": "asc localizations list --version-id 74ed4466-...",
+        "listLocalizations": "asc version-localizations list --version-id 74ed4466-...",
         "listScreenshotSets": "asc screenshot-sets list --localization-id 9584409e-...",
-        "updateLocalization": "asc localizations update --localization-id 9584409e-..."
+        "updateLocalization": "asc version-localizations update --localization-id 9584409e-..."
       }
     }
   ]
@@ -156,20 +156,20 @@ asc apps list --output table
 asc versions list --app-id <APP_ID> --output table
 
 # 3. List existing localizations (get localization IDs)
-asc localizations list --version-id <VERSION_ID> --output table
+asc version-localizations list --version-id <VERSION_ID> --output table
 
 # 4a. Update What's New for English
-asc localizations update \
+asc version-localizations update \
   --localization-id <EN_LOC_ID> \
   --whats-new "Bug fixes and performance improvements"
 
 # 4b. Update What's New for Chinese (Simplified)
-asc localizations update \
+asc version-localizations update \
   --localization-id <ZH_LOC_ID> \
   --whats-new "修复了已知问题，提升了性能"
 
 # 4c. Create a new locale if it doesn't exist yet
-asc localizations create --version-id <VERSION_ID> --locale fr-FR
+asc version-localizations create --version-id <VERSION_ID> --locale fr-FR
 
 # 5. Upload screenshots for each locale
 asc screenshot-sets list --localization-id <LOC_ID>
@@ -248,8 +248,8 @@ public struct AppStoreVersionLocalization: Sendable, Equatable, Identifiable {
 **Affordances (always present):**
 ```
 "listScreenshotSets"  → asc screenshot-sets list --localization-id <id>
-"listLocalizations"   → asc localizations list --version-id <versionId>
-"updateLocalization"  → asc localizations update --localization-id <id>
+"listLocalizations"   → asc version-localizations list --version-id <versionId>
+"updateLocalization"  → asc version-localizations update --localization-id <id>
 ```
 
 ### `VersionLocalizationRepository`
@@ -341,7 +341,7 @@ Tests follow **Chicago school TDD** — assert on exact state and output values.
 // Domain: affordance included always
 @Test func `localization affordances include updateLocalization command`() {
     let loc = MockRepositoryFactory.makeLocalization(id: "loc-42", versionId: "v-1")
-    #expect(loc.affordances["updateLocalization"] == "asc localizations update --localization-id loc-42")
+    #expect(loc.affordances["updateLocalization"] == "asc version-localizations update --localization-id loc-42")
 }
 
 // Infrastructure: parent ID injection
@@ -372,9 +372,9 @@ Tests follow **Chicago school TDD** — assert on exact state and output values.
       "data" : [
         {
           "affordances" : {
-            "listLocalizations" : "asc localizations list --version-id v-1",
+            "listLocalizations" : "asc version-localizations list --version-id v-1",
             "listScreenshotSets" : "asc screenshot-sets list --localization-id loc-1",
-            "updateLocalization" : "asc localizations update --localization-id loc-1"
+            "updateLocalization" : "asc version-localizations update --localization-id loc-1"
           },
           "id" : "loc-1",
           "locale" : "en-US",
@@ -400,8 +400,8 @@ swift test
 
 ```bash
 # Script: update What's New for all localizations of a version
-for LOC_ID in $(asc localizations list --version-id $VERSION_ID | jq -r '.data[].id'); do
-  asc localizations update --localization-id $LOC_ID --whats-new "Bug fixes"
+for LOC_ID in $(asc version-localizations list --version-id $VERSION_ID | jq -r '.data[].id'); do
+  asc version-localizations update --localization-id $LOC_ID --whats-new "Bug fixes"
 done
 ```
 
@@ -422,7 +422,7 @@ APIEndpoint.v1.appStoreVersionLocalizations.id(localizationId).delete
 `VersionLocalizationRepository` handles text content. For screenshots, continue using `ScreenshotRepository`:
 
 ```
-asc localizations list → localization ID
+asc version-localizations list → localization ID
 asc screenshot-sets list --localization-id <id>  ← ScreenshotRepository
 asc screenshots upload --set-id <id> --file <path>
 ```
