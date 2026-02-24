@@ -38,6 +38,11 @@ jobs:
         with:
           swift-version: "6.2"
 
+      - name: Update version in source
+        run: |
+          sed -i '' "s/let ascVersion = \".*\"/let ascVersion = \"${{ steps.version.outputs.version }}\"/" Sources/ASCCommand/Version.swift
+          grep ascVersion Sources/ASCCommand/Version.swift
+
       - name: Create release directory
         run: mkdir -p release
 
