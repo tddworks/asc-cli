@@ -257,6 +257,16 @@ See [docs/desgin.md](docs/desgin.md) for the full architecture and CAEOAS patter
 
 See [CHANGELOG.md](CHANGELOG.md).
 
+## Sponsors
+
+Apps that use and support asc-cli development:
+
+<a href="https://appnexus.app">
+  <img src="https://appnexus.app/favicon.ico" width="64" height="64" alt="AppNexus" style="border-radius:14px">
+  <br>
+  <b>AppNexus for App Store Connect</b>
+</a>
+
 ## License
 
 MIT

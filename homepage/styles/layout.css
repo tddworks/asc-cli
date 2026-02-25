@@ -605,6 +605,70 @@
 }
 .gradient-line.is-visible { opacity: 1; }
 
+/* ---- Sponsors ---- */
+.sponsors-section {
+  padding: 60px var(--space-xl);
+  text-align: center;
+  border-top: 1px solid var(--color-border);
+}
+.sponsors-inner {
+  max-width: 800px;
+  margin: 0 auto;
+}
+.sponsors-eyebrow {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  margin-bottom: 8px;
+}
+.sponsors-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 36px;
+}
+.sponsors-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+.sponsor-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 32px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-elevated);
+  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  text-decoration: none;
+  min-width: 140px;
+}
+.sponsor-card:hover {
+  border-color: rgba(var(--color-accent-rgb), 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.sponsor-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  object-fit: contain;
+}
+.sponsor-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.sponsor-desc {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
 /* ---- CAEOAS Demo Block ---- */
 .affordances-demo {
   background: var(--color-bg-terminal);
