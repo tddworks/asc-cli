@@ -186,15 +186,15 @@ asc versions submit --version-id <VERSION_ID>
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │  ASCCommand                                                      │
-│  LocalizationsCommand                                            │
-│    ├── LocalizationsList   (list --version-id)                   │
-│    ├── LocalizationsCreate (create --version-id --locale)        │
-│    └── LocalizationsUpdate (update --localization-id             │
+│  VersionLocalizationsCommand                                     │
+│    ├── VersionLocalizationsList   (list --version-id)            │
+│    ├── VersionLocalizationsCreate (create --version-id --locale) │
+│    └── VersionLocalizationsUpdate (update --localization-id      │
 │           [--whats-new] [--description] [--keywords] ...)        │
 └────────────────────────────┬─────────────────────────────────────┘
                              │ uses VersionLocalizationRepository
 ┌────────────────────────────▼─────────────────────────────────────┐
-│  Domain/Localizations/                                           │
+│  Domain/Apps/Versions/Localizations/                             │
 │  AppStoreVersionLocalization                                     │
 │    id, versionId, locale                                         │
 │    whatsNew?, description?, keywords?                            │
@@ -204,11 +204,11 @@ asc versions submit --version-id <VERSION_ID>
 │  VersionLocalizationRepository (@Mockable)                       │
 │    listLocalizations(versionId:)                                 │
 │    createLocalization(versionId:locale:)                         │
-│    updateLocalization(localizationId:whatsNew:...) ← new         │
+│    updateLocalization(localizationId:whatsNew:...)               │
 └────────────────────────────┬─────────────────────────────────────┘
                              │ implements
 ┌────────────────────────────▼─────────────────────────────────────┐
-│  Infrastructure/Localizations/                                   │
+│  Infrastructure/Apps/Versions/Localizations/                     │
 │  SDKLocalizationRepository                                       │
 │    GET  /v1/appStoreVersions/{id}/appStoreVersionLocalizations   │
 │    POST /v1/appStoreVersionLocalizations                         │
@@ -277,30 +277,30 @@ public protocol VersionLocalizationRepository: Sendable {
 
 ```
 Sources/
-├── Domain/Localizations/
-│   ├── AppStoreVersionLocalization.swift  # Value type + nil-safe Codable + AffordanceProviding
+├── Domain/Apps/Versions/Localizations/
+│   ├── AppStoreVersionLocalization.swift   # Value type + nil-safe Codable + AffordanceProviding
 │   └── VersionLocalizationRepository.swift # @Mockable protocol (3 methods)
 │
-├── Infrastructure/Localizations/
-│   └── SDKLocalizationRepository.swift    # Implements VersionLocalizationRepository; maps SDK → domain
+├── Infrastructure/Apps/Versions/Localizations/
+│   └── SDKLocalizationRepository.swift     # Implements VersionLocalizationRepository; maps SDK → domain
 │
-└── ASCCommand/Commands/Localizations/
-    ├── LocalizationsCommand.swift          # Command group + LocalizationsList
-    ├── LocalizationsCreate.swift           # Create subcommand
-    └── LocalizationsUpdate.swift           # Update subcommand (new)
+└── ASCCommand/Commands/VersionLocalizations/
+    ├── VersionLocalizationsCommand.swift   # Command group + VersionLocalizationsList
+    ├── VersionLocalizationsCreate.swift    # Create subcommand
+    └── VersionLocalizationsUpdate.swift    # Update subcommand
 
 Tests/
-├── DomainTests/Localizations/
+├── DomainTests/Apps/Versions/Localizations/
 │   ├── AppStoreVersionLocalizationTests.swift   # Field carrying, nil defaults, affordances
-│   └── VersionLocalizationRepositoryTests.swift  # list/create/update mock patterns
-├── InfrastructureTests/Localizations/
+│   └── VersionLocalizationRepositoryTests.swift # list/create/update mock patterns
+├── InfrastructureTests/Apps/Versions/Localizations/
 │   └── SDKLocalizationRepositoryTests.swift     # Parent ID injection, field mapping, URL conversion
-├── ASCCommandTests/Commands/Localizations/
-│   ├── LocalizationsListTests.swift    # Exact JSON output, affordances
-│   ├── LocalizationsCreateTests.swift  # Exact JSON output, arg passing
-│   └── LocalizationsUpdateTests.swift  # Exact JSON output, all flags
+├── ASCCommandTests/Commands/VersionLocalizations/
+│   ├── VersionLocalizationsListTests.swift   # Exact JSON output, affordances
+│   ├── VersionLocalizationsCreateTests.swift # Exact JSON output, arg passing
+│   └── VersionLocalizationsUpdateTests.swift # Exact JSON output, all flags
 └── DomainTests/Apps/
-    └── AffordancesTests.swift           # Updated: added updateLocalization affordance test
+    └── AffordancesTests.swift                # updateLocalization affordance test
 ```
 
 **Wiring files modified:**
