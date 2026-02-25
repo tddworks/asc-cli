@@ -73,4 +73,16 @@ struct ClientProvider {
         let factory = ClientFactory()
         return try factory.makeProfileRepository(authProvider: authProvider)
     }
+
+    static func makeBuildUploadRepository() throws -> any BuildUploadRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeBuildUploadRepository(authProvider: authProvider)
+    }
+
+    static func makeBetaBuildLocalizationRepository() throws -> any BetaBuildLocalizationRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeBetaBuildLocalizationRepository(authProvider: authProvider)
+    }
 }

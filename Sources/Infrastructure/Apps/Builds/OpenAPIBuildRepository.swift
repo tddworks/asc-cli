@@ -30,6 +30,20 @@ public struct SDKBuildRepository: BuildRepository, @unchecked Sendable {
         return mapBuild(response.data)
     }
 
+    public func addBetaGroups(buildId: String, betaGroupIds: [String]) async throws {
+        let body = BuildBetaGroupsLinkagesRequest(
+            data: betaGroupIds.map { .init(type: .betaGroups, id: $0) }
+        )
+        try await client.request(APIEndpoint.v1.builds.id(buildId).relationships.betaGroups.post(body))
+    }
+
+    public func removeBetaGroups(buildId: String, betaGroupIds: [String]) async throws {
+        let body = BuildBetaGroupsLinkagesRequest(
+            data: betaGroupIds.map { .init(type: .betaGroups, id: $0) }
+        )
+        try await client.request(APIEndpoint.v1.builds.id(buildId).relationships.betaGroups.delete(body))
+    }
+
     private func mapBuild(_ sdkBuild: AppStoreConnect_Swift_SDK.Build) -> Domain.Build {
         Domain.Build(
             id: sdkBuild.id,

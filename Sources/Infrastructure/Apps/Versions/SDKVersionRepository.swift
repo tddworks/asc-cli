@@ -32,6 +32,19 @@ public struct SDKVersionRepository: VersionRepository, @unchecked Sendable {
         return version
     }
 
+    public func setBuild(versionId: String, buildId: String) async throws {
+        let body = AppStoreVersionUpdateRequest(
+            data: .init(
+                type: .appStoreVersions,
+                id: versionId,
+                relationships: .init(
+                    build: .init(data: .init(type: .builds, id: buildId))
+                )
+            )
+        )
+        _ = try await client.request(APIEndpoint.v1.appStoreVersions.id(versionId).patch(body))
+    }
+
     private func mapVersion(
         _ sdkVersion: AppStoreConnect_Swift_SDK.AppStoreVersion,
         appId: String

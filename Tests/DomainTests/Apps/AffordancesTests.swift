@@ -130,4 +130,47 @@ struct AffordancesTests {
         #expect(profile.affordances["delete"] == "asc profiles delete --profile-id prof-1")
         #expect(profile.affordances["listProfiles"] == "asc profiles list --bundle-id-id bid-abc")
     }
+
+    // MARK: - BuildUpload affordances
+
+    @Test
+    func `build upload affordances include checkStatus always`() {
+        let upload = MockRepositoryFactory.makeBuildUpload(id: "up-1", appId: "app-1", state: .processing)
+        #expect(upload.affordances["checkStatus"] == "asc builds uploads get --upload-id up-1")
+    }
+
+    @Test
+    func `build upload affordances include listBuilds only when complete`() {
+        let complete = MockRepositoryFactory.makeBuildUpload(id: "up-1", appId: "app-1", state: .complete)
+        let processing = MockRepositoryFactory.makeBuildUpload(id: "up-2", appId: "app-1", state: .processing)
+        #expect(complete.affordances["listBuilds"] == "asc builds list --app-id app-1")
+        #expect(processing.affordances["listBuilds"] == nil)
+    }
+
+    // MARK: - BetaGroup affordances
+
+    @Test
+    func `beta group affordances include listTesters importTesters and exportTesters`() {
+        let group = MockRepositoryFactory.makeBetaGroup(id: "g-1", appId: "app-1")
+        #expect(group.affordances["listTesters"] == "asc testflight testers list --group-id g-1")
+        #expect(group.affordances["importTesters"] == "asc testflight testers import --group-id g-1 --file testers.csv")
+        #expect(group.affordances["exportTesters"] == "asc testflight testers export --group-id g-1")
+    }
+
+    // MARK: - BetaTester affordances
+
+    @Test
+    func `beta tester affordances include remove and listSiblings`() {
+        let tester = MockRepositoryFactory.makeBetaTester(id: "t-1", groupId: "g-1")
+        #expect(tester.affordances["remove"] == "asc testflight testers remove --group-id g-1 --tester-id t-1")
+        #expect(tester.affordances["listSiblings"] == "asc testflight testers list --group-id g-1")
+    }
+
+    // MARK: - BetaBuildLocalization affordances
+
+    @Test
+    func `beta build localization affordances include updateNotes`() {
+        let loc = MockRepositoryFactory.makeBetaBuildLocalization(id: "bbl-1", buildId: "build-abc", locale: "en-US")
+        #expect(loc.affordances["updateNotes"] == "asc builds update-beta-notes --build-id build-abc --locale en-US --notes <text>")
+    }
 }

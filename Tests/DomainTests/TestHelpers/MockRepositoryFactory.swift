@@ -48,19 +48,21 @@ struct MockRepositoryFactory {
 
     static func makeBetaGroup(
         id: String = "1",
+        appId: String = "app-1",
         name: String = "External Testers",
         isInternalGroup: Bool = false
     ) -> BetaGroup {
-        BetaGroup(id: id, name: name, isInternalGroup: isInternalGroup)
+        BetaGroup(id: id, appId: appId, name: name, isInternalGroup: isInternalGroup)
     }
 
     static func makeBetaTester(
         id: String = "1",
+        groupId: String = "group-1",
         firstName: String? = "John",
         lastName: String? = "Doe",
         email: String? = "john@example.com"
     ) -> BetaTester {
-        BetaTester(id: id, firstName: firstName, lastName: lastName, email: email)
+        BetaTester(id: id, groupId: groupId, firstName: firstName, lastName: lastName, email: email)
     }
 
     static func makeVersion(
@@ -166,6 +168,35 @@ struct MockRepositoryFactory {
             imageWidth: imageWidth,
             imageHeight: imageHeight
         )
+    }
+
+    // MARK: - Build Upload
+
+    static func makeBuildUpload(
+        id: String = "upload-1",
+        appId: String = "app-1",
+        version: String = "1.0.0",
+        buildNumber: String = "1",
+        platform: BuildUploadPlatform = .iOS,
+        state: BuildUploadState = .complete
+    ) -> BuildUpload {
+        BuildUpload(
+            id: id,
+            appId: appId,
+            version: version,
+            buildNumber: buildNumber,
+            platform: platform,
+            state: state
+        )
+    }
+
+    static func makeBetaBuildLocalization(
+        id: String = "bbl-1",
+        buildId: String = "build-1",
+        locale: String = "en-US",
+        whatsNew: String? = "Bug fixes and improvements"
+    ) -> BetaBuildLocalization {
+        BetaBuildLocalization(id: id, buildId: buildId, locale: locale, whatsNew: whatsNew)
     }
 
     // MARK: - Code Signing

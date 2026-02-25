@@ -5,7 +5,7 @@ struct VersionsCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "versions",
         abstract: "Manage App Store versions",
-        subcommands: [VersionsList.self, VersionsCreate.self, VersionsSubmit.self]
+        subcommands: [VersionsList.self, VersionsCreate.self, VersionsSubmit.self, VersionsSetBuild.self]
     )
 }
 
