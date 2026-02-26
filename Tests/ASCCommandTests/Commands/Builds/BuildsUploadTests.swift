@@ -16,8 +16,24 @@ struct BuildsUploadCommandTests {
         let cmd = try BuildsUpload.parse(["--app-id", "app-1", "--file", "/tmp/App.ipa", "--version", "1.0", "--build-number", "1", "--pretty"])
         let output = try await cmd.execute(repo: mockRepo)
 
-        #expect(output.contains("up-1"))
-        #expect(output.contains("IOS"))
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "checkStatus" : "asc builds uploads get --upload-id up-1",
+                "listBuilds" : "asc builds list --app-id app-1"
+              },
+              "appId" : "app-1",
+              "buildNumber" : "1",
+              "id" : "up-1",
+              "platform" : "IOS",
+              "state" : "COMPLETE",
+              "version" : "1.0"
+            }
+          ]
+        }
+        """)
     }
 
     @Test func `auto-detects macOS platform from pkg extension`() async throws {
@@ -28,7 +44,24 @@ struct BuildsUploadCommandTests {
         let cmd = try BuildsUpload.parse(["--app-id", "app-1", "--file", "/tmp/App.pkg", "--version", "1.0", "--build-number", "1", "--pretty"])
         let output = try await cmd.execute(repo: mockRepo)
 
-        #expect(output.contains("MAC_OS"))
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "checkStatus" : "asc builds uploads get --upload-id up-2",
+                "listBuilds" : "asc builds list --app-id app-1"
+              },
+              "appId" : "app-1",
+              "buildNumber" : "1",
+              "id" : "up-2",
+              "platform" : "MAC_OS",
+              "state" : "COMPLETE",
+              "version" : "1.0"
+            }
+          ]
+        }
+        """)
     }
 
     @Test func `uses explicit platform when provided`() async throws {
@@ -39,7 +72,24 @@ struct BuildsUploadCommandTests {
         let cmd = try BuildsUpload.parse(["--app-id", "app-1", "--file", "/tmp/App.ipa", "--version", "1.0", "--build-number", "1", "--platform", "tvos", "--pretty"])
         let output = try await cmd.execute(repo: mockRepo)
 
-        #expect(output.contains("TV_OS"))
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "checkStatus" : "asc builds uploads get --upload-id up-3",
+                "listBuilds" : "asc builds list --app-id app-1"
+              },
+              "appId" : "app-1",
+              "buildNumber" : "1",
+              "id" : "up-3",
+              "platform" : "TV_OS",
+              "state" : "COMPLETE",
+              "version" : "1.0"
+            }
+          ]
+        }
+        """)
     }
 
     @Test func `throws for unknown explicit platform`() async throws {
@@ -61,7 +111,24 @@ struct BuildsUploadCommandTests {
         let cmd = try BuildsUpload.parse(["--app-id", "app-1", "--file", "/tmp/App.ipa", "--version", "1.0", "--build-number", "1", "--wait", "--pretty"])
         let output = try await cmd.execute(repo: mockRepo)
 
-        #expect(output.contains("COMPLETE"))
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "checkStatus" : "asc builds uploads get --upload-id up-1",
+                "listBuilds" : "asc builds list --app-id app-1"
+              },
+              "appId" : "app-1",
+              "buildNumber" : "1",
+              "id" : "up-1",
+              "platform" : "IOS",
+              "state" : "COMPLETE",
+              "version" : "1.0"
+            }
+          ]
+        }
+        """)
     }
 
     @Test func `wait throws when upload fails with no details`() async throws {

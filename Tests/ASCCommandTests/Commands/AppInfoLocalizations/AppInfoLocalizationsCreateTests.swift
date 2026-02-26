@@ -20,9 +20,22 @@ struct AppInfoLocalizationsCreateTests {
         ])
         let output = try await cmd.execute(repo: mockRepo)
 
-        #expect(output.contains("loc-1"))
-        #expect(output.contains("en-US"))
-        #expect(output.contains("My App"))
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "listLocalizations" : "asc app-info-localizations list --app-info-id info-1",
+                "updateLocalization" : "asc app-info-localizations update --localization-id loc-1"
+              },
+              "appInfoId" : "info-1",
+              "id" : "loc-1",
+              "locale" : "en-US",
+              "name" : "My App"
+            }
+          ]
+        }
+        """)
     }
 
     @Test func `table output includes all row fields`() async throws {
