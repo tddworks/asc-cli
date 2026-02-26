@@ -2,10 +2,11 @@ import SwiftUI
 import Shimmer
 import Domain
 
-/// Main menu bar popup — three states matching row-1-core-states.html exactly:
-///   1. Loading  — shimmer grid + disabled action bar      (isSyncing && apps.isEmpty)
-///   2. Error    — ErrorStateView + Retry-only action bar  (lastError != nil && apps.isEmpty)
-///   3. Loaded   — pills + version grid + Apps/Refresh bar
+/// Main menu bar popup — three states matching row-1-core-states.html exactly.
+///
+/// Layout fix: content is a plain VStack; background (solid colour + orbs) is applied
+/// via `.background {}` so `GeometryReader` never participates in the parent layout pass.
+/// This eliminates the "Update Constraints in Window" constraint loop.
 struct MenuContentView: View {
     let portfolio: AppPortfolio
 
@@ -15,17 +16,15 @@ struct MenuContentView: View {
     @State private var lastCopiedCommand: String? = nil
     @State private var copiedConfirmed = false
 
-    // MARK: - State helpers
+    // MARK: - State helpers (read domain directly)
 
     private var isLoading: Bool { portfolio.isSyncing && portfolio.apps.isEmpty }
     private var isError: Bool   { portfolio.lastError != nil && portfolio.apps.isEmpty }
 
+    // MARK: - Root
+
     var body: some View {
-        ZStack {
-            theme.backgroundGradient.ignoresSafeArea()
-
-            if theme.showBackgroundOrbs { backgroundOrbs }
-
+        Group {
             if showSettings {
                 SettingsContentView(showSettings: $showSettings, monitor: portfolio)
             } else {
@@ -33,7 +32,7 @@ struct MenuContentView: View {
             }
         }
         .frame(width: 400)
-        .fixedSize(horizontal: false, vertical: true)
+        .background { popoverBackground }
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .task {
             withAnimation(.easeOut(duration: 0.4)) { animateIn = true }
@@ -41,7 +40,35 @@ struct MenuContentView: View {
         }
     }
 
-    // MARK: - Main Content
+    // MARK: - Popover background (solid #1e1e20 + two orbs)
+    // GeometryReader lives here — inside .background{} it cannot affect parent layout.
+
+    private var popoverBackground: some View {
+        GeometryReader { proxy in
+            // --bg-base: #1e1e20
+            Color(red: 0.118, green: 0.118, blue: 0.125)
+
+            // Orb 1 — purple top-left  (--orb1: rgba(120,60,220,.35))
+            // CSS: top:-80px; left:-60px; width:220px → centre at (50, 30)
+            Circle()
+                .fill(RadialGradient(
+                    colors: [Color(red: 120/255, green: 60/255, blue: 220/255).opacity(0.35), .clear],
+                    center: .center, startRadius: 0, endRadius: 110))
+                .frame(width: 220, height: 220)
+                .position(x: 50, y: 30)
+
+            // Orb 2 — pink bottom-right  (--orb2: rgba(220,60,120,.28))
+            // CSS: bottom:-60px; right:-40px; width:180px → centre at (w-50, h-30)
+            Circle()
+                .fill(RadialGradient(
+                    colors: [Color(red: 220/255, green: 60/255, blue: 120/255).opacity(0.28), .clear],
+                    center: .center, startRadius: 0, endRadius: 90))
+                .frame(width: 180, height: 180)
+                .position(x: proxy.size.width - 50, y: proxy.size.height - 30)
+        }
+    }
+
+    // MARK: - Main content
 
     private var mainContent: some View {
         VStack(spacing: 0) {
@@ -49,17 +76,13 @@ struct MenuContentView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 14)
                 .padding(.bottom, 10)
-                .overlay(alignment: .bottom) {
-                    Divider().background(theme.glassBorder)
-                }
+                .overlay(alignment: .bottom) { divider }
 
             if !portfolio.apps.isEmpty {
                 appPillsRow
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-                    .overlay(alignment: .bottom) {
-                        Divider().background(theme.glassBorder)
-                    }
+                    .overlay(alignment: .bottom) { divider }
             }
 
             contentSection
@@ -75,17 +98,21 @@ struct MenuContentView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 2)
                 .padding(.bottom, 14)
-                .overlay(alignment: .top) {
-                    Divider().background(theme.glassBorder)
-                }
+                .overlay(alignment: .top) { divider }
         }
         .animation(.easeOut(duration: 0.2), value: lastCopiedCommand)
     }
 
-    // MARK: - Header
+    private var divider: some View {
+        // rgba(255,255,255,.06)
+        Rectangle().fill(Color.white.opacity(0.06)).frame(height: 1)
+    }
+
+    // MARK: - Header  (matches .pop-header)
 
     private var header: some View {
         HStack(spacing: 12) {
+            // .logo-circle — linear-gradient(135deg, #7b5af5, #c74af7) + shadow
             ZStack {
                 Circle()
                     .fill(theme.accentGradient)
@@ -96,9 +123,10 @@ struct MenuContentView: View {
                     .foregroundStyle(.white)
             }
 
+            // .pop-title
             VStack(alignment: .leading, spacing: 1) {
                 Text("ASCBar")
-                    .font(.system(size: 16, weight: .bold, design: theme.fontDesign))
+                    .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(theme.textPrimary)
                 Text("> app monitor")
                     .font(.system(size: 11, design: .monospaced))
@@ -106,6 +134,8 @@ struct MenuContentView: View {
             }
 
             Spacer()
+
+            // .status-pill
             statusPill
         }
         .opacity(animateIn ? 1 : 0)
@@ -113,37 +143,37 @@ struct MenuContentView: View {
         .animation(.easeOut(duration: 0.4), value: animateIn)
     }
 
+    // MARK: - Status pill
+
     private var statusPill: some View {
         HStack(spacing: 5) {
             statusDot
             Text(statusText)
-                .font(.system(size: 11, weight: .semibold, design: theme.fontDesign))
+                .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(theme.textPrimary)
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 4)
+        // .status-pill: background bg-card, border --border, radius 20px
         .background(
-            RoundedRectangle(cornerRadius: theme.pillCornerRadius)
+            Capsule()
                 .fill(theme.glassBackground)
-                .overlay(
-                    RoundedRectangle(cornerRadius: theme.pillCornerRadius)
-                        .stroke(theme.glassBorder, lineWidth: 1)
-                )
+                .overlay(Capsule().stroke(theme.glassBorder, lineWidth: 1))
         )
     }
 
     @ViewBuilder
     private var statusDot: some View {
         if portfolio.isSyncing {
-            PulsingDot(color: theme.accentPrimary)
+            PulsingDot(color: theme.accentPrimary)     // .dot.pulse → --accent
         } else if portfolio.lastError != nil {
-            Circle().fill(theme.statusRemoved)
+            Circle().fill(theme.statusRemoved)          // .dot.red  → --red
                 .frame(width: 7, height: 7)
-                .shadow(color: theme.statusRemoved, radius: 3)
+                .shadow(color: theme.statusRemoved.opacity(0.8), radius: 3)
         } else {
-            Circle().fill(theme.statusLive)
+            Circle().fill(theme.statusLive)             // .dot.green → --green
                 .frame(width: 7, height: 7)
-                .shadow(color: theme.statusLive, radius: 3)
+                .shadow(color: theme.statusLive.opacity(0.8), radius: 3)
         }
     }
 
@@ -153,7 +183,7 @@ struct MenuContentView: View {
         return "Ready"
     }
 
-    // MARK: - App Pills
+    // MARK: - App pills row  (matches .pills-row / .app-pill)
 
     private var appPillsRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -174,7 +204,7 @@ struct MenuContentView: View {
         .animation(.easeOut(duration: 0.4).delay(0.05), value: animateIn)
     }
 
-    // MARK: - Content Section (state switch)
+    // MARK: - Content section (state switch)
 
     @ViewBuilder
     private var contentSection: some View {
@@ -193,14 +223,15 @@ struct MenuContentView: View {
         }
     }
 
-    // MARK: - Loaded content
+    // MARK: - Loaded content  (matches .app-meta-header + .version-grid)
 
     private var loadedContent: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // .app-meta-header
             if let app = portfolio.selectedApp {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(app.displayName)
-                        .font(.system(size: 13, weight: .bold, design: theme.fontDesign))
+                        .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(theme.textPrimary)
                     Text(metaLine(for: app))
                         .font(.system(size: 10, design: .monospaced))
@@ -212,11 +243,12 @@ struct MenuContentView: View {
                 shimmerGrid
             } else if portfolio.selectedVersions.isEmpty {
                 Text("No versions found")
-                    .font(.system(size: 12, design: theme.fontDesign))
+                    .font(.system(size: 12))
                     .foregroundStyle(theme.textTertiary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 24)
             } else {
+                // .version-grid — grid-template-columns: 1fr 1fr; gap: 8px
                 LazyVGrid(
                     columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
                     spacing: 8
@@ -231,7 +263,7 @@ struct MenuContentView: View {
         }
     }
 
-    /// "com.example.ascbar · macOS" — platform suffix only when all versions share one platform.
+    /// "com.example.ascbar · macOS" — suffix only when all versions share one platform.
     private func metaLine(for app: ASCApp) -> String {
         let platforms = Set(portfolio.selectedVersions.map(\.platform))
         if platforms.count == 1, let display = portfolio.selectedVersions.first?.platformDisplayName {
@@ -240,7 +272,7 @@ struct MenuContentView: View {
         return app.bundleId
     }
 
-    // MARK: - Shimmer Skeleton Grid
+    // MARK: - Shimmer skeleton grid  (matches .skeleton cards)
 
     private var shimmerGrid: some View {
         LazyVGrid(
@@ -252,35 +284,53 @@ struct MenuContentView: View {
     }
 
     private var skeletonCard: some View {
+        // Card bg: rgba(255,255,255,.04) — matches .version-card bg in HTML skeleton
         VStack(alignment: .leading, spacing: 6) {
-            shimmerBar(width: 36, height: 9)
-            shimmerBar(width: 60, height: 22)
-            shimmerBar(width: 80, height: 11)
+            shimmerBar(width: 40, height: 9)     // platform badge
+            shimmerBar(width: 56, height: 22)    // version number
+            shimmerBar(width: 88, height: 11)    // state label
         }
-        .padding(12)
+        .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: theme.cardCornerRadius)
-                .fill(theme.glassBackground.opacity(0.5))
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.white.opacity(0.04))
                 .overlay(
-                    RoundedRectangle(cornerRadius: theme.cardCornerRadius)
-                        .stroke(theme.glassBorder, lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.white.opacity(0.07), lineWidth: 1)
                 )
         )
     }
 
+    /// Shimmer bar — two-layer trick:
+    ///   • Bottom: solid `white(.18)` fill → always visible (never disappears at trough)
+    ///   • Top:    `.shimmering()` with a `clear→white→clear` mask → traveling bright sweep
+    /// Effective opacity: trough ≈ 0.18 (light gray), peak ≈ 0.18+boost (bright highlight).
     private func shimmerBar(width: CGFloat, height: CGFloat) -> some View {
-        RoundedRectangle(cornerRadius: 3).fill(theme.glassBorder)
-            .frame(width: width, height: height)
-            .shimmering(
-                animation: .easeInOut(duration: 1.4).repeatForever(autoreverses: false),
-                gradient: Gradient(colors: [theme.glassBorder, theme.glassHighlight, theme.glassBorder])
-            )
+        ZStack {
+            // Always-on base — the "skeleton" you always see
+            RoundedRectangle(cornerRadius: height / 2)
+                .fill(Color.white.opacity(0.18))
+
+            // Traveling highlight — adds brightness on top of the base
+            RoundedRectangle(cornerRadius: height / 2)
+                .fill(Color.white.opacity(0.18))
+                .shimmering(
+                    animation: .easeInOut(duration: 1.6).repeatForever(autoreverses: false),
+                    gradient: Gradient(colors: [
+                        Color.clear,
+                        Color.white.opacity(0.45),
+                        Color.clear,
+                    ])
+                )
+        }
+        .frame(width: width, height: height)
     }
 
-    // MARK: - Code Snippet Toast
+    // MARK: - Code snippet toast
 
     private func codeSnippetBar(_ command: String) -> some View {
+        // Matches .code-snippet: bg rgba(0,0,0,.35) border rgba(100,210,255,.15)
         HStack(spacing: 8) {
             Text(command)
                 .font(.system(size: 11, design: .monospaced))
@@ -294,32 +344,21 @@ struct MenuContentView: View {
                 copyToClipboard(command)
                 withAnimation { copiedConfirmed = true }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    withAnimation {
-                        copiedConfirmed = false
-                        lastCopiedCommand = nil
-                    }
+                    withAnimation { copiedConfirmed = false; lastCopiedCommand = nil }
                 }
             } label: {
+                // .copy-btn
                 Text(copiedConfirmed ? "✓ Copied!" : "Copy")
-                    .font(.system(size: 10, weight: .bold, design: theme.fontDesign))
+                    .font(.system(size: 10, weight: .bold))
                     .foregroundStyle(copiedConfirmed ? theme.statusLive : theme.accentPrimary)
                     .padding(.horizontal, 7)
                     .padding(.vertical, 2)
                     .background(
                         RoundedRectangle(cornerRadius: 4)
-                            .fill(
-                                copiedConfirmed
-                                    ? theme.statusLive.opacity(0.12)
-                                    : theme.accentPrimary.opacity(0.12)
-                            )
+                            .fill((copiedConfirmed ? theme.statusLive : theme.accentPrimary).opacity(0.12))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 4)
-                                    .stroke(
-                                        copiedConfirmed
-                                            ? theme.statusLive.opacity(0.25)
-                                            : theme.accentPrimary.opacity(0.25),
-                                        lineWidth: 1
-                                    )
+                                    .stroke((copiedConfirmed ? theme.statusLive : theme.accentPrimary).opacity(0.25), lineWidth: 1)
                             )
                     )
             }
@@ -337,7 +376,7 @@ struct MenuContentView: View {
         )
     }
 
-    // MARK: - Action Bar (state-aware)
+    // MARK: - Action bar (state-aware — matches .action-bar)
 
     @ViewBuilder
     private var actionBar: some View {
@@ -350,16 +389,16 @@ struct MenuContentView: View {
         }
     }
 
-    /// State 1 — all controls disabled while initial fetch is in progress.
+    /// State 1 — disabled while initial fetch in progress.
     private var loadingActionBar: some View {
         HStack(spacing: 8) {
-            appsButton.opacity(0.5).disabled(true)
-            syncingButton.opacity(0.5).disabled(true)
+            appsButton.opacity(0.5).allowsHitTesting(false)
+            ghostPill(label: "Syncing", icon: "arrow.triangle.2.circlepath").opacity(0.5)
             Spacer()
-            iconButton(symbol: "gearshape.fill", help: "Settings") { showSettings = true }
-                .opacity(0.4).disabled(true)
-            iconButton(symbol: "xmark", help: "Quit ASCBar") { NSApplication.shared.terminate(nil) }
-                .opacity(0.4).disabled(true)
+            circleIconButton(symbol: "gearshape.fill", help: "Settings") { showSettings = true }
+                .opacity(0.4).allowsHitTesting(false)
+            circleIconButton(symbol: "xmark", help: "Quit ASCBar") { NSApplication.shared.terminate(nil) }
+                .opacity(0.4).allowsHitTesting(false)
         }
     }
 
@@ -369,18 +408,15 @@ struct MenuContentView: View {
             Button { Task { await portfolio.refresh() } } label: {
                 HStack(spacing: 5) {
                     Image(systemName: "arrow.clockwise").font(.system(size: 10, weight: .bold))
-                    Text("Retry").font(.system(size: 12, weight: .bold, design: theme.fontDesign))
+                    Text("Retry").font(.system(size: 12, weight: .bold))
                 }
                 .foregroundStyle(theme.textSecondary)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 7)
                 .background(
-                    RoundedRectangle(cornerRadius: theme.pillCornerRadius)
+                    Capsule()
                         .fill(theme.glassBackground)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: theme.pillCornerRadius)
-                                .stroke(theme.glassBorder, lineWidth: 1)
-                        )
+                        .overlay(Capsule().stroke(theme.glassBorder, lineWidth: 1))
                 )
             }
             .buttonStyle(.plain)
@@ -388,9 +424,9 @@ struct MenuContentView: View {
 
             Spacer()
 
-            iconButton(symbol: "gearshape.fill", help: "Settings") { showSettings = true }
+            circleIconButton(symbol: "gearshape.fill", help: "Settings") { showSettings = true }
                 .keyboardShortcut(",")
-            iconButton(symbol: "xmark", help: "Quit ASCBar") { NSApplication.shared.terminate(nil) }
+            circleIconButton(symbol: "xmark", help: "Quit ASCBar") { NSApplication.shared.terminate(nil) }
                 .keyboardShortcut("q")
         }
     }
@@ -401,15 +437,16 @@ struct MenuContentView: View {
             appsButton.keyboardShortcut("a")
             refreshButton.keyboardShortcut("r")
             Spacer()
-            iconButton(symbol: "gearshape.fill", help: "Settings") { showSettings = true }
+            circleIconButton(symbol: "gearshape.fill", help: "Settings") { showSettings = true }
                 .keyboardShortcut(",")
-            iconButton(symbol: "xmark", help: "Quit ASCBar") { NSApplication.shared.terminate(nil) }
+            circleIconButton(symbol: "xmark", help: "Quit ASCBar") { NSApplication.shared.terminate(nil) }
                 .keyboardShortcut("q")
         }
     }
 
     // MARK: - Shared button shapes
 
+    /// .bar-btn.primary — purple-pink gradient pill
     private var appsButton: some View {
         Button {
             if let app = portfolio.selectedApp {
@@ -418,13 +455,13 @@ struct MenuContentView: View {
         } label: {
             HStack(spacing: 5) {
                 Image(systemName: "square.grid.2x2").font(.system(size: 10, weight: .bold))
-                Text("Apps").font(.system(size: 12, weight: .bold, design: theme.fontDesign))
+                Text("Apps").font(.system(size: 12, weight: .bold))
             }
             .foregroundStyle(.white)
             .padding(.horizontal, 14)
             .padding(.vertical, 7)
             .background(
-                RoundedRectangle(cornerRadius: theme.pillCornerRadius)
+                Capsule()
                     .fill(theme.accentGradient)
                     .shadow(color: BaseColors.brandPurple.opacity(0.35), radius: 6, y: 2)
             )
@@ -432,10 +469,7 @@ struct MenuContentView: View {
         .buttonStyle(.plain)
     }
 
-    private var syncingButton: some View {
-        ghostPill(label: "Syncing", icon: "arrow.triangle.2.circlepath")
-    }
-
+    /// .bar-btn.ghost — Refresh / Syncing
     private var refreshButton: some View {
         Button { Task { await portfolio.refresh() } } label: {
             HStack(spacing: 5) {
@@ -449,18 +483,15 @@ struct MenuContentView: View {
                         value: portfolio.isSyncing
                     )
                 Text(portfolio.isSyncing ? "Syncing" : "Refresh")
-                    .font(.system(size: 12, weight: .bold, design: theme.fontDesign))
+                    .font(.system(size: 12, weight: .bold))
             }
             .foregroundStyle(theme.textSecondary)
             .padding(.horizontal, 14)
             .padding(.vertical, 7)
             .background(
-                RoundedRectangle(cornerRadius: theme.pillCornerRadius)
+                Capsule()
                     .fill(theme.glassBackground)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: theme.pillCornerRadius)
-                            .stroke(theme.glassBorder, lineWidth: 1)
-                    )
+                    .overlay(Capsule().stroke(theme.glassBorder, lineWidth: 1))
             )
         }
         .buttonStyle(.plain)
@@ -469,22 +500,20 @@ struct MenuContentView: View {
     private func ghostPill(label: String, icon: String) -> some View {
         HStack(spacing: 5) {
             Image(systemName: icon).font(.system(size: 10, weight: .bold))
-            Text(label).font(.system(size: 12, weight: .bold, design: theme.fontDesign))
+            Text(label).font(.system(size: 12, weight: .bold))
         }
         .foregroundStyle(theme.textSecondary)
         .padding(.horizontal, 14)
         .padding(.vertical, 7)
         .background(
-            RoundedRectangle(cornerRadius: theme.pillCornerRadius)
+            Capsule()
                 .fill(theme.glassBackground)
-                .overlay(
-                    RoundedRectangle(cornerRadius: theme.pillCornerRadius)
-                        .stroke(theme.glassBorder, lineWidth: 1)
-                )
+                .overlay(Capsule().stroke(theme.glassBorder, lineWidth: 1))
         )
     }
 
-    private func iconButton(symbol: String, help: String, action: @escaping () -> Void) -> some View {
+    /// .icon-btn — 30×30 circle
+    private func circleIconButton(symbol: String, help: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             ZStack {
                 Circle()
@@ -500,30 +529,6 @@ struct MenuContentView: View {
         .help(help)
     }
 
-    // MARK: - Background Orbs
-
-    private var backgroundOrbs: some View {
-        GeometryReader { geo in
-            ZStack {
-                Circle()
-                    .fill(RadialGradient(
-                        colors: [BaseColors.brandPurple.opacity(0.35), .clear],
-                        center: .center, startRadius: 0, endRadius: 120))
-                    .frame(width: 220, height: 220)
-                    .offset(x: -60, y: -80)
-                    .blur(radius: 40)
-                Circle()
-                    .fill(RadialGradient(
-                        colors: [BaseColors.brandPink.opacity(0.28), .clear],
-                        center: .center, startRadius: 0, endRadius: 100))
-                    .frame(width: 180, height: 180)
-                    .offset(x: geo.size.width - 40, y: geo.size.height - 60)
-                    .blur(radius: 30)
-            }
-        }
-        .allowsHitTesting(false)
-    }
-
     // MARK: - Helpers
 
     private func handleCopy(_ command: String) {
@@ -533,10 +538,7 @@ struct MenuContentView: View {
             copiedConfirmed = true
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-            withAnimation {
-                copiedConfirmed = false
-                lastCopiedCommand = nil
-            }
+            withAnimation { copiedConfirmed = false; lastCopiedCommand = nil }
         }
     }
 
@@ -546,7 +548,7 @@ struct MenuContentView: View {
     }
 }
 
-// MARK: - Pulsing Dot
+// MARK: - Pulsing dot  (.dot.pulse → CSS keyframes pulse)
 
 private struct PulsingDot: View {
     let color: Color
@@ -565,12 +567,11 @@ private struct PulsingDot: View {
     }
 }
 
-// MARK: - Previews
+// MARK: - Previews (one per core state)
 
 #Preview("State 1 — Loading") {
     MenuContentView(portfolio: AppPortfolio(repository: PreviewRepository(state: .loading)))
         .appThemeProvider(themeModeId: "dark")
-        .frame(width: 400)
 }
 
 #Preview("State 2 — Main View") {
@@ -579,16 +580,14 @@ private struct PulsingDot: View {
         return m
     }())
     .appThemeProvider(themeModeId: "dark")
-    .frame(width: 400)
 }
 
 #Preview("State 3 — Error / No Auth") {
     MenuContentView(portfolio: AppPortfolio(repository: PreviewRepository(state: .error)))
         .appThemeProvider(themeModeId: "dark")
-        .frame(width: 400)
 }
 
-// MARK: - Preview Repository
+// MARK: - Preview repository
 
 private enum PreviewState { case loaded, loading, error }
 
@@ -599,7 +598,7 @@ private final class PreviewRepository: AppStoreRepository {
     func fetchApps() async throws -> [ASCApp] {
         switch state {
         case .loading: try? await Task.sleep(for: .seconds(60)); return []
-        case .error: throw URLError(.badServerResponse)
+        case .error:   throw URLError(.badServerResponse)
         case .loaded:
             return [
                 ASCApp(id: "1", name: "ASCBar",      bundleId: "com.example.ascbar"),
