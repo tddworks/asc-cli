@@ -43,7 +43,7 @@ extension Build: AffordanceProviding {
     public var affordances: [String: String] {
         guard isUsable else { return [:] }
         return [
-            "addToTestFlight": "asc builds add-beta-group --build-id \(id) --group-id <group-id>",
+            "addToTestFlight": "asc builds add-beta-group --build-id \(id) --beta-group-id <beta-group-id>",
             "updateBetaNotes": "asc builds update-beta-notes --build-id \(id) --locale en-US --notes <notes>"
         ]
     }

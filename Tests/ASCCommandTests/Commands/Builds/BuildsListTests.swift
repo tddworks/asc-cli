@@ -22,7 +22,7 @@ struct BuildsListTests {
           "data" : [
             {
               "affordances" : {
-                "addToTestFlight" : "asc builds add-beta-group --build-id b-1 --group-id <group-id>",
+                "addToTestFlight" : "asc builds add-beta-group --build-id b-1 --beta-group-id <beta-group-id>",
                 "updateBetaNotes" : "asc builds update-beta-notes --build-id b-1 --locale en-US --notes <notes>"
               },
               "expired" : false,
