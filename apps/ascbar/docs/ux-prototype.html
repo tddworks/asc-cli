@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASCBar — macOS Menu Bar Prototype</title>
+  <style>
+    :root {
+      --popover-width: 400px;
+      --radius-popover: 14px;
+      --radius-card: 10px;
+      --radius-pill: 20px;
+
+      /* macOS dark vibrancy palette */
+      --bg-base:      #1e1e20;
+      --bg-card:      rgba(255,255,255,0.06);
+      --bg-card-hover:rgba(255,255,255,0.10);
+      --bg-input:     rgba(255,255,255,0.08);
+      --border:       rgba(255,255,255,0.10);
+      --border-focus: rgba(255,255,255,0.20);
+
+      --text-primary:   rgba(255,255,255,0.92);
+      --text-secondary: rgba(255,255,255,0.50);
+      --text-tertiary:  rgba(255,255,255,0.28);
+      --text-mono:      rgba(100,210,255,0.85);
+
+      --accent:   #0a84ff;
+      --green:    #30d158;
+      --orange:   #ff9f0a;
+      --red:      #ff453a;
+      --purple:   #bf5af2;
+      --yellow:   #ffd60a;
+      --cyan:     #64d2ff;
+
+      /* orb colours */
+      --orb1: rgba(120,60,220,0.35);
+      --orb2: rgba(220,60,120,0.28);
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+      background: #0c0c0e;
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* ── Page shell ── */
+    .page { padding: 56px 40px 80px; max-width: 1900px; margin: 0 auto; }
+
+    .page-header { text-align:center; margin-bottom: 72px; }
+    .page-header .badge {
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(10,132,255,0.12); border:1px solid rgba(10,132,255,0.28);
+      padding:5px 16px; border-radius:20px; font-size:12px; font-weight:700;
+      color:var(--accent); letter-spacing:.06em; text-transform:uppercase;
+      margin-bottom:18px;
+    }
+    .page-header h1 {
+      font-size:48px; font-weight:700; letter-spacing:-.022em; margin-bottom:14px;
+      background:linear-gradient(135deg,#fff 0%,rgba(255,255,255,.55) 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    .page-header p { font-size:16px; color:var(--text-secondary); line-height:1.6; max-width:660px; margin:0 auto; }
+
+    /* ── Row + step labels ── */
+    .row-label {
+      display:flex; align-items:center; gap:16px; margin:0 0 36px;
+    }
+    .row-label-line { flex:1; height:1px; background:rgba(255,255,255,.08); }
+    .row-label span {
+      font-size:11px; font-weight:700; letter-spacing:.1em;
+      text-transform:uppercase; color:var(--text-tertiary);
+    }
+    .flow-row {
+      display:flex; align-items:flex-start; justify-content:center;
+      gap:28px; margin-bottom:80px; flex-wrap:wrap;
+    }
+    .flow-step { display:flex; flex-direction:column; align-items:center; gap:14px; }
+    .step-label {
+      display:flex; align-items:center; gap:8px;
+    }
+    .step-num {
+      width:24px; height:24px; border-radius:50%; background:var(--accent);
+      display:flex; align-items:center; justify-content:center;
+      font-size:12px; font-weight:700; flex-shrink:0;
+    }
+    .step-name {
+      font-size:11px; font-weight:700; color:var(--text-secondary);
+      text-transform:uppercase; letter-spacing:.07em;
+    }
+    .arrow {
+      color:var(--text-tertiary); padding-top:120px; flex-shrink:0;
+    }
+    .arrow svg { width:26px; height:26px; }
+
+    /* ── macOS Menu Bar pill (decorative) ── */
+    .menubar-context {
+      display:flex; align-items:center; justify-content:center;
+      margin-bottom:10px; gap:8px;
+    }
+    .menubar-pill {
+      background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12);
+      border-radius:6px; padding:3px 10px; font-size:11px; color:var(--text-secondary);
+      font-weight:500;
+    }
+    .menubar-pill.active {
+      background:rgba(255,255,255,0.14);
+      color:var(--text-primary);
+    }
+
+    /* ── Popover frame ── */
+    .popover {
+      width: var(--popover-width);
+      background: var(--bg-base);
+      border-radius: var(--radius-popover);
+      border: 1px solid var(--border);
+      box-shadow:
+        0 30px 80px rgba(0,0,0,.7),
+        0 0 0 0.5px rgba(255,255,255,.06) inset;
+      overflow: hidden;
+      position: relative;
+    }
+    /* Ambient orbs */
+    .popover::before {
+      content:'';
+      position:absolute; width:220px; height:220px;
+      border-radius:50%;
+      background: radial-gradient(circle, var(--orb1) 0%, transparent 70%);
+      top:-80px; left:-60px; pointer-events:none; z-index:0;
+    }
+    .popover::after {
+      content:'';
+      position:absolute; width:180px; height:180px;
+      border-radius:50%;
+      background: radial-gradient(circle, var(--orb2) 0%, transparent 70%);
+      bottom:-60px; right:-40px; pointer-events:none; z-index:0;
+    }
+    .popover > * { position:relative; z-index:1; }
+
+    /* Arrow caret pointing up */
+    .popover-caret {
+      width:14px; height:7px; overflow:hidden; margin:0 auto;
+    }
+    .popover-caret::before {
+      content:'';
+      display:block; width:14px; height:14px;
+      background:var(--bg-base);
+      border:1px solid var(--border);
+      transform:rotate(45deg) translate(-5px,-5px);
+    }
+
+    /* ── Inner sections ── */
+    .pop-header {
+      padding: 14px 16px 10px;
+      display:flex; align-items:center; gap:12px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .logo-circle {
+      width:36px; height:36px; border-radius:50%; flex-shrink:0;
+      background:linear-gradient(135deg,#7b5af5,#c74af7);
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 4px 14px rgba(122,90,245,.45);
+    }
+    .logo-circle svg { width:17px; height:17px; color:#fff; }
+    .pop-title { flex:1; }
+    .pop-title h2 { font-size:16px; font-weight:700; line-height:1.1; }
+    .pop-title p  { font-size:11px; color:var(--text-secondary); font-family:monospace; }
+    .status-pill {
+      display:flex; align-items:center; gap:5px;
+      background:var(--bg-card); border:1px solid var(--border);
+      border-radius:var(--radius-pill); padding:4px 10px;
+      font-size:11px; font-weight:600; color:var(--text-primary);
+    }
+    .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+    .dot.green  { background:var(--green);  box-shadow:0 0 6px var(--green); }
+    .dot.orange { background:var(--orange); box-shadow:0 0 6px var(--orange); }
+    .dot.pulse  { background:var(--accent); animation:pulse 1.2s ease-in-out infinite; }
+    .dot.red    { background:var(--red);    box-shadow:0 0 6px var(--red); }
+    @keyframes pulse {
+      0%,100%{ opacity:1; transform:scale(1); }
+      50%{ opacity:.4; transform:scale(1.5); }
+    }
+
+    /* App pills row */
+    .pills-row {
+      padding:10px 16px;
+      display:flex; gap:6px; overflow-x:auto;
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .pills-row::-webkit-scrollbar { display:none; }
+    .app-pill {
+      display:flex; align-items:center; gap:6px;
+      background:var(--bg-card); border:1px solid transparent;
+      border-radius:var(--radius-pill); padding:4px 12px;
+      font-size:12px; font-weight:600; white-space:nowrap; cursor:pointer;
+      color:var(--text-secondary); transition:all .15s;
+    }
+    .app-pill.active {
+      background:rgba(10,132,255,.15); border-color:rgba(10,132,255,.35);
+      color:var(--text-primary);
+    }
+    .pill-dot { width:6px; height:6px; border-radius:50%; }
+
+    /* App name + bundle header */
+    .app-meta-header { padding:12px 16px 8px; }
+    .app-meta-header h3 { font-size:13px; font-weight:700; color:var(--text-primary); }
+    .app-meta-header code {
+      font-size:10px; color:var(--text-tertiary);
+      font-family:'SF Mono','Menlo',monospace;
+    }
+
+    /* Version card grid */
+    .version-grid {
+      padding:0 16px 14px;
+      display:grid; grid-template-columns:1fr 1fr; gap:8px;
+    }
+    .version-card {
+      background:var(--bg-card); border:1px solid var(--border);
+      border-radius:var(--radius-card); padding:12px;
+      cursor:pointer; transition:background .15s;
+      position:relative; overflow:hidden;
+    }
+    .version-card:hover { background:var(--bg-card-hover); }
+    .version-card.highlighted {
+      background:rgba(10,132,255,.1); border-color:rgba(10,132,255,.28);
+    }
+    .version-card.live {
+      background:rgba(48,209,88,.07); border-color:rgba(48,209,88,.2);
+    }
+    .version-card.pending {
+      background:rgba(255,159,10,.07); border-color:rgba(255,159,10,.2);
+    }
+    .version-card.rejected {
+      background:rgba(255,69,58,.07); border-color:rgba(255,69,58,.2);
+    }
+    .vc-platform {
+      font-size:9px; font-weight:700; text-transform:uppercase;
+      letter-spacing:.06em; color:var(--text-tertiary);
+      background:rgba(255,255,255,.08); border-radius:3px;
+      padding:1px 5px; display:inline-block; margin-bottom:6px;
+    }
+    .vc-version { font-size:18px; font-weight:700; line-height:1; margin-bottom:4px; }
+    .vc-state   { font-size:11px; font-weight:600; margin-bottom:8px; }
+    .vc-state.green  { color:var(--green); }
+    .vc-state.orange { color:var(--orange); }
+    .vc-state.red    { color:var(--red); }
+    .vc-state.purple { color:var(--purple); }
+    .vc-state.blue   { color:var(--accent); }
+    .vc-action {
+      display:flex; align-items:center; gap:4px;
+      font-size:10px; font-weight:600; color:var(--accent);
+      opacity:0; transition:opacity .15s;
+    }
+    .version-card:hover .vc-action { opacity:1; }
+    .vc-action svg { width:10px; height:10px; }
+
+    /* Action bar */
+    .action-bar {
+      padding:10px 16px 14px;
+      display:flex; align-items:center; gap:8px;
+      border-top:1px solid rgba(255,255,255,.06);
+    }
+    .bar-btn {
+      display:flex; align-items:center; gap:5px;
+      border:none; border-radius:var(--radius-pill);
+      padding:6px 14px; font-size:12px; font-weight:700;
+      cursor:pointer; font-family:inherit; transition:all .15s;
+    }
+    .bar-btn.primary {
+      background:linear-gradient(135deg,#7b5af5,#c74af7);
+      color:#fff;
+      box-shadow:0 3px 12px rgba(122,90,245,.35);
+    }
+    .bar-btn.ghost {
+      background:var(--bg-card); border:1px solid var(--border);
+      color:var(--text-secondary);
+    }
+    .bar-btn.ghost:hover { color:var(--text-primary); }
+    .bar-spacer { flex:1; }
+    .icon-btn {
+      width:30px; height:30px; border-radius:50%;
+      background:var(--bg-card); border:1px solid var(--border);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer;
+    }
+    .icon-btn svg { width:13px; height:13px; color:var(--text-secondary); }
+
+    /* ── Detail / expanded panel ── */
+    .section-header {
+      padding:10px 16px 6px;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .section-header h4 { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-tertiary); }
+    .section-header a  { font-size:12px; color:var(--accent); cursor:pointer; }
+
+    .detail-row {
+      display:flex; align-items:center; padding:9px 16px; gap:10px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+    .detail-row:last-child { border-bottom:none; }
+    .dr-icon {
+      width:28px; height:28px; border-radius:6px; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center; font-size:13px;
+    }
+    .dr-icon.blue   { background:rgba(10,132,255,.18); }
+    .dr-icon.green  { background:rgba(48,209,88,.18); }
+    .dr-icon.orange { background:rgba(255,159,10,.18); }
+    .dr-icon.purple { background:rgba(191,90,242,.18); }
+    .dr-icon.red    { background:rgba(255,69,58,.18); }
+    .dr-label { flex:1; font-size:13px; color:var(--text-primary); }
+    .dr-value { font-size:12px; color:var(--text-secondary); font-family:'SF Mono','Menlo',monospace; }
+    .dr-badge {
+      font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px;
+    }
+    .dr-badge.green  { background:rgba(48,209,88,.15);  color:var(--green); }
+    .dr-badge.orange { background:rgba(255,159,10,.15); color:var(--orange); }
+    .dr-badge.red    { background:rgba(255,69,58,.15);  color:var(--red); }
+    .dr-badge.blue   { background:rgba(10,132,255,.15); color:var(--accent); }
+
+    /* Check rows */
+    .check-row {
+      display:flex; align-items:center; padding:8px 16px; gap:10px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+    .check-row:last-child { border-bottom:none; }
+    .check-icon {
+      width:18px; height:18px; border-radius:50%; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700;
+    }
+    .check-icon.pass { background:rgba(48,209,88,.2); color:var(--green); }
+    .check-icon.fail { background:rgba(255,69,58,.2); color:var(--red); }
+    .check-icon.warn { background:rgba(255,159,10,.2); color:var(--orange); }
+    .check-text .ct-title { font-size:12px; font-weight:600; }
+    .check-text .ct-desc  { font-size:10px; color:var(--text-secondary); }
+
+    /* Notification item */
+    .notif-item {
+      display:flex; align-items:flex-start; gap:10px;
+      padding:10px 16px; border-bottom:1px solid rgba(255,255,255,.05);
+    }
+    .notif-item:last-child { border-bottom:none; }
+    .notif-icon {
+      width:30px; height:30px; border-radius:50%; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center; font-size:14px;
+    }
+    .notif-icon.orange { background:rgba(255,159,10,.18); }
+    .notif-icon.green  { background:rgba(48,209,88,.18); }
+    .notif-icon.red    { background:rgba(255,69,58,.18); }
+    .notif-body { flex:1; }
+    .notif-body .nb-title { font-size:12px; font-weight:700; margin-bottom:2px; }
+    .notif-body .nb-desc  { font-size:11px; color:var(--text-secondary); line-height:1.4; }
+    .notif-body .nb-time  { font-size:10px; color:var(--text-tertiary); margin-top:4px; }
+    .notif-unread {
+      width:8px; height:8px; border-radius:50%; background:var(--accent);
+      flex-shrink:0; margin-top:6px;
+    }
+
+    /* Settings rows */
+    .settings-row {
+      display:flex; align-items:center; padding:10px 16px; gap:10px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+    .settings-row:last-child { border-bottom:none; }
+    .settings-row .sr-label { flex:1; font-size:13px; }
+    .settings-row .sr-value { font-size:12px; color:var(--text-secondary); }
+    .toggle {
+      width:36px; height:20px; border-radius:10px; background:var(--green);
+      position:relative; flex-shrink:0;
+    }
+    .toggle::after {
+      content:''; position:absolute; width:16px; height:16px; border-radius:50%;
+      background:#fff; top:2px; right:2px; box-shadow:0 1px 3px rgba(0,0,0,.3);
+    }
+    .toggle.off { background:rgba(255,255,255,.15); }
+    .toggle.off::after { right:auto; left:2px; }
+
+    /* Theme swatches */
+    .theme-grid {
+      display:flex; gap:8px; padding:0 16px 14px; flex-wrap:wrap;
+    }
+    .theme-swatch {
+      width:52px; height:38px; border-radius:8px; cursor:pointer;
+      border:1px solid transparent; position:relative; overflow:hidden;
+    }
+    .theme-swatch.selected { border-color:var(--accent); }
+    .theme-swatch::after {
+      content:''; position:absolute; inset:0;
+      border-radius:8px; border:1px solid rgba(255,255,255,.08);
+    }
+    .theme-swatch .ts-label {
+      position:absolute; bottom:3px; left:0; right:0;
+      font-size:8px; font-weight:700; text-align:center; color:#fff;
+      text-shadow:0 1px 3px rgba(0,0,0,.8); letter-spacing:.04em;
+    }
+
+    /* Code snippet */
+    .code-snippet {
+      margin:0 16px 12px;
+      background:rgba(0,0,0,.35); border:1px solid rgba(100,210,255,.15);
+      border-radius:8px; padding:8px 12px;
+      font-family:'SF Mono','Menlo',monospace; font-size:11px; color:var(--text-mono);
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+    }
+    .copy-btn {
+      font-size:10px; font-weight:700; color:var(--accent);
+      background:rgba(10,132,255,.12); border:1px solid rgba(10,132,255,.25);
+      border-radius:4px; padding:2px 7px; cursor:pointer; white-space:nowrap;
+    }
+
+    /* Info banner */
+    .info-banner {
+      margin:10px 16px; padding:9px 12px; border-radius:8px;
+      display:flex; align-items:flex-start; gap:8px;
+      font-size:12px; line-height:1.4;
+    }
+    .info-banner.blue  { background:rgba(10,132,255,.1);  border:1px solid rgba(10,132,255,.2);  }
+    .info-banner.orange{ background:rgba(255,159,10,.1); border:1px solid rgba(255,159,10,.2); color:var(--orange); }
+
+    /* Upload progress */
+    .upload-bar { margin:8px 16px; }
+    .upload-bar-label { display:flex; justify-content:space-between; font-size:11px; color:var(--text-secondary); margin-bottom:5px; }
+    .progress-track { height:3px; background:rgba(255,255,255,.1); border-radius:2px; }
+    .progress-fill  { height:3px; border-radius:2px; background:var(--accent); }
+    .upload-steps   { padding:6px 16px 4px; }
+    .upload-step { display:flex; align-items:center; gap:8px; padding:5px 0; }
+    .us-icon {
+      width:18px; height:18px; border-radius:50%; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700;
+    }
+    .us-icon.done    { background:rgba(48,209,88,.2);   color:var(--green); }
+    .us-icon.active  { background:rgba(10,132,255,.2);  color:var(--accent); }
+    .us-icon.pending { background:rgba(255,255,255,.08); color:var(--text-tertiary); }
+    .us-label { flex:1; font-size:11px; }
+    .us-label.done    { color:var(--text-secondary); }
+    .us-label.active  { color:var(--text-primary); font-weight:600; }
+    .us-label.pending { color:var(--text-tertiary); }
+    .us-val { font-size:10px; font-weight:600; }
+    .us-val.done   { color:var(--green); }
+    .us-val.active { color:var(--accent); }
+
+    /* Loading skeleton */
+    .skeleton {
+      height:12px; border-radius:6px; margin-bottom:6px;
+      background:linear-gradient(90deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.1) 50%,rgba(255,255,255,.05) 100%);
+      background-size:200% 100%;
+      animation:shimmer 1.4s infinite;
+    }
+    @keyframes shimmer { to{background-position:-200% 0;} }
+
+    /* Empty / Error states */
+    .state-empty {
+      padding:28px 16px; text-align:center;
+    }
+    .state-icon {
+      font-size:36px; margin-bottom:10px;
+    }
+    .state-title { font-size:14px; font-weight:700; margin-bottom:4px; }
+    .state-desc  { font-size:12px; color:var(--text-secondary); line-height:1.4; }
+    .state-desc code { font-family:'SF Mono','Menlo',monospace; color:var(--text-mono); }
+
+    /* Divider */
+    .divider { height:1px; background:rgba(255,255,255,.06); }
+
+    /* Annotation */
+    .annotation {
+      position:absolute; background:var(--orange); color:#000;
+      padding:5px 10px; border-radius:6px; font-size:11px; font-weight:700;
+      white-space:nowrap; z-index:200; pointer-events:none;
+    }
+    .annotation::before { content:''; position:absolute; }
+    .annotation.right::before {
+      left:-7px; top:50%; transform:translateY(-50%);
+      border-top:6px solid transparent; border-bottom:6px solid transparent; border-right:7px solid var(--orange);
+    }
+    .annotation.left::before {
+      right:-7px; top:50%; transform:translateY(-50%);
+      border-top:6px solid transparent; border-bottom:6px solid transparent; border-left:7px solid var(--orange);
+    }
+    .annotation.top::before {
+      bottom:-7px; left:50%; transform:translateX(-50%);
+      border-left:6px solid transparent; border-right:6px solid transparent; border-top:7px solid var(--orange);
+    }
+
+    /* Section divider in page */
+    .section-divider {
+      display:flex; align-items:center; gap:20px;
+      margin:8px 0 48px;
+    }
+    .section-divider-line { flex:1; height:1px; background:rgba(255,255,255,.08); }
+    .section-divider-text {
+      font-size:11px; font-weight:700; text-transform:uppercase;
+      letter-spacing:.1em; color:var(--text-tertiary);
+    }
+
+    /* Summary insight box */
+    .insight-box {
+      max-width:1100px; margin:0 auto 0;
+      padding:40px; background:rgba(255,255,255,.04);
+      border-radius:20px; border:1px solid rgba(255,255,255,.08);
+    }
+    .insight-box h3 { font-size:22px; font-weight:700; margin-bottom:6px; text-align:center; }
+    .insight-box .ib-sub { font-size:14px; color:var(--text-secondary); text-align:center; margin-bottom:32px; }
+    .insight-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:28px; }
+    .insight-item { text-align:center; }
+    .insight-item .ii-icon { font-size:32px; margin-bottom:10px; }
+    .insight-item h4 { font-size:14px; font-weight:700; margin-bottom:6px; }
+    .insight-item p  { font-size:12px; color:var(--text-secondary); line-height:1.5; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <header class="page-header">
+    <div class="badge">🍎 macOS menu bar · 400 px popover</div>
+    <h1>ASCBar</h1>
+    <p>Full UX flow prototype for the macOS menu bar app. Every popover reflects the real <code style="font-family:monospace;font-size:14px;color:rgba(100,210,255,.8);">MenuContentView</code> layout: logo header → app pills → 2-column version grid → action bar.</p>
+  </header>
+
+  <!-- ── Row 1: Core popover states ── -->
+  <div class="row-label">
+    <div class="row-label-line"></div>
+    <span>Row 1 — Core Popover States</span>
+    <div class="row-label-line"></div>
+  </div>
+  <div class="flow-row">
+
+    <!-- 1. Loading -->
+    <div class="flow-step">
+      <div class="step-label"><div class="step-num">1</div><span class="step-name">Loading</span></div>
+      <div style="position:relative;">
+        <div class="popover-caret"></div>
+        <div class="popover">
+          <!-- Header -->
+          <div class="pop-header">
+            <div class="logo-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="9" height="9" rx="2"/><rect x="13" y="3" width="9" height="9" rx="2"/><rect x="2" y="14" width="9" height="9" rx="2"/><rect x="13" y="14" width="9" height="9" rx="2"/></svg></div>
+            <div class="pop-title"><h2>ASCBar</h2><p>&gt; app monitor</p></div>
+            <div class="status-pill"><div class="dot pulse"></div>Syncing…</div>
+          </div>
+          <!-- Loading skeletons -->
+          <div style="padding:16px;">
+            <div class="skeleton" style="width:60%;height:14px;margin-bottom:16px;"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px;">
+                <div class="skeleton" style="width:40%;height:9px;"></div>
+                <div class="skeleton" style="width:55%;height:22px;"></div>
+                <div class="skeleton" style="width:70%;height:11px;margin-bottom:0;"></div>
+              </div>
+              <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px;">
+                <div class="skeleton" style="width:40%;height:9px;"></div>
+                <div class="skeleton" style="width:55%;height:22px;"></div>
+                <div class="skeleton" style="width:70%;height:11px;margin-bottom:0;"></div>
+              </div>
+              <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px;">
+                <div class="skeleton" style="width:40%;height:9px;"></div>
+                <div class="skeleton" style="width:55%;height:22px;"></div>
+                <div class="skeleton" style="width:70%;height:11px;margin-bottom:0;"></div>
+              </div>
+              <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px;">
+                <div class="skeleton" style="width:40%;height:9px;"></div>
+                <div class="skeleton" style="width:55%;height:22px;"></div>
+                <div class="skeleton" style="width:70%;height:11px;margin-bottom:0;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="action-bar">
+            <div class="bar-btn primary" style="opacity:.5;">⊞ Apps</div>
+            <div class="bar-btn ghost" style="opacity:.5;">↻ Syncing</div>
+            <div class="bar-spacer"></div>
+            <div class="icon-btn" style="opacity:.4;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
+            <div class="icon-btn" style="opacity:.4;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div>
+          </div>
+        </div>
+        <div class="annotation top" style="bottom:-42px;left:50%;transform:translateX(-50%);">monitor.isSyncing = true</div>
+      </div>
+    </div>
+
+    <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+
+    <!-- 2. Main — app selected -->
+    <div class="flow-step">
+      <div class="step-label"><div class="step-num">2</div><span class="step-name">Main View</span></div>
+      <div style="position:relative;">
+        <div class="popover-caret"></div>
+        <div class="popover">
+          <div class="pop-header">
+            <div class="logo-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="9" height="9" rx="2"/><rect x="13" y="3" width="9" height="9" rx="2"/><rect x="2" y="14" width="9" height="9" rx="2"/><rect x="13" y="14" width="9" height="9" rx="2"/></svg></div>
+            <div class="pop-title"><h2>ASCBar</h2><p>&gt; app monitor</p></div>
+            <div class="status-pill"><div class="dot green"></div>Ready</div>
+          </div>
+          <!-- App Pills -->
+          <div class="pills-row">
+            <div class="app-pill active"><div class="pill-dot" style="background:var(--orange);"></div>ASCBar</div>
+            <div class="app-pill"><div class="pill-dot" style="background:var(--green);"></div>MoneyNotes</div>
+            <div class="app-pill"><div class="pill-dot" style="background:var(--purple);"></div>TaskKit Pro</div>
+            <div class="app-pill"><div class="pill-dot" style="background:var(--accent);"></div>WatchLog</div>
+          </div>
+          <!-- App meta -->
+          <div class="app-meta-header">
+            <h3>ASCBar</h3>
+            <code>com.example.ascbar · macOS</code>
+          </div>
+          <!-- Version cards 2-col grid -->
+          <div class="version-grid">
+            <div class="version-card live">
+              <div class="vc-platform">macOS</div>
+              <div class="vc-version">2.0.1</div>
+              <div class="vc-state green">Ready for Sale</div>
+              <div class="vc-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy cmd</div>
+            </div>
+            <div class="version-card pending">
+              <div class="vc-platform">macOS</div>
+              <div class="vc-version">2.1.0</div>
+              <div class="vc-state orange">In Review</div>
+              <div class="vc-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy status</div>
+            </div>
+            <div class="version-card highlighted">
+              <div class="vc-platform">iOS</div>
+              <div class="vc-version">1.0.0</div>
+              <div class="vc-state blue">Prepare for Sub.</div>
+              <div class="vc-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy submit</div>
+            </div>
+            <div class="version-card live">
+              <div class="vc-platform">iOS</div>
+              <div class="vc-version">0.9.5</div>
+              <div class="vc-state green">Ready for Sale</div>
+              <div class="vc-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy cmd</div>
+            </div>
+          </div>
+          <div class="action-bar">
+            <div class="bar-btn primary">⊞ Apps</div>
+            <div class="bar-btn ghost">↻ Refresh</div>
+            <div class="bar-spacer"></div>
+            <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
+            <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div>
+          </div>
+        </div>
+        <div class="annotation right" style="top:128px;right:-165px;">Tap pill → switch app</div>
+        <div class="annotation right" style="top:255px;right:-185px;">Hover card → copy CLI cmd</div>
+      </div>
+    </div>
+
+    <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+
+    <!-- 3. Error state -->
+    <div class="flow-step">
+      <div class="step-label"><div class="step-num">3</div><span class="step-name">Error / No Auth</span></div>
+      <div style="position:relative;">
+        <div class="popover-caret"></div>
+        <div class="popover">
+          <div class="pop-header">
+            <div class="logo-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="9" height="9" rx="2"/><rect x="13" y="3" width="9" height="9" rx="2"/><rect x="2" y="14" width="9" height="9" rx="2"/><rect x="13" y="14" width="9" height="9" rx="2"/></svg></div>
+            <div class="pop-title"><h2>ASCBar</h2><p>&gt; app monitor</p></div>
+            <div class="status-pill"><div class="dot red"></div>Error</div>
+          </div>
+          <div style="padding:12px 16px;">
+            <div style="background:rgba(255,69,58,.08);border:1px solid rgba(255,69,58,.2);border-radius:10px;padding:20px;text-align:center;">
+              <div style="font-size:36px;margin-bottom:10px;">⚠️</div>
+              <div style="font-size:14px;font-weight:700;margin-bottom:6px;">Could not load apps</div>
+              <div style="font-size:11px;color:var(--text-secondary);margin-bottom:12px;">No credentials found.<br>Run the command below in Terminal.</div>
+              <div class="code-snippet" style="margin:0;text-align:left;">
+                <span>$ asc auth login</span>
+                <span class="copy-btn">Copy</span>
+              </div>
+            </div>
+          </div>
+          <div style="padding:0 16px 14px;">
+            <div class="detail-row" style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;border:1px solid rgba(255,255,255,.07);">
+              <div class="dr-icon blue">🔑</div>
+              <span class="dr-label">Set up credentials</span>
+              <span style="font-size:12px;color:var(--accent);">Guide ›</span>
+            </div>
+          </div>
+          <div class="action-bar">
+            <div class="bar-btn ghost">↻ Retry</div>
+            <div class="bar-spacer"></div>
+            <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
+            <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /row 1 -->
+
+
+  <!-- ── Row 2: Version actions (CAEOAS) ── -->
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <span class="section-divider-text">Row 2 — Version Actions (CAEOAS)</span>
+    <div class="section-divider-line"></div>
+  </div>
+  <div class="flow-row">
+
+    <!-- 4. Hover — copy submit command -->
+    <div class="flow-step">
+      <div class="step-label"><div class="step-num">4</div><span class="step-name">Hover: Submit</span></div>
+      <div style="position:relative;">
+        <div class="popover-caret"></div>
+        <div class="popover">
+          <div class="pop-header">
+            <div class="logo-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="9" height="9" rx="2"/><rect x="13" y="3" width="9" height="9" rx="2"/><rect x="2" y="14" width="9" height="9" rx="2"/><rect x="13" y="14" width="9" height="9" rx="2"/></svg></div>
+            <div class="pop-title"><h2>ASCBar</h2><p>&gt; app monitor</p></div>
+            <div class="status-pill"><div class="dot green"></div>Ready</div>
+          </div>
+          <div class="pills-row">
+            <div class="app-pill active"><div class="pill-dot" style="background:var(--orange);"></div>ASCBar</div>
+            <div class="app-pill"><div class="pill-dot" style="background:var(--green);"></div>MoneyNotes</div>
+          </div>
+          <div class="app-meta-header"><h3>ASCBar</h3><code>com.example.ascbar</code></div>
+          <div class="version-grid">
+            <div class="version-card live">
+              <div class="vc-platform">macOS</div><div class="vc-version">2.0.1</div>
+              <div class="vc-state green">Ready for Sale</div>
+            </div>
+            <!-- Hovered card — action visible -->
+            <div class="version-card highlighted" style="box-shadow:0 0 0 1.5px rgba(10,132,255,.5);">
+              <div class="vc-platform">macOS</div><div class="vc-version">2.1.0</div>
+              <div class="vc-state blue">Prepare for Sub.</div>
+              <div class="vc-action" style="opacity:1;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy submit
+              </div>
+            </div>
+          </div>
+          <!-- Copied toast -->
+          <div class="code-snippet">
+            <span>asc versions submit --version-id v21</span>
+            <span class="copy-btn" style="background:rgba(48,209,88,.12);border-color:rgba(48,209,88,.25);color:var(--green);">✓ Copied!</span>
+          </div>
+          <div class="action-bar">
+            <div class="bar-btn primary">⊞ Apps</div>
+            <div class="bar-btn ghost">↻ Refresh</div>
+            <div class="bar-spacer"></div>
+            <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
+            <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div>
+          </div>
+        </div>
+        <div class="annotation left" style="top:236px;left:-190px;">Hover card → reveal action</div>
+        <div class="annotation left" style="top:315px;left:-175px;">Inline toast confirms copy</div>
+      </div>
+    </div>
+
+    <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+
+    <!-- 5. Version detail expanded (proposed new view) -->
+    <div class="flow-step">
+      <div class="step-label"><div class="step-num">5</div><span class="step-name">Version Detail ✦ new</span></div>
+      <div style="position:relative;">
+        <div class="popover-caret"></div>
+        <div class="popover">
+          <div class="pop-header" style="border-bottom:none;">
+            <div style="display:flex;align-items:center;gap:8px;color:var(--accent);font-size:13px;cursor:pointer;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+              Back
+            </div>
+            <div style="flex:1;text-align:center;font-size:14px;font-weight:700;">ASCBar 2.1.0</div>
+            <div style="width:60px;"></div>
+          </div>
+          <div class="divider"></div>
+          <!-- Status banner -->
+          <div class="info-banner blue">
+            <span>📋</span>
+            <div>
+              <div style="font-weight:700;margin-bottom:2px;">Prepare for Submission</div>
+              <div style="color:var(--text-secondary);font-size:11px;">Version is editable — ready to link a build and submit.</div>
+            </div>
+          </div>
+          <!-- Detail rows -->
+          <div style="margin:0 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-card);overflow:hidden;">
+            <div class="detail-row">
+              <div class="dr-icon blue">📱</div>
+              <span class="dr-label">Platform</span>
+              <span class="dr-value">macOS</span>
+            </div>
+            <div class="detail-row">
+              <div class="dr-icon green">🔨</div>
+              <span class="dr-label">Build</span>
+              <span class="dr-badge orange">Not attached</span>
+            </div>
+            <div class="detail-row">
+              <div class="dr-icon purple">🌍</div>
+              <span class="dr-label">Localizations</span>
+              <span class="dr-value">3 locales</span>
+            </div>
+            <div class="detail-row">
+              <div class="dr-icon orange">📊</div>
+              <span class="dr-label">Pricing</span>
+              <span class="dr-badge green">Set</span>
+            </div>
+          </div>
+          <!-- Quick CLI commands -->
+          <div class="section-header" style="margin-top:10px;">
+            <h4>CLI Commands</h4>
+          </div>
+          <div class="code-snippet">
+            <span>asc versions check-readiness --version-id v21</span>
+            <span class="copy-btn">Copy</span>
+          </div>
+          <div class="code-snippet">
+            <span>asc versions submit --version-id v21</span>
+            <span class="copy-btn">Copy</span>
+          </div>
+          <div class="code-snippet" style="margin-bottom:14px;">
+            <span>asc versions set-build --version-id v21</span>
+            <span class="copy-btn">Copy</span>
+          </div>
+          <div class="action-bar">
+            <div class="bar-btn primary" style="background:linear-gradient(135deg,#ff9f0a,#ff6b00);">🚀 Submit</div>
+            <div class="bar-btn ghost">🔍 Check</div>
+            <div class="bar-spacer"></div>
+            <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div>
+          </div>
+        </div>
+        <div class="annotation right" style="top:170px;right:-165px;">New detail panel (proposed)</div>
+        <div class="annotation right" style="top:310px;right:-170px;">All 3 CLI commands inline</div>
+      </div>
+    </div>
+
+    <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+
+    <!-- 6. Check Readiness inline -->
+    <div class="flow-step">
+      <div class="step-label"><div class="step-num">6</div><span class="step-name">Readiness ✦ new</span></div>
+      <div style="position:relative;">
+        <div class="popover-caret"></div>
+        <div class="popover">
+          <div class="pop-header" style="border-bottom:none;">
+            <div style="display:flex;align-items:center;gap:8px;color:var(--accent);font-size:13px;cursor:pointer;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+              2.1.0
+            </div>
+            <div style="flex:1;text-align:center;font-size:14px;font-weight:700;">Readiness Check</div>
+            <div style="width:60px;"></div>
+          </div>
+          <div class="divider"></div>
+          <!-- Must Fix -->
+          <div class="section-header" style="padding-top:10px;">
+            <h4 style="color:var(--red);">🚨 Must Fix</h4>
+            <span style="font-size:11px;font-weight:700;color:var(--red);">2 issues</span>
+          </div>
+          <div style="margin:0 16px;background:rgba(255,69,58,.06);border:1px solid rgba(255,69,58,.15);border-radius:var(--radius-card);overflow:hidden;margin-bottom:10px;">
+            <div class="check-row">
+              <div class="check-icon fail">✕</div>
+              <div class="check-text">
+                <div class="ct-title">No Build Attached</div>
+                <div class="ct-desc">Link a processed build before submitting</div>
+              </div>
+            </div>
+            <div class="check-row">
+              <div class="check-icon fail">✕</div>
+              <div class="check-text">
+                <div class="ct-title">Pricing Not Set</div>
+                <div class="ct-desc">Configure app pricing for required territories</div>
+              </div>
+            </div>
+          </div>
+          <!-- Should Fix -->
+          <div class="section-header">
+            <h4 style="color:var(--orange);">⚠ Should Fix</h4>
+            <span style="font-size:11px;font-weight:700;color:var(--orange);">1 warning</span>
+          </div>
+          <div style="margin:0 16px;background:rgba(255,159,10,.06);border:1px solid rgba(255,159,10,.15);border-radius:var(--radius-card);overflow:hidden;margin-bottom:10px;">
+            <div class="check-row">
+              <div class="check-icon warn">!</div>
+              <div class="check-text">
+                <div class="ct-title">Missing What's New (EN)</div>
+                <div class="ct-desc">Release notes empty for English locale</div>
+              </div>
+            </div>
+          </div>
+          <!-- Passing -->
+          <div class="section-header">
+            <h4 style="color:var(--green);">✓ Passing</h4>
+            <span style="font-size:11px;font-weight:700;color:var(--green);">3 checks</span>
+          </div>
+          <div style="margin:0 16px 12px;background:rgba(48,209,88,.05);border:1px solid rgba(48,209,88,.12);border-radius:var(--radius-card);overflow:hidden;">
+            <div class="check-row"><div class="check-icon pass">✓</div><div class="check-text"><div class="ct-title">Version State — editable</div></div></div>
+            <div class="check-row"><div class="check-icon pass">✓</div><div class="check-text"><div class="ct-title">Review Contact set</div></div></div>
+            <div class="check-row"><div class="check-icon pass">✓</div><div class="check-text"><div class="ct-title">Screenshots uploaded</div></div></div>
+          </div>
+          <div class="action-bar">
+            <div class="bar-btn primary" style="opacity:.4;background:rgba(255,255,255,.1);cursor:default;">Fix issues to submit</div>
+            <div class="bar-spacer"></div>
+            <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /row 2 -->
+
+
+  <!-- ── Row 3: Build Upload + Notifications ── -->
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <span class="section-divider-text">Row 3 — Build Upload &amp; Notifications</span>
+    <div class="section-divider-line"></div>
+  </div>
+  <div class="flow-row">
+
+    <!-- 7. Upload Build form -->
+    <div class="flow-step">
+      <div class="step-label"><div class="step-num">7</div><span class="step-name">Upload Build ✦ new</span></div>
+      <div style="position:relative;">
+        <div class="popover-caret"></div>
+        <div class="popover">
+          <div class="pop-header" style="border-bottom:none;">
+            <div style="display:flex;align-items:center;gap:8px;color:var(--accent);font-size:13px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+              ASCBar
+            </div>
+            <div style="flex:1;text-align:center;font-size:14px;font-weight:700;">Upload Build</div>
+            <div style="width:60px;"></div>
+          </div>
+          <div class="divider"></div>
+          <!-- Platform -->
+          <div style="padding:12px 16px 0;">
+            <div style="display:flex;background:rgba(255,255,255,.06);border-radius:8px;padding:2px;gap:2px;font-size:12px;font-weight:600;">
+              <div style="flex:1;text-align:center;padding:5px;background:rgba(255,255,255,.12);border-radius:6px;">macOS</div>
+              <div style="flex:1;text-align:center;padding:5px;color:var(--text-secondary);">iOS</div>
+              <div style="flex:1;text-align:center;padding:5px;color:var(--text-secondary);">tvOS</div>
+              <div style="flex:1;text-align:center;padding:5px;color:var(--text-secondary);">visionOS</div>
+            </div>
+          </div>
+          <!-- File zone -->
+          <div style="margin:12px 16px 0;background:rgba(255,255,255,.04);border:1.5px dashed rgba(255,255,255,.15);border-radius:var(--radius-card);padding:16px;text-align:center;">
+            <div style="font-size:28px;margin-bottom:6px;">📦</div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:2px;">ASCBar-2.1.0.pkg</div>
+            <div style="font-size:11px;color:var(--text-secondary);">47.2 MB · macOS</div>
+            <div style="margin-top:8px;color:var(--accent);font-size:12px;font-weight:600;">Change File</div>
+          </div>
+          <!-- Metadata -->
+          <div style="margin:10px 16px 0;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-card);overflow:hidden;">
+            <div class="detail-row">
+              <div class="dr-icon blue">📱</div><span class="dr-label">App</span><span class="dr-value">ASCBar</span>
+            </div>
+            <div class="detail-row">
+              <div class="dr-icon green">🏷</div><span class="dr-label">Version</span><span class="dr-value">2.1.0</span>
+            </div>
+            <div class="detail-row">
+              <div class="dr-icon purple">🔢</div><span class="dr-label">Build #</span><span class="dr-value">43</span>
+            </div>
+          </div>
+          <div class="code-snippet" style="margin-top:10px;">
+            <span>asc builds upload --app-id 123 --file … --platform macos</span>
+            <span class="copy-btn">Copy</span>
+          </div>
+          <div class="action-bar">
+            <div class="bar-btn primary" style="background:linear-gradient(135deg,#64d2ff,#007aff);">📤 Upload</div>
+            <div class="bar-btn ghost">Cancel</div>
+            <div class="bar-spacer"></div>
+            <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+
+    <!-- 8. Upload progress -->
+    <div class="flow-step">
+      <div class="step-label"><div class="step-num">8</div><span class="step-name">Uploading…</span></div>
+      <div style="position:relative;">
+        <div class="popover-caret"></div>
+        <div class="popover">
+          <div class="pop-header" style="border-bottom:none;">
+            <div class="logo-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="9" height="9" rx="2"/><rect x="13" y="3" width="9" height="9" rx="2"/><rect x="2" y="14" width="9" height="9" rx="2"/><rect x="13" y="14" width="9" height="9" rx="2"/></svg></div>
+            <div class="pop-title"><h2>ASCBar</h2><p>&gt; app monitor</p></div>
+            <div class="status-pill"><div class="dot pulse"></div>Uploading</div>
+          </div>
+          <div class="divider"></div>
+          <!-- Summary -->
+          <div style="padding:14px 16px 8px;display:flex;align-items:center;gap:12px;">
+            <div style="width:42px;height:42px;border-radius:50%;background:rgba(10,132,255,.15);border:1.5px solid rgba(10,132,255,.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📤</div>
+            <div>
+              <div style="font-size:14px;font-weight:700;">ASCBar-2.1.0.pkg</div>
+              <div style="font-size:11px;color:var(--text-secondary);">47.2 MB · macOS · Build 43</div>
+            </div>
+          </div>
+          <!-- Progress bar -->
+          <div class="upload-bar">
+            <div class="upload-bar-label"><span>Uploading chunks…</span><span style="color:var(--accent);font-weight:700;">68%</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:68%;"></div></div>
+          </div>
+          <!-- Steps -->
+          <div class="upload-steps">
+            <div class="upload-step">
+              <div class="us-icon done">✓</div>
+              <div class="us-label done">Reserve file slot</div>
+              <div class="us-val done">Done</div>
+            </div>
+            <div class="upload-step">
+              <div class="us-icon active">⋯</div>
+              <div class="us-label active">Upload chunks (PUT)</div>
+              <div class="us-val active">68%</div>
+            </div>
+            <div class="upload-step">
+              <div class="us-icon pending">3</div>
+              <div class="us-label pending">Confirm MD5 (PATCH)</div>
+              <div class="us-val" style="color:var(--text-tertiary);">—</div>
+            </div>
+            <div class="upload-step">
+              <div class="us-icon pending">4</div>
+              <div class="us-label pending">Apple processing (GET)</div>
+              <div class="us-val" style="color:var(--text-tertiary);">—</div>
+            </div>
+            <div class="upload-step">
+              <div class="us-icon pending">5</div>
+              <div class="us-label pending">Build ready</div>
+              <div class="us-val" style="color:var(--text-tertiary);">—</div>
+            </div>
+          </div>
+          <div class="action-bar" style="margin-top:4px;">
+            <div class="bar-btn ghost" style="color:var(--red);">Cancel Upload</div>
+            <div class="bar-spacer"></div>
+            <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div>
+          </div>
+        </div>
+        <div class="annotation right" style="top:270px;right:-170px;">5-step domain flow</div>
+      </div>
+    </div>
+
+    <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+
+    <!-- 9. Alerts panel -->
+    <div class="flow-step">
+      <div class="step-label"><div class="step-num">9</div><span class="step-name">Alerts ✦ new</span></div>
+      <div style="position:relative;">
+        <div class="popover-caret"></div>
+        <div class="popover">
+          <div class="pop-header">
+            <div class="logo-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="9" height="9" rx="2"/><rect x="13" y="3" width="9" height="9" rx="2"/><rect x="2" y="14" width="9" height="9" rx="2"/><rect x="13" y="14" width="9" height="9" rx="2"/></svg></div>
+            <div class="pop-title"><h2>Alerts</h2><p>&gt; 3 unread</p></div>
+            <div style="font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;">Clear all</div>
+          </div>
+          <!-- Notif list -->
+          <div class="notif-item">
+            <div class="notif-icon orange">⏳</div>
+            <div class="notif-body">
+              <div class="nb-title">ASCBar 2.1.0 — In Review</div>
+              <div class="nb-desc">Apple has started reviewing your submission.</div>
+              <div class="nb-time">2 minutes ago</div>
+            </div>
+            <div class="notif-unread"></div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-icon green">✅</div>
+            <div class="notif-body">
+              <div class="nb-title">Build 43 — Processing Complete</div>
+              <div class="nb-desc">Build 43 is ready to attach to a version.</div>
+              <div class="nb-time">15 minutes ago</div>
+            </div>
+            <div class="notif-unread"></div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-icon red">❌</div>
+            <div class="notif-body">
+              <div class="nb-title">FocusTimer 3.8.1 — Rejected</div>
+              <div class="nb-desc">Review rejected. Check metadata guidelines.</div>
+              <div class="nb-time">1 hour ago</div>
+            </div>
+            <div class="notif-unread"></div>
+          </div>
+          <div class="notif-item" style="opacity:.5;">
+            <div class="notif-icon green">🚀</div>
+            <div class="notif-body">
+              <div class="nb-title">MoneyNotes 4.3.2 — Ready for Sale</div>
+              <div class="nb-desc">App is now live on the App Store.</div>
+              <div class="nb-time">Yesterday</div>
+            </div>
+          </div>
+          <div class="action-bar">
+            <div class="bar-btn ghost">⊞ All Apps</div>
+            <div class="bar-spacer"></div>
+            <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
+            <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div>
+          </div>
+        </div>
+        <div class="annotation left" style="top:200px;left:-180px;">Polls for state changes</div>
+      </div>
+    </div>
+
+  </div><!-- /row 3 -->
+
+
+  <!-- ── Row 4: Settings ── -->
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <span class="section-divider-text">Row 4 — Settings &amp; Auth</span>
+    <div class="section-divider-line"></div>
+  </div>
+  <div class="flow-row" style="justify-content:center;">
+
+    <!-- 10. Settings -->
+    <div class="flow-step">
+      <div class="step-label"><div class="step-num">10</div><span class="step-name">Settings</span></div>
+      <div style="position:relative;">
+        <div class="popover-caret"></div>
+        <div class="popover">
+          <div class="pop-header" style="border-bottom:none;">
+            <div style="display:flex;align-items:center;gap:8px;color:var(--accent);font-size:13px;cursor:pointer;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+              Back
+            </div>
+            <div style="flex:1;text-align:center;font-size:14px;font-weight:700;">Settings</div>
+            <div style="width:60px;"></div>
+          </div>
+          <div class="divider"></div>
+          <div class="section-header" style="padding-top:10px;"><h4>Auth</h4></div>
+          <div style="margin:0 16px 12px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-card);overflow:hidden;">
+            <div class="settings-row">
+              <div class="dr-icon green" style="width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">🔑</div>
+              <div style="flex:1;">
+                <div style="font-size:13px;font-weight:600;">Credentials</div>
+                <div style="font-size:11px;color:var(--text-secondary);">Source: file · ~/.asc/credentials.json</div>
+              </div>
+              <span class="dr-badge green">Active</span>
+            </div>
+            <div class="settings-row">
+              <span class="sr-label">Key ID</span>
+              <span class="sr-value" style="font-family:monospace;">ABCD123456</span>
+            </div>
+            <div class="settings-row">
+              <span class="sr-label">Issuer ID</span>
+              <span class="sr-value" style="font-family:monospace;">69a6…</span>
+            </div>
+          </div>
+          <div class="section-header"><h4>Appearance</h4></div>
+          <div class="theme-grid">
+            <div class="theme-swatch selected" style="background:linear-gradient(135deg,#1a1a2e,#16213e);">
+              <div class="ts-label">Dark</div>
+            </div>
+            <div class="theme-swatch" style="background:linear-gradient(135deg,#f0f0f5,#e0e0ea);">
+              <div class="ts-label" style="color:#333;">Light</div>
+            </div>
+            <div class="theme-swatch" style="background:linear-gradient(135deg,#1a0a2e,#2d1060);">
+              <div class="ts-label">Purple</div>
+            </div>
+            <div class="theme-swatch" style="background:linear-gradient(135deg,#0a1a2e,#103050);">
+              <div class="ts-label">Ocean</div>
+            </div>
+          </div>
+          <div class="section-header"><h4>Behavior</h4></div>
+          <div style="margin:0 16px 12px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-card);overflow:hidden;">
+            <div class="settings-row">
+              <span class="sr-label">Auto-refresh interval</span>
+              <span class="sr-value">5 min</span>
+            </div>
+            <div class="settings-row">
+              <span class="sr-label">Show notifications</span>
+              <div class="toggle"></div>
+            </div>
+            <div class="settings-row">
+              <span class="sr-label">Launch at login</span>
+              <div class="toggle off"></div>
+            </div>
+            <div class="settings-row">
+              <span class="sr-label">Background orbs</span>
+              <div class="toggle"></div>
+            </div>
+          </div>
+          <div class="action-bar">
+            <div class="bar-btn ghost" style="color:var(--red);">Sign Out</div>
+            <div class="bar-spacer"></div>
+            <div style="font-size:11px;color:var(--text-tertiary);">ASCBar v1.0.0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /row 4 -->
+
+
+  <!-- Summary -->
+  <div class="insight-box">
+    <h3>Implementation Roadmap</h3>
+    <p class="ib-sub">Existing screens (✅) + proposed new panels (✦) based on the current domain layer</p>
+    <div class="insight-grid">
+      <div class="insight-item">
+        <div class="ii-icon">✅</div>
+        <h4>Already Built</h4>
+        <p>Main popover · app pills · 2-col version grid · hover copy · dark/light theme · loading/error states</p>
+      </div>
+      <div class="insight-item">
+        <div class="ii-icon">✦</div>
+        <h4>Version Detail Panel</h4>
+        <p>Drill into a card to see build, pricing, localizations and all 3 relevant CLI commands at once.</p>
+      </div>
+      <div class="insight-item">
+        <div class="ii-icon">✦</div>
+        <h4>Build Upload Flow</h4>
+        <p>Platform picker + file drop + 5-step progress (reserve → chunks → MD5 → process → ready).</p>
+      </div>
+      <div class="insight-item">
+        <div class="ii-icon">✦</div>
+        <h4>Alerts Tab</h4>
+        <p>Poll <code style="font-family:monospace;font-size:11px;color:var(--text-mono);">AppStoreMonitor</code> for state transitions and surface them as timestamped notifications.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
