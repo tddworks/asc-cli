@@ -1,7 +1,8 @@
 import SwiftUI
 import Domain
 
-/// A tappable pill for selecting an app in the app switcher row.
+/// A tappable pill for selecting an app — styled after ClaudeBar's ProviderPill.
+/// Selected state uses the accent gradient fill with a drop shadow.
 struct AppPillView: View {
     let app: ASCApp
     let isSelected: Bool
@@ -12,23 +13,32 @@ struct AppPillView: View {
 
     var body: some View {
         Button(action: onTap) {
-            Text(app.displayName)
-                .font(.system(size: 12, weight: isSelected ? .semibold : .regular, design: theme.fontDesign))
-                .foregroundStyle(isSelected ? theme.accentPrimary : theme.textSecondary)
-                .lineLimit(1)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background {
+            HStack(spacing: 4) {
+                Image(systemName: "app.fill")
+                    .font(.system(size: 10, weight: .semibold))
+
+                Text(app.displayName)
+                    .font(.system(size: 11, weight: .medium, design: theme.fontDesign))
+                    .lineLimit(1)
+                    .fixedSize()
+            }
+            .foregroundStyle(isSelected ? .white : theme.textPrimary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(
+                ZStack {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: theme.pillCornerRadius)
+                            .fill(theme.accentGradient)
+                            .shadow(color: theme.accentPrimary.opacity(0.3), radius: 6, y: 2)
+                    } else {
+                        RoundedRectangle(cornerRadius: theme.pillCornerRadius)
+                            .fill(isHovering ? theme.hoverOverlay : theme.glassBackground)
+                    }
                     RoundedRectangle(cornerRadius: theme.pillCornerRadius)
-                        .fill(isSelected ? theme.accentPrimary.opacity(0.15) : (isHovering ? theme.hoverOverlay : Color.clear))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: theme.pillCornerRadius)
-                                .strokeBorder(
-                                    isSelected ? theme.accentPrimary.opacity(0.4) : theme.glassBorder,
-                                    lineWidth: 1
-                                )
-                        )
+                        .stroke(isSelected ? theme.accentPrimary.opacity(0.5) : theme.glassBorder, lineWidth: 1)
                 }
+            )
         }
         .buttonStyle(.plain)
         .onHover { isHovering = $0 }

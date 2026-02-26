@@ -40,9 +40,11 @@ public protocol AppThemeProvider: Sendable {
     var accentSecondary: Color { get }
     var accentGradient: LinearGradient { get }
     var pillGradient: LinearGradient { get }
+    var shareGradient: LinearGradient { get }
 
     // Interactive
     var hoverOverlay: Color { get }
+    var pressedOverlay: Color { get }
     var progressTrack: Color { get }
 }
 
@@ -65,9 +67,10 @@ public extension AppThemeProvider {
     }
 }
 
-// MARK: - Base Colors
+// MARK: - Base Colors (mirrors ClaudeBar's BaseTheme)
 
 public enum BaseColors {
+    // Status
     public static let green   = Color(red: 0.35, green: 0.92, blue: 0.68)
     public static let amber   = Color(red: 0.98, green: 0.72, blue: 0.35)
     public static let coral   = Color(red: 0.98, green: 0.55, blue: 0.45)
@@ -76,4 +79,11 @@ public enum BaseColors {
     public static let blue    = Color(red: 0.38, green: 0.62, blue: 0.98)
     public static let purple  = Color(red: 0.55, green: 0.32, blue: 0.85)
     public static let gray    = Color(red: 0.55, green: 0.55, blue: 0.60)
+
+    // Extended (matching ClaudeBar's BaseTheme)
+    public static let purpleVibrant = Color(red: 0.55, green: 0.32, blue: 0.85)
+    public static let pinkHot       = Color(red: 0.85, green: 0.35, blue: 0.65)
+    public static let coralAccent   = Color(red: 0.98, green: 0.55, blue: 0.45)
+    public static let goldenGlow    = Color(red: 0.98, green: 0.78, blue: 0.35)
+    public static let tealBright    = Color(red: 0.35, green: 0.85, blue: 0.78)
 }
