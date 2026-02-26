@@ -22,26 +22,21 @@ private struct LocalizationDraft: Equatable {
         promotionalText = loc.promotionalText ?? ""
     }
 
-    func changedFields(from original: LocalizationSummary) -> (
+    func changedFields(comparedTo loc: LocalizationSummary) -> (
         whatsNew: String?, description: String?, keywords: String?,
         marketingUrl: String?, supportUrl: String?, promotionalText: String?
     ) {
-        func changed(_ draft: String, _ original: String?) -> String? {
+        func diff(_ draft: String, _ original: String?) -> String? {
             draft != (original ?? "") ? draft : nil
         }
         return (
-            changed(whatsNew,        original.whatsNew),
-            changed(description,     original.description),
-            changed(keywords,        original.keywords),
-            changed(marketingUrl,    original.marketingUrl),
-            changed(supportUrl,      original.supportUrl),
-            changed(promotionalText, original.promotionalText)
+            diff(whatsNew,        loc.whatsNew),
+            diff(description,     loc.description),
+            diff(keywords,        loc.keywords),
+            diff(marketingUrl,    loc.marketingUrl),
+            diff(supportUrl,      loc.supportUrl),
+            diff(promotionalText, loc.promotionalText)
         )
-    }
-
-    var hasAnyChange: Bool {
-        // Compared against empty original — caller checks against actual original
-        false // real check done via changedFields()
     }
 }
 
@@ -59,24 +54,20 @@ struct VersionLocalizationsView: View {
     @State private var isLoading = true
     @State private var loadError: String? = nil
 
-    // Active locale
-    @State private var selectedId: String? = nil
+    @State private var selectedId: String = ""
+    // Non-optional @State draft → $draft.field gives @Sendable-safe bindings
+    @State private var draft = LocalizationDraft(from: .empty)
+    @State private var savedDraft = LocalizationDraft(from: .empty)  // for change detection
 
-    // Edit state for the active locale
-    @State private var draft: LocalizationDraft? = nil
     @State private var isSaving = false
     @State private var saveError: String? = nil
-    @State private var showMoreFields = false
     @State private var copiedCmd = false
 
     private var selectedLocale: LocalizationSummary? {
-        guard let id = selectedId else { return localizations.first }
-        return localizations.first(where: { $0.id == id }) ?? localizations.first
+        localizations.first(where: { $0.id == selectedId }) ?? localizations.first
     }
 
-    private var currentDraft: LocalizationDraft {
-        draft ?? LocalizationDraft(from: selectedLocale ?? .empty)
-    }
+    private var hasChanges: Bool { draft != savedDraft }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -89,7 +80,6 @@ struct VersionLocalizationsView: View {
                 emptyView
             } else {
                 localeTabs
-                Divider().background(theme.dividerColor)
                 editorScroll
                 if let loc = selectedLocale {
                     actionBar(for: loc)
@@ -147,17 +137,17 @@ struct VersionLocalizationsView: View {
                                     .foregroundStyle(BaseColors.systemPurple.opacity(0.8))
                             }
                         }
-                        .foregroundStyle(isSelected(loc) ? theme.textPrimary : theme.textSecondary)
+                        .foregroundStyle(loc.id == selectedId ? theme.textPrimary : theme.textSecondary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 5)
                         .background(
                             Capsule()
-                                .fill(isSelected(loc)
+                                .fill(loc.id == selectedId
                                       ? BaseColors.systemPurple.opacity(0.15)
                                       : theme.glassBackground)
                                 .overlay(
                                     Capsule()
-                                        .stroke(isSelected(loc)
+                                        .stroke(loc.id == selectedId
                                                 ? BaseColors.systemPurple.opacity(0.35)
                                                 : theme.glassBorder, lineWidth: 1)
                                 )
@@ -171,25 +161,22 @@ struct VersionLocalizationsView: View {
         }
     }
 
-    private func isSelected(_ loc: LocalizationSummary) -> Bool {
-        loc.id == (selectedId ?? localizations.first?.id)
-    }
-
     // MARK: - Editor scroll
 
     private var editorScroll: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
+                whatsNewField
+                otherFields
                 if let loc = selectedLocale {
-                    whatsNewField(loc: loc)
-                    moreFieldsSection(loc: loc)
-                    if let err = saveError {
-                        saveErrorBanner(err)
-                    }
+                    cliCommandPreview(for: loc)
+                }
+                if let err = saveError {
+                    saveErrorBanner(err)
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.top, 12)
+            .padding(.top, 10)
             .padding(.bottom, 4)
         }
         .frame(maxHeight: 340)
@@ -197,8 +184,8 @@ struct VersionLocalizationsView: View {
 
     // MARK: - What's New (primary field)
 
-    private func whatsNewField(loc: LocalizationSummary) -> some View {
-        let isEmpty = currentDraft.whatsNew.isEmpty
+    private var whatsNewField: some View {
+        let isEmpty = draft.whatsNew.isEmpty
         return VStack(alignment: .leading, spacing: 5) {
             HStack {
                 Text("WHAT'S NEW")
@@ -212,29 +199,25 @@ struct VersionLocalizationsView: View {
                 }
             }
 
-            TextEditor(text: Binding(
-                get: { currentDraft.whatsNew },
-                set: { val in
-                    var d = currentDraft; d.whatsNew = val; draft = d
-                }
-            ))
-            .font(.system(size: 13, design: theme.fontDesign))
-            .foregroundStyle(theme.textPrimary)
-            .scrollContentBackground(.hidden)
-            .frame(height: 88)
-            .padding(8)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(isEmpty
-                          ? BaseColors.systemOrange.opacity(0.05)
-                          : theme.codeBackground)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(isEmpty
-                                    ? BaseColors.systemOrange.opacity(0.35)
-                                    : theme.glassBorder, lineWidth: 1)
-                    )
-            )
+            // $draft.whatsNew is a @State-backed Binding — no Sendable issues
+            TextEditor(text: $draft.whatsNew)
+                .font(.system(size: 13, design: theme.fontDesign))
+                .foregroundStyle(theme.textPrimary)
+                .scrollContentBackground(.hidden)
+                .frame(height: 88)
+                .padding(8)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(isEmpty
+                              ? BaseColors.systemOrange.opacity(0.05)
+                              : theme.codeBackground)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(isEmpty
+                                        ? BaseColors.systemOrange.opacity(0.35)
+                                        : theme.glassBorder, lineWidth: 1)
+                        )
+                )
 
             Text("Shown to users in the App Store Updates tab")
                 .font(.system(size: 10, design: theme.fontDesign))
@@ -242,84 +225,64 @@ struct VersionLocalizationsView: View {
         }
     }
 
-    // MARK: - More Fields (collapsed)
+    // MARK: - Other Fields (always visible, flat)
 
-    private func moreFieldsSection(loc: LocalizationSummary) -> some View {
-        let setCount = [loc.description, loc.keywords, loc.marketingUrl,
-                        loc.supportUrl, loc.promotionalText].compactMap(\.self).count
+    private var otherFields: some View {
+        let setCount = [draft.description, draft.keywords, draft.marketingUrl,
+                        draft.supportUrl, draft.promotionalText]
+            .filter { !$0.isEmpty }.count
 
-        return VStack(alignment: .leading, spacing: 8) {
-            Button {
-                withAnimation(.easeOut(duration: 0.15)) { showMoreFields.toggle() }
-            } label: {
-                HStack(spacing: 8) {
-                    Text("🔤")
-                        .font(.system(size: 13))
-                    Text("Description · Keywords · URLs")
-                        .font(.system(size: 12, weight: .semibold, design: theme.fontDesign))
-                        .foregroundStyle(theme.textSecondary)
-                    Spacer()
-                    Text("\(setCount)/5")
-                        .font(.system(size: 9, weight: .bold, design: theme.fontDesign))
-                        .foregroundStyle(setCount > 0 ? BaseColors.systemGreen : theme.textTertiary)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill((setCount > 0 ? BaseColors.systemGreen : theme.textTertiary).opacity(0.15))
-                        )
-                    Image(systemName: showMoreFields ? "chevron.up" : "chevron.right")
-                        .font(.system(size: 10, weight: .semibold))
-                        .foregroundStyle(theme.textTertiary)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 9)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(theme.glassBackground)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(theme.glassBorder, lineWidth: 1)
-                        )
-                )
+        return VStack(alignment: .leading, spacing: 10) {
+            // Section header row
+            HStack(spacing: 8) {
+                Text("🔤").font(.system(size: 13))
+                Text("Description · Keywords · URLs")
+                    .font(.system(size: 12, weight: .semibold, design: theme.fontDesign))
+                    .foregroundStyle(theme.textSecondary)
+                Spacer()
+                Text("\(setCount)/5 set")
+                    .font(.system(size: 9, weight: .bold, design: theme.fontDesign))
+                    .foregroundStyle(setCount > 0 ? BaseColors.systemGreen : theme.textTertiary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill((setCount > 0 ? BaseColors.systemGreen : theme.textTertiary).opacity(0.15))
+                    )
             }
-            .buttonStyle(.plain)
-
-            if showMoreFields {
-                VStack(alignment: .leading, spacing: 10) {
-                    inlineField(label: "Description", multiline: true,
-                                hint: "Min 10 chars",
-                                validationError: descriptionError,
-                                get: { currentDraft.description },
-                                set: { val in var d = currentDraft; d.description = val; draft = d })
-                    inlineField(label: "Keywords", multiline: false,
-                                hint: "Comma-separated",
-                                get: { currentDraft.keywords },
-                                set: { val in var d = currentDraft; d.keywords = val; draft = d })
-                    inlineField(label: "Marketing URL", multiline: false,
-                                hint: "https://",
-                                validationError: urlError(currentDraft.marketingUrl),
-                                get: { currentDraft.marketingUrl },
-                                set: { val in var d = currentDraft; d.marketingUrl = val; draft = d })
-                    inlineField(label: "Support URL", multiline: false,
-                                hint: "https://",
-                                validationError: urlError(currentDraft.supportUrl),
-                                get: { currentDraft.supportUrl },
-                                set: { val in var d = currentDraft; d.supportUrl = val; draft = d })
-                    inlineField(label: "Promotional Text", multiline: true,
-                                get: { currentDraft.promotionalText },
-                                set: { val in var d = currentDraft; d.promotionalText = val; draft = d })
-                }
-                .transition(.opacity.combined(with: .move(edge: .top)))
-            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 9)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(theme.glassBackground)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(theme.glassBorder, lineWidth: 1)
+                    )
+            )
+            inlineField(label: "Description", text: $draft.description,
+                        multiline: true, hint: "Min 10 chars",
+                        validationError: descriptionError)
+            inlineField(label: "Keywords", text: $draft.keywords,
+                        multiline: false, hint: "Comma-separated")
+            inlineField(label: "Marketing URL", text: $draft.marketingUrl,
+                        multiline: false, hint: "https://",
+                        validationError: urlError(draft.marketingUrl))
+            inlineField(label: "Support URL", text: $draft.supportUrl,
+                        multiline: false, hint: "https://",
+                        validationError: urlError(draft.supportUrl))
+            inlineField(label: "Promotional Text", text: $draft.promotionalText,
+                        multiline: true)
         }
     }
 
+    // Binding<String> parameter — Sendable by construction, no closure forwarding
     private func inlineField(
-        label: String, multiline: Bool,
-        hint: String? = nil, validationError: String? = nil,
-        get: @escaping () -> String,
-        set: @escaping (String) -> Void
+        label: String,
+        text: Binding<String>,
+        multiline: Bool,
+        hint: String? = nil,
+        validationError: String? = nil
     ) -> some View {
         let hasError = validationError != nil
         return VStack(alignment: .leading, spacing: 4) {
@@ -329,7 +292,7 @@ struct VersionLocalizationsView: View {
                 .tracking(0.3)
 
             if multiline {
-                TextEditor(text: Binding(get: get, set: set))
+                TextEditor(text: text)
                     .font(.system(size: 12, design: theme.fontDesign))
                     .foregroundStyle(theme.textPrimary)
                     .scrollContentBackground(.hidden)
@@ -337,7 +300,7 @@ struct VersionLocalizationsView: View {
                     .padding(4)
                     .background(fieldBackground(hasError: hasError))
             } else {
-                TextField("", text: Binding(get: get, set: set))
+                TextField("", text: text)
                     .font(.system(size: 12, design: theme.fontDesign))
                     .foregroundStyle(theme.textPrimary)
                     .textFieldStyle(.plain)
@@ -363,6 +326,88 @@ struct VersionLocalizationsView: View {
             )
     }
 
+    // MARK: - Validation
+
+    private var descriptionError: String? {
+        let v = draft.description
+        if !v.isEmpty && v.count < 10 { return "At least 10 characters required" }
+        return nil
+    }
+
+    private func urlError(_ value: String) -> String? {
+        if !value.isEmpty && !value.hasPrefix("https://") && !value.hasPrefix("http://") {
+            return "Must start with https://"
+        }
+        return nil
+    }
+
+    private var hasValidationErrors: Bool {
+        descriptionError != nil
+            || urlError(draft.marketingUrl) != nil
+            || urlError(draft.supportUrl) != nil
+    }
+
+    // MARK: - CLI Command Preview
+
+    private func cliCommandPreview(for loc: LocalizationSummary) -> some View {
+        let cmd = buildCLICommand(draft: draft, loc: loc)
+        let text = cmd ?? "asc version-localizations update --localization-id \(loc.id)"
+        let hasCmd = cmd != nil
+
+        return VStack(alignment: .leading, spacing: 5) {
+            Text("CLI COMMAND")
+                .font(.system(size: 10, weight: .bold, design: theme.fontDesign))
+                .foregroundStyle(theme.textTertiary)
+                .tracking(0.6)
+
+            HStack(alignment: .top, spacing: 8) {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    Text(text)
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundStyle(hasCmd ? theme.textMono : theme.textTertiary)
+                        .fixedSize(horizontal: true, vertical: false)
+                }
+
+                Button {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(text, forType: .string)
+                    withAnimation { copiedCmd = true }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        withAnimation { copiedCmd = false }
+                    }
+                } label: {
+                    Text(copiedCmd ? "✓" : "Copy")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(copiedCmd ? theme.statusLive : theme.accentPrimary)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 2)
+                        .background(
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill((copiedCmd ? theme.statusLive : theme.accentPrimary).opacity(0.12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .stroke((copiedCmd ? theme.statusLive : theme.accentPrimary).opacity(0.25), lineWidth: 1)
+                                )
+                        )
+                }
+                .buttonStyle(.plain)
+                .animation(.easeInOut(duration: 0.15), value: copiedCmd)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(theme.codeBackground)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(hasCmd
+                                    ? theme.textMono.opacity(0.2)
+                                    : theme.glassBorder, lineWidth: 1)
+                    )
+            )
+        }
+    }
+
     // MARK: - Save Error Banner
 
     private func saveErrorBanner(_ error: String) -> some View {
@@ -386,17 +431,14 @@ struct VersionLocalizationsView: View {
     // MARK: - Action Bar
 
     private func actionBar(for loc: LocalizationSummary) -> some View {
-        let changed = currentDraft.changedFields(from: loc)
-        let hasChanges = changed.whatsNew != nil || changed.description != nil
-            || changed.keywords != nil || changed.marketingUrl != nil
-            || changed.supportUrl != nil || changed.promotionalText != nil
+        let changed = draft.changedFields(comparedTo: loc)
         let hasErrors = hasValidationErrors
-        let cmd = buildCLICommand(draft: currentDraft, loc: loc)
+        let cmd = buildCLICommand(draft: draft, loc: loc)
 
         return HStack(spacing: 8) {
             if hasChanges {
                 Button {
-                    switchLocale(to: loc, force: true) // discard
+                    switchLocale(to: loc)
                 } label: {
                     Text("Cancel")
                         .font(.system(size: 12, weight: .semibold, design: theme.fontDesign))
@@ -443,10 +485,9 @@ struct VersionLocalizationsView: View {
                 ProgressView().progressViewStyle(.circular).scaleEffect(0.75)
             } else {
                 let locId = loc.id
-                let originalLoc = loc
-                let snapshotDraft = currentDraft
+                let snapshotDraft = draft
                 Button {
-                    Task { await saveDraft(snapshotDraft, originalLoc: originalLoc, localizationId: locId) }
+                    Task { await saveDraft(snapshotDraft, loc: loc, localizationId: locId) }
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "checkmark").font(.system(size: 9, weight: .bold))
@@ -470,22 +511,18 @@ struct VersionLocalizationsView: View {
         .padding(.horizontal, 16)
         .padding(.top, 10)
         .padding(.bottom, 14)
-        .background(
-            Rectangle()
-                .fill(theme.backgroundColor)
-                .overlay(Rectangle().frame(height: 1).foregroundStyle(theme.dividerColor), alignment: .top)
-        )
     }
 
     // MARK: - State transitions
 
-    private func switchLocale(to loc: LocalizationSummary, force: Bool = false) {
+    private func switchLocale(to loc: LocalizationSummary) {
         withAnimation(.easeOut(duration: 0.15)) {
             selectedId = loc.id
-            draft = nil
+            let fresh = LocalizationDraft(from: loc)
+            draft = fresh
+            savedDraft = fresh
             saveError = nil
             copiedCmd = false
-            if !force { showMoreFields = false }
         }
     }
 
@@ -540,31 +577,10 @@ struct VersionLocalizationsView: View {
             .padding(.vertical, 48)
     }
 
-    // MARK: - Validation
-
-    private var descriptionError: String? {
-        let v = currentDraft.description
-        if !v.isEmpty && v.count < 10 { return "At least 10 characters required" }
-        return nil
-    }
-
-    private func urlError(_ value: String) -> String? {
-        if !value.isEmpty && !value.hasPrefix("https://") && !value.hasPrefix("http://") {
-            return "Must start with https://"
-        }
-        return nil
-    }
-
-    private var hasValidationErrors: Bool {
-        descriptionError != nil
-            || urlError(currentDraft.marketingUrl) != nil
-            || urlError(currentDraft.supportUrl) != nil
-    }
-
     // MARK: - CLI Command
 
     private func buildCLICommand(draft: LocalizationDraft, loc: LocalizationSummary) -> String? {
-        let changed = draft.changedFields(from: loc)
+        let changed = draft.changedFields(comparedTo: loc)
         var parts: [String] = ["asc version-localizations update --localization-id \(loc.id)"]
         if let v = changed.whatsNew        { parts.append("--whats-new \(shellQuote(v))") }
         if let v = changed.description     { parts.append("--description \(shellQuote(v))") }
@@ -587,7 +603,12 @@ struct VersionLocalizationsView: View {
         loadError = nil
         do {
             localizations = try await detailRepository.fetchLocalizations(versionId: version.id)
-            selectedId = localizations.first?.id
+            if let first = localizations.first {
+                selectedId = first.id
+                let fresh = LocalizationDraft(from: first)
+                draft = fresh
+                savedDraft = fresh
+            }
         } catch {
             loadError = error.localizedDescription
         }
@@ -596,16 +617,16 @@ struct VersionLocalizationsView: View {
 
     private func saveDraft(
         _ snapshotDraft: LocalizationDraft,
-        originalLoc: LocalizationSummary,
+        loc: LocalizationSummary,
         localizationId: String
     ) async {
         isSaving = true
         saveError = nil
-        let changed = snapshotDraft.changedFields(from: originalLoc)
+        let changed = snapshotDraft.changedFields(comparedTo: loc)
         guard changed.whatsNew != nil || changed.description != nil || changed.keywords != nil
                 || changed.marketingUrl != nil || changed.supportUrl != nil || changed.promotionalText != nil
         else {
-            withAnimation(.easeOut(duration: 0.15)) { draft = nil }
+            savedDraft = snapshotDraft
             isSaving = false
             return
         }
@@ -619,6 +640,7 @@ struct VersionLocalizationsView: View {
                 supportUrl: changed.supportUrl,
                 promotionalText: changed.promotionalText
             )
+            // Update local cache without a network round-trip
             if let idx = localizations.firstIndex(where: { $0.id == localizationId }) {
                 let orig = localizations[idx]
                 func apply(_ c: String?, _ o: String?) -> String? {
@@ -635,7 +657,7 @@ struct VersionLocalizationsView: View {
                     promotionalText: apply(changed.promotionalText, orig.promotionalText)
                 )
             }
-            withAnimation(.easeOut(duration: 0.15)) { draft = nil }
+            savedDraft = snapshotDraft
         } catch {
             saveError = error.localizedDescription
         }
@@ -653,7 +675,7 @@ private extension LocalizationSummary {
 
 // MARK: - Previews
 
-#Preview("Localizations — Loaded (en-US selected)") {
+#Preview("Localizations — Loaded") {
     VersionLocalizationsView(
         version: ASCVersion(id: "v1", appId: "app1", versionString: "2.1.0",
                             platform: "MAC_OS", state: "PREPARE_FOR_SUBMISSION"),
@@ -664,7 +686,7 @@ private extension LocalizationSummary {
     .appThemeProvider(themeModeId: "dark")
 }
 
-#Preview("Localizations — Loaded (light)") {
+#Preview("Localizations — Light") {
     VersionLocalizationsView(
         version: ASCVersion(id: "v1", appId: "app1", versionString: "2.1.0",
                             platform: "MAC_OS", state: "PREPARE_FOR_SUBMISSION"),
