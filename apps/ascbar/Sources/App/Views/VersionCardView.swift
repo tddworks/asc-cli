@@ -2,17 +2,17 @@ import SwiftUI
 import Domain
 
 /// Compact version card — mirrors the HTML prototype's `.version-card` exactly.
-/// State-tinted background, hover-reveal "Copy [action]" affordance.
+/// State-tinted background, hover-reveal "Open details" affordance.
 struct VersionCardView: View {
     let version: ASCVersion
-    /// Called when the user clicks the hover affordance — provides the CLI command to copy.
-    var onCopyCommand: ((String) -> Void)?
+    /// Called when the user taps the card to open version detail.
+    var onTapDetail: ((ASCVersion) -> Void)?
 
     @Environment(\.appTheme) private var theme
     @State private var isHovering = false
 
     var body: some View {
-        Button(action: copyAction) {
+        Button(action: tapAction) {
             VStack(alignment: .leading, spacing: 4) {
                 // Platform label — 9px uppercase glass badge
                 Text(version.platformDisplayName.uppercased())
@@ -39,11 +39,11 @@ struct VersionCardView: View {
                     .lineLimit(1)
 
                 // Hover affordance — appears on hover
-                if isHovering, let label = affordanceLabel {
+                if isHovering {
                     HStack(spacing: 4) {
-                        Image(systemName: "doc.on.doc")
+                        Image(systemName: "arrow.up.right.square")
                             .font(.system(size: 9, weight: .semibold))
-                        Text(label)
+                        Text("Open details")
                             .font(.system(size: 10, weight: .semibold, design: theme.fontDesign))
                     }
                     .foregroundStyle(theme.accentPrimary)
@@ -76,35 +76,8 @@ struct VersionCardView: View {
             )
     }
 
-    // MARK: - Affordance
-
-    /// The hover label for the copy action — nil for non-actionable states.
-    private var affordanceLabel: String? {
-        switch version.appStatus {
-        case .editable:   return "Copy submit"
-        case .live:       return "Copy cmd"
-        case .pending:    return "Copy status"
-        case .removed, .processing: return nil
-        }
-    }
-
-    /// The CLI command that gets copied on tap.
-    private var cliCommand: String? {
-        switch version.appStatus {
-        case .editable:
-            return "asc versions submit --version-id \(version.id)"
-        case .live:
-            return "asc versions list --app-id \(version.appId)"
-        case .pending:
-            return "asc builds list --app-id \(version.appId)"
-        case .removed, .processing:
-            return nil
-        }
-    }
-
-    private func copyAction() {
-        guard let cmd = cliCommand else { return }
-        onCopyCommand?(cmd)
+    private func tapAction() {
+        onTapDetail?(version)
     }
 
     private var statusColor: Color {

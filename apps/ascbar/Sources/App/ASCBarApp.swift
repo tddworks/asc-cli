@@ -6,6 +6,7 @@ import Infrastructure
 struct ASCBarApp: App {
     @State private var portfolio: AppPortfolio
     @State private var settings = AppSettings.shared
+    private let detailRepository: any VersionDetailRepository = CLIVersionDetailRepository()
 
     init() {
         _portfolio = State(initialValue: AppPortfolio(repository: CLIAppStoreRepository()))
@@ -13,7 +14,7 @@ struct ASCBarApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            MenuContentView(portfolio: portfolio)
+            MenuContentView(portfolio: portfolio, detailRepository: detailRepository)
                 .appThemeProvider(themeModeId: settings.themeMode)
                 .task { await portfolio.refresh() }
         } label: {

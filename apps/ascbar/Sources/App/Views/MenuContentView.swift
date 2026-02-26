@@ -2,6 +2,16 @@ import SwiftUI
 import Shimmer
 import Domain
 
+// MARK: - Navigation
+
+enum AppNavigation: Equatable {
+    case main
+    case settings
+    case versionDetail(ASCVersion)
+    case readiness(ASCVersion)
+    case localizations(ASCVersion)
+}
+
 /// Main menu bar popup — three states matching row-1-core-states.html exactly.
 ///
 /// Layout fix: content is a plain VStack; background (solid colour + orbs) is applied
@@ -9,10 +19,11 @@ import Domain
 /// This eliminates the "Update Constraints in Window" constraint loop.
 struct MenuContentView: View {
     let portfolio: AppPortfolio
+    let detailRepository: any VersionDetailRepository
 
     @Environment(\.appTheme) private var theme
     @State private var settings = AppSettings.shared
-    @State private var showSettings = false
+    @State private var navigation: AppNavigation = .main
     @State private var animateIn = false
     @State private var lastCopiedCommand: String? = nil
     @State private var copiedConfirmed = false
@@ -26,10 +37,35 @@ struct MenuContentView: View {
 
     var body: some View {
         Group {
-            if showSettings {
-                SettingsContentView(showSettings: $showSettings, monitor: portfolio)
-            } else {
+            switch navigation {
+            case .main:
                 mainContent
+            case .settings:
+                SettingsContentView(
+                    showSettings: Binding(get: { true }, set: { _ in navigation = .main }),
+                    monitor: portfolio
+                )
+            case .versionDetail(let version):
+                VersionDetailView(
+                    version: version,
+                    detailRepository: detailRepository,
+                    onOpenReadiness: { navigation = .readiness(version) },
+                    onOpenLocalizations: { navigation = .localizations(version) },
+                    onBack: { navigation = .main }
+                )
+            case .readiness(let version):
+                ReadinessCheckView(
+                    version: version,
+                    detailRepository: detailRepository,
+                    onFixLocalizations: { navigation = .localizations(version) },
+                    onBack: { navigation = .versionDetail(version) }
+                )
+            case .localizations(let version):
+                VersionLocalizationsView(
+                    version: version,
+                    detailRepository: detailRepository,
+                    onBack: { navigation = .versionDetail(version) }
+                )
             }
         }
         .frame(width: 400)
@@ -248,7 +284,7 @@ struct MenuContentView: View {
                     spacing: 8
                 ) {
                     ForEach(portfolio.selectedVersions.prefix(6)) { version in
-                        VersionCardView(version: version) { cmd in handleCopy(cmd) }
+                        VersionCardView(version: version) { v in navigation = .versionDetail(v) }
                     }
                 }
                 .opacity(animateIn ? 1 : 0)
@@ -399,7 +435,7 @@ struct MenuContentView: View {
             appsButton.opacity(0.5).allowsHitTesting(false)
             ghostPill(label: "Syncing", icon: "arrow.triangle.2.circlepath").opacity(0.5)
             Spacer()
-            circleIconButton(symbol: "gearshape.fill", help: "Settings") { showSettings = true }
+            circleIconButton(symbol: "gearshape.fill", help: "Settings") { navigation = .settings }
                 .opacity(0.4).allowsHitTesting(false)
             circleIconButton(symbol: "xmark", help: "Quit ASCBar") { NSApplication.shared.terminate(nil) }
                 .opacity(0.4).allowsHitTesting(false)
@@ -428,7 +464,7 @@ struct MenuContentView: View {
 
             Spacer()
 
-            circleIconButton(symbol: "gearshape.fill", help: "Settings") { showSettings = true }
+            circleIconButton(symbol: "gearshape.fill", help: "Settings") { navigation = .settings }
                 .keyboardShortcut(",")
             circleIconButton(symbol: "xmark", help: "Quit ASCBar") { NSApplication.shared.terminate(nil) }
                 .keyboardShortcut("q")
@@ -441,7 +477,7 @@ struct MenuContentView: View {
             appsButton.keyboardShortcut("a")
             refreshButton.keyboardShortcut("r")
             Spacer()
-            circleIconButton(symbol: "gearshape.fill", help: "Settings") { showSettings = true }
+            circleIconButton(symbol: "gearshape.fill", help: "Settings") { navigation = .settings }
                 .keyboardShortcut(",")
             circleIconButton(symbol: "xmark", help: "Quit ASCBar") { NSApplication.shared.terminate(nil) }
                 .keyboardShortcut("q")
@@ -574,21 +610,30 @@ private struct PulsingDot: View {
 // MARK: - Previews (one per core state)
 
 #Preview("State 1 — Loading") {
-    MenuContentView(portfolio: AppPortfolio(repository: PreviewRepository(state: .loading)))
-        .appThemeProvider(themeModeId: "dark")
+    MenuContentView(
+        portfolio: AppPortfolio(repository: PreviewRepository(state: .loading)),
+        detailRepository: PreviewVersionDetailRepository()
+    )
+    .appThemeProvider(themeModeId: "dark")
 }
 
 #Preview("State 2 — Main View") {
-    MenuContentView(portfolio: {
-        let m = AppPortfolio(repository: PreviewRepository(state: .loaded))
-        return m
-    }())
+    MenuContentView(
+        portfolio: {
+            let m = AppPortfolio(repository: PreviewRepository(state: .loaded))
+            return m
+        }(),
+        detailRepository: PreviewVersionDetailRepository()
+    )
     .appThemeProvider(themeModeId: "dark")
 }
 
 #Preview("State 3 — Error / No Auth") {
-    MenuContentView(portfolio: AppPortfolio(repository: PreviewRepository(state: .error)))
-        .appThemeProvider(themeModeId: "dark")
+    MenuContentView(
+        portfolio: AppPortfolio(repository: PreviewRepository(state: .error)),
+        detailRepository: PreviewVersionDetailRepository()
+    )
+    .appThemeProvider(themeModeId: "dark")
 }
 
 // MARK: - Preview repository
