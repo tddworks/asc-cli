@@ -18,14 +18,20 @@ struct BuildsListTests {
         let output = try await cmd.execute(repo: mockRepo)
 
         #expect(output == """
-        [
-          {
-            "expired" : false,
-            "id" : "b-1",
-            "processingState" : "VALID",
-            "version" : "42"
-          }
-        ]
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "addToTestFlight" : "asc builds add-beta-group --build-id b-1 --group-id <group-id>",
+                "updateBetaNotes" : "asc builds update-beta-notes --build-id b-1 --locale en-US --notes <notes>"
+              },
+              "expired" : false,
+              "id" : "b-1",
+              "processingState" : "VALID",
+              "version" : "42"
+            }
+          ]
+        }
         """)
     }
 
@@ -41,14 +47,19 @@ struct BuildsListTests {
         let output = try await cmd.execute(repo: mockRepo)
 
         #expect(output == """
-        [
-          {
-            "expired" : true,
-            "id" : "b-1",
-            "processingState" : "VALID",
-            "version" : "1"
-          }
-        ]
+        {
+          "data" : [
+            {
+              "affordances" : {
+
+              },
+              "expired" : true,
+              "id" : "b-1",
+              "processingState" : "VALID",
+              "version" : "1"
+            }
+          ]
+        }
         """)
     }
 }
