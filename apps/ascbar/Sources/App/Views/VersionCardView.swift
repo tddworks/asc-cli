@@ -82,7 +82,7 @@ struct VersionCardView: View {
     private var affordanceLabel: String? {
         switch version.appStatus {
         case .editable:   return "Copy submit"
-        case .live:       return "Copy list"
+        case .live:       return "Copy cmd"
         case .pending:    return "Copy status"
         case .removed, .processing: return nil
         }

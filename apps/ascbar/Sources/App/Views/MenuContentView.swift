@@ -2,17 +2,23 @@ import SwiftUI
 import Shimmer
 import Domain
 
-/// Main menu bar popup — layout matches ux-prototype.html exactly:
-/// header → app pills → app meta → 2-col version grid → (code snippet toast) → action bar.
+/// Main menu bar popup — three states matching row-1-core-states.html exactly:
+///   1. Loading  — shimmer grid + disabled action bar      (isSyncing && apps.isEmpty)
+///   2. Error    — ErrorStateView + Retry-only action bar  (lastError != nil && apps.isEmpty)
+///   3. Loaded   — pills + version grid + Apps/Refresh bar
 struct MenuContentView: View {
     let portfolio: AppPortfolio
 
     @Environment(\.appTheme) private var theme
     @State private var showSettings = false
     @State private var animateIn = false
-    /// The last CLI command copied — drives the code-snippet toast bar.
     @State private var lastCopiedCommand: String? = nil
     @State private var copiedConfirmed = false
+
+    // MARK: - State helpers
+
+    private var isLoading: Bool { portfolio.isSyncing && portfolio.apps.isEmpty }
+    private var isError: Bool   { portfolio.lastError != nil && portfolio.apps.isEmpty }
 
     var body: some View {
         ZStack {
@@ -56,12 +62,8 @@ struct MenuContentView: View {
                     }
             }
 
-            versionsSection
-                .padding(.horizontal, 16)
-                .padding(.top, 12)
-                .padding(.bottom, 8)
+            contentSection
 
-            // Code-snippet toast — appears after copy
             if let cmd = lastCopiedCommand {
                 codeSnippetBar(cmd)
                     .padding(.horizontal, 16)
@@ -84,13 +86,11 @@ struct MenuContentView: View {
 
     private var header: some View {
         HStack(spacing: 12) {
-            // Brand logo circle with purple-pink gradient
             ZStack {
                 Circle()
                     .fill(theme.accentGradient)
                     .frame(width: 36, height: 36)
                     .shadow(color: BaseColors.brandPurple.opacity(0.45), radius: 8, y: 2)
-
                 Image(systemName: "square.grid.2x2.fill")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(.white)
@@ -106,7 +106,6 @@ struct MenuContentView: View {
             }
 
             Spacer()
-
             statusPill
         }
         .opacity(animateIn ? 1 : 0)
@@ -149,7 +148,7 @@ struct MenuContentView: View {
     }
 
     private var statusText: String {
-        if portfolio.isSyncing   { return "Syncing…" }
+        if portfolio.isSyncing    { return "Syncing…" }
         if portfolio.lastError != nil { return "Error" }
         return "Ready"
     }
@@ -175,101 +174,88 @@ struct MenuContentView: View {
         .animation(.easeOut(duration: 0.4).delay(0.05), value: animateIn)
     }
 
-    // MARK: - Versions Section
+    // MARK: - Content Section (state switch)
 
     @ViewBuilder
-    private var versionsSection: some View {
-        if portfolio.isSyncing && portfolio.apps.isEmpty {
+    private var contentSection: some View {
+        if isLoading {
             shimmerGrid
-        } else if let error = portfolio.lastError, portfolio.apps.isEmpty {
-            errorCard(error)
-        } else if portfolio.apps.isEmpty {
-            emptyCard
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
+        } else if isError {
+            ErrorStateView { cmd in handleCopy(cmd) }
         } else {
-            VStack(alignment: .leading, spacing: 8) {
-                // App name + bundle ID
-                if let app = portfolio.selectedApp {
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(app.displayName)
-                            .font(.system(size: 13, weight: .bold, design: theme.fontDesign))
-                            .foregroundStyle(theme.textPrimary)
-                        Text(app.bundleId)
-                            .font(.system(size: 10, design: .monospaced))
-                            .foregroundStyle(theme.textTertiary)
-                    }
-                }
+            loadedContent
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
+        }
+    }
 
-                if portfolio.isSyncing {
-                    shimmerGrid
-                } else if portfolio.selectedVersions.isEmpty {
-                    Text("No versions found")
-                        .font(.system(size: 12, design: theme.fontDesign))
+    // MARK: - Loaded content
+
+    private var loadedContent: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let app = portfolio.selectedApp {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(app.displayName)
+                        .font(.system(size: 13, weight: .bold, design: theme.fontDesign))
+                        .foregroundStyle(theme.textPrimary)
+                    Text(metaLine(for: app))
+                        .font(.system(size: 10, design: .monospaced))
                         .foregroundStyle(theme.textTertiary)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.vertical, 24)
-                } else {
-                    LazyVGrid(
-                        columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
-                        spacing: 8
-                    ) {
-                        ForEach(portfolio.selectedVersions.prefix(6)) { version in
-                            VersionCardView(version: version) { cmd in
-                                handleCopy(cmd)
-                            }
-                        }
-                    }
-                    .opacity(animateIn ? 1 : 0)
-                    .animation(.easeOut(duration: 0.4).delay(0.1), value: animateIn)
                 }
+            }
+
+            if portfolio.isSyncing {
+                shimmerGrid
+            } else if portfolio.selectedVersions.isEmpty {
+                Text("No versions found")
+                    .font(.system(size: 12, design: theme.fontDesign))
+                    .foregroundStyle(theme.textTertiary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 24)
+            } else {
+                LazyVGrid(
+                    columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
+                    spacing: 8
+                ) {
+                    ForEach(portfolio.selectedVersions.prefix(6)) { version in
+                        VersionCardView(version: version) { cmd in handleCopy(cmd) }
+                    }
+                }
+                .opacity(animateIn ? 1 : 0)
+                .animation(.easeOut(duration: 0.4).delay(0.1), value: animateIn)
             }
         }
     }
 
-    // MARK: - Shimmer Skeleton Grid (loading state)
+    /// "com.example.ascbar · macOS" — platform suffix only when all versions share one platform.
+    private func metaLine(for app: ASCApp) -> String {
+        let platforms = Set(portfolio.selectedVersions.map(\.platform))
+        if platforms.count == 1, let display = portfolio.selectedVersions.first?.platformDisplayName {
+            return "\(app.bundleId) · \(display)"
+        }
+        return app.bundleId
+    }
+
+    // MARK: - Shimmer Skeleton Grid
 
     private var shimmerGrid: some View {
         LazyVGrid(
             columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
             spacing: 8
         ) {
-            ForEach(0..<4, id: \.self) { _ in
-                skeletonCard
-            }
+            ForEach(0..<4, id: \.self) { _ in skeletonCard }
         }
     }
 
     private var skeletonCard: some View {
         VStack(alignment: .leading, spacing: 6) {
-            RoundedRectangle(cornerRadius: 3).fill(theme.glassBorder)
-                .frame(width: 36, height: 9)
-                .shimmering(
-                    animation: .easeInOut(duration: 1.4).repeatForever(autoreverses: false),
-                    gradient: Gradient(colors: [
-                        theme.glassBorder,
-                        theme.glassHighlight,
-                        theme.glassBorder,
-                    ])
-                )
-            RoundedRectangle(cornerRadius: 3).fill(theme.glassBorder)
-                .frame(width: 60, height: 22)
-                .shimmering(
-                    animation: .easeInOut(duration: 1.4).repeatForever(autoreverses: false),
-                    gradient: Gradient(colors: [
-                        theme.glassBorder,
-                        theme.glassHighlight,
-                        theme.glassBorder,
-                    ])
-                )
-            RoundedRectangle(cornerRadius: 3).fill(theme.glassBorder)
-                .frame(width: 80, height: 11)
-                .shimmering(
-                    animation: .easeInOut(duration: 1.4).repeatForever(autoreverses: false),
-                    gradient: Gradient(colors: [
-                        theme.glassBorder,
-                        theme.glassHighlight,
-                        theme.glassBorder,
-                    ])
-                )
+            shimmerBar(width: 36, height: 9)
+            shimmerBar(width: 60, height: 22)
+            shimmerBar(width: 80, height: 11)
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -281,6 +267,15 @@ struct MenuContentView: View {
                         .stroke(theme.glassBorder, lineWidth: 1)
                 )
         )
+    }
+
+    private func shimmerBar(width: CGFloat, height: CGFloat) -> some View {
+        RoundedRectangle(cornerRadius: 3).fill(theme.glassBorder)
+            .frame(width: width, height: height)
+            .shimmering(
+                animation: .easeInOut(duration: 1.4).repeatForever(autoreverses: false),
+                gradient: Gradient(colors: [theme.glassBorder, theme.glassHighlight, theme.glassBorder])
+            )
     }
 
     // MARK: - Code Snippet Toast
@@ -342,50 +337,39 @@ struct MenuContentView: View {
         )
     }
 
-    // MARK: - Action Bar
+    // MARK: - Action Bar (state-aware)
 
+    @ViewBuilder
     private var actionBar: some View {
-        HStack(spacing: 8) {
-            // "Apps" — primary gradient pill (matches .bar-btn.primary)
-            Button {
-                if let app = portfolio.selectedApp {
-                    handleCopy("asc versions list --app-id \(app.id)")
-                }
-            } label: {
-                HStack(spacing: 5) {
-                    Image(systemName: "square.grid.2x2")
-                        .font(.system(size: 10, weight: .bold))
-                    Text("Apps")
-                        .font(.system(size: 12, weight: .bold, design: theme.fontDesign))
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 7)
-                .background(
-                    RoundedRectangle(cornerRadius: theme.pillCornerRadius)
-                        .fill(theme.accentGradient)
-                        .shadow(color: BaseColors.brandPurple.opacity(0.35), radius: 6, y: 2)
-                )
-            }
-            .buttonStyle(.plain)
-            .keyboardShortcut("a")
+        if isLoading {
+            loadingActionBar
+        } else if isError {
+            errorActionBar
+        } else {
+            loadedActionBar
+        }
+    }
 
-            // "Refresh" — ghost pill (matches .bar-btn.ghost)
+    /// State 1 — all controls disabled while initial fetch is in progress.
+    private var loadingActionBar: some View {
+        HStack(spacing: 8) {
+            appsButton.opacity(0.5).disabled(true)
+            syncingButton.opacity(0.5).disabled(true)
+            Spacer()
+            iconButton(symbol: "gearshape.fill", help: "Settings") { showSettings = true }
+                .opacity(0.4).disabled(true)
+            iconButton(symbol: "xmark", help: "Quit ASCBar") { NSApplication.shared.terminate(nil) }
+                .opacity(0.4).disabled(true)
+        }
+    }
+
+    /// State 3 — Retry only; no Apps button.
+    private var errorActionBar: some View {
+        HStack(spacing: 8) {
             Button { Task { await portfolio.refresh() } } label: {
                 HStack(spacing: 5) {
-                    Image(systemName: portfolio.isSyncing
-                          ? "arrow.triangle.2.circlepath"
-                          : "arrow.clockwise")
-                        .font(.system(size: 10, weight: .bold))
-                        .rotationEffect(portfolio.isSyncing ? .degrees(360) : .zero)
-                        .animation(
-                            portfolio.isSyncing
-                                ? .linear(duration: 1.0).repeatForever(autoreverses: false)
-                                : .default,
-                            value: portfolio.isSyncing
-                        )
-                    Text(portfolio.isSyncing ? "Syncing" : "Refresh")
-                        .font(.system(size: 12, weight: .bold, design: theme.fontDesign))
+                    Image(systemName: "arrow.clockwise").font(.system(size: 10, weight: .bold))
+                    Text("Retry").font(.system(size: 12, weight: .bold, design: theme.fontDesign))
                 }
                 .foregroundStyle(theme.textSecondary)
                 .padding(.horizontal, 14)
@@ -404,16 +388,100 @@ struct MenuContentView: View {
 
             Spacer()
 
-            // Settings icon button (circle)
             iconButton(symbol: "gearshape.fill", help: "Settings") { showSettings = true }
                 .keyboardShortcut(",")
-
-            // Quit icon button (circle)
-            iconButton(symbol: "xmark", help: "Quit ASCBar") {
-                NSApplication.shared.terminate(nil)
-            }
-            .keyboardShortcut("q")
+            iconButton(symbol: "xmark", help: "Quit ASCBar") { NSApplication.shared.terminate(nil) }
+                .keyboardShortcut("q")
         }
+    }
+
+    /// State 2 — full controls.
+    private var loadedActionBar: some View {
+        HStack(spacing: 8) {
+            appsButton.keyboardShortcut("a")
+            refreshButton.keyboardShortcut("r")
+            Spacer()
+            iconButton(symbol: "gearshape.fill", help: "Settings") { showSettings = true }
+                .keyboardShortcut(",")
+            iconButton(symbol: "xmark", help: "Quit ASCBar") { NSApplication.shared.terminate(nil) }
+                .keyboardShortcut("q")
+        }
+    }
+
+    // MARK: - Shared button shapes
+
+    private var appsButton: some View {
+        Button {
+            if let app = portfolio.selectedApp {
+                handleCopy("asc versions list --app-id \(app.id)")
+            }
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: "square.grid.2x2").font(.system(size: 10, weight: .bold))
+                Text("Apps").font(.system(size: 12, weight: .bold, design: theme.fontDesign))
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 7)
+            .background(
+                RoundedRectangle(cornerRadius: theme.pillCornerRadius)
+                    .fill(theme.accentGradient)
+                    .shadow(color: BaseColors.brandPurple.opacity(0.35), radius: 6, y: 2)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var syncingButton: some View {
+        ghostPill(label: "Syncing", icon: "arrow.triangle.2.circlepath")
+    }
+
+    private var refreshButton: some View {
+        Button { Task { await portfolio.refresh() } } label: {
+            HStack(spacing: 5) {
+                Image(systemName: portfolio.isSyncing ? "arrow.triangle.2.circlepath" : "arrow.clockwise")
+                    .font(.system(size: 10, weight: .bold))
+                    .rotationEffect(portfolio.isSyncing ? .degrees(360) : .zero)
+                    .animation(
+                        portfolio.isSyncing
+                            ? .linear(duration: 1.0).repeatForever(autoreverses: false)
+                            : .default,
+                        value: portfolio.isSyncing
+                    )
+                Text(portfolio.isSyncing ? "Syncing" : "Refresh")
+                    .font(.system(size: 12, weight: .bold, design: theme.fontDesign))
+            }
+            .foregroundStyle(theme.textSecondary)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 7)
+            .background(
+                RoundedRectangle(cornerRadius: theme.pillCornerRadius)
+                    .fill(theme.glassBackground)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: theme.pillCornerRadius)
+                            .stroke(theme.glassBorder, lineWidth: 1)
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func ghostPill(label: String, icon: String) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: icon).font(.system(size: 10, weight: .bold))
+            Text(label).font(.system(size: 12, weight: .bold, design: theme.fontDesign))
+        }
+        .foregroundStyle(theme.textSecondary)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 7)
+        .background(
+            RoundedRectangle(cornerRadius: theme.pillCornerRadius)
+                .fill(theme.glassBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: theme.pillCornerRadius)
+                        .stroke(theme.glassBorder, lineWidth: 1)
+                )
+        )
     }
 
     private func iconButton(symbol: String, help: String, action: @escaping () -> Void) -> some View {
@@ -432,67 +500,6 @@ struct MenuContentView: View {
         .help(help)
     }
 
-    // MARK: - Error / Empty Cards
-
-    private func errorCard(_ error: String) -> some View {
-        VStack(spacing: 12) {
-            VStack(spacing: 6) {
-                Text("⚠️").font(.system(size: 32))
-                Text("Could not load apps")
-                    .font(.system(size: 14, weight: .bold, design: theme.fontDesign))
-                    .foregroundStyle(theme.textPrimary)
-                Text("No credentials found.\nRun the command below in Terminal.")
-                    .font(.system(size: 11, design: theme.fontDesign))
-                    .foregroundStyle(theme.textSecondary)
-                    .multilineTextAlignment(.center)
-            }
-            .padding(.top, 8)
-
-            // Code snippet for auth
-            HStack {
-                Text("$ asc auth login")
-                    .font(.system(size: 11, design: .monospaced))
-                    .foregroundStyle(theme.textMono)
-                Spacer()
-                Button("Copy") { handleCopy("asc auth login") }
-                    .font(.system(size: 10, weight: .bold, design: theme.fontDesign))
-                    .foregroundStyle(theme.accentPrimary)
-                    .buttonStyle(.plain)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.black.opacity(0.35))
-                    .overlay(RoundedRectangle(cornerRadius: 8)
-                        .stroke(theme.textMono.opacity(0.15), lineWidth: 1))
-            )
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: theme.cardCornerRadius)
-                .fill(theme.statusRemoved.opacity(0.06))
-                .overlay(RoundedRectangle(cornerRadius: theme.cardCornerRadius)
-                    .stroke(theme.statusRemoved.opacity(0.18), lineWidth: 1))
-        )
-        .padding(.bottom, 4)
-    }
-
-    private var emptyCard: some View {
-        VStack(spacing: 8) {
-            Text("📭").font(.system(size: 32))
-            Text("No apps found")
-                .font(.system(size: 14, weight: .bold, design: theme.fontDesign))
-                .foregroundStyle(theme.textPrimary)
-            Text("Make sure `asc auth login` was run.")
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundStyle(theme.textTertiary)
-        }
-        .padding(24)
-        .frame(maxWidth: .infinity)
-    }
-
     // MARK: - Background Orbs
 
     private var backgroundOrbs: some View {
@@ -505,7 +512,6 @@ struct MenuContentView: View {
                     .frame(width: 220, height: 220)
                     .offset(x: -60, y: -80)
                     .blur(radius: 40)
-
                 Circle()
                     .fill(RadialGradient(
                         colors: [BaseColors.brandPink.opacity(0.28), .clear],
@@ -540,7 +546,7 @@ struct MenuContentView: View {
     }
 }
 
-// MARK: - Pulsing Status Dot
+// MARK: - Pulsing Dot
 
 private struct PulsingDot: View {
     let color: Color
@@ -561,7 +567,13 @@ private struct PulsingDot: View {
 
 // MARK: - Previews
 
-#Preview("Dark — Main") {
+#Preview("State 1 — Loading") {
+    MenuContentView(portfolio: AppPortfolio(repository: PreviewRepository(state: .loading)))
+        .appThemeProvider(themeModeId: "dark")
+        .frame(width: 400)
+}
+
+#Preview("State 2 — Main View") {
     MenuContentView(portfolio: {
         let m = AppPortfolio(repository: PreviewRepository(state: .loaded))
         return m
@@ -570,13 +582,7 @@ private struct PulsingDot: View {
     .frame(width: 400)
 }
 
-#Preview("Dark — Loading") {
-    MenuContentView(portfolio: AppPortfolio(repository: PreviewRepository(state: .loading)))
-        .appThemeProvider(themeModeId: "dark")
-        .frame(width: 400)
-}
-
-#Preview("Dark — Error") {
+#Preview("State 3 — Error / No Auth") {
     MenuContentView(portfolio: AppPortfolio(repository: PreviewRepository(state: .error)))
         .appThemeProvider(themeModeId: "dark")
         .frame(width: 400)
@@ -596,9 +602,10 @@ private final class PreviewRepository: AppStoreRepository {
         case .error: throw URLError(.badServerResponse)
         case .loaded:
             return [
-                ASCApp(id: "1", name: "ASCBar", bundleId: "com.example.ascbar"),
-                ASCApp(id: "2", name: "MoneyNotes", bundleId: "com.example.moneynotes"),
+                ASCApp(id: "1", name: "ASCBar",      bundleId: "com.example.ascbar"),
+                ASCApp(id: "2", name: "MoneyNotes",  bundleId: "com.example.moneynotes"),
                 ASCApp(id: "3", name: "TaskKit Pro", bundleId: "com.example.taskkit"),
+                ASCApp(id: "4", name: "WatchLog",    bundleId: "com.example.watchlog"),
             ]
         }
     }
@@ -607,8 +614,8 @@ private final class PreviewRepository: AppStoreRepository {
         [
             ASCVersion(id: "v1", appId: appId, versionString: "2.0.1", platform: "MAC_OS", state: "READY_FOR_SALE"),
             ASCVersion(id: "v2", appId: appId, versionString: "2.1.0", platform: "MAC_OS", state: "WAITING_FOR_REVIEW"),
-            ASCVersion(id: "v3", appId: appId, versionString: "1.0.0", platform: "IOS", state: "PREPARE_FOR_SUBMISSION"),
-            ASCVersion(id: "v4", appId: appId, versionString: "0.9.5", platform: "IOS", state: "READY_FOR_SALE"),
+            ASCVersion(id: "v3", appId: appId, versionString: "1.0.0", platform: "IOS",    state: "PREPARE_FOR_SUBMISSION"),
+            ASCVersion(id: "v4", appId: appId, versionString: "0.9.5", platform: "IOS",    state: "READY_FOR_SALE"),
         ]
     }
 }
