@@ -45,17 +45,21 @@ asc versions check-readiness --version-id 74ed4466-8dc4-4ec7-b2ce-3c1bbe620964 -
       },
       "id": "74ed4466-8dc4-4ec7-b2ce-3c1bbe620964",
       "isReadyToSubmit": true,
-      "localizations": [
-        {
-          "hasDescription": true,
-          "hasKeywords": true,
-          "hasSupportUrl": true,
-          "hasWhatsNew": true,
-          "locale": "en-US",
-          "pass": true,
-          "screenshotSetCount": 3
-        }
-      ],
+      "localizationCheck": {
+        "localizations": [
+          {
+            "hasDescription": true,
+            "hasKeywords": true,
+            "hasSupportUrl": true,
+            "hasWhatsNew": true,
+            "isPrimary": true,
+            "locale": "en-US",
+            "pass": true,
+            "screenshotSetCount": 3
+          }
+        ],
+        "pass": true
+      },
       "pricingCheck": { "pass": true },
       "reviewContactCheck": { "pass": true },
       "state": "PREPARE_FOR_SUBMISSION",
@@ -85,7 +89,10 @@ asc versions check-readiness --version-id 74ed4466-8dc4-4ec7-b2ce-3c1bbe620964 -
       },
       "id": "74ed4466-...",
       "isReadyToSubmit": false,
-      "localizations": [],
+      "localizationCheck": {
+        "localizations": [],
+        "pass": false
+      },
       "pricingCheck": { "pass": true },
       "reviewContactCheck": { "pass": true },
       "state": "PREPARE_FOR_SUBMISSION",
@@ -93,6 +100,39 @@ asc versions check-readiness --version-id 74ed4466-8dc4-4ec7-b2ce-3c1bbe620964 -
       "versionString": "2.1.0"
     }
   ]
+}
+```
+
+**JSON output (secondary locale has no screenshots — primary passes, still ready):**
+
+```json
+{
+  "localizationCheck": {
+    "localizations": [
+      {
+        "hasDescription": true,
+        "hasKeywords": true,
+        "hasSupportUrl": false,
+        "hasWhatsNew": false,
+        "isPrimary": true,
+        "locale": "en-US",
+        "pass": true,
+        "screenshotSetCount": 2
+      },
+      {
+        "hasDescription": true,
+        "hasKeywords": false,
+        "hasSupportUrl": false,
+        "hasWhatsNew": false,
+        "isPrimary": false,
+        "locale": "zh-Hans",
+        "pass": false,
+        "screenshotSetCount": 0
+      }
+    ],
+    "pass": true
+  },
+  "isReadyToSubmit": true
 }
 ```
 
@@ -115,10 +155,13 @@ ID                                    Version  State                   Ready
 | Version state is editable | `stateCheck` | MUST FIX | Yes |
 | Build linked, valid, not expired | `buildCheck` | MUST FIX | Yes |
 | App price schedule configured | `pricingCheck` | MUST FIX | Yes |
+| Primary locale has description + screenshots | `localizationCheck` | MUST FIX | Yes |
 | Review contact info (email + phone) | `reviewContactCheck` | SHOULD FIX | No |
-| Localization description + screenshots | `localizations[].pass` | SHOULD FIX | No (Apple rejects post-submit) |
+| Secondary locale description + screenshots | `localizationCheck.localizations[isPrimary=false].pass` | SHOULD FIX | No (Apple rejects post-submit) |
 
-`isReadyToSubmit = stateCheck.pass && buildCheck.pass && pricingCheck.pass`
+`isReadyToSubmit = stateCheck.pass && buildCheck.pass && pricingCheck.pass && localizationCheck.pass`
+
+`localizationCheck.pass` = `true` when the primary locale (`isPrimary == true`) has a description and at least one screenshot set. It is `false` when there are no localizations at all.
 
 ---
 
@@ -143,6 +186,9 @@ asc versions set-build --version-id <VERSION_ID> --build-id <BUILD_ID>
 # 4c. If pricingCheck.pass == false → configure pricing in App Store Connect web UI
 #     (no asc CLI command for pricing setup)
 
+# 4d. If localizationCheck.pass == false → add description and screenshots to primary locale
+asc version-localizations list --version-id <VERSION_ID>
+
 # 5. Re-run check until ready
 asc versions check-readiness --version-id <VERSION_ID> --pretty
 ```
@@ -161,7 +207,7 @@ if [ "$IS_READY" = "true" ]; then
   asc versions submit --version-id "$VERSION_ID"
 else
   echo "Version is NOT ready. Issues:"
-  echo "$RESULT" | jq '.data[0] | {stateCheck, buildCheck, pricingCheck, reviewContactCheck}'
+  echo "$RESULT" | jq '.data[0] | {stateCheck, buildCheck, pricingCheck, localizationCheck}'
   exit 1
 fi
 ```
@@ -184,12 +230,13 @@ fi
 │  VersionReadiness — id, appId, versionString, state,           │
 │                     isReadyToSubmit, stateCheck,               │
 │                     buildCheck, pricingCheck,                  │
-│                     reviewContactCheck, localizations          │
+│                     localizationCheck, reviewContactCheck      │
 │  ReadinessCheck — pass, message?                               │
 │  BuildReadinessCheck — linked, valid, notExpired, buildVersion?│
-│  LocalizationReadiness — locale, hasDescription, hasKeywords,  │
-│                          hasSupportUrl, hasWhatsNew,           │
-│                          screenshotSetCount                    │
+│  LocalizationReadinessCheck — localizations, pass (computed)   │
+│  LocalizationReadiness — locale, isPrimary, hasDescription,    │
+│                          hasKeywords, hasSupportUrl,           │
+│                          hasWhatsNew, screenshotSetCount        │
 │                                                                 │
 │  AppStoreReviewDetail — id, versionId,                         │
 │                         contactPhone?, contactEmail?,          │
@@ -241,9 +288,9 @@ public struct VersionReadiness: Sendable, Equatable, Identifiable, Codable {
     public let stateCheck: ReadinessCheck
     public let buildCheck: BuildReadinessCheck
     public let pricingCheck: ReadinessCheck
+    public let localizationCheck: LocalizationReadinessCheck
     // SHOULD FIX (warning only, does not block submission)
     public let reviewContactCheck: ReadinessCheck
-    public let localizations: [LocalizationReadiness]
 }
 ```
 
@@ -283,13 +330,29 @@ public struct BuildReadinessCheck: Sendable, Equatable, Codable {
 }
 ```
 
+### `LocalizationReadinessCheck`
+
+Wrapper for all per-locale checks. `pass` is computed from the primary locale.
+
+```swift
+public struct LocalizationReadinessCheck: Sendable, Equatable, Codable {
+    public let localizations: [LocalizationReadiness]
+
+    /// True when the primary locale has a description and at least one screenshot set.
+    public var pass: Bool {
+        localizations.first(where: { $0.isPrimary })?.pass ?? false
+    }
+}
+```
+
 ### `LocalizationReadiness`
 
-Per-locale SHOULD FIX check. `pass` is a computed property, explicitly encoded.
+Per-locale detail. `isPrimary` marks the first locale returned by the API (the app's default locale). Secondary locale failures are informational — only primary locale failure blocks submission.
 
 ```swift
 public struct LocalizationReadiness: Sendable, Equatable, Codable {
     public let locale: String
+    public let isPrimary: Bool          // first locale returned by API = primary
     public let hasDescription: Bool
     public let hasKeywords: Bool
     public let hasSupportUrl: Bool
@@ -377,7 +440,8 @@ Sources/
 Tests/
 ├── DomainTests/Apps/Versions/
 │   ├── VersionReadinessTests.swift     # ReadinessCheck, BuildReadinessCheck,
-│   │                                   # LocalizationReadiness, affordances, Codable
+│   │                                   # LocalizationReadinessCheck, LocalizationReadiness,
+│   │                                   # affordances, Codable
 │   └── AppStoreReviewDetailTests.swift # hasContact, demoAccountConfigured, Codable
 │
 ├── DomainTests/Apps/
@@ -391,8 +455,9 @@ Tests/
 │   └── SDKPricingRepositoryTests.swift  # hasPricing true/false; ThrowingStubAPIClient
 │
 └── ASCCommandTests/Commands/Versions/
-    └── VersionsCheckReadinessTests.swift # 4 scenarios: ready / no build /
-                                          # not editable state / contact missing
+    └── VersionsCheckReadinessTests.swift # 5 scenarios: ready / no build /
+                                          # not editable state / multi-locale /
+                                          # contact missing (still ready)
 ```
 
 **Wiring files modified:**
@@ -427,46 +492,35 @@ Tests/
 Tests follow **Chicago School TDD** — assert on exact state and output values.
 
 ```swift
-// Domain: computed pass aggregates build flags correctly
-@Test func `build check passes only when linked and valid and not expired`() {
-    let failExpired = BuildReadinessCheck(linked: true, valid: true, notExpired: false)
-    #expect(failExpired.pass == false)
-    let allGood = BuildReadinessCheck(linked: true, valid: true, notExpired: true)
-    #expect(allGood.pass == true)
+// Domain: primary locale pass drives localizationCheck.pass
+@Test func `localization check passes when primary locale has description and screenshots`() {
+    let check = LocalizationReadinessCheck(localizations: [
+        LocalizationReadiness(locale: "en-US", isPrimary: true,
+                              hasDescription: true, hasKeywords: true,
+                              hasSupportUrl: false, hasWhatsNew: false,
+                              screenshotSetCount: 2)
+    ])
+    #expect(check.pass == true)
 }
 
-// Domain: submit affordance only when ready
-@Test func `version readiness submit affordance absent when not ready`() {
-    let notReady = MockRepositoryFactory.makeVersionReadiness(isReadyToSubmit: false)
-    #expect(notReady.affordances["submit"] == nil)
+// Domain: no localizations → localizationCheck.pass false
+@Test func `localization check fails when no localizations`() {
+    let check = LocalizationReadinessCheck(localizations: [])
+    #expect(check.pass == false)
 }
 
-// Infrastructure: versionId injection
-@Test func `getReviewDetail injects versionId and maps contact fields`() async throws {
-    let stub = StubAPIClient()
-    stub.willReturn(AppStoreReviewDetailResponse(
-        data: AppStoreConnect_Swift_SDK.AppStoreReviewDetail(
-            type: .appStoreReviewDetails,
-            id: "rd-1",
-            attributes: .init(contactFirstName: "Jane", contactLastName: "Smith",
-                              contactPhone: "+1-555-0100", contactEmail: "jane@example.com",
-                              demoAccountName: nil, demoAccountPassword: nil,
-                              isDemoAccountRequired: false, notes: nil)
-        ),
-        links: .init(this: "")
-    ))
-    let repo = SDKReviewDetailRepository(client: stub)
-    let result = try await repo.getReviewDetail(versionId: "v-42")
-    #expect(result.versionId == "v-42")
-    #expect(result.hasContact == true)
+// Command: secondary locale without screenshots does not block submission
+@Test func `secondary locale without screenshots does not block submission`() async throws {
+    // en-US (primary, isPrimary: true): has screenshots → pass: true
+    // zh-Hans (secondary, isPrimary: false): no screenshots → pass: false
+    // localizationCheck.pass = true (primary passes)
+    // isReadyToSubmit = true
 }
 
 // Command: reviewContactCheck failure is SHOULD FIX only — does not block submission
-@Test func `execute shows reviewContactCheck fail when contact missing`() async throws {
-    // ... setup mocks ...
-    let output = try await cmd.execute(...)
-    #expect(output.contains("\"isReadyToSubmit\" : true"))
-    #expect(output.contains("No contact email or phone set"))
+@Test func `missing review contact does not block submission`() async throws {
+    // reviewContactCheck.pass = false, but isReadyToSubmit = true
+    // (primary localization passes; only MUST FIX checks gate submission)
 }
 ```
 
@@ -488,7 +542,8 @@ let demoCheck: ReadinessCheck = reviewDetail.demoAccountConfigured
     : .fail("Demo account is required but not fully configured")
 
 // Add to VersionReadiness and update isReadyToSubmit:
-let isReadyToSubmit = stateCheck.pass && buildCheck.pass && pricingCheck.pass && demoCheck.pass
+let isReadyToSubmit = stateCheck.pass && buildCheck.pass && pricingCheck.pass
+    && localizationCheck.pass && demoCheck.pass
 ```
 
 ### Surface readiness as part of `versions list`
