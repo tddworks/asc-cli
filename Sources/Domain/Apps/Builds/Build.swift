@@ -38,3 +38,13 @@ public struct Build: Sendable, Codable, Equatable, Identifiable {
         case valid = "VALID"
     }
 }
+
+extension Build: AffordanceProviding {
+    public var affordances: [String: String] {
+        guard isUsable else { return [:] }
+        return [
+            "addToTestFlight": "asc builds add-beta-group --build-id \(id) --group-id <group-id>",
+            "updateBetaNotes": "asc builds update-beta-notes --build-id \(id) --locale en-US --notes <notes>"
+        ]
+    }
+}

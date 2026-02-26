@@ -42,4 +42,19 @@ struct BuildTests {
         #expect(Build.ProcessingState.invalid.rawValue == "INVALID")
         #expect(Build.ProcessingState.valid.rawValue == "VALID")
     }
+
+    @Test
+    func `usable build has addToTestFlight and updateBetaNotes affordances`() {
+        let build = Build(id: "b-1", version: "1.0", expired: false, processingState: .valid)
+        #expect(build.affordances["addToTestFlight"] == "asc builds add-beta-group --build-id b-1 --group-id <group-id>")
+        #expect(build.affordances["updateBetaNotes"] == "asc builds update-beta-notes --build-id b-1 --locale en-US --notes <notes>")
+    }
+
+    @Test
+    func `non-usable build has no affordances`() {
+        #expect(Build(id: "b-1", version: "1.0", expired: false, processingState: .processing).affordances.isEmpty)
+        #expect(Build(id: "b-1", version: "1.0", expired: false, processingState: .failed).affordances.isEmpty)
+        #expect(Build(id: "b-1", version: "1.0", expired: false, processingState: .invalid).affordances.isEmpty)
+        #expect(Build(id: "b-1", version: "1.0", expired: true,  processingState: .valid).affordances.isEmpty)
+    }
 }

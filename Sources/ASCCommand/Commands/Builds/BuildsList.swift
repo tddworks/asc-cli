@@ -23,7 +23,7 @@ struct BuildsList: AsyncParsableCommand {
     func execute(repo: any BuildRepository) async throws -> String {
         let response = try await repo.listBuilds(appId: appId, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatItems(
+        return try formatter.formatAgentItems(
             response.data,
             headers: ["ID", "Version", "State", "Expired"],
             rowMapper: { [$0.id, $0.version, $0.processingState.rawValue, $0.expired ? "Yes" : "No"] }
