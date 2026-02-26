@@ -73,6 +73,7 @@ let project = Project(
             dependencies: [
                 .target(name: "Domain"),
                 .target(name: "Infrastructure"),
+                .external(name: "Shimmer"),
             ],
             settings: .settings(
                 base: [

@@ -4,33 +4,32 @@ import Infrastructure
 
 @main
 struct ASCBarApp: App {
-    @State private var monitor: AppStoreMonitor
+    @State private var portfolio: AppPortfolio
     @State private var settings = AppSettings.shared
 
     init() {
-        let repository = CLIAppStoreRepository()
-        _monitor = State(initialValue: AppStoreMonitor(repository: repository))
+        _portfolio = State(initialValue: AppPortfolio(repository: CLIAppStoreRepository()))
     }
 
     var body: some Scene {
         MenuBarExtra {
-            MenuContentView(monitor: monitor)
+            MenuContentView(portfolio: portfolio)
                 .appThemeProvider(themeModeId: settings.themeMode)
                 .task {
-                    await monitor.refresh()
+                    await portfolio.refresh()
                     if settings.backgroundSyncEnabled {
-                        monitor.startMonitoring(interval: settings.backgroundSyncInterval)
+                        portfolio.startAutoRefresh(interval: settings.backgroundSyncInterval)
                     }
                 }
                 .onChange(of: settings.backgroundSyncEnabled) { _, enabled in
                     if enabled {
-                        monitor.startMonitoring(interval: settings.backgroundSyncInterval)
+                        portfolio.startAutoRefresh(interval: settings.backgroundSyncInterval)
                     } else {
-                        monitor.stopMonitoring()
+                        portfolio.stopAutoRefresh()
                     }
                 }
         } label: {
-            StatusBarIcon(status: monitor.overallStatus, isSyncing: monitor.isSyncing)
+            StatusBarIcon(status: portfolio.overallStatus, isSyncing: portfolio.isSyncing)
                 .appThemeProvider(themeModeId: settings.themeMode)
         }
         .menuBarExtraStyle(.window)
@@ -39,7 +38,7 @@ struct ASCBarApp: App {
 
 // MARK: - Status Bar Icon
 
-/// The menu bar icon. Shows app status with an animated spinner when syncing.
+/// Menu bar icon — shows the portfolio's most urgent status; spins while fetching.
 struct StatusBarIcon: View {
     let status: AppStatus
     let isSyncing: Bool
@@ -47,30 +46,18 @@ struct StatusBarIcon: View {
     @Environment(\.appTheme) private var theme
 
     var body: some View {
-        HStack(spacing: 3) {
-            if isSyncing {
-                Image(systemName: "arrow.triangle.2.circlepath")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(theme.statusColor(for: status).opacity(0.7))
-            } else {
-                Image(systemName: iconName)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(iconColor)
-            }
-        }
+        Image(systemName: isSyncing ? "arrow.triangle.2.circlepath" : iconName)
+            .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(theme.statusColor(for: status).opacity(isSyncing ? 0.7 : 1.0))
     }
 
     private var iconName: String {
         switch status {
-        case .live:       return "app.badge.checkmark.fill"
         case .editable:   return "app.fill"
         case .pending:    return "clock.badge.fill"
+        case .live:       return "app.badge.checkmark.fill"
         case .removed:    return "app.badge.fill"
         case .processing: return "app.fill"
         }
-    }
-
-    private var iconColor: Color {
-        theme.statusColor(for: status)
     }
 }

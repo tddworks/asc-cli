@@ -13,5 +13,6 @@ let package = Package(
     name: "ASCBar",
     dependencies: [
         .package(url: "https://github.com/Kolos65/Mockable.git", from: "0.5.0"),
+        .package(url: "https://github.com/markiv/SwiftUI-Shimmer.git", from: "1.5.1"),
     ]
 )

@@ -4,7 +4,7 @@ import Domain
 /// Inline settings panel shown inside the menu bar popup.
 struct SettingsContentView: View {
     @Binding var showSettings: Bool
-    let monitor: AppStoreMonitor
+    let monitor: AppPortfolio
 
     @Environment(\.appTheme) private var theme
     @State private var settings = AppSettings.shared

@@ -1,11 +1,12 @@
 import SwiftUI
 import Domain
 
-/// A tappable pill for selecting an app — styled after ClaudeBar's ProviderPill.
-/// Selected state uses the accent gradient fill with a drop shadow.
+/// App selector pill — mirrors the HTML prototype's `.app-pill`.
+/// Selected state uses blue accent background; each pill shows a status-colored dot.
 struct AppPillView: View {
     let app: ASCApp
     let isSelected: Bool
+    let statusColor: Color
     let onTap: () -> Void
 
     @Environment(\.appTheme) private var theme
@@ -13,31 +14,36 @@ struct AppPillView: View {
 
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: 4) {
-                Image(systemName: "app.fill")
-                    .font(.system(size: 10, weight: .semibold))
+            HStack(spacing: 6) {
+                // Status dot
+                Circle()
+                    .fill(statusColor)
+                    .frame(width: 6, height: 6)
 
                 Text(app.displayName)
-                    .font(.system(size: 11, weight: .medium, design: theme.fontDesign))
+                    .font(.system(size: 12, weight: .semibold, design: theme.fontDesign))
                     .lineLimit(1)
                     .fixedSize()
             }
-            .foregroundStyle(isSelected ? .white : theme.textPrimary)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
+            .foregroundStyle(isSelected ? theme.textPrimary : theme.textSecondary)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 5)
             .background(
-                ZStack {
-                    if isSelected {
+                RoundedRectangle(cornerRadius: theme.pillCornerRadius)
+                    .fill(
+                        isSelected
+                            ? theme.accentPrimary.opacity(0.15)
+                            : (isHovering ? theme.hoverBackground : theme.glassBackground)
+                    )
+                    .overlay(
                         RoundedRectangle(cornerRadius: theme.pillCornerRadius)
-                            .fill(theme.accentGradient)
-                            .shadow(color: theme.accentPrimary.opacity(0.3), radius: 6, y: 2)
-                    } else {
-                        RoundedRectangle(cornerRadius: theme.pillCornerRadius)
-                            .fill(isHovering ? theme.hoverOverlay : theme.glassBackground)
-                    }
-                    RoundedRectangle(cornerRadius: theme.pillCornerRadius)
-                        .stroke(isSelected ? theme.accentPrimary.opacity(0.5) : theme.glassBorder, lineWidth: 1)
-                }
+                            .stroke(
+                                isSelected
+                                    ? theme.accentPrimary.opacity(0.35)
+                                    : Color.clear,
+                                lineWidth: 1
+                            )
+                    )
             )
         }
         .buttonStyle(.plain)
