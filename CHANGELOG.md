@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `asc subscription-offers list` — list introductory offers for a subscription
+- `asc subscription-offers create` — create a `FREE_TRIAL`, `PAY_AS_YOU_GO`, or `PAY_UP_FRONT` introductory offer; validates that `--price-point-id` is provided for paid modes
+- `SubscriptionIntroductoryOffer` domain model with `SubscriptionOfferDuration` and `SubscriptionOfferMode` enums; `requiresPricePoint` semantic boolean on `SubscriptionOfferMode`
+- `createIntroductoryOffer` and `listIntroductoryOffers` CAEOAS affordances on `Subscription`
 - `asc iap list` — list in-app purchases (consumable, non-consumable, non-renewing subscription) for an app
 - `asc iap create` — create a new in-app purchase with reference name, product ID, and type
 - `asc iap-localizations list` — list localizations for an in-app purchase

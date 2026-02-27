@@ -9,7 +9,9 @@ description: |
   (4) Creating a subscription: "asc subscriptions create --group-id ID --period ONE_MONTH"
   (5) Listing subscription localizations: "asc subscription-localizations list --subscription-id ID"
   (6) Adding subscription localizations: "asc subscription-localizations create --subscription-id ID --locale en-US --name 'Monthly'"
-  (7) User says "add subscription tier", "create subscription group", "manage subscriptions", "localize subscription", "subscription plans"
+  (7) Listing introductory offers: "asc subscription-offers list --subscription-id ID"
+  (8) Creating an introductory offer: "asc subscription-offers create --subscription-id ID --duration ONE_MONTH --mode FREE_TRIAL --periods 1"
+  (9) User says "add subscription tier", "create subscription group", "manage subscriptions", "localize subscription", "subscription plans", "introductory offer", "free trial offer"
 ---
 
 # asc Subscriptions
@@ -60,6 +62,33 @@ asc subscription-localizations create \
   [--description "Full access, billed monthly"]
 ```
 
+## Subscription Introductory Offers
+
+```bash
+# List
+asc subscription-offers list --subscription-id <SUBSCRIPTION_ID>
+
+# Create free trial
+asc subscription-offers create \
+  --subscription-id <SUBSCRIPTION_ID> \
+  --duration ONE_MONTH \
+  --mode FREE_TRIAL \
+  --periods 1
+
+# Create paid intro offer (price point required for PAY_AS_YOU_GO / PAY_UP_FRONT)
+asc subscription-offers create \
+  --subscription-id <SUBSCRIPTION_ID> \
+  --duration THREE_MONTHS \
+  --mode PAY_AS_YOU_GO \
+  --periods 3 \
+  --territory USA \
+  --price-point-id <PRICE_POINT_ID>
+```
+
+**`--duration`** values: `THREE_DAYS`, `ONE_WEEK`, `TWO_WEEKS`, `ONE_MONTH`, `TWO_MONTHS`, `THREE_MONTHS`, `SIX_MONTHS`, `ONE_YEAR`
+
+**`--mode`** values: `FREE_TRIAL`, `PAY_AS_YOU_GO`, `PAY_UP_FRONT` — paid modes require `--price-point-id`
+
 ## CAEOAS Affordances
 
 Every subscription group response embeds ready-to-run follow-up commands:
@@ -78,8 +107,19 @@ Every subscription group response embeds ready-to-run follow-up commands:
 ```json
 {
   "affordances": {
-    "listLocalizations":  "asc subscription-localizations list --subscription-id <ID>",
-    "createLocalization": "asc subscription-localizations create --subscription-id <ID> --locale en-US --name <name>"
+    "createIntroductoryOffer": "asc subscription-offers create --subscription-id <ID> --duration ONE_MONTH --mode FREE_TRIAL --periods 1",
+    "createLocalization":      "asc subscription-localizations create --subscription-id <ID> --locale en-US --name <name>",
+    "listIntroductoryOffers":  "asc subscription-offers list --subscription-id <ID>",
+    "listLocalizations":       "asc subscription-localizations list --subscription-id <ID>"
+  }
+}
+```
+
+**SubscriptionIntroductoryOffer:**
+```json
+{
+  "affordances": {
+    "listOffers": "asc subscription-offers list --subscription-id <SUBSCRIPTION_ID>"
   }
 }
 ```

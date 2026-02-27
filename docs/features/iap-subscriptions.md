@@ -256,6 +256,60 @@ asc subscription-localizations create --subscription-id sub-1 --locale en-US --n
 
 ---
 
+### `asc subscription-offers list`
+
+List introductory offers for a subscription.
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--subscription-id` | ✓ | Subscription ID |
+| `--output` | | `json` (default) or `table` |
+| `--pretty` | | Pretty-print JSON |
+
+```bash
+asc subscription-offers list --subscription-id sub-1 --pretty
+```
+
+---
+
+### `asc subscription-offers create`
+
+Create an introductory offer for a subscription.
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--subscription-id` | ✓ | Subscription ID |
+| `--duration` | ✓ | `THREE_DAYS`, `ONE_WEEK`, `TWO_WEEKS`, `ONE_MONTH`, `TWO_MONTHS`, `THREE_MONTHS`, `SIX_MONTHS`, `ONE_YEAR` |
+| `--mode` | ✓ | `FREE_TRIAL`, `PAY_AS_YOU_GO`, `PAY_UP_FRONT` |
+| `--periods` | ✓ | Number of periods (integer) |
+| `--territory` | | Territory code (e.g. `USA`) |
+| `--price-point-id` | ✓ for PAY_AS_YOU_GO / PAY_UP_FRONT | Subscription price point ID |
+| `--start-date` | | Start date `YYYY-MM-DD` |
+| `--end-date` | | End date `YYYY-MM-DD` |
+| `--pretty` | | Pretty-print JSON |
+
+```bash
+# Free trial — 1 month
+asc subscription-offers create \
+  --subscription-id sub-1 \
+  --duration ONE_MONTH \
+  --mode FREE_TRIAL \
+  --periods 1 \
+  --pretty
+
+# Discounted price — requires price point ID
+asc subscription-offers create \
+  --subscription-id sub-1 \
+  --duration THREE_MONTHS \
+  --mode PAY_AS_YOU_GO \
+  --periods 3 \
+  --territory USA \
+  --price-point-id pp-123 \
+  --pretty
+```
+
+---
+
 ## Typical Workflow
 
 ```bash
@@ -461,7 +515,33 @@ public struct Subscription: Sendable, Equatable, Identifiable {
 
 **`SubscriptionState`** semantic booleans: same as `InAppPurchaseState`
 
-**Affordances:** `listLocalizations`, `createLocalization`
+**Affordances:** `createIntroductoryOffer`, `createLocalization`, `listIntroductoryOffers`, `listLocalizations`
+
+---
+
+### `SubscriptionIntroductoryOffer`
+
+```swift
+public struct SubscriptionIntroductoryOffer: Sendable, Equatable, Identifiable {
+    public let id: String
+    public let subscriptionId: String  // parent — injected by Infrastructure
+    public let duration: SubscriptionOfferDuration
+    public let offerMode: SubscriptionOfferMode
+    public let numberOfPeriods: Int
+    public let startDate: String?      // omitted from JSON when nil
+    public let endDate: String?        // omitted from JSON when nil
+    public let territory: String?      // omitted from JSON when nil
+}
+```
+
+**`SubscriptionOfferDuration`** values: `THREE_DAYS`, `ONE_WEEK`, `TWO_WEEKS`, `ONE_MONTH`, `TWO_MONTHS`, `THREE_MONTHS`, `SIX_MONTHS`, `ONE_YEAR`
+
+**`SubscriptionOfferMode`** values: `PAY_AS_YOU_GO`, `PAY_UP_FRONT`, `FREE_TRIAL`
+- `requiresPricePoint` — `true` for `PAY_AS_YOU_GO` and `PAY_UP_FRONT`; a `--price-point-id` is required when creating those offers
+
+Nil fields are omitted from JSON (custom `Codable` with `encodeIfPresent`).
+
+**Affordances:** `listOffers`
 
 ---
 
@@ -504,6 +584,9 @@ Sources/Domain/Apps/
     ├── SubscriptionGroupRepository.swift
     ├── Subscription.swift
     ├── SubscriptionRepository.swift
+    ├── IntroductoryOffers/
+    │   ├── SubscriptionIntroductoryOffer.swift
+    │   └── SubscriptionIntroductoryOfferRepository.swift
     └── Localizations/
         ├── SubscriptionLocalization.swift
         └── SubscriptionLocalizationRepository.swift
@@ -518,6 +601,8 @@ Sources/Infrastructure/Apps/
 └── Subscriptions/
     ├── SDKSubscriptionGroupRepository.swift
     ├── SDKSubscriptionRepository.swift
+    ├── IntroductoryOffers/
+    │   └── SDKSubscriptionIntroductoryOfferRepository.swift
     └── Localizations/
         └── SDKSubscriptionLocalizationRepository.swift
 
@@ -543,18 +628,22 @@ Sources/ASCCommand/Commands/
 │   ├── SubscriptionsCommand.swift
 │   ├── SubscriptionsList.swift
 │   └── SubscriptionsCreate.swift
-└── SubscriptionLocalizations/
-    ├── SubscriptionLocalizationsCommand.swift
-    ├── SubscriptionLocalizationsList.swift
-    └── SubscriptionLocalizationsCreate.swift
+├── SubscriptionLocalizations/
+│   ├── SubscriptionLocalizationsCommand.swift
+│   ├── SubscriptionLocalizationsList.swift
+│   └── SubscriptionLocalizationsCreate.swift
+└── SubscriptionOffers/
+    ├── SubscriptionOffersCommand.swift
+    ├── SubscriptionOffersList.swift
+    └── SubscriptionOffersCreate.swift
 ```
 
 **Wiring files:**
 | File | Change |
 |------|--------|
-| `Sources/ASCCommand/ASC.swift` | Register 6 new command groups |
-| `Sources/ASCCommand/ClientProvider.swift` | 7 new factory methods |
-| `Sources/Infrastructure/Client/ClientFactory.swift` | 7 new factory methods |
+| `Sources/ASCCommand/ASC.swift` | Register 7 new command groups |
+| `Sources/ASCCommand/ClientProvider.swift` | 8 new factory methods |
+| `Sources/Infrastructure/Client/ClientFactory.swift` | 8 new factory methods |
 
 ---
 
@@ -575,6 +664,8 @@ Sources/ASCCommand/Commands/
 | `subscriptions create` | `APIEndpoint.v1.subscriptions.post(SubscriptionCreateRequest)` | v1 |
 | `subscription-localizations list` | `APIEndpoint.v1.subscriptions.id(subscriptionId).subscriptionLocalizations.get()` | v1 |
 | `subscription-localizations create` | `APIEndpoint.v1.subscriptionLocalizations.post(SubscriptionLocalizationCreateRequest)` | v1 |
+| `subscription-offers list` | `APIEndpoint.v1.subscriptions.id(subscriptionId).introductoryOffers.get()` | v1 |
+| `subscription-offers create` | `APIEndpoint.v1.subscriptionIntroductoryOffers.post(SubscriptionIntroductoryOfferCreateRequest)` | v1 |
 
 ---
 
@@ -625,7 +716,7 @@ swift test --filter 'IAPListTests|IAPCreateTests|IAPSubmitTests|IAPPricePointsLi
 
 Natural next steps:
 
-**Subscription Introductory Offers** — `POST /v1/subscriptionIntroductoryOffers`:
+**Subscription Promotional Offers** — `POST /v1/subscriptionPromotionalOffers`:
 ```bash
-asc subscription-offers create --subscription-id <id> --duration ONE_MONTH --mode PAY_UP_FRONT
+asc subscription-promotional-offers create --subscription-id <id> --name "Winback" --duration ONE_MONTH --mode PAY_AS_YOU_GO
 ```
