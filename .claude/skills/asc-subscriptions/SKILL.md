@@ -3,15 +3,12 @@ name: asc-subscriptions
 description: |
   Manage auto-renewable subscriptions using the `asc` CLI tool.
   Use this skill when:
-  (1) Listing subscription groups: "asc subscription-groups list --app-id ID"
-  (2) Creating a subscription group: "asc subscription-groups create --app-id ID --reference-name 'Premium'"
-  (3) Listing subscriptions: "asc subscriptions list --group-id ID"
-  (4) Creating a subscription: "asc subscriptions create --group-id ID --period ONE_MONTH"
-  (5) Listing subscription localizations: "asc subscription-localizations list --subscription-id ID"
-  (6) Adding subscription localizations: "asc subscription-localizations create --subscription-id ID --locale en-US --name 'Monthly'"
-  (7) Listing introductory offers: "asc subscription-offers list --subscription-id ID"
-  (8) Creating an introductory offer: "asc subscription-offers create --subscription-id ID --duration ONE_MONTH --mode FREE_TRIAL --periods 1"
-  (9) User says "add subscription tier", "create subscription group", "manage subscriptions", "localize subscription", "subscription plans", "introductory offer", "free trial offer"
+  (1) Listing or creating subscription groups: "asc subscription-groups list|create"
+  (2) Listing or creating subscriptions: "asc subscriptions list|create --group-id ID"
+  (3) Listing or creating subscription localizations: "asc subscription-localizations list|create"
+  (4) Listing introductory offers: "asc subscription-offers list --subscription-id ID"
+  (5) Creating introductory offers (FREE_TRIAL, PAY_AS_YOU_GO, PAY_UP_FRONT): "asc subscription-offers create --subscription-id ID --duration ONE_MONTH --mode FREE_TRIAL --periods 1"
+  (6) User says "add subscription tier", "create subscription group", "manage subscriptions", "localize subscription", "subscription plans", "introductory offer", "free trial offer", "promotional pricing"
 ---
 
 # asc Subscriptions
