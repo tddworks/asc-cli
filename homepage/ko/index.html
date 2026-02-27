@@ -177,110 +177,353 @@
       <h2 class="section-title" data-animate="fade-up" data-delay="1">필요한 모든 기능을 갖췄습니다</h2>
       <p class="section-subtitle" data-animate="fade-up" data-delay="2">공식 App Store Connect API 기반으로, 깔끔한 3레이어 아키텍처와 AI 에이전트 워크플로우를 위한 완전한 Affordance 출력을 제공합니다.</p>
     </div>
-    <div class="feature-grid">
-      <!-- Feature 1: CAEOAS -->
-      <div class="feature-card" data-animate="fade-up" data-delay="1">
-        <div class="feature-card-preview">
-          <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/></svg></div>
-          <div class="affordances-demo" id="caeoas-demo"></div>
-        </div>
-        <div class="feature-card-content">
-          <h3 class="feature-card-title">AI 에이전트 지원 (CAEOAS)</h3>
-          <p class="feature-card-description">모든 응답에 affordances 필드로 바로 실행 가능한 다음 명령어가 포함됩니다. 에이전트는 전체 명령 트리를 알 필요 없이 링크만 따라가면 됩니다.</p>
-        </div>
-      </div>
 
-      <!-- Feature 2: Auth Login -->
-      <div class="feature-card" data-animate="fade-up" data-delay="2">
-        <div class="feature-card-preview">
-          <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg></div>
-          <div class="code-snippet">
-            <div class="t-line"><span class="t-dim"># 최초 한 번만 설정</span></div>
-            <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc auth login \</span></div>
-            <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--key-id KEY \</span></div>
-            <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--private-key-path ~/.asc/Key.p8</span></div>
-            <div class="t-blank"></div>
-            <div class="t-line"><span class="t-success">✓</span> <span class="t-dim">~/.asc/credentials.json에 저장됨</span></div>
-            <div class="t-blank"></div>
-            <div class="t-line"><span class="t-dim"># 이후 환경변수 불필요</span></div>
-            <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc apps list</span></div>
-          </div>
-        </div>
-        <div class="feature-card-content">
-          <h3 class="feature-card-title">영구 로그인 인증</h3>
-          <p class="feature-card-description">asc auth login으로 한 번 로그인하면 인증 정보가 ~/.asc/credentials.json에 저장되어 모든 명령에서 자동으로 사용됩니다. 환경변수 설정이 필요 없습니다.</p>
-        </div>
-      </div>
-
-      <!-- Feature 3: Full hierarchy -->
-      <div class="feature-card" data-animate="fade-up" data-delay="3">
-        <div class="feature-card-preview">
-          <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/></svg></div>
-          <div class="code-snippet">
-            <div class="t-line"><span class="t-success">App</span></div>
-            <div class="t-line"><span class="t-dim">└─</span> <span class="t-val">AppStoreVersion</span></div>
-            <div class="t-line"><span class="t-dim">&nbsp;&nbsp;&nbsp;└─</span> <span class="t-key">Localization</span></div>
-            <div class="t-line"><span class="t-dim">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─</span> <span class="t-str">ScreenshotSet</span></div>
-            <div class="t-line"><span class="t-dim">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─</span> <span class="t-dim">Screenshot</span></div>
-            <div class="t-blank"></div>
-            <div class="t-line"><span class="t-success">App</span></div>
-            <div class="t-line"><span class="t-dim">├─</span> <span class="t-val">Build</span></div>
-            <div class="t-line"><span class="t-dim">└─</span> <span class="t-key">TestFlight</span></div>
-          </div>
-        </div>
-        <div class="feature-card-content">
-          <h3 class="feature-card-title">완전한 리소스 계층</h3>
-          <p class="feature-card-description">전체 App Store Connect 리소스 트리 관리: 앱 → 버전 → 현지화 → 스크린샷 세트 → 스크린샷. 빌드와 TestFlight도 지원.</p>
-        </div>
-      </div>
-
-      <!-- Feature 4: Submit -->
-      <div class="feature-card" data-animate="fade-up" data-delay="4">
-        <div class="feature-card-preview">
-          <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg></div>
-          <div class="code-snippet">
-            <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc versions submit \</span></div>
-            <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--version-id a9657737</span></div>
-            <div class="t-blank"></div>
-            <div class="t-line"><span class="t-dim">// 4 API calls, 1 command:</span></div>
-            <div class="t-line"><span class="t-dim">1. GET  /appStoreVersions/{id}</span></div>
-            <div class="t-line"><span class="t-dim">2. POST /reviewSubmissions</span></div>
-            <div class="t-line"><span class="t-dim">3. POST /reviewSubmissionItems</span></div>
-            <div class="t-line"><span class="t-dim">4. PATCH /reviewSubmissions/{id}</span></div>
-            <div class="t-blank"></div>
-            <div class="t-line"><span class="t-success">✓</span> <span class="t-dim">state: WAITING_FOR_REVIEW</span></div>
-          </div>
-        </div>
-        <div class="feature-card-content">
-          <h3 class="feature-card-title">원클릭 심사 제출</h3>
-          <p class="feature-card-description">단 하나의 명령으로 iOS 또는 macOS 버전을 App Store 심사에 제출합니다. CLI가 복잡한 다단계 심사 제출 흐름을 자동으로 처리합니다.</p>
-        </div>
-      </div>
-
-      <!-- Feature 5: Output formats -->
-      <div class="feature-card" data-animate="fade-up" data-delay="5">
-        <div class="feature-card-preview">
-          <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"/></svg></div>
-          <div class="code-snippet" id="output-formats-demo" style="padding:0;overflow:hidden;"></div>
-        </div>
-        <div class="feature-card-content">
-          <h3 class="feature-card-title">다양한 출력 형식</h3>
-          <p class="feature-card-description">사람과 기계 모두를 위한 설계. JSON(기본값), 테이블, Markdown 형식으로 출력. jq, 스크립트, AI 에이전트로 손쉽게 파이프 연결.</p>
-        </div>
-      </div>
-
-      <!-- Feature 6: Check Readiness -->
-      <div class="feature-card" data-animate="fade-up" data-delay="6">
-        <div class="feature-card-preview">
-          <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0118 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3l1.5 1.5 3-3.75"/></svg></div>
-          <div class="code-snippet" id="readiness-demo"></div>
-        </div>
-        <div class="feature-card-content">
-          <h3 class="feature-card-title">사전 제출 확인</h3>
-          <p class="feature-card-description">제출 전에 한 명령으로 모든 검사를 실행하세요. 누락된 빌드, 미설정 가격, 불완전한 현지화를 탐지합니다 — MUST FIX와 SHOULD FIX 심각도로 구분. 모든 검사 통과 시에만 제출 기능이 활성화됩니다.</p>
-        </div>
-      </div>
+    <!-- Feature Tab Navigation -->
+    <div class="feature-tabs-nav" data-animate="fade-up" data-delay="3">
+      <button class="feature-tab-btn active" data-tab="0">게시</button>
+      <button class="feature-tab-btn" data-tab="1">콘텐츠</button>
+      <button class="feature-tab-btn" data-tab="2">빌드 & 테스트</button>
+      <button class="feature-tab-btn" data-tab="3">수익화</button>
     </div>
+
+    <div class="feature-tab-panels">
+
+      <!-- Panel 0: Publishing -->
+      <div class="feature-tab-panel is-active">
+        <div class="feature-grid">
+          <!-- Feature 1: CAEOAS -->
+          <div class="feature-card">
+            <div class="feature-card-preview">
+              <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/></svg></div>
+              <div class="affordances-demo" id="caeoas-demo"></div>
+            </div>
+            <div class="feature-card-content">
+              <h3 class="feature-card-title">AI 에이전트 지원 (CAEOAS)</h3>
+              <p class="feature-card-description">모든 응답에 affordances 필드로 바로 실행 가능한 다음 명령어가 포함됩니다. 에이전트는 전체 명령 트리를 알 필요 없이 링크만 따라가면 됩니다.</p>
+            </div>
+          </div>
+
+          <!-- Feature 3: Full hierarchy -->
+          <div class="feature-card">
+            <div class="feature-card-preview">
+              <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/></svg></div>
+              <div class="code-snippet">
+                <div class="t-line"><span class="t-success">App</span></div>
+                <div class="t-line"><span class="t-dim">├─</span> <span class="t-val">AppStoreVersion</span></div>
+                <div class="t-line"><span class="t-dim">│&nbsp;&nbsp;└─</span> <span class="t-key">Localization</span></div>
+                <div class="t-line"><span class="t-dim">│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─</span> <span class="t-str">ScreenshotSet</span></div>
+                <div class="t-line"><span class="t-dim">├─</span> <span class="t-val">AppInfo</span></div>
+                <div class="t-line"><span class="t-dim">│&nbsp;&nbsp;└─</span> <span class="t-key">AppInfoLocalization</span></div>
+                <div class="t-line"><span class="t-dim">├─</span> <span class="t-val">Build</span></div>
+                <div class="t-line"><span class="t-dim">└─</span> <span class="t-key">TestFlight</span></div>
+              </div>
+            </div>
+            <div class="feature-card-content">
+              <h3 class="feature-card-title">완전한 리소스 계층</h3>
+              <p class="feature-card-description">전체 App Store Connect 리소스 트리 관리: 앱 → 버전 → 현지화 → 스크린샷 세트 → 스크린샷. 빌드와 TestFlight도 지원.</p>
+            </div>
+          </div>
+
+          <!-- Feature 4: Submit -->
+          <div class="feature-card">
+            <div class="feature-card-preview">
+              <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg></div>
+              <div class="code-snippet">
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc versions submit \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--version-id a9657737</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-dim">// 4 API calls, 1 command:</span></div>
+                <div class="t-line"><span class="t-dim">1. GET  /appStoreVersions/{id}</span></div>
+                <div class="t-line"><span class="t-dim">2. POST /reviewSubmissions</span></div>
+                <div class="t-line"><span class="t-dim">3. POST /reviewSubmissionItems</span></div>
+                <div class="t-line"><span class="t-dim">4. PATCH /reviewSubmissions/{id}</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-success">✓</span> <span class="t-dim">state: WAITING_FOR_REVIEW</span></div>
+              </div>
+            </div>
+            <div class="feature-card-content">
+              <h3 class="feature-card-title">원클릭 심사 제출</h3>
+              <p class="feature-card-description">단 하나의 명령으로 iOS 또는 macOS 버전을 App Store 심사에 제출합니다. CLI가 복잡한 다단계 심사 제출 흐름을 자동으로 처리합니다.</p>
+            </div>
+          </div>
+
+          <!-- Feature 6: Check Readiness -->
+          <div class="feature-card">
+            <div class="feature-card-preview">
+              <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0118 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3l1.5 1.5 3-3.75"/></svg></div>
+              <div class="code-snippet" id="readiness-demo"></div>
+            </div>
+            <div class="feature-card-content">
+              <h3 class="feature-card-title">사전 제출 확인</h3>
+              <p class="feature-card-description">제출 전에 한 명령으로 모든 검사를 실행하세요. 누락된 빌드, 미설정 가격, 불완전한 현지화를 탐지합니다 — MUST FIX와 SHOULD FIX 심각도로 구분. 모든 검사 통과 시에만 제출 기능이 활성화됩니다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 1: Content & Media -->
+      <div class="feature-tab-panel">
+        <div class="feature-grid">
+          <!-- Feature 7: Version Localizations -->
+          <div class="feature-card">
+            <div class="feature-card-preview">
+              <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg></div>
+              <div class="code-snippet">
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc version-localizations list \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--version-id v1</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc version-localizations update \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--localization-id id \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--whats-new "Bug fixes"</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-success">✓</span> <span class="t-dim">en-US · zh-Hans · ja · ko</span></div>
+              </div>
+            </div>
+            <div class="feature-card-content">
+              <h3 class="feature-card-title">버전 현지화</h3>
+              <p class="feature-card-description">각 언어별 '새로운 기능' 텍스트, 설명, 키워드 및 홍보 URL을 업데이트합니다. 모든 지원 로케일에 대한 완전한 CRUD 작업(목록, 생성, 업데이트)을 지원합니다.</p>
+            </div>
+          </div>
+
+          <!-- Feature 8: Screenshots -->
+          <div class="feature-card">
+            <div class="feature-card-preview">
+              <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg></div>
+              <div class="code-snippet">
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc screenshot-sets create \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--localization-id id \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--display-type APP_IPHONE_67</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc screenshots upload \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--set-id id --file screen.png</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-success">✓</span> <span class="t-dim">3-step ASC upload flow</span></div>
+              </div>
+            </div>
+            <div class="feature-card-content">
+              <h3 class="feature-card-title">스크린샷</h3>
+              <p class="feature-card-description">모든 화면 크기의 스크린샷 세트를 생성하고 3단계 ASC 업로드 흐름으로 PNG 이미지를 업로드합니다. iPhone, iPad, Mac, Apple TV 모든 디스플레이 유형을 지원합니다.</p>
+            </div>
+          </div>
+
+          <!-- Feature 9: App Previews -->
+          <div class="feature-card">
+            <div class="feature-card-preview">
+              <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"/></svg></div>
+              <div class="code-snippet">
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc app-preview-sets create \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--localization-id id \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--preview-type IPHONE_67</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc app-previews upload \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--set-id id --file preview.mp4 \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--preview-frame-time-code 00:00:05</span></div>
+              </div>
+            </div>
+            <div class="feature-card-content">
+              <h3 class="feature-card-title">앱 미리보기</h3>
+              <p class="feature-card-description">선택적 썸네일 타임코드와 함께 동영상 미리보기(.mp4, .mov, .m4v)를 업로드합니다. CLI가 예약, 청크 업로드, MD5 확인의 완전한 3단계 업로드 흐름을 처리합니다.</p>
+            </div>
+          </div>
+
+          <!-- Feature 10: App Info Localizations -->
+          <div class="feature-card">
+            <div class="feature-card-preview">
+              <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg></div>
+              <div class="code-snippet">
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc app-info-localizations list \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--app-info-id id</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc app-info-localizations update \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--localization-id id \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--name "My App" \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--subtitle "Do things faster"</span></div>
+              </div>
+            </div>
+            <div class="feature-card-content">
+              <h3 class="feature-card-title">앱 정보 현지화</h3>
+              <p class="feature-card-description">언어별 앱 메타데이터(이름, 부제목, 개인정보 처리방침 URL)를 읽고 씁니다. 모든 버전에 적용되는 앱 수준의 메타데이터로, 버전 현지화와 별도로 관리됩니다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 2: Builds & Testing -->
+      <div class="feature-tab-panel">
+        <div class="feature-grid">
+          <!-- Feature 2: Auth Login -->
+          <div class="feature-card">
+            <div class="feature-card-preview">
+              <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg></div>
+              <div class="code-snippet">
+                <div class="t-line"><span class="t-dim"># 최초 한 번만 설정</span></div>
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc auth login \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--key-id KEY \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--private-key-path ~/.asc/Key.p8</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-success">✓</span> <span class="t-dim">~/.asc/credentials.json에 저장됨</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-dim"># 이후 환경변수 불필요</span></div>
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc apps list</span></div>
+              </div>
+            </div>
+            <div class="feature-card-content">
+              <h3 class="feature-card-title">영구 로그인 인증</h3>
+              <p class="feature-card-description">asc auth login으로 한 번 로그인하면 인증 정보가 ~/.asc/credentials.json에 저장되어 모든 명령에서 자동으로 사용됩니다. 환경변수 설정이 필요 없습니다.</p>
+            </div>
+          </div>
+
+          <!-- Feature 11: Builds Upload -->
+          <div class="feature-card">
+            <div class="feature-card-preview">
+              <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.323 3.75 3.75 0 013.316 4.098A4.5 4.5 0 0118 19.5H6.75z"/></svg></div>
+              <div class="code-snippet">
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc builds upload \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--app-id id --file MyApp.ipa \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--version 1.2.0 --build-number 55</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-dim">// 5-step flow:</span></div>
+                <div class="t-line"><span class="t-dim">1. Reserve slot</span></div>
+                <div class="t-line"><span class="t-dim">2. Upload chunks</span></div>
+                <div class="t-line"><span class="t-dim">3. Confirm MD5</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-success">✓</span> <span class="t-dim">state: processing</span></div>
+              </div>
+            </div>
+            <div class="feature-card-content">
+              <h3 class="feature-card-title">빌드 업로드</h3>
+              <p class="feature-card-description">5단계 ASC 업로드 흐름으로 IPA/PKG를 업로드합니다: 슬롯 예약, 청크 업로드, MD5 확인, 처리 상태 폴링. 업로드 기록 목록, 조회, 삭제도 지원합니다.</p>
+            </div>
+          </div>
+
+          <!-- Feature 12: TestFlight -->
+          <div class="feature-card">
+            <div class="feature-card-preview">
+              <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg></div>
+              <div class="code-snippet">
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc testflight groups list \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--app-id id</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc testflight testers add \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--beta-group-id id \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--email user@example.com</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc testflight testers import \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--beta-group-id id --file testers.csv</span></div>
+              </div>
+            </div>
+            <div class="feature-card-content">
+              <h3 class="feature-card-title">TestFlight</h3>
+              <p class="feature-card-description">베타 그룹과 테스터 관리: 이메일로 추가/제거, CSV로 대량 가져오기/내보내기, 그룹에 빌드 배포, 언어별 새로운 기능 노트 업데이트.</p>
+            </div>
+          </div>
+
+          <!-- Feature 5: Output formats -->
+          <div class="feature-card">
+            <div class="feature-card-preview">
+              <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"/></svg></div>
+              <div class="code-snippet" id="output-formats-demo" style="padding:0;overflow:hidden;"></div>
+            </div>
+            <div class="feature-card-content">
+              <h3 class="feature-card-title">다양한 출력 형식</h3>
+              <p class="feature-card-description">사람과 기계 모두를 위한 설계. JSON(기본값), 테이블, Markdown 형식으로 출력. jq, 스크립트, AI 에이전트로 손쉽게 파이프 연결.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 3: Monetization -->
+      <div class="feature-tab-panel">
+        <div class="feature-grid">
+          <!-- Feature 13: In-App Purchases -->
+          <div class="feature-card">
+            <div class="feature-card-preview">
+              <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+              <div class="code-snippet">
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc iap create --app-id id \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--type consumable \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--reference-name "Coins 100"</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc iap prices set \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--iap-id id --base-territory USA \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--price-point-id id</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc iap submit --iap-id id</span></div>
+              </div>
+            </div>
+            <div class="feature-card-content">
+              <h3 class="feature-card-title">인앱 구매</h3>
+              <p class="feature-card-description">소모성, 비소모성, 비갱신 구독 IAP를 생성합니다. App Store 가격 포인트에서 지역별 가격을 설정하고, 언어별 이름과 설명을 관리하여 심사를 제출합니다.</p>
+            </div>
+          </div>
+
+          <!-- Feature 14: Subscriptions -->
+          <div class="feature-card">
+            <div class="feature-card-preview">
+              <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg></div>
+              <div class="code-snippet">
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc subscription-groups create \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--app-id id --reference-name "Pro"</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc subscriptions create \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--group-id id --period ONE_MONTH</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc subscription-offers create \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--subscription-id id \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--mode FREE_TRIAL --periods 7</span></div>
+              </div>
+            </div>
+            <div class="feature-card-content">
+              <h3 class="feature-card-title">자동 갱신 구독</h3>
+              <p class="feature-card-description">구독 그룹과 등급(주간~연간)을 생성합니다. 무료 체험, 사용량 기반 결제, 선불 결제 등 인트로덕토리 오퍼와 언어별 메타데이터를 관리하여 심사를 제출합니다.</p>
+            </div>
+          </div>
+
+          <!-- Feature 15: Code Signing -->
+          <div class="feature-card">
+            <div class="feature-card-preview">
+              <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div>
+              <div class="code-snippet">
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc bundle-ids create \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--name "My App" \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--identifier com.example.app \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--platform ios</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc profiles create \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--type IOS_APP_STORE \</span></div>
+                <div class="t-line"><span class="t-dim">&nbsp;&nbsp;--bundle-id-id id --certificate-ids id</span></div>
+              </div>
+            </div>
+            <div class="feature-card-content">
+              <h3 class="feature-card-title">코드 서명</h3>
+              <p class="feature-card-description">전체 서명 체인 관리: Bundle ID 등록, CSR에서 인증서 생성, UDID로 기기 등록, 프로비저닝 프로파일 생성 및 삭제 — 모두 터미널에서.</p>
+            </div>
+          </div>
+
+          <!-- Feature 16: TUI Mode -->
+          <div class="feature-card">
+            <div class="feature-card-preview">
+              <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25"/></svg></div>
+              <div class="code-snippet">
+                <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">asc tui</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-dim">┌─ Apps ─────────────────────────┐</span></div>
+                <div class="t-line"><span class="t-dim">│</span> <span class="t-success">▶ AppNexus</span>                     <span class="t-dim">│</span></div>
+                <div class="t-line"><span class="t-dim">│&nbsp;&nbsp;My Other App</span>                  <span class="t-dim">│</span></div>
+                <div class="t-line"><span class="t-dim">└────────────────────────────────┘</span></div>
+                <div class="t-blank"></div>
+                <div class="t-line"><span class="t-dim">↑↓ navigate · Enter · Esc back</span></div>
+              </div>
+            </div>
+            <div class="feature-card-content">
+              <h3 class="feature-card-title">대화형 TUI 모드</h3>
+              <p class="feature-card-description">asc tui를 실행하여 완전한 터미널 UI 브라우저를 엽니다. 방향키로 앱, 버전, 빌드, TestFlight를 탐색 — 명령어를 외울 필요 없이 탐색과 발견에 최적.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- .feature-tab-panels -->
   </section>
 
   <!-- Quick Start / How It Works -->
@@ -696,6 +939,62 @@
         document.querySelector(this.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
       });
     });
+
+    // Feature tabs auto-cycle
+    (function() {
+      var btns = document.querySelectorAll('.feature-tab-btn');
+      var panels = document.querySelectorAll('.feature-tab-panel');
+      if (!btns.length) return;
+      var current = 0;
+      var timer = null;
+      var DURATION = 5000;
+
+      function activateTab(idx) {
+        btns[current].classList.remove('active', 'running');
+        panels[current].classList.remove('is-active');
+        current = (idx + btns.length) % btns.length;
+        btns[current].classList.add('active');
+        panels[current].classList.add('is-active');
+        // restart progress bar animation
+        void btns[current].offsetWidth;
+        btns[current].classList.add('running');
+      }
+
+      function startCycle() {
+        clearInterval(timer);
+        timer = setInterval(function() { activateTab(current + 1); }, DURATION);
+        btns[current].classList.remove('running');
+        void btns[current].offsetWidth;
+        btns[current].classList.add('running');
+      }
+
+      function stopCycle() {
+        clearInterval(timer);
+        btns[current].classList.remove('running');
+      }
+
+      btns.forEach(function(btn, i) {
+        btn.addEventListener('click', function() { activateTab(i); startCycle(); });
+      });
+
+      var panelArea = document.querySelector('.feature-tab-panels');
+      var tabNav = document.querySelector('.feature-tabs-nav');
+      [panelArea, tabNav].forEach(function(el) {
+        if (!el) return;
+        el.addEventListener('mouseenter', stopCycle);
+        el.addEventListener('mouseleave', startCycle);
+      });
+
+      var featureSection = document.getElementById('features');
+      if (featureSection) {
+        var tabObs = new IntersectionObserver(function(entries) {
+          if (entries[0].isIntersecting) startCycle(); else stopCycle();
+        }, { threshold: 0.15 });
+        tabObs.observe(featureSection);
+      } else {
+        startCycle();
+      }
+    })();
 
     // Language dropdown
     const langDropdown = document.querySelector('.lang-dropdown');
