@@ -178,6 +178,7 @@ function build() {
 
     const isRoot = lang === config.defaultLang;
     html = html.replace('{{APPS_JSON_PATH}}', isRoot ? 'apps.json' : '../apps.json');
+    html = html.replace('{{APPS_DATA_PATH}}', isRoot ? 'apps-data.json' : '../apps-data.json');
     html = html.replace('{{HTML_LANG}}', langConfig.htmlLang);
     html = html.replace('{{LANG_DROPDOWN_ITEMS}}', generateLangDropdownItems(lang));
     html = html.replace('{{CURRENT_LANG_LABEL}}', langLabels[lang] || lang.toUpperCase());

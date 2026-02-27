@@ -559,54 +559,25 @@
       const loading = document.getElementById('app-wall-loading');
       if (!scroller) return;
       try {
-        const res = await fetch('../apps.json');
-        if (!res.ok) throw new Error('not found');
-        const data = await res.json();
+        // Load pre-fetched static data — no runtime API calls, no CORS issues.
+        // Regenerate apps-data.json by running: node homepage/fetch-apps-data.js
+        const res = await fetch('../apps-data.json');
+        if (!res.ok) throw new Error('apps-data.json not found');
+        const { items } = await res.json();
 
-        // Phase 1: fetch all apps from developer IDs in parallel
-        const devResults = [];
-        await Promise.all(data.filter(e => e.developerId).map(async ({ developer, developerId, github, x }) => {
-          try {
-            const r = await fetch(
-              'https://itunes.apple.com/lookup?id=' + developerId + '&entity=software&limit=200'
-            );
-            const j = await r.json();
-            for (const app of (j.results || [])) {
-              if (app.wrapperType === 'software') {
-                devResults.push({ developer, github: github || null, x: x || null, info: app, url: app.trackViewUrl });
-              }
-            }
-          } catch (_) {}
+        // Map flat items to the shape makeCard expects
+        const all = (items || []).map(item => ({
+          developer: item.developer,
+          github:    item.github,
+          x:         item.x,
+          url:       item.url,
+          info: {
+            trackId:          item.trackId,
+            trackName:        item.trackName,
+            artworkUrl100:    item.artworkUrl100,
+            primaryGenreName: item.primaryGenreName,
+          },
         }));
-
-        // Phase 2: batch-fetch specific app URLs
-        const appResults = [];
-        const appEntries = [];
-        for (const { developer, github, x, apps } of data) {
-          for (const url of (apps || [])) {
-            const m = url.match(/\/id(\d+)/);
-            if (m) appEntries.push({ developer, github: github || null, x: x || null, appId: m[1], url });
-          }
-        }
-        if (appEntries.length) {
-          const ids = [...new Set(appEntries.map(e => e.appId))].join(',');
-          const lr = await fetch('https://itunes.apple.com/lookup?id=' + ids);
-          const lj = await lr.json();
-          const byId = {};
-          for (const r of (lj.results || [])) byId[String(r.trackId)] = r;
-          for (const entry of appEntries) {
-            const info = byId[entry.appId];
-            if (info) appResults.push({ developer: entry.developer, github: entry.github, x: entry.x, info, url: entry.url });
-          }
-        }
-
-        // Combine, dedup by trackId (developerId results first)
-        const seen = new Set();
-        const all = [];
-        for (const item of [...devResults, ...appResults]) {
-          const key = String(item.info.trackId);
-          if (!seen.has(key)) { seen.add(key); all.push(item); }
-        }
 
         loading.remove();
         if (!all.length) {
