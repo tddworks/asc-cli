@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `asc app-preview-sets list` — list App Store video preview sets for a version localization
+- `asc app-preview-sets create` — create a new preview set for a specific device type
+- `asc app-previews list` — list video previews in a preview set
+- `asc app-previews upload` — upload a video file (`.mp4`, `.mov`, `.m4v`) to a preview set using a 3-step upload flow (reserve → PUT chunks → PATCH with MD5)
+- `PreviewType` enum with 16 device cases (iPhone, iPad, Mac, Apple TV, Apple Vision Pro)
+- `AppPreview.VideoDeliveryState` with 5 states including `PROCESSING` (unique to video)
+- Renamed `--group-id` to `--beta-group-id` in all `asc testflight testers` commands for consistency with `asc builds add-beta-group`
+
 ---
 
 ## [0.1.23] - 2026-02-26

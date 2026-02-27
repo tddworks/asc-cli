@@ -71,6 +71,7 @@ $ asc versions list --app-id app-abc
 - **Version localizations** — update What's New, description, keywords, and URLs per locale
 - **App info localizations** — read and write per-locale name, subtitle, and privacy policy
 - **Screenshots** — create screenshot sets and upload images (3-step ASC upload flow)
+- **App Previews** — create preview sets and upload video previews (`.mp4`, `.mov`, `.m4v`) with optional thumbnail timecode
 - **Create & submit** — create versions, link builds, check readiness, submit for App Store review
 - **Builds upload** — upload IPA/PKG with 5-step flow; list/get/delete upload records
 - **TestFlight** — list groups; add/remove/import/export testers; distribute builds to groups; update What's New notes
@@ -161,6 +162,12 @@ asc screenshot-sets list --localization-id <id>
 asc screenshot-sets create --localization-id <id> --display-type APP_IPHONE_67
 asc screenshots list --set-id <id>
 asc screenshots upload --set-id <id> --file ./screen.png
+
+# App Previews
+asc app-preview-sets list --localization-id <id>
+asc app-preview-sets create --localization-id <id> --preview-type IPHONE_67
+asc app-previews list --set-id <id>
+asc app-previews upload --set-id <id> --file ./preview.mp4 [--preview-frame-time-code 00:00:05]
 
 # App Info
 asc app-infos list --app-id <id>
@@ -261,6 +268,7 @@ Detailed documentation for each feature area:
 - [Auth Login](docs/features/auth-login.md) — persistent credential storage, login/logout/check
 - [Version Localizations](docs/features/version-localizations.md) — What's New, description, keywords, and URLs
 - [Screenshots](docs/features/screenshots.md) — screenshot sets and image uploads
+- [App Previews](docs/features/app-previews.md) — preview sets and video uploads (`.mp4`, `.mov`, `.m4v`)
 - [App Info Localizations](docs/features/app-info-localizations.md) — per-locale name, subtitle, and privacy policy
 - [TestFlight](docs/features/testflight.md) — beta groups, tester management, CSV import/export
 - [Builds Upload](docs/features/builds-upload.md) — upload IPA/PKG, TestFlight distribution, beta notes
