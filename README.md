@@ -211,6 +211,7 @@ asc subscriptions list --group-id <id>
 asc subscriptions create --group-id <id> --name <n> --product-id <id> --period ONE_MONTH
 asc subscription-localizations list --subscription-id <id>
 asc subscription-localizations create --subscription-id <id> --locale en-US --name <n>
+asc subscriptions submit --subscription-id <id>
 asc subscription-offers list --subscription-id <id>
 asc subscription-offers create --subscription-id <id> --duration ONE_MONTH --mode FREE_TRIAL --periods 1
 asc subscription-offers create --subscription-id <id> --duration THREE_MONTHS --mode PAY_AS_YOU_GO --periods 3 --price-point-id <id>

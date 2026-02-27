@@ -256,6 +256,23 @@ asc subscription-localizations create --subscription-id sub-1 --locale en-US --n
 
 ---
 
+### `asc subscriptions submit`
+
+Submit a subscription for App Store review.
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--subscription-id` | ✓ | Subscription ID |
+| `--pretty` | | Pretty-print JSON |
+
+```bash
+asc subscriptions submit --subscription-id sub-1
+```
+
+> The `submit` affordance appears in `Subscription` JSON only when `state == READY_TO_SUBMIT`.
+
+---
+
 ### `asc subscription-offers list`
 
 List introductory offers for a subscription.
@@ -515,7 +532,20 @@ public struct Subscription: Sendable, Equatable, Identifiable {
 
 **`SubscriptionState`** semantic booleans: same as `InAppPurchaseState`
 
-**Affordances:** `createIntroductoryOffer`, `createLocalization`, `listIntroductoryOffers`, `listLocalizations`
+**Affordances:** `createIntroductoryOffer`, `createLocalization`, `listIntroductoryOffers`, `listLocalizations` (always); `submit` only when `state == READY_TO_SUBMIT`
+
+---
+
+### `SubscriptionSubmission`
+
+```swift
+public struct SubscriptionSubmission: Sendable, Equatable, Identifiable, Codable {
+    public let id: String
+    public let subscriptionId: String  // parent — injected by Infrastructure
+}
+```
+
+**Affordances:** `listLocalizations`
 
 ---
 
@@ -584,6 +614,8 @@ Sources/Domain/Apps/
     ├── SubscriptionGroupRepository.swift
     ├── Subscription.swift
     ├── SubscriptionRepository.swift
+    ├── SubscriptionSubmission.swift
+    ├── SubscriptionSubmissionRepository.swift
     ├── IntroductoryOffers/
     │   ├── SubscriptionIntroductoryOffer.swift
     │   └── SubscriptionIntroductoryOfferRepository.swift
@@ -601,6 +633,7 @@ Sources/Infrastructure/Apps/
 └── Subscriptions/
     ├── SDKSubscriptionGroupRepository.swift
     ├── SDKSubscriptionRepository.swift
+    ├── SDKSubscriptionSubmissionRepository.swift
     ├── IntroductoryOffers/
     │   └── SDKSubscriptionIntroductoryOfferRepository.swift
     └── Localizations/
@@ -627,7 +660,8 @@ Sources/ASCCommand/Commands/
 ├── Subscriptions/
 │   ├── SubscriptionsCommand.swift
 │   ├── SubscriptionsList.swift
-│   └── SubscriptionsCreate.swift
+│   ├── SubscriptionsCreate.swift
+│   └── SubscriptionsSubmit.swift
 ├── SubscriptionLocalizations/
 │   ├── SubscriptionLocalizationsCommand.swift
 │   ├── SubscriptionLocalizationsList.swift
@@ -664,6 +698,7 @@ Sources/ASCCommand/Commands/
 | `subscriptions create` | `APIEndpoint.v1.subscriptions.post(SubscriptionCreateRequest)` | v1 |
 | `subscription-localizations list` | `APIEndpoint.v1.subscriptions.id(subscriptionId).subscriptionLocalizations.get()` | v1 |
 | `subscription-localizations create` | `APIEndpoint.v1.subscriptionLocalizations.post(SubscriptionLocalizationCreateRequest)` | v1 |
+| `subscriptions submit` | `APIEndpoint.v1.subscriptionSubmissions.post(SubscriptionSubmissionCreateRequest)` | v1 |
 | `subscription-offers list` | `APIEndpoint.v1.subscriptions.id(subscriptionId).introductoryOffers.get()` | v1 |
 | `subscription-offers create` | `APIEndpoint.v1.subscriptionIntroductoryOffers.post(SubscriptionIntroductoryOfferCreateRequest)` | v1 |
 

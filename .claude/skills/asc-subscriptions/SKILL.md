@@ -6,9 +6,10 @@ description: |
   (1) Listing or creating subscription groups: "asc subscription-groups list|create"
   (2) Listing or creating subscriptions: "asc subscriptions list|create --group-id ID"
   (3) Listing or creating subscription localizations: "asc subscription-localizations list|create"
-  (4) Listing introductory offers: "asc subscription-offers list --subscription-id ID"
-  (5) Creating introductory offers (FREE_TRIAL, PAY_AS_YOU_GO, PAY_UP_FRONT): "asc subscription-offers create --subscription-id ID --duration ONE_MONTH --mode FREE_TRIAL --periods 1"
-  (6) User says "add subscription tier", "create subscription group", "manage subscriptions", "localize subscription", "subscription plans", "introductory offer", "free trial offer", "promotional pricing"
+  (4) Submitting a subscription for review: "asc subscriptions submit --subscription-id ID"
+  (5) Listing introductory offers: "asc subscription-offers list --subscription-id ID"
+  (6) Creating introductory offers (FREE_TRIAL, PAY_AS_YOU_GO, PAY_UP_FRONT): "asc subscription-offers create --subscription-id ID --duration ONE_MONTH --mode FREE_TRIAL --periods 1"
+  (7) User says "add subscription tier", "create subscription group", "manage subscriptions", "localize subscription", "subscription plans", "introductory offer", "free trial offer", "submit subscription"
 ---
 
 # asc Subscriptions
