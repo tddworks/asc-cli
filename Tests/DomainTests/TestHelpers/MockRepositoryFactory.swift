@@ -250,6 +250,46 @@ struct MockRepositoryFactory {
         BetaBuildLocalization(id: id, buildId: buildId, locale: locale, whatsNew: whatsNew)
     }
 
+    // MARK: - App Previews
+
+    static func makePreviewSet(
+        id: String = "set-1",
+        localizationId: String = "loc-1",
+        previewType: PreviewType = .iphone67,
+        previewsCount: Int = 0
+    ) -> AppPreviewSet {
+        AppPreviewSet(
+            id: id,
+            localizationId: localizationId,
+            previewType: previewType,
+            previewsCount: previewsCount
+        )
+    }
+
+    static func makePreview(
+        id: String = "prev-1",
+        setId: String = "set-1",
+        fileName: String = "preview.mp4",
+        fileSize: Int = 10_485_760,
+        mimeType: String? = "video/mp4",
+        assetDeliveryState: AppPreview.AssetDeliveryState? = .complete,
+        videoDeliveryState: AppPreview.VideoDeliveryState? = .complete,
+        videoURL: String? = nil,
+        previewFrameTimeCode: String? = nil
+    ) -> AppPreview {
+        AppPreview(
+            id: id,
+            setId: setId,
+            fileName: fileName,
+            fileSize: fileSize,
+            mimeType: mimeType,
+            assetDeliveryState: assetDeliveryState,
+            videoDeliveryState: videoDeliveryState,
+            videoURL: videoURL,
+            previewFrameTimeCode: previewFrameTimeCode
+        )
+    }
+
     // MARK: - Code Signing
 
     static func makeBundleID(

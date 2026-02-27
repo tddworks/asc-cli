@@ -86,6 +86,11 @@ public struct ClientFactory: Sendable {
         return SDKPricingRepository(client: provider)
     }
 
+    public func makePreviewRepository(authProvider: any AuthProvider) throws -> any PreviewRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return OpenAPIPreviewRepository(client: provider)
+    }
+
     private func makeProvider(authProvider: any AuthProvider) throws -> APIProvider {
         let credentials = try authProvider.resolve()
         let strippedKey = credentials.privateKeyPEM

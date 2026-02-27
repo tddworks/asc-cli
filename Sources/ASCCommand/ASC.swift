@@ -23,6 +23,8 @@ struct ASC: AsyncParsableCommand {
             CertificatesCommand.self,
             DevicesCommand.self,
             ProfilesCommand.self,
+            AppPreviewSetsCommand.self,
+            AppPreviewsCommand.self,
         ]
     )
 }

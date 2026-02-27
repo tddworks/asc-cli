@@ -196,4 +196,21 @@ struct AffordancesTests {
         let loc = MockRepositoryFactory.makeBetaBuildLocalization(id: "bbl-1", buildId: "build-abc", locale: "en-US")
         #expect(loc.affordances["updateNotes"] == "asc builds update-beta-notes --build-id build-abc --locale en-US --notes <text>")
     }
+
+    // MARK: - AppPreviewSet affordances
+
+    @Test
+    func `preview set affordances include listPreviews and listPreviewSets`() {
+        let set = MockRepositoryFactory.makePreviewSet(id: "set-1", localizationId: "loc-1")
+        #expect(set.affordances["listPreviews"] == "asc app-previews list --set-id set-1")
+        #expect(set.affordances["listPreviewSets"] == "asc app-preview-sets list --localization-id loc-1")
+    }
+
+    // MARK: - AppPreview affordances
+
+    @Test
+    func `preview affordances include listPreviews`() {
+        let preview = MockRepositoryFactory.makePreview(id: "p-1", setId: "set-1")
+        #expect(preview.affordances["listPreviews"] == "asc app-previews list --set-id set-1")
+    }
 }

@@ -97,4 +97,10 @@ struct ClientProvider {
         let factory = ClientFactory()
         return try factory.makePricingRepository(authProvider: authProvider)
     }
+
+    static func makePreviewRepository() throws -> any PreviewRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makePreviewRepository(authProvider: authProvider)
+    }
 }
