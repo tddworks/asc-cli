@@ -276,6 +276,7 @@ Detailed documentation for each feature area:
 - [Builds Upload](docs/features/builds-upload.md) — upload IPA/PKG, TestFlight distribution, beta notes
 - [Code Signing](docs/features/code-signing.md) — bundle IDs, certificates, devices, profiles
 - [Version Check-Readiness](docs/features/version-check-readiness.md) — pre-flight submission checks
+- [In-App Purchases & Subscriptions](docs/features/iap-subscriptions.md) — IAPs, subscription groups, tiers, and per-locale metadata
 
 ## Development
 
