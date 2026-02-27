@@ -134,6 +134,48 @@ The codebase has two distinct localization concepts with separate repositories:
 
 `ScreenshotRepository` (in `Domain/ScreenshotSets/`) handles screenshot sets and screenshot images — **no localization methods**.
 
+## Documentation
+
+After every code change — new feature, improvement, or bug fix — update all affected docs before considering the task done.
+
+### What to update
+
+| Change type | Files to update |
+|-------------|-----------------|
+| New feature / command | `docs/features/<feature>.md` (create), `CHANGELOG.md` ([Unreleased]), `README.md` (feature list + CLI examples), `.claude/skills/` (relevant skill files) |
+| Improvement / enhancement | `docs/features/<feature>.md` (update affected sections), `CHANGELOG.md` ([Unreleased]) |
+| Bug fix | `CHANGELOG.md` ([Unreleased]) |
+| Architecture / API change | `CLAUDE.md` (update architecture / patterns sections), `docs/features/<feature>.md` |
+| Auth / config change | `CLAUDE.md` (Authentication section), `README.md` |
+
+### Per-file rules
+
+**`docs/features/<feature>.md`** — write from actual code (read files first, never from memory). Structure:
+1. CLI Usage — flags table + examples + output samples (json + table)
+2. Typical Workflow — end-to-end bash script showing the happy path
+3. Architecture — three-layer ASCII diagram + dependency note
+4. Domain Models — every public struct/enum/protocol with fields, computed properties, affordances
+5. File Map — `Sources/` and `Tests/` trees + wiring files table
+6. API Reference — endpoint → SDK call → repository method
+7. Testing — representative test snippet + `swift test` command
+8. Extending — natural next steps with stub code
+
+**`CHANGELOG.md`** — add entry under `[Unreleased]` using Keep a Changelog format:
+- `### Added` for new features/commands
+- `### Changed` for improvements to existing behaviour
+- `### Fixed` for bug fixes
+
+**`README.md`** — update the feature/command table and any usage examples that changed.
+
+**`.claude/skills/`** — update the relevant `SKILL.md` or reference file when commands are added or flags change. Key files to keep in sync:
+- `implement-feature/SKILL.md` — workflow + checklist
+- `asc-cli/references/commands.md` — command reference
+- Feature-specific skills (`asc-testflight`, `asc-builds-upload`, `asc-code-signing`, `asc-check-readiness`, etc.)
+
+**`CLAUDE.md`** — update when architecture patterns, file locations, or design rules change.
+
+---
+
 ## Authentication
 
 **Option A — Persistent login (recommended):**
