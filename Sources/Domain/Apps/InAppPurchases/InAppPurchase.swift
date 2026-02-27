@@ -1,0 +1,80 @@
+public struct InAppPurchase: Sendable, Codable, Equatable, Identifiable {
+    public let id: String
+    /// Parent app identifier — injected by Infrastructure since ASC API omits it from response
+    public let appId: String
+    public let referenceName: String
+    public let productId: String
+    public let type: InAppPurchaseType
+    public let state: InAppPurchaseState
+
+    public init(
+        id: String,
+        appId: String,
+        referenceName: String,
+        productId: String,
+        type: InAppPurchaseType,
+        state: InAppPurchaseState
+    ) {
+        self.id = id
+        self.appId = appId
+        self.referenceName = referenceName
+        self.productId = productId
+        self.type = type
+        self.state = state
+    }
+}
+
+public enum InAppPurchaseType: String, Sendable, Codable, Equatable {
+    case consumable = "CONSUMABLE"
+    case nonConsumable = "NON_CONSUMABLE"
+    case nonRenewingSubscription = "NON_RENEWING_SUBSCRIPTION"
+    case freeSubscription = "FREE_SUBSCRIPTION"
+
+    public init?(cliArgument: String) {
+        switch cliArgument.lowercased() {
+        case "consumable": self = .consumable
+        case "non-consumable": self = .nonConsumable
+        case "non-renewing-subscription": self = .nonRenewingSubscription
+        case "free-subscription": self = .freeSubscription
+        default: return nil
+        }
+    }
+
+    public var displayName: String {
+        switch self {
+        case .consumable: return "Consumable"
+        case .nonConsumable: return "Non-Consumable"
+        case .nonRenewingSubscription: return "Non-Renewing Subscription"
+        case .freeSubscription: return "Free Subscription"
+        }
+    }
+}
+
+public enum InAppPurchaseState: String, Sendable, Codable, Equatable {
+    case missingMetadata = "MISSING_METADATA"
+    case readyToSubmit = "READY_TO_SUBMIT"
+    case waitingForReview = "WAITING_FOR_REVIEW"
+    case inReview = "IN_REVIEW"
+    case developerActionNeeded = "DEVELOPER_ACTION_NEEDED"
+    case pendingBinaryApproval = "PENDING_BINARY_APPROVAL"
+    case approved = "APPROVED"
+    case developerRemovedFromSale = "DEVELOPER_REMOVED_FROM_SALE"
+    case removedFromSale = "REMOVED_FROM_SALE"
+    case rejected = "REJECTED"
+
+    public var isApproved: Bool { self == .approved }
+    public var isLive: Bool { self == .approved }
+    public var isEditable: Bool {
+        self == .missingMetadata || self == .rejected || self == .developerActionNeeded
+    }
+    public var isPendingReview: Bool { self == .waitingForReview || self == .inReview }
+}
+
+extension InAppPurchase: AffordanceProviding {
+    public var affordances: [String: String] {
+        [
+            "createLocalization": "asc iap-localizations create --iap-id \(id) --locale en-US --name <name>",
+            "listLocalizations": "asc iap-localizations list --iap-id \(id)",
+        ]
+    }
+}

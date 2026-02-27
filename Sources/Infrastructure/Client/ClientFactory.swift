@@ -91,6 +91,31 @@ public struct ClientFactory: Sendable {
         return OpenAPIPreviewRepository(client: provider)
     }
 
+    public func makeInAppPurchaseRepository(authProvider: any AuthProvider) throws -> any InAppPurchaseRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKInAppPurchaseRepository(client: provider)
+    }
+
+    public func makeInAppPurchaseLocalizationRepository(authProvider: any AuthProvider) throws -> any InAppPurchaseLocalizationRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKInAppPurchaseLocalizationRepository(client: provider)
+    }
+
+    public func makeSubscriptionGroupRepository(authProvider: any AuthProvider) throws -> any SubscriptionGroupRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKSubscriptionGroupRepository(client: provider)
+    }
+
+    public func makeSubscriptionRepository(authProvider: any AuthProvider) throws -> any SubscriptionRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKSubscriptionRepository(client: provider)
+    }
+
+    public func makeSubscriptionLocalizationRepository(authProvider: any AuthProvider) throws -> any SubscriptionLocalizationRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKSubscriptionLocalizationRepository(client: provider)
+    }
+
     private func makeProvider(authProvider: any AuthProvider) throws -> APIProvider {
         let credentials = try authProvider.resolve()
         let strippedKey = credentials.privateKeyPEM

@@ -346,6 +346,94 @@ struct MockRepositoryFactory {
         )
     }
 
+    // MARK: - InAppPurchases
+
+    static func makeInAppPurchase(
+        id: String = "iap-1",
+        appId: String = "app-1",
+        referenceName: String = "Gold Coins",
+        productId: String = "com.app.gold",
+        type: InAppPurchaseType = .consumable,
+        state: InAppPurchaseState = .missingMetadata
+    ) -> InAppPurchase {
+        InAppPurchase(
+            id: id,
+            appId: appId,
+            referenceName: referenceName,
+            productId: productId,
+            type: type,
+            state: state
+        )
+    }
+
+    static func makeInAppPurchaseLocalization(
+        id: String = "iap-loc-1",
+        iapId: String = "iap-1",
+        locale: String = "en-US",
+        name: String? = "Gold Coins",
+        description: String? = nil,
+        state: InAppPurchaseLocalizationState? = nil
+    ) -> InAppPurchaseLocalization {
+        InAppPurchaseLocalization(
+            id: id,
+            iapId: iapId,
+            locale: locale,
+            name: name,
+            description: description,
+            state: state
+        )
+    }
+
+    // MARK: - Subscriptions
+
+    static func makeSubscriptionGroup(
+        id: String = "grp-1",
+        appId: String = "app-1",
+        referenceName: String = "Premium Plans"
+    ) -> SubscriptionGroup {
+        SubscriptionGroup(id: id, appId: appId, referenceName: referenceName)
+    }
+
+    static func makeSubscription(
+        id: String = "sub-1",
+        groupId: String = "grp-1",
+        name: String = "Monthly Premium",
+        productId: String = "com.app.monthly",
+        subscriptionPeriod: SubscriptionPeriod = .oneMonth,
+        isFamilySharable: Bool = false,
+        state: SubscriptionState = .missingMetadata,
+        groupLevel: Int? = nil
+    ) -> Subscription {
+        Subscription(
+            id: id,
+            groupId: groupId,
+            name: name,
+            productId: productId,
+            subscriptionPeriod: subscriptionPeriod,
+            isFamilySharable: isFamilySharable,
+            state: state,
+            groupLevel: groupLevel
+        )
+    }
+
+    static func makeSubscriptionLocalization(
+        id: String = "sub-loc-1",
+        subscriptionId: String = "sub-1",
+        locale: String = "en-US",
+        name: String? = "Monthly Premium",
+        description: String? = nil,
+        state: SubscriptionLocalizationState? = nil
+    ) -> SubscriptionLocalization {
+        SubscriptionLocalization(
+            id: id,
+            subscriptionId: subscriptionId,
+            locale: locale,
+            name: name,
+            description: description,
+            state: state
+        )
+    }
+
     static func makeProfile(
         id: String = "prof-1",
         name: String = "My Profile",

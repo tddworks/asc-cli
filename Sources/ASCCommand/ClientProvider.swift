@@ -103,4 +103,34 @@ struct ClientProvider {
         let factory = ClientFactory()
         return try factory.makePreviewRepository(authProvider: authProvider)
     }
+
+    static func makeInAppPurchaseRepository() throws -> any InAppPurchaseRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeInAppPurchaseRepository(authProvider: authProvider)
+    }
+
+    static func makeInAppPurchaseLocalizationRepository() throws -> any InAppPurchaseLocalizationRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeInAppPurchaseLocalizationRepository(authProvider: authProvider)
+    }
+
+    static func makeSubscriptionGroupRepository() throws -> any SubscriptionGroupRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeSubscriptionGroupRepository(authProvider: authProvider)
+    }
+
+    static func makeSubscriptionRepository() throws -> any SubscriptionRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeSubscriptionRepository(authProvider: authProvider)
+    }
+
+    static func makeSubscriptionLocalizationRepository() throws -> any SubscriptionLocalizationRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeSubscriptionLocalizationRepository(authProvider: authProvider)
+    }
 }

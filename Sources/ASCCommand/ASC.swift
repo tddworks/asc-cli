@@ -25,6 +25,11 @@ struct ASC: AsyncParsableCommand {
             ProfilesCommand.self,
             AppPreviewSetsCommand.self,
             AppPreviewsCommand.self,
+            IAPCommand.self,
+            IAPLocalizationsCommand.self,
+            SubscriptionGroupsCommand.self,
+            SubscriptionsCommand.self,
+            SubscriptionLocalizationsCommand.self,
         ]
     )
 }
