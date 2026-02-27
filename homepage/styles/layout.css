@@ -740,6 +740,18 @@
   -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
   mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
 }
+/* Static grid mode — used when there aren't enough apps to fill a scroll row */
+.app-wall-scroller.is-static {
+  overflow: visible;
+  -webkit-mask-image: none;
+  mask-image: none;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  padding: 10px;
+}
+
 /* Pause both rows when hovering anywhere in the scroller */
 .app-wall-scroller:hover .app-wall-track {
   animation-play-state: paused;

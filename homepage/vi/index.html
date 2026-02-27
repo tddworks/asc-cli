@@ -651,29 +651,38 @@
           return card;
         }
 
-        function buildTrack(items, reverse) {
+        const CARD_W = 176; // card width + gap
+        const vpW = window.innerWidth || 1280;
+        // Minimum unique apps needed for one row to scroll without forced repetition
+        const rowThreshold = Math.ceil(vpW / CARD_W) + 1;
+
+        function buildScrollTrack(items, reverse) {
           const track = document.createElement('div');
           track.className = 'app-wall-track' + (reverse ? ' app-wall-track--rev' : '');
           const arr = reverse ? [...items].reverse() : items;
-          // Repeat until we have enough cards to fill ~2× viewport width
-          const minCopies = Math.max(2, Math.ceil(8 / arr.length));
-          for (let i = 0; i < minCopies; i++) {
-            for (const item of arr) track.appendChild(makeCard(item));
-          }
-          // Clone all children as second half so -50% translateX loops perfectly
-          const half = track.children.length;
-          for (let i = 0; i < half; i++) track.appendChild(track.children[i].cloneNode(true));
-          // ~50px/s scroll speed
-          const cardWidth = 176;
-          const duration = Math.round(arr.length * minCopies * cardWidth / 50);
-          track.style.animationDuration = duration + 's';
+          // Render each app exactly once
+          for (const item of arr) track.appendChild(makeCard(item));
+          // Clone once — the second copy makes -50% translateX loop seamlessly
+          const n = track.children.length;
+          for (let i = 0; i < n; i++) track.appendChild(track.children[i].cloneNode(true));
+          // ~50px/s
+          track.style.animationDuration = Math.round(arr.length * CARD_W / 50) + 's';
           return track;
         }
 
-        // Auto-decide rows: two rows when there are enough apps to justify it
-        scroller.appendChild(buildTrack(all, false));
-        if (all.length >= 6) {
-          scroller.appendChild(buildTrack(all, true));
+        if (all.length < rowThreshold) {
+          // Not enough apps to fill the viewport — static centered grid, no looping
+          scroller.classList.add('is-static');
+          for (const item of all) scroller.appendChild(makeCard(item));
+        } else if (all.length >= rowThreshold * 2) {
+          // Enough for two independent scrolling rows — interleave so no app repeats across rows
+          const row1 = all.filter((_, i) => i % 2 === 0);
+          const row2 = all.filter((_, i) => i % 2 === 1);
+          scroller.appendChild(buildScrollTrack(row1, false));
+          scroller.appendChild(buildScrollTrack(row2, true));
+        } else {
+          // Enough for one scrolling row
+          scroller.appendChild(buildScrollTrack(all, false));
         }
       } catch (e) {
         if (loading) loading.remove();
