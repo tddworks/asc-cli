@@ -8,9 +8,11 @@ description: |
   (3) Uploading screenshots or creating screenshot sets, or importing a screenshot ZIP
   (4) Managing TestFlight beta groups and testers
   (5) Managing app info localizations (name, subtitle, privacy policy URL)
-  (6) Any task involving `asc` commands, App Store Connect operations, or navigating the CAEOAS affordance system
-  (7) User says "submit AppName", "list my apps", "upload screenshots", "check builds", "update app name", etc.
-  (8) Setting up authentication or logging in/out with `asc auth login`
+  (6) Managing in-app purchases (list/create IAPs, IAP localizations)
+  (7) Managing subscriptions (subscription groups, subscription tiers, subscription localizations)
+  (8) Any task involving `asc` commands, App Store Connect operations, or navigating the CAEOAS affordance system
+  (9) User says "submit AppName", "list my apps", "upload screenshots", "check builds", "update app name", "create IAP", "add subscription", etc.
+  (10) Setting up authentication or logging in/out with `asc auth login`
 ---
 
 # asc CLI — App Store Connect CLI
@@ -92,6 +94,18 @@ See [api_reference.md](references/api_reference.md) for the underlying App Store
 | List app infos | `asc app-infos list --app-id <id>` |
 | List app info localizations | `asc app-info-localizations list --app-info-id <id>` |
 | Update app name/subtitle | `asc app-info-localizations update --localization-id <id> --name <n>` |
+| **In-App Purchases** | |
+| List IAPs | `asc iap list --app-id <id>` |
+| Create IAP | `asc iap create --app-id <id> --reference-name <n> --product-id <id> --type consumable` |
+| IAP localizations | `asc iap-localizations list --iap-id <id>` |
+| Add IAP locale | `asc iap-localizations create --iap-id <id> --locale en-US --name <n>` |
+| **Subscriptions** | |
+| List subscription groups | `asc subscription-groups list --app-id <id>` |
+| Create subscription group | `asc subscription-groups create --app-id <id> --reference-name <n>` |
+| List subscriptions | `asc subscriptions list --group-id <id>` |
+| Create subscription | `asc subscriptions create --group-id <id> --name <n> --product-id <id> --period ONE_MONTH` |
+| Subscription localizations | `asc subscription-localizations list --subscription-id <id>` |
+| Add subscription locale | `asc subscription-localizations create --subscription-id <id> --locale en-US --name <n>` |
 
 ---
 

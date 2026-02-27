@@ -153,6 +153,98 @@ All fields are optional — only provided fields are changed.
 
 ---
 
+## iap
+
+### list
+```bash
+asc iap list --app-id <id> [--limit N] [--pretty]
+```
+
+### create
+```bash
+asc iap create \
+  --app-id <id> \
+  --reference-name "Gold Coins" \
+  --product-id "com.app.goldcoins" \
+  --type consumable
+```
+**`--type`** values: `consumable`, `non-consumable`, `non-renewing-subscription`
+
+---
+
+## iap-localizations
+
+### list
+```bash
+asc iap-localizations list --iap-id <id>
+```
+
+### create
+```bash
+asc iap-localizations create \
+  --iap-id <id> \
+  --locale en-US \
+  --name "Gold Coins" \
+  [--description "In-game currency"]
+```
+
+---
+
+## subscription-groups
+
+### list
+```bash
+asc subscription-groups list --app-id <id> [--limit N]
+```
+
+### create
+```bash
+asc subscription-groups create \
+  --app-id <id> \
+  --reference-name "Premium Plans"
+```
+
+---
+
+## subscriptions
+
+### list
+```bash
+asc subscriptions list --group-id <id> [--limit N]
+```
+
+### create
+```bash
+asc subscriptions create \
+  --group-id <id> \
+  --name "Monthly Premium" \
+  --product-id "com.app.monthly" \
+  --period ONE_MONTH \
+  [--family-sharable] \
+  [--group-level 1]
+```
+**`--period`** values: `ONE_WEEK`, `ONE_MONTH`, `TWO_MONTHS`, `THREE_MONTHS`, `SIX_MONTHS`, `ONE_YEAR`
+
+---
+
+## subscription-localizations
+
+### list
+```bash
+asc subscription-localizations list --subscription-id <id>
+```
+
+### create
+```bash
+asc subscription-localizations create \
+  --subscription-id <id> \
+  --locale en-US \
+  --name "Monthly Premium" \
+  [--description "Full access, billed monthly"]
+```
+
+---
+
 ## builds
 
 ### list
