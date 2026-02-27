@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.25] - 2026-02-27
+
 ### Added
 - `asc subscriptions submit` — submit a subscription for App Store review; `submit` affordance on `Subscription` appears only when `state == READY_TO_SUBMIT`
 - `asc subscription-offers list` — list introductory offers for a subscription
@@ -200,7 +204,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.24...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.25...HEAD
+[0.1.25]: https://github.com/tddworks/asc-cli/compare/v0.1.24...v0.1.25
 [0.1.24]: https://github.com/tddworks/asc-cli/compare/v0.1.23...v0.1.24
 [0.1.23]: https://github.com/tddworks/asc-cli/compare/v0.1.22...v0.1.23
 [0.1.22]: https://github.com/tddworks/asc-cli/compare/v0.1.21...v0.1.22
