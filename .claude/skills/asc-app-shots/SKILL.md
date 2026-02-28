@@ -66,38 +66,50 @@ Extract the app's dominant color palette to populate `colors`:
 
 **Fallbacks if colors are ambiguous:** `#0D1B2A` / `#4A7CFF` / `#FFFFFF` / `#A8B8D0`
 
+### Hero vs Standard — App Store design convention (CRITICAL)
+
+**Only `index: 0` is the hero screenshot.** All others (`index: 1, 2, 3...`) are standard screenshots.
+
+| | Hero (index 0) | Standard (index 1+) |
+|---|---|---|
+| Device angle | Tilted ~8-10° | Upright, straight (0-2°) |
+| Device size | ~70% canvas | ~80% canvas, fills frame |
+| Effects | Radial glow, floating dots, light streaks | Subtle gradient or flat background only |
+| Text placement | Heading above, subheading below | Heading above device, subheading below |
+| Purpose | Grab attention in search results | Show features clearly |
+| layoutMode | `center` or `tilted` | `center` |
+
 ### Per-screen config
 For each screenshot:
 1. **heading** — 2-5 word benefit headline (what does the user gain?)
 2. **subheading** — 6-12 word supporting text (how? for whom?)
-3. **layoutMode** — `center` (hero, large device), `left` (feature, text on right), `tilted` (dynamic angle)
+3. **layoutMode** — always `center` for standard; `center` or `tilted` for hero
 4. **visualDirection** — 1-2 sentence factual description of what the UI shows
 5. **imagePrompt** — Gemini generation prompt (see formula below)
 
 ### imagePrompt Formula (CRITICAL — sent directly to Gemini for image generation)
 
-Use this 1-3 sentence structure:
+Always quote **exact heading and subheading text** — Gemini renders them in the image.
 
+**Hero (index 0) — cinematic, tilted, atmospheric:**
 ```
-"Generate a [premium/cinematic/modern] App Store [hero/feature/showcase] screenshot.
-The uploaded iPhone UI is displayed in a [style] device mockup [angle/position].
-Bold [color] heading '[EXACT heading text]' [placement], with [color] subtext '[EXACT subheading]' [placement].
-[Background hex color], [glow/gradient/lighting effect]. [Quality/style descriptors]."
+"Generate a premium App Store hero screenshot. The uploaded iPhone UI is displayed in a
+sleek tilted device mockup (~8 degrees) centered on a [dark] canvas ([hex]). Bold white
+heading '[EXACT heading]' above the device, with [color] subtext '[EXACT subheading]' below.
+[Accent color] radial glow behind the device. [Floating dots / light streaks]. Premium quality."
 ```
 
-**Rules:**
-- Always start: "Generate a [adjective] App Store screenshot"
-- Always quote **exact heading and subheading text** — Gemini renders them in the image
-- Specify device angle: "tilted ~8 degrees", "centered on canvas", "positioned to the left"
-- Include background hex + lighting: "deep electric blue radial glow (#4A7CFF)", "soft bokeh depth"
-- End with quality: "Minimal, editorial, premium quality" / "Cinematic depth, professional quality"
-- 1-3 sentences max — be concise, let Gemini be creative
+> Example: "Generate a premium App Store hero screenshot. The uploaded iPhone UI is displayed in a sleek tilted device mockup (~10 degrees) centered on a deep navy canvas (#0A0F1E). Bold white heading 'All Your Apps' above the device, with soft blue-gray subtext 'Manage your entire App Store portfolio in one place' below. Brilliant electric blue radial glow (#4A90E2) pulses behind the device. Floating micro-dots add cinematic depth. Professional, editorial, premium quality."
 
-**Hero screen (tilted, centered):**
-> "Generate a premium App Store hero screenshot. The uploaded iPhone UI is displayed in a sleek tilted device mockup (~8 degrees) centered on a near-black canvas (#0D1B2A). Bold white heading 'Manage All Your Apps' sits above the device, with soft blue-gray subtext 'One dashboard for every release' below. A deep electric blue radial glow (#4A7CFF) pulses behind the device. Floating micro-dots add cinematic depth. Minimal, editorial, premium quality."
+**Standard (index 1+) — clean, upright, UI-focused:**
+```
+"Generate a clean App Store feature screenshot. The uploaded iPhone UI is displayed upright
+and centered, filling most of the canvas on a [dark] background ([hex]). Bold white heading
+'[EXACT heading]' above the device, with [color] subtext '[EXACT subheading]' below.
+Subtle background vignette. Clean, minimal, editorial quality."
+```
 
-**Feature screen (left-positioned):**
-> "Generate a modern App Store feature screenshot. The uploaded iPhone UI is positioned to the left on a deep navy background (#0D1B2A), tilted slightly right. Bold white heading 'Ship With Confidence' on the right side, with muted blue subtext 'Metadata, screenshots, and AI in one tap' below. Soft blue accent glow radiates from behind the device. Professional depth-of-field atmosphere, editorial quality."
+> Example: "Generate a clean App Store feature screenshot. The uploaded iPhone UI is displayed upright and centered, filling most of the canvas on a deep navy background (#0A0F1E). Bold white heading 'Ship With Confidence' above the device, with muted blue-gray subtext 'App Info, Screenshots, and AI tools in one tap' below. Subtle background vignette. Clean, minimal, editorial quality."
 
 ### Tone (for the whole plan)
 Choose based on app category + metadata:
