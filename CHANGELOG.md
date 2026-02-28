@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `asc app-shots generate` — AI-powered App Store screenshot plan enhancement using Gemini AI; reads a `ScreenPlan` JSON, optionally includes screenshot images for visual context, and returns enhanced headings, subheadings, and image prompts
+- `ScreenPlan`, `ScreenConfig`, `ScreenTone`, `LayoutMode`, `ScreenColors` domain models with CAEOAS affordances
+- `ScreenshotGenerationRepository` `@Mockable` protocol; `GeminiScreenshotGenerationRepository` implementation using URLSession and Gemini OpenAI-compatible API
+- `--output-file` flag to write enhanced plan JSON to disk in addition to stdout
+- `--model` flag to select Gemini model (default: `gemini-2.0-flash-exp`)
+
 ---
 
 ## [0.1.25] - 2026-02-27

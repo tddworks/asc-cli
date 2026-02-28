@@ -78,6 +78,7 @@ $ asc versions list --app-id app-abc
 - **Code signing** — manage bundle IDs, certificates, devices, and provisioning profiles
 - **In-App Purchases** — create and list IAPs; set per-territory pricing; submit for review; manage per-locale name and description
 - **Subscriptions** — create subscription groups and tiers (weekly–yearly); submit for review; introductory offers (free trial, pay-as-you-go, pay-up-front); manage per-locale name and description
+- **App Shots** — AI-powered screenshot plan enhancement using Gemini AI; generates compelling headings, subheadings, and image prompts
 - **Version readiness check** — pre-flight check aggregating all Apple submission requirements
 - **TUI mode** — interactive terminal UI for human browsing
 - **Swift 6.2** — strict concurrency, async/await throughout
@@ -229,6 +230,10 @@ asc profiles list [--bundle-id-id <id>] [--type IOS_APP_STORE]
 asc profiles create --name "My Profile" --type IOS_APP_STORE --bundle-id-id <id> --certificate-ids <id>
 asc profiles delete --profile-id <id>
 
+# App Shots (AI Screenshot Planning)
+asc app-shots generate --plan app-shots-plan.json --gemini-api-key KEY --pretty
+asc app-shots generate --plan plan.json --output-file enhanced.json screen1.png screen2.png
+
 # Interactive
 asc tui                                                               # interactive browser
 ```
@@ -298,6 +303,7 @@ Detailed documentation for each feature area:
 - [Code Signing](docs/features/code-signing.md) — bundle IDs, certificates, devices, profiles
 - [Version Check-Readiness](docs/features/version-check-readiness.md) — pre-flight submission checks
 - [In-App Purchases & Subscriptions](docs/features/iap-subscriptions.md) — IAPs (consumable, non-consumable, non-renewing); subscription groups, tiers, submit, introductory offers; per-locale metadata and pricing
+- [App Shots](docs/features/app-shots.md) — AI-powered screenshot plan enhancement with Gemini AI
 - [App Wall](docs/features/app-wall.md) — community showcase on the homepage; `apps.json` format, iTunes pre-fetch architecture, display logic
 
 ## Development
