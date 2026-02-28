@@ -163,15 +163,15 @@ Use the Write tool to save the file alongside the screenshots.
 
 After writing the plan, **immediately run `asc app-shots generate`** — do not print instructions and wait for the user to say "continue".
 
-Resolve the Gemini API key:
+Resolve the Gemini API key (in order):
 1. Check `$GEMINI_API_KEY` env var — if set, use it
-2. If not set, ask the user once: "Please provide your Gemini API key"
+2. The CLI will automatically fall back to `~/.asc/app-shots-config.json` (set via `asc app-shots config`)
+3. If neither is set, ask the user once: "Please provide your Gemini API key (or save it with: `asc app-shots config --gemini-api-key KEY`)"
 
-Then run:
+Then run (omit `--gemini-api-key` if the user has already saved it with `asc app-shots config`):
 ```bash
 asc app-shots generate \
   --plan <plan-file-path> \
-  --gemini-api-key <key> \
   --model gemini-3.1-flash-image-preview \
   --output-dir <screenshots-dir>/output \
   <screenshot files...>
@@ -180,6 +180,21 @@ asc app-shots generate \
 (Use `swift run asc` if `asc` is not installed globally, as detected in Step 1.)
 
 After generation completes, show the paths of the generated PNG files.
+
+---
+
+## Gemini API key management
+
+Users can save their key once so they never need to pass `--gemini-api-key` again:
+
+```bash
+asc app-shots config --gemini-api-key AIzaSy...    # save key
+asc app-shots config                                # show current key (masked) + source
+asc app-shots config --remove                       # delete saved key
+```
+
+Key is stored at `~/.asc/app-shots-config.json`. Resolution order in `generate`:
+`--gemini-api-key` flag → `$GEMINI_API_KEY` env var → saved config file → error
 
 ---
 

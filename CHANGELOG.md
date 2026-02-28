@@ -8,11 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- `asc app-shots generate` — AI-powered App Store screenshot plan enhancement using Gemini AI; reads a `ScreenPlan` JSON, optionally includes screenshot images for visual context, and returns enhanced headings, subheadings, and image prompts
-- `ScreenPlan`, `ScreenConfig`, `ScreenTone`, `LayoutMode`, `ScreenColors` domain models with CAEOAS affordances
-- `ScreenshotGenerationRepository` `@Mockable` protocol; `GeminiScreenshotGenerationRepository` implementation using URLSession and Gemini OpenAI-compatible API
-- `--output-file` flag to write enhanced plan JSON to disk in addition to stdout
-- `--model` flag to select Gemini model (default: `gemini-2.0-flash-exp`)
+- `asc app-shots generate` — AI-powered App Store screenshot generation using Gemini; reads a `ScreenPlan` JSON + screenshot images, calls Gemini image generation API, writes `screen-{index}.png` files
+- `asc app-shots config` — persistent Gemini API key management; `--gemini-api-key` saves to `~/.asc/app-shots-config.json`, bare invocation shows current key + source (file/env), `--remove` deletes it; `generate` resolves key from flag → env var → stored config
+- `ScreenPlan`, `ScreenConfig`, `ScreenTone`, `LayoutMode`, `ScreenColors`, `AppShotsConfig` domain models
+- `ScreenshotGenerationRepository` + `AppShotsConfigStorage` `@Mockable` protocols
+- `GeminiScreenshotGenerationRepository` — native Gemini `generateContent` API with `responseModalities: ["TEXT","IMAGE"]`, parallel TaskGroup generation
+- `FileAppShotsConfigStorage` — saves Gemini API key to `~/.asc/app-shots-config.json`
 
 ---
 
