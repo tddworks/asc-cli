@@ -21,6 +21,8 @@ Generate marketing PNG images using Gemini AI. Reads a `ScreenPlan` JSON file, d
 | `--gemini-api-key` | — | Gemini API key (falls back to `GEMINI_API_KEY` env var, then stored config) |
 | `--model` | `gemini-3.1-flash-image-preview` | Gemini image generation model |
 | `--output-dir` | `.asc/app-shots/output` | Directory to write generated PNG files |
+| `--output-width` | `1320` | Output PNG width in pixels (iPhone 6.9" required) |
+| `--output-height` | `2868` | Output PNG height in pixels (iPhone 6.9" required) |
 | `<screenshots>` | *(auto-discovered)* | Screenshot files; omit to auto-discover `*.png/*.jpg` from plan directory |
 | `--output` | `json` | Output format: `json`, `table`, `markdown` |
 | `--pretty` | — | Pretty-print JSON output |
@@ -69,6 +71,8 @@ Translate already-generated screenshots into one or more locales. The command mo
 | `--to` | *(required, repeatable)* | Target locale(s): `--to zh --to ja --to ko` |
 | `--source-dir` | `.asc/app-shots/output` | Directory containing existing `screen-*.png` files |
 | `--output-dir` | `.asc/app-shots/output` | Base output directory; locale subdirs are created automatically |
+| `--output-width` | `1320` | Output PNG width in pixels |
+| `--output-height` | `2868` | Output PNG height in pixels |
 | `--gemini-api-key` | — | Gemini API key (same 3-level resolution as `generate`) |
 | `--model` | `gemini-3.1-flash-image-preview` | Gemini image generation model |
 | `--output` | `json` | Output format: `json`, `table`, `markdown` |
