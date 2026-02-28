@@ -4,7 +4,8 @@ description: |
   AI-powered App Store screenshot planning skill. Fetches app metadata from App Store Connect
   via `asc` CLI, analyzes screenshots using Claude's vision to extract colors and layout,
   summarizes the app description, and writes a ScreenPlan JSON file ready for
-  `asc app-shots generate` to produce final marketing screenshots via Gemini.
+  `asc app-shots generate` to produce final marketing screenshots via Gemini, and optionally
+  `asc app-shots translate` to produce localized versions for any locale.
   Use this skill when:
   (1) User asks to "analyze my screenshots for App Store"
   (2) User asks to "create an app shots plan" or "generate screenshot plan"
@@ -14,9 +15,10 @@ description: |
 
 # asc-app-shots: Screenshot Plan Generator
 
-Two-step workflow:
+Three-step workflow:
 1. **This skill** — fetch metadata + analyze screenshots → write `app-shots-plan.json`
-2. **`asc app-shots generate`** — read plan + call Gemini image generation → output PNG files
+2. **`asc app-shots generate`** — read plan + call Gemini image generation → output `screen-{n}.png`
+3. **`asc app-shots translate`** *(optional)* — translate generated screenshots into other locales
 
 ---
 
@@ -190,6 +192,45 @@ After generation completes, show the paths of the generated PNG files.
 
 ---
 
+## Step 7 — Translate to other locales (optional)
+
+If the user wants screenshots in additional locales (e.g. Chinese, Japanese, Korean), run:
+
+```bash
+# Translate English outputs to Chinese and Japanese in one command
+asc app-shots translate --to zh --to ja
+
+# Or with explicit paths / single locale
+asc app-shots translate \
+  --plan .asc/app-shots/app-shots-plan.json \
+  --source-dir .asc/app-shots/output \
+  --output-dir .asc/app-shots/output \
+  --to zh --to ja --to ko
+```
+
+The command reads `screen-{n}.png` from `--source-dir` as visual references, modifies each
+screen's `imagePrompt` to include a translation instruction, then calls Gemini in parallel
+for each locale. Outputs go to `{output-dir}/{locale}/screen-{n}.png`.
+
+**Key flags:**
+- `--to` — target locale, repeatable (`--to zh --to ja --to ko`)
+- `--source-dir` — where the English PNGs live (default: `.asc/app-shots/output`)
+- `--output-dir` — base output dir; locale subdirs are created automatically
+- `--from` — source locale label, informational (default: `en`)
+- Same `--gemini-api-key` / `--model` resolution as `generate`
+
+The translate command modifies each screen's `imagePrompt` with:
+```
+LOCALIZATION REQUIREMENT: Recreate this image in {locale}.
+Translate all visible text:
+  - Heading: "{original}" → translate to {locale}
+  - Subheading: "{original}" → translate to {locale}
+  - Tagline: "{tagline}" → translate to {locale}
+Keep identical layout, colors, device mockup, and visual design. Only text changes.
+```
+
+---
+
 ## Gemini API key management
 
 Users can save their key once so they never need to pass `--gemini-api-key` again:
@@ -220,3 +261,4 @@ Claude:
 8. Writes `.asc/app-shots/app-shots-plan.json` with `appId` key
 9. Checks `$GEMINI_API_KEY` → set → runs `asc app-shots generate` (no args needed)
 10. Shows generated PNG paths in `.asc/app-shots/output/`
+11. (If user requested translation) Runs `asc app-shots translate --to <locale>` for each target locale

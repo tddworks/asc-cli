@@ -174,7 +174,7 @@ After every code change — new feature, improvement, or bug fix — update all 
 Key skills to keep in sync:
 - `implement-feature/SKILL.md` — workflow + checklist
 - `asc-cli/references/commands.md` — command reference
-- Feature-specific skills (`asc-testflight`, `asc-builds-upload`, `asc-code-signing`, `asc-check-readiness`, `asc-app-previews`, etc.)
+- Feature-specific skills (`asc-testflight`, `asc-builds-upload`, `asc-code-signing`, `asc-check-readiness`, `asc-app-previews`, `asc-app-shots`, etc.)
 
 **`CLAUDE.md`** — update when architecture patterns, file locations, or design rules change.
 

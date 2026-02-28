@@ -1,4 +1,4 @@
-# asc Commands for Screenshot Planning
+# asc Commands for Screenshot Planning and Translation
 
 ## List apps (get App ID)
 
@@ -70,4 +70,60 @@ echo "App: $APP_NAME ($APP_ID)"
 echo "Subtitle: $SUBTITLE"
 echo "Description: $DESCRIPTION"
 echo "Keywords: $KEYWORDS"
+```
+
+## Generate screenshots (English)
+
+```bash
+# Zero-argument happy path — reads .asc/app-shots/app-shots-plan.json automatically
+asc app-shots generate
+
+# Explicit paths
+asc app-shots generate \
+  --plan .asc/app-shots/app-shots-plan.json \
+  --output-dir .asc/app-shots/output \
+  screen1.png screen2.png
+
+# With explicit API key
+asc app-shots generate --gemini-api-key AIzaSy...
+```
+
+## Translate screenshots to other locales
+
+```bash
+# Translate to Chinese and Japanese — reads screen-*.png from output dir automatically
+asc app-shots translate --to zh --to ja
+
+# Translate with explicit paths
+asc app-shots translate \
+  --plan .asc/app-shots/app-shots-plan.json \
+  --source-dir .asc/app-shots/output \
+  --output-dir .asc/app-shots/output \
+  --to zh --to ja --to ko
+
+# Single locale
+asc app-shots translate --to fr
+
+# Output goes to:
+# .asc/app-shots/output/zh/screen-0.png
+# .asc/app-shots/output/ja/screen-0.png
+```
+
+**Flags:**
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--plan` | `.asc/app-shots/app-shots-plan.json` | Source ScreenPlan JSON |
+| `--from` | `en` | Source locale label (informational) |
+| `--to` | *(required, repeatable)* | Target locale(s) |
+| `--source-dir` | `.asc/app-shots/output` | Dir with existing `screen-*.png` files |
+| `--output-dir` | `.asc/app-shots/output` | Base output dir; locale subdirs created automatically |
+| `--gemini-api-key` | — | API key (flag → env var → config file) |
+| `--model` | `gemini-3.1-flash-image-preview` | Gemini model |
+
+## Config (save Gemini API key once)
+
+```bash
+asc app-shots config --gemini-api-key AIzaSy...   # save key
+asc app-shots config                               # show current key + source
+asc app-shots config --remove                      # delete saved key
 ```

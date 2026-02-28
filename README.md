@@ -78,7 +78,7 @@ $ asc versions list --app-id app-abc
 - **Code signing** — manage bundle IDs, certificates, devices, and provisioning profiles
 - **In-App Purchases** — create and list IAPs; set per-territory pricing; submit for review; manage per-locale name and description
 - **Subscriptions** — create subscription groups and tiers (weekly–yearly); submit for review; introductory offers (free trial, pay-as-you-go, pay-up-front); manage per-locale name and description
-- **App Shots** — AI-powered screenshot plan enhancement using Gemini AI; generates compelling headings, subheadings, and image prompts
+- **App Shots** — AI-powered screenshot generation and localization; `generate` produces polished marketing PNGs via Gemini; `translate` recreates them in any locale (`--to zh --to ja --to ko`) in one command
 - **Version readiness check** — pre-flight check aggregating all Apple submission requirements
 - **TUI mode** — interactive terminal UI for human browsing
 - **Swift 6.2** — strict concurrency, async/await throughout
@@ -230,9 +230,12 @@ asc profiles list [--bundle-id-id <id>] [--type IOS_APP_STORE]
 asc profiles create --name "My Profile" --type IOS_APP_STORE --bundle-id-id <id> --certificate-ids <id>
 asc profiles delete --profile-id <id>
 
-# App Shots (AI Screenshot Planning)
-asc app-shots generate --plan app-shots-plan.json --gemini-api-key KEY --pretty
-asc app-shots generate --plan plan.json --output-file enhanced.json screen1.png screen2.png
+# App Shots (AI Screenshot Generation & Translation)
+asc app-shots config --gemini-api-key KEY                    # save key once
+asc app-shots generate                                        # generate English PNGs (zero args)
+asc app-shots generate --plan plan.json screen1.png screen2.png  # explicit paths
+asc app-shots translate --to zh --to ja                      # translate to Chinese + Japanese
+asc app-shots translate --to ko --source-dir ./output --output-dir ./output  # explicit
 
 # Interactive
 asc tui                                                               # interactive browser
