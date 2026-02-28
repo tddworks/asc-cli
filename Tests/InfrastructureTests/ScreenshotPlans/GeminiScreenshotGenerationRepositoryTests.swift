@@ -17,34 +17,30 @@ final class StubHTTPClient: HTTPPerforming, @unchecked Sendable {
     }
 }
 
-private func makeHTTPResponse(statusCode: Int = 200) -> HTTPURLResponse {
-    HTTPURLResponse(
-        url: URL(string: "https://generativelanguage.googleapis.com")!,
-        statusCode: statusCode,
-        httpVersion: nil,
-        headerFields: nil
-    )!
+private func makeHTTPResponse(statusCode: Int = 200, url: String = "https://generativelanguage.googleapis.com") -> HTTPURLResponse {
+    HTTPURLResponse(url: URL(string: url)!, statusCode: statusCode, httpVersion: nil, headerFields: nil)!
 }
 
-/// Fake PNG bytes (valid PNG magic bytes so size check passes)
+/// Minimal PNG bytes (valid magic + padding)
 private let fakePNGData: Data = {
     var bytes: [UInt8] = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]
     bytes += [UInt8](repeating: 0x00, count: 200)
     return Data(bytes)
 }()
 
-private func makeGeminiImageResponse(imageData: Data = fakePNGData) -> Data {
-    let base64 = imageData.base64EncodedString()
+/// Native Gemini generateContent response with image inlineData
+private func makeNativeGeminiImageResponse(imageData: Data = fakePNGData) -> Data {
+    let b64 = imageData.base64EncodedString()
     let body = """
     {
-      "choices": [
+      "candidates": [
         {
-          "message": {
-            "content": [
+          "content": {
+            "parts": [
               {
-                "type": "image_url",
-                "image_url": {
-                  "url": "data:image/png;base64,\(base64)"
+                "inlineData": {
+                  "mimeType": "image/png",
+                  "data": "\(b64)"
                 }
               }
             ]
@@ -56,7 +52,29 @@ private func makeGeminiImageResponse(imageData: Data = fakePNGData) -> Data {
     return body.data(using: .utf8)!
 }
 
-private func makeSingleScreenPlan(imagePrompt: String = "Clean UI on dark background") -> ScreenPlan {
+/// OpenAI-compat response with image_url content part
+private func makeOpenAICompatImageResponse(imageData: Data = fakePNGData) -> Data {
+    let b64 = imageData.base64EncodedString()
+    let body = """
+    {
+      "choices": [
+        {
+          "message": {
+            "content": [
+              {
+                "type": "image_url",
+                "image_url": { "url": "data:image/png;base64,\(b64)" }
+              }
+            ]
+          }
+        }
+      ]
+    }
+    """
+    return body.data(using: .utf8)!
+}
+
+private func makeSingleScreenPlan(imagePrompt: String = "App screenshot on dark navy background") -> ScreenPlan {
     ScreenPlan(
         appId: "app-123",
         appName: "TestApp",
@@ -82,9 +100,46 @@ private func makeSingleScreenPlan(imagePrompt: String = "Clean UI on dark backgr
 @Suite
 struct GeminiScreenshotGenerationRepositoryTests {
 
-    @Test func `generateImages returns PNG data for each screen`() async throws {
+    // MARK: Native Gemini API (generativelanguage.googleapis.com)
+
+    @Test func `generateImages uses native generateContent API for Gemini URLs`() async throws {
         let stub = StubHTTPClient()
-        stub.response = (makeGeminiImageResponse(), makeHTTPResponse())
+        stub.response = (makeNativeGeminiImageResponse(), makeHTTPResponse())
+
+        let repo = GeminiScreenshotGenerationRepository(
+            apiKey: "test-key",
+            baseURL: "https://generativelanguage.googleapis.com/v1beta/openai",
+            httpClient: stub
+        )
+        _ = try await repo.generateImages(plan: makeSingleScreenPlan(), screenshotURLs: [])
+
+        // Must use native endpoint, not /chat/completions
+        let url = stub.lastRequest?.url?.absoluteString ?? ""
+        #expect(url.contains("/models/"))
+        #expect(url.contains(":generateContent"))
+        #expect(url.contains("key=test-key"))
+        #expect(!url.contains("chat/completions"))
+    }
+
+    @Test func `generateImages strips openai suffix when building native URL`() async throws {
+        let stub = StubHTTPClient()
+        stub.response = (makeNativeGeminiImageResponse(), makeHTTPResponse())
+
+        let repo = GeminiScreenshotGenerationRepository(
+            apiKey: "my-key",
+            model: "gemini-3.1-flash-image-preview",
+            baseURL: "https://generativelanguage.googleapis.com/v1beta/openai",
+            httpClient: stub
+        )
+        _ = try await repo.generateImages(plan: makeSingleScreenPlan(), screenshotURLs: [])
+
+        let url = stub.lastRequest?.url?.absoluteString ?? ""
+        #expect(url == "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=my-key")
+    }
+
+    @Test func `generateImages returns PNG data from native Gemini inlineData`() async throws {
+        let stub = StubHTTPClient()
+        stub.response = (makeNativeGeminiImageResponse(), makeHTTPResponse())
 
         let repo = GeminiScreenshotGenerationRepository(apiKey: "test-key", httpClient: stub)
         let results = try await repo.generateImages(plan: makeSingleScreenPlan(), screenshotURLs: [])
@@ -94,34 +149,9 @@ struct GeminiScreenshotGenerationRepositoryTests {
         #expect(results[0]!.count > 100)
     }
 
-    @Test func `generateImages sends Authorization Bearer header`() async throws {
+    @Test func `generateImages native API sends imagePrompt as text part`() async throws {
         let stub = StubHTTPClient()
-        stub.response = (makeGeminiImageResponse(), makeHTTPResponse())
-
-        let repo = GeminiScreenshotGenerationRepository(apiKey: "my-api-key", httpClient: stub)
-        _ = try await repo.generateImages(plan: makeSingleScreenPlan(), screenshotURLs: [])
-
-        #expect(stub.lastRequest?.value(forHTTPHeaderField: "Authorization") == "Bearer my-api-key")
-    }
-
-    @Test func `generateImages sends POST to correct endpoint`() async throws {
-        let stub = StubHTTPClient()
-        stub.response = (makeGeminiImageResponse(), makeHTTPResponse())
-
-        let repo = GeminiScreenshotGenerationRepository(
-            apiKey: "test-key",
-            baseURL: "https://generativelanguage.googleapis.com/v1beta/openai",
-            httpClient: stub
-        )
-        _ = try await repo.generateImages(plan: makeSingleScreenPlan(), screenshotURLs: [])
-
-        #expect(stub.lastRequest?.url?.absoluteString == "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions")
-        #expect(stub.lastRequest?.httpMethod == "POST")
-    }
-
-    @Test func `generateImages includes imagePrompt in request body`() async throws {
-        let stub = StubHTTPClient()
-        stub.response = (makeGeminiImageResponse(), makeHTTPResponse())
+        stub.response = (makeNativeGeminiImageResponse(), makeHTTPResponse())
 
         let repo = GeminiScreenshotGenerationRepository(apiKey: "key", httpClient: stub)
         _ = try await repo.generateImages(
@@ -132,11 +162,13 @@ struct GeminiScreenshotGenerationRepositoryTests {
         let bodyData = stub.lastRequest?.httpBody ?? Data()
         let bodyString = String(data: bodyData, encoding: .utf8) ?? ""
         #expect(bodyString.contains("Dark navy with glowing accents"))
+        #expect(bodyString.contains("responseModalities"))
+        #expect(bodyString.contains("IMAGE"))
     }
 
-    @Test func `generateImages uses custom model in request body`() async throws {
+    @Test func `generateImages native API uses model in URL`() async throws {
         let stub = StubHTTPClient()
-        stub.response = (makeGeminiImageResponse(), makeHTTPResponse())
+        stub.response = (makeNativeGeminiImageResponse(), makeHTTPResponse())
 
         let repo = GeminiScreenshotGenerationRepository(
             apiKey: "key",
@@ -145,9 +177,8 @@ struct GeminiScreenshotGenerationRepositoryTests {
         )
         _ = try await repo.generateImages(plan: makeSingleScreenPlan(), screenshotURLs: [])
 
-        let bodyData = stub.lastRequest?.httpBody ?? Data()
-        let bodyJSON = try JSONSerialization.jsonObject(with: bodyData) as? [String: Any]
-        #expect(bodyJSON?["model"] as? String == "gemini-3.1-flash-image-preview")
+        let url = stub.lastRequest?.url?.absoluteString ?? ""
+        #expect(url.contains("gemini-3.1-flash-image-preview"))
     }
 
     @Test func `generateImages throws on HTTP error`() async throws {
@@ -167,9 +198,10 @@ struct GeminiScreenshotGenerationRepositoryTests {
         }
     }
 
-    @Test func `generateImages throws when no image data in response`() async throws {
+    @Test func `generateImages throws when no image in native response`() async throws {
         let stub = StubHTTPClient()
-        stub.response = (Data("{\"choices\":[{\"message\":{\"content\":\"no image here\"}}]}".utf8), makeHTTPResponse())
+        let emptyResponse = Data(#"{"candidates":[{"content":{"parts":[{"text":"no image"}]}}]}"#.utf8)
+        stub.response = (emptyResponse, makeHTTPResponse())
 
         let repo = GeminiScreenshotGenerationRepository(apiKey: "key", httpClient: stub)
         do {
@@ -177,7 +209,7 @@ struct GeminiScreenshotGenerationRepositoryTests {
             Issue.record("Expected error to be thrown")
         } catch let error as Domain.APIError {
             if case .unknown(let msg) = error {
-                #expect(msg.contains("No image data found"))
+                #expect(msg.contains("No image data"))
             } else {
                 Issue.record("Expected APIError.unknown, got \(error)")
             }
@@ -196,5 +228,23 @@ struct GeminiScreenshotGenerationRepositoryTests {
         let results = try await repo.generateImages(plan: emptyPlan, screenshotURLs: [])
 
         #expect(results.isEmpty)
+    }
+
+    // MARK: OpenAI-compat path (non-Gemini endpoints)
+
+    @Test func `generateImages uses OpenAI compat endpoint for non-Gemini base URLs`() async throws {
+        let stub = StubHTTPClient()
+        stub.response = (makeOpenAICompatImageResponse(), makeHTTPResponse(url: "https://api.openai.com"))
+
+        let repo = GeminiScreenshotGenerationRepository(
+            apiKey: "sk-test",
+            baseURL: "https://api.openai.com/v1",
+            httpClient: stub
+        )
+        _ = try await repo.generateImages(plan: makeSingleScreenPlan(), screenshotURLs: [])
+
+        let url = stub.lastRequest?.url?.absoluteString ?? ""
+        #expect(url.contains("chat/completions"))
+        #expect(stub.lastRequest?.value(forHTTPHeaderField: "Authorization") == "Bearer sk-test")
     }
 }

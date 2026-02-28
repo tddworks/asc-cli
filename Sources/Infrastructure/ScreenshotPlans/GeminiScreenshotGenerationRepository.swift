@@ -11,9 +11,12 @@ extension URLSession: HTTPPerforming {}
 
 // MARK: - GeminiScreenshotGenerationRepository
 
-/// Calls the Gemini image generation API (OpenAI-compatible endpoint) for each screen
-/// in the plan, sending the screen's `imagePrompt` + the matched screenshot.
-/// Returns a dictionary mapping screen index → generated PNG data.
+/// Calls the Gemini image generation API for each screen in the plan,
+/// sending the screen's `imagePrompt` + the matched screenshot.
+///
+/// For generativelanguage.googleapis.com URLs (with or without /openai suffix),
+/// uses the native generateContent API — the OpenAI-compat chat/completions endpoint
+/// does not support image generation output. Other base URLs fall back to OpenAI-compat.
 public struct GeminiScreenshotGenerationRepository: ScreenshotGenerationRepository {
     private let apiKey: String
     private let model: String
@@ -32,10 +35,11 @@ public struct GeminiScreenshotGenerationRepository: ScreenshotGenerationReposito
         self.httpClient = httpClient ?? URLSession.shared
     }
 
+    // MARK: - Protocol conformance
+
     public func generateImages(plan: ScreenPlan, screenshotURLs: [URL]) async throws -> [Int: Data] {
         try await withThrowingTaskGroup(of: (Int, Data).self) { group in
             for screen in plan.screens {
-                // Match screenshot by filename or fall back to index order
                 let screenshotURL: URL? = screenshotURLs.first {
                     $0.lastPathComponent == screen.screenshotFile
                 } ?? (screen.index < screenshotURLs.count ? screenshotURLs[screen.index] : nil)
@@ -60,16 +64,58 @@ public struct GeminiScreenshotGenerationRepository: ScreenshotGenerationReposito
         }
     }
 
-    // MARK: - Single image generation
+    // MARK: - Endpoint routing
+
+    /// For any generativelanguage.googleapis.com URL, use the native generateContent API.
+    /// The OpenAI-compat /chat/completions endpoint does not support image output.
+    private var isGeminiNativeEndpoint: Bool {
+        baseURL.contains("generativelanguage.googleapis.com")
+    }
 
     private func generateSingleImage(prompt: String, screenshotURL: URL?) async throws -> Data {
-        let url = URL(string: "\(baseURL)/chat/completions")!
+        if isGeminiNativeEndpoint {
+            return try await generateNativeGemini(prompt: prompt, screenshotURL: screenshotURL)
+        } else {
+            return try await generateOpenAICompat(prompt: prompt, screenshotURL: screenshotURL)
+        }
+    }
+
+    // MARK: - Native Gemini generateContent API
+
+    private func generateNativeGemini(prompt: String, screenshotURL: URL?) async throws -> Data {
+        // Strip /openai suffix if present — native API doesn't use it
+        var base = baseURL
+        if base.hasSuffix("/") { base = String(base.dropLast()) }
+        if base.hasSuffix("/openai") { base = String(base.dropLast("/openai".count)) }
+
+        let urlString = "\(base)/models/\(model):generateContent"
+        guard var components = URLComponents(string: urlString) else {
+            throw APIError.unknown("Invalid Gemini URL: \(urlString)")
+        }
+        components.queryItems = [URLQueryItem(name: "key", value: apiKey)]
+        guard let url = components.url else {
+            throw APIError.unknown("Could not build Gemini URL")
+        }
+
+        // Build parts: optional screenshot inlineData + text prompt
+        var parts: [[String: Any]] = []
+        if let screenshotURL, let imageData = try? Data(contentsOf: screenshotURL) {
+            let ext = screenshotURL.pathExtension.lowercased()
+            let mimeType = (ext == "jpg" || ext == "jpeg") ? "image/jpeg" : "image/png"
+            parts.append(["inlineData": ["mimeType": mimeType, "data": imageData.base64EncodedString()]])
+        }
+        parts.append(["text": prompt])
+
+        let body: [String: Any] = [
+            "contents": [["parts": parts]],
+            "generationConfig": ["responseModalities": ["TEXT", "IMAGE"]]
+        ]
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.timeoutInterval = 120
-        request.httpBody = try buildRequestBody(prompt: prompt, screenshotURL: screenshotURL)
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
         let (data, response) = try await httpClient.data(for: request)
 
@@ -81,73 +127,110 @@ public struct GeminiScreenshotGenerationRepository: ScreenshotGenerationReposito
             throw APIError.unknown("Gemini API error \(httpResponse.statusCode): \(body)")
         }
 
-        return try extractImageData(from: data)
+        return try extractNativeGeminiImage(from: data)
     }
 
-    // MARK: - Request building
-
-    private func buildRequestBody(prompt: String, screenshotURL: URL?) throws -> Data {
-        var messageContent: [[String: Any]] = []
-
-        // Include screenshot as base64 image if available
-        if let url = screenshotURL, let imageData = try? Data(contentsOf: url) {
-            let base64 = imageData.base64EncodedString()
-            let ext = url.pathExtension.lowercased()
-            let mimeType = (ext == "jpg" || ext == "jpeg") ? "image/jpeg" : "image/png"
-            messageContent.append([
-                "type": "image_url",
-                "image_url": ["url": "data:\(mimeType);base64,\(base64)"]
-            ])
-        }
-
-        messageContent.append(["type": "text", "text": prompt])
-
-        let body: [String: Any] = [
-            "model": model,
-            "max_tokens": 4096,
-            "messages": [
-                ["role": "user", "content": messageContent]
-            ]
-        ]
-
-        return try JSONSerialization.data(withJSONObject: body)
-    }
-
-    // MARK: - Response parsing — extract PNG from Gemini image generation response
-
-    private func extractImageData(from responseData: Data) throws -> Data {
+    private func extractNativeGeminiImage(from responseData: Data) throws -> Data {
         guard let json = try? JSONSerialization.jsonObject(with: responseData) as? [String: Any] else {
             throw APIError.unknown("Response is not valid JSON")
         }
 
-        // Check for API-level error
         if let error = json["error"] as? [String: Any],
            let message = error["message"] as? String {
             throw APIError.unknown("Gemini error: \(message)")
         }
 
-        // OpenAI Chat Completions: choices[0].message.content (array of parts)
-        if let choices = json["choices"] as? [[String: Any]],
-           let first = choices.first,
-           let message = first["message"] as? [String: Any] {
+        // candidates[0].content.parts[].inlineData.data
+        if let candidates = json["candidates"] as? [[String: Any]],
+           let content = candidates.first?["content"] as? [String: Any],
+           let parts = content["parts"] as? [[String: Any]] {
+            for part in parts {
+                if let inlineData = part["inlineData"] as? [String: Any],
+                   let mimeType = inlineData["mimeType"] as? String,
+                   mimeType.hasPrefix("image/"),
+                   let b64 = inlineData["data"] as? String,
+                   let imageData = Data(base64Encoded: b64, options: .ignoreUnknownCharacters),
+                   imageData.count > 100 {
+                    return imageData
+                }
+            }
+        }
 
+        let preview = String(data: responseData.prefix(300), encoding: .utf8) ?? ""
+        throw APIError.unknown("No image data in Gemini response. Preview: \(preview)")
+    }
+
+    // MARK: - OpenAI-compatible Chat Completions (non-Gemini endpoints)
+
+    private func generateOpenAICompat(prompt: String, screenshotURL: URL?) async throws -> Data {
+        var base = baseURL.hasSuffix("/") ? String(baseURL.dropLast()) : baseURL
+        let urlString = base.hasSuffix("/chat/completions") ? base : "\(base)/chat/completions"
+        guard let url = URL(string: urlString) else {
+            throw APIError.unknown("Invalid URL: \(urlString)")
+        }
+
+        var messageContent: [[String: Any]] = []
+        if let screenshotURL, let imageData = try? Data(contentsOf: screenshotURL) {
+            let ext = screenshotURL.pathExtension.lowercased()
+            let mimeType = (ext == "jpg" || ext == "jpeg") ? "image/jpeg" : "image/png"
+            let base64 = imageData.base64EncodedString()
+            messageContent.append([
+                "type": "image_url",
+                "image_url": ["url": "data:\(mimeType);base64,\(base64)"]
+            ])
+        }
+        messageContent.append(["type": "text", "text": prompt])
+
+        let body: [String: Any] = [
+            "model": model,
+            "max_tokens": 4096,
+            "messages": [["role": "user", "content": messageContent]]
+        ]
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 120
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (data, response) = try await httpClient.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.unknown("Invalid response type")
+        }
+        guard (200..<300).contains(httpResponse.statusCode) else {
+            let body = String(data: data, encoding: .utf8) ?? ""
+            throw APIError.unknown("API error \(httpResponse.statusCode): \(body)")
+        }
+
+        return try extractOpenAICompatImage(from: data)
+    }
+
+    private func extractOpenAICompatImage(from responseData: Data) throws -> Data {
+        guard let json = try? JSONSerialization.jsonObject(with: responseData) as? [String: Any] else {
+            throw APIError.unknown("Response is not valid JSON")
+        }
+
+        if let error = json["error"] as? [String: Any],
+           let message = error["message"] as? String {
+            throw APIError.unknown("API error: \(message)")
+        }
+
+        // choices[0].message.content as array of parts
+        if let choices = json["choices"] as? [[String: Any]],
+           let message = choices.first?["message"] as? [String: Any] {
             if let contentArray = message["content"] as? [[String: Any]] {
                 for part in contentArray {
                     if let data = extractImageFromPart(part) { return data }
                 }
-                // Fallback: base64 text in text parts
-                for part in contentArray {
-                    if (part["type"] as? String) == "text",
-                       let text = part["text"] as? String,
-                       let data = decodeBase64Image(text) { return data }
-                }
-            } else if let contentString = message["content"] as? String,
-                      let data = decodeBase64Image(contentString) {
+            } else if let text = message["content"] as? String,
+                      let data = decodeBase64Image(text) {
                 return data
             }
         }
 
-        // OpenAI Images API: data[0].b64_json
+        // data[].b64_json (OpenAI Images API)
         if let dataArray = json["data"] as? [[String: Any]] {
             for item in dataArray {
                 if let b64 = item["b64_json"] as? String,
@@ -157,18 +240,16 @@ public struct GeminiScreenshotGenerationRepository: ScreenshotGenerationReposito
         }
 
         let preview = String(data: responseData.prefix(200), encoding: .utf8) ?? ""
-        throw APIError.unknown("No image data found in Gemini response. Preview: \(preview)")
+        throw APIError.unknown("No image data found in response. Preview: \(preview)")
     }
 
     private func extractImageFromPart(_ part: [String: Any]) -> Data? {
         let type = part["type"] as? String
-        // { "type": "image_url", "image_url": { "url": "data:image/png;base64,..." } }
         if type == "image_url",
            let imageUrl = part["image_url"] as? [String: Any],
            let urlStr = imageUrl["url"] as? String {
             return decodeBase64Image(urlStr)
         }
-        // { "type": "image", "data": "...", "media_type": "..." }
         if type == "image",
            let b64 = part["data"] as? String,
            let data = Data(base64Encoded: b64, options: .ignoreUnknownCharacters),
@@ -177,14 +258,11 @@ public struct GeminiScreenshotGenerationRepository: ScreenshotGenerationReposito
     }
 
     private func decodeBase64Image(_ text: String) -> Data? {
-        // Direct base64
         if let data = Data(base64Encoded: text, options: .ignoreUnknownCharacters), data.count > 100 {
             return data
         }
-        // Data URI: data:image/png;base64,<data>
         if let range = text.range(of: "base64,") {
-            let b64 = String(text[range.upperBound...])
-                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let b64 = String(text[range.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
             if let data = Data(base64Encoded: b64, options: .ignoreUnknownCharacters), data.count > 100 {
                 return data
             }
