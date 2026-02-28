@@ -61,9 +61,34 @@ For each screenshot file provided, use your multimodal vision to:
 1. Identify the primary UI elements shown
 2. Determine what feature or benefit is being demonstrated
 3. Note the visual style (colors, typography, layout)
-4. Suggest a short heading (3-5 words) and subheading (6-10 words)
+4. Suggest a short heading (3-5 words) and subheading (6-12 words)
 5. Write a `visualDirection` description of the screenshot content
-6. Write an `imagePrompt` for Gemini image generation — 1-3 sentences describing the full composition: device presentation, text placement, background style, mood, and atmosphere. Include the heading/subheading text in the prompt so Gemini renders it. Example: "Premium App Store screenshot. Uploaded iPhone UI centered on a near-black (#0a0a0a) background with a deep blue radial glow (#3b82f6). Bold heading 'Write. Encrypt. Sync.' at top, subheading 'Beautiful Markdown, fully private' below in muted blue-gray. Cinematic studio lighting, editorial quality."
+6. Write an `imagePrompt` following the formula below
+
+#### imagePrompt Formula (CRITICAL — this is sent directly to Gemini for image generation)
+
+Use this 1-3 sentence structure for stable, high-quality results:
+
+```
+"Generate a [premium/cinematic/modern] App Store [hero/feature/showcase] screenshot.
+The uploaded iPhone UI is displayed in a [style] device mockup [angle/position].
+Bold [color] heading '[EXACT heading text]' [placement], with [color] subtext '[EXACT subheading]' [placement].
+[Background hex color], [glow/gradient/lighting effect]. [Quality/style descriptors]."
+```
+
+**Rules:**
+- Always start: "Generate a [adjective] App Store screenshot"
+- Always quote **exact heading and subheading text** — Gemini renders them in the image
+- Specify device presentation: "tilted ~8 degrees", "centered on the canvas", "positioned to the left"
+- Include background hex + lighting: "deep electric blue radial glow (#3b82f6)", "soft bokeh depth"
+- End with quality: "Minimal, editorial, premium quality" / "Cinematic depth, professional quality"
+- 1-3 sentences max — be concise, let Gemini be creative
+
+**Hero screen example (tilted, centered):**
+> "Generate a premium App Store hero screenshot. The uploaded iPhone UI is displayed in a sleek tilted device mockup (~8 degrees) centered on a near-black canvas (#0a0a0a). Bold white heading 'Manage All Your Apps' sits above the device, with soft blue-gray subtext 'One dashboard for every release' below. A deep electric blue radial glow (#4A7CFF) pulses behind the device. Floating micro-dots add cinematic depth. Minimal, editorial, premium quality."
+
+**Feature screen example (left-positioned):**
+> "Generate a modern App Store feature screenshot. The uploaded iPhone UI is positioned to the left on a deep navy background (#0d1b2a), tilted slightly right. Bold white heading 'Optimize Your Presence' on the right side, with muted blue subtext 'AI search, sync and smart tools in one place' below. Soft blue accent glow radiates from behind the device. Professional depth-of-field atmosphere, editorial quality."
 
 Choose a `tone` for the app based on the app category and metadata:
 - `minimal` — clean, sparse, functional
