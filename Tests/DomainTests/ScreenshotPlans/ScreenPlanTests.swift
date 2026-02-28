@@ -77,12 +77,50 @@ struct ScreenPlanTests {
                 )
             ]
         )
-        let encoder = JSONEncoder()
-        let data = try encoder.encode(plan)
-        let decoder = JSONDecoder()
-        let decoded = try decoder.decode(ScreenPlan.self, from: data)
+        let data = try JSONEncoder().encode(plan)
+        let decoded = try JSONDecoder().decode(ScreenPlan.self, from: data)
         #expect(decoded == plan)
         #expect(decoded.appId == "6736834466")
         #expect(decoded.screens.count == 1)
+    }
+
+    @Test func `appDescription is preserved in JSON roundtrip`() throws {
+        let plan = ScreenPlan(
+            appId: "app-1",
+            appName: "MyApp",
+            tagline: "Great app",
+            appDescription: "A powerful productivity tool for iOS developers.",
+            tone: .professional,
+            colors: ScreenColors(primary: "#000000", accent: "#FF0000", text: "#FFFFFF", subtext: "#CCCCCC"),
+            screens: []
+        )
+        let data = try JSONEncoder().encode(plan)
+        let decoded = try JSONDecoder().decode(ScreenPlan.self, from: data)
+        #expect(decoded.appDescription == "A powerful productivity tool for iOS developers.")
+    }
+
+    @Test func `appDescription is omitted from JSON when nil`() throws {
+        let plan = ScreenPlan(
+            appId: "app-1",
+            appName: "MyApp",
+            tagline: "Great app",
+            appDescription: nil,
+            tone: .minimal,
+            colors: ScreenColors(primary: "#000000", accent: "#FF0000", text: "#FFFFFF", subtext: "#CCCCCC"),
+            screens: []
+        )
+        let data = try JSONEncoder().encode(plan)
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        #expect(json?["appDescription"] == nil)
+    }
+
+    @Test func `existing plan JSON without appDescription decodes with nil`() throws {
+        let json = """
+        {"appId":"app-1","appName":"MyApp","tagline":"t","tone":"minimal",
+         "colors":{"primary":"#000","accent":"#fff","text":"#fff","subtext":"#ccc"},
+         "screens":[]}
+        """
+        let decoded = try JSONDecoder().decode(ScreenPlan.self, from: Data(json.utf8))
+        #expect(decoded.appDescription == nil)
     }
 }

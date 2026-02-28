@@ -38,13 +38,19 @@ public struct GeminiScreenshotGenerationRepository: ScreenshotGenerationReposito
     // MARK: - Protocol conformance
 
     public func generateImages(plan: ScreenPlan, screenshotURLs: [URL]) async throws -> [Int: Data] {
-        try await withThrowingTaskGroup(of: (Int, Data).self) { group in
+        // Build app context prefix once — shared across all screen generations
+        let appContext = buildAppContext(plan: plan)
+
+        return try await withThrowingTaskGroup(of: (Int, Data).self) { group in
             for screen in plan.screens {
                 let screenshotURL: URL? = screenshotURLs.first {
                     $0.lastPathComponent == screen.screenshotFile
                 } ?? (screen.index < screenshotURLs.count ? screenshotURLs[screen.index] : nil)
 
-                let prompt = screen.imagePrompt
+                // Prepend app context to the imagePrompt so Gemini understands the app
+                let prompt = appContext.isEmpty
+                    ? screen.imagePrompt
+                    : "\(appContext)\n\n\(screen.imagePrompt)"
                 let index = screen.index
 
                 group.addTask {
@@ -62,6 +68,22 @@ public struct GeminiScreenshotGenerationRepository: ScreenshotGenerationReposito
             }
             return results
         }
+    }
+
+    // MARK: - App context
+
+    /// Builds a brief context string from plan metadata to prepend to each imagePrompt,
+    /// giving Gemini richer understanding of the app's purpose and target audience.
+    private func buildAppContext(plan: ScreenPlan) -> String {
+        var parts: [String] = ["App: \(plan.appName)"]
+        if !plan.tagline.isEmpty { parts.append(plan.tagline) }
+        if let desc = plan.appDescription, !desc.isEmpty {
+            // Truncate to first 300 chars to keep the prompt concise
+            let truncated = desc.count > 300 ? String(desc.prefix(300)) + "..." : desc
+            parts.append(truncated)
+        }
+        guard parts.count > 1 else { return "" }
+        return "App context: \(parts.joined(separator: ". "))"
     }
 
     // MARK: - Endpoint routing
