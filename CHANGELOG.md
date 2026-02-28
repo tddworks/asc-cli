@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.28] - 2026-02-28
+
 ### Added
 - `--device-type` flag on `asc app-shots generate` and `asc app-shots translate` — accepts named App Store display type constants (`APP_IPHONE_69`, `APP_IPHONE_67`, `APP_IPAD_PRO_129`, etc.) and automatically sets the correct `--output-width`/`--output-height`; overrides explicit dimension flags when both are provided; all 16 device types supported across iPhone, iPad, Apple TV, Mac, and Apple Vision Pro
 
@@ -223,7 +227,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.27...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.28...HEAD
+[0.1.28]: https://github.com/tddworks/asc-cli/compare/v0.1.27...v0.1.28
 [0.1.27]: https://github.com/tddworks/asc-cli/compare/v0.1.25...v0.1.27
 [0.1.25]: https://github.com/tddworks/asc-cli/compare/v0.1.24...v0.1.25
 [0.1.24]: https://github.com/tddworks/asc-cli/compare/v0.1.23...v0.1.24
