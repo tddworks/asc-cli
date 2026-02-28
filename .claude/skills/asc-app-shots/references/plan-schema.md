@@ -11,62 +11,76 @@ The `ScreenPlan` is the core data structure written by the `asc-app-shots` skill
   "tagline": "string — 5-8 word marketing tagline for the app",
   "tone": "string — one of: minimal | playful | professional | bold | elegant",
   "colors": {
-    "primary": "string — hex color for background/primary elements (e.g. '#1A1A2E')",
-    "accent": "string — hex color for highlights/CTAs (e.g. '#E94560')",
+    "primary": "string — hex color for background (e.g. '#0a0a0a')",
+    "accent": "string — hex color for highlights/CTAs (e.g. '#3b82f6')",
     "text": "string — hex color for heading text (e.g. '#FFFFFF')",
-    "subtext": "string — hex color for subheading text (e.g. '#CCCCCC')"
+    "subtext": "string — hex color for subheading text (e.g. '#94A3B8')"
   },
   "screens": [
     {
       "index": "number — 0-based screen order",
-      "screenshotFile": "string — path to screenshot file",
+      "screenshotFile": "string — filename of the screenshot (e.g. 'IMG_7141.PNG')",
       "heading": "string — 2-5 word headline for this screen",
       "subheading": "string — 6-12 word supporting text for this screen",
       "layoutMode": "string — one of: center | left | tilted",
       "visualDirection": "string — 1-2 sentence description of what the screenshot shows",
-      "imagePrompt": "string — detailed prompt for AI image enhancement of this screen"
+      "imagePrompt": "string — Gemini image generation prompt (see rules below)"
     }
   ]
 }
 ```
 
-## Field Descriptions
+---
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `appId` | Yes | App Store Connect app ID |
-| `appName` | Yes | Localized app name |
-| `tagline` | Yes | Short marketing tagline |
-| `tone` | Yes | Visual/messaging tone |
-| `colors.primary` | Yes | Background hex color |
-| `colors.accent` | Yes | Accent/highlight hex color |
-| `colors.text` | Yes | Heading text hex color |
-| `colors.subtext` | Yes | Subheading text hex color |
-| `screens[].index` | Yes | 0-based ordering index |
-| `screens[].screenshotFile` | Yes | Path to the source screenshot |
-| `screens[].heading` | Yes | Short headline text |
-| `screens[].subheading` | Yes | Supporting subheadline text |
-| `screens[].layoutMode` | Yes | How text overlays the image |
-| `screens[].visualDirection` | Yes | What the screenshot shows |
-| `screens[].imagePrompt` | Yes | Prompt for image enhancement AI |
+## imagePrompt Writing Rules (CRITICAL)
+
+This prompt is sent directly to Gemini image generation along with the actual screenshot.
+Write 1-3 concise sentences following this structure:
+
+**Formula:**
+```
+"Generate a [premium/cinematic/modern] App Store [hero/feature/showcase] screenshot.
+The uploaded iPhone UI is displayed in a [style] device mockup [angle] [position].
+Bold [color] heading '[EXACT heading text]' [placement], with [color] subtext '[EXACT subheading]' [placement].
+[Background: hex color, glow/gradient/particles]. [Atmosphere/quality descriptors]."
+```
+
+**Rules:**
+1. Always start with "Generate a [adjective] App Store screenshot"
+2. Always include **exact heading and subheading text** quoted — Gemini renders them
+3. Specify device angle: "centered", "tilted ~8 degrees", "positioned left/right"
+4. Include background hex color and lighting effect (radial glow, gradient, bokeh)
+5. End with quality/style descriptors: "Minimal, editorial, premium quality"
+6. 1-3 sentences max — be concise, let Gemini be creative with composition
+
+**Tips from AppShots:**
+- Be concise — 1-3 sentences work best
+- Describe the creative perspective and device angle
+- Include the heading text you want rendered
+- Mention colors, mood, and atmosphere
+- Let the AI be creative — don't over-specify
+
+---
 
 ## Tone Guide
 
-| Tone | Best for | Example headings |
-|------|----------|-----------------|
-| `minimal` | Productivity, tools, utilities | "Focus. Ship." / "Less noise." |
-| `playful` | Games, kids, lifestyle | "Level up your day!" / "Fun starts here" |
-| `professional` | Business, finance, enterprise | "Enterprise-grade security" / "Your team, in sync" |
-| `bold` | Sports, media, entertainment | "DOMINATE YOUR GOALS" / "STREAM EVERYTHING" |
-| `elegant` | Fashion, luxury, wellness | "Effortless beauty" / "Curated for you" |
+| Tone | Background | Accent | Best for |
+|------|-----------|--------|----------|
+| `minimal` | `#0a0a0a`–`#1a1a2e` | blue/indigo | Productivity, tools, utilities |
+| `playful` | bright vibrant | warm colors | Games, kids, lifestyle |
+| `professional` | navy/slate `#0d1b2a` | blue `#4A7CFF` | Business, finance, enterprise |
+| `bold` | high contrast dark | vivid saturated | Sports, media, entertainment |
+| `elegant` | rich dark gradient | gold/cream | Fashion, luxury, wellness |
 
 ## Layout Mode Guide
 
-| Mode | Description | Best for |
-|------|-------------|----------|
-| `center` | Text centered, screenshot as full background | Clean, impactful single-feature screens |
-| `left` | Text on left, screenshot on right | Feature comparison screens |
-| `tilted` | Screenshot at slight angle with shadow, text beside | Premium feel, depth |
+| Mode | Description | imagePrompt device phrase |
+|------|-------------|--------------------------|
+| `center` | Device centered, big (80% canvas) | "centered on the canvas" |
+| `left` | Device on left side (65% width) | "positioned to the left, text on right side" |
+| `tilted` | Device tilted ~8 degrees | "in a sleek tilted device mockup (~8 degrees)" |
+
+---
 
 ## Complete Example
 
@@ -75,40 +89,31 @@ The `ScreenPlan` is the core data structure written by the `asc-app-shots` skill
   "appId": "6736834466",
   "appName": "TaskFlow",
   "tagline": "Organize your life, effortlessly",
-  "tone": "professional",
+  "tone": "minimal",
   "colors": {
-    "primary": "#0F172A",
-    "accent": "#6366F1",
-    "text": "#F8FAFC",
+    "primary": "#0a0a0a",
+    "accent": "#3b82f6",
+    "text": "#FFFFFF",
     "subtext": "#94A3B8"
   },
   "screens": [
     {
       "index": 0,
-      "screenshotFile": "screen1.png",
+      "screenshotFile": "IMG_7141.PNG",
       "heading": "Work Smarter",
       "subheading": "Organize all your tasks in one beautiful place",
       "layoutMode": "center",
-      "visualDirection": "Main dashboard showing a list of tasks with colored priority badges and completion checkboxes",
-      "imagePrompt": "Clean dark dashboard UI with colorful task cards, subtle gradient background, minimalist typography, depth of field blur on background elements"
+      "visualDirection": "Main dashboard showing a list of tasks with colored priority badges",
+      "imagePrompt": "Generate a premium App Store hero screenshot. The uploaded iPhone UI is displayed in a sleek tilted device mockup (~8 degrees) centered on a near-black canvas (#0a0a0a). Bold white heading 'Work Smarter' sits above the device, with soft blue-gray subtext 'Organize all your tasks in one beautiful place' below. A deep electric blue radial glow (#3b82f6) pulses behind the device. Floating micro-dots and a subtle light streak add cinematic depth. Minimal, editorial, premium quality."
     },
     {
       "index": 1,
-      "screenshotFile": "screen2.png",
+      "screenshotFile": "IMG_7142.PNG",
       "heading": "Stay on Track",
       "subheading": "Smart reminders that fit your schedule",
       "layoutMode": "left",
       "visualDirection": "Calendar view showing scheduled tasks with a notification popup",
-      "imagePrompt": "Calendar UI with soft purple accent colors, notification card floating above with gentle shadow, light mode with warm undertones"
-    },
-    {
-      "index": 2,
-      "screenshotFile": "screen3.png",
-      "heading": "Team Sync",
-      "subheading": "Collaborate seamlessly with your team",
-      "layoutMode": "tilted",
-      "visualDirection": "Team collaboration view showing multiple user avatars and shared task assignments",
-      "imagePrompt": "Team collaboration screen with avatar circles, shared task list, blurred background with depth, professional corporate aesthetic"
+      "imagePrompt": "Generate a modern App Store feature screenshot. The uploaded iPhone UI is positioned to the left of the canvas, tilted slightly right on a deep navy background (#0d1b2a). Bold white heading 'Stay on Track' appears on the right side, with muted blue subtext 'Smart reminders that fit your schedule' below. Soft blue accent glow (#3b82f6) radiates from behind the device. Professional depth-of-field atmosphere, clean editorial quality."
     }
   ]
 }
