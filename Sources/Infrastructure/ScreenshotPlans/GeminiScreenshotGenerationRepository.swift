@@ -80,18 +80,31 @@ public struct GeminiScreenshotGenerationRepository: ScreenshotGenerationReposito
     // MARK: - Prompt builders
 
     /// When a style reference image is provided, all visual design is driven by the reference.
-    /// The prompt addresses images by position so Gemini knows which is which.
+    /// The prompt addresses images by position and enumerates every layout element so
+    /// Gemini does not fall back on its built-in App Store screenshot conventions.
     /// Parts order: [style reference image] [app screenshot image] [this text]
     private func buildStyleReferencePrompt(screen: ScreenConfig) -> String {
         """
-        Recreate this App Store marketing screenshot in the EXACT visual style of the FIRST image (style reference).
-        - Use the SECOND image (app UI) as the device screen content
-        - Heading text: '\(screen.heading)'
-        - Subheading text: '\(screen.subheading)'
-        - Replicate the reference faithfully: background, colors, layout composition, device angle, typography, and all visual effects
-        - Do NOT invent a new design — the first image defines the entire look
+        Recreate this App Store screenshot using the FIRST image as the definitive visual reference.
+        - Place the SECOND image (app UI) inside a device mockup
+        - Heading text (render exactly as written): '\(screen.heading)'
+        - Subheading text (render exactly as written): '\(screen.subheading)'
+        - Copy every visual element from the FIRST image exactly:
+          background color(s) and any gradient or diagonal panel shapes,
+          device angle and position on canvas (left/center/right, how high/low),
+          text placement and alignment (left/center/right, top/middle/bottom),
+          typography weight and size, any decorative effects or geometric overlays
+        - The FIRST image is the only design authority — override all default screenshot conventions
         """
     }
+
+    static let styleReferenceSystemInstruction =
+        "You are a precise visual style replication engine. " +
+        "Reproduce the reference image's design exactly — " +
+        "background, colors, layout composition, device position and angle, " +
+        "text placement, typography, and all decorative effects. " +
+        "Never apply default App Store screenshot conventions. " +
+        "The reference image is the only design authority."
 
     /// Builds a brief context string from plan metadata to prepend to each imagePrompt,
     /// giving Gemini richer understanding of the app's purpose and target audience.
@@ -156,10 +169,13 @@ public struct GeminiScreenshotGenerationRepository: ScreenshotGenerationReposito
         }
         parts.append(["text": prompt])
 
-        let body: [String: Any] = [
+        var body: [String: Any] = [
             "contents": [["parts": parts]],
             "generationConfig": ["responseModalities": ["TEXT", "IMAGE"]]
         ]
+        if styleReferenceURL != nil {
+            body["systemInstruction"] = ["parts": [["text": Self.styleReferenceSystemInstruction]]]
+        }
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"

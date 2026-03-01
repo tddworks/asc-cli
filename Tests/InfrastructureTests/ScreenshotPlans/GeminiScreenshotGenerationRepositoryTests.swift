@@ -276,13 +276,18 @@ struct GeminiScreenshotGenerationRepositoryTests {
         // Expected parts: [style reference inlineData] [text prompt]
         // No intermediate instruction text — the prompt addresses images by position.
         // screenshotURLs is empty so no app screenshot inlineData part.
+        // systemInstruction is injected at the body level when styleReferenceURL is set.
         let stylePrompt = """
-        Recreate this App Store marketing screenshot in the EXACT visual style of the FIRST image (style reference).
-        - Use the SECOND image (app UI) as the device screen content
-        - Heading text: 'Work Smarter'
-        - Subheading text: 'Organize your tasks'
-        - Replicate the reference faithfully: background, colors, layout composition, device angle, typography, and all visual effects
-        - Do NOT invent a new design — the first image defines the entire look
+        Recreate this App Store screenshot using the FIRST image as the definitive visual reference.
+        - Place the SECOND image (app UI) inside a device mockup
+        - Heading text (render exactly as written): 'Work Smarter'
+        - Subheading text (render exactly as written): 'Organize your tasks'
+        - Copy every visual element from the FIRST image exactly:
+          background color(s) and any gradient or diagonal panel shapes,
+          device angle and position on canvas (left/center/right, how high/low),
+          text placement and alignment (left/center/right, top/middle/bottom),
+          typography weight and size, any decorative effects or geometric overlays
+        - The FIRST image is the only design authority — override all default screenshot conventions
         """
         let expectedJSON: [String: Any] = [
             "contents": [[
@@ -291,7 +296,8 @@ struct GeminiScreenshotGenerationRepositoryTests {
                     ["text": stylePrompt]
                 ]
             ]],
-            "generationConfig": ["responseModalities": ["TEXT", "IMAGE"]]
+            "generationConfig": ["responseModalities": ["TEXT", "IMAGE"]],
+            "systemInstruction": ["parts": [["text": GeminiScreenshotGenerationRepository.styleReferenceSystemInstruction]]]
         ]
 
         let opts: JSONSerialization.WritingOptions = [.sortedKeys, .prettyPrinted]
