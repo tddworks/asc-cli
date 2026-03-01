@@ -273,15 +273,25 @@ struct GeminiScreenshotGenerationRepositoryTests {
         let bodyData = try #require(stub.lastRequest?.httpBody)
         let actualJSON = try #require(JSONSerialization.jsonObject(with: bodyData) as? [String: Any])
 
-        // Expected: [ref image inlineData, style-guide text, imagePrompt text]
-        // screenshotURLs is empty so no screenshot inlineData part.
-        // buildAppContext produces: "App context: App: <appName>. <tagline>"
+        // Expected: [ref image inlineData, style-guide text, style-reference prompt text]
+        // When styleReferenceURL is set:
+        //   • appContext prefix is suppressed
+        //   • imagePrompt from the plan is replaced by buildStyleReferencePrompt(screen:)
+        //     which only carries heading + subheading — visual design is driven by the reference
+        let stylePrompt = """
+        Recreate this App Store marketing screenshot in the EXACT visual style of the reference image above.
+        - Show the provided app UI inside a device mockup
+        - Heading text: 'Work Smarter'
+        - Subheading text: 'Organize your tasks'
+        - Copy the reference exactly: layout composition, background colors, typography, device angle, visual effects
+        - Do NOT apply any design choices from the app UI — follow the reference style completely
+        """
         let expectedJSON: [String: Any] = [
             "contents": [[
                 "parts": [
                     ["inlineData": ["mimeType": "image/png", "data": fakePNGData.base64EncodedString()]],
                     ["text": "Use the above image as a STYLE GUIDE only — match its colors, typography, background gradients, and visual composition. Do NOT copy its content."],
-                    ["text": "App context: App: TestApp. Great app\n\nApp screenshot on dark navy background"]
+                    ["text": stylePrompt]
                 ]
             ]],
             "generationConfig": ["responseModalities": ["TEXT", "IMAGE"]]

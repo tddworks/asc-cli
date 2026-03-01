@@ -38,8 +38,10 @@ public struct GeminiScreenshotGenerationRepository: ScreenshotGenerationReposito
     // MARK: - Protocol conformance
 
     public func generateImages(plan: ScreenPlan, screenshotURLs: [URL], styleReferenceURL: URL?) async throws -> [Int: Data] {
-        // Build app context prefix once — shared across all screen generations
-        let appContext = buildAppContext(plan: plan)
+        // When a style reference is provided, the reference image owns all visual design.
+        // Skip the plan's imagePrompt / colors / tone entirely — only pass heading + subheading
+        // so Gemini knows what text to render. Otherwise prepend app context to the imagePrompt.
+        let appContext = styleReferenceURL == nil ? buildAppContext(plan: plan) : ""
 
         return try await withThrowingTaskGroup(of: (Int, Data).self) { group in
             for screen in plan.screens {
@@ -47,10 +49,14 @@ public struct GeminiScreenshotGenerationRepository: ScreenshotGenerationReposito
                     $0.lastPathComponent == screen.screenshotFile
                 } ?? (screen.index < screenshotURLs.count ? screenshotURLs[screen.index] : nil)
 
-                // Prepend app context to the imagePrompt so Gemini understands the app
-                let prompt = appContext.isEmpty
-                    ? screen.imagePrompt
-                    : "\(appContext)\n\n\(screen.imagePrompt)"
+                let prompt: String
+                if styleReferenceURL != nil {
+                    prompt = buildStyleReferencePrompt(screen: screen)
+                } else {
+                    prompt = appContext.isEmpty
+                        ? screen.imagePrompt
+                        : "\(appContext)\n\n\(screen.imagePrompt)"
+                }
                 let index = screen.index
 
                 group.addTask {
@@ -71,7 +77,21 @@ public struct GeminiScreenshotGenerationRepository: ScreenshotGenerationReposito
         }
     }
 
-    // MARK: - App context
+    // MARK: - Prompt builders
+
+    /// When a style reference image is provided, all visual design is driven by the reference.
+    /// Only the heading and subheading text are specified — colors, layout, device angle, and
+    /// effects are all copied from the reference image, not from the plan's imagePrompt.
+    private func buildStyleReferencePrompt(screen: ScreenConfig) -> String {
+        """
+        Recreate this App Store marketing screenshot in the EXACT visual style of the reference image above.
+        - Show the provided app UI inside a device mockup
+        - Heading text: '\(screen.heading)'
+        - Subheading text: '\(screen.subheading)'
+        - Copy the reference exactly: layout composition, background colors, typography, device angle, visual effects
+        - Do NOT apply any design choices from the app UI — follow the reference style completely
+        """
+    }
 
     /// Builds a brief context string from plan metadata to prepend to each imagePrompt,
     /// giving Gemini richer understanding of the app's purpose and target audience.
