@@ -12,7 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.31] - 2026-03-01
 
 ### Added
-- `asc version-review-detail get --version-id <id>` — fetch the App Store review contact info and demo account settings for a version
+- **Plugin system** — users can install executable plugins in `~/.asc/plugins/<name>/` to extend the CLI with custom event handlers (e.g., Slack/Telegram notifications)
+- `asc plugins list` — list all installed plugins with name, version, enabled status, and subscribed events
+- `asc plugins install <path>` — install a plugin from a local directory containing `manifest.json` and a `run` executable
+- `asc plugins uninstall --name <name>` — remove an installed plugin
+- `asc plugins enable --name <name>` — re-enable a disabled plugin
+- `asc plugins disable --name <name>` — disable a plugin without removing it
+- `asc plugins run --name <name> --event <event>` — manually invoke a plugin for testing; supports `--app-id`, `--version-id`, `--build-id` payload flags
+- Auto-event emission: `asc builds upload` fires `build.uploaded` after a successful upload; `asc versions submit` fires `version.submitted` after a successful submission
+- Plugin protocol: plugins receive a JSON event payload on stdin and write a `{"success": bool, "message": "..."}` result to stdout
+- `version-review-detail get --version-id <id>` — fetch the App Store review contact info and demo account settings for a version
 - `asc version-review-detail update --version-id <id> [flags]` — upsert review info (creates if none exists, patches if already set); supports `--contact-first-name`, `--contact-last-name`, `--contact-phone`, `--contact-email`, `--demo-account-required`, `--demo-account-name`, `--demo-account-password`, `--notes`
 - `notes` field added to `AppStoreReviewDetail` domain model
 - `getReviewDetail` affordance added to `AppStoreVersion` for agent navigation

@@ -81,6 +81,7 @@ $ asc versions list --app-id app-abc
 - **App Shots** — AI-powered screenshot generation and localization; `generate` produces polished marketing PNGs via Gemini; `translate` recreates them in any locale (`--to zh --to ja --to ko`) in one command
 - **Age rating** — get and update age rating declarations; configure content intensity (violence, gambling, sexual content, etc.), boolean flags, kids age band, and regional overrides
 - **Version readiness check** — pre-flight check aggregating all Apple submission requirements
+- **Plugins** — install executable plugins in `~/.asc/plugins/` to extend the CLI with custom event handlers; plugins receive JSON event payloads via stdin (e.g., Slack/Telegram notifications on build upload or version submission)
 - **TUI mode** — interactive terminal UI for human browsing
 - **Swift 6.2** — strict concurrency, async/await throughout
 - **Clean architecture** — Domain / Infrastructure / Command layers with Chicago School TDD
@@ -250,6 +251,14 @@ asc app-shots translate --to zh --to ja                                  # local
 asc app-shots translate --to ko --device-type APP_IPHONE_67              # translate at iPhone 6.7" size
 asc app-shots translate --to zh --style-reference ~/Downloads/ref.png    # translate while preserving reference style
 
+# Plugins
+asc plugins list                                                      # list installed plugins
+asc plugins install ./my-plugin                                       # install from local directory
+asc plugins uninstall --name slack-notify                             # remove
+asc plugins enable --name slack-notify                                # enable
+asc plugins disable --name slack-notify                               # disable
+asc plugins run --name slack-notify --event build.uploaded            # test a plugin manually
+
 # Interactive
 asc tui                                                               # interactive browser
 ```
@@ -320,13 +329,14 @@ Detailed documentation for each feature area:
 - [Version Check-Readiness](docs/features/version-check-readiness.md) — pre-flight submission checks
 - [In-App Purchases & Subscriptions](docs/features/iap-subscriptions.md) — IAPs (consumable, non-consumable, non-renewing); subscription groups, tiers, submit, introductory offers; per-locale metadata and pricing
 - [App Shots](docs/features/app-shots.md) — AI-powered screenshot plan enhancement with Gemini AI
+- [Plugins](docs/features/plugins.md) — install executable plugins in `~/.asc/plugins/` for custom event handlers (Slack, Telegram, webhooks, etc.)
 - [App Wall](docs/features/app-wall.md) — community showcase on the homepage; `apps.json` format, iTunes pre-fetch architecture, display logic
 
 ## Development
 
 ```bash
 swift build          # Build
-swift test           # Run tests (564 tests, Chicago School TDD)
+swift test           # Run tests (701 tests, Chicago School TDD)
 swift format --in-place --recursive Sources Tests  # Format
 ```
 
