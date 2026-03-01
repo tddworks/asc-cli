@@ -9,6 +9,7 @@ public struct AppStoreReviewDetail: Sendable, Equatable, Identifiable {
     public let demoAccountRequired: Bool
     public let demoAccountName: String?
     public let demoAccountPassword: String?
+    public let notes: String?
 
     public init(
         id: String,
@@ -19,7 +20,8 @@ public struct AppStoreReviewDetail: Sendable, Equatable, Identifiable {
         contactEmail: String? = nil,
         demoAccountRequired: Bool = false,
         demoAccountName: String? = nil,
-        demoAccountPassword: String? = nil
+        demoAccountPassword: String? = nil,
+        notes: String? = nil
     ) {
         self.id = id
         self.versionId = versionId
@@ -30,6 +32,7 @@ public struct AppStoreReviewDetail: Sendable, Equatable, Identifiable {
         self.demoAccountRequired = demoAccountRequired
         self.demoAccountName = demoAccountName
         self.demoAccountPassword = demoAccountPassword
+        self.notes = notes
     }
 
     public var hasContact: Bool { contactEmail != nil && contactPhone != nil }
@@ -45,6 +48,7 @@ extension AppStoreReviewDetail: Codable {
         case id, versionId
         case contactFirstName, contactLastName, contactPhone, contactEmail
         case demoAccountRequired, demoAccountName, demoAccountPassword
+        case notes
     }
 
     public init(from decoder: any Decoder) throws {
@@ -58,6 +62,7 @@ extension AppStoreReviewDetail: Codable {
         demoAccountRequired = try c.decode(Bool.self, forKey: .demoAccountRequired)
         demoAccountName = try c.decodeIfPresent(String.self, forKey: .demoAccountName)
         demoAccountPassword = try c.decodeIfPresent(String.self, forKey: .demoAccountPassword)
+        notes = try c.decodeIfPresent(String.self, forKey: .notes)
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -71,5 +76,17 @@ extension AppStoreReviewDetail: Codable {
         try c.encode(demoAccountRequired, forKey: .demoAccountRequired)
         try c.encodeIfPresent(demoAccountName, forKey: .demoAccountName)
         try c.encodeIfPresent(demoAccountPassword, forKey: .demoAccountPassword)
+        try c.encodeIfPresent(notes, forKey: .notes)
+    }
+}
+
+// MARK: - AffordanceProviding
+
+extension AppStoreReviewDetail: AffordanceProviding {
+    public var affordances: [String: String] {
+        [
+            "getReviewDetail": "asc version-review-detail get --version-id \(versionId)",
+            "updateReviewDetail": "asc version-review-detail update --version-id \(versionId)",
+        ]
     }
 }

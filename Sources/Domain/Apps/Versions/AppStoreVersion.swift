@@ -72,6 +72,7 @@ extension AppStoreVersion: AffordanceProviding {
             "listLocalizations": "asc version-localizations list --version-id \(id)",
             "listVersions": "asc versions list --app-id \(appId)",
             "checkReadiness": "asc versions check-readiness --version-id \(id)",
+            "getReviewDetail": "asc version-review-detail get --version-id \(id)",
         ]
         if isEditable {
             cmds["submitForReview"] = "asc versions submit --version-id \(id)"

@@ -21,6 +21,7 @@ struct VersionsListTests {
             {
               "affordances" : {
                 "checkReadiness" : "asc versions check-readiness --version-id v-1",
+                "getReviewDetail" : "asc version-review-detail get --version-id v-1",
                 "listLocalizations" : "asc version-localizations list --version-id v-1",
                 "listVersions" : "asc versions list --app-id app-1"
               },

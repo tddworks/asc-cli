@@ -85,7 +85,8 @@ struct MockRepositoryFactory {
         contactEmail: String? = "john@example.com",
         demoAccountRequired: Bool = false,
         demoAccountName: String? = nil,
-        demoAccountPassword: String? = nil
+        demoAccountPassword: String? = nil,
+        notes: String? = nil
     ) -> AppStoreReviewDetail {
         AppStoreReviewDetail(
             id: id,
@@ -96,7 +97,8 @@ struct MockRepositoryFactory {
             contactEmail: contactEmail,
             demoAccountRequired: demoAccountRequired,
             demoAccountName: demoAccountName,
-            demoAccountPassword: demoAccountPassword
+            demoAccountPassword: demoAccountPassword,
+            notes: notes
         )
     }
 

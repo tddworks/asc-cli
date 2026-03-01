@@ -86,5 +86,19 @@ struct AppStoreReviewDetailTests {
         #expect(!json.contains("contactFirstName"))
         #expect(!json.contains("contactEmail"))
         #expect(!json.contains("demoAccountName"))
+        #expect(!json.contains("notes"))
+    }
+
+    @Test func `review detail affordances include get and update commands`() {
+        let detail = MockRepositoryFactory.makeReviewDetail(id: "rd-1", versionId: "v-42")
+        #expect(detail.affordances["getReviewDetail"] == "asc version-review-detail get --version-id v-42")
+        #expect(detail.affordances["updateReviewDetail"] == "asc version-review-detail update --version-id v-42")
+    }
+
+    @Test func `notes field round-trips through Codable`() throws {
+        let detail = MockRepositoryFactory.makeReviewDetail(notes: "Please use the staging environment")
+        let data = try JSONEncoder().encode(detail)
+        let decoded = try JSONDecoder().decode(AppStoreReviewDetail.self, from: data)
+        #expect(decoded.notes == "Please use the staging environment")
     }
 }

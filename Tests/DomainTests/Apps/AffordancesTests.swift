@@ -28,6 +28,12 @@ struct AffordancesTests {
     }
 
     @Test
+    func `version affordances include getReviewDetail always`() {
+        let version = MockRepositoryFactory.makeVersion(id: "v1", state: .readyForSale)
+        #expect(version.affordances["getReviewDetail"] == "asc version-review-detail get --version-id v1")
+    }
+
+    @Test
     func `version affordances include submitForReview only when editable`() {
         let editable = MockRepositoryFactory.makeVersion(id: "v1", state: .prepareForSubmission)
         let live = MockRepositoryFactory.makeVersion(id: "v2", state: .readyForSale)
