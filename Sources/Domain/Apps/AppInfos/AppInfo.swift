@@ -14,6 +14,7 @@ extension AppInfo: AffordanceProviding {
         [
             "listLocalizations": "asc app-info-localizations list --app-info-id \(id)",
             "listAppInfos": "asc app-infos list --app-id \(appId)",
+            "getAgeRating": "asc age-rating get --app-info-id \(id)",
         ]
     }
 }

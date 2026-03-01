@@ -158,6 +158,12 @@ struct ClientProvider {
         return try factory.makeSubscriptionIntroductoryOfferRepository(authProvider: authProvider)
     }
 
+    static func makeAgeRatingDeclarationRepository() throws -> any AgeRatingDeclarationRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeAgeRatingDeclarationRepository(authProvider: authProvider)
+    }
+
     static func makeScreenshotGenerationRepository(apiKey: String, model: String = "gemini-3.1-flash-image-preview") -> any ScreenshotGenerationRepository {
         GeminiScreenshotGenerationRepository(apiKey: apiKey, model: model)
     }
