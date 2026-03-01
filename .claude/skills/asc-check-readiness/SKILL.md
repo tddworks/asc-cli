@@ -95,7 +95,7 @@ asc versions submit --version-id <VERSION_ID>
 | `buildCheck.valid == false` | Build is still processing — wait and re-check, or upload a new build |
 | `buildCheck.notExpired == false` | Build expired — upload a new build with `asc builds upload` |
 | `pricingCheck` fails | Set up pricing in App Store Connect web UI (no `asc` command for pricing) |
-| `reviewContactCheck` fails | Add contact info in App Store Connect → App → App Review Information |
+| `reviewContactCheck` fails | `asc version-review-detail update --version-id <id> --contact-email dev@example.com --contact-phone "+1-555-0100"` |
 
 ## CI Gate Script
 
