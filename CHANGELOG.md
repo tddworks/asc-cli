@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.29] - 2026-03-01
+
 ### Added
 - `--style-reference <path>` flag on `asc app-shots generate` and `asc app-shots translate` — pass any PNG/JPEG as a visual style guide; Gemini replicates the reference's colors, typography, gradients, and layout patterns without copying its content; the reference image is sent as the first part in the Gemini request followed by an explicit style-guide instruction
 
@@ -230,7 +234,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.28...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.29...HEAD
+[0.1.29]: https://github.com/tddworks/asc-cli/compare/v0.1.28...v0.1.29
 [0.1.28]: https://github.com/tddworks/asc-cli/compare/v0.1.27...v0.1.28
 [0.1.27]: https://github.com/tddworks/asc-cli/compare/v0.1.25...v0.1.27
 [0.1.25]: https://github.com/tddworks/asc-cli/compare/v0.1.24...v0.1.25
