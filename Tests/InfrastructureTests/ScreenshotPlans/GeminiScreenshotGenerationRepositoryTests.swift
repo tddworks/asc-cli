@@ -268,9 +268,28 @@ struct GeminiScreenshotGenerationRepositoryTests {
             styleReferenceURL: refFile
         )
 
-        let bodyData = stub.lastRequest?.httpBody ?? Data()
-        let bodyString = String(data: bodyData, encoding: .utf8) ?? ""
-        #expect(bodyString.contains("STYLE GUIDE"))
-        #expect(bodyString.contains("Do NOT copy its content"))
+        // Parse actual body and round-trip both through JSONSerialization with sortedKeys
+        // so the full structure can be compared as a canonical string in one assertion.
+        let bodyData = try #require(stub.lastRequest?.httpBody)
+        let actualJSON = try #require(JSONSerialization.jsonObject(with: bodyData) as? [String: Any])
+
+        // Expected: [ref image inlineData, style-guide text, imagePrompt text]
+        // screenshotURLs is empty so no screenshot inlineData part.
+        // buildAppContext produces: "App context: App: <appName>. <tagline>"
+        let expectedJSON: [String: Any] = [
+            "contents": [[
+                "parts": [
+                    ["inlineData": ["mimeType": "image/png", "data": fakePNGData.base64EncodedString()]],
+                    ["text": "Use the above image as a STYLE GUIDE only — match its colors, typography, background gradients, and visual composition. Do NOT copy its content."],
+                    ["text": "App context: App: TestApp. Great app\n\nApp screenshot on dark navy background"]
+                ]
+            ]],
+            "generationConfig": ["responseModalities": ["TEXT", "IMAGE"]]
+        ]
+
+        let opts: JSONSerialization.WritingOptions = [.sortedKeys, .prettyPrinted]
+        let actual   = try #require(String(data: JSONSerialization.data(withJSONObject: actualJSON,   options: opts), encoding: .utf8))
+        let expected = try #require(String(data: JSONSerialization.data(withJSONObject: expectedJSON, options: opts), encoding: .utf8))
+        #expect(actual == expected)
     }
 }
