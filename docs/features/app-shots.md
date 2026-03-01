@@ -24,6 +24,7 @@ Generate marketing PNG images using Gemini AI. Reads a `ScreenPlan` JSON file, d
 | `--output-width` | `1320` | Output PNG width in pixels — see [Device Sizes](#device-sizes) |
 | `--output-height` | `2868` | Output PNG height in pixels — see [Device Sizes](#device-sizes) |
 | `--device-type` | — | Named device type (e.g. `APP_IPHONE_69`) — overrides `--output-width`/`--output-height` |
+| `--style-reference` | — | Path to a reference image whose visual style (colors, typography, layout) Gemini should replicate. Content is not copied — only the aesthetic. |
 | `<screenshots>` | *(auto-discovered)* | Screenshot files; omit to auto-discover `*.png/*.jpg` from plan directory |
 | `--output` | `json` | Output format: `json`, `table`, `markdown` |
 | `--pretty` | — | Pretty-print JSON output |
@@ -32,11 +33,19 @@ Generate marketing PNG images using Gemini AI. Reads a `ScreenPlan` JSON file, d
 # Zero-argument happy path — iPhone 6.9" (APP_IPHONE_69) at 1320×2868 by default
 asc app-shots generate
 
+# Match the visual style of a reference screenshot
+asc app-shots generate --style-reference ~/Downloads/competitor-shot.png
+
 # Named device type — no need to remember pixel dimensions
 asc app-shots generate --device-type APP_IPHONE_67   # 1290×2796
 asc app-shots generate --device-type APP_IPHONE_65   # 1242×2688
 asc app-shots generate --device-type APP_IPHONE_55   # 1242×2208
 asc app-shots generate --device-type APP_IPAD_PRO_129  # 2048×2732
+
+# Style reference + device type combined
+asc app-shots generate \
+  --style-reference ~/Downloads/competitor-shot.png \
+  --device-type APP_IPHONE_69
 
 # Explicit dimensions (alternative to --device-type)
 asc app-shots generate --output-width 1290 --output-height 2796
@@ -84,6 +93,7 @@ Translate already-generated screenshots into one or more locales. The command mo
 | `--output-width` | `1320` | Output PNG width in pixels — see [Device Sizes](#device-sizes) |
 | `--output-height` | `2868` | Output PNG height in pixels — see [Device Sizes](#device-sizes) |
 | `--device-type` | — | Named device type (e.g. `APP_IPHONE_69`) — overrides `--output-width`/`--output-height` |
+| `--style-reference` | — | Path to a reference image whose visual style Gemini should replicate (same aesthetic as in `generate`) |
 | `--gemini-api-key` | — | Gemini API key (same 3-level resolution as `generate`) |
 | `--model` | `gemini-3.1-flash-image-preview` | Gemini image generation model |
 | `--output` | `json` | Output format: `json`, `table`, `markdown` |
@@ -91,6 +101,9 @@ Translate already-generated screenshots into one or more locales. The command mo
 ```bash
 # Translate to Chinese and Japanese in one command
 asc app-shots translate --to zh --to ja
+
+# Keep the same visual style as the original reference during translation
+asc app-shots translate --to zh --to ja --style-reference ~/Downloads/competitor-shot.png
 
 # Explicit paths
 asc app-shots translate \
@@ -211,8 +224,14 @@ cp ~/Screenshots/screen2.png .asc/app-shots/
 # 4. Generate English marketing images — zero arguments needed
 asc app-shots generate
 
+# 4b. (Optional) Generate matching the style of a reference screenshot
+asc app-shots generate --style-reference ~/Downloads/inspiration.png
+
 # 5. Translate to Chinese and Japanese in one command
 asc app-shots translate --to zh --to ja
+
+# 5b. (Optional) Translate while preserving the same reference style
+asc app-shots translate --to zh --to ja --style-reference ~/Downloads/inspiration.png
 
 # 6. Find output images
 ls .asc/app-shots/output/
@@ -265,8 +284,8 @@ ASCCommand                     Infrastructure                   Domain
 ```
 
 - **Domain**: Pure value types (`ScreenPlan`, `ScreenConfig`, `AppShotsConfig`) and `@Mockable` protocols (`ScreenshotGenerationRepository`, `AppShotsConfigStorage`)
-- **Infrastructure**: `GeminiScreenshotGenerationRepository` calls the native Gemini `generateContent` API (`?key=` query param, `responseModalities: ["TEXT","IMAGE"]`, parallel `TaskGroup`). `FileAppShotsConfigStorage` reads/writes JSON to `~/.asc/app-shots-config.json`
-- **ASCCommand**: `AppShotsGenerate` auto-discovers screenshots from the plan directory when none are provided; `AppShotsTranslate` modifies each screen's `imagePrompt` with a translation instruction and processes locales in parallel; `AppShotsConfig` mirrors the `asc auth login` pattern
+- **Infrastructure**: `GeminiScreenshotGenerationRepository` calls the native Gemini `generateContent` API (`?key=` query param, `responseModalities: ["TEXT","IMAGE"]`, parallel `TaskGroup`). When a `styleReferenceURL` is provided, the reference image is placed as the **first** part in the request (base64 inline-data) followed by a style-guide instruction text — before the app screenshot and `imagePrompt`. `FileAppShotsConfigStorage` reads/writes JSON to `~/.asc/app-shots-config.json`
+- **ASCCommand**: `AppShotsGenerate` auto-discovers screenshots from the plan directory when none are provided; validates `--style-reference` file existence before calling Gemini. `AppShotsTranslate` modifies each screen's `imagePrompt` with a translation instruction, forwards the same `styleReferenceURL`, and processes locales in parallel. `AppShotsConfig` mirrors the `asc auth login` pattern
 
 ---
 
@@ -342,9 +361,16 @@ Main plan model. Implements `AffordanceProviding`.
 ```swift
 @Mockable
 public protocol ScreenshotGenerationRepository: Sendable {
-    func generateImages(plan: ScreenPlan, screenshotURLs: [URL]) async throws -> [Int: Data]
+    func generateImages(
+        plan: ScreenPlan,
+        screenshotURLs: [URL],
+        styleReferenceURL: URL?
+    ) async throws -> [Int: Data]
 }
 ```
+
+- `screenshotURLs` — matched by filename then index order against `plan.screens[n].screenshotFile`
+- `styleReferenceURL` — optional path to a reference image; when provided, the repository prepends the image + a style-guide instruction to each Gemini request so the generated output replicates the reference's colors, typography, gradients, and layout patterns without copying its content
 
 ### `AppShotsConfigStorage` (protocol)
 
@@ -419,35 +445,62 @@ Tests/
 | Load config | `~/.asc/app-shots-config.json` (local file) | `load()` |
 
 The `GeminiScreenshotGenerationRepository`:
-1. Builds a `generateContent` request with `contents`, `systemInstruction`, and `responseModalities: ["TEXT", "IMAGE"]`
-2. Encodes `imagePrompt` + `appDescription` as the text part; includes each screenshot as a base64 `inlineData` image part
-3. Calls Gemini in parallel via `TaskGroup` — one task per screen
-4. Parses `candidates[0].content.parts[].inlineData.data` as base64 PNG data
-5. Returns `[Int: Data]` mapping screen index to PNG bytes
+Per screen, the `GeminiScreenshotGenerationRepository`:
+1. Prepends `App context: <appName>. <tagline>. <description>` to the `imagePrompt`
+2. Builds `parts` in this order:
+   - *(if `styleReferenceURL` is set)* base64 `inlineData` of the reference image + style-guide instruction text
+   - *(if a matching screenshot is found)* base64 `inlineData` of the app screenshot
+   - `text` containing the full `imagePrompt`
+3. POSTs to the native `generateContent` endpoint with `responseModalities: ["TEXT","IMAGE"]`
+4. Calls Gemini in parallel via `TaskGroup` — one task per screen
+5. Parses `candidates[0].content.parts[].inlineData.data` as base64 PNG data
+6. Returns `[Int: Data]` mapping screen index to PNG bytes
 
 ---
 
 ## Testing
 
 ```swift
-@Test func `generate auto-discovers screenshots from plan directory when none provided`() async throws {
-    // Write plan + two PNG files into a temp dir
-    let tmpDir = FileManager.default.temporaryDirectory
-        .appendingPathComponent("app-shots-\(UUID().uuidString)")
-    try planData.write(to: tmpDir.appendingPathComponent("app-shots-plan.json"))
-    try fakePNG.write(to: tmpDir.appendingPathComponent("screen1.png"))
-    try fakePNG.write(to: tmpDir.appendingPathComponent("screen2.png"))
+// Style reference is forwarded as a URL to the repository
+@Test func `--style-reference passes reference URL to repository`() async throws {
+    let refFile = FileManager.default.temporaryDirectory
+        .appendingPathComponent("ref-\(UUID().uuidString).png")
+    try fakePNG.write(to: refFile)
+    defer { try? FileManager.default.removeItem(at: refFile) }
 
+    var capturedStyleRef: URL?
     let mockRepo = MockScreenshotGenerationRepository()
-    given(mockRepo).generateImages(plan: .any, screenshotURLs: .any)
-        .willReturn([0: fakePNG, 1: fakePNG])
+    given(mockRepo).generateImages(plan: .any, screenshotURLs: .any, styleReferenceURL: .any)
+        .willProduce { _, _, styleRef in
+            capturedStyleRef = styleRef
+            return [0: fakePNG]
+        }
 
-    // No screenshots argument — auto-discovery finds screen1.png, screen2.png
-    let cmd = try AppShotsGenerate.parse(["--plan", planURL.path, "--output-dir", outputDir])
-    let output = try await cmd.execute(repo: mockRepo)
+    let cmd = try AppShotsGenerate.parse([
+        "--plan", planPath, "--output-dir", outputDir,
+        "--style-reference", refFile.path
+    ])
+    _ = try await cmd.execute(repo: mockRepo)
 
-    #expect(output.contains("screen-0.png"))
-    #expect(output.contains("screen-1.png"))
+    #expect(capturedStyleRef == refFile)
+}
+
+// Infrastructure: style reference image appears before screenshot in Gemini request
+@Test func `generateImages includes style reference image and instruction before screenshot`() async throws {
+    let stub = StubHTTPClient()
+    stub.response = (makeNativeGeminiImageResponse(), makeHTTPResponse())
+
+    let refFile = /* temp PNG file */ URL(fileURLWithPath: "/tmp/style.png")
+    try fakePNGData.write(to: refFile)
+
+    let repo = GeminiScreenshotGenerationRepository(apiKey: "key", httpClient: stub)
+    _ = try await repo.generateImages(
+        plan: makeSingleScreenPlan(), screenshotURLs: [], styleReferenceURL: refFile
+    )
+
+    let bodyString = String(data: stub.lastRequest!.httpBody!, encoding: .utf8)!
+    #expect(bodyString.contains("STYLE GUIDE"))
+    #expect(bodyString.contains("Do NOT copy its content"))
 }
 ```
 
@@ -455,10 +508,10 @@ Run tests:
 
 ```bash
 swift test --filter 'AppShotsConfigTests'     # Domain + command config tests (21)
-swift test --filter 'AppShotsGenerateTests'   # Command generate tests (7)
-swift test --filter 'AppShotsTranslateTests'  # Command translate tests (8)
-swift test --filter 'GeminiScreenshot'        # Infrastructure tests (8)
-swift test --filter 'AppShots'               # All app-shots tests (44)
+swift test --filter 'AppShotsGenerateTests'   # Command generate tests (9)
+swift test --filter 'AppShotsTranslateTests'  # Command translate tests (9)
+swift test --filter 'GeminiScreenshot'        # Infrastructure tests (10)
+swift test --filter 'AppShots'               # All app-shots tests (52)
 ```
 
 ---
@@ -475,9 +528,24 @@ swift test --filter 'AppShots'               # All app-shots tests (44)
 let planURL = URL(fileURLWithPath: ".asc/app-shots/plan-\(locale).json")
 ```
 
+**Add multiple style references (pick best):**
+
+```swift
+// In ScreenshotGenerationRepository.swift
+func generateImages(
+    plan: ScreenPlan,
+    screenshotURLs: [URL],
+    styleReferenceURLs: [URL]   // send several references, ask Gemini to blend
+) async throws -> [Int: Data]
+```
+
 **Add video output via Gemini video generation:**
 
 ```swift
 // In ScreenshotGenerationRepository.swift
-func generateVideo(plan: ScreenPlan, screenshotURLs: [URL]) async throws -> Data
+func generateVideo(
+    plan: ScreenPlan,
+    screenshotURLs: [URL],
+    styleReferenceURL: URL?
+) async throws -> Data
 ```
