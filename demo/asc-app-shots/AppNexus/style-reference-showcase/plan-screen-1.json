@@ -1,0 +1,25 @@
+{
+  "appId": "6748760927",
+  "appName": "AppNexus for App Store Connect",
+  "tagline": "Metadata•Keywords•Localization",
+  "appDescription": "AppNexus manages App Store Connect apps with AI-powered ASO, screenshot tools, and localization for iOS/macOS. One unified dashboard for indie developers and agencies.",
+  "tone": "professional",
+  "colors": {
+    "primary": "#0A1628",
+    "accent": "#4A7CFF",
+    "text": "#FFFFFF",
+    "subtext": "#A8B8D0"
+  },
+  "screens": [
+    {
+      "id": "1",
+      "index": 1,
+      "screenshotFile": "screenshot-2.png",
+      "heading": "App Control Hub",
+      "subheading": "Info, Screenshots, AI tools — everything in one tap",
+      "layoutMode": "center",
+      "visualDirection": "App detail screen showing version info (v1.1.5, Ready), a 2x2 feature grid (App Info, Screenshots, AI Assistant, App Store), and settings in a MORE section.",
+      "imagePrompt": "Generate a clean App Store feature screenshot. The uploaded iPhone UI is displayed upright and centered, filling most of the canvas on a deep navy background (#0A1628). Bold white heading 'App Control Hub' above the device, with muted blue-gray subtext 'Info, Screenshots, AI tools — everything in one tap' below. Subtle background vignette. Clean, minimal, editorial quality."
+    }
+  ]
+}

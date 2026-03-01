@@ -1,0 +1,25 @@
+{
+  "appId": "6748760927",
+  "appName": "AppNexus for App Store Connect",
+  "tagline": "Metadata•Keywords•Localization",
+  "appDescription": "AppNexus manages App Store Connect apps with AI-powered ASO, screenshot tools, and localization for iOS/macOS. One unified dashboard for indie developers and agencies.",
+  "tone": "professional",
+  "colors": {
+    "primary": "#0A1628",
+    "accent": "#4A7CFF",
+    "text": "#FFFFFF",
+    "subtext": "#A8B8D0"
+  },
+  "screens": [
+    {
+      "id": "0",
+      "index": 0,
+      "screenshotFile": "screenshot-1.png",
+      "heading": "All Your Apps",
+      "subheading": "Manage every App Store project from one unified dashboard",
+      "layoutMode": "tilted",
+      "visualDirection": "App list view showing 14 apps with status badges (Preparing, Ready), icons, and a search bar at the bottom. Clean card-based iOS UI.",
+      "imagePrompt": "Generate a premium App Store hero screenshot. The uploaded iPhone UI is displayed in a sleek tilted device mockup (~8 degrees) centered on a deep navy canvas (#0A1628). Bold white heading 'All Your Apps' above the device, with soft blue-gray subtext 'Manage every App Store project from one unified dashboard' below. Electric blue radial glow (#4A7CFF) pulses behind the device. Floating micro-dots add cinematic depth. Professional, editorial, premium quality."
+    }
+  ]
+}
