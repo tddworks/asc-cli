@@ -66,6 +66,7 @@ $ asc versions list --app-id app-abc
 
 - **Agent-first JSON output** — complete models with parent IDs, semantic booleans, and state-aware affordances
 - **CAEOAS** — responses tell agents exactly what to run next
+- **Project init** — `asc init` pins the current project's app ID to `.asc/project.json`; auto-detects from `.xcodeproj` bundle ID, or use `--name` / `--app-id` directly
 - **Persistent auth** — `asc auth login` saves credentials to `~/.asc/credentials.json`; no env vars needed after setup
 - **Full resource hierarchy** — Apps → Versions → Localizations → Screenshot Sets → Screenshots
 - **Version localizations** — update What's New, description, keywords, and URLs per locale
@@ -148,6 +149,12 @@ export ASC_PRIVATE_KEY_PATH="~/.asc/AuthKey_XXXXXX.p8"
 asc auth login --key-id <id> --issuer-id <id> --private-key-path <path>
 asc auth logout
 asc auth check
+
+# Project Context
+asc init                    # auto-detect app from *.xcodeproj bundle ID
+asc init --name "My App"    # search by name
+asc init --app-id <id>      # direct — no API list call needed
+# → saves .asc/project.json for subsequent sessions
 
 # Apps & Versions
 asc apps list                                                         # list all apps

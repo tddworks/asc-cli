@@ -10,6 +10,18 @@
 
 ---
 
+## init
+
+### init — pin project context
+```bash
+asc init [--app-id <id>] [--name <name>] [--pretty]
+```
+Saves app ID, name, and bundle ID to `.asc/project.json` in the current directory. Priority: `--app-id` > `--name` > auto-detect from `.xcodeproj`.
+
+Returns `ProjectConfig` with affordances for `listVersions`, `listBuilds`, `listAppInfos`, `checkReadiness`.
+
+---
+
 ## apps
 
 ### list

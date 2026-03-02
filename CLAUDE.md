@@ -108,9 +108,22 @@ Domain/
 │   └── Profiles/                  → Profile, ProfileRepository
 ├── Submissions/                   → ReviewSubmission, ReviewSubmissionState, SubmissionRepository
 ├── Auth/                          → AuthCredentials, AuthProvider, AuthStatus, AuthStorage, CredentialSource, AuthError
+├── Projects/                      → ProjectConfig, ProjectConfigStorage
 └── Shared/                        → AffordanceProviding, APIError, OutputFormat, PaginatedResponse
 ```
 Infrastructure and test folders mirror this exact structure.
+
+### Project Context (`.asc/project.json`)
+
+`asc init` saves the app ID, name, and bundle ID to `.asc/project.json` in the current directory:
+
+```bash
+asc init              # auto-detect from *.xcodeproj bundle ID
+asc init --name "X"   # search by name
+asc init --app-id <id>
+```
+
+`FileProjectConfigStorage` (Infrastructure) reads/writes `.asc/project.json` relative to cwd. `ProjectConfig` (Domain) carries `appId`, `appName`, `bundleId` + CAEOAS affordances.
 
 ## Testing
 

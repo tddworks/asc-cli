@@ -76,6 +76,10 @@ See [api_reference.md](references/api_reference.md) for the underlying App Store
 | Save credentials to disk | `asc auth login --key-id <id> --issuer-id <id> --private-key-path <path>` |
 | Remove saved credentials | `asc auth logout` |
 | Check credentials + source | `asc auth check` |
+| **Project Context** | |
+| Pin app to current directory | `asc init --app-id <id>` |
+| Find app by name | `asc init --name "My App"` |
+| Auto-detect from Xcode project | `asc init` |
 | **Apps & Versions** | |
 | List all apps | `asc apps list` |
 | List versions | `asc versions list --app-id <id>` |

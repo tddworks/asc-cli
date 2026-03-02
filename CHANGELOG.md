@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `asc init` — initialise project context by saving the app ID, name, and bundle ID to `.asc/project.json` in the current directory; supports `--app-id` (direct), `--name` (search by name), or auto-detect from `.xcodeproj` bundle identifier; output includes CAEOAS affordances for common next steps
+
 ---
 
 ## [0.1.32] - 2026-03-01
