@@ -8,6 +8,7 @@ struct ASC: AsyncParsableCommand {
         version: ascVersion,
         subcommands: [
             AppsCommand.self,
+            InitCommand.self,
             VersionsCommand.self,
             VersionLocalizationsCommand.self,
             ScreenshotSetsCommand.self,
