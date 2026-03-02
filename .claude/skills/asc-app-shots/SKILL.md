@@ -155,7 +155,11 @@ Choose based on app category + metadata:
 
 Combine metadata + vision analysis into `app-shots-plan.json`.
 
-**CRITICAL: The root JSON key is `appId` (not `id`).** See `references/plan-schema.md` for the full schema.
+**CRITICAL field names — wrong key = decode error at runtime:**
+- Root key: `appId` (not `id`)
+- Per-screen screenshot key: `screenshotFile` (not `file`, not `screenshot`, not `screenshotPath`)
+
+See `references/plan-schema.md` for the full schema.
 
 Use the Write tool to save the plan to **`.asc/app-shots/app-shots-plan.json`** (create the directory if needed). This is the default location that `asc app-shots generate` reads automatically.
 
