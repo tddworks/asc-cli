@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.34] - 2026-03-02
+
 ### Fixed
 - `asc app-shots translate` — no longer regenerates the visual design (background, colors, device mockup, layout) from the original plan specs; now sends a simple "edit this image, translate only the text overlays" prompt so the existing generated screenshot is preserved exactly
 
@@ -283,7 +287,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.33...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.34...HEAD
+[0.1.34]: https://github.com/tddworks/asc-cli/compare/v0.1.33...v0.1.34
 [0.1.33]: https://github.com/tddworks/asc-cli/compare/v0.1.32...v0.1.33
 [0.1.32]: https://github.com/tddworks/asc-cli/compare/v0.1.31...v0.1.32
 [0.1.31]: https://github.com/tddworks/asc-cli/compare/v0.1.30...v0.1.31
