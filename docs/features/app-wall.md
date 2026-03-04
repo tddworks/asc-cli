@@ -13,13 +13,15 @@ asc app-wall submit --developer <handle> [options]
 | Flag | Required | Description |
 |------|----------|-------------|
 | `--developer` | ✓ | Display handle shown on the card (`@developer`) |
-| `--developer-id` | — | Apple developer/seller ID — auto-fetches **all** your App Store apps |
+| `--developer-id` | ✓* | Apple developer/seller ID — auto-fetches **all** your App Store apps |
 | `--github` | — | GitHub username; card links to `github.com/<handle>` |
 | `--x` | — | X/Twitter handle; card links to `x.com/<handle>` |
-| `--app` | — | Specific App Store URL (repeat flag for multiple apps) |
+| `--app` | ✓* | Specific App Store URL (repeat flag for multiple apps) |
 | `--github-token` | — | GitHub personal access token (or `GITHUB_TOKEN` env var) |
 | `--output` | — | Output format: `json` (default), `table`, `markdown` |
 | `--pretty` | — | Pretty-print JSON output |
+
+_✓* At least one of `--developer-id` or `--app` is required — an entry with neither has no apps to display on the wall._
 
 **Examples:**
 
@@ -92,6 +94,16 @@ asc app-wall submit \
 # 4. Open the PR in your browser
 open "https://github.com/tddworks/asc-cli/pull/<number>"
 ```
+
+## Error Cases
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `Provide --developer-id or at least one --app URL` | Neither flag supplied | Add `--developer-id` or at least one `--app` URL |
+| `GitHub token required` | No token found | Pass `--github-token`, set `GITHUB_TOKEN`, or run `gh auth login` |
+| `Developer X is already listed` | Duplicate `developer` in `apps.json` | Entry already submitted; check existing PR |
+| `Timed out waiting for fork` | Fork creation took > 24 seconds | Retry after a moment |
+| `GitHub API error (422)` | Branch already exists | Safe to ignore — command continues with the existing branch |
 
 ## Architecture
 

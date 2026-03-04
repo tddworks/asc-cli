@@ -31,7 +31,7 @@ struct AppWallSubmitTests {
         #expect(output.contains("\"openPR\""))
     }
 
-    @Test func `submit with only required developer field works`() async throws {
+    @Test func `submit with developer and developerId works`() async throws {
         let mockRepo = MockAppWallRepository()
         given(mockRepo).submit(app: .any).willReturn(
             AppWallSubmission(
@@ -44,6 +44,7 @@ struct AppWallSubmitTests {
 
         var cmd = try AppWallSubmit.parse([
             "--developer", "jane",
+            "--developer-id", "9876543210",
         ])
         let output = try await cmd.execute(repo: mockRepo)
 
