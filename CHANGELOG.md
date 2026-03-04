@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `asc app-wall submit` — submit your app to the community app wall at asccli.app by opening a GitHub pull request against `tddworks/asc-cli`; forks the repo, adds your entry to `homepage/apps.json`, and creates a PR automatically; supports `--developer-id` (auto-fetches all your App Store apps), `--app` (specific App Store URLs, repeatable), `--github`, `--x`; GitHub token resolved from `--github-token` flag, `$GITHUB_TOKEN`, or `gh auth token`
+
 ---
 
 ## [0.1.34] - 2026-03-02
