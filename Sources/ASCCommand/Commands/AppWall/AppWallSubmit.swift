@@ -6,40 +6,44 @@ import Infrastructure
 struct AppWallSubmit: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "submit",
-        abstract: "Add yourself to the asc app wall by opening a pull request on GitHub"
+        abstract: "Submit your app to the asc app wall by opening a pull request on GitHub"
     )
 
     @OptionGroup var globals: GlobalOptions
 
-    @Option(name: .long, help: "Your Apple developer display name")
+    @Option(name: .long, help: "Your developer display name (required)")
     var developer: String
 
-    @Option(name: .long, help: "Your Apple developer/seller ID (from iTunes lookup)")
-    var developerId: String
+    @Option(name: .long, help: "Your Apple developer/seller ID — auto-fetches all your App Store apps")
+    var developerId: String?
 
     @Option(name: .long, help: "Your GitHub username")
-    var github: String
+    var github: String?
 
-    @Option(name: .long, help: "Your X (Twitter) handle (optional)")
+    @Option(name: .long, help: "Your X (Twitter) handle")
     var x: String?
+
+    @Option(name: .long, help: "Specific App Store URL (repeat for multiple apps)")
+    var app: [String] = []
 
     @Option(name: .long, help: "GitHub personal access token (or set GITHUB_TOKEN)")
     var githubToken: String?
 
     func run() async throws {
         let token = try resolveGitHubToken()
-        let repo = GitHubAppWallRepository(token: token)
+        let repo = ClientProvider.makeAppWallRepository(token: token)
         print(try await execute(repo: repo))
     }
 
     func execute(repo: any AppWallRepository) async throws -> String {
-        let entry = AppWallEntry(
+        let wallApp = AppWallApp(
             developer: developer,
             developerId: developerId,
             github: github,
-            x: x
+            x: x,
+            apps: app.isEmpty ? nil : app
         )
-        let submission = try await repo.submit(entry: entry)
+        let submission = try await repo.submit(app: wallApp)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
             [submission],
@@ -48,7 +52,7 @@ struct AppWallSubmit: AsyncParsableCommand {
         )
     }
 
-    // MARK: - Token resolution
+    // MARK: - Token resolution: flag → $GITHUB_TOKEN → gh auth token
 
     private func resolveGitHubToken() throws -> String {
         if let token = githubToken, !token.isEmpty { return token }

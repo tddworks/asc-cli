@@ -11,8 +11,8 @@ public struct GitHubAppWallRepository: AppWallRepository {
     public init(
         token: String,
         httpClient: (any HTTPPerforming)? = nil,
-        upstreamOwner: String = "hanrw",
-        upstreamRepo: String = "asc-swift",
+        upstreamOwner: String = "tddworks",
+        upstreamRepo: String = "asc-cli",
         filePath: String = "homepage/apps.json"
     ) {
         self.token = token
@@ -24,7 +24,7 @@ public struct GitHubAppWallRepository: AppWallRepository {
 
     // MARK: - AppWallRepository
 
-    public func submit(entry: AppWallEntry) async throws -> AppWallSubmission {
+    public func submit(app: AppWallApp) async throws -> AppWallSubmission {
         // 1. Resolve authenticated GitHub username
         let username = try await getAuthenticatedUser()
 
@@ -35,29 +35,26 @@ public struct GitHubAppWallRepository: AppWallRepository {
         try await syncFork(owner: username)
 
         // 4. Fetch current file — retry briefly while fork initialises
-        let (currentEntries, baseSHA) = try await getFileWithRetry(owner: username)
+        let (currentApps, baseSHA) = try await getFileWithRetry(owner: username)
 
         // 5. Guard against duplicate entries
-        let isDuplicate = currentEntries.contains {
-            $0.github == entry.github || $0.developerId == entry.developerId
-        }
+        let isDuplicate = currentApps.contains { $0.developer == app.developer }
         guard !isDuplicate else {
-            throw AppWallError.alreadySubmitted(github: entry.github)
+            throw AppWallError.alreadySubmitted(developer: app.developer)
         }
 
         // 6. Encode updated array
-        let updatedEntries = currentEntries + [entry]
-        let newContent = try encodeEntries(updatedEntries)
+        let newContent = try encodeApps(currentApps + [app])
 
         // 7. Create feature branch
-        let branchName = "app-wall/\(entry.github)"
+        let branchName = "app-wall/\(app.developer)"
         try await createBranch(owner: username, branchName: branchName)
 
         // 8. Commit file update to feature branch
-        try await updateFile(owner: username, branchName: branchName, content: newContent, sha: baseSHA, entry: entry)
+        try await updateFile(owner: username, branchName: branchName, content: newContent, sha: baseSHA, app: app)
 
         // 9. Open pull request
-        return try await createPR(fromOwner: username, branchName: branchName, entry: entry)
+        return try await createPR(fromOwner: username, branchName: branchName, app: app)
     }
 
     // MARK: - GitHub API helpers
@@ -92,7 +89,7 @@ public struct GitHubAppWallRepository: AppWallRepository {
         _ = try? await httpClient.data(for: request)
     }
 
-    private func getFileWithRetry(owner: String) async throws -> ([AppWallEntry], String) {
+    private func getFileWithRetry(owner: String) async throws -> ([AppWallApp], String) {
         let maxAttempts = 8
         var lastError: Error = AppWallError.forkTimeout
         for attempt in 1...maxAttempts {
@@ -108,7 +105,7 @@ public struct GitHubAppWallRepository: AppWallRepository {
         throw lastError
     }
 
-    private func getFile(owner: String) async throws -> ([AppWallEntry], String) {
+    private func getFile(owner: String) async throws -> ([AppWallApp], String) {
         struct FileContent: Decodable {
             let sha: String
             let content: String
@@ -123,12 +120,11 @@ public struct GitHubAppWallRepository: AppWallRepository {
         guard let data = Data(base64Encoded: cleaned) else {
             throw AppWallError.githubAPIError(statusCode: 0, message: "Failed to decode base64 file content")
         }
-        let entries = try JSONDecoder().decode([AppWallEntry].self, from: data)
-        return (entries, fileContent.sha)
+        let apps = try JSONDecoder().decode([AppWallApp].self, from: data)
+        return (apps, fileContent.sha)
     }
 
     private func createBranch(owner: String, branchName: String) async throws {
-        // Get the SHA of the current main branch HEAD
         struct Ref: Decodable {
             struct Object: Decodable { let sha: String }
             let object: Object
@@ -152,12 +148,12 @@ public struct GitHubAppWallRepository: AppWallRepository {
         }
     }
 
-    private func updateFile(owner: String, branchName: String, content: Data, sha: String, entry: AppWallEntry) async throws {
+    private func updateFile(owner: String, branchName: String, content: Data, sha: String, app: AppWallApp) async throws {
         let url = githubURL("repos/\(owner)/\(upstreamRepo)/contents/\(filePath)")
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
         request.httpBody = try JSONSerialization.data(withJSONObject: [
-            "message": "feat(app-wall): add \(entry.github)",
+            "message": "feat(app-wall): add \(app.developer)",
             "content": content.base64EncodedString(),
             "sha": sha,
             "branch": branchName
@@ -170,7 +166,7 @@ public struct GitHubAppWallRepository: AppWallRepository {
         }
     }
 
-    private func createPR(fromOwner: String, branchName: String, entry: AppWallEntry) async throws -> AppWallSubmission {
+    private func createPR(fromOwner: String, branchName: String, app: AppWallApp) async throws -> AppWallSubmission {
         struct PR: Decodable {
             let number: Int
             let html_url: String
@@ -179,20 +175,24 @@ public struct GitHubAppWallRepository: AppWallRepository {
         let url = githubURL("repos/\(upstreamOwner)/\(upstreamRepo)/pulls")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+
+        var bodyLines = [
+            "## Add \(app.developer) to the app wall",
+            "",
+            "- **Developer**: \(app.developer)",
+        ]
+        if let devId = app.developerId { bodyLines.append("- **Developer ID**: \(devId)") }
+        if let gh = app.github        { bodyLines.append("- **GitHub**: @\(gh)") }
+        if let x = app.x              { bodyLines.append("- **X**: @\(x)") }
+        if let appUrls = app.apps     { bodyLines.append("- **Apps**: \(appUrls.joined(separator: ", "))") }
+        bodyLines.append("")
+        bodyLines.append("_Submitted via `asc app-wall submit`_")
+
         request.httpBody = try JSONSerialization.data(withJSONObject: [
-            "title": "feat(app-wall): add \(entry.github)",
+            "title": "feat(app-wall): add \(app.developer)",
             "head": "\(fromOwner):\(branchName)",
             "base": "main",
-            "body": """
-            ## Add \(entry.developer) to the app wall
-
-            - **Developer**: \(entry.developer)
-            - **Developer ID**: \(entry.developerId)
-            - **GitHub**: @\(entry.github)
-            \(entry.x.map { "- **X**: @\($0)" } ?? "")
-
-            _Submitted via `asc app-wall submit`_
-            """
+            "body": bodyLines.joined(separator: "\n")
         ])
         addHeaders(to: &request)
         let (data, response) = try await httpClient.data(for: request)
@@ -206,7 +206,7 @@ public struct GitHubAppWallRepository: AppWallRepository {
             prNumber: pr.number,
             prUrl: pr.html_url,
             title: pr.title,
-            developer: entry.developer
+            developer: app.developer
         )
     }
 
@@ -236,14 +236,12 @@ public struct GitHubAppWallRepository: AppWallRepository {
         URL(string: "https://api.github.com/\(path)")!
     }
 
-    private func encodeEntries(_ entries: [AppWallEntry]) throws -> Data {
+    private func encodeApps(_ apps: [AppWallApp]) throws -> Data {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted]
-        return try encoder.encode(entries)
+        return try encoder.encode(apps)
     }
 }
-
-// MARK: - Private API error response model
 
 private struct GitHubErrorResponse: Decodable {
     let message: String
