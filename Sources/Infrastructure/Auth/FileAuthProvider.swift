@@ -8,7 +8,7 @@ public struct FileAuthProvider: AuthProvider {
     }
 
     public func resolve() throws -> AuthCredentials {
-        guard let credentials = try storage.load() else {
+        guard let credentials = try storage.load(name: nil) else {
             throw AuthError.missingKeyID
         }
         try credentials.validate()

@@ -17,6 +17,9 @@ struct AuthLogin: AsyncParsableCommand {
     @Option(name: .long, help: "App Store Connect Issuer ID")
     var issuerId: String
 
+    @Option(name: .long, help: "Account name (defaults to key ID)")
+    var name: String?
+
     @Option(name: .long, help: "Path to .p8 private key file")
     var privateKeyPath: String?
 
@@ -41,16 +44,18 @@ struct AuthLogin: AsyncParsableCommand {
             throw ValidationError("Provide either --private-key-path or --private-key")
         }
 
+        let accountName = name ?? keyId
         let credentials = AuthCredentials(keyID: keyId, issuerID: issuerId, privateKeyPEM: privateKeyPEM)
         try credentials.validate()
-        try storage.save(credentials)
+        try storage.save(credentials, name: accountName)
+        try storage.setActive(name: accountName)
 
-        let status = AuthStatus(keyID: keyId, issuerID: issuerId, source: .file)
+        let status = AuthStatus(name: accountName, keyID: keyId, issuerID: issuerId, source: .file)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
             [status],
-            headers: ["Key ID", "Issuer ID", "Source"],
-            rowMapper: { [$0.keyID, $0.issuerID, $0.source.rawValue] }
+            headers: ["Name", "Key ID", "Issuer ID", "Source"],
+            rowMapper: { [$0.name ?? "", $0.keyID, $0.issuerID, $0.source.rawValue] }
         )
     }
 }

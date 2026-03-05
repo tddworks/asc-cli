@@ -4,4 +4,5 @@ public enum AuthError: Error, Equatable, Sendable {
     case missingPrivateKey
     case invalidPrivateKey(String)
     case tokenGenerationFailed(String)
+    case accountNotFound(String)
 }

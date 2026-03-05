@@ -8,13 +8,16 @@ struct AuthLogout: AsyncParsableCommand {
         abstract: "Remove saved authentication credentials"
     )
 
+    @Option(name: .long, help: "Account name to remove (defaults to active account)")
+    var name: String?
+
     func run() async throws {
         let storage = FileAuthStorage()
         try await execute(storage: storage)
     }
 
     func execute(storage: any AuthStorage) async throws {
-        try storage.delete()
+        try storage.delete(name: name)
         print("Logged out successfully")
     }
 }
