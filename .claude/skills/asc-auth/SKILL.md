@@ -5,7 +5,7 @@ description: |
   Use this skill when:
   (1) Logging in with an API key: "asc auth login", "save my credentials", "set up authentication"
   (2) Managing multiple accounts: "asc auth list", "switch account", "use work account", "add another account"
-  (3) Switching the active account: "asc auth use <name>", "switch to personal account"
+  (3) Switching the active account: "asc auth use NAME", "switch to personal account"
   (4) Logging out: "asc auth logout", "remove credentials", "remove account"
   (5) Verifying current credentials: "asc auth check", "which account am I using?"
   (6) Explaining the credentials file format (~/.asc/credentials.json)
