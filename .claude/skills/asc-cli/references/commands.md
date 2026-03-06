@@ -499,3 +499,33 @@ Shows active credentials with `name` (omitted for environment credentials) and `
 **Credential resolution order:** active account in `~/.asc/credentials.json` → environment variables (`ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_PRIVATE_KEY_PATH` / `ASC_PRIVATE_KEY_B64` / `ASC_PRIVATE_KEY`).
 
 Output fields: `keyID`, `issuerID`, `source`, `affordances`.
+
+---
+
+## users
+
+Manage App Store Connect team members.
+
+```bash
+asc users list [--role <ROLE>] [--pretty] [--output table]
+asc users update --user-id <id> --role <ROLE> [--role <ROLE> ...]
+asc users remove --user-id <id>
+```
+
+**Roles (uppercase):** `ADMIN`, `FINANCE`, `ACCOUNT_HOLDER`, `SALES`, `MARKETING`, `APP_MANAGER`, `DEVELOPER`, `ACCESS_TO_REPORTS`, `CUSTOMER_SUPPORT`, `CREATE_APPS`, `CLOUD_MANAGED_DEVELOPER_ID`, `CLOUD_MANAGED_APP_DISTRIBUTION`, `GENERATE_INDIVIDUAL_KEYS`
+
+`TeamMember` affordances: `remove`, `updateRoles` (pre-filled with current roles).
+
+---
+
+## user-invitations
+
+Manage pending team invitations.
+
+```bash
+asc user-invitations list [--role <ROLE>] [--pretty] [--output table]
+asc user-invitations invite --email <email> --first-name <name> --last-name <name> --role <ROLE> [--role <ROLE> ...] [--all-apps-visible]
+asc user-invitations cancel --invitation-id <id>
+```
+
+`UserInvitationRecord` affordance: `cancel`.

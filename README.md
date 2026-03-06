@@ -245,6 +245,31 @@ asc profiles create --name "My Profile" --type IOS_APP_STORE --bundle-id-id <id>
 asc profiles delete --profile-id <id>
 ```
 
+### Team Management
+
+```bash
+# List all team members
+asc users list
+
+# Filter by role
+asc users list --role DEVELOPER --output table
+
+# Update a member's roles
+asc users update --user-id <id> --role APP_MANAGER --role DEVELOPER
+
+# Revoke access (e.g. on offboarding)
+asc users remove --user-id <id>
+
+# List pending invitations
+asc user-invitations list
+
+# Invite a new member
+asc user-invitations invite --email new@example.com --first-name Alex --last-name Smith --role DEVELOPER
+
+# Cancel a pending invitation
+asc user-invitations cancel --invitation-id <id>
+```
+
 ### Plugins
 
 ```bash
@@ -311,6 +336,7 @@ Detailed documentation for each feature:
 - [App Shots](docs/features/app-shots.md) — AI-powered screenshot generation and localization
 - [Plugins](docs/features/plugins.md) — custom event handlers (Slack, Telegram, webhooks)
 - [App Wall](docs/features/app-wall.md) — community showcase; `apps.json` format and architecture
+- [Users & Roles](docs/features/users.md) — team member management, role assignment, invitation lifecycle; directory integration for automated access control
 
 ## Design: CAEOAS
 

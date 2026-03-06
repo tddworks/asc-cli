@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `asc users list/update/remove` — manage App Store Connect team members; list users filtered by role, update a member's roles (replaces all current roles), or revoke access immediately; `TeamMember` carries `username`, `firstName`, `lastName`, `roles`, `isAllAppsVisible`, `isProvisioningAllowed`; affordances: `remove`, `updateRoles` (pre-filled with current roles)
+- `asc user-invitations list/invite/cancel` — manage pending team invitations; invite a new member with one or more roles (`--role DEVELOPER --role APP_MANAGER`); `UserInvitationRecord` carries `email`, `roles`, `expirationDate`; affordance: `cancel`; supports 13 roles; `--all-apps-visible` flag on invite grants access to all apps
 - `asc auth list` — list all saved App Store Connect accounts with active status and per-account affordances (`use`, `logout`)
 - `asc auth use <name>` — switch the active App Store Connect account; all subsequent commands use the newly active account
 - `asc auth login --name <alias>` — optional `--name` flag to save credentials under a human-readable alias (defaults to `"default"`); first saved account becomes active automatically; subsequent logins with new names are saved alongside existing accounts; account names must not contain spaces (use hyphens or underscores)
