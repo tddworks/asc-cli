@@ -146,6 +146,11 @@ public struct ClientFactory: Sendable {
         return SDKAgeRatingDeclarationRepository(client: provider)
     }
 
+    public func makeUserRepository(authProvider: any AuthProvider) throws -> any UserRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKUserRepository(client: provider)
+    }
+
     // MARK: - Plugins (no ASC auth needed — local filesystem + subprocess)
 
     public func makePluginRepository() -> any PluginRepository {

@@ -38,6 +38,8 @@ struct ASC: AsyncParsableCommand {
             VersionReviewDetailCommand.self,
             PluginsCommand.self,
             AppWallCommand.self,
+            UsersCommand.self,
+            UserInvitationsCommand.self,
         ]
     )
 }

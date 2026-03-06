@@ -195,4 +195,10 @@ struct ClientProvider {
     static func makeAppWallRepository(token: String) -> any AppWallRepository {
         GitHubAppWallRepository(token: token)
     }
+
+    static func makeUserRepository() throws -> any UserRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeUserRepository(authProvider: authProvider)
+    }
 }
