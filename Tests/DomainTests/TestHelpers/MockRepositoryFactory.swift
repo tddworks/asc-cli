@@ -616,6 +616,53 @@ struct MockRepositoryFactory {
         PluginResult(success: success, message: message, error: error)
     }
 
+    // MARK: - XcodeCloud
+
+    static func makeXcodeCloudProduct(
+        id: String = "prod-1",
+        appId: String = "app-1",
+        name: String = "My App CI",
+        productType: XcodeCloudProductType = .app,
+        createdDate: Date? = nil
+    ) -> XcodeCloudProduct {
+        XcodeCloudProduct(id: id, appId: appId, name: name, productType: productType, createdDate: createdDate)
+    }
+
+    static func makeXcodeCloudWorkflow(
+        id: String = "wf-1",
+        productId: String = "prod-1",
+        name: String = "CI Build",
+        description: String? = nil,
+        isEnabled: Bool = true,
+        isLockedForEditing: Bool = false,
+        containerFilePath: String? = nil
+    ) -> XcodeCloudWorkflow {
+        XcodeCloudWorkflow(
+            id: id, productId: productId, name: name,
+            description: description, isEnabled: isEnabled,
+            isLockedForEditing: isLockedForEditing, containerFilePath: containerFilePath
+        )
+    }
+
+    static func makeXcodeCloudBuildRun(
+        id: String = "run-1",
+        workflowId: String = "wf-1",
+        number: Int? = 1,
+        executionProgress: XcodeCloudBuildRunExecutionProgress = .pending,
+        completionStatus: XcodeCloudBuildRunCompletionStatus? = nil,
+        startReason: XcodeCloudBuildRunStartReason? = nil,
+        createdDate: Date? = nil,
+        startedDate: Date? = nil,
+        finishedDate: Date? = nil
+    ) -> XcodeCloudBuildRun {
+        XcodeCloudBuildRun(
+            id: id, workflowId: workflowId,
+            number: number, executionProgress: executionProgress,
+            completionStatus: completionStatus, startReason: startReason,
+            createdDate: createdDate, startedDate: startedDate, finishedDate: finishedDate
+        )
+    }
+
     static func makeProfile(
         id: String = "prof-1",
         name: String = "My Profile",

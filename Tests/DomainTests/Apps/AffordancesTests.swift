@@ -260,4 +260,35 @@ struct AffordancesTests {
         let category = MockRepositoryFactory.makeAppCategory(id: "6014")
         #expect(category.affordances["listCategories"] == "asc app-categories list")
     }
+
+    // MARK: - XcodeCloudProduct affordances
+
+    @Test func `xcode cloud product affordances include listWorkflows and listProducts`() {
+        let product = MockRepositoryFactory.makeXcodeCloudProduct(id: "prod-1", appId: "app-abc")
+        #expect(product.affordances["listWorkflows"] == "asc xcode-cloud workflows list --product-id prod-1")
+        #expect(product.affordances["listProducts"] == "asc xcode-cloud products list --app-id app-abc")
+    }
+
+    // MARK: - XcodeCloudWorkflow affordances
+
+    @Test func `xcode cloud workflow affordances include listBuildRuns and startBuild when enabled`() {
+        let workflow = MockRepositoryFactory.makeXcodeCloudWorkflow(id: "wf-1", productId: "prod-1", isEnabled: true)
+        #expect(workflow.affordances["listBuildRuns"] == "asc xcode-cloud builds list --workflow-id wf-1")
+        #expect(workflow.affordances["startBuild"] == "asc xcode-cloud builds start --workflow-id wf-1")
+        #expect(workflow.affordances["listWorkflows"] == "asc xcode-cloud workflows list --product-id prod-1")
+    }
+
+    @Test func `disabled workflow affordances omit startBuild`() {
+        let workflow = MockRepositoryFactory.makeXcodeCloudWorkflow(id: "wf-2", productId: "prod-1", isEnabled: false)
+        #expect(workflow.affordances["startBuild"] == nil)
+        #expect(workflow.affordances["listBuildRuns"] != nil)
+    }
+
+    // MARK: - XcodeCloudBuildRun affordances
+
+    @Test func `xcode cloud build run affordances include getBuildRun and listBuildRuns`() {
+        let run = MockRepositoryFactory.makeXcodeCloudBuildRun(id: "run-1", workflowId: "wf-abc")
+        #expect(run.affordances["getBuildRun"] == "asc xcode-cloud builds get --build-run-id run-1")
+        #expect(run.affordances["listBuildRuns"] == "asc xcode-cloud builds list --workflow-id wf-abc")
+    }
 }

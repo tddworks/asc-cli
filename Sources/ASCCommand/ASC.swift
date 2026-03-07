@@ -40,6 +40,7 @@ struct ASC: AsyncParsableCommand {
             AppWallCommand.self,
             UsersCommand.self,
             UserInvitationsCommand.self,
+            XcodeCloudCommand.self,
         ]
     )
 }

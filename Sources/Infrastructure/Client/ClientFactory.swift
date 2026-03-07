@@ -151,6 +151,21 @@ public struct ClientFactory: Sendable {
         return SDKUserRepository(client: provider)
     }
 
+    public func makeXcodeCloudProductRepository(authProvider: any AuthProvider) throws -> any XcodeCloudProductRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKXcodeCloudProductRepository(client: provider)
+    }
+
+    public func makeXcodeCloudWorkflowRepository(authProvider: any AuthProvider) throws -> any XcodeCloudWorkflowRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKXcodeCloudWorkflowRepository(client: provider)
+    }
+
+    public func makeXcodeCloudBuildRunRepository(authProvider: any AuthProvider) throws -> any XcodeCloudBuildRunRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKXcodeCloudBuildRunRepository(client: provider)
+    }
+
     // MARK: - Plugins (no ASC auth needed — local filesystem + subprocess)
 
     public func makePluginRepository() -> any PluginRepository {

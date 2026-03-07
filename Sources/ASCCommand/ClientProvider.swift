@@ -201,4 +201,22 @@ struct ClientProvider {
         let factory = ClientFactory()
         return try factory.makeUserRepository(authProvider: authProvider)
     }
+
+    static func makeXcodeCloudProductRepository() throws -> any XcodeCloudProductRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeXcodeCloudProductRepository(authProvider: authProvider)
+    }
+
+    static func makeXcodeCloudWorkflowRepository() throws -> any XcodeCloudWorkflowRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeXcodeCloudWorkflowRepository(authProvider: authProvider)
+    }
+
+    static func makeXcodeCloudBuildRunRepository() throws -> any XcodeCloudBuildRunRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeXcodeCloudBuildRunRepository(authProvider: authProvider)
+    }
 }
