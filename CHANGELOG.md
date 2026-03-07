@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.38] - 2026-03-07
+
 ### Added
 - `asc xcode-cloud products list [--app-id <id>]` — list Xcode Cloud products; `XcodeCloudProduct` carries `appId` (injected from relationship), `name`, `productType`; affordances: `listWorkflows`, `listProducts`
 - `asc xcode-cloud workflows list --product-id <id>` — list CI workflows for a product; `XcodeCloudWorkflow` carries `productId` (injected), `name`, `description`, `isEnabled`, `isLockedForEditing`; affordances: `listBuildRuns`, `listWorkflows` always, `startBuild` only when `isEnabled`
@@ -324,7 +328,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.37...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.38...HEAD
+[0.1.38]: https://github.com/tddworks/asc-cli/compare/v0.1.37...v0.1.38
 [0.1.37]: https://github.com/tddworks/asc-cli/compare/v0.1.36...v0.1.37
 [0.1.36]: https://github.com/tddworks/asc-cli/compare/v0.1.35...v0.1.36
 [0.1.35]: https://github.com/tddworks/asc-cli/compare/v0.1.34...v0.1.35
