@@ -79,6 +79,7 @@ AppCategory (top-level, not nested under App)
 App → Build → BetaBuildLocalization
 App → BuildUpload
 App → TestFlight (BetaGroup → BetaTester)
+App → CiProduct (XcodeCloud) → CiWorkflow → CiBuildRun
 AppStoreVersion → VersionReadiness
 AppStoreVersion → AppStoreReviewDetail
 CodeSigning: BundleID → Profile
