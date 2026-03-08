@@ -6,6 +6,19 @@ import Testing
 @Suite
 struct GameCenterDetailGetTests {
 
+    @Test func `detail get table output includes id appId and arcade enabled status`() async throws {
+        let mockRepo = MockGameCenterRepository()
+        given(mockRepo).getDetail(appId: .any)
+            .willReturn(GameCenterDetail(id: "gc-1", appId: "app-1", isArcadeEnabled: false))
+
+        let cmd = try GameCenterDetailGet.parse(["--app-id", "app-1", "--output", "table"])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output.contains("gc-1"))
+        #expect(output.contains("app-1"))
+        #expect(output.contains("no"))
+    }
+
     @Test func `detail get returns id, appId, isArcadeEnabled and affordances`() async throws {
         let mockRepo = MockGameCenterRepository()
         given(mockRepo).getDetail(appId: .any)
@@ -175,6 +188,30 @@ struct GameCenterAchievementsDeleteTests {
 @Suite
 struct GameCenterLeaderboardsListTests {
 
+    @Test func `table output includes leaderboard fields`() async throws {
+        let mockRepo = MockGameCenterRepository()
+        given(mockRepo).listLeaderboards(gameCenterDetailId: .any)
+            .willReturn([
+                GameCenterLeaderboard(
+                    id: "lb-1",
+                    gameCenterDetailId: "gc-1",
+                    referenceName: "All Time High",
+                    vendorIdentifier: "all_time_high",
+                    scoreSortType: ScoreSortType.desc,
+                    submissionType: LeaderboardSubmissionType.bestScore,
+                    isArchived: false
+                )
+            ])
+
+        let cmd = try GameCenterLeaderboardsList.parse(["--detail-id", "gc-1", "--output", "table"])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output.contains("lb-1"))
+        #expect(output.contains("All Time High"))
+        #expect(output.contains("DESC"))
+        #expect(output.contains("BEST_SCORE"))
+    }
+
     @Test func `leaderboards list returns id, detailId, and affordances`() async throws {
         let mockRepo = MockGameCenterRepository()
         given(mockRepo).listLeaderboards(gameCenterDetailId: .any)
@@ -265,6 +302,45 @@ struct GameCenterLeaderboardsCreateTests {
           ]
         }
         """)
+    }
+}
+
+@Suite
+struct GameCenterLeaderboardsCreateValidationTests {
+
+    @Test func `invalid score sort type throws validation error`() async throws {
+        let mockRepo = MockGameCenterRepository()
+
+        let cmd = try GameCenterLeaderboardsCreate.parse([
+            "--detail-id", "gc-1",
+            "--reference-name", "Test",
+            "--vendor-identifier", "test",
+            "--score-sort-type", "INVALID",
+        ])
+        do {
+            _ = try await cmd.execute(repo: mockRepo)
+            Issue.record("Expected error to be thrown")
+        } catch {
+            #expect(error.localizedDescription.contains("INVALID") || String(describing: error).contains("INVALID"))
+        }
+    }
+
+    @Test func `invalid submission type throws validation error`() async throws {
+        let mockRepo = MockGameCenterRepository()
+
+        let cmd = try GameCenterLeaderboardsCreate.parse([
+            "--detail-id", "gc-1",
+            "--reference-name", "Test",
+            "--vendor-identifier", "test",
+            "--score-sort-type", "DESC",
+            "--submission-type", "BAD_VALUE",
+        ])
+        do {
+            _ = try await cmd.execute(repo: mockRepo)
+            Issue.record("Expected error to be thrown")
+        } catch {
+            #expect(error.localizedDescription.contains("BAD_VALUE") || String(describing: error).contains("BAD_VALUE"))
+        }
     }
 }
 

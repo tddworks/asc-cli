@@ -291,4 +291,29 @@ struct AffordancesTests {
         #expect(run.affordances["getBuildRun"] == "asc xcode-cloud builds get --build-run-id run-1")
         #expect(run.affordances["listBuildRuns"] == "asc xcode-cloud builds list --workflow-id wf-abc")
     }
+
+    // MARK: - GameCenterDetail affordances
+
+    @Test func `game center detail affordances include getDetail listAchievements listLeaderboards`() {
+        let detail = MockRepositoryFactory.makeGameCenterDetail(id: "gc-1", appId: "app-42")
+        #expect(detail.affordances["getDetail"] == "asc game-center detail get --app-id app-42")
+        #expect(detail.affordances["listAchievements"] == "asc game-center achievements list --detail-id gc-1")
+        #expect(detail.affordances["listLeaderboards"] == "asc game-center leaderboards list --detail-id gc-1")
+    }
+
+    // MARK: - GameCenterAchievement affordances
+
+    @Test func `game center achievement affordances include listAchievements and delete`() {
+        let achievement = MockRepositoryFactory.makeGameCenterAchievement(id: "ach-1", gameCenterDetailId: "gc-42")
+        #expect(achievement.affordances["listAchievements"] == "asc game-center achievements list --detail-id gc-42")
+        #expect(achievement.affordances["delete"] == "asc game-center achievements delete --achievement-id ach-1")
+    }
+
+    // MARK: - GameCenterLeaderboard affordances
+
+    @Test func `game center leaderboard affordances include listLeaderboards and delete`() {
+        let leaderboard = MockRepositoryFactory.makeGameCenterLeaderboard(id: "lb-1", gameCenterDetailId: "gc-42")
+        #expect(leaderboard.affordances["listLeaderboards"] == "asc game-center leaderboards list --detail-id gc-42")
+        #expect(leaderboard.affordances["delete"] == "asc game-center leaderboards delete --leaderboard-id lb-1")
+    }
 }
