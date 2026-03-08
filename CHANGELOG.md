@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `asc game-center detail get --app-id <id>` — get Game Center configuration for an app; `GameCenterDetail` carries `appId` (injected), `isArcadeEnabled`; affordances: `getDetail`, `listAchievements`, `listLeaderboards`
+- `asc game-center achievements list --detail-id <id>` — list Game Center achievements; `GameCenterAchievement` carries `gameCenterDetailId` (injected), `referenceName`, `vendorIdentifier`, `points`, `isShowBeforeEarned`, `isRepeatable`, `isArchived`; affordances: `listAchievements`, `delete`
+- `asc game-center achievements create --detail-id <id> --reference-name <n> --vendor-identifier <v> --points <n> [--show-before-earned] [--repeatable]` — create a new achievement
+- `asc game-center achievements delete --achievement-id <id>` — delete an achievement
+- `asc game-center leaderboards list --detail-id <id>` — list Game Center leaderboards; `GameCenterLeaderboard` carries `gameCenterDetailId` (injected), `referenceName`, `vendorIdentifier`, `scoreSortType` (ASC/DESC), `submissionType` (BEST_SCORE/MOST_RECENT_SCORE), `isArchived`; affordances: `listLeaderboards`, `delete`
+- `asc game-center leaderboards create --detail-id <id> --reference-name <n> --vendor-identifier <v> --score-sort-type ASC|DESC [--submission-type BEST_SCORE|MOST_RECENT_SCORE]` — create a new leaderboard
+- `asc game-center leaderboards delete --leaderboard-id <id>` — delete a leaderboard
+- `ScoreSortType` and `LeaderboardSubmissionType` domain enums
+- `GameCenterRepository` `@Mockable` protocol with 7 methods covering all CRUD operations
+
 ---
 
 ## [0.1.38] - 2026-03-07

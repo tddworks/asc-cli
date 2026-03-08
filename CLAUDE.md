@@ -131,6 +131,7 @@ asc init --app-id <id>
 We follow the Chicago School of TDD — state-based, not interaction-based. Tests should verify what domain objects return and compute, rather than how they call their collaborators.
 
 - If code is difficult to test, treat that as a design problem, not an exception to testing.
+- Implement strictly in TDD order: tests first, then implementation
 - The proper TDD workflow:
     1. **Think**: What should `execute()` return in JSON mode? For example: raw field values like `"IOS"`, `"READY_FOR_SALE"`, `"expired": true`.
     2. **Write the test**: Assert those exact output values.

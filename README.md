@@ -40,6 +40,7 @@ asc init --app-id <id> # pin it — skip --app-id on every future command
 | **Code Signing** | Bundle IDs, certificates, devices, provisioning profiles |
 | **Authentication** | Multi-account credential management; named accounts, active-account switching |
 | **Project Init** | `asc init` pins app context to `.asc/project.json`; auto-detects from `.xcodeproj` |
+| **Game Center** | Manage achievements and leaderboards for your game |
 | **Plugins** | Install executable plugins in `~/.asc/plugins/` for custom event handlers |
 | **AI Agents** | JSON output with CAEOAS affordances — agents navigate without knowing the command tree |
 
@@ -158,6 +159,25 @@ asc xcode-cloud workflows list --product-id <id>
 asc xcode-cloud builds list --workflow-id <id>
 asc xcode-cloud builds get --build-run-id <id>
 asc xcode-cloud builds start --workflow-id <id> [--clean]
+```
+
+### Game Center
+
+```bash
+# Get Game Center configuration (detail-id needed for subsequent commands)
+asc game-center detail get --app-id <id>
+
+# Achievements
+asc game-center achievements list --detail-id <id>
+asc game-center achievements create --detail-id <id> --reference-name "First Steps" --vendor-identifier first_steps --points 10
+asc game-center achievements create --detail-id <id> --reference-name <n> --vendor-identifier <v> --points <n> [--show-before-earned] [--repeatable]
+asc game-center achievements delete --achievement-id <id>
+
+# Leaderboards
+asc game-center leaderboards list --detail-id <id>
+asc game-center leaderboards create --detail-id <id> --reference-name "All Time High" --vendor-identifier all_time_high --score-sort-type DESC
+asc game-center leaderboards create --detail-id <id> --reference-name <n> --vendor-identifier <v> --score-sort-type ASC|DESC [--submission-type BEST_SCORE|MOST_RECENT_SCORE]
+asc game-center leaderboards delete --leaderboard-id <id>
 ```
 
 ### Metadata
@@ -350,6 +370,7 @@ Detailed documentation for each feature:
 - [Plugins](docs/features/plugins.md) — custom event handlers (Slack, Telegram, webhooks)
 - [App Wall](docs/features/app-wall.md) — community showcase; `apps.json` format and architecture
 - [Users & Roles](docs/features/users.md) — team member management, role assignment, invitation lifecycle; directory integration for automated access control
+- [Game Center](docs/features/game-center.md) — achievements (list, create, delete) and leaderboards (list, create, delete)
 
 ## Design: CAEOAS
 
