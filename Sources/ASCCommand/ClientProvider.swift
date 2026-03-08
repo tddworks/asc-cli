@@ -219,4 +219,10 @@ struct ClientProvider {
         let factory = ClientFactory()
         return try factory.makeXcodeCloudBuildRunRepository(authProvider: authProvider)
     }
+
+    static func makeGameCenterRepository() throws -> any GameCenterRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeGameCenterRepository(authProvider: authProvider)
+    }
 }

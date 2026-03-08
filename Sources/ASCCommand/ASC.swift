@@ -41,6 +41,7 @@ struct ASC: AsyncParsableCommand {
             UsersCommand.self,
             UserInvitationsCommand.self,
             XcodeCloudCommand.self,
+            GameCenterCommand.self,
         ]
     )
 }

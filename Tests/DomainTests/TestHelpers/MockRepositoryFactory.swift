@@ -684,4 +684,54 @@ struct MockRepositoryFactory {
             profileContent: profileContent
         )
     }
+
+    static func makeGameCenterDetail(
+        id: String = "gc-1",
+        appId: String = "app-1",
+        isArcadeEnabled: Bool = false
+    ) -> GameCenterDetail {
+        GameCenterDetail(id: id, appId: appId, isArcadeEnabled: isArcadeEnabled)
+    }
+
+    static func makeGameCenterAchievement(
+        id: String = "ach-1",
+        gameCenterDetailId: String = "gc-1",
+        referenceName: String = "Test Achievement",
+        vendorIdentifier: String = "test_achievement",
+        points: Int = 10,
+        isShowBeforeEarned: Bool = false,
+        isRepeatable: Bool = false,
+        isArchived: Bool = false
+    ) -> GameCenterAchievement {
+        GameCenterAchievement(
+            id: id,
+            gameCenterDetailId: gameCenterDetailId,
+            referenceName: referenceName,
+            vendorIdentifier: vendorIdentifier,
+            points: points,
+            isShowBeforeEarned: isShowBeforeEarned,
+            isRepeatable: isRepeatable,
+            isArchived: isArchived
+        )
+    }
+
+    static func makeGameCenterLeaderboard(
+        id: String = "lb-1",
+        gameCenterDetailId: String = "gc-1",
+        referenceName: String = "Test Leaderboard",
+        vendorIdentifier: String = "test_leaderboard",
+        scoreSortType: ScoreSortType = .desc,
+        submissionType: LeaderboardSubmissionType = .bestScore,
+        isArchived: Bool = false
+    ) -> GameCenterLeaderboard {
+        GameCenterLeaderboard(
+            id: id,
+            gameCenterDetailId: gameCenterDetailId,
+            referenceName: referenceName,
+            vendorIdentifier: vendorIdentifier,
+            scoreSortType: scoreSortType,
+            submissionType: submissionType,
+            isArchived: isArchived
+        )
+    }
 }
