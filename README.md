@@ -40,6 +40,7 @@ asc init --app-id <id> # pin it — skip --app-id on every future command
 | **Code Signing** | Bundle IDs, certificates, devices, provisioning profiles |
 | **Authentication** | Multi-account credential management; named accounts, active-account switching |
 | **Project Init** | `asc init` pins app context to `.asc/project.json`; auto-detects from `.xcodeproj` |
+| **App Clips** | Manage App Clips, default experiences, and locale-specific card content |
 | **Game Center** | Manage achievements and leaderboards for your game |
 | **Plugins** | Install executable plugins in `~/.asc/plugins/` for custom event handlers |
 | **AI Agents** | JSON output with CAEOAS affordances — agents navigate without knowing the command tree |

@@ -606,3 +606,50 @@ asc game-center leaderboards create \
   --vendor-identifier all_time_high \
   --score-sort-type DESC
 ```
+
+---
+
+## App Clips
+
+```bash
+# List App Clips
+asc app-clips list --app-id <id>
+
+# List default experiences for an App Clip
+asc app-clip-experiences list --app-clip-id <id>
+
+# Create a default experience
+asc app-clip-experiences create --app-clip-id <id> --action OPEN
+asc app-clip-experiences create --app-clip-id <id>  # no action
+
+# Delete a default experience
+asc app-clip-experiences delete --experience-id <id>
+
+# List localizations for a default experience
+asc app-clip-experience-localizations list --experience-id <id>
+
+# Create a localization
+asc app-clip-experience-localizations create \
+  --experience-id <id> \
+  --locale en-US \
+  --subtitle "Order faster with your loyalty card"
+
+# Delete a localization
+asc app-clip-experience-localizations delete --localization-id <id>
+```
+
+### App Clip Typical Workflow
+
+```bash
+# 1. Find the App Clip for an app
+asc app-clips list --app-id 6450000000 --pretty
+
+# 2. Create a default experience
+asc app-clip-experiences create --app-clip-id clip-abc --action OPEN --pretty
+
+# 3. Add localizations
+asc app-clip-experience-localizations create \
+  --experience-id exp-xyz \
+  --locale en-US \
+  --subtitle "Order faster with your loyalty card"
+```

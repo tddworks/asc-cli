@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `asc app-clips list --app-id <id>` — list App Clips for an app; `AppClip` carries `appId` (injected), `bundleId?`; affordances: `listAppClips`, `listExperiences`
+- `asc app-clip-experiences list --app-clip-id <id>` — list default experiences for an App Clip; `AppClipDefaultExperience` carries `appClipId` (injected), `action?` (OPEN/VIEW/PLAY); affordances: `delete`, `listExperiences`, `listLocalizations`
+- `asc app-clip-experiences create --app-clip-id <id> [--action OPEN|VIEW|PLAY]` — create a default experience
+- `asc app-clip-experiences delete --experience-id <id>` — delete a default experience
+- `asc app-clip-experience-localizations list --experience-id <id>` — list localizations; `AppClipDefaultExperienceLocalization` carries `experienceId` (injected), `locale`, `subtitle?`; affordances: `delete`, `listLocalizations`
+- `asc app-clip-experience-localizations create --experience-id <id> --locale <code> [--subtitle "..."]` — create a localization
+- `asc app-clip-experience-localizations delete --localization-id <id>` — delete a localization
+- `AppClipRepository` `@Mockable` protocol with 7 methods covering all CRUD operations
 - `asc game-center detail get --app-id <id>` — get Game Center configuration for an app; `GameCenterDetail` carries `appId` (injected), `isArcadeEnabled`; affordances: `getDetail`, `listAchievements`, `listLeaderboards`
 - `asc game-center achievements list --detail-id <id>` — list Game Center achievements; `GameCenterAchievement` carries `gameCenterDetailId` (injected), `referenceName`, `vendorIdentifier`, `points`, `isShowBeforeEarned`, `isRepeatable`, `isArchived`; affordances: `listAchievements`, `delete`
 - `asc game-center achievements create --detail-id <id> --reference-name <n> --vendor-identifier <v> --points <n> [--show-before-earned] [--repeatable]` — create a new achievement
