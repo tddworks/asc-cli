@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.39] - 2026-03-08
+
 ### Added
 - `asc app-clips list --app-id <id>` — list App Clips for an app; `AppClip` carries `appId` (injected), `bundleId?`; affordances: `listAppClips`, `listExperiences`
 - `asc app-clip-experiences list --app-clip-id <id>` — list default experiences for an App Clip; `AppClipDefaultExperience` carries `appClipId` (injected), `action?` (OPEN/VIEW/PLAY); affordances: `delete`, `listExperiences`, `listLocalizations`
@@ -347,7 +351,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.38...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.39...HEAD
+[0.1.39]: https://github.com/tddworks/asc-cli/compare/v0.1.38...v0.1.39
 [0.1.38]: https://github.com/tddworks/asc-cli/compare/v0.1.37...v0.1.38
 [0.1.37]: https://github.com/tddworks/asc-cli/compare/v0.1.36...v0.1.37
 [0.1.36]: https://github.com/tddworks/asc-cli/compare/v0.1.35...v0.1.36
