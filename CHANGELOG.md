@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Finance reports: `asc finance-reports download` with financial and finance detail report types
 - Gzip decompression and TSV parsing infrastructure for App Store Connect report downloads
 - Analytics reports: `asc analytics-reports request/list/delete/reports/instances/segments` — multi-step analytics workflow with 5 report categories and 3 granularity levels
+- `asc auth login --vendor-number <number>` — save vendor number with account credentials
+- `asc auth update --vendor-number <number>` — add or update vendor number on an existing account
+- Vendor number auto-resolution for `sales-reports download` and `finance-reports download` — `--vendor-number` is now optional when saved on the active account
 
 ---
 

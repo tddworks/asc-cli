@@ -84,6 +84,7 @@ asc auth login \
 asc auth login --key-id K1 --issuer-id I1 --private-key-path work.p8 --name work
 asc auth login --key-id K2 --issuer-id I2 --private-key-path personal.p8 --name personal
 
+asc auth update --vendor-number 88012345  # save vendor number for reports
 asc auth list            # list all saved accounts
 asc auth use work        # switch active account
 asc auth check           # → shows active account name + source: "file"
@@ -109,7 +110,8 @@ export ASC_PRIVATE_KEY_PATH="~/.asc/AuthKey_XXXXXX.p8"
 ### Auth & Project
 
 ```bash
-asc auth login --key-id <id> --issuer-id <id> --private-key-path <path> [--name alias]
+asc auth login --key-id <id> --issuer-id <id> --private-key-path <path> [--name alias] [--vendor-number <n>]
+asc auth update [--name alias] --vendor-number <number>
 asc auth list
 asc auth use <name>
 asc auth check
@@ -308,13 +310,17 @@ asc user-invitations cancel --invitation-id <id>
 
 ```bash
 # Daily sales (latest — --report-date optional for DAILY only)
-asc sales-reports download --vendor-number <n> --report-type SALES --sub-type SUMMARY --frequency DAILY
+# --vendor-number auto-resolved from active account if saved via auth login/update
+asc sales-reports download --report-type SALES --sub-type SUMMARY --frequency DAILY
 
 # Weekly/monthly/yearly require --report-date
-asc sales-reports download --vendor-number <n> --report-type SUBSCRIPTION --sub-type SUMMARY --frequency MONTHLY --report-date 2024-01
+asc sales-reports download --report-type SUBSCRIPTION --sub-type SUMMARY --frequency MONTHLY --report-date 2024-01
 
 # Financial report (--report-date always required)
-asc finance-reports download --vendor-number <n> --report-type FINANCIAL --region-code US --report-date 2024-01
+asc finance-reports download --report-type FINANCIAL --region-code US --report-date 2024-01
+
+# Explicit vendor number override
+asc sales-reports download --vendor-number <n> --report-type SALES --sub-type SUMMARY --frequency DAILY
 
 # Analytics (multi-step workflow)
 asc analytics-reports request --app-id <id> --access-type ONE_TIME_SNAPSHOT

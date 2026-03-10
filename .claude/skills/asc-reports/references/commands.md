@@ -8,10 +8,15 @@ Download a sales report from App Store Connect.
 
 | Flag | Description |
 |------|-------------|
-| `--vendor-number` | Your vendor number from App Store Connect |
 | `--report-type` | Type of sales report (see values below) |
 | `--sub-type` | Report sub-type (see values below) |
 | `--frequency` | Reporting frequency (see values below) |
+
+### Optional Flags
+
+| Flag | Description |
+|------|-------------|
+| `--vendor-number` | Vendor number (auto-resolved from active account if saved via `asc auth update --vendor-number`) |
 
 ### Conditionally Required Flags
 
@@ -99,7 +104,6 @@ Download a financial report from App Store Connect.
 
 | Flag | Description |
 |------|-------------|
-| `--vendor-number` | Your vendor number from App Store Connect |
 | `--report-type` | Type of finance report (see values below) |
 | `--region-code` | Region code (e.g. `US`, `EU`, `JP`, `AU`) |
 | `--report-date` | Report date (e.g. `2024-01`) |
@@ -108,6 +112,7 @@ Download a financial report from App Store Connect.
 
 | Flag | Description |
 |------|-------------|
+| `--vendor-number` | Vendor number (auto-resolved from active account if saved via `asc auth update --vendor-number`) |
 | `--output` | Output format: `json` (default), `table` |
 | `--pretty` | Pretty-print JSON output |
 

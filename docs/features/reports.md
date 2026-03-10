@@ -8,7 +8,7 @@ Download sales and trends data and financial reports from App Store Connect.
 
 ```bash
 asc sales-reports download \
-  --vendor-number <number> \
+  [--vendor-number <number>] \
   --report-type <type> \
   --sub-type <sub-type> \
   --frequency <frequency> \
@@ -17,7 +17,7 @@ asc sales-reports download \
 
 | Flag | Required | Description |
 |------|----------|-------------|
-| `--vendor-number` | Yes | Your vendor number from App Store Connect |
+| `--vendor-number` | No | Auto-resolved from active account if saved via `asc auth login --vendor-number` or `asc auth update --vendor-number`. Explicit value overrides. |
 | `--report-type` | Yes | `SALES`, `PRE_ORDER`, `NEWSSTAND`, `SUBSCRIPTION`, `SUBSCRIPTION_EVENT`, `SUBSCRIBER`, `SUBSCRIPTION_OFFER_CODE_REDEMPTION`, `INSTALLS`, `FIRST_ANNUAL`, `WIN_BACK_ELIGIBILITY` |
 | `--sub-type` | Yes | `SUMMARY`, `DETAILED`, `SUMMARY_INSTALL_TYPE`, `SUMMARY_TERRITORY`, `SUMMARY_CHANNEL` |
 | `--frequency` | Yes | `DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY` |
@@ -84,7 +84,7 @@ USD                   6.99                APPLE     US                com.exampl
 
 ```bash
 asc finance-reports download \
-  --vendor-number <number> \
+  [--vendor-number <number>] \
   --report-type <type> \
   --region-code <code> \
   --report-date <date>
@@ -92,7 +92,7 @@ asc finance-reports download \
 
 | Flag | Required | Description |
 |------|----------|-------------|
-| `--vendor-number` | Yes | Your vendor number from App Store Connect |
+| `--vendor-number` | No | Auto-resolved from active account if saved. Explicit value overrides. |
 | `--report-type` | Yes | `FINANCIAL`, `FINANCE_DETAIL` |
 | `--region-code` | Yes | Region code (e.g. `US`, `EU`, `JP`) |
 | `--report-date` | Yes | Report date (e.g. `2024-01`) |
@@ -121,9 +121,11 @@ asc finance-reports download \
 ## Typical Workflow
 
 ```bash
-# 1. Download yesterday's sales data
+# 0. Save vendor number once (found in ASC → Payments and Financial Reports)
+asc auth update --vendor-number 88012345
+
+# 1. Download yesterday's sales data (vendor number auto-resolved)
 asc sales-reports download \
-  --vendor-number 123456 \
   --report-type SALES \
   --sub-type SUMMARY \
   --frequency DAILY \
@@ -132,7 +134,6 @@ asc sales-reports download \
 
 # 2. Check monthly subscription metrics
 asc sales-reports download \
-  --vendor-number 123456 \
   --report-type SUBSCRIPTION \
   --sub-type SUMMARY \
   --frequency MONTHLY \
@@ -141,7 +142,6 @@ asc sales-reports download \
 
 # 3. Download financial report for proceeds
 asc finance-reports download \
-  --vendor-number 123456 \
   --report-type FINANCIAL \
   --region-code US \
   --report-date 2024-01 \
@@ -254,6 +254,7 @@ Sources/
     │   ├── SalesReportsDownload.swift      # asc sales-reports download
     │   ├── FinanceReportsCommand.swift     # Parent: asc finance-reports
     │   ├── FinanceReportsDownload.swift    # asc finance-reports download
+    │   ├── VendorNumberResolver.swift     # Auto-resolves vendor number from auth
     │   └── ReportOutputHelper.swift        # JSON/table formatting
     └── AnalyticsReports/
         ├── AnalyticsReportsCommand.swift       # Parent: asc analytics-reports

@@ -466,11 +466,12 @@ asc auth login \
   --key-id <KEY_ID> \
   --issuer-id <ISSUER_ID> \
   --private-key-path ~/.asc/AuthKey_KEYID.p8 \
-  [--name <alias>]
+  [--name <alias>] \
+  [--vendor-number <number>]
 ```
-Saves credentials under a named account (defaults to key ID). The saved account becomes active. Accepts `--private-key` (raw PEM) instead of `--private-key-path`.
+Saves credentials under a named account (defaults to "default"). The saved account becomes active. Accepts `--private-key` (raw PEM) instead of `--private-key-path`. `--vendor-number` saves the vendor number for auto-resolution by report commands.
 
-Output: JSON `AuthStatus` with `name`, `source: "file"` and affordances.
+Output: JSON `AuthStatus` with `name`, `source: "file"`, optional `vendorNumber`, and affordances.
 
 ### list
 ```bash
@@ -490,15 +491,21 @@ asc auth logout [--name <alias>]
 ```
 Removes the named account (or the active account if `--name` is omitted). Prints "Logged out successfully".
 
+### update
+```bash
+asc auth update [--name <alias>] --vendor-number <number>
+```
+Updates an existing account (defaults to active). Currently supports `--vendor-number` for saving the vendor number used by report commands.
+
 ### check
 ```bash
 asc auth check [--pretty] [--output table]
 ```
-Shows active credentials with `name` (omitted for environment credentials) and `source` (`"file"` or `"environment"`).
+Shows active credentials with `name` (omitted for environment credentials), `source` (`"file"` or `"environment"`), and `vendorNumber` (if saved).
 
 **Credential resolution order:** active account in `~/.asc/credentials.json` → environment variables (`ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_PRIVATE_KEY_PATH` / `ASC_PRIVATE_KEY_B64` / `ASC_PRIVATE_KEY`).
 
-Output fields: `keyID`, `issuerID`, `source`, `affordances`.
+Output fields: `keyID`, `issuerID`, `source`, optional `vendorNumber`, `affordances`.
 
 ---
 

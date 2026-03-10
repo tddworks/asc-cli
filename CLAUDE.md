@@ -205,12 +205,13 @@ Key skills to keep in sync:
 **Option A — Persistent login (recommended):**
 
 ```bash
-asc auth login --key-id <id> --issuer-id <id> --private-key-path ~/.asc/AuthKey_XXXXXX.p8
+asc auth login --key-id <id> --issuer-id <id> --private-key-path ~/.asc/AuthKey_XXXXXX.p8 [--vendor-number <number>]
+asc auth update --vendor-number <number>  # add vendor number to existing account
 asc auth logout   # remove saved credentials
 asc auth check    # verify credentials; shows source: "file" or "environment"
 ```
 
-Credentials saved to `~/.asc/credentials.json`.
+Credentials saved to `~/.asc/credentials.json`. Vendor number (optional) is used by `sales-reports` and `finance-reports` commands — auto-resolved from the active account when `--vendor-number` is omitted.
 
 **Option B — Environment variables:**
 
