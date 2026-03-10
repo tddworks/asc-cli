@@ -1,5 +1,4 @@
 @preconcurrency import AppStoreConnect_Swift_SDK
-import CryptoKit
 import Domain
 import Foundation
 
@@ -164,12 +163,5 @@ public struct OpenAPIPreviewRepository: PreviewRepository, @unchecked Sendable {
         case "m4v": return "video/x-m4v"
         default: return "application/octet-stream"
         }
-    }
-}
-
-private extension Data {
-    var md5HexString: String {
-        let digest = Insecure.MD5.hash(data: self)
-        return digest.map { String(format: "%02x", $0) }.joined()
     }
 }

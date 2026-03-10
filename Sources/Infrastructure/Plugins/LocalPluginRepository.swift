@@ -32,11 +32,7 @@ public struct LocalPluginRepository: PluginRepository {
         )
 
         return entries
-            .filter { url in
-                var isDir: ObjCBool = false
-                fileManager.fileExists(atPath: url.path, isDirectory: &isDir)
-                return isDir.boolValue
-            }
+            .filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true }
             .compactMap { dir in try? loadPlugin(from: dir) }
             .sorted { $0.name < $1.name }
     }

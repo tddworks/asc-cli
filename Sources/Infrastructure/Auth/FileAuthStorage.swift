@@ -85,10 +85,8 @@ public struct FileAuthStorage: AuthStorage {
         }
         let data = try Data(contentsOf: fileURL)
 
-        // Detect new multi-account format by checking for "accounts" key
-        if let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           dict["accounts"] != nil {
-            return try JSONDecoder().decode(CredentialsFile.self, from: data)
+        if let file = try? JSONDecoder().decode(CredentialsFile.self, from: data) {
+            return file
         }
 
         // Migrate from legacy single-credential format

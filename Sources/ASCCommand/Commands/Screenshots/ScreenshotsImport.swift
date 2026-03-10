@@ -34,11 +34,11 @@ struct ScreenshotsImport: AsyncParsableCommand {
     ) async throws -> String {
         var results: [AppScreenshot] = []
 
+        let existingLocalizations = try await localizationRepo.listLocalizations(versionId: versionId)
         for (locale, locManifest) in manifest.localizations.sorted(by: { $0.key < $1.key }) {
             // Find or create localization
-            let localizations = try await localizationRepo.listLocalizations(versionId: versionId)
             let localization: AppStoreVersionLocalization
-            if let existing = localizations.first(where: { $0.locale == locale }) {
+            if let existing = existingLocalizations.first(where: { $0.locale == locale }) {
                 localization = existing
             } else {
                 localization = try await localizationRepo.createLocalization(versionId: versionId, locale: locale)

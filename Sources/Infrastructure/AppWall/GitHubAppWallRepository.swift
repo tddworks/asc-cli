@@ -236,7 +236,11 @@ public struct GitHubAppWallRepository: AppWallRepository {
     }
 
     private func githubURL(_ path: String) -> URL {
-        URL(string: "https://api.github.com/\(path)")!
+        let encoded = path.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? path
+        guard let url = URL(string: "https://api.github.com/\(encoded)") else {
+            preconditionFailure("Invalid GitHub URL path: \(path)")
+        }
+        return url
     }
 
     private func encodeApps(_ apps: [AppWallApp]) throws -> Data {

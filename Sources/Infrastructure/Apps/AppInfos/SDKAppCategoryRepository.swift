@@ -11,8 +11,7 @@ public struct SDKAppCategoryRepository: AppCategoryRepository, @unchecked Sendab
     public func listCategories(platform: String?) async throws -> [Domain.AppCategory] {
         let filterPlatforms: [APIEndpoint.V1.AppCategories.GetParameters.FilterPlatforms]?
         if let platform {
-            filterPlatforms = APIEndpoint.V1.AppCategories.GetParameters.FilterPlatforms.allCases
-                .filter { $0.rawValue == platform }
+            filterPlatforms = APIEndpoint.V1.AppCategories.GetParameters.FilterPlatforms(rawValue: platform).map { [$0] } ?? []
         } else {
             filterPlatforms = nil
         }
