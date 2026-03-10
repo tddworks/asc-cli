@@ -653,3 +653,59 @@ asc app-clip-experience-localizations create \
   --locale en-US \
   --subtitle "Order faster with your loyalty card"
 ```
+
+---
+
+## sales-reports
+
+### download
+```bash
+asc sales-reports download \
+  --vendor-number <number> \
+  --report-type <SALES|PRE_ORDER|NEWSSTAND|SUBSCRIPTION|SUBSCRIPTION_EVENT|SUBSCRIBER|SUBSCRIPTION_OFFER_CODE_REDEMPTION|INSTALLS|FIRST_ANNUAL|WIN_BACK_ELIGIBILITY> \
+  --sub-type <SUMMARY|DETAILED|SUMMARY_INSTALL_TYPE|SUMMARY_TERRITORY|SUMMARY_CHANNEL> \
+  --frequency <DAILY|WEEKLY|MONTHLY|YEARLY> \
+  [--report-date <date>]
+```
+Downloads a gzip-compressed TSV sales report, decompresses and parses it into JSON. Columns vary by report type.
+
+---
+
+## finance-reports
+
+### download
+```bash
+asc finance-reports download \
+  --vendor-number <number> \
+  --report-type <FINANCIAL|FINANCE_DETAIL> \
+  --region-code <US|EU|JP|...> \
+  --report-date <date>
+```
+Downloads a gzip-compressed TSV financial report. All four flags are required.
+
+### Reports Typical Workflow
+
+```bash
+# Daily sales summary
+asc sales-reports download \
+  --vendor-number 123456 \
+  --report-type SALES \
+  --sub-type SUMMARY \
+  --frequency DAILY \
+  --report-date 2024-01-15 --pretty
+
+# Monthly subscription metrics
+asc sales-reports download \
+  --vendor-number 123456 \
+  --report-type SUBSCRIPTION \
+  --sub-type SUMMARY \
+  --frequency MONTHLY \
+  --report-date 2024-01 --pretty
+
+# US financial report
+asc finance-reports download \
+  --vendor-number 123456 \
+  --report-type FINANCIAL \
+  --region-code US \
+  --report-date 2024-01 --pretty
+```
