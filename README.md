@@ -43,6 +43,7 @@ asc init --app-id <id> # pin it — skip --app-id on every future command
 | **App Clips** | Manage App Clips, default experiences, and locale-specific card content |
 | **Game Center** | Manage achievements and leaderboards for your game |
 | **Plugins** | Install executable plugins in `~/.asc/plugins/` for custom event handlers |
+| **Reports** | Sales, subscription, installs, and financial reports; multi-step analytics workflow |
 | **AI Agents** | JSON output with CAEOAS affordances — agents navigate without knowing the command tree |
 
 ## Requirements
@@ -303,6 +304,26 @@ asc user-invitations invite --email new@example.com --first-name Alex --last-nam
 asc user-invitations cancel --invitation-id <id>
 ```
 
+### Reports
+
+```bash
+# Daily sales (latest — --report-date optional for DAILY only)
+asc sales-reports download --vendor-number <n> --report-type SALES --sub-type SUMMARY --frequency DAILY
+
+# Weekly/monthly/yearly require --report-date
+asc sales-reports download --vendor-number <n> --report-type SUBSCRIPTION --sub-type SUMMARY --frequency MONTHLY --report-date 2024-01
+
+# Financial report (--report-date always required)
+asc finance-reports download --vendor-number <n> --report-type FINANCIAL --region-code US --report-date 2024-01
+
+# Analytics (multi-step workflow)
+asc analytics-reports request --app-id <id> --access-type ONE_TIME_SNAPSHOT
+asc analytics-reports list --app-id <id>
+asc analytics-reports reports --request-id <id> --category COMMERCE
+asc analytics-reports instances --report-id <id> --granularity DAILY
+asc analytics-reports segments --instance-id <id>
+```
+
 ### Plugins
 
 ```bash
@@ -372,6 +393,7 @@ Detailed documentation for each feature:
 - [App Wall](docs/features/app-wall.md) — community showcase; `apps.json` format and architecture
 - [Users & Roles](docs/features/users.md) — team member management, role assignment, invitation lifecycle; directory integration for automated access control
 - [Game Center](docs/features/game-center.md) — achievements (list, create, delete) and leaderboards (list, create, delete)
+- [Reports](docs/features/reports.md) — sales, finance, and analytics reports; TSV parsing, multi-step analytics workflow
 
 ## Design: CAEOAS
 

@@ -29,7 +29,7 @@ asc sales-reports download \
   [--pretty]
 ```
 
-All four required flags (`--vendor-number`, `--report-type`, `--sub-type`, `--frequency`) must be provided. `--report-date` is optional — omit to get the latest available report.
+All four required flags (`--vendor-number`, `--report-type`, `--sub-type`, `--frequency`) must be provided. `--report-date` is optional **only for DAILY** frequency — omit to get the latest available daily report. For WEEKLY, MONTHLY, and YEARLY frequencies, `--report-date` is **mandatory** (Apple returns `PARAMETER_ERROR.INVALID` without it).
 
 ### Download a finance report
 
@@ -118,6 +118,7 @@ asc finance-reports download \
 
 - The vendor number can be found in App Store Connect under "Sales and Trends" → "Payments and Financial Reports"
 - Reports are gzip-compressed TSV from Apple's API — the CLI handles decompression and parsing automatically
+- `--report-date` is only optional for DAILY frequency; WEEKLY, MONTHLY, and YEARLY **require** it. Weekly dates must be a Sunday.
 - Not all report type + sub-type + frequency combinations are valid; Apple returns an error for unsupported combinations
 - Finance reports require `--region-code` (e.g. `US`, `EU`, `JP`, `AU`) and `--report-date`
 - Daily reports are typically available after a 1-day delay; monthly reports after the month ends

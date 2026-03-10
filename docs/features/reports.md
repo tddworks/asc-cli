@@ -21,7 +21,7 @@ asc sales-reports download \
 | `--report-type` | Yes | `SALES`, `PRE_ORDER`, `NEWSSTAND`, `SUBSCRIPTION`, `SUBSCRIPTION_EVENT`, `SUBSCRIBER`, `SUBSCRIPTION_OFFER_CODE_REDEMPTION`, `INSTALLS`, `FIRST_ANNUAL`, `WIN_BACK_ELIGIBILITY` |
 | `--sub-type` | Yes | `SUMMARY`, `DETAILED`, `SUMMARY_INSTALL_TYPE`, `SUMMARY_TERRITORY`, `SUMMARY_CHANNEL` |
 | `--frequency` | Yes | `DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY` |
-| `--report-date` | No | Report date (e.g. `2024-01-15` for daily, `2024-01` for monthly) |
+| `--report-date` | **DAILY: No; WEEKLY/MONTHLY/YEARLY: Yes** | Report date (e.g. `2024-01-15` for daily, `2024-03-02` for weekly — must be a Sunday, `2024-01` for monthly). Optional only for DAILY (omit to get latest). Required for all other frequencies. |
 | `--output` | No | `json` (default), `table` |
 | `--pretty` | No | Pretty-print JSON output |
 
@@ -44,12 +44,13 @@ asc sales-reports download \
   --frequency MONTHLY \
   --report-date 2024-01
 
-# Weekly installs report (table format)
+# Weekly installs report (--report-date required for WEEKLY)
 asc sales-reports download \
   --vendor-number 123456 \
   --report-type INSTALLS \
   --sub-type SUMMARY \
   --frequency WEEKLY \
+  --report-date 2024-01-07 \
   --output table
 ```
 

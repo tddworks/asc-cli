@@ -13,11 +13,16 @@ Download a sales report from App Store Connect.
 | `--sub-type` | Report sub-type (see values below) |
 | `--frequency` | Reporting frequency (see values below) |
 
+### Conditionally Required Flags
+
+| Flag | Description |
+|------|-------------|
+| `--report-date` | Report date (e.g. `2024-01-15` for daily, `2024-03-01` for weekly, `2024-01` for monthly). **Optional for DAILY** (omit to get latest). **Required for WEEKLY, MONTHLY, and YEARLY** — Apple returns `PARAMETER_ERROR.INVALID` without it. Weekly dates must be a Sunday. |
+
 ### Optional Flags
 
 | Flag | Description |
 |------|-------------|
-| `--report-date` | Report date (e.g. `2024-01-15` for daily, `2024-01` for monthly) |
 | `--output` | Output format: `json` (default), `table` |
 | `--pretty` | Pretty-print JSON output |
 
@@ -74,12 +79,13 @@ asc sales-reports download \
   --report-date 2024-01 \
   --pretty
 
-# Detailed installs by territory
+# Detailed installs by territory (--report-date required for WEEKLY)
 asc sales-reports download \
   --vendor-number 123456 \
   --report-type INSTALLS \
   --sub-type SUMMARY_TERRITORY \
   --frequency WEEKLY \
+  --report-date 2024-01-07 \
   --output table
 ```
 
