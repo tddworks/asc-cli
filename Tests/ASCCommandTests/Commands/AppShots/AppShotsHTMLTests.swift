@@ -123,10 +123,9 @@ struct AppShotsHTMLTests {
         _ = try await cmd.execute()
 
         let html = try String(contentsOfFile: "\(outputDir)/app-shots.html", encoding: .utf8)
-        #expect(html.contains("#0A1628"))
-        #expect(html.contains("#4A7CFF"))
-        #expect(html.contains("#FFFFFF"))
-        #expect(html.contains("#A8B8D0"))
+        #expect(html.contains("#0A1628"))  // primary background
+        #expect(html.contains("#4A7CFF"))  // accent (category label + buttons)
+        #expect(html.contains("#FFFFFF"))  // text (heading)
     }
 
     @Test func `html embeds screenshots as base64 data URIs`() async throws {

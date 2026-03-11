@@ -154,8 +154,10 @@ struct AppShotsHTML: AsyncParsableCommand {
         }.joined(separator: "\n")
 
         let aspectRatio = Double(width) / Double(height)
+        let previewW = 320
+        let previewH = Int(Double(previewW) / aspectRatio)
 
-        // Compute device CSS dimensions based on mockup or defaults
+        // Mockup-aware device CSS
         let deviceCSS: String
         if let m = mockupInfo {
             let screenW = m.frameWidth - 2 * m.insetX
@@ -172,7 +174,7 @@ struct AppShotsHTML: AsyncParsableCommand {
             .slide .phone .device .mockup-frame {
                 display: block;
                 width: 100%;
-                height: 100%;
+                height: auto;
                 position: relative;
                 z-index: 2;
                 pointer-events: none;
@@ -200,7 +202,7 @@ struct AppShotsHTML: AsyncParsableCommand {
                 position: relative;
                 border-radius: \(Int(Double(width) * 0.06))px;
                 overflow: hidden;
-                box-shadow: 0 \(width / 30)px \(width / 10)px rgba(0,0,0,0.5);
+                box-shadow: 0 \(width / 20)px \(width / 8)px rgba(0,0,0,0.4);
             }
             .slide .phone .device img {
                 display: block;
@@ -211,6 +213,20 @@ struct AppShotsHTML: AsyncParsableCommand {
             """
         }
 
+        // Device size picker entries
+        let sizes: [(label: String, w: Int, h: Int)] = [
+            ("6.9\"", 1320, 2868),
+            ("6.7\"", 1290, 2796),
+            ("6.5\"", 1260, 2736),
+            ("6.3\"", 1206, 2622),
+            ("6.1\"", 1179, 2556),
+        ]
+
+        let sizeButtons = sizes.map { size in
+            let isActive = size.w == width && size.h == height
+            return "<button class=\"size-btn\(isActive ? " active" : "")\" data-w=\"\(size.w)\" data-h=\"\(size.h)\">\(size.label)</button>"
+        }.joined(separator: "\n            ")
+
         return """
         <!DOCTYPE html>
         <html lang="en">
@@ -220,221 +236,259 @@ struct AppShotsHTML: AsyncParsableCommand {
         <title>\(escapeHTML(plan.appName)) — App Store Screenshots</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
         <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-            background: #1a1a2e;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+            background: #111;
             color: #e0e0e0;
-            padding: 40px 20px;
+            min-height: 100vh;
         }
 
-        .toolbar {
-            text-align: center;
-            margin-bottom: 40px;
+        /* ── Header bar ── */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 40px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
-        .toolbar h1 {
-            font-size: 24px;
+        .header-left h1 {
+            font-size: 18px;
             font-weight: 700;
-            margin-bottom: 8px;
+            color: #fff;
         }
 
-        .toolbar p {
-            font-size: 14px;
+        .header-left .meta {
+            font-size: 13px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .size-btn {
+            background: rgba(255,255,255,0.08);
             color: #888;
-            margin-bottom: 20px;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
         }
 
-        .toolbar button {
+        .size-btn:hover { background: rgba(255,255,255,0.12); color: #ccc; }
+        .size-btn.active {
+            background: \(plan.colors.accent);
+            color: #fff;
+        }
+
+        .export-all-btn {
             background: \(plan.colors.accent);
             color: #fff;
             border: none;
-            padding: 12px 32px;
-            border-radius: 10px;
-            font-size: 16px;
+            padding: 8px 24px;
+            border-radius: 8px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            margin: 0 8px;
-            transition: opacity 0.2s;
+            margin-left: 10px;
+            transition: opacity 0.15s;
         }
 
-        .toolbar button:hover { opacity: 0.85; }
-        .toolbar button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .export-all-btn:hover { opacity: 0.85; }
+        .export-all-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        .toolbar .size-info {
-            display: inline-block;
-            background: rgba(255,255,255,0.08);
-            padding: 6px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #aaa;
-            margin-left: 12px;
-        }
-
+        /* ── Grid ── */
         .grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 24px;
-            justify-content: center;
-            max-width: 1400px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(\(previewW)px, 1fr));
+            gap: 20px;
+            padding: 32px 40px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
         .card {
-            background: rgba(255,255,255,0.04);
-            border-radius: 16px;
-            padding: 16px;
-            text-align: center;
+            display: flex;
+            flex-direction: column;
         }
 
-        .card .label {
-            font-size: 13px;
-            color: #888;
-            margin-bottom: 8px;
-        }
-
-        /* Preview container — scales the full-resolution slide to fit */
+        /* Preview container — scales the full-res slide to a card */
         .preview-wrap {
-            width: 280px;
-            height: \(Int(280.0 / aspectRatio))px;
+            width: 100%;
+            aspect-ratio: \(width) / \(height);
             overflow: hidden;
-            border-radius: 12px;
+            border-radius: \(Int(Double(width) * 0.04))px;
             position: relative;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .preview-wrap:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5);
         }
 
         .preview-wrap .slide {
             transform-origin: top left;
         }
 
-        /* Full-resolution slide — rendered at actual pixel size */
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 4px 0;
+        }
+
+        .card-footer .card-label {
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .card-footer .card-index {
+            font-size: 13px;
+            color: #444;
+            font-weight: 600;
+        }
+
+        /* ── Full-resolution slide ── */
         .slide {
             width: \(width)px;
             height: \(height)px;
             position: relative;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-        }
-
-        .slide .bg-glow {
-            position: absolute;
-            width: 60%;
-            height: 40%;
-            top: 35%;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 50%;
-            filter: blur(\(width / 4)px);
-            opacity: 0.3;
-            pointer-events: none;
+            border-radius: \(Int(Double(width) * 0.04))px;
         }
 
         .slide .caption {
-            position: relative;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
             z-index: 2;
-            text-align: center;
-            padding-top: \(Int(Double(height) * 0.06))px;
+            padding: \(Int(Double(height) * 0.04))px \(Int(Double(width) * 0.065))px 0;
         }
 
         .slide .caption h2 {
-            font-weight: 700;
-            line-height: 1.1;
-            letter-spacing: -0.02em;
+            font-weight: 800;
+            font-size: \(Int(Double(width) * 0.1))px;
+            line-height: 1.0;
+            letter-spacing: -0.03em;
         }
 
         .slide .caption p {
             font-weight: 400;
+            font-size: \(Int(Double(width) * 0.035))px;
             line-height: 1.3;
-            margin-top: \(Int(Double(height) * 0.012))px;
+            margin-top: \(Int(Double(height) * 0.008))px;
+            opacity: 0.65;
         }
 
         .slide .phone {
-            position: relative;
-            z-index: 2;
-            flex: 1;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            padding-bottom: 0;
+            position: absolute;
+            z-index: 1;
         }
 
         \(deviceCSS)
 
-        /* Layout: center */
-        .layout-center .phone .device {
-            width: \(Int(Double(width) * 0.78))px;
-            height: \(Int(Double(height) * 0.72))px;
+        /* Layout: center — phone centered, overflows bottom */
+        .layout-center .phone {
+            bottom: \(Int(Double(height) * -0.14))px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: \(Int(Double(width) * 0.85))px;
         }
 
-        .layout-center .caption h2 { font-size: \(Int(Double(width) * 0.085))px; }
-        .layout-center .caption p  { font-size: \(Int(Double(width) * 0.04))px; }
+        .layout-center .phone .device { width: 100%; }
 
-        /* Layout: tilted */
-        .layout-tilted .phone .device {
-            width: \(Int(Double(width) * 0.82))px;
-            height: \(Int(Double(height) * 0.72))px;
-            transform: rotate(-6deg) translateY(\(Int(Double(height) * 0.02))px);
+        .layout-center .caption {
+            padding-top: \(Int(Double(height) * 0.035))px;
+            text-align: center;
         }
 
-        .layout-tilted .caption h2 { font-size: \(Int(Double(width) * 0.095))px; }
-        .layout-tilted .caption p  { font-size: \(Int(Double(width) * 0.042))px; }
-
-        /* Layout: left */
-        .layout-left {
-            flex-direction: row !important;
-            align-items: center !important;
+        /* Layout: tilted — hero, slight rotation, overflows bottom */
+        .layout-tilted .phone {
+            bottom: \(Int(Double(height) * -0.12))px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-4deg);
+            width: \(Int(Double(width) * 0.88))px;
         }
 
+        .layout-tilted .phone .device { width: 100%; }
+
+        .layout-tilted .caption {
+            padding-top: \(Int(Double(height) * 0.035))px;
+        }
+
+        /* Layout: left — text left, phone right, overflows bottom+right */
         .layout-left .caption {
-            text-align: left;
-            padding: 0 \(Int(Double(width) * 0.06))px;
-            flex: 1;
+            width: 55%;
+            padding-top: \(Int(Double(height) * 0.06))px;
         }
-
-        .layout-left .caption h2 { font-size: \(Int(Double(width) * 0.08))px; }
-        .layout-left .caption p  { font-size: \(Int(Double(width) * 0.038))px; }
 
         .layout-left .phone {
-            flex: none;
-            align-items: center;
+            right: \(Int(Double(width) * -0.06))px;
+            bottom: \(Int(Double(height) * -0.14))px;
+            width: \(Int(Double(width) * 0.62))px;
         }
 
-        .layout-left .phone .device {
-            width: \(Int(Double(width) * 0.52))px;
-            height: \(Int(Double(height) * 0.72))px;
-        }
+        .layout-left .phone .device { width: 100%; }
 
-        /* Off-screen export container */
+        /* ── Off-screen export container ── */
         .export-container {
             position: absolute;
             left: -99999px;
             top: 0;
         }
 
-        .status {
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(17,17,17,0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 12px 40px;
             text-align: center;
-            margin-top: 20px;
-            font-size: 14px;
+            font-size: 13px;
             color: #888;
-            min-height: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+            z-index: 100;
         }
+
+        .status-bar.visible { transform: translateY(0); }
         </style>
         </head>
         <body>
-        <div class="toolbar">
-            <h1>\(escapeHTML(plan.appName))</h1>
-            <p>\(escapeHTML(plan.tagline))</p>
-            <button onclick="exportAll()">Export All PNGs</button>
-            <span class="size-info">\(width) × \(height)</span>
+        <div class="header">
+            <div class="header-left">
+                <h1>\(escapeHTML(plan.appName))</h1>
+                <div class="meta">\(plan.screens.count) screenshots &middot; \(width)&times;\(height)</div>
+            </div>
+            <div class="header-right">
+                \(sizeButtons)
+                <button class="export-all-btn" onclick="exportAll()">Export All</button>
+            </div>
         </div>
-        <div class="status" id="status"></div>
 
         <div class="grid">
         \(screenshotCards)
         </div>
+
+        <div class="status-bar" id="statusBar"></div>
 
         <!-- Off-screen full-resolution slides for export -->
         <div class="export-container" id="exportContainer">
@@ -449,31 +503,48 @@ struct AppShotsHTML: AsyncParsableCommand {
         const H = \(height);
 
         // Scale previews to fit their containers
-        document.querySelectorAll('.preview-wrap .slide').forEach(el => {
-            const containerWidth = 280;
-            const scale = containerWidth / W;
-            el.style.transform = 'scale(' + scale + ')';
+        function scaleAllPreviews() {
+            document.querySelectorAll('.preview-wrap').forEach(wrap => {
+                const slide = wrap.querySelector('.slide');
+                if (!slide) return;
+                const scale = wrap.offsetWidth / W;
+                slide.style.transform = 'scale(' + scale + ')';
+            });
+        }
+        scaleAllPreviews();
+        window.addEventListener('resize', scaleAllPreviews);
+
+        // Size picker (visual only — shows which size is selected; actual re-gen requires CLI)
+        document.querySelectorAll('.size-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
         });
+
+        function showStatus(msg) {
+            const bar = document.getElementById('statusBar');
+            bar.textContent = msg;
+            bar.classList.add('visible');
+        }
+        function hideStatus() {
+            document.getElementById('statusBar').classList.remove('visible');
+        }
 
         async function exportSingle(index) {
             const el = document.getElementById('export-slide-' + index);
             if (!el) return;
 
-            // Move on-screen momentarily
             const container = document.getElementById('exportContainer');
             container.style.left = '0px';
             container.style.opacity = '0';
             container.style.zIndex = '-1';
 
-            // Warm-up call (ensures fonts/images are loaded)
             await htmlToImage.toPng(el, { width: W, height: H, pixelRatio: 1, cacheBust: true });
-            // Actual export
             const dataUrl = await htmlToImage.toPng(el, { width: W, height: H, pixelRatio: 1, cacheBust: true });
 
-            // Move back off-screen
             container.style.left = '-99999px';
 
-            // Download
             const link = document.createElement('a');
             link.download = 'screen-' + index + '-' + W + 'x' + H + '.png';
             link.href = dataUrl;
@@ -481,21 +552,19 @@ struct AppShotsHTML: AsyncParsableCommand {
         }
 
         async function exportAll() {
-            const btn = document.querySelector('.toolbar button');
-            const status = document.getElementById('status');
+            const btn = document.querySelector('.export-all-btn');
             btn.disabled = true;
 
             const indices = [\(plan.screens.map { "\($0.index)" }.joined(separator: ", "))];
             for (let i = 0; i < indices.length; i++) {
-                status.textContent = 'Exporting screen ' + (i + 1) + ' of ' + indices.length + '...';
+                showStatus('Exporting screen ' + (i + 1) + ' of ' + indices.length + '...');
                 await exportSingle(indices[i]);
-                // Brief delay between exports
                 await new Promise(r => setTimeout(r, 300));
             }
 
-            status.textContent = 'All ' + indices.length + ' screenshots exported!';
+            showStatus('All ' + indices.length + ' screenshots exported!');
             btn.disabled = false;
-            setTimeout(() => { status.textContent = ''; }, 3000);
+            setTimeout(hideStatus, 3000);
         }
         </script>
         </body>
@@ -539,13 +608,12 @@ struct AppShotsHTML: AsyncParsableCommand {
         height: Int
     ) -> String {
         let deviceHTML = renderDeviceHTML(dataURI: dataURI, mockupInfo: mockupInfo, plan: plan, screenIndex: screen.index)
+        let label = screen.index == 0 ? "Hero" : screen.heading
 
         return """
         <div class="card">
-            <div class="label">Screen \(screen.index)\(screen.index == 0 ? " (Hero)" : "")</div>
-            <div class="preview-wrap">
+            <div class="preview-wrap" onclick="exportSingle(\(screen.index))">
                 <div class="slide layout-\(screen.layoutMode.rawValue)" style="background:\(plan.colors.primary);">
-                    <div class="bg-glow" style="background:\(plan.colors.accent);"></div>
                     <div class="caption">
                         <h2 style="color:\(plan.colors.text);">\(escapeHTML(screen.heading))</h2>
                         <p style="color:\(plan.colors.subtext);">\(escapeHTML(screen.subheading))</p>
@@ -555,7 +623,10 @@ struct AppShotsHTML: AsyncParsableCommand {
                     </div>
                 </div>
             </div>
-            <button onclick="exportSingle(\(screen.index))" style="margin-top:10px;background:\(plan.colors.accent);color:#fff;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;font-size:13px;">Export</button>
+            <div class="card-footer">
+                <span class="card-label">\(escapeHTML(label))</span>
+                <span class="card-index">#\(screen.index)</span>
+            </div>
         </div>
         """
     }
@@ -572,7 +643,6 @@ struct AppShotsHTML: AsyncParsableCommand {
 
         return """
         <div id="export-slide-\(screen.index)" class="slide layout-\(screen.layoutMode.rawValue)" style="background:\(plan.colors.primary);">
-            <div class="bg-glow" style="background:\(plan.colors.accent);"></div>
             <div class="caption">
                 <h2 style="color:\(plan.colors.text);">\(escapeHTML(screen.heading))</h2>
                 <p style="color:\(plan.colors.subtext);">\(escapeHTML(screen.subheading))</p>
