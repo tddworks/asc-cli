@@ -14,6 +14,7 @@
   },
   "screens": [
     {
+      "background": { "type": "gradient", "from": "#0B0F1A", "to": "#1B2A4A", "angle": 160 },
       "texts": [
         {
           "content": "All Your Apps",
@@ -28,7 +29,7 @@
           "x": 0.065,
           "y": 0.09,
           "fontSize": 0.033,
-          "color": "#A8B8D0"
+          "color": "#7B9FCC"
         }
       ],
       "devices": [
@@ -42,7 +43,7 @@
       ]
     },
     {
-      "background": { "type": "gradient", "from": "#0A1628", "to": "#1a2744", "angle": 180 },
+      "background": { "type": "gradient", "from": "#0D1B2A", "to": "#1A3352", "angle": 180 },
       "texts": [
         {
           "content": "App Control Hub",
@@ -57,7 +58,7 @@
           "x": 0.065,
           "y": 0.09,
           "fontSize": 0.033,
-          "color": "#A8B8D0"
+          "color": "#6BA3D6"
         }
       ],
       "devices": [
@@ -71,7 +72,7 @@
       ]
     },
     {
-      "background": { "type": "gradient", "from": "#0f1d35", "to": "#162a4a", "angle": 135 },
+      "background": { "type": "gradient", "from": "#0A1225", "to": "#1E3A5F", "angle": 135 },
       "texts": [
         {
           "content": "One App.\nTwo Views.",
@@ -87,7 +88,7 @@
           "x": 0.5,
           "y": 0.12,
           "fontSize": 0.03,
-          "color": "#A8B8D0",
+          "color": "#6BA3D6",
           "textAlign": "center"
         }
       ],
