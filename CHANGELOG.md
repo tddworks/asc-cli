@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- HTML screenshot generation: `asc app-shots html --plan composition-plan.json` — deterministic App Store screenshot generation with real device mockup frames, no AI or API keys needed
+- CompositionPlan format: normalized 0-1 coordinates, multiple devices per slide, text overlays with alignment, gradient backgrounds, per-screen color themes
+- Device mockup system: bundled iPhone 17 Pro Max frame with `mockups.json` config; users can add custom mockups to `~/.asc/mockups/`
+- TextOverlay `textAlign` property: supports `left`, `center`, `right` alignment for text positioning in composition plans
+- Client-side PNG export via html-to-image CDN in generated HTML pages
+
 ---
 
 ## [0.1.42] - 2026-03-11
