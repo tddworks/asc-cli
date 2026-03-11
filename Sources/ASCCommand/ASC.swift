@@ -48,6 +48,8 @@ struct ASC: AsyncParsableCommand {
             SalesReportsCommand.self,
             FinanceReportsCommand.self,
             AnalyticsReportsCommand.self,
+            ReviewsCommand.self,
+            ReviewResponsesCommand.self,
         ]
     )
 }

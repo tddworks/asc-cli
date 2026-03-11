@@ -762,6 +762,46 @@ struct MockRepositoryFactory {
         AppClipDefaultExperienceLocalization(id: id, experienceId: experienceId, locale: locale, subtitle: subtitle)
     }
 
+    // MARK: - Customer Reviews
+
+    static func makeCustomerReview(
+        id: String = "rev-1",
+        appId: String = "app-1",
+        rating: Int = 5,
+        title: String? = "Great app!",
+        body: String? = "Love using this app",
+        reviewerNickname: String? = "user123",
+        createdDate: Date? = nil,
+        territory: String? = "USA"
+    ) -> CustomerReview {
+        CustomerReview(
+            id: id,
+            appId: appId,
+            rating: rating,
+            title: title,
+            body: body,
+            reviewerNickname: reviewerNickname,
+            createdDate: createdDate,
+            territory: territory
+        )
+    }
+
+    static func makeCustomerReviewResponse(
+        id: String = "resp-1",
+        reviewId: String = "rev-1",
+        responseBody: String = "Thank you for your feedback!",
+        lastModifiedDate: Date? = nil,
+        state: ReviewResponseState = .published
+    ) -> CustomerReviewResponse {
+        CustomerReviewResponse(
+            id: id,
+            reviewId: reviewId,
+            responseBody: responseBody,
+            lastModifiedDate: lastModifiedDate,
+            state: state
+        )
+    }
+
     // MARK: - Analytics Reports
 
     static func makeAnalyticsReportRequest(

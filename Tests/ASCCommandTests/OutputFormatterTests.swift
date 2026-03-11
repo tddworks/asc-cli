@@ -81,6 +81,7 @@ struct OutputFormatterTests {
             {
               "affordances" : {
                 "listAppInfos" : "asc app-infos list --app-id 1",
+                "listReviews" : "asc reviews list --app-id 1",
                 "listVersions" : "asc versions list --app-id 1"
               },
               "bundleId" : "com.test",
@@ -107,6 +108,7 @@ struct OutputFormatterTests {
             {
               "affordances" : {
                 "listAppInfos" : "asc app-infos list --app-id app-1",
+                "listReviews" : "asc reviews list --app-id app-1",
                 "listVersions" : "asc versions list --app-id app-1"
               },
               "bundleId" : "com.test",

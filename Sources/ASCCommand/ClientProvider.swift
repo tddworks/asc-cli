@@ -243,4 +243,10 @@ struct ClientProvider {
         let factory = ClientFactory()
         return try factory.makeAnalyticsReportRepository(authProvider: authProvider)
     }
+
+    static func makeCustomerReviewRepository() throws -> any CustomerReviewRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeCustomerReviewRepository(authProvider: authProvider)
+    }
 }

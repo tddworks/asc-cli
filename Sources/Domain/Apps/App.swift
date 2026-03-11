@@ -29,6 +29,7 @@ extension App: AffordanceProviding {
         [
             "listVersions": "asc versions list --app-id \(id)",
             "listAppInfos": "asc app-infos list --app-id \(id)",
+            "listReviews": "asc reviews list --app-id \(id)",
         ]
     }
 }
