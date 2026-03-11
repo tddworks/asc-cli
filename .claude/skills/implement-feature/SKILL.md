@@ -21,8 +21,10 @@ Implement features using architecture-first design, TDD, rich domain models, and
    • Analyze requirements, create ASCII diagram
    • Present to user → wait for approval
 
-2. TDD IMPLEMENTATION
-   • Think from user's mental model for test cases by writing domain tests first, then infrastructure, then command tests
+2. TDD IMPLEMENTATION (Always write tests FIRST)
+   • NEVER write implementation code without a failing test
+   • Write domain tests first → then infrastructure tests → then command tests
+   • Each test must FAIL (red) before writing implementation
    • Domain tests → Domain value types + AffordanceProviding + @Mockable protocol
    • Infrastructure: SDK adapter injecting parent IDs
    • Command: formatAgentItems → {"data":[{...,"affordances":{...}}]}
@@ -110,6 +112,8 @@ struct MyList: AsyncParsableCommand {
 ---
 
 ## TDD Workflow
+
+**ALWAYS write tests first, then implement. Never write implementation code without a failing test. This is non-negotiable.**
 
 See [tdd-patterns.md](references/tdd-patterns.md) for complete patterns including:
 - `MockRepositoryFactory` (always use, never construct models inline)

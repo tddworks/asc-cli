@@ -131,6 +131,8 @@ Examples:
 
 ## TDD Pattern (Chicago School)
 
+**ALWAYS write tests first, then implement. Never write implementation code without a failing test. This is non-negotiable.**
+
 ```swift
 @Suite
 struct {Component}Tests {
@@ -170,6 +172,7 @@ swift test  # Must remain all green
 - Follow existing code patterns
 
 ### Don't
+- Write implementation before tests — always Red → Green → Refactor
 - Over-engineer simple improvements
 - Change unrelated code
 - Break existing tests
