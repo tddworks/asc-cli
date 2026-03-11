@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.41] - 2026-03-10
+
 ### Added
 - Customer reviews: `asc reviews list --app-id <id>` and `asc reviews get --review-id <id>` — list and view customer reviews with rating, title, body, reviewer nickname, and territory
 - Review responses: `asc review-responses create --review-id <id> --response-body "text"`, `asc review-responses get --review-id <id>`, `asc review-responses delete --response-id <id>` — manage developer responses to customer reviews
@@ -369,7 +373,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.40...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.41...HEAD
+[0.1.41]: https://github.com/tddworks/asc-cli/compare/v0.1.40...v0.1.41
 [0.1.40]: https://github.com/tddworks/asc-cli/compare/v0.1.39...v0.1.40
 [0.1.39]: https://github.com/tddworks/asc-cli/compare/v0.1.38...v0.1.39
 [0.1.38]: https://github.com/tddworks/asc-cli/compare/v0.1.37...v0.1.38
