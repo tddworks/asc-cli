@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Subscription offer codes: `asc subscription-offer-codes list/create/update`, `asc subscription-offer-code-custom-codes list/create/update`, `asc subscription-offer-code-one-time-codes list/create/update` — manage offer codes, custom redeemable codes, and one-time use code batches for auto-renewable subscriptions
+- IAP offer codes: `asc iap-offer-codes list/create/update`, `asc iap-offer-code-custom-codes list/create/update`, `asc iap-offer-code-one-time-codes list/create/update` — manage offer codes, custom redeemable codes, and one-time use code batches for in-app purchases
 - Power & performance metrics: `asc perf-metrics list --app-id <id>` and `asc perf-metrics list --build-id <id>` — download launch time, hang rate, memory, disk, battery, termination, and animation metrics with `--metric-type` filter
 - Diagnostic signatures: `asc diagnostics list --build-id <id>` — list hang, disk write, and launch diagnostic hotspots with `--diagnostic-type` filter
 - Diagnostic logs: `asc diagnostic-logs list --signature-id <id>` — view call stack metadata for a specific diagnostic signature

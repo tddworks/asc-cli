@@ -327,6 +327,224 @@ asc subscription-offers create \
 
 ---
 
+### `asc subscription-offer-codes list`
+
+List offer codes for a subscription.
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--subscription-id` | ✓ | Subscription ID |
+| `--output` | | `json` (default) or `table` |
+| `--pretty` | | Pretty-print JSON |
+
+```bash
+asc subscription-offer-codes list --subscription-id sub-1 --pretty
+```
+
+---
+
+### `asc subscription-offer-codes create`
+
+Create a new offer code for a subscription.
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--subscription-id` | ✓ | Subscription ID |
+| `--name` | ✓ | Offer code name (e.g. `SUMMER2026`) |
+| `--duration` | ✓ | `THREE_DAYS`, `ONE_WEEK`, `TWO_WEEKS`, `ONE_MONTH`, `TWO_MONTHS`, `THREE_MONTHS`, `SIX_MONTHS`, `ONE_YEAR` |
+| `--mode` | ✓ | `FREE_TRIAL`, `PAY_AS_YOU_GO`, `PAY_UP_FRONT` |
+| `--periods` | ✓ | Number of periods |
+| `--eligibility` | ✓ | Customer eligibility (repeatable): `NEW`, `LAPSED`, `WIN_BACK`, `PAID_SUBSCRIBER` |
+| `--offer-eligibility` | ✓ | `STACKABLE`, `INTRODUCTORY`, `SUBSCRIPTION_OFFER` |
+
+```bash
+asc subscription-offer-codes create \
+  --subscription-id sub-1 \
+  --name "SUMMER2026" \
+  --duration ONE_MONTH \
+  --mode FREE_TRIAL \
+  --periods 1 \
+  --eligibility NEW \
+  --eligibility LAPSED \
+  --offer-eligibility STACKABLE
+```
+
+---
+
+### `asc subscription-offer-codes update`
+
+Activate or deactivate an offer code.
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--offer-code-id` | ✓ | Offer code ID |
+| `--active` | ✓ | `true` or `false` |
+
+```bash
+asc subscription-offer-codes update --offer-code-id oc-1 --active false
+```
+
+---
+
+### `asc subscription-offer-code-custom-codes list`
+
+List custom redeemable codes for an offer code.
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--offer-code-id` | ✓ | Offer code ID |
+
+```bash
+asc subscription-offer-code-custom-codes list --offer-code-id oc-1
+```
+
+---
+
+### `asc subscription-offer-code-custom-codes create`
+
+Create a custom redeemable code for an offer code.
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--offer-code-id` | ✓ | Offer code ID |
+| `--custom-code` | ✓ | Custom code string (e.g. `SUMMER2026`) |
+| `--number-of-codes` | ✓ | Number of redemptions allowed |
+| `--expiration-date` | | Expiration date `YYYY-MM-DD` |
+
+```bash
+asc subscription-offer-code-custom-codes create \
+  --offer-code-id oc-1 \
+  --custom-code "SUMMER2026" \
+  --number-of-codes 1000 \
+  --expiration-date 2026-12-31
+```
+
+---
+
+### `asc subscription-offer-code-custom-codes update`
+
+Activate or deactivate a custom code.
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--custom-code-id` | ✓ | Custom code ID |
+| `--active` | ✓ | `true` or `false` |
+
+```bash
+asc subscription-offer-code-custom-codes update --custom-code-id cc-1 --active false
+```
+
+---
+
+### `asc subscription-offer-code-one-time-codes list`
+
+List one-time use code batches for an offer code.
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--offer-code-id` | ✓ | Offer code ID |
+
+```bash
+asc subscription-offer-code-one-time-codes list --offer-code-id oc-1
+```
+
+---
+
+### `asc subscription-offer-code-one-time-codes create`
+
+Generate a batch of one-time use codes.
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--offer-code-id` | ✓ | Offer code ID |
+| `--number-of-codes` | ✓ | Number of codes to generate |
+| `--expiration-date` | ✓ | Expiration date `YYYY-MM-DD` |
+
+```bash
+asc subscription-offer-code-one-time-codes create \
+  --offer-code-id oc-1 \
+  --number-of-codes 5000 \
+  --expiration-date 2026-12-31
+```
+
+---
+
+### `asc subscription-offer-code-one-time-codes update`
+
+Activate or deactivate a one-time code batch.
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--one-time-code-id` | ✓ | One-time code ID |
+| `--active` | ✓ | `true` or `false` |
+
+```bash
+asc subscription-offer-code-one-time-codes update --one-time-code-id otc-1 --active false
+```
+
+---
+
+### `asc iap-offer-codes list`
+
+List offer codes for an in-app purchase.
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--iap-id` | ✓ | IAP ID |
+
+```bash
+asc iap-offer-codes list --iap-id iap-1
+```
+
+---
+
+### `asc iap-offer-codes create`
+
+Create a new offer code for an in-app purchase.
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--iap-id` | ✓ | IAP ID |
+| `--name` | ✓ | Offer code name |
+| `--eligibility` | ✓ | Customer eligibility (repeatable): `NON_SPENDER`, `ACTIVE_SPENDER`, `CHURNED_SPENDER` |
+
+```bash
+asc iap-offer-codes create \
+  --iap-id iap-1 \
+  --name "FREEGEMS" \
+  --eligibility NON_SPENDER \
+  --eligibility CHURNED_SPENDER
+```
+
+---
+
+### `asc iap-offer-codes update`
+
+Activate or deactivate an IAP offer code.
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--offer-code-id` | ✓ | Offer code ID |
+| `--active` | ✓ | `true` or `false` |
+
+```bash
+asc iap-offer-codes update --offer-code-id oc-1 --active false
+```
+
+---
+
+### `asc iap-offer-code-custom-codes list/create/update`
+
+Same interface as subscription custom codes — `--offer-code-id`, `--custom-code`, `--number-of-codes`, `--expiration-date`, `--custom-code-id`, `--active`.
+
+---
+
+### `asc iap-offer-code-one-time-codes list/create/update`
+
+Same interface as subscription one-time codes — `--offer-code-id`, `--number-of-codes`, `--expiration-date`, `--one-time-code-id`, `--active`.
+
+---
+
 ## Typical Workflow
 
 ```bash
@@ -396,6 +614,16 @@ IAPLocalizationsList/Create      SDKIAPLocalizationRepo               InAppPurch
 SubscriptionGroupsList/Create    SDKSubscriptionGroupRepo             SubscriptionGroup
 SubscriptionsList/Create         SDKSubscriptionRepository            Subscription
 SubLocalizationsList/Create      SDKSubLocalizationRepo               SubscriptionLocalization
+SubOfferCodesList/Create/Update  SDKSubscriptionOfferCodeRepo         SubscriptionOfferCode
+SubOfferCodeCustomCodesList/     SDKSubscriptionOfferCodeRepo         SubscriptionOfferCodeCustomCode
+  Create/Update
+SubOfferCodeOneTimeCodesList/    SDKSubscriptionOfferCodeRepo         SubscriptionOfferCodeOneTimeUseCode
+  Create/Update
+IAPOfferCodesList/Create/Update  SDKIAPOfferCodeRepo                  InAppPurchaseOfferCode
+IAPOfferCodeCustomCodesList/     SDKIAPOfferCodeRepo                  InAppPurchaseOfferCodeCustomCode
+  Create/Update
+IAPOfferCodeOneTimeCodesList/    SDKIAPOfferCodeRepo                  InAppPurchaseOfferCodeOneTimeUseCode
+  Create/Update
 ```
 
 All Infrastructure repositories inject the parent ID from the request parameter since the ASC API does not return it in responses.
@@ -606,9 +834,14 @@ Sources/Domain/Apps/
 │   ├── InAppPurchasePricePoint.swift
 │   ├── InAppPurchasePriceSchedule.swift
 │   ├── InAppPurchasePriceRepository.swift
-│   └── Localizations/
-│       ├── InAppPurchaseLocalization.swift
-│       └── InAppPurchaseLocalizationRepository.swift
+│   ├── Localizations/
+│   │   ├── InAppPurchaseLocalization.swift
+│   │   └── InAppPurchaseLocalizationRepository.swift
+│   └── OfferCodes/
+│       ├── InAppPurchaseOfferCode.swift
+│       ├── InAppPurchaseOfferCodeCustomCode.swift
+│       ├── InAppPurchaseOfferCodeOneTimeUseCode.swift
+│       └── InAppPurchaseOfferCodeRepository.swift
 └── Subscriptions/
     ├── SubscriptionGroup.swift
     ├── SubscriptionGroupRepository.swift
@@ -619,6 +852,11 @@ Sources/Domain/Apps/
     ├── IntroductoryOffers/
     │   ├── SubscriptionIntroductoryOffer.swift
     │   └── SubscriptionIntroductoryOfferRepository.swift
+    ├── OfferCodes/
+    │   ├── SubscriptionOfferCode.swift
+    │   ├── SubscriptionOfferCodeCustomCode.swift
+    │   ├── SubscriptionOfferCodeOneTimeUseCode.swift
+    │   └── SubscriptionOfferCodeRepository.swift
     └── Localizations/
         ├── SubscriptionLocalization.swift
         └── SubscriptionLocalizationRepository.swift
@@ -628,14 +866,18 @@ Sources/Infrastructure/Apps/
 │   ├── SDKInAppPurchaseRepository.swift
 │   ├── SDKInAppPurchaseSubmissionRepository.swift
 │   ├── SDKInAppPurchasePriceRepository.swift
-│   └── Localizations/
-│       └── SDKInAppPurchaseLocalizationRepository.swift
+│   ├── Localizations/
+│   │   └── SDKInAppPurchaseLocalizationRepository.swift
+│   └── OfferCodes/
+│       └── SDKInAppPurchaseOfferCodeRepository.swift
 └── Subscriptions/
     ├── SDKSubscriptionGroupRepository.swift
     ├── SDKSubscriptionRepository.swift
     ├── SDKSubscriptionSubmissionRepository.swift
     ├── IntroductoryOffers/
     │   └── SDKSubscriptionIntroductoryOfferRepository.swift
+    ├── OfferCodes/
+    │   └── SDKSubscriptionOfferCodeRepository.swift
     └── Localizations/
         └── SDKSubscriptionLocalizationRepository.swift
 
@@ -666,18 +908,48 @@ Sources/ASCCommand/Commands/
 │   ├── SubscriptionLocalizationsCommand.swift
 │   ├── SubscriptionLocalizationsList.swift
 │   └── SubscriptionLocalizationsCreate.swift
-└── SubscriptionOffers/
-    ├── SubscriptionOffersCommand.swift
-    ├── SubscriptionOffersList.swift
-    └── SubscriptionOffersCreate.swift
+├── SubscriptionOffers/
+│   ├── SubscriptionOffersCommand.swift
+│   ├── SubscriptionOffersList.swift
+│   └── SubscriptionOffersCreate.swift
+├── SubscriptionOfferCodes/
+│   ├── SubscriptionOfferCodesCommand.swift
+│   ├── SubscriptionOfferCodesList.swift
+│   ├── SubscriptionOfferCodesCreate.swift
+│   └── SubscriptionOfferCodesUpdate.swift
+├── SubscriptionOfferCodeCustomCodes/
+│   ├── SubscriptionOfferCodeCustomCodesCommand.swift
+│   ├── SubscriptionOfferCodeCustomCodesList.swift
+│   ├── SubscriptionOfferCodeCustomCodesCreate.swift
+│   └── SubscriptionOfferCodeCustomCodesUpdate.swift
+├── SubscriptionOfferCodeOneTimeCodes/
+│   ├── SubscriptionOfferCodeOneTimeCodesCommand.swift
+│   ├── SubscriptionOfferCodeOneTimeCodesList.swift
+│   ├── SubscriptionOfferCodeOneTimeCodesCreate.swift
+│   └── SubscriptionOfferCodeOneTimeCodesUpdate.swift
+├── IAPOfferCodes/
+│   ├── IAPOfferCodesCommand.swift
+│   ├── IAPOfferCodesList.swift
+│   ├── IAPOfferCodesCreate.swift
+│   └── IAPOfferCodesUpdate.swift
+├── IAPOfferCodeCustomCodes/
+│   ├── IAPOfferCodeCustomCodesCommand.swift
+│   ├── IAPOfferCodeCustomCodesList.swift
+│   ├── IAPOfferCodeCustomCodesCreate.swift
+│   └── IAPOfferCodeCustomCodesUpdate.swift
+└── IAPOfferCodeOneTimeCodes/
+    ├── IAPOfferCodeOneTimeCodesCommand.swift
+    ├── IAPOfferCodeOneTimeCodesList.swift
+    ├── IAPOfferCodeOneTimeCodesCreate.swift
+    └── IAPOfferCodeOneTimeCodesUpdate.swift
 ```
 
 **Wiring files:**
 | File | Change |
 |------|--------|
-| `Sources/ASCCommand/ASC.swift` | Register 7 new command groups |
-| `Sources/ASCCommand/ClientProvider.swift` | 8 new factory methods |
-| `Sources/Infrastructure/Client/ClientFactory.swift` | 8 new factory methods |
+| `Sources/ASCCommand/ASC.swift` | Register 13 command groups (7 existing + 6 new offer code groups) |
+| `Sources/ASCCommand/ClientProvider.swift` | 10 factory methods (8 existing + 2 new offer code repos) |
+| `Sources/Infrastructure/Client/ClientFactory.swift` | 10 factory methods (8 existing + 2 new offer code repos) |
 
 ---
 
@@ -701,6 +973,20 @@ Sources/ASCCommand/Commands/
 | `subscriptions submit` | `APIEndpoint.v1.subscriptionSubmissions.post(SubscriptionSubmissionCreateRequest)` | v1 |
 | `subscription-offers list` | `APIEndpoint.v1.subscriptions.id(subscriptionId).introductoryOffers.get()` | v1 |
 | `subscription-offers create` | `APIEndpoint.v1.subscriptionIntroductoryOffers.post(SubscriptionIntroductoryOfferCreateRequest)` | v1 |
+| `subscription-offer-codes list` | `APIEndpoint.v1.subscriptions.id(subscriptionId).offerCodes.get()` | v1 |
+| `subscription-offer-codes create` | `APIEndpoint.v1.subscriptionOfferCodes.post(SubscriptionOfferCodeCreateRequest)` | v1 |
+| `subscription-offer-codes update` | `APIEndpoint.v1.subscriptionOfferCodes.id(offerCodeId).patch(SubscriptionOfferCodeUpdateRequest)` | v1 |
+| `subscription-offer-code-custom-codes list` | `APIEndpoint.v1.subscriptionOfferCodes.id(offerCodeId).customCodes.get()` | v1 |
+| `subscription-offer-code-custom-codes create` | `APIEndpoint.v1.subscriptionOfferCodeCustomCodes.post(SubscriptionOfferCodeCustomCodeCreateRequest)` | v1 |
+| `subscription-offer-code-one-time-codes list` | `APIEndpoint.v1.subscriptionOfferCodes.id(offerCodeId).oneTimeUseCodes.get()` | v1 |
+| `subscription-offer-code-one-time-codes create` | `APIEndpoint.v1.subscriptionOfferCodeOneTimeUseCodes.post(SubscriptionOfferCodeOneTimeUseCodeCreateRequest)` | v1 |
+| `iap-offer-codes list` | `APIEndpoint.v2.inAppPurchases.id(iapId).offerCodes.get()` | v2 |
+| `iap-offer-codes create` | `APIEndpoint.v1.inAppPurchaseOfferCodes.post(InAppPurchaseOfferCodeCreateRequest)` | v1 |
+| `iap-offer-codes update` | `APIEndpoint.v1.inAppPurchaseOfferCodes.id(offerCodeId).patch(InAppPurchaseOfferCodeUpdateRequest)` | v1 |
+| `iap-offer-code-custom-codes list` | `APIEndpoint.v1.inAppPurchaseOfferCodes.id(offerCodeId).customCodes.get()` | v1 |
+| `iap-offer-code-custom-codes create` | `APIEndpoint.v1.inAppPurchaseOfferCodeCustomCodes.post(InAppPurchaseOfferCodeCustomCodeCreateRequest)` | v1 |
+| `iap-offer-code-one-time-codes list` | `APIEndpoint.v1.inAppPurchaseOfferCodes.id(offerCodeId).oneTimeUseCodes.get()` | v1 |
+| `iap-offer-code-one-time-codes create` | `APIEndpoint.v1.inAppPurchaseOfferCodeOneTimeUseCodes.post(InAppPurchaseOfferCodeOneTimeUseCodeCreateRequest)` | v1 |
 
 ---
 
@@ -744,6 +1030,90 @@ Sources/ASCCommand/Commands/
 ```bash
 swift test --filter 'IAPListTests|IAPCreateTests|IAPSubmitTests|IAPPricePointsListTests|IAPPricesSetTests|SubscriptionGroupsListTests|SubscriptionsListTests'
 ```
+
+---
+
+### `SubscriptionOfferCode`
+
+```swift
+public struct SubscriptionOfferCode: Sendable, Equatable, Identifiable {
+    public let id: String
+    public let subscriptionId: String  // parent — injected by Infrastructure
+    public let name: String
+    public let customerEligibilities: [SubscriptionCustomerEligibility]
+    public let offerEligibility: SubscriptionOfferEligibility
+    public let duration: SubscriptionOfferDuration
+    public let offerMode: SubscriptionOfferMode
+    public let numberOfPeriods: Int
+    public let totalNumberOfCodes: Int?  // omitted from JSON when nil
+    public let isActive: Bool
+}
+```
+
+**`SubscriptionCustomerEligibility`**: `NEW`, `LAPSED`, `WIN_BACK`, `PAID_SUBSCRIBER`
+**`SubscriptionOfferEligibility`**: `STACKABLE`, `INTRODUCTORY`, `SUBSCRIPTION_OFFER`
+
+**Affordances:** `listOfferCodes`, `listCustomCodes`, `listOneTimeCodes` (always); `deactivate` only when `isActive == true`
+
+---
+
+### `SubscriptionOfferCodeCustomCode`
+
+```swift
+public struct SubscriptionOfferCodeCustomCode: Sendable, Equatable, Identifiable {
+    public let id: String
+    public let offerCodeId: String     // parent — injected by Infrastructure
+    public let customCode: String
+    public let numberOfCodes: Int
+    public let createdDate: String?    // omitted from JSON when nil
+    public let expirationDate: String? // omitted from JSON when nil
+    public let isActive: Bool
+}
+```
+
+**Affordances:** `listCustomCodes` (always); `deactivate` only when `isActive == true`
+
+---
+
+### `SubscriptionOfferCodeOneTimeUseCode`
+
+```swift
+public struct SubscriptionOfferCodeOneTimeUseCode: Sendable, Equatable, Identifiable {
+    public let id: String
+    public let offerCodeId: String     // parent — injected by Infrastructure
+    public let numberOfCodes: Int
+    public let createdDate: String?    // omitted from JSON when nil
+    public let expirationDate: String? // omitted from JSON when nil
+    public let isActive: Bool
+}
+```
+
+**Affordances:** `listOneTimeCodes` (always); `deactivate` only when `isActive == true`
+
+---
+
+### `InAppPurchaseOfferCode`
+
+```swift
+public struct InAppPurchaseOfferCode: Sendable, Equatable, Identifiable {
+    public let id: String
+    public let iapId: String           // parent — injected by Infrastructure
+    public let name: String
+    public let customerEligibilities: [IAPCustomerEligibility]
+    public let isActive: Bool
+    public let totalNumberOfCodes: Int? // omitted from JSON when nil
+}
+```
+
+**`IAPCustomerEligibility`**: `NON_SPENDER`, `ACTIVE_SPENDER`, `CHURNED_SPENDER`
+
+**Affordances:** `listOfferCodes`, `listCustomCodes`, `listOneTimeCodes` (always); `deactivate` only when `isActive == true`
+
+---
+
+### `InAppPurchaseOfferCodeCustomCode` / `InAppPurchaseOfferCodeOneTimeUseCode`
+
+Same structure as subscription counterparts with `offerCodeId` as parent.
 
 ---
 
