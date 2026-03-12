@@ -147,6 +147,7 @@ Every IAP response embeds ready-to-run follow-up commands:
   "affordances": {
     "listLocalizations":  "asc iap-localizations list --iap-id <ID>",
     "createLocalization": "asc iap-localizations create --iap-id <ID> --locale en-US --name <name>",
+    "listOfferCodes":     "asc iap-offer-codes list --iap-id <ID>",
     "listPricePoints":    "asc iap price-points list --iap-id <ID>",
     "submit":             "asc iap submit --iap-id <ID>"
   }

@@ -27,7 +27,8 @@ asc iap list --app-id A123 --pretty
     {
       "affordances": {
         "createLocalization": "asc iap-localizations create --iap-id iap-1 --locale en-US --name <name>",
-        "listLocalizations": "asc iap-localizations list --iap-id iap-1"
+        "listLocalizations": "asc iap-localizations list --iap-id iap-1",
+        "listOfferCodes": "asc iap-offer-codes list --iap-id iap-1"
       },
       "appId": "A123",
       "id": "iap-1",
@@ -662,7 +663,7 @@ CLI arguments: `consumable`, `non-consumable`, `non-renewing-subscription`
 - `isEditable` — `true` when `MISSING_METADATA`, `REJECTED`, or `DEVELOPER_ACTION_NEEDED`
 - `isPendingReview` — `true` when `WAITING_FOR_REVIEW` or `IN_REVIEW`
 
-**Affordances:** `listLocalizations`, `createLocalization`, `listPricePoints` (always); `submit` only when `state == .readyToSubmit`
+**Affordances:** `listLocalizations`, `createLocalization`, `listOfferCodes`, `listPricePoints` (always); `submit` only when `state == .readyToSubmit`
 
 ---
 
@@ -760,7 +761,7 @@ public struct Subscription: Sendable, Equatable, Identifiable {
 
 **`SubscriptionState`** semantic booleans: same as `InAppPurchaseState`
 
-**Affordances:** `createIntroductoryOffer`, `createLocalization`, `listIntroductoryOffers`, `listLocalizations` (always); `submit` only when `state == READY_TO_SUBMIT`
+**Affordances:** `createIntroductoryOffer`, `createLocalization`, `listIntroductoryOffers`, `listLocalizations`, `listOfferCodes` (always); `submit` only when `state == READY_TO_SUBMIT`
 
 ---
 

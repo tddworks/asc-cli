@@ -181,7 +181,8 @@ Every subscription group response embeds ready-to-run follow-up commands:
     "createIntroductoryOffer": "asc subscription-offers create --subscription-id <ID> --duration ONE_MONTH --mode FREE_TRIAL --periods 1",
     "createLocalization":      "asc subscription-localizations create --subscription-id <ID> --locale en-US --name <name>",
     "listIntroductoryOffers":  "asc subscription-offers list --subscription-id <ID>",
-    "listLocalizations":       "asc subscription-localizations list --subscription-id <ID>"
+    "listLocalizations":       "asc subscription-localizations list --subscription-id <ID>",
+    "listOfferCodes":          "asc subscription-offer-codes list --subscription-id <ID>"
   }
 }
 ```

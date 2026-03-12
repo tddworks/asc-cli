@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- `InAppPurchase` and `Subscription` affordances now include `listOfferCodes` for direct navigation to offer codes
+
 ### Added
 - Subscription offer codes: `asc subscription-offer-codes list/create/update`, `asc subscription-offer-code-custom-codes list/create/update`, `asc subscription-offer-code-one-time-codes list/create/update` — manage offer codes, custom redeemable codes, and one-time use code batches for auto-renewable subscriptions
 - IAP offer codes: `asc iap-offer-codes list/create/update`, `asc iap-offer-code-custom-codes list/create/update`, `asc iap-offer-code-one-time-codes list/create/update` — manage offer codes, custom redeemable codes, and one-time use code batches for in-app purchases
