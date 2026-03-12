@@ -73,6 +73,139 @@ struct SDKDiagnosticsRepositoryTests {
         #expect(result[0].insightDirection == nil)
     }
 
+    @Test func `listSignatures maps diskWrites diagnostic type`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(DiagnosticSignaturesResponse(
+            data: [makeSDKSignature(diagnosticType: .diskWrites)],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKDiagnosticsRepository(client: stub)
+        let result = try await repo.listSignatures(buildId: "build-1", diagnosticType: .diskWrites)
+
+        #expect(result[0].diagnosticType == .diskWrites)
+    }
+
+    @Test func `listSignatures maps launches diagnostic type`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(DiagnosticSignaturesResponse(
+            data: [makeSDKSignature(diagnosticType: .launches)],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKDiagnosticsRepository(client: stub)
+        let result = try await repo.listSignatures(buildId: "build-1", diagnosticType: .launches)
+
+        #expect(result[0].diagnosticType == .launches)
+    }
+
+    @Test func `listSignatures maps DOWN insight direction`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(DiagnosticSignaturesResponse(
+            data: [makeSDKSignature(insightDirection: .down)],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKDiagnosticsRepository(client: stub)
+        let result = try await repo.listSignatures(buildId: "build-1", diagnosticType: nil)
+
+        #expect(result[0].insightDirection == "DOWN")
+    }
+
+    @Test func `listSignatures maps UNDEFINED insight direction`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(DiagnosticSignaturesResponse(
+            data: [makeSDKSignature(insightDirection: .undefined)],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKDiagnosticsRepository(client: stub)
+        let result = try await repo.listSignatures(buildId: "build-1", diagnosticType: nil)
+
+        #expect(result[0].insightDirection == "UNDEFINED")
+    }
+
+    @Test func `listSignatures maps nil diagnosticType as hangs`() async throws {
+        let stub = StubAPIClient()
+        let sig = AppStoreConnect_Swift_SDK.DiagnosticSignature(
+            type: .diagnosticSignatures,
+            id: "sig-nil",
+            attributes: .init(diagnosticType: nil, signature: "unknown", weight: 10.0)
+        )
+        stub.willReturn(DiagnosticSignaturesResponse(data: [sig], links: .init(this: "")))
+
+        let repo = SDKDiagnosticsRepository(client: stub)
+        let result = try await repo.listSignatures(buildId: "build-1", diagnosticType: nil)
+
+        #expect(result[0].diagnosticType == .hangs)
+    }
+
+    @Test func `listLogs extracts call stack summary from frames`() async throws {
+        let stub = StubAPIClient()
+        let logs = DiagnosticLogs(
+            productData: [
+                .init(
+                    signatureID: "sig-1",
+                    diagnosticInsights: nil,
+                    diagnosticLogs: [
+                        .init(
+                            callStackTree: [
+                                .init(
+                                    isCallStackPerThread: false,
+                                    callStacks: [
+                                        .init(callStackRootFrames: [
+                                            DiagnosticLogCallStackNode(
+                                                symbolName: "main",
+                                                subFrames: [
+                                                    DiagnosticLogCallStackNode(
+                                                        symbolName: "UIApplicationMain",
+                                                        subFrames: [
+                                                            DiagnosticLogCallStackNode(symbolName: "layoutSubviews")
+                                                        ]
+                                                    )
+                                                ]
+                                            )
+                                        ])
+                                    ]
+                                )
+                            ],
+                            diagnosticMetaData: .init(bundleID: "com.test")
+                        )
+                    ]
+                )
+            ],
+            version: "1.0"
+        )
+        stub.willReturn(logs)
+
+        let repo = SDKDiagnosticsRepository(client: stub)
+        let result = try await repo.listLogs(signatureId: "sig-1")
+
+        #expect(result[0].callStackSummary == "main > UIApplicationMain > layoutSubviews")
+    }
+
+    @Test func `listLogs returns nil callStackSummary when no call stack tree`() async throws {
+        let stub = StubAPIClient()
+        let logs = DiagnosticLogs(
+            productData: [
+                .init(
+                    signatureID: "sig-1",
+                    diagnosticInsights: nil,
+                    diagnosticLogs: [
+                        .init(callStackTree: nil, diagnosticMetaData: .init(bundleID: "com.test"))
+                    ]
+                )
+            ],
+            version: "1.0"
+        )
+        stub.willReturn(logs)
+
+        let repo = SDKDiagnosticsRepository(client: stub)
+        let result = try await repo.listLogs(signatureId: "sig-1")
+
+        #expect(result[0].callStackSummary == nil)
+    }
+
     @Test func `listLogs maps diagnostic logs and injects signatureId`() async throws {
         let stub = StubAPIClient()
         let logs = DiagnosticLogs(
