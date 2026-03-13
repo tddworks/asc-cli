@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.48] - 2026-03-13
+
 ### Added
 - `asc beta-review submissions list --build-id <id>` — list beta app review submissions for a build
 - `asc beta-review submissions create --build-id <id>` — submit a build for beta (TestFlight external) review
@@ -433,7 +437,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.47...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.48...HEAD
+[0.1.48]: https://github.com/tddworks/asc-cli/compare/v0.1.47...v0.1.48
 [0.1.47]: https://github.com/tddworks/asc-cli/compare/v0.1.46...v0.1.47
 [0.1.46]: https://github.com/tddworks/asc-cli/compare/v0.1.45...v0.1.46
 [0.1.45]: https://github.com/tddworks/asc-cli/compare/v0.1.43...v0.1.45
