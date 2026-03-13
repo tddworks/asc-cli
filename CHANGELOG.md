@@ -16,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.47] - 2026-03-13
+
+### Changed
+- Bug fixes and improvements.
+
+---
+
 ## [0.1.46] - 2026-03-13
 
 ### Added
@@ -426,7 +433,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.46...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.47...HEAD
+[0.1.47]: https://github.com/tddworks/asc-cli/compare/v0.1.46...v0.1.47
 [0.1.46]: https://github.com/tddworks/asc-cli/compare/v0.1.45...v0.1.46
 [0.1.45]: https://github.com/tddworks/asc-cli/compare/v0.1.43...v0.1.45
 [0.1.43]: https://github.com/tddworks/asc-cli/compare/v0.1.42...v0.1.43
