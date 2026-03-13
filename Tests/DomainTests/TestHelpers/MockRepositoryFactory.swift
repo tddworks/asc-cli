@@ -1025,6 +1025,43 @@ struct MockRepositoryFactory {
         )
     }
 
+    // MARK: - Beta App Review
+
+    static func makeBetaAppReviewSubmission(
+        id: String = "sub-1",
+        buildId: String = "build-1",
+        state: BetaReviewState = .waitingForReview,
+        submittedDate: Date? = nil
+    ) -> BetaAppReviewSubmission {
+        BetaAppReviewSubmission(id: id, buildId: buildId, state: state, submittedDate: submittedDate)
+    }
+
+    static func makeBetaAppReviewDetail(
+        id: String = "brd-1",
+        appId: String = "app-1",
+        contactFirstName: String? = "John",
+        contactLastName: String? = "Doe",
+        contactPhone: String? = "+1-555-0100",
+        contactEmail: String? = "john@example.com",
+        demoAccountName: String? = nil,
+        demoAccountPassword: String? = nil,
+        demoAccountRequired: Bool = false,
+        notes: String? = nil
+    ) -> BetaAppReviewDetail {
+        BetaAppReviewDetail(
+            id: id,
+            appId: appId,
+            contactFirstName: contactFirstName,
+            contactLastName: contactLastName,
+            contactPhone: contactPhone,
+            contactEmail: contactEmail,
+            demoAccountName: demoAccountName,
+            demoAccountPassword: demoAccountPassword,
+            demoAccountRequired: demoAccountRequired,
+            notes: notes
+        )
+    }
+
     // MARK: - XcodeBuild Archive/Export
 
     static func makeArchiveRequest(
