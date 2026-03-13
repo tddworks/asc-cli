@@ -26,12 +26,14 @@
     "installCmd": "brew install tddworks/tap/asccli",
     "githubLabel": "Смотреть на GitHub",
     "stats": {
-      "stat1Value": "50+",
+      "stat1Value": "130+",
       "stat1Label": "Команд",
       "stat2Value": "CAEOAS",
       "stat2Label": "Поддержка ИИ",
       "stat3Value": "MIT",
-      "stat3Label": "Открытый код"
+      "stat3Label": "Открытый код",
+      "stat4Value": "100+",
+      "stat4Label": "API эндпоинтов"
     },
     "submittedMsg": "Отправлено на проверку"
   },

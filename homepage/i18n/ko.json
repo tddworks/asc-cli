@@ -26,12 +26,14 @@
     "installCmd": "brew install tddworks/tap/asccli",
     "githubLabel": "GitHub에서 보기",
     "stats": {
-      "stat1Value": "50+",
+      "stat1Value": "130+",
       "stat1Label": "명령어",
       "stat2Value": "CAEOAS",
       "stat2Label": "AI 에이전트 지원",
       "stat3Value": "MIT",
-      "stat3Label": "오픈소스"
+      "stat3Label": "오픈소스",
+      "stat4Value": "100+",
+      "stat4Label": "API 엔드포인트"
     },
     "submittedMsg": "검토에 제출되었습니다"
   },

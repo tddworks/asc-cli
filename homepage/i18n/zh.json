@@ -26,12 +26,14 @@
     "installCmd": "brew install tddworks/tap/asccli",
     "githubLabel": "在 GitHub 上查看",
     "stats": {
-      "stat1Value": "50+",
+      "stat1Value": "130+",
       "stat1Label": "命令",
       "stat2Value": "CAEOAS",
       "stat2Label": "AI 智能体就绪",
       "stat3Value": "MIT",
-      "stat3Label": "开源许可"
+      "stat3Label": "开源许可",
+      "stat4Value": "100+",
+      "stat4Label": "API 端点"
     },
     "submittedMsg": "已提交审核"
   },

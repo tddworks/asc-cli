@@ -26,12 +26,14 @@
     "installCmd": "brew install tddworks/tap/asccli",
     "githubLabel": "ดูบน GitHub",
     "stats": {
-      "stat1Value": "50+",
+      "stat1Value": "130+",
       "stat1Label": "คำสั่ง",
       "stat2Value": "CAEOAS",
       "stat2Label": "พร้อมใช้กับ AI",
       "stat3Value": "MIT",
-      "stat3Label": "โอเพนซอร์ส"
+      "stat3Label": "โอเพนซอร์ส",
+      "stat4Value": "100+",
+      "stat4Label": "API Endpoints"
     },
     "submittedMsg": "ส่งเพื่อตรวจสอบแล้ว"
   },
