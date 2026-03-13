@@ -5,7 +5,9 @@
 ```
 BuildsArchive (ASCCommand)
 ├── resolve platform (--platform or default ios)
-├── resolve export method (--export-method or default app-store)
+├── resolve export method (--export-method or default app-store-connect)
+├── resolve signing style (--signing-style or default automatic)
+├── resolve team ID (--team-id, optional)
 ├── auto-detect workspace/project from cwd
 ├── XcodeBuildRunner.archive(request)
 │   └── xcodebuild archive -scheme X -archivePath .build/X.xcarchive
@@ -36,7 +38,7 @@ Explicit flags always take precedence over auto-detection.
 
 ## ExportOptions Plist
 
-Auto-generated as a temporary file with the selected export method:
+Auto-generated as a temporary file with the selected export method, signing style, and optional team ID:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -45,10 +47,18 @@ Auto-generated as a temporary file with the selected export method:
 <plist version="1.0">
 <dict>
     <key>method</key>
-    <string>app-store</string>
+    <string>app-store-connect</string>
+    <key>signingStyle</key>
+    <string>automatic</string>
+    <key>teamID</key>
+    <string>ABCD1234</string>
 </dict>
 </plist>
 ```
+
+- `signingStyle` is always included (default: `automatic`)
+- `teamID` is only included when `--team-id` is provided
+- When `signingStyle` is `automatic`, `-allowProvisioningUpdates` is added to the xcodebuild args
 
 The plist is cleaned up after export completes.
 
@@ -74,9 +84,10 @@ When `--upload` is specified:
 
 - `ArchiveRequest` — scheme, workspace?, project?, platform, configuration, archivePath
 - `ArchiveResult` — archivePath, scheme, platform (AffordanceProviding: `exportArchive`)
-- `ExportRequest` — archivePath, exportPath, method
+- `ExportRequest` — archivePath, exportPath, method, signingStyle (default: .automatic), teamId?
 - `ExportResult` — ipaPath, exportPath (AffordanceProviding: `upload`)
-- `ExportMethod` — appStore, adHoc, development, enterprise
+- `ExportMethod` — appStoreConnect, adHoc, development, enterprise
+- `SigningStyle` — automatic, manual
 - `XcodeBuildRunner` — @Mockable protocol: archive(request:), exportArchive(request:)
 
 ### Sources/Infrastructure/Apps/Builds/XcodeBuild/ProcessXcodeBuildRunner.swift

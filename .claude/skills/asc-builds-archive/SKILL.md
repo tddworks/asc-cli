@@ -25,7 +25,9 @@ asc builds archive \
   [--project MyApp.xcodeproj]         # auto-detected from cwd
   [--platform ios|macos|tvos|visionos] # default: ios
   [--configuration Release]           # default: Release
-  [--export-method app-store|ad-hoc|development|enterprise]  # default: app-store
+  [--export-method app-store-connect|ad-hoc|development|enterprise]  # default: app-store-connect
+  [--signing-style automatic|manual]  # default: automatic
+  [--team-id ABCD1234]               # team ID for signing
   [--output-dir .build]              # default: .build
 ```
 
@@ -84,6 +86,9 @@ asc builds archive --scheme MyApp
 # Ad-hoc distribution
 asc builds archive --scheme MyApp --export-method ad-hoc --output-dir dist/
 
+# Manual signing with team ID
+asc builds archive --scheme MyApp --signing-style manual --team-id ABCD1234
+
 # macOS app
 asc builds archive --scheme MyMacApp --platform macos
 ```
@@ -92,10 +97,19 @@ asc builds archive --scheme MyMacApp --platform macos
 
 | Method | Use case |
 |--------|----------|
-| `app-store` | App Store / TestFlight distribution (default) |
+| `app-store-connect` | App Store / TestFlight distribution (default) |
 | `ad-hoc` | Direct distribution to registered devices |
 | `development` | Development testing on registered devices |
 | `enterprise` | In-house enterprise distribution |
+
+## Signing Options
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--signing-style` | `automatic` | `automatic` lets Xcode manage profiles; `manual` requires pre-configured profiles |
+| `--team-id` | (none) | Apple Developer team ID; useful when multiple teams are configured |
+
+When `--signing-style automatic` (the default), the export step passes `-allowProvisioningUpdates` to `xcodebuild` so profiles are automatically resolved.
 
 ## CAEOAS Affordances
 
@@ -122,6 +136,8 @@ When `--upload` is used, the response matches the standard build upload format w
 | "Unknown platform: watchos" | Invalid platform argument | Use: `ios`, `macos`, `tvos`, `visionos` |
 | "Scheme not found" | Scheme doesn't exist or workspace not detected | Pass `--workspace` or `--project` explicitly |
 | "no signing identity found" | Code signing not configured | Configure signing in Xcode or pass `--export-method development` |
+| "No profiles for 'X' were found" | Provisioning profile not available | Default `--signing-style automatic` resolves this; or pass `--team-id` explicitly |
+| "app-store" is deprecated | Old export method name | Use `app-store-connect` (now the default) |
 | "No .ipa or .pkg found" | Export succeeded but no binary produced | Check xcodebuild output, verify scheme builds an app target |
 | "--app-id is required" | `--upload` used without `--app-id` | Provide `--app-id` or run `asc init` first |
 
