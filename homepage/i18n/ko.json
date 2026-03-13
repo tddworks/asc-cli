@@ -167,7 +167,7 @@
     "title": "앱 쇼케이스",
     "subtitle": "asc CLI를 사용해 App Store에 출시된 실제 앱입니다.",
     "submitCta": "앱 등록하기",
-    "ctaHint": "homepage/apps.json 수정 후 PR 열기 →",
+    "ctaHint": "한 줄 명령어로 앱을 등록하고 PR 열기 →",
     "empty": "아직 등록된 앱이 없습니다 — 첫 번째로 등록해보세요!"
   },
   "footer": {

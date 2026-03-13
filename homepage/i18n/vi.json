@@ -167,7 +167,7 @@
     "title": "App Wall",
     "subtitle": "Ứng dụng thực tế trên App Store được xuất bản bởi các nhà phát triển dùng asc CLI.",
     "submitCta": "Gửi ứng dụng của bạn",
-    "ctaHint": "Chỉnh sửa homepage/apps.json và mở pull request →",
+    "ctaHint": "Một lệnh duy nhất để gửi ứng dụng và mở pull request →",
     "empty": "Chưa có ứng dụng — hãy là người đầu tiên gửi!"
   },
   "footer": {

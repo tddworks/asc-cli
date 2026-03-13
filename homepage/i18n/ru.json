@@ -167,7 +167,7 @@
     "title": "App Wall",
     "subtitle": "Реальные приложения в App Store, опубликованные разработчиками с помощью asc CLI.",
     "submitCta": "Добавить своё приложение",
-    "ctaHint": "Отредактируйте homepage/apps.json и откройте pull request →",
+    "ctaHint": "Одна команда для отправки приложения и открытия pull request →",
     "empty": "Пока нет приложений — станьте первым!"
   },
   "footer": {

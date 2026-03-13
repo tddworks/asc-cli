@@ -167,7 +167,7 @@
     "title": "アプリショーケース",
     "subtitle": "asc CLI を使ってApp Storeに公開された実際のアプリです。",
     "submitCta": "アプリを掲載する",
-    "ctaHint": "homepage/apps.json を編集してPRを送る →",
+    "ctaHint": "1つのコマンドでアプリを掲載してPRを送る →",
     "empty": "まだアプリがありません — 最初に掲載してみましょう！"
   },
   "footer": {

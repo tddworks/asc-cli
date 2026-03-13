@@ -167,7 +167,7 @@
     "title": "應用展示",
     "subtitle": "開發者使用 asc CLI 發布到 App Store 的真實應用程式。",
     "submitCta": "提交您的應用程式",
-    "ctaHint": "編輯 homepage/apps.json 並提交 Pull Request →",
+    "ctaHint": "一條命令提交應用程式並開啟 Pull Request →",
     "empty": "尚無應用程式 — 成為第一個提交的開發者！"
   },
   "footer": {

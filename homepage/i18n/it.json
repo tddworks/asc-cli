@@ -167,7 +167,7 @@
     "title": "App Wall",
     "subtitle": "App reali sull'App Store pubblicate da sviluppatori che usano asc CLI.",
     "submitCta": "Invia la tua app",
-    "ctaHint": "Modifica homepage/apps.json e apri una pull request →",
+    "ctaHint": "Un solo comando per inviare la tua app e aprire una pull request →",
     "empty": "Nessuna app ancora — sii il primo a inviarne una!"
   },
   "footer": {
