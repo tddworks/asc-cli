@@ -188,6 +188,16 @@ struct ClientProvider {
         return try factory.makeBetaAppReviewRepository(authProvider: authProvider)
     }
 
+    // MARK: - Skills
+
+    static func makeSkillRepository() -> any SkillRepository {
+        ClientFactory().makeSkillRepository()
+    }
+
+    static func makeSkillConfigStorage() -> any SkillConfigStorage {
+        ClientFactory().makeSkillConfigStorage()
+    }
+
     // MARK: - Plugins
 
     static func makePluginRepository() -> any PluginRepository {

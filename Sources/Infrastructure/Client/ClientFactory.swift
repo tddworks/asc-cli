@@ -216,6 +216,16 @@ public struct ClientFactory: Sendable {
         return SDKBetaAppReviewRepository(client: provider)
     }
 
+    // MARK: - Skills (no ASC auth needed — subprocess + local filesystem)
+
+    public func makeSkillRepository() -> any SkillRepository {
+        ProcessSkillRepository()
+    }
+
+    public func makeSkillConfigStorage() -> any SkillConfigStorage {
+        FileSkillConfigStorage()
+    }
+
     // MARK: - Plugins (no ASC auth needed — local filesystem + subprocess)
 
     public func makePluginRepository() -> any PluginRepository {

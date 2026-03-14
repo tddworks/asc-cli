@@ -616,6 +616,23 @@ struct MockRepositoryFactory {
         PluginResult(success: success, message: message, error: error)
     }
 
+    // MARK: - Skills
+
+    static func makeSkill(
+        id: String = "asc-cli",
+        name: String = "asc-cli",
+        description: String = "App Store Connect CLI skill",
+        isInstalled: Bool = false
+    ) -> Skill {
+        Skill(id: id, name: name, description: description, isInstalled: isInstalled)
+    }
+
+    static func makeSkillConfig(
+        skillsCheckedAt: Date? = nil
+    ) -> SkillConfig {
+        SkillConfig(skillsCheckedAt: skillsCheckedAt)
+    }
+
     // MARK: - XcodeCloud
 
     static func makeXcodeCloudProduct(
