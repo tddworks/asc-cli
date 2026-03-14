@@ -530,9 +530,9 @@
 .skills-section { position: relative; }
 .skills-install-row {
   display: flex;
-  justify-content: center;
-  gap: var(--space-md);
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
   margin-bottom: var(--space-2xl);
 }
 .skills-install-tabs {
@@ -567,6 +567,11 @@
 .skills-install-cmd {
   display: flex;
   justify-content: center;
+  width: 100%;
+  max-width: 520px;
+}
+.skills-install-cmd .install-box {
+  width: 100%;
 }
 .skills-grid {
   display: grid;
@@ -1117,6 +1122,10 @@
   .terminal-window { font-size: 11px; }
   .install-box { font-size: 13px; }
   .skills-grid { grid-template-columns: 1fr; }
+  .skills-install-cmd { max-width: 100%; }
+  .skills-install-cmd .install-box { font-size: 12px; gap: 8px; padding: 10px 14px; }
+  .skills-install-cmd .cmd { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .skills-count { font-size: 12px; }
   .hero-stats { gap: var(--space-lg); flex-wrap: wrap; justify-content: center; }
   .hero-stat-value { font-size: 24px; }
   .hero-subtitle { word-break: break-word; }
