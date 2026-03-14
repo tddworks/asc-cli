@@ -37,6 +37,8 @@ public struct SystemShellRunner: ShellRunner {
             process.environment = env
         }
 
+        // Close stdin so the child process cannot block waiting for input.
+        process.standardInput = FileHandle.nullDevice
         let stdoutPipe = Pipe()
         let stderrPipe = Pipe()
         process.standardOutput = stdoutPipe
