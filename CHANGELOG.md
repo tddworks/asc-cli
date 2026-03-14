@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.49] - 2026-03-14
+
 ### Added
 - `asc skills list` — list available skills from the asc-cli repository via `npx skills add tddworks/asc-cli --list`
 - `asc skills install --name <name>` — install a specific skill; `--all` to install all available skills
@@ -448,7 +452,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.48...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.49...HEAD
+[0.1.49]: https://github.com/tddworks/asc-cli/compare/v0.1.48...v0.1.49
 [0.1.48]: https://github.com/tddworks/asc-cli/compare/v0.1.47...v0.1.48
 [0.1.47]: https://github.com/tddworks/asc-cli/compare/v0.1.46...v0.1.47
 [0.1.46]: https://github.com/tddworks/asc-cli/compare/v0.1.45...v0.1.46
