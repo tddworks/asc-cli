@@ -10,7 +10,7 @@ Manage Claude Code agent skills from the asc-cli repository. Browse available sk
 asc skills list
 ```
 
-Lists all available skills from the `tddworks/asc-cli` repository. Delegates to `npx skills add tddworks/asc-cli --list`.
+Lists all available skills from the `tddworks/asc-cli-skills` repository. Delegates to `npx skills add tddworks/asc-cli-skills --list`.
 
 ### Install Skills
 
@@ -25,7 +25,7 @@ asc skills install --all
 asc skills install
 ```
 
-Delegates to `npx --yes skills add tddworks/asc-cli`.
+Delegates to `npx --yes skills add tddworks/asc-cli-skills`.
 
 ### Show Installed Skills
 

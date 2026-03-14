@@ -7,7 +7,7 @@ import Foundation
 /// Strategy B: Fallback to `npx --yes skills ...`.
 public struct ProcessSkillRepository: SkillRepository {
 
-    private static let repoSlug = "tddworks/asc-cli"
+    private static let repoSlug = "tddworks/asc-cli-skills"
     private let runner: any ShellRunner
 
     public init(runner: any ShellRunner = SystemShellRunner()) {

@@ -1,6 +1,6 @@
 /// A Claude Code skill that can be installed from the asc-cli skills repository.
 ///
-/// Skills are discovered via `npx skills add tddworks/asc-cli --list`
+/// Skills are discovered via `npx skills add tddworks/asc-cli-skills --list`
 /// and installed to `~/.claude/skills/` for agent use.
 public struct Skill: Sendable, Equatable, Identifiable, Codable {
     public let id: String           // = name

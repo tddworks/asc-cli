@@ -43,11 +43,21 @@ public struct SystemShellRunner: ShellRunner {
         process.standardError = stderrPipe
 
         try process.run()
+
+        // Read stdout and stderr concurrently to avoid pipe buffer deadlock.
+        // If one pipe fills its buffer (~64KB) while we're blocking on the other,
+        // the child process blocks on write and we deadlock.
+        var stderrData = Data()
+        let stderrQueue = DispatchQueue(label: "shell-runner-stderr")
+        stderrQueue.async {
+            stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
+        }
+
         let outputData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
+        stderrQueue.sync {} // wait for stderr read to finish
         process.waitUntilExit()
 
         guard process.terminationStatus == 0 else {
-            let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
             let stderr = String(data: stderrData, encoding: .utf8) ?? ""
             throw ShellRunnerError.executionFailed(exitCode: process.terminationStatus, stderr: stderr)
         }
