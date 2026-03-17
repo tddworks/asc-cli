@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ASC Manager — App Store Connect</title>
+<link rel="icon" type="image/png" sizes="32x32" href="../../homepage/static/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../homepage/static/favicon-16x16.png">
+<link rel="apple-touch-icon" href="../../homepage/static/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -89,14 +92,6 @@ input, select, textarea { font-family: var(--font); }
   align-items: center;
   gap: 12px;
 }
-.sidebar-brand-icon {
-  width: 36px; height: 36px;
-  background: linear-gradient(135deg, var(--accent), #7C3AED);
-  border-radius: var(--radius);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.sidebar-brand-icon svg { width: 20px; height: 20px; color: #fff; }
 .sidebar-brand h1 { font-size: 16px; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
 .sidebar-brand p { font-size: 11px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.02em; }
 
@@ -710,9 +705,7 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
   <!-- ===== SIDEBAR ===== -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-      <div class="sidebar-brand-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      </div>
+      <img src="../../homepage/static/icon-192.png" alt="ASC" style="width:36px;height:36px;border-radius:var(--radius);flex-shrink:0">
       <div>
         <h1>ASC Manager</h1>
         <p>App Store Connect</p>
