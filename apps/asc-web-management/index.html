@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASC Manager — App Store Connect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ========== RESET & BASE ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --bg: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --bg-sidebar: #FFFFFF;
+  --bg-hover: #F1F5F9;
+  --bg-active: #EFF6FF;
+  --bg-badge: #EFF6FF;
+  --border: #E2E8F0;
+  --border-light: #F1F5F9;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --accent: #2563EB;
+  --accent-hover: #1D4ED8;
+  --accent-light: #DBEAFE;
+  --accent-text: #1E40AF;
+  --success: #059669;
+  --success-bg: #ECFDF5;
+  --success-text: #065F46;
+  --warning: #D97706;
+  --warning-bg: #FFFBEB;
+  --warning-text: #92400E;
+  --danger: #DC2626;
+  --danger-bg: #FEF2F2;
+  --danger-text: #991B1B;
+  --info: #7C3AED;
+  --info-bg: #F5F3FF;
+  --info-text: #5B21B6;
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.06), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --transition: 150ms ease;
+  --sidebar-w: 260px;
+  --header-h: 64px;
+}
+
+html { font-size: 14px; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+button { font-family: var(--font); cursor: pointer; border: none; background: none; }
+input, select, textarea { font-family: var(--font); }
+
+/* ========== LAYOUT ========== */
+.app { display: flex; min-height: 100vh; }
+
+/* ========== SIDEBAR ========== */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 40;
+  overflow-y: auto;
+  transition: transform var(--transition);
+}
+.sidebar-brand {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sidebar-brand-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent), #7C3AED);
+  border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sidebar-brand-icon svg { width: 20px; height: 20px; color: #fff; }
+.sidebar-brand h1 { font-size: 16px; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
+.sidebar-brand p { font-size: 11px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.02em; }
+
+.sidebar-nav { flex: 1; padding: 12px 10px; overflow-y: auto; }
+.nav-section { margin-bottom: 6px; }
+.nav-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: 12px 12px 6px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all var(--transition);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+.nav-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+.nav-item.active { background: var(--bg-active); color: var(--accent); font-weight: 600; }
+.nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.7; }
+.nav-item.active svg { opacity: 1; }
+.nav-item .badge {
+  margin-left: auto;
+  background: var(--accent-light);
+  color: var(--accent-text);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+.sidebar-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+.auth-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  background: var(--success-bg);
+}
+.auth-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  flex-shrink: 0;
+}
+.auth-dot.disconnected { background: var(--danger); }
+.auth-info { font-size: 11px; color: var(--success-text); font-weight: 500; line-height: 1.3; }
+.auth-info span { display: block; font-weight: 600; }
+
+/* ========== MAIN ========== */
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ========== HEADER ========== */
+.header {
+  height: var(--header-h);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-title { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.header-breadcrumb { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+.header-breadcrumb svg { width: 12px; height: 12px; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 280px;
+  transition: all var(--transition);
+}
+.search-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+.search-box svg { width: 16px; height: 16px; color: var(--text-muted); flex-shrink: 0; }
+.search-box input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--text-primary);
+  width: 100%;
+}
+.search-box input::placeholder { color: var(--text-muted); }
+.search-box kbd {
+  font-size: 10px;
+  padding: 2px 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-family: var(--font);
+  font-weight: 600;
+}
+
+.header-btn {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  transition: all var(--transition);
+  position: relative;
+}
+.header-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.header-btn svg { width: 18px; height: 18px; }
+.header-btn .dot {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 7px; height: 7px;
+  background: var(--danger);
+  border-radius: 50%;
+  border: 2px solid var(--bg-card);
+}
+
+/* ========== CONTENT ========== */
+.content { flex: 1; padding: 28px; }
+
+/* ========== DASHBOARD ========== */
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transition: all var(--transition);
+}
+.stat-card:hover { box-shadow: var(--shadow-md); }
+.stat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.stat-icon {
+  width: 40px; height: 40px;
+  border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+}
+.stat-icon svg { width: 20px; height: 20px; }
+.stat-icon.blue { background: var(--accent-light); color: var(--accent); }
+.stat-icon.green { background: var(--success-bg); color: var(--success); }
+.stat-icon.purple { background: var(--info-bg); color: var(--info); }
+.stat-icon.orange { background: var(--warning-bg); color: var(--warning); }
+.stat-change { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+.stat-change.up { background: var(--success-bg); color: var(--success-text); }
+.stat-change.down { background: var(--danger-bg); color: var(--danger-text); }
+.stat-value { font-size: 28px; font-weight: 700; color: var(--text-primary); line-height: 1; margin-bottom: 4px; }
+.stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+
+/* ========== CARDS ========== */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.card-body { padding: 0; }
+.card-body.padded { padding: 20px; }
+
+/* ========== TABLE ========== */
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+tbody td {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-light);
+  white-space: nowrap;
+}
+tbody tr { transition: background var(--transition); }
+tbody tr:hover { background: var(--bg-hover); }
+tbody tr:last-child td { border-bottom: none; }
+td .cell-primary { font-weight: 600; color: var(--text-primary); }
+td .cell-mono { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 12px; color: var(--text-muted); }
+
+/* ========== BADGES / STATUS ========== */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.status::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status.live { background: var(--success-bg); color: var(--success-text); }
+.status.live::before { background: var(--success); }
+.status.pending { background: var(--warning-bg); color: var(--warning-text); }
+.status.pending::before { background: var(--warning); }
+.status.review { background: var(--info-bg); color: var(--info-text); }
+.status.review::before { background: var(--info); }
+.status.rejected { background: var(--danger-bg); color: var(--danger-text); }
+.status.rejected::before { background: var(--danger); }
+.status.draft { background: var(--bg); color: var(--text-muted); }
+.status.draft::before { background: var(--text-muted); }
+.status.processing { background: var(--accent-light); color: var(--accent-text); }
+.status.processing::before { background: var(--accent); }
+
+.platform-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+/* ========== BUTTONS ========== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius);
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.btn svg { width: 16px; height: 16px; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); box-shadow: var(--shadow-sm); }
+.btn-secondary { background: var(--bg); color: var(--text-secondary); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--bg-hover); color: var(--text-primary); }
+.btn-danger { background: var(--danger-bg); color: var(--danger-text); }
+.btn-danger:hover { background: #FECACA; }
+.btn-success { background: var(--success-bg); color: var(--success-text); }
+.btn-success:hover { background: #A7F3D0; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-sm svg { width: 14px; height: 14px; }
+.btn-icon { padding: 6px; }
+
+/* ========== TOOLBAR ========== */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.toolbar-left { display: flex; align-items: center; gap: 10px; flex: 1; }
+.toolbar-right { display: flex; align-items: center; gap: 8px; }
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.filter-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  transition: all var(--transition);
+}
+.filter-btn:last-child { border-right: none; }
+.filter-btn:hover { background: var(--bg-hover); }
+.filter-btn.active { background: var(--accent); color: #fff; }
+
+.select-styled {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  padding-right: 28px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+.select-styled:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+
+/* ========== GRID LAYOUTS ========== */
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+/* ========== APP CARD ========== */
+.app-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transition: all var(--transition);
+  cursor: pointer;
+}
+.app-card:hover { box-shadow: var(--shadow-md); border-color: var(--accent-light); }
+.app-card-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+.app-icon {
+  width: 52px; height: 52px;
+  border-radius: var(--radius-lg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.app-card-info { flex: 1; min-width: 0; }
+.app-card-name { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-card-bundle { font-size: 11px; color: var(--text-muted); font-family: 'SF Mono', monospace; }
+.app-card-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.app-meta-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); }
+.app-meta-item svg { width: 13px; height: 13px; }
+
+/* ========== DETAIL PANEL ========== */
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.detail-icon {
+  width: 64px; height: 64px;
+  border-radius: var(--radius-xl);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.detail-info h2 { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+.detail-info p { font-size: 13px; color: var(--text-muted); }
+.detail-actions { margin-left: auto; display: flex; gap: 8px; }
+
+.detail-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.detail-tab {
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  transition: all var(--transition);
+  cursor: pointer;
+}
+.detail-tab:hover { color: var(--text-primary); }
+.detail-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* ========== FORM ========== */
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+.form-input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  outline: none;
+  transition: all var(--transition);
+}
+.form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
+.form-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* ========== MODAL ========== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-header h3 { font-size: 16px; font-weight: 700; }
+.modal-close {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  transition: all var(--transition);
+}
+.modal-close:hover { background: var(--bg-hover); color: var(--text-primary); }
+.modal-close svg { width: 18px; height: 18px; }
+.modal-body { padding: 20px 24px; }
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ========== COMMAND LOG ========== */
+.cmd-log {
+  background: #0F172A;
+  border-radius: var(--radius);
+  padding: 16px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 12px;
+  color: #CBD5E1;
+  max-height: 200px;
+  overflow-y: auto;
+  line-height: 1.8;
+}
+.cmd-log .cmd-prompt { color: var(--success); }
+.cmd-log .cmd-output { color: #94A3B8; }
+.cmd-log .cmd-error { color: #F87171; }
+.cmd-log .cmd-success { color: #34D399; }
+
+/* ========== TOAST ========== */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  font-size: 13px;
+  font-weight: 500;
+  animation: slideIn 200ms ease;
+  min-width: 300px;
+}
+.toast.success { border-left: 3px solid var(--success); }
+.toast.error { border-left: 3px solid var(--danger); }
+.toast.info { border-left: 3px solid var(--accent); }
+.toast svg { width: 18px; height: 18px; flex-shrink: 0; }
+.toast.success svg { color: var(--success); }
+.toast.error svg { color: var(--danger); }
+.toast.info svg { color: var(--accent); }
+.toast-dismiss { margin-left: auto; color: var(--text-muted); cursor: pointer; }
+.toast-dismiss:hover { color: var(--text-primary); }
+
+@keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ========== EMPTY STATE ========== */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+}
+.empty-state svg { width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 12px; opacity: 0.5; }
+.empty-state h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.empty-state p { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+
+/* ========== LOADING ========== */
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 600ms linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg) 25%, var(--bg-hover) 50%, var(--bg) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* ========== RELEASE TIMELINE ========== */
+.timeline { position: relative; padding-left: 24px; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 4px; bottom: 4px;
+  width: 2px;
+  background: var(--border);
+}
+.timeline-item { position: relative; padding-bottom: 20px; }
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-dot {
+  position: absolute;
+  left: -21px;
+  top: 4px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg-card);
+}
+.timeline-item.active .timeline-dot { border-color: var(--accent); background: var(--accent); }
+.timeline-item.done .timeline-dot { border-color: var(--success); background: var(--success); }
+.timeline-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.timeline-desc { font-size: 12px; color: var(--text-muted); }
+.timeline-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* ========== MOBILE ========== */
+.mobile-menu-btn { display: none; }
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .mobile-menu-btn { display: flex; }
+  .dashboard-stats { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .search-box { width: 200px; }
+}
+@media (max-width: 480px) {
+  .dashboard-stats { grid-template-columns: 1fr; }
+  .search-box { display: none; }
+}
+
+/* ========== UTILITY ========== */
+.hidden { display: none !important; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.text-right { text-align: right; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+.gap-8 { gap: 8px; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div>
+        <h1>ASC Manager</h1>
+        <p>App Store Connect</p>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Overview</div>
+        <button class="nav-item active" data-page="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </button>
+        <button class="nav-item" data-page="apps">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+          Apps
+        </button>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Release</div>
+        <button class="nav-item" data-page="versions">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+          Versions
+        </button>
+        <button class="nav-item" data-page="builds">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          Builds
+          <span class="badge">3</span>
+        </button>
+        <button class="nav-item" data-page="testflight">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+          TestFlight
+        </button>
+        <button class="nav-item" data-page="submissions">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+          Submissions
+        </button>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Metadata</div>
+        <button class="nav-item" data-page="appinfo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          App Info
+        </button>
+        <button class="nav-item" data-page="screenshots">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          Screenshots
+        </button>
+        <button class="nav-item" data-page="reviews">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Reviews
+        </button>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Monetization</div>
+        <button class="nav-item" data-page="iap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          In-App Purchases
+        </button>
+        <button class="nav-item" data-page="subscriptions">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
+          Subscriptions
+        </button>
+        <button class="nav-item" data-page="reports">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+          Reports
+        </button>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Infrastructure</div>
+        <button class="nav-item" data-page="codesigning">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Code Signing
+        </button>
+        <button class="nav-item" data-page="xcodecloud">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>
+          Xcode Cloud
+        </button>
+        <button class="nav-item" data-page="users">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Users & Roles
+        </button>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="auth-status" id="authStatus">
+        <div class="auth-dot" id="authDot"></div>
+        <div class="auth-info" id="authInfo">
+          <span>Checking...</span>
+          asc auth check
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="header-btn mobile-menu-btn" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <div class="header-title" id="pageTitle">Dashboard</div>
+          <div class="header-breadcrumb" id="pageBreadcrumb">
+            <span>ASC Manager</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            <span>Dashboard</span>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Search commands..." id="searchInput" />
+          <kbd>/</kbd>
+        </div>
+        <button class="header-btn" onclick="openCommandLog()" title="Command Log">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        </button>
+        <button class="header-btn" title="Refresh" onclick="refreshCurrentPage()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content" id="content">
+      <!-- Pages rendered by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Command Log Modal -->
+<div class="modal-overlay" id="cmdLogModal">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <h3>Command Log</h3>
+      <button class="modal-close" onclick="closeModal('cmdLogModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="cmd-log" id="cmdLogContent">
+        <div><span class="cmd-prompt">$</span> Ready. Run commands from the UI to see logs here.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Version Modal -->
+<div class="modal-overlay" id="createVersionModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Create New Version</h3>
+      <button class="modal-close" onclick="closeModal('createVersionModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">App</label>
+        <select class="form-input select-styled" id="cvApp"><option>Select app...</option></select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Version Number</label>
+          <input class="form-input" placeholder="1.2.0" id="cvVersion"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Platform</label>
+          <select class="form-input select-styled" id="cvPlatform">
+            <option value="IOS">iOS</option>
+            <option value="MAC_OS">macOS</option>
+            <option value="TV_OS">tvOS</option>
+            <option value="VISION_OS">visionOS</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('createVersionModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createVersion()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Create Version
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== STATE ==========
+const state = {
+  currentPage: 'dashboard',
+  apps: [],
+  versions: [],
+  builds: [],
+  selectedApp: null,
+  commandLog: [],
+  loading: {},
+};
+
+// ========== CLI EXECUTOR ==========
+async function runASC(args, opts = {}) {
+  const cmd = `asc ${args}`;
+  logCommand(cmd);
+
+  try {
+    const resp = await fetch(`/api/exec`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ command: args }),
+      signal: opts.signal,
+    });
+
+    if (!resp.ok) {
+      // Fallback: try running asc directly if no server
+      return await runASCDirect(args);
+    }
+
+    const data = await resp.json();
+    if (data.error) {
+      logError(data.error);
+      return null;
+    }
+    logOutput(JSON.stringify(data.result, null, 2).substring(0, 500));
+    return data.result;
+  } catch {
+    return await runASCDirect(args);
+  }
+}
+
+async function runASCDirect(args) {
+  // Simulate CLI output for demo - in production, connect to a local server
+  logOutput('(demo mode — connect asc backend for live data)');
+  return getDemoData(args);
+}
+
+function getDemoData(args) {
+  if (args.startsWith('apps list')) {
+    return [
+      { id: '6449071230', name: 'PhotoSync Pro', bundleId: 'com.example.photosync', platform: 'IOS', state: 'READY_FOR_SALE' },
+      { id: '6449071231', name: 'TaskFlow', bundleId: 'com.example.taskflow', platform: 'IOS', state: 'PREPARE_FOR_SUBMISSION' },
+      { id: '6449071232', name: 'WeatherLens', bundleId: 'com.example.weatherlens', platform: 'IOS', state: 'READY_FOR_SALE' },
+      { id: '6449071233', name: 'CodePad', bundleId: 'com.example.codepad', platform: 'MAC_OS', state: 'READY_FOR_SALE' },
+      { id: '6449071234', name: 'FitTrack', bundleId: 'com.example.fittrack', platform: 'IOS', state: 'IN_REVIEW' },
+      { id: '6449071235', name: 'MindMap Studio', bundleId: 'com.example.mindmap', platform: 'IOS', state: 'WAITING_FOR_REVIEW' },
+    ];
+  }
+  if (args.startsWith('versions list')) {
+    return [
+      { id: 'v001', versionString: '2.1.0', platform: 'IOS', state: 'READY_FOR_SALE', createdDate: '2026-03-10T10:00:00Z' },
+      { id: 'v002', versionString: '2.2.0', platform: 'IOS', state: 'PREPARE_FOR_SUBMISSION', createdDate: '2026-03-15T14:00:00Z' },
+      { id: 'v003', versionString: '2.0.1', platform: 'IOS', state: 'READY_FOR_SALE', createdDate: '2026-02-28T09:00:00Z' },
+    ];
+  }
+  if (args.startsWith('builds list')) {
+    return [
+      { id: 'b001', version: '2.2.0', buildNumber: '142', platform: 'IOS', processingState: 'VALID', uploadedDate: '2026-03-16T08:30:00Z' },
+      { id: 'b002', version: '2.2.0', buildNumber: '141', platform: 'IOS', processingState: 'VALID', uploadedDate: '2026-03-14T11:00:00Z' },
+      { id: 'b003', version: '2.1.0', buildNumber: '138', platform: 'IOS', processingState: 'VALID', uploadedDate: '2026-03-09T15:00:00Z' },
+      { id: 'b004', version: '2.2.0', buildNumber: '140', platform: 'IOS', processingState: 'INVALID', uploadedDate: '2026-03-13T09:00:00Z' },
+    ];
+  }
+  if (args.startsWith('testflight groups list')) {
+    return [
+      { id: 'bg001', name: 'Internal Testers', isInternalGroup: true, testersCount: 12 },
+      { id: 'bg002', name: 'External Beta', isInternalGroup: false, testersCount: 248 },
+      { id: 'bg003', name: 'VIP Testers', isInternalGroup: false, testersCount: 35 },
+    ];
+  }
+  if (args.startsWith('reviews list')) {
+    return [
+      { id: 'r001', title: 'Amazing app!', body: 'Love the new photo sync feature. Works flawlessly.', rating: 5, reviewerNickname: 'PhotoFan42', createdDate: '2026-03-15T12:00:00Z' },
+      { id: 'r002', title: 'Crashes on iPad', body: 'App crashes when I try to open large albums. Please fix.', rating: 2, reviewerNickname: 'iPadUser99', createdDate: '2026-03-14T08:00:00Z' },
+      { id: 'r003', title: 'Good but needs dark mode', body: 'Great app overall, but please add dark mode support.', rating: 4, reviewerNickname: 'NightOwl', createdDate: '2026-03-12T18:00:00Z' },
+    ];
+  }
+  if (args.startsWith('users list')) {
+    return [
+      { id: 'u001', username: 'admin@example.com', firstName: 'Alex', lastName: 'Chen', roles: ['ADMIN'], isAllAppsVisible: true },
+      { id: 'u002', username: 'dev@example.com', firstName: 'Sarah', lastName: 'Kim', roles: ['DEVELOPER'], isAllAppsVisible: true },
+      { id: 'u003', username: 'marketing@example.com', firstName: 'James', lastName: 'Wu', roles: ['MARKETING'], isAllAppsVisible: false },
+    ];
+  }
+  if (args.startsWith('bundle-ids list')) {
+    return [
+      { id: 'bid001', identifier: 'com.example.photosync', name: 'PhotoSync Pro', platform: 'IOS' },
+      { id: 'bid002', identifier: 'com.example.codepad', name: 'CodePad', platform: 'MAC_OS' },
+    ];
+  }
+  if (args.startsWith('certificates list')) {
+    return [
+      { id: 'cert001', name: 'Apple Distribution', type: 'DISTRIBUTION', expirationDate: '2027-03-15', platform: 'IOS' },
+      { id: 'cert002', name: 'Apple Development', type: 'DEVELOPMENT', expirationDate: '2027-01-20', platform: 'IOS' },
+    ];
+  }
+  if (args.startsWith('auth check')) {
+    return { keyID: 'ABC123XYZ', issuerID: '69a6de...', source: 'file', name: 'default' };
+  }
+  if (args.startsWith('iap list')) {
+    return [
+      { id: 'iap001', name: 'Premium Unlock', productId: 'com.example.premium', type: 'NON_CONSUMABLE', state: 'APPROVED' },
+      { id: 'iap002', name: '100 Coins', productId: 'com.example.coins100', type: 'CONSUMABLE', state: 'APPROVED' },
+    ];
+  }
+  if (args.startsWith('subscription-groups list')) {
+    return [
+      { id: 'sg001', referenceName: 'Pro Plans', subscriptionsCount: 3 },
+    ];
+  }
+  if (args.startsWith('xcode-cloud products list')) {
+    return [
+      { id: 'xcp001', name: 'PhotoSync Pro', appId: '6449071230' },
+    ];
+  }
+  if (args.startsWith('xcode-cloud builds list') || args.startsWith('xcode-cloud workflows list')) {
+    return [
+      { id: 'xcw001', name: 'Release Build', isEnabled: true },
+      { id: 'xcw002', name: 'PR Check', isEnabled: true },
+    ];
+  }
+  return [];
+}
+
+// ========== COMMAND LOG ==========
+function logCommand(cmd) {
+  state.commandLog.push({ type: 'cmd', text: cmd, time: new Date() });
+  updateLogUI();
+}
+function logOutput(text) {
+  state.commandLog.push({ type: 'output', text, time: new Date() });
+  updateLogUI();
+}
+function logError(text) {
+  state.commandLog.push({ type: 'error', text, time: new Date() });
+  updateLogUI();
+}
+
+function updateLogUI() {
+  const el = document.getElementById('cmdLogContent');
+  if (!el) return;
+  el.innerHTML = state.commandLog.slice(-30).map(entry => {
+    if (entry.type === 'cmd') return `<div><span class="cmd-prompt">$</span> ${escapeHTML(entry.text)}</div>`;
+    if (entry.type === 'error') return `<div class="cmd-error">${escapeHTML(entry.text)}</div>`;
+    return `<div class="cmd-output">${escapeHTML(entry.text)}</div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+// ========== TOAST ==========
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const icons = {
+    success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>',
+    error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>',
+  };
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `${icons[type]}<span>${escapeHTML(message)}</span><button class="toast-dismiss" onclick="this.parentElement.remove()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+// ========== NAVIGATION ==========
+function navigate(page) {
+  state.currentPage = page;
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.page === page);
+  });
+  const titles = {
+    dashboard: 'Dashboard', apps: 'Apps', versions: 'Versions', builds: 'Builds',
+    testflight: 'TestFlight', submissions: 'Submissions', appinfo: 'App Info',
+    screenshots: 'Screenshots', reviews: 'Customer Reviews', iap: 'In-App Purchases',
+    subscriptions: 'Subscriptions', reports: 'Reports', codesigning: 'Code Signing',
+    xcodecloud: 'Xcode Cloud', users: 'Users & Roles',
+  };
+  document.getElementById('pageTitle').textContent = titles[page] || page;
+  document.getElementById('pageBreadcrumb').innerHTML = `<span>ASC Manager</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg><span>${titles[page] || page}</span>`;
+  renderPage(page);
+}
+
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.addEventListener('click', () => navigate(btn.dataset.page));
+});
+
+// ========== RENDER PAGES ==========
+function renderPage(page) {
+  const content = document.getElementById('content');
+  const renderers = {
+    dashboard: renderDashboard,
+    apps: renderApps,
+    versions: renderVersions,
+    builds: renderBuilds,
+    testflight: renderTestFlight,
+    submissions: renderSubmissions,
+    appinfo: renderAppInfo,
+    screenshots: renderScreenshots,
+    reviews: renderReviews,
+    iap: renderIAP,
+    subscriptions: renderSubscriptions,
+    reports: renderReports,
+    codesigning: renderCodeSigning,
+    xcodecloud: renderXcodeCloud,
+    users: renderUsers,
+  };
+  const render = renderers[page];
+  if (render) {
+    content.innerHTML = render();
+    if (page === 'dashboard') loadDashboard();
+    if (page === 'apps') loadApps();
+    if (page === 'versions') loadVersions();
+    if (page === 'builds') loadBuilds();
+    if (page === 'testflight') loadTestFlight();
+    if (page === 'reviews') loadReviews();
+    if (page === 'users') loadUsers();
+    if (page === 'codesigning') loadCodeSigning();
+    if (page === 'iap') loadIAP();
+    if (page === 'subscriptions') loadSubscriptions();
+    if (page === 'xcodecloud') loadXcodeCloud();
+  }
+}
+
+// ===== DASHBOARD =====
+function renderDashboard() {
+  return `
+    <div class="dashboard-stats">
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg></div>
+          <span class="stat-change up" id="statAppsChange">--</span>
+        </div>
+        <div class="stat-value" id="statApps">--</div>
+        <div class="stat-label">Total Apps</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div>
+          <span class="stat-change up" id="statLiveChange">Live</span>
+        </div>
+        <div class="stat-value" id="statLive">--</div>
+        <div class="stat-label">Live on Store</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+        </div>
+        <div class="stat-value" id="statBuilds">--</div>
+        <div class="stat-label">Recent Builds</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg></div>
+        </div>
+        <div class="stat-value" id="statPending">--</div>
+        <div class="stat-label">Pending Review</div>
+      </div>
+    </div>
+
+    <div class="grid-2 mb-24">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Recent Activity</span>
+          <button class="btn btn-sm btn-secondary" onclick="navigate('builds')">View All</button>
+        </div>
+        <div class="card-body" id="recentActivity">
+          <div class="empty-state"><div class="spinner" style="margin: 24px auto"></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Release Pipeline</span>
+        </div>
+        <div class="card-body padded">
+          <div class="timeline" id="releasePipeline">
+            <div class="timeline-item done">
+              <div class="timeline-dot"></div>
+              <div class="timeline-title">Build Uploaded</div>
+              <div class="timeline-desc">v2.2.0 (142) processed successfully</div>
+              <div class="timeline-time">Mar 16, 2026 08:30</div>
+            </div>
+            <div class="timeline-item done">
+              <div class="timeline-dot"></div>
+              <div class="timeline-title">Metadata Updated</div>
+              <div class="timeline-desc">What's New, screenshots refreshed</div>
+              <div class="timeline-time">Mar 16, 2026 09:15</div>
+            </div>
+            <div class="timeline-item active">
+              <div class="timeline-dot"></div>
+              <div class="timeline-title">Build Linked to Version</div>
+              <div class="timeline-desc">Awaiting: set build & submit for review</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-title">Submit for Review</div>
+              <div class="timeline-desc">Ready when build is linked</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-title">App Store Release</div>
+              <div class="timeline-desc">Publish after approval</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Quick Actions</span>
+      </div>
+      <div class="card-body padded">
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="navigate('apps')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>Browse Apps</button>
+          <button class="btn btn-secondary" onclick="openModal('createVersionModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Version</button>
+          <button class="btn btn-secondary" onclick="navigate('builds')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload Build</button>
+          <button class="btn btn-secondary" onclick="navigate('testflight')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>TestFlight</button>
+          <button class="btn btn-success" onclick="navigate('submissions')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>Submit for Review</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function loadDashboard() {
+  const apps = await runASC('apps list');
+  if (apps) {
+    state.apps = apps;
+    const live = apps.filter(a => a.state === 'READY_FOR_SALE').length;
+    const pending = apps.filter(a => ['IN_REVIEW','WAITING_FOR_REVIEW'].includes(a.state)).length;
+    document.getElementById('statApps').textContent = apps.length;
+    document.getElementById('statLive').textContent = live;
+    document.getElementById('statPending').textContent = pending;
+    document.getElementById('statAppsChange').textContent = `${apps.length} total`;
+  }
+  const builds = await runASC('builds list --app-id all --limit 5');
+  if (builds) {
+    document.getElementById('statBuilds').textContent = builds.length;
+    document.getElementById('recentActivity').innerHTML = `<table><thead><tr><th>Build</th><th>Version</th><th>Platform</th><th>Status</th><th>Uploaded</th></tr></thead><tbody>${builds.map(b => `<tr><td><span class="cell-primary">#${b.buildNumber}</span></td><td>${b.version}</td><td><span class="platform-badge">${b.platform}</span></td><td>${statusBadge(b.processingState)}</td><td>${formatDate(b.uploadedDate)}</td></tr>`).join('')}</tbody></table>`;
+  }
+}
+
+// ===== APPS =====
+function renderApps() {
+  return `
+    <div class="toolbar" style="padding:0 0 16px;border:none">
+      <div class="toolbar-left">
+        <div class="search-box" style="width:320px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Filter apps..." oninput="filterApps(this.value)"/>
+        </div>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn btn-primary" onclick="showToast('Run: asc apps create','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New App</button>
+      </div>
+    </div>
+    <div class="grid-3" id="appsGrid">
+      <div class="empty-state"><div class="spinner" style="margin:24px auto"></div></div>
+    </div>`;
+}
+
+const appColors = ['#2563EB','#7C3AED','#059669','#D97706','#DC2626','#0891B2','#4F46E5','#EA580C'];
+function getAppColor(i) { return appColors[i % appColors.length]; }
+
+async function loadApps() {
+  const apps = await runASC('apps list');
+  if (apps) {
+    state.apps = apps;
+    renderAppCards(apps);
+  }
+}
+
+function renderAppCards(apps) {
+  document.getElementById('appsGrid').innerHTML = apps.length ? apps.map((app, i) => `
+    <div class="app-card" onclick="selectApp('${app.id}')">
+      <div class="app-card-top">
+        <div class="app-icon" style="background:${getAppColor(i)}">${app.name[0]}</div>
+        <div class="app-card-info">
+          <div class="app-card-name">${escapeHTML(app.name)}</div>
+          <div class="app-card-bundle">${escapeHTML(app.bundleId)}</div>
+        </div>
+      </div>
+      <div class="app-card-meta">
+        <span class="app-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>${app.platform}</span>
+        ${statusBadge(app.state)}
+        <span class="app-meta-item" style="margin-left:auto"><span class="cell-mono">${app.id}</span></span>
+      </div>
+    </div>`).join('') : '<div class="empty-state"><h3>No apps found</h3><p>Run <code>asc apps list</code> to fetch your apps</p></div>';
+}
+
+function filterApps(q) {
+  const filtered = state.apps.filter(a =>
+    a.name.toLowerCase().includes(q.toLowerCase()) ||
+    a.bundleId.toLowerCase().includes(q.toLowerCase())
+  );
+  renderAppCards(filtered);
+}
+
+function selectApp(id) {
+  state.selectedApp = state.apps.find(a => a.id === id);
+  showToast(`Selected: ${state.selectedApp?.name}`, 'success');
+  navigate('versions');
+}
+
+// ===== VERSIONS =====
+function renderVersions() {
+  const appName = state.selectedApp?.name || 'All Apps';
+  return `
+    <div class="card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <span style="font-size:13px;color:var(--text-muted)">App:</span>
+          <span style="font-size:13px;font-weight:600">${escapeHTML(appName)}</span>
+          <div class="filter-group">
+            <button class="filter-btn active" onclick="filterVersions('all',this)">All</button>
+            <button class="filter-btn" onclick="filterVersions('live',this)">Live</button>
+            <button class="filter-btn" onclick="filterVersions('editable',this)">Editable</button>
+          </div>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn btn-primary btn-sm" onclick="openModal('createVersionModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Version</button>
+        </div>
+      </div>
+      <div class="table-wrapper" id="versionsTable">
+        <div class="empty-state"><div class="spinner" style="margin:24px auto"></div></div>
+      </div>
+    </div>`;
+}
+
+async function loadVersions() {
+  const appId = state.selectedApp?.id || '';
+  const args = appId ? `versions list --app-id ${appId}` : 'versions list --app-id 6449071230';
+  const versions = await runASC(args);
+  if (versions) {
+    state.versions = versions;
+    renderVersionRows(versions);
+  }
+}
+
+function renderVersionRows(versions) {
+  document.getElementById('versionsTable').innerHTML = `<table><thead><tr><th>Version</th><th>Platform</th><th>State</th><th>Created</th><th style="text-align:right">Actions</th></tr></thead><tbody>${versions.map(v => `<tr>
+    <td><span class="cell-primary">${v.versionString}</span></td>
+    <td><span class="platform-badge">${v.platform}</span></td>
+    <td>${statusBadge(v.state)}</td>
+    <td>${formatDate(v.createdDate)}</td>
+    <td class="text-right">
+      <button class="btn btn-sm btn-secondary" onclick="showToast('asc versions check-readiness --version-id ${v.id}','info')">Check</button>
+      ${v.state === 'PREPARE_FOR_SUBMISSION' ? `<button class="btn btn-sm btn-success" onclick="submitVersion('${v.id}')">Submit</button>` : ''}
+    </td>
+  </tr>`).join('')}</tbody></table>`;
+}
+
+function filterVersions(type, btn) {
+  btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  let filtered = state.versions;
+  if (type === 'live') filtered = filtered.filter(v => v.state === 'READY_FOR_SALE');
+  if (type === 'editable') filtered = filtered.filter(v => v.state === 'PREPARE_FOR_SUBMISSION');
+  renderVersionRows(filtered);
+}
+
+async function submitVersion(id) {
+  showToast('Submitting for review...', 'info');
+  await runASC(`versions submit --version-id ${id}`);
+  showToast('Submitted for App Store Review!', 'success');
+}
+
+async function createVersion() {
+  const version = document.getElementById('cvVersion').value;
+  const platform = document.getElementById('cvPlatform').value;
+  if (!version) { showToast('Enter a version number', 'error'); return; }
+  const appId = state.selectedApp?.id || '';
+  await runASC(`versions create --app-id ${appId} --version-string ${version} --platform ${platform}`);
+  closeModal('createVersionModal');
+  showToast(`Version ${version} created!`, 'success');
+  loadVersions();
+}
+
+// ===== BUILDS =====
+function renderBuilds() {
+  return `
+    <div class="card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="filter-group">
+            <button class="filter-btn active">All</button>
+            <button class="filter-btn">Valid</button>
+            <button class="filter-btn">Processing</button>
+            <button class="filter-btn">Invalid</button>
+          </div>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn btn-primary btn-sm" onclick="showToast('Use: asc builds archive --scheme MyApp','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload Build</button>
+        </div>
+      </div>
+      <div class="table-wrapper" id="buildsTable">
+        <div class="empty-state"><div class="spinner" style="margin:24px auto"></div></div>
+      </div>
+    </div>`;
+}
+
+async function loadBuilds() {
+  const appId = state.selectedApp?.id || '6449071230';
+  const builds = await runASC(`builds list --app-id ${appId}`);
+  if (builds) {
+    state.builds = builds;
+    document.getElementById('buildsTable').innerHTML = `<table><thead><tr><th>Build</th><th>Version</th><th>Platform</th><th>Status</th><th>Uploaded</th><th style="text-align:right">Actions</th></tr></thead><tbody>${builds.map(b => `<tr>
+      <td><span class="cell-primary">#${b.buildNumber}</span></td>
+      <td>${b.version}</td>
+      <td><span class="platform-badge">${b.platform}</span></td>
+      <td>${statusBadge(b.processingState)}</td>
+      <td>${formatDate(b.uploadedDate)}</td>
+      <td class="text-right">
+        <button class="btn btn-sm btn-secondary" onclick="showToast('asc builds add-beta-group --build-id ${b.id}','info')">TestFlight</button>
+      </td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+}
+
+// ===== TESTFLIGHT =====
+function renderTestFlight() {
+  return `
+    <div class="grid-2 mb-24">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Beta Groups</span>
+          <button class="btn btn-sm btn-primary" onclick="showToast('asc testflight groups create','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Group</button>
+        </div>
+        <div class="card-body" id="betaGroupsList">
+          <div class="empty-state"><div class="spinner" style="margin:24px auto"></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Quick Tester Actions</span>
+        </div>
+        <div class="card-body padded">
+          <div class="form-group">
+            <label class="form-label">Add Tester by Email</label>
+            <div style="display:flex;gap:8px">
+              <input class="form-input" placeholder="tester@example.com" id="testerEmail" style="flex:1"/>
+              <button class="btn btn-primary" onclick="addTester()">Add</button>
+            </div>
+            <div class="form-hint">Adds to the first external beta group</div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:16px">
+            <button class="btn btn-sm btn-secondary" onclick="showToast('asc testflight testers import --file testers.csv','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import CSV</button>
+            <button class="btn btn-sm btn-secondary" onclick="showToast('asc testflight testers export','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function loadTestFlight() {
+  const appId = state.selectedApp?.id || '6449071230';
+  const groups = await runASC(`testflight groups list --app-id ${appId}`);
+  if (groups) {
+    document.getElementById('betaGroupsList').innerHTML = `<table><thead><tr><th>Group</th><th>Type</th><th>Testers</th><th style="text-align:right">Actions</th></tr></thead><tbody>${groups.map(g => `<tr>
+      <td><span class="cell-primary">${escapeHTML(g.name)}</span></td>
+      <td>${g.isInternalGroup ? '<span class="status draft">Internal</span>' : '<span class="status processing">External</span>'}</td>
+      <td>${g.testersCount}</td>
+      <td class="text-right"><button class="btn btn-sm btn-secondary" onclick="showToast('asc testflight testers list --beta-group-id ${g.id}','info')">View</button></td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+}
+
+function addTester() {
+  const email = document.getElementById('testerEmail').value;
+  if (!email) { showToast('Enter an email address', 'error'); return; }
+  runASC(`testflight testers add --beta-group-id bg002 --email ${email}`);
+  showToast(`Invited ${email} to TestFlight`, 'success');
+  document.getElementById('testerEmail').value = '';
+}
+
+// ===== SUBMISSIONS =====
+function renderSubmissions() {
+  return `
+    <div class="card mb-24">
+      <div class="card-header"><span class="card-title">Submit for App Store Review</span></div>
+      <div class="card-body padded">
+        <div class="form-row mb-16">
+          <div class="form-group">
+            <label class="form-label">Version ID</label>
+            <input class="form-input" placeholder="e.g. v002" id="submitVersionId"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Pre-flight Check</label>
+            <button class="btn btn-secondary" onclick="checkReadiness()" style="margin-top:2px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+              Check Readiness
+            </button>
+          </div>
+        </div>
+        <div id="readinessResult"></div>
+        <div style="margin-top:16px">
+          <button class="btn btn-primary" onclick="submitForReview()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>Submit for Review</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Review Contact & Demo Account</span></div>
+      <div class="card-body padded">
+        <div class="form-row mb-16">
+          <div class="form-group"><label class="form-label">Contact First Name</label><input class="form-input" placeholder="John"/></div>
+          <div class="form-group"><label class="form-label">Contact Last Name</label><input class="form-input" placeholder="Doe"/></div>
+        </div>
+        <div class="form-row mb-16">
+          <div class="form-group"><label class="form-label">Contact Email</label><input class="form-input" placeholder="john@example.com"/></div>
+          <div class="form-group"><label class="form-label">Contact Phone</label><input class="form-input" placeholder="+1 555-0100"/></div>
+        </div>
+        <div class="form-row mb-16">
+          <div class="form-group"><label class="form-label">Demo Username</label><input class="form-input" placeholder="demo@example.com"/></div>
+          <div class="form-group"><label class="form-label">Demo Password</label><input class="form-input" type="password" placeholder="password"/></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Review Notes</label>
+          <textarea class="form-input" placeholder="Any notes for the reviewer..."></textarea>
+        </div>
+        <button class="btn btn-secondary" style="margin-top:8px" onclick="showToast('Review details saved','success')">Save Review Info</button>
+      </div>
+    </div>`;
+}
+
+async function checkReadiness() {
+  const vid = document.getElementById('submitVersionId').value || 'v002';
+  showToast('Checking readiness...', 'info');
+  await runASC(`versions check-readiness --version-id ${vid}`);
+  document.getElementById('readinessResult').innerHTML = `
+    <div style="padding:12px;background:var(--success-bg);border-radius:var(--radius);border:1px solid #A7F3D0">
+      <div style="font-weight:600;color:var(--success-text);margin-bottom:4px">Readiness Check Passed</div>
+      <div style="font-size:12px;color:var(--success-text)">All required fields are set. Version is ready for submission.</div>
+    </div>`;
+}
+
+async function submitForReview() {
+  const vid = document.getElementById('submitVersionId')?.value || 'v002';
+  showToast('Submitting...', 'info');
+  await runASC(`versions submit --version-id ${vid}`);
+  showToast('Submitted for App Store Review!', 'success');
+}
+
+// ===== APP INFO =====
+function renderAppInfo() {
+  return `
+    <div class="card mb-24">
+      <div class="card-header"><span class="card-title">App Metadata</span></div>
+      <div class="card-body padded">
+        <div class="form-group"><label class="form-label">App Name</label><input class="form-input" placeholder="PhotoSync Pro"/></div>
+        <div class="form-row mb-16">
+          <div class="form-group"><label class="form-label">Subtitle</label><input class="form-input" placeholder="Sync photos everywhere"/></div>
+          <div class="form-group"><label class="form-label">Primary Category</label>
+            <select class="form-input select-styled"><option>Photography</option><option>Utilities</option><option>Productivity</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Privacy Policy URL</label><input class="form-input" placeholder="https://example.com/privacy"/></div>
+        <button class="btn btn-primary" onclick="showToast('Metadata updated','success')">Save Changes</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Localizations</span>
+        <button class="btn btn-sm btn-primary" onclick="showToast('asc app-info-localizations create','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Locale</button>
+      </div>
+      <div class="table-wrapper">
+        <table><thead><tr><th>Locale</th><th>Name</th><th>Subtitle</th><th style="text-align:right">Actions</th></tr></thead><tbody>
+          <tr><td><span class="cell-primary">en-US</span></td><td>PhotoSync Pro</td><td>Sync photos everywhere</td><td class="text-right"><button class="btn btn-sm btn-secondary">Edit</button></td></tr>
+          <tr><td><span class="cell-primary">zh-Hans</span></td><td>PhotoSync Pro</td><td>--</td><td class="text-right"><button class="btn btn-sm btn-secondary">Edit</button> <button class="btn btn-sm btn-danger">Delete</button></td></tr>
+        </tbody></table>
+      </div>
+    </div>`;
+}
+
+// ===== SCREENSHOTS =====
+function renderScreenshots() {
+  return `
+    <div class="card mb-24">
+      <div class="card-header">
+        <span class="card-title">Screenshot Sets</span>
+        <button class="btn btn-sm btn-primary" onclick="showToast('asc screenshot-sets create','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Set</button>
+      </div>
+      <div class="table-wrapper">
+        <table><thead><tr><th>Display Type</th><th>Locale</th><th>Count</th><th style="text-align:right">Actions</th></tr></thead><tbody>
+          <tr><td><span class="cell-primary">IPHONE_67</span></td><td>en-US</td><td>6</td><td class="text-right"><button class="btn btn-sm btn-secondary">View</button> <button class="btn btn-sm btn-secondary">Upload</button></td></tr>
+          <tr><td><span class="cell-primary">IPHONE_65</span></td><td>en-US</td><td>6</td><td class="text-right"><button class="btn btn-sm btn-secondary">View</button> <button class="btn btn-sm btn-secondary">Upload</button></td></tr>
+          <tr><td><span class="cell-primary">IPAD_PRO_129</span></td><td>en-US</td><td>4</td><td class="text-right"><button class="btn btn-sm btn-secondary">View</button> <button class="btn btn-sm btn-secondary">Upload</button></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">AI Screenshot Generation</span>
+      </div>
+      <div class="card-body padded">
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">Generate marketing screenshots with AI using <code>asc app-shots</code></p>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary" onclick="showToast('asc app-shots generate --plan plan.json','info')">Generate</button>
+          <button class="btn btn-secondary" onclick="showToast('asc app-shots translate --to zh --to ja','info')">Translate</button>
+          <button class="btn btn-secondary" onclick="showToast('asc app-shots html --plan plan.json','info')">HTML Export</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ===== REVIEWS =====
+function renderReviews() {
+  return `
+    <div class="card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="filter-group">
+            <button class="filter-btn active">All</button>
+            <button class="filter-btn">5 Stars</button>
+            <button class="filter-btn">Needs Reply</button>
+          </div>
+        </div>
+      </div>
+      <div class="card-body" id="reviewsList">
+        <div class="empty-state"><div class="spinner" style="margin:24px auto"></div></div>
+      </div>
+    </div>`;
+}
+
+async function loadReviews() {
+  const appId = state.selectedApp?.id || '6449071230';
+  const reviews = await runASC(`reviews list --app-id ${appId}`);
+  if (reviews) {
+    document.getElementById('reviewsList').innerHTML = reviews.map(r => `
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border-light)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-weight:600;font-size:13px">${escapeHTML(r.title)}</span>
+          <span style="color:#F59E0B;font-size:12px">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+          <span style="margin-left:auto;font-size:11px;color:var(--text-muted)">${formatDate(r.createdDate)}</span>
+        </div>
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px">${escapeHTML(r.body)}</p>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--text-muted)">by ${escapeHTML(r.reviewerNickname)}</span>
+          <button class="btn btn-sm btn-secondary" style="margin-left:auto" onclick="showToast('asc review-responses create --review-id ${r.id}','info')">Reply</button>
+        </div>
+      </div>`).join('');
+  }
+}
+
+// ===== IAP =====
+function renderIAP() {
+  return `
+    <div class="card">
+      <div class="toolbar">
+        <div class="toolbar-left"><span class="card-title">In-App Purchases</span></div>
+        <div class="toolbar-right">
+          <button class="btn btn-sm btn-primary" onclick="showToast('asc iap create --type non-consumable','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Create IAP</button>
+        </div>
+      </div>
+      <div class="table-wrapper" id="iapTable">
+        <div class="empty-state"><div class="spinner" style="margin:24px auto"></div></div>
+      </div>
+    </div>`;
+}
+
+async function loadIAP() {
+  const appId = state.selectedApp?.id || '6449071230';
+  const iaps = await runASC(`iap list --app-id ${appId}`);
+  if (iaps) {
+    document.getElementById('iapTable').innerHTML = `<table><thead><tr><th>Name</th><th>Product ID</th><th>Type</th><th>State</th><th style="text-align:right">Actions</th></tr></thead><tbody>${iaps.map(p => `<tr>
+      <td><span class="cell-primary">${escapeHTML(p.name)}</span></td>
+      <td><span class="cell-mono">${p.productId}</span></td>
+      <td><span class="platform-badge">${p.type}</span></td>
+      <td>${statusBadge(p.state)}</td>
+      <td class="text-right"><button class="btn btn-sm btn-secondary" onclick="showToast('asc iap submit --iap-id ${p.id}','info')">Submit</button></td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+}
+
+// ===== SUBSCRIPTIONS =====
+function renderSubscriptions() {
+  return `
+    <div class="card mb-24">
+      <div class="toolbar">
+        <div class="toolbar-left"><span class="card-title">Subscription Groups</span></div>
+        <div class="toolbar-right">
+          <button class="btn btn-sm btn-primary" onclick="showToast('asc subscription-groups create','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Group</button>
+        </div>
+      </div>
+      <div class="table-wrapper" id="subGroupsTable">
+        <div class="empty-state"><div class="spinner" style="margin:24px auto"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Offer Codes</span></div>
+      <div class="card-body padded">
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary btn-sm" onclick="showToast('asc subscription-offer-codes list','info')">List Codes</button>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('asc subscription-offer-codes create','info')">Create Code</button>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('asc subscription-offer-code-custom-codes list','info')">Custom Codes</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function loadSubscriptions() {
+  const appId = state.selectedApp?.id || '6449071230';
+  const groups = await runASC(`subscription-groups list --app-id ${appId}`);
+  if (groups) {
+    document.getElementById('subGroupsTable').innerHTML = `<table><thead><tr><th>Group</th><th>Subscriptions</th><th style="text-align:right">Actions</th></tr></thead><tbody>${groups.map(g => `<tr>
+      <td><span class="cell-primary">${escapeHTML(g.referenceName)}</span></td>
+      <td>${g.subscriptionsCount}</td>
+      <td class="text-right"><button class="btn btn-sm btn-secondary" onclick="showToast('asc subscriptions list --group-id ${g.id}','info')">View</button></td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+}
+
+// ===== REPORTS =====
+function renderReports() {
+  return `
+    <div class="grid-3 mb-24">
+      <div class="card">
+        <div class="card-body padded" style="text-align:center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32" style="color:var(--accent);margin-bottom:8px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          <div style="font-weight:600;margin-bottom:4px">Sales Report</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Download daily, weekly, or monthly sales data</div>
+          <button class="btn btn-primary btn-sm" onclick="showToast('asc sales-reports download --report-type SALES','info')">Download</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body padded" style="text-align:center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32" style="color:var(--success);margin-bottom:8px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <div style="font-weight:600;margin-bottom:4px">Finance Report</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Revenue, proceeds, and payment details</div>
+          <button class="btn btn-success btn-sm" onclick="showToast('asc finance-reports download --report-type FINANCIAL','info')">Download</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body padded" style="text-align:center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32" style="color:var(--info);margin-bottom:8px"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
+          <div style="font-weight:600;margin-bottom:4px">Analytics</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">App usage, engagement, and performance</div>
+          <button class="btn btn-sm" style="background:var(--info-bg);color:var(--info-text)" onclick="showToast('asc analytics-reports request','info')">Request</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Performance Metrics</span></div>
+      <div class="card-body padded">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-secondary btn-sm" onclick="showToast('asc perf-metrics list --metric-type LAUNCH','info')">Launch Time</button>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('asc perf-metrics list --metric-type HANG','info')">Hang Rate</button>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('asc perf-metrics list --metric-type DISK','info')">Disk Writes</button>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('asc perf-metrics list --metric-type MEMORY','info')">Memory</button>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('asc diagnostics list','info')">Diagnostics</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ===== CODE SIGNING =====
+function renderCodeSigning() {
+  return `
+    <div class="detail-tabs mb-24" id="cssTabs">
+      <button class="detail-tab active" onclick="switchCSTab('bundles',this)">Bundle IDs</button>
+      <button class="detail-tab" onclick="switchCSTab('certs',this)">Certificates</button>
+      <button class="detail-tab" onclick="switchCSTab('devices',this)">Devices</button>
+      <button class="detail-tab" onclick="switchCSTab('profiles',this)">Profiles</button>
+    </div>
+    <div class="card">
+      <div class="toolbar">
+        <div class="toolbar-left"></div>
+        <div class="toolbar-right">
+          <button class="btn btn-sm btn-primary" id="cssCreateBtn" onclick="showToast('asc bundle-ids create','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Register</button>
+        </div>
+      </div>
+      <div class="table-wrapper" id="cssTable">
+        <div class="empty-state"><div class="spinner" style="margin:24px auto"></div></div>
+      </div>
+    </div>`;
+}
+
+async function loadCodeSigning() {
+  const bundles = await runASC('bundle-ids list');
+  if (bundles) {
+    document.getElementById('cssTable').innerHTML = `<table><thead><tr><th>Name</th><th>Identifier</th><th>Platform</th><th style="text-align:right">Actions</th></tr></thead><tbody>${bundles.map(b => `<tr>
+      <td><span class="cell-primary">${escapeHTML(b.name)}</span></td>
+      <td><span class="cell-mono">${b.identifier}</span></td>
+      <td><span class="platform-badge">${b.platform}</span></td>
+      <td class="text-right"><button class="btn btn-sm btn-danger" onclick="showToast('asc bundle-ids delete --bundle-id-id ${b.id}','info')">Delete</button></td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+}
+
+function switchCSTab(tab, btn) {
+  document.querySelectorAll('#cssTabs .detail-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const cmds = { bundles: 'bundle-ids list', certs: 'certificates list', devices: 'devices list', profiles: 'profiles list' };
+  showToast(`Running: asc ${cmds[tab]}`, 'info');
+}
+
+// ===== XCODE CLOUD =====
+function renderXcodeCloud() {
+  return `
+    <div class="card mb-24">
+      <div class="card-header"><span class="card-title">CI/CD Products</span></div>
+      <div class="table-wrapper" id="xcpTable">
+        <div class="empty-state"><div class="spinner" style="margin:24px auto"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Workflows</span>
+        <button class="btn btn-sm btn-primary" onclick="showToast('asc xcode-cloud builds start','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="5 3 19 12 5 21 5 3"/></svg>Start Build</button>
+      </div>
+      <div class="table-wrapper" id="xcwTable">
+        <div class="empty-state"><div class="spinner" style="margin:24px auto"></div></div>
+      </div>
+    </div>`;
+}
+
+async function loadXcodeCloud() {
+  const products = await runASC('xcode-cloud products list');
+  if (products) {
+    document.getElementById('xcpTable').innerHTML = `<table><thead><tr><th>Product</th><th>App ID</th><th style="text-align:right">Actions</th></tr></thead><tbody>${products.map(p => `<tr>
+      <td><span class="cell-primary">${escapeHTML(p.name)}</span></td>
+      <td><span class="cell-mono">${p.appId}</span></td>
+      <td class="text-right"><button class="btn btn-sm btn-secondary" onclick="showToast('asc xcode-cloud workflows list --product-id ${p.id}','info')">Workflows</button></td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+  const workflows = await runASC('xcode-cloud workflows list --product-id xcp001');
+  if (workflows) {
+    document.getElementById('xcwTable').innerHTML = `<table><thead><tr><th>Workflow</th><th>Enabled</th><th style="text-align:right">Actions</th></tr></thead><tbody>${workflows.map(w => `<tr>
+      <td><span class="cell-primary">${escapeHTML(w.name)}</span></td>
+      <td>${w.isEnabled ? '<span class="status live">Active</span>' : '<span class="status draft">Disabled</span>'}</td>
+      <td class="text-right"><button class="btn btn-sm btn-primary" onclick="showToast('asc xcode-cloud builds start --workflow-id ${w.id}','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="5 3 19 12 5 21 5 3"/></svg>Run</button></td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+}
+
+// ===== USERS =====
+function renderUsers() {
+  return `
+    <div class="card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="filter-group">
+            <button class="filter-btn active">All</button>
+            <button class="filter-btn">Admin</button>
+            <button class="filter-btn">Developer</button>
+          </div>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn btn-sm btn-primary" onclick="showToast('asc user-invitations invite','info')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Invite</button>
+        </div>
+      </div>
+      <div class="table-wrapper" id="usersTable">
+        <div class="empty-state"><div class="spinner" style="margin:24px auto"></div></div>
+      </div>
+    </div>`;
+}
+
+async function loadUsers() {
+  const users = await runASC('users list');
+  if (users) {
+    document.getElementById('usersTable').innerHTML = `<table><thead><tr><th>Name</th><th>Email</th><th>Roles</th><th>All Apps</th><th style="text-align:right">Actions</th></tr></thead><tbody>${users.map(u => `<tr>
+      <td><span class="cell-primary">${escapeHTML(u.firstName)} ${escapeHTML(u.lastName)}</span></td>
+      <td>${escapeHTML(u.username)}</td>
+      <td>${u.roles.map(r => `<span class="platform-badge">${r}</span>`).join(' ')}</td>
+      <td>${u.isAllAppsVisible ? '<span class="status live">Yes</span>' : '<span class="status draft">No</span>'}</td>
+      <td class="text-right">
+        <button class="btn btn-sm btn-secondary" onclick="showToast('asc users update --user-id ${u.id}','info')">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="showToast('asc users remove --user-id ${u.id}','info')">Remove</button>
+      </td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+}
+
+// ========== HELPERS ==========
+function statusBadge(state) {
+  const map = {
+    'READY_FOR_SALE': ['live', 'Live'],
+    'PREPARE_FOR_SUBMISSION': ['pending', 'Preparing'],
+    'WAITING_FOR_REVIEW': ['review', 'Waiting'],
+    'IN_REVIEW': ['review', 'In Review'],
+    'REJECTED': ['rejected', 'Rejected'],
+    'DEVELOPER_REJECTED': ['rejected', 'Dev Rejected'],
+    'VALID': ['live', 'Valid'],
+    'INVALID': ['rejected', 'Invalid'],
+    'PROCESSING': ['processing', 'Processing'],
+    'APPROVED': ['live', 'Approved'],
+    'READY_TO_SUBMIT': ['pending', 'Ready'],
+  };
+  const [cls, label] = map[state] || ['draft', state?.replace(/_/g, ' ') || 'Unknown'];
+  return `<span class="status ${cls}">${label}</span>`;
+}
+
+function formatDate(iso) {
+  if (!iso) return '--';
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function escapeHTML(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openCommandLog() { openModal('cmdLogModal'); }
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+function refreshCurrentPage() {
+  showToast('Refreshing...', 'info');
+  renderPage(state.currentPage);
+}
+
+// Click outside modal to close
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
+    e.preventDefault();
+    document.getElementById('searchInput').focus();
+  }
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(el => el.classList.remove('open'));
+  }
+});
+
+// ========== AUTH CHECK ==========
+async function checkAuth() {
+  const result = await runASC('auth check');
+  const dot = document.getElementById('authDot');
+  const info = document.getElementById('authInfo');
+  if (result && result.keyID) {
+    dot.classList.remove('disconnected');
+    info.innerHTML = `<span>${escapeHTML(result.name || 'default')}</span>Key: ${result.keyID.substring(0, 6)}... (${result.source})`;
+    document.querySelector('.auth-status').style.background = 'var(--success-bg)';
+    info.style.color = 'var(--success-text)';
+  } else {
+    dot.classList.add('disconnected');
+    info.innerHTML = '<span>Not Connected</span>Run: asc auth login';
+    document.querySelector('.auth-status').style.background = 'var(--danger-bg)';
+    info.style.color = 'var(--danger-text)';
+  }
+}
+
+// ========== INIT ==========
+checkAuth();
+renderPage('dashboard');
+</script>
+</body>
+</html>
