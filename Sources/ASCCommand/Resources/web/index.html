@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASC Console</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    * { scrollbar-width: thin; scrollbar-color: #d4d4d4 transparent; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 3px; }
+    .nav-item.active { background: #f5f5f5; color: #171717; font-weight: 500; }
+    .nav-item:hover:not(.active) { background: #fafafa; }
+    .fade-in { animation: fadeIn 0.15s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .animate-spin { animation: spin 0.7s linear infinite; }
+    @media (prefers-reduced-motion: reduce) { .fade-in, .animate-spin { animation: none; } }
+  </style>
+</head>
+<body class="bg-neutral-50 text-neutral-800 font-sans antialiased min-h-screen flex">
+
+  <!-- Sidebar -->
+  <aside class="fixed top-0 left-0 bottom-0 w-56 bg-white border-r border-neutral-200 z-50 flex flex-col">
+    <!-- App selector -->
+    <div class="px-4 pt-4 pb-3 border-b border-neutral-100">
+      <div class="flex items-center gap-2 px-2 py-1.5">
+        <div class="w-6 h-6 rounded-md bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shrink-0">
+          <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        </div>
+        <div class="min-w-0">
+          <p id="app-name" class="text-sm font-semibold text-neutral-900 truncate">Loading...</p>
+          <p id="app-bundle" class="text-[0.6rem] text-neutral-400 font-mono truncate"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Platform tabs -->
+    <div class="px-4 py-2 flex gap-1 border-b border-neutral-100">
+      <button class="platform-tab flex-1 text-[0.65rem] font-medium py-1 rounded text-center cursor-pointer bg-neutral-100 text-neutral-800" data-platform="IOS">iOS</button>
+      <button class="platform-tab flex-1 text-[0.65rem] font-medium py-1 rounded text-center cursor-pointer text-neutral-400 hover:text-neutral-600" data-platform="MAC_OS">macOS</button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
+      <button data-page="releases" class="nav-item active w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[0.8rem] text-neutral-600 cursor-pointer transition-colors">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        Releases
+      </button>
+      <button data-page="builds" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[0.8rem] text-neutral-600 cursor-pointer transition-colors">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        Builds
+      </button>
+      <button data-page="testflight" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[0.8rem] text-neutral-600 cursor-pointer transition-colors">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        TestFlight
+      </button>
+      <button data-page="reviews" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[0.8rem] text-neutral-600 cursor-pointer transition-colors">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Reviews
+      </button>
+
+      <div class="pt-3 pb-1 px-3"><span class="text-[0.6rem] font-semibold text-neutral-300 uppercase tracking-wider">Monetization</span></div>
+      <button data-page="iap" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[0.8rem] text-neutral-600 cursor-pointer transition-colors">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+        In-App Purchases
+      </button>
+      <button data-page="subscriptions" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[0.8rem] text-neutral-600 cursor-pointer transition-colors">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+        Subscriptions
+      </button>
+
+      <div class="pt-3 pb-1 px-3"><span class="text-[0.6rem] font-semibold text-neutral-300 uppercase tracking-wider">Infrastructure</span></div>
+      <button data-page="signing" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[0.8rem] text-neutral-600 cursor-pointer transition-colors">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Code Signing
+      </button>
+      <button data-page="xcodecloud" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[0.8rem] text-neutral-600 cursor-pointer transition-colors">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+        Xcode Cloud
+      </button>
+      <button data-page="team" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[0.8rem] text-neutral-600 cursor-pointer transition-colors">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Team
+      </button>
+    </nav>
+
+    <!-- Footer: auth status -->
+    <div class="border-t border-neutral-100 px-4 py-3">
+      <div class="flex items-center gap-2">
+        <div id="auth-dot" class="w-2 h-2 rounded-full bg-neutral-300"></div>
+        <span id="auth-label" class="text-[0.65rem] text-neutral-400">Checking...</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="ml-56 flex-1 min-h-screen">
+    <div id="page" class="max-w-5xl mx-auto px-6 py-6 fade-in"></div>
+  </main>
+
+  <script type="module">
+    import { asc, toList } from './js/api.js';
+    import { state, navigate, onNavigate } from './js/state.js';
+    import { loading, error, setupActionHandler } from './js/components.js';
+
+    // Page modules (lazy loaded)
+    const pages = {
+      releases:      () => import('./js/pages/releases.js'),
+      builds:        () => import('./js/pages/builds.js'),
+      testflight:    () => import('./js/pages/testflight.js'),
+      reviews:       () => import('./js/pages/reviews.js'),
+      iap:           () => import('./js/pages/iap.js'),
+      subscriptions: () => import('./js/pages/subscriptions.js'),
+      signing:       () => import('./js/pages/signing.js'),
+      xcodecloud:    () => import('./js/pages/xcodecloud.js'),
+      team:          () => import('./js/pages/team.js'),
+    };
+
+    const pageEl = document.getElementById('page');
+
+    // Render current page
+    async function renderPage() {
+      pageEl.classList.remove('fade-in');
+      void pageEl.offsetWidth;
+      pageEl.classList.add('fade-in');
+
+      pageEl.innerHTML = loading();
+      try {
+        const mod = await pages[state.page]();
+        pageEl.innerHTML = await mod.render();
+      } catch (e) {
+        pageEl.innerHTML = error(e.message);
+      }
+    }
+
+    // Navigation
+    onNavigate((page) => {
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.toggle('active', el.dataset.page === page);
+      });
+      renderPage();
+    });
+
+    document.querySelectorAll('.nav-item').forEach(el => {
+      el.addEventListener('click', () => navigate(el.dataset.page));
+    });
+
+    // Platform tabs
+    document.querySelectorAll('.platform-tab').forEach(el => {
+      el.addEventListener('click', () => {
+        state.platform = el.dataset.platform;
+        document.querySelectorAll('.platform-tab').forEach(t => {
+          const isActive = t === el;
+          t.className = `platform-tab flex-1 text-[0.65rem] font-medium py-1 rounded text-center cursor-pointer ${isActive ? 'bg-neutral-100 text-neutral-800' : 'text-neutral-400 hover:text-neutral-600'}`;
+        });
+        renderPage();
+      });
+    });
+
+    // Action handler: click affordance button -> run command -> toast -> refresh
+    setupActionHandler(renderPage);
+
+    // Init
+    async function init() {
+      // Auth check
+      try {
+        const auth = await asc('auth check --output json');
+        document.getElementById('auth-dot').className = 'w-2 h-2 rounded-full bg-emerald-400';
+        document.getElementById('auth-label').textContent = auth.keyID ? `Key: ...${auth.keyID.slice(-4)}` : 'Connected';
+      } catch {
+        document.getElementById('auth-dot').className = 'w-2 h-2 rounded-full bg-red-400';
+        document.getElementById('auth-label').textContent = 'Not authenticated';
+      }
+
+      // Load first app
+      try {
+        const apps = toList(await asc('apps list --output json'));
+        if (apps.length > 0) {
+          const app = apps[0];
+          state.appId = app.id;
+          state.appName = app.name || app.appName || 'App';
+          state.bundleId = app.bundleId || '';
+          document.getElementById('app-name').textContent = state.appName;
+          document.getElementById('app-bundle').textContent = state.bundleId;
+        }
+      } catch {
+        document.getElementById('app-name').textContent = 'No app found';
+      }
+
+      renderPage();
+    }
+
+    init();
+  </script>
+</body>
+</html>

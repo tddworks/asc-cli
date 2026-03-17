@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "asc-swift",
-    platforms: [.macOS(.v13)],
+    platforms: [.macOS(.v14)],
     products: [
         .executable(name: "asc", targets: ["ASCCommand"]),
     ],
@@ -12,6 +12,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0"),
         .package(url: "https://github.com/Kolos65/Mockable", from: "0.6.0"),
         .package(url: "https://github.com/steipete/TauTUI.git", from: "0.1.5"),
+        .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.21.0"),
     ],
     targets: [
         .target(
@@ -35,8 +36,9 @@ let package = Package(
                 "Infrastructure",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "TauTUI", package: "TauTUI"),
+                .product(name: "Hummingbird", package: "hummingbird"),
             ],
-            resources: [.copy("Resources/mockups")]
+            resources: [.copy("Resources/mockups"), .copy("Resources/web")]
         ),
         .testTarget(
             name: "DomainTests",
