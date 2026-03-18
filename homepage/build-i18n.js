@@ -173,7 +173,8 @@ function adjustAssetPaths(html, lang) {
     .replace(/href="styles\//g, 'href="../styles/')
     .replace(/src="components\//g, 'src="../components/')
     .replace(/href="favicon\.ico"/g, 'href="../favicon.ico"')
-    .replace(/href="manifest\.json"/g, 'href="../manifest.json"');
+    .replace(/href="manifest\.json"/g, 'href="../manifest.json"')
+    .replace(/Audio\('static\//g, "Audio('../static/");
 }
 
 function build() {

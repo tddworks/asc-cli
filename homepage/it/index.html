@@ -866,9 +866,9 @@
 
   <script src="../components/js/TerminalOutput.js"></script>
   <script>
-    var _nuclearAudio = new Audio('static/nuclear-launch-detected.mp3');
+    var _nuclearAudio = new Audio('../static/nuclear-launch-detected.mp3');
     function _playNuclear() { _nuclearAudio.currentTime = 0; _nuclearAudio.play(); }
-    var _dropshipAudio = new Audio('static/SC_Dropship_In_The_Pipe_Five_By_Five_Sound_Effect.mp3');
+    var _dropshipAudio = new Audio('../static/SC_Dropship_In_The_Pipe_Five_By_Five_Sound_Effect.mp3');
     function _playDropship() { _dropshipAudio.currentTime = 0; _dropshipAudio.play(); }
     document.querySelectorAll('.nav-logo-icon').forEach(function(el) {
       el.style.cursor = 'pointer';
