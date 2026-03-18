@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.53] - 2026-03-18
+
 ### Changed
 - **`asc web` → `asc web-server`** — renamed command to reflect its role as a local API proxy, no longer serves static files
 - **Removed Hummingbird dependency** — web server replaced with embedded Node.js proxy (`apps/server.js`), reducing binary size and build dependencies
@@ -505,7 +509,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.52...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.53...HEAD
+[0.1.53]: https://github.com/tddworks/asc-cli/compare/v0.1.52...v0.1.53
 [0.1.52]: https://github.com/tddworks/asc-cli/compare/v0.1.51...v0.1.52
 [0.1.51]: https://github.com/tddworks/asc-cli/compare/v0.1.50...v0.1.51
 [0.1.50]: https://github.com/tddworks/asc-cli/compare/v0.1.49...v0.1.50
