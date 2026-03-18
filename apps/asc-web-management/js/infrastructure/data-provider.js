@@ -16,20 +16,24 @@ export const DataProvider = {
   _onModeChange: null, // callback set by main.js
 
   async init() {
-    try {
-      const controller = new AbortController();
-      setTimeout(() => controller.abort(), 2000);
-      const resp = await fetch('/api/run', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command: 'asc version' }),
-        signal: controller.signal,
-      });
-      if (resp.ok) {
-        this._mode = 'cli';
-        return;
-      }
-    } catch {}
+    // Try relative path first (works when served by server.js or GitHub Pages proxy)
+    for (const base of ['', 'http://127.0.0.1:8420']) {
+      try {
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(), 2000);
+        const resp = await fetch(`${base}/api/run`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command: 'asc version' }),
+          signal: controller.signal,
+        });
+        if (resp.ok) {
+          this._mode = 'cli';
+          this._serverUrl = base;
+          return;
+        }
+      } catch {}
+    }
     this._mode = 'mock';
   },
 
