@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ASC Web Console</title>
+  <link rel="icon" href="../favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="../static/icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../static/apple-touch-icon.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <script>
@@ -64,9 +67,7 @@
   <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-60 bg-slate-925 border-r border-slate-800/60 z-50 flex flex-col overflow-hidden">
     <!-- Logo -->
     <div class="px-4 py-5 border-b border-slate-800/60 flex items-center gap-2.5 shrink-0">
-      <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center">
-        <svg class="w-4.5 h-4.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-      </div>
+      <picture><source srcset="../static/apple-touch-icon.webp" type="image/webp"><img src="../static/apple-touch-icon.png" alt="asc CLI logo" width="32" height="32" class="rounded-lg"></picture>
       <div>
         <span class="text-sm font-semibold text-white tracking-tight">ASC Console</span>
         <span class="block text-[0.6rem] text-slate-500 font-mono">v0.1.50</span>
