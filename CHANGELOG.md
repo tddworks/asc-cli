@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **`asc web` → `asc web-server`** — renamed command to reflect its role as a local API proxy, no longer serves static files
+- **Removed Hummingbird dependency** — web server replaced with embedded Node.js proxy (`apps/server.js`), reducing binary size and build dependencies
+- **Unified web apps under `apps/`** — moved dashboard from `Sources/ASCCommand/Resources/web/` to `apps/asc-web-management/`, console from `homepage/asc-web-console/` to `apps/asc-web-console/`
+- **Dual-mode API detection** — both web apps auto-detect local proxy (tries relative `/api/run`, then `localhost:8420`, then falls back to mock mode)
+
+### Added
+- **SPM build plugin (`Plugins/EmbedServerJS/`)** — auto-generates Swift source from `apps/server.js` at build time, embedding the API proxy in the binary with `apps/server.js` as single source of truth
+- **Dashboard nav link on homepage** — added "Dashboard" navigation to homepage template with translations in all 12 languages
+- **GitHub Pages deployment for web apps** — deploy workflow now copies `apps/asc-web-*` to homepage for static hosting
+
+### Removed
+- `WebServer.swift` (Hummingbird-based static file server)
+- `homepage/asc-web-console/server.py` (Python dev server)
+- Hummingbird package dependency
+
 ---
 
 ## [0.1.52] - 2026-03-18
