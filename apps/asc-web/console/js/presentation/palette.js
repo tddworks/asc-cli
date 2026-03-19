@@ -148,17 +148,15 @@ function renderResults(rawQuery) {
     html += `<div style="padding:6px 16px;font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;font-weight:600">${q ? 'Features' : 'All Features'}</div>`;
     pages.forEach(r => {
       const active = idx === activeIndex ? ' active' : '';
-      html += `<button class="palette-item${active}" data-idx="${idx}" data-type="page" data-page="${r.id}" style="gap:12px">
+      html += `<button class="palette-item${active}" data-idx="${idx}" data-type="page" data-page="${r.id}">
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
-          <div class="palette-icon-box" style="width:28px;height:28px;border-radius:6px;background:rgba(51,65,85,0.5);border:1px solid transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            ${icon(r.icon)}
-          </div>
+          <span class="palette-icon">${icon(r.icon)}</span>
           <div style="min-width:0">
-            <div class="palette-label" style="font-size:13px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${highlightMatch(r.label, q)}</div>
+            <div class="palette-label" style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${highlightMatch(r.label, q)}</div>
             <div style="font-size:10px;color:var(--text-dim)">${r.group}${r.cmdCount ? ` · ${r.cmdCount} commands` : ''}</div>
           </div>
         </div>
-        <svg class="palette-chevron" style="width:14px;height:14px;color:var(--text-dim);flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <svg class="palette-chevron" style="width:12px;height:12px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
       </button>`;
       idx++;
     });
@@ -168,13 +166,11 @@ function renderResults(rawQuery) {
     html += `<div style="padding:6px 16px;font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-top:4px">Commands</div>`;
     cmds.forEach(r => {
       const active = idx === activeIndex ? ' active' : '';
-      html += `<button class="palette-item${active}" data-idx="${idx}" data-type="cmd" data-cmd="${escapeHtml(r.cmd)}" data-page="${r.pageId}" style="gap:12px">
+      html += `<button class="palette-item${active}" data-idx="${idx}" data-type="cmd" data-cmd="${escapeHtml(r.cmd)}" data-page="${r.pageId}">
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
-          <div class="palette-icon-box" style="width:28px;height:28px;border-radius:6px;background:rgba(51,65,85,0.5);border:1px solid transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg style="width:14px;height:14px;color:var(--text-dim)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-          </div>
+          <span class="palette-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></span>
           <div style="min-width:0">
-            <code class="palette-label" style="font-size:12px;color:var(--text-secondary);font-family:var(--font-mono)">${highlightMatch(r.cmd, q)}</code>
+            <code class="palette-label" style="font-size:12px;font-family:var(--font-mono)">${highlightMatch(r.cmd, q)}</code>
             <div style="font-size:10px;color:var(--text-dim)">${r.pageLabel}</div>
           </div>
         </div>
