@@ -198,7 +198,13 @@
   background: none;
   text-align: left;
 }
-.palette-item:hover, .palette-item.active { background: rgba(51,65,85,0.5); }
+.palette-item:hover { background: rgba(51,65,85,0.35); }
+.palette-item.active {
+  background: rgba(59,130,246,0.12);
+}
+.palette-item.active .palette-label { color: #60a5fa; }
+.palette-item.active .palette-icon-box { border-color: rgba(59,130,246,0.3); }
+.palette-item.active .palette-chevron { color: var(--text-secondary); }
 
 @media (max-width: 1024px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
