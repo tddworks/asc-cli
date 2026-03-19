@@ -1,8 +1,13 @@
 [
   {
-    "developer": "itshan",
-    "developerId": "1725133580",
-    "github": "hanrw",
-    "x": "itshanrw"
+    "developer" : "itshan",
+    "x" : "itshanrw",
+    "developerId" : "1725133580",
+    "github" : "hanrw"
+  },
+  {
+    "apps" : [
+      "https:\/\/apps.apple.com\/app\/idplace.wapi.app"
+    ]
   }
 ]
