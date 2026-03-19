@@ -26,7 +26,8 @@ document.getElementById('search-input').addEventListener('input', (e) => {
   const allItems = NAV.flatMap(g => g.items);
   const matched = allItems.filter(item => {
     if (item.label.toLowerCase().includes(q)) return true;
-    if (item.cmds && item.cmds.some(c => c.includes(q))) return true;
+    const allCmds = [...(item.entry || []), ...(item.workflow || [])];
+    if (allCmds.some(c => c.includes(q))) return true;
     return false;
   });
   let html = `<div class="nav-group-title">Results (${matched.length})</div>`;

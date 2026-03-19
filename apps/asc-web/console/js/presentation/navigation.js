@@ -49,8 +49,9 @@ export function renderPage() {
 
   if (!data) return;
   title.textContent = data.label;
-  if (data.cmds) {
-    badge.textContent = `${data.cmds.length} commands`;
+  const cmdCount = (data.entry?.length || 0) + (data.workflow?.length || 0);
+  if (cmdCount) {
+    badge.textContent = `${cmdCount} commands`;
     badge.style.display = '';
   } else {
     badge.style.display = 'none';

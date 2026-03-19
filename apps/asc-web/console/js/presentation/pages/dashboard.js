@@ -3,7 +3,7 @@ import { icon } from '../icons.js';
 import { NAV } from '../nav-data.js';
 
 export function renderDashboard() {
-  const totalCmds = NAV.reduce((s, g) => s + g.items.reduce((s2, i) => s2 + (i.cmds ? i.cmds.length : 0), 0), 0);
+  const totalCmds = NAV.reduce((s, g) => s + g.items.reduce((s2, i) => s2 + (i.entry?.length || 0) + (i.workflow?.length || 0), 0), 0);
   const totalFeatures = NAV.reduce((s, g) => s + g.items.length, 0) - 1;
   const groups = NAV.filter(g => g.group !== 'Overview');
 
@@ -26,7 +26,7 @@ export function renderDashboard() {
                   ${icon(item.icon)}
                   <span class="label">${item.label}</span>
                 </div>
-                ${item.cmds ? `<span class="count">${item.cmds.length} cmd${item.cmds.length > 1 ? 's' : ''}</span>` : ''}
+                ${(item.entry || item.workflow) ? `<span class="count">${(item.entry?.length || 0) + (item.workflow?.length || 0)} cmds</span>` : ''}
               </button>
             `).join('')}
           </div>
