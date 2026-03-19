@@ -7,6 +7,10 @@ on:
       - 'homepage/**'
       - 'apps/asc-web/**'
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Update Apps Data"]
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: read
@@ -20,8 +24,11 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
 
       - uses: actions/setup-node@v4
         with:
