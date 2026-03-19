@@ -1,0 +1,37 @@
+name: Update Apps Data
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'homepage/apps.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    name: Fetch & Commit apps-data.json
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch apps metadata
+        run: node homepage/fetch-apps-data.js
+
+      - name: Commit updated apps-data.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git diff --quiet homepage/apps-data.json && echo "No changes" && exit 0
+          git add homepage/apps-data.json
+          git commit -m "chore: update apps-data.json from apps.json"
+          git push
