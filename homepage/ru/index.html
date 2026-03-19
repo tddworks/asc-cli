@@ -1056,10 +1056,7 @@
           if (x) {
             profileLinks += '<a class="app-card-profile-link" href="https://x.com/' + x.replace(/</g,'&lt;') + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="X">'+  ICON_X + '</a>';
           }
-          // Fallback: link developer handle to GitHub if neither provided
-          if (!profileLinks && developer) {
-            profileLinks = '<a class="app-card-profile-link" href="https://github.com/' + developer.replace(/</g,'&lt;') + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="GitHub">' + ICON_GITHUB + '</a>';
-          }
+          // No fallback — only show badges when github/x are explicitly provided
 
           card.innerHTML =
             '<img class="app-card-icon" src="' + info.artworkUrl100 + '" alt="' + info.name + ' app icon" loading="lazy" width="60" height="60">' +
