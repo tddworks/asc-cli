@@ -1,5 +1,5 @@
 // Page: Builds
-import { DataProvider } from '../../infrastructure/data-provider.js';
+import { DataProvider } from '../../../../shared/infrastructure/data-provider.js';
 import { state } from '../state.js';
 import { escapeHTML, statusBadge, formatDate } from '../helpers.js';
 

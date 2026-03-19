@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,934 +7,118 @@
   <link rel="icon" href="../favicon.ico">
   <link rel="icon" type="image/png" sizes="192x192" href="../static/icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="../static/apple-touch-icon.png">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            slate: {
-              925: '#0c1222',
-              950: '#070d1a',
-            },
-            brand: {
-              50: '#eff6ff',
-              100: '#dbeafe',
-              200: '#bfdbfe',
-              300: '#93c5fd',
-              400: '#60a5fa',
-              500: '#3b82f6',
-              600: '#2563eb',
-              700: '#1d4ed8',
-              800: '#1e40af',
-              900: '#1e3a8a',
-            },
-          },
-          fontFamily: {
-            sans: ['IBM Plex Sans', 'system-ui', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          },
-        },
-      },
-    }
-  </script>
-  <style>
-    * { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-    .sidebar-item.active { background: rgba(59,130,246,0.12); color: #60a5fa; border-left: 2px solid #3b82f6; }
-    .sidebar-item:not(.active) { border-left: 2px solid transparent; }
-    .sidebar-item:hover:not(.active) { background: rgba(148,163,184,0.06); }
-    .fade-in { animation: fadeIn 0.2s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-    .stat-card { transition: border-color 0.2s, box-shadow 0.2s; }
-    .stat-card:hover { border-color: rgba(59,130,246,0.3); box-shadow: 0 0 20px rgba(59,130,246,0.06); }
-    .table-row { transition: background 0.15s; }
-    .table-row:hover { background: rgba(148,163,184,0.04); }
-    .cmd-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; }
-    .group-header { font-size: 0.65rem; letter-spacing: 0.08em; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .animate-spin { animation: spin 0.8s linear infinite; }
-    @media (prefers-reduced-motion: reduce) { .fade-in { animation: none; } .animate-spin { animation: none; } }
-  </style>
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
 </head>
-<body class="bg-slate-950 text-slate-200 font-sans antialiased min-h-screen flex">
+
+<body>
 
   <!-- Sidebar -->
-  <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-60 bg-slate-925 border-r border-slate-800/60 z-50 flex flex-col overflow-hidden">
-    <!-- Logo -->
-    <div class="px-4 py-5 border-b border-slate-800/60 flex items-center gap-2.5 shrink-0">
-      <picture><source srcset="../static/apple-touch-icon.webp" type="image/webp"><img src="../static/apple-touch-icon.png" alt="asc CLI logo" width="32" height="32" class="rounded-lg"></picture>
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <picture>
+        <source srcset="../static/apple-touch-icon.webp" type="image/webp">
+        <img src="../static/apple-touch-icon.png" alt="asc CLI logo">
+      </picture>
       <div>
-        <span class="text-sm font-semibold text-white tracking-tight">ASC Console</span>
-        <span class="block text-[0.6rem] text-slate-500 font-mono">v0.1.50</span>
+        <div class="title">ASC Console</div>
+        <div class="version">v0.1.53</div>
       </div>
     </div>
 
-    <!-- Navigation -->
-    <nav class="flex-1 overflow-y-auto py-3 px-2 space-y-0.5" id="nav">
+    <nav class="sidebar-nav" id="nav">
       <!-- Populated by JS -->
     </nav>
 
-    <!-- Auth status -->
-    <div class="border-t border-slate-800/60 p-3 shrink-0">
-      <div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
-          <svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <div class="sidebar-footer">
+      <div class="auth-status">
+        <div class="auth-avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </div>
-        <div class="min-w-0">
-          <p class="text-xs font-medium text-slate-300 truncate">Connected</p>
-          <p class="text-[0.6rem] text-slate-500 font-mono truncate">~/.asc/credentials</p>
+        <div>
+          <div class="auth-name">Connected</div>
+          <div class="auth-detail">~/.asc/credentials</div>
         </div>
       </div>
     </div>
   </aside>
 
   <!-- Main Content -->
-  <main class="ml-60 flex-1 min-h-screen">
-    <!-- Top bar -->
-    <header class="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-lg border-b border-slate-800/40">
-      <div class="flex items-center justify-between px-6 py-3">
-        <div class="flex items-center gap-3">
-          <button id="mobile-menu-btn" class="lg:hidden p-1.5 rounded-md hover:bg-slate-800 cursor-pointer">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-          </button>
-          <h1 id="page-title" class="text-base font-semibold text-white"></h1>
-          <span id="page-badge" class="hidden text-[0.6rem] font-mono px-1.5 py-0.5 rounded bg-brand-600/15 text-brand-400 border border-brand-600/20"></span>
+  <div class="main">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-inner">
+        <div style="display:flex;align-items:center;gap:12px">
+          <h1 class="header-title" id="page-title"></h1>
+          <span class="header-badge" id="page-badge" style="display:none"></span>
         </div>
-        <div class="flex items-center gap-2">
-          <!-- Search -->
-          <div class="relative hidden sm:block">
-            <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            <input type="text" id="search-input" placeholder="Search commands..." class="w-52 pl-8 pr-3 py-1.5 text-xs bg-slate-900 border border-slate-800 rounded-md text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-brand-600/50 focus:ring-1 focus:ring-brand-600/20 transition-colors" />
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="search-input" placeholder="Search commands..." />
           </div>
-          <!-- Terminal btn -->
-          <button id="terminal-btn" class="p-1.5 rounded-md hover:bg-slate-800 cursor-pointer transition-colors" title="Run command">
-            <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          <button class="icon-btn" id="terminal-btn" title="Run command">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
           </button>
         </div>
       </div>
     </header>
 
     <!-- Page content -->
-    <div id="page-content" class="p-6 fade-in">
+    <div class="content fade-in" id="page-content">
       <!-- Populated by JS -->
     </div>
-  </main>
+  </div>
 
-  <!-- Terminal Panel (bottom drawer) -->
-  <div id="terminal-panel" class="fixed bottom-0 left-60 right-0 z-[55] translate-y-full transition-transform duration-300 ease-out" style="height: 45vh;">
-    <div class="h-full bg-slate-925 border-t border-slate-700/60 shadow-2xl flex flex-col">
-      <!-- Terminal header -->
-      <div class="flex items-center justify-between px-4 py-2 border-b border-slate-800/60 shrink-0 cursor-grab select-none" id="terminal-header">
-        <div class="flex items-center gap-2">
-          <svg class="w-3.5 h-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-          <span class="text-xs font-medium text-slate-400">Terminal</span>
-          <span id="terminal-status" class="text-[0.55rem] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">ready</span>
+  <!-- Terminal Panel -->
+  <div class="terminal-panel" id="terminal-panel">
+    <div class="terminal-inner">
+      <div class="terminal-header">
+        <div style="display:flex;align-items:center;gap:8px">
+          <svg style="width:14px;height:14px;color:var(--text-dim)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          <span style="font-size:12px;font-weight:500;color:var(--text-secondary)">Terminal</span>
+          <span class="status-badge status-ready" id="terminal-status">ready</span>
         </div>
-        <div class="flex items-center gap-1">
-          <button id="terminal-clear" class="p-1 rounded hover:bg-slate-800 cursor-pointer transition-colors" title="Clear">
-            <svg class="w-3.5 h-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+        <div style="display:flex;align-items:center;gap:4px">
+          <button class="icon-btn" id="terminal-clear" title="Clear">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
           </button>
-          <button id="terminal-close" class="p-1 rounded hover:bg-slate-800 cursor-pointer transition-colors" title="Close">
-            <svg class="w-3.5 h-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <button class="icon-btn" id="terminal-close" title="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
       </div>
-      <!-- Terminal output -->
-      <div id="cmd-output" class="flex-1 overflow-y-auto p-4 font-mono text-xs text-slate-400 space-y-3">
-        <div class="text-slate-600">ASC Web Console terminal. Type a command and press Enter.</div>
-        <div class="text-slate-600 text-[0.6rem]">Server: <span id="server-url">detecting…</span></div>
+      <div class="terminal-output" id="cmd-output">
+        <div style="color:var(--text-dim)">ASC Web Console terminal. Type a command and press Enter.</div>
+        <div style="color:var(--text-dim);font-size:10px">Server: <span id="server-url">detecting...</span></div>
       </div>
-      <!-- Terminal input -->
-      <div class="border-t border-slate-800/60 px-4 py-2 flex items-center gap-2 shrink-0">
-        <span class="text-brand-400 text-xs font-mono">$</span>
-        <input type="text" id="cmd-input" placeholder="asc apps list --output json --pretty" class="flex-1 bg-transparent text-sm text-slate-200 font-mono placeholder:text-slate-600 focus:outline-none" autocomplete="off" spellcheck="false" />
-        <kbd class="text-[0.55rem] text-slate-600 bg-slate-800 px-1.5 py-0.5 rounded hidden sm:inline">Enter</kbd>
+      <div class="terminal-input-bar">
+        <span style="color:#60a5fa;font-size:12px;font-family:var(--font-mono)">$</span>
+        <input type="text" id="cmd-input" placeholder="asc apps list --output json --pretty" autocomplete="off" spellcheck="false" />
       </div>
     </div>
   </div>
 
-  <!-- Command Palette (quick search overlay) -->
-  <div id="cmd-modal" class="fixed inset-0 z-[60] hidden">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="cmd-backdrop"></div>
-    <div class="absolute top-[15%] left-1/2 -translate-x-1/2 w-full max-w-lg">
-      <div class="bg-slate-900 border border-slate-700/60 rounded-xl shadow-2xl overflow-hidden">
-        <div class="flex items-center gap-2 px-4 py-3 border-b border-slate-800">
-          <svg class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-          <input type="text" id="palette-input" placeholder="Search commands... (type to filter)" class="flex-1 bg-transparent text-sm text-slate-200 font-mono placeholder:text-slate-600 focus:outline-none" />
-          <kbd class="text-[0.6rem] text-slate-600 bg-slate-800 px-1.5 py-0.5 rounded">ESC</kbd>
-        </div>
-        <div id="palette-results" class="max-h-72 overflow-y-auto">
-          <!-- Populated by JS -->
-        </div>
+  <!-- Command Palette -->
+  <div class="cmd-palette-overlay" id="cmd-modal">
+    <div class="cmd-palette-backdrop" id="cmd-backdrop"></div>
+    <div class="cmd-palette">
+      <div style="display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border)">
+        <svg style="width:16px;height:16px;color:var(--text-dim)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="palette-input" placeholder="Search commands... (type to filter)" style="flex:1;background:transparent;border:none;font-size:14px;color:var(--text-primary);font-family:var(--font-mono);outline:none" />
+        <kbd style="font-size:10px;color:var(--text-dim);background:rgba(51,65,85,1);padding:2px 6px;border-radius:4px">ESC</kbd>
+      </div>
+      <div id="palette-results" style="max-height:288px;overflow-y:auto">
+        <!-- Populated by JS -->
       </div>
     </div>
   </div>
 
-<script>
-// ── Data ──────────────────────────────────────────────
-const NAV = [
-  { group: 'Overview', items: [
-    { id: 'dashboard', label: 'Dashboard', icon: 'grid' },
-  ]},
-  { group: 'App Management', items: [
-    { id: 'apps', label: 'Apps', icon: 'box', cmds: ['apps list'] },
-    { id: 'versions', label: 'Versions', icon: 'layers', cmds: ['versions list','versions create','versions submit','versions set-build','versions check-readiness'] },
-    { id: 'localizations', label: 'Localizations', icon: 'globe', cmds: ['version-localizations list','version-localizations create','version-localizations update'] },
-    { id: 'screenshots', label: 'Screenshots', icon: 'image', cmds: ['screenshot-sets list','screenshot-sets create','screenshots list','screenshots upload','screenshots import'] },
-    { id: 'previews', label: 'App Previews', icon: 'play', cmds: ['app-preview-sets list','app-preview-sets create','app-previews list','app-previews upload'] },
-    { id: 'appinfo', label: 'App Info', icon: 'info', cmds: ['app-infos list','app-infos update','app-info-localizations list','app-info-localizations create','app-info-localizations update','app-info-localizations delete','age-rating get','age-rating update','app-categories list'] },
-    { id: 'appclips', label: 'App Clips', icon: 'scissors', cmds: ['app-clips list','app-clip-experiences list','app-clip-experiences create','app-clip-experiences delete','app-clip-experience-localizations list','app-clip-experience-localizations create','app-clip-experience-localizations delete'] },
-  ]},
-  { group: 'Distribution', items: [
-    { id: 'builds', label: 'Builds', icon: 'package', cmds: ['builds list','builds upload','builds archive','builds uploads','builds add-beta-group','builds remove-beta-group','builds update-beta-notes'] },
-    { id: 'testflight', label: 'TestFlight', icon: 'send', cmds: ['testflight groups list','testflight testers list','testflight testers add','testflight testers remove','testflight testers import','testflight testers export'] },
-    { id: 'reviews', label: 'Reviews', icon: 'star', cmds: ['reviews list','reviews get','review-responses get','review-responses create','review-responses delete','version-review-detail get','version-review-detail update'] },
-    { id: 'betareview', label: 'Beta Review', icon: 'check-circle', cmds: ['beta-review submissions list','beta-review submissions create','beta-review submissions get','beta-review detail get','beta-review detail update'] },
-  ]},
-  { group: 'Monetization', items: [
-    { id: 'iap', label: 'In-App Purchases', icon: 'shopping-cart', cmds: ['iap list','iap create','iap submit','iap-localizations list','iap-localizations create','iap-price-points list','iap-prices set'] },
-    { id: 'subscriptions', label: 'Subscriptions', icon: 'repeat', cmds: ['subscription-groups list','subscription-groups create','subscriptions list','subscriptions create','subscriptions submit','subscription-localizations list','subscription-localizations create','subscription-offers list','subscription-offers create'] },
-    { id: 'offercodes', label: 'Offer Codes', icon: 'tag', cmds: ['subscription-offer-codes list','subscription-offer-codes create','iap-offer-codes list','iap-offer-codes create'] },
-    { id: 'reports', label: 'Reports', icon: 'bar-chart', cmds: ['sales-reports download','finance-reports download','analytics-reports request','analytics-reports list'] },
-  ]},
-  { group: 'Development', items: [
-    { id: 'codesigning', label: 'Code Signing', icon: 'shield', cmds: ['bundle-ids list','bundle-ids create','certificates list','certificates create','devices list','devices register','profiles list','profiles create'] },
-    { id: 'xcodecloud', label: 'Xcode Cloud', icon: 'cloud', cmds: ['xcode-cloud products list','xcode-cloud workflows list','xcode-cloud builds list','xcode-cloud builds get','xcode-cloud builds start'] },
-    { id: 'gamecenter', label: 'Game Center', icon: 'trophy', cmds: ['game-center detail get','game-center achievements list','game-center achievements create','game-center leaderboards list','game-center leaderboards create'] },
-    { id: 'performance', label: 'Performance', icon: 'activity', cmds: ['perf-metrics list','diagnostics list','diagnostic-logs list'] },
-  ]},
-  { group: 'Tools', items: [
-    { id: 'appshots', label: 'App Shots', icon: 'camera', cmds: ['app-shots generate','app-shots translate','app-shots html','app-shots config'] },
-    { id: 'availability', label: 'Availability', icon: 'map', cmds: ['app-availability get','iap-availability get','subscription-availability get','territories list'] },
-  ]},
-  { group: 'Settings', items: [
-    { id: 'auth', label: 'Authentication', icon: 'key', cmds: ['auth login','auth logout','auth check','auth list','auth use','auth update'] },
-    { id: 'users', label: 'Users & Teams', icon: 'users', cmds: ['users list','users update','users remove','user-invitations list','user-invitations invite','user-invitations cancel'] },
-    { id: 'plugins', label: 'Plugins', icon: 'puzzle', cmds: ['plugins list','plugins install','plugins uninstall','plugins enable','plugins disable','plugins run'] },
-    { id: 'skills', label: 'Skills', icon: 'zap', cmds: ['skills list','skills install','skills uninstall','skills installed','skills check','skills update'] },
-  ]},
-];
-
-const ICONS = {
-  grid: '<path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/>',
-  box: '<path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
-  layers: '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
-  globe: '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>',
-  image: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
-  play: '<polygon points="5 3 19 12 5 21 5 3"/>',
-  info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
-  scissors: '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/>',
-  package: '<line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
-  send: '<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',
-  star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
-  'check-circle': '<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
-  'shopping-cart': '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>',
-  repeat: '<polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/>',
-  tag: '<path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>',
-  'bar-chart': '<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>',
-  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
-  cloud: '<path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/>',
-  trophy: '<path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2Z"/>',
-  activity: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
-  camera: '<path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/>',
-  map: '<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>',
-  key: '<path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>',
-  users: '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>',
-  puzzle: '<path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 01-.837.276c-.47-.07-.802-.452-.968-.893-.296-.806-.915-1.294-1.753-1.294-1.215 0-2.127 1.037-2.127 2.353 0 .636-.207 1.212-.556 1.629-.346.412-.843.658-1.427.658h-2.28c-1.18 0-2.087-.963-2.087-2.204 0-1.316-.912-2.353-2.127-2.353-.838 0-1.457.488-1.753 1.294-.166.441-.498.823-.968.893a.98.98 0 01-.837-.276L.306 13.704C-.102 13.296-.102 12.664.306 12.256L1.874 10.688a1.187 1.187 0 00.289-.878C2.053 8.626 1.19 7.878 0 7.878V5.694c0-.584.246-1.081.658-1.427C1.075 3.917 1.651 3.71 2.287 3.71c1.316 0 2.353-.912 2.353-2.127C4.64.659 5.603-.304 6.783-.304h2.28c.584 0 1.081.246 1.427.658.35.417.556.993.556 1.629 0 1.316.912 2.353 2.127 2.353.838 0 1.457-.488 1.753-1.294"/>',
-  zap: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
-};
-
-function icon(name, cls = 'w-4 h-4') {
-  return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[name] || ''}</svg>`;
-}
-
-// ── State ─────────────────────────────────────────────
-let currentPage = 'dashboard';
-
-// ── Render nav ────────────────────────────────────────
-function renderNav() {
-  const nav = document.getElementById('nav');
-  let html = '';
-  NAV.forEach(section => {
-    html += `<div class="group-header text-slate-600 uppercase font-semibold px-3 pt-4 pb-1.5">${section.group}</div>`;
-    section.items.forEach(item => {
-      const active = item.id === currentPage ? 'active' : '';
-      html += `<button data-page="${item.id}" class="sidebar-item ${active} w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-slate-400 cursor-pointer transition-colors">
-        ${icon(item.icon, 'w-3.5 h-3.5 shrink-0')}
-        <span>${item.label}</span>
-      </button>`;
-    });
-  });
-  nav.innerHTML = html;
-
-  nav.querySelectorAll('[data-page]').forEach(btn => {
-    btn.addEventListener('click', () => navigate(btn.dataset.page));
-  });
-}
-
-function navigate(pageId) {
-  currentPage = pageId;
-  renderNav();
-  renderPage();
-}
-
-// ── Page renderer ─────────────────────────────────────
-function getPageData(id) {
-  for (const section of NAV) {
-    for (const item of section.items) {
-      if (item.id === id) return item;
-    }
-  }
-  return null;
-}
-
-function renderPage() {
-  const container = document.getElementById('page-content');
-  const title = document.getElementById('page-title');
-  const badge = document.getElementById('page-badge');
-  const data = getPageData(currentPage);
-
-  container.classList.remove('fade-in');
-  void container.offsetWidth;
-  container.classList.add('fade-in');
-
-  if (currentPage === 'dashboard') {
-    title.textContent = 'Dashboard';
-    badge.classList.add('hidden');
-    container.innerHTML = renderDashboard();
-    return;
-  }
-
-  if (!data) return;
-  title.textContent = data.label;
-  if (data.cmds) {
-    badge.textContent = `${data.cmds.length} commands`;
-    badge.classList.remove('hidden');
-  } else {
-    badge.classList.add('hidden');
-  }
-  container.innerHTML = renderFeaturePage(data);
-}
-
-// ── Dashboard ─────────────────────────────────────────
-function renderDashboard() {
-  const totalCmds = NAV.reduce((s, g) => s + g.items.reduce((s2, i) => s2 + (i.cmds ? i.cmds.length : 0), 0), 0);
-  const totalFeatures = NAV.reduce((s, g) => s + g.items.length, 0) - 1; // exclude dashboard
-  const groups = NAV.filter(g => g.group !== 'Overview');
-
-  return `
-    <!-- Stats -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      ${statCard('Total Features', totalFeatures, 'box', 'brand')}
-      ${statCard('CLI Commands', totalCmds, 'zap', 'emerald')}
-      ${statCard('Categories', groups.length, 'layers', 'violet')}
-      ${statCard('Version', 'v0.1.50', 'tag', 'amber')}
-    </div>
-
-    <!-- Feature groups -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-      ${groups.map(g => `
-        <div class="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4">
-          <h3 class="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">${g.group}</h3>
-          <div class="space-y-1">
-            ${g.items.map(item => `
-              <button data-page="${item.id}" class="dashboard-nav w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-slate-800/50 cursor-pointer transition-colors group">
-                <div class="flex items-center gap-2.5">
-                  ${icon(item.icon, 'w-3.5 h-3.5 text-slate-500 group-hover:text-brand-400 transition-colors')}
-                  <span class="text-sm text-slate-300 group-hover:text-white transition-colors">${item.label}</span>
-                </div>
-                ${item.cmds ? `<span class="text-[0.6rem] font-mono text-slate-600">${item.cmds.length} cmd${item.cmds.length > 1 ? 's' : ''}</span>` : ''}
-              </button>
-            `).join('')}
-          </div>
-        </div>
-      `).join('')}
-    </div>
-
-    <!-- Quick commands -->
-    <div class="mt-8 bg-slate-900/60 border border-slate-800/60 rounded-xl p-5">
-      <h3 class="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-4">Quick Actions</h3>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        ${quickAction('List Apps', 'asc apps list', 'box')}
-        ${quickAction('Check Auth', 'asc auth check', 'key')}
-        ${quickAction('List Builds', 'asc builds list', 'package')}
-        ${quickAction('Sales Report', 'asc sales-reports download', 'bar-chart')}
-      </div>
-    </div>
-  `;
-}
-
-function statCard(label, value, iconName, color) {
-  const colors = {
-    brand: 'text-brand-400 bg-brand-500/10',
-    emerald: 'text-emerald-400 bg-emerald-500/10',
-    violet: 'text-violet-400 bg-violet-500/10',
-    amber: 'text-amber-400 bg-amber-500/10',
-  };
-  return `
-    <div class="stat-card bg-slate-900/60 border border-slate-800/60 rounded-xl p-4 cursor-default">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-lg ${colors[color]} flex items-center justify-center">
-          ${icon(iconName, 'w-4 h-4')}
-        </div>
-        <div>
-          <p class="text-lg font-semibold text-white">${value}</p>
-          <p class="text-[0.65rem] text-slate-500 uppercase tracking-wider">${label}</p>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function quickAction(label, cmd, iconName) {
-  return `
-    <button class="quick-cmd flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-slate-800/40 border border-slate-700/40 hover:border-brand-600/30 hover:bg-slate-800/70 cursor-pointer transition-all" data-cmd="${cmd}">
-      ${icon(iconName, 'w-3.5 h-3.5 text-slate-500')}
-      <div class="text-left">
-        <p class="text-xs text-slate-300">${label}</p>
-        <p class="text-[0.6rem] font-mono text-slate-600">${cmd}</p>
-      </div>
-    </button>
-  `;
-}
-
-// ── Feature Page ──────────────────────────────────────
-function renderFeaturePage(data) {
-  if (!data.cmds) return '<p class="text-slate-500">No commands available.</p>';
-
-  // Group commands by prefix
-  const groups = {};
-  data.cmds.forEach(cmd => {
-    const parts = cmd.split(' ');
-    const prefix = parts.length > 1 ? parts.slice(0, -1).join(' ') : cmd;
-    if (!groups[prefix]) groups[prefix] = [];
-    groups[prefix].push({ full: cmd, action: parts[parts.length - 1] });
-  });
-
-  return `
-    <!-- Command Groups -->
-    <div class="space-y-6">
-      ${Object.entries(groups).map(([prefix, cmds]) => `
-        <div class="bg-slate-900/60 border border-slate-800/60 rounded-xl overflow-hidden">
-          <div class="px-5 py-3 border-b border-slate-800/40 flex items-center gap-2">
-            <code class="text-xs font-mono text-brand-400">asc ${prefix}</code>
-            <span class="text-[0.6rem] text-slate-600">${cmds.length} action${cmds.length > 1 ? 's' : ''}</span>
-          </div>
-          <div class="divide-y divide-slate-800/30">
-            ${cmds.map(cmd => `
-              <div class="table-row flex items-center justify-between px-5 py-3">
-                <div class="flex items-center gap-3">
-                  <span class="cmd-tag px-2 py-0.5 rounded ${actionColor(cmd.action)} border">${cmd.action}</span>
-                  <code class="text-sm font-mono text-slate-300">asc ${cmd.full}</code>
-                </div>
-                <div class="flex items-center gap-2">
-                  <button class="copy-cmd p-1.5 rounded hover:bg-slate-800 cursor-pointer transition-colors" data-cmd="asc ${cmd.full}" title="Copy command">
-                    <svg class="w-3.5 h-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                  </button>
-                  <button class="run-cmd p-1.5 rounded hover:bg-slate-800 cursor-pointer transition-colors" data-cmd="asc ${cmd.full}" title="Run in terminal">
-                    <svg class="w-3.5 h-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-                  </button>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `).join('')}
-    </div>
-
-    <!-- Usage section -->
-    <div class="mt-6 bg-slate-900/60 border border-slate-800/60 rounded-xl p-5">
-      <h3 class="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">Usage Example</h3>
-      <div class="bg-slate-950 rounded-lg p-4 font-mono text-xs text-slate-400 overflow-x-auto">
-        <span class="text-slate-600">$</span> <span class="text-brand-400">asc</span> ${data.cmds[0]} <span class="text-slate-600">--output json --pretty</span>
-      </div>
-    </div>
-  `;
-}
-
-function actionColor(action) {
-  const colors = {
-    list: 'text-emerald-400 bg-emerald-500/8 border-emerald-500/20',
-    get: 'text-emerald-400 bg-emerald-500/8 border-emerald-500/20',
-    create: 'text-brand-400 bg-brand-500/8 border-brand-500/20',
-    update: 'text-amber-400 bg-amber-500/8 border-amber-500/20',
-    delete: 'text-red-400 bg-red-500/8 border-red-500/20',
-    remove: 'text-red-400 bg-red-500/8 border-red-500/20',
-    revoke: 'text-red-400 bg-red-500/8 border-red-500/20',
-    cancel: 'text-red-400 bg-red-500/8 border-red-500/20',
-    upload: 'text-violet-400 bg-violet-500/8 border-violet-500/20',
-    submit: 'text-violet-400 bg-violet-500/8 border-violet-500/20',
-    download: 'text-cyan-400 bg-cyan-500/8 border-cyan-500/20',
-    import: 'text-cyan-400 bg-cyan-500/8 border-cyan-500/20',
-    export: 'text-cyan-400 bg-cyan-500/8 border-cyan-500/20',
-    archive: 'text-violet-400 bg-violet-500/8 border-violet-500/20',
-    login: 'text-emerald-400 bg-emerald-500/8 border-emerald-500/20',
-    logout: 'text-red-400 bg-red-500/8 border-red-500/20',
-    check: 'text-amber-400 bg-amber-500/8 border-amber-500/20',
-    use: 'text-brand-400 bg-brand-500/8 border-brand-500/20',
-    add: 'text-brand-400 bg-brand-500/8 border-brand-500/20',
-    invite: 'text-brand-400 bg-brand-500/8 border-brand-500/20',
-    register: 'text-brand-400 bg-brand-500/8 border-brand-500/20',
-    install: 'text-brand-400 bg-brand-500/8 border-brand-500/20',
-    uninstall: 'text-red-400 bg-red-500/8 border-red-500/20',
-    enable: 'text-emerald-400 bg-emerald-500/8 border-emerald-500/20',
-    disable: 'text-amber-400 bg-amber-500/8 border-amber-500/20',
-    run: 'text-violet-400 bg-violet-500/8 border-violet-500/20',
-    installed: 'text-emerald-400 bg-emerald-500/8 border-emerald-500/20',
-    set: 'text-amber-400 bg-amber-500/8 border-amber-500/20',
-    start: 'text-violet-400 bg-violet-500/8 border-violet-500/20',
-    generate: 'text-violet-400 bg-violet-500/8 border-violet-500/20',
-    translate: 'text-cyan-400 bg-cyan-500/8 border-cyan-500/20',
-    html: 'text-amber-400 bg-amber-500/8 border-amber-500/20',
-    config: 'text-slate-400 bg-slate-500/8 border-slate-500/20',
-    request: 'text-brand-400 bg-brand-500/8 border-brand-500/20',
-    uploads: 'text-violet-400 bg-violet-500/8 border-violet-500/20',
-  };
-  return colors[action] || 'text-slate-400 bg-slate-500/8 border-slate-500/20';
-}
-
-// ── Search ────────────────────────────────────────────
-document.getElementById('search-input').addEventListener('input', (e) => {
-  const q = e.target.value.toLowerCase().trim();
-  if (!q) { renderNav(); return; }
-  const nav = document.getElementById('nav');
-  const allItems = NAV.flatMap(g => g.items);
-  const matched = allItems.filter(item => {
-    if (item.label.toLowerCase().includes(q)) return true;
-    if (item.cmds && item.cmds.some(c => c.includes(q))) return true;
-    return false;
-  });
-  let html = `<div class="group-header text-slate-600 uppercase font-semibold px-3 pt-2 pb-1.5">Results (${matched.length})</div>`;
-  matched.forEach(item => {
-    const active = item.id === currentPage ? 'active' : '';
-    html += `<button data-page="${item.id}" class="sidebar-item ${active} w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-slate-400 cursor-pointer transition-colors">
-      ${icon(item.icon, 'w-3.5 h-3.5 shrink-0')}
-      <span>${item.label}</span>
-    </button>`;
-  });
-  nav.innerHTML = html;
-  nav.querySelectorAll('[data-page]').forEach(btn => {
-    btn.addEventListener('click', () => { e.target.value = ''; navigate(btn.dataset.page); });
-  });
-});
-
-// ── Terminal ──────────────────────────────────────────
-let API_BASE = '';
-async function detectApiBase() {
-  // Try relative path first (works when served by server.js)
-  try {
-    const controller = new AbortController();
-    setTimeout(() => controller.abort(), 2000);
-    const res = await fetch('/api/run', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ command: 'asc version' }),
-      signal: controller.signal,
-    });
-    if (res.ok) { API_BASE = ''; return true; }
-  } catch {}
-  // Try localhost (works on GitHub Pages with local server)
-  try {
-    const controller = new AbortController();
-    setTimeout(() => controller.abort(), 2000);
-    const res = await fetch('http://127.0.0.1:8420/api/run', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ command: 'asc version' }),
-      signal: controller.signal,
-    });
-    if (res.ok) { API_BASE = 'http://127.0.0.1:8420'; return true; }
-  } catch {}
-  return false;
-}
-detectApiBase().then(online => {
-  const el = document.getElementById('server-url');
-  if (el) el.textContent = online
-    ? (API_BASE || window.location.origin)
-    : 'offline — run: asc web-server';
-});
-const terminalPanel = document.getElementById('terminal-panel');
-const cmdInput = document.getElementById('cmd-input');
-const cmdOutput = document.getElementById('cmd-output');
-const terminalStatus = document.getElementById('terminal-status');
-let terminalOpen = false;
-let cmdHistory = [];
-let historyIndex = -1;
-let isRunning = false;
-
-function toggleTerminal(show) {
-  const shouldShow = show !== undefined ? show : !terminalOpen;
-  terminalOpen = shouldShow;
-  if (shouldShow) {
-    terminalPanel.classList.remove('translate-y-full');
-    terminalPanel.classList.add('translate-y-0');
-    setTimeout(() => cmdInput.focus(), 300);
-  } else {
-    terminalPanel.classList.remove('translate-y-0');
-    terminalPanel.classList.add('translate-y-full');
-  }
-}
-
-document.getElementById('terminal-btn').addEventListener('click', () => toggleTerminal());
-document.getElementById('terminal-close').addEventListener('click', () => toggleTerminal(false));
-document.getElementById('terminal-clear').addEventListener('click', () => {
-  cmdOutput.innerHTML = '<div class="text-slate-600">Terminal cleared.</div>';
-});
-
-function setTerminalStatus(status, color) {
-  const colors = {
-    ready: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    running: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    error: 'bg-red-500/10 text-red-400 border-red-500/20',
-  };
-  terminalStatus.textContent = status;
-  terminalStatus.className = `text-[0.55rem] font-mono px-1.5 py-0.5 rounded border ${colors[color] || colors.ready}`;
-}
-
-async function executeCommand(cmd) {
-  if (isRunning) return;
-  isRunning = true;
-
-  // Add to history
-  if (cmdHistory[0] !== cmd) cmdHistory.unshift(cmd);
-  if (cmdHistory.length > 50) cmdHistory.pop();
-  historyIndex = -1;
-
-  // Show command in output
-  const cmdLine = document.createElement('div');
-  cmdLine.innerHTML = `<span class="text-brand-400 select-none">$ </span><span class="text-slate-200">${escapeHtml(cmd)}</span>`;
-  cmdOutput.appendChild(cmdLine);
-
-  // Loading indicator
-  const loader = document.createElement('div');
-  loader.className = 'flex items-center gap-2 text-slate-500';
-  loader.innerHTML = `<svg class="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity="0.25"/><path d="M12 2a10 10 0 019.95 9" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg> Running...`;
-  cmdOutput.appendChild(loader);
-  cmdOutput.scrollTop = cmdOutput.scrollHeight;
-  setTerminalStatus('running', 'running');
-
-  try {
-    const res = await fetch(`${API_BASE}/api/run`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ command: cmd }),
-    });
-
-    const data = await res.json();
-    loader.remove();
-
-    if (data.error) {
-      appendOutput(data.error, 'text-red-400');
-      setTerminalStatus('error', 'error');
-    } else {
-      // Show stdout
-      if (data.stdout && data.stdout.trim()) {
-        // Try to parse and pretty-print JSON
-        try {
-          const json = JSON.parse(data.stdout);
-          appendJsonOutput(json);
-        } catch {
-          appendOutput(data.stdout.trim(), 'text-slate-300');
-        }
-      }
-      // Show stderr if present
-      if (data.stderr && data.stderr.trim()) {
-        appendOutput(data.stderr.trim(), 'text-amber-400/70');
-      }
-      // Exit code
-      if (data.exit_code !== 0) {
-        appendOutput(`Exit code: ${data.exit_code}`, 'text-red-400/60');
-        setTerminalStatus('error', 'error');
-      } else {
-        setTerminalStatus('ready', 'ready');
-      }
-      if (!data.stdout?.trim() && !data.stderr?.trim() && data.exit_code === 0) {
-        appendOutput('(no output)', 'text-slate-600');
-        setTerminalStatus('ready', 'ready');
-      }
-    }
-  } catch (err) {
-    loader.remove();
-    appendOutput(`Connection error: ${err.message}. Is the server running?\n  python3 apps/asc-web/server.py`, 'text-red-400');
-    setTerminalStatus('error', 'error');
-  }
-
-  // Spacer
-  const spacer = document.createElement('div');
-  spacer.className = 'h-2';
-  cmdOutput.appendChild(spacer);
-  cmdOutput.scrollTop = cmdOutput.scrollHeight;
-  isRunning = false;
-}
-
-function appendOutput(text, cls) {
-  const el = document.createElement('pre');
-  el.className = `${cls} whitespace-pre-wrap break-words leading-relaxed`;
-  el.textContent = text;
-  cmdOutput.appendChild(el);
-}
-
-function appendJsonOutput(json) {
-  const el = document.createElement('div');
-  el.className = 'text-slate-300 leading-relaxed';
-
-  if (Array.isArray(json)) {
-    // Render as interactive table for arrays of objects
-    if (json.length > 0 && typeof json[0] === 'object') {
-      el.innerHTML = renderJsonTable(json);
-    } else {
-      el.innerHTML = `<pre class="whitespace-pre-wrap">${escapeHtml(JSON.stringify(json, null, 2))}</pre>`;
-    }
-  } else if (typeof json === 'object' && json !== null) {
-    // Check if it has a data array (common ASC response format)
-    if (Array.isArray(json.data) && json.data.length > 0 && typeof json.data[0] === 'object') {
-      el.innerHTML = renderJsonTable(json.data);
-      // Show affordances if present
-      if (json.affordances) {
-        el.innerHTML += renderAffordances(json.affordances);
-      }
-    } else {
-      el.innerHTML = renderJsonObject(json);
-    }
-  } else {
-    el.textContent = JSON.stringify(json, null, 2);
-  }
-  cmdOutput.appendChild(el);
-}
-
-function renderJsonTable(rows) {
-  if (!rows.length) return '<span class="text-slate-600">(empty)</span>';
-  // Get all keys, prioritize id and name-like fields
-  const allKeys = [...new Set(rows.flatMap(r => Object.keys(r)))];
-  const priority = ['id', 'name', 'appName', 'bundleId', 'state', 'platform', 'version', 'locale', 'type', 'status'];
-  const keys = [
-    ...priority.filter(k => allKeys.includes(k)),
-    ...allKeys.filter(k => !priority.includes(k) && k !== 'affordances')
-  ].slice(0, 8); // max 8 columns
-
-  const hasAffordances = rows.some(r => r.affordances);
-
-  return `
-    <div class="overflow-x-auto rounded-lg border border-slate-800/60 my-1">
-      <table class="w-full text-[0.7rem]">
-        <thead>
-          <tr class="bg-slate-800/30">
-            ${keys.map(k => `<th class="text-left px-3 py-1.5 text-slate-500 font-medium">${escapeHtml(k)}</th>`).join('')}
-            ${hasAffordances ? '<th class="text-left px-3 py-1.5 text-slate-500 font-medium">actions</th>' : ''}
-          </tr>
-        </thead>
-        <tbody>
-          ${rows.map(row => `
-            <tr class="table-row border-t border-slate-800/30">
-              ${keys.map(k => {
-                const val = row[k];
-                const display = val === null || val === undefined ? '' : typeof val === 'object' ? JSON.stringify(val) : String(val);
-                const colorCls = k === 'state' || k === 'status' ? stateColor(display) : k === 'id' ? 'text-brand-400/70' : 'text-slate-300';
-                return `<td class="px-3 py-1.5 ${colorCls} truncate max-w-[200px]" title="${escapeHtml(display)}">${escapeHtml(display)}</td>`;
-              }).join('')}
-              ${hasAffordances && row.affordances ? `
-                <td class="px-3 py-1.5">
-                  <div class="flex flex-wrap gap-1">
-                    ${Object.entries(row.affordances).map(([name, cmd]) =>
-                      `<button class="run-affordance cmd-tag px-1.5 py-0.5 rounded bg-brand-500/8 text-brand-400 border border-brand-500/20 cursor-pointer hover:bg-brand-500/15 transition-colors" data-cmd="${escapeHtml(cmd)}" title="${escapeHtml(cmd)}">${escapeHtml(name)}</button>`
-                    ).join('')}
-                  </div>
-                </td>
-              ` : hasAffordances ? '<td class="px-3 py-1.5"></td>' : ''}
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
-    <div class="text-[0.6rem] text-slate-600 mt-1">${rows.length} record${rows.length !== 1 ? 's' : ''}</div>
-  `;
-}
-
-function renderAffordances(affordances) {
-  return `
-    <div class="flex flex-wrap gap-1.5 mt-2">
-      ${Object.entries(affordances).map(([name, cmd]) =>
-        `<button class="run-affordance cmd-tag px-2 py-1 rounded bg-slate-800/50 text-brand-400 border border-slate-700/40 cursor-pointer hover:bg-slate-800 hover:border-brand-500/30 transition-colors" data-cmd="${escapeHtml(cmd)}" title="${escapeHtml(cmd)}">${escapeHtml(name)}</button>`
-      ).join('')}
-    </div>
-  `;
-}
-
-function renderJsonObject(obj) {
-  const entries = Object.entries(obj).filter(([k]) => k !== 'affordances');
-  let html = '<div class="space-y-0.5 my-1">';
-  entries.forEach(([key, val]) => {
-    const display = val === null || val === undefined ? 'null' : typeof val === 'object' ? JSON.stringify(val) : String(val);
-    const colorCls = key === 'state' || key === 'status' ? stateColor(display) : key === 'id' ? 'text-brand-400/70' : typeof val === 'boolean' ? (val ? 'text-emerald-400' : 'text-red-400/60') : 'text-slate-300';
-    html += `<div class="flex gap-3"><span class="text-slate-500 shrink-0 w-36 text-right">${escapeHtml(key)}</span><span class="${colorCls}">${escapeHtml(display)}</span></div>`;
-  });
-  html += '</div>';
-  if (obj.affordances) html += renderAffordances(obj.affordances);
-  return html;
-}
-
-function stateColor(state) {
-  const s = String(state).toLowerCase();
-  if (['ready_for_sale','ready_for_distribution','live','active','enabled','complete','succeeded','valid'].some(x => s.includes(x))) return 'text-emerald-400';
-  if (['in_review','processing','pending','waiting','running'].some(x => s.includes(x))) return 'text-amber-400';
-  if (['rejected','failed','error','invalid','expired','revoked'].some(x => s.includes(x))) return 'text-red-400';
-  return 'text-slate-300';
-}
-
-// Terminal input handler
-cmdInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    const cmd = cmdInput.value.trim();
-    if (!cmd || isRunning) return;
-    cmdInput.value = '';
-    // Auto-prefix with 'asc' if missing
-    const finalCmd = cmd.startsWith('asc ') || cmd === 'asc' ? cmd : `asc ${cmd}`;
-    executeCommand(finalCmd);
-  }
-  // Command history navigation
-  if (e.key === 'ArrowUp') {
-    e.preventDefault();
-    if (historyIndex < cmdHistory.length - 1) {
-      historyIndex++;
-      cmdInput.value = cmdHistory[historyIndex];
-    }
-  }
-  if (e.key === 'ArrowDown') {
-    e.preventDefault();
-    if (historyIndex > 0) {
-      historyIndex--;
-      cmdInput.value = cmdHistory[historyIndex];
-    } else {
-      historyIndex = -1;
-      cmdInput.value = '';
-    }
-  }
-});
-
-function escapeHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ── Command Palette (Cmd+K) ──────────────────────────
-const cmdModal = document.getElementById('cmd-modal');
-const paletteInput = document.getElementById('palette-input');
-const paletteResults = document.getElementById('palette-results');
-
-function getAllCommands() {
-  const cmds = [];
-  NAV.forEach(g => g.items.forEach(item => {
-    if (item.cmds) item.cmds.forEach(c => cmds.push({ cmd: `asc ${c}`, label: item.label, icon: item.icon }));
-  }));
-  return cmds;
-}
-
-function togglePalette(show) {
-  const shouldShow = show !== undefined ? show : cmdModal.classList.contains('hidden');
-  if (shouldShow) {
-    cmdModal.classList.remove('hidden');
-    paletteInput.value = '';
-    renderPaletteResults('');
-    paletteInput.focus();
-  } else {
-    cmdModal.classList.add('hidden');
-  }
-}
-
-function renderPaletteResults(query) {
-  const all = getAllCommands();
-  const q = query.toLowerCase();
-  const filtered = q ? all.filter(c => c.cmd.includes(q) || c.label.toLowerCase().includes(q)) : all;
-  const shown = filtered.slice(0, 15);
-
-  paletteResults.innerHTML = shown.length ? shown.map((c, i) => `
-    <button class="palette-item w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-800/50 cursor-pointer transition-colors ${i === 0 ? 'bg-slate-800/30' : ''}" data-cmd="${escapeHtml(c.cmd)}">
-      <div class="flex items-center gap-2.5">
-        ${icon(c.icon, 'w-3.5 h-3.5 text-slate-500')}
-        <code class="text-xs text-slate-300 font-mono">${escapeHtml(c.cmd)}</code>
-      </div>
-      <span class="text-[0.6rem] text-slate-600">${escapeHtml(c.label)}</span>
-    </button>
-  `).join('') : '<div class="px-4 py-6 text-center text-sm text-slate-600">No matching commands</div>';
-}
-
-paletteInput.addEventListener('input', () => renderPaletteResults(paletteInput.value));
-
-paletteInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    const first = paletteResults.querySelector('.palette-item');
-    if (first) {
-      const cmd = first.dataset.cmd;
-      togglePalette(false);
-      toggleTerminal(true);
-      setTimeout(() => executeCommand(cmd), 350);
-    }
-  }
-});
-
-document.getElementById('cmd-backdrop').addEventListener('click', () => togglePalette(false));
-
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'k' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); togglePalette(); }
-  if (e.key === 'Escape') {
-    if (!cmdModal.classList.contains('hidden')) togglePalette(false);
-    else if (terminalOpen) toggleTerminal(false);
-  }
-  // Backtick to toggle terminal
-  if (e.key === '`' && e.ctrlKey) { e.preventDefault(); toggleTerminal(); }
-});
-
-// ── Event delegation ──────────────────────────────────
-document.addEventListener('click', (e) => {
-  // Dashboard nav
-  const dashNav = e.target.closest('.dashboard-nav');
-  if (dashNav) { navigate(dashNav.dataset.page); return; }
-
-  // Copy command
-  const copyBtn = e.target.closest('.copy-cmd');
-  if (copyBtn) {
-    navigator.clipboard.writeText(copyBtn.dataset.cmd);
-    const svg = copyBtn.querySelector('svg');
-    svg.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
-    setTimeout(() => { svg.innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>'; }, 1200);
-    return;
-  }
-
-  // Run command (from feature page buttons or quick actions)
-  const runBtn = e.target.closest('.run-cmd') || e.target.closest('.quick-cmd');
-  if (runBtn) {
-    const cmd = runBtn.dataset.cmd;
-    toggleTerminal(true);
-    setTimeout(() => executeCommand(cmd), 350);
-    return;
-  }
-
-  // Run affordance from terminal output
-  const affordanceBtn = e.target.closest('.run-affordance');
-  if (affordanceBtn) {
-    const cmd = affordanceBtn.dataset.cmd;
-    executeCommand(cmd);
-    return;
-  }
-
-  // Palette item
-  const paletteItem = e.target.closest('.palette-item');
-  if (paletteItem) {
-    const cmd = paletteItem.dataset.cmd;
-    togglePalette(false);
-    toggleTerminal(true);
-    setTimeout(() => executeCommand(cmd), 350);
-    return;
-  }
-});
-
-// ── Init ──────────────────────────────────────────────
-renderNav();
-renderPage();
-</script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

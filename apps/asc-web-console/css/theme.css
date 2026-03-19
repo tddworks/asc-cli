@@ -1,0 +1,37 @@
+/* Console theme — CSS custom properties for dark terminal aesthetic */
+:root {
+  --bg: #070d1a;
+  --bg-card: #0c1222;
+  --bg-hover: rgba(148,163,184,0.04);
+  --border: rgba(51,65,85,0.6);
+  --border-light: rgba(51,65,85,0.3);
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-dim: #475569;
+  --accent: #3b82f6;
+  --accent-dim: rgba(59,130,246,0.12);
+  --accent-border: rgba(59,130,246,0.2);
+  --success: #34d399;
+  --success-dim: rgba(16,185,129,0.1);
+  --success-border: rgba(16,185,129,0.2);
+  --warning: #fbbf24;
+  --warning-dim: rgba(245,158,11,0.1);
+  --warning-border: rgba(245,158,11,0.2);
+  --danger: #f87171;
+  --danger-dim: rgba(239,68,68,0.1);
+  --danger-border: rgba(239,68,68,0.2);
+  --violet: #a78bfa;
+  --violet-dim: rgba(139,92,246,0.08);
+  --violet-border: rgba(139,92,246,0.2);
+  --cyan: #22d3ee;
+  --cyan-dim: rgba(6,182,212,0.08);
+  --cyan-border: rgba(6,182,212,0.2);
+  --sidebar-w: 240px;
+  --header-h: 48px;
+  --font: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --transition: 150ms ease;
+}

@@ -1,5 +1,5 @@
 // Page: TestFlight
-import { DataProvider } from '../../infrastructure/data-provider.js';
+import { DataProvider } from '../../../../shared/infrastructure/data-provider.js';
 import { state } from '../state.js';
 import { showToast } from '../toast.js';
 import { escapeHTML } from '../helpers.js';

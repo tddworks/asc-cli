@@ -1,4 +1,5 @@
 // Infrastructure: Abstraction layer for swapping mock <-> real CLI
+// Decoupled from presentation — uses callback hooks for logging/notifications
 import { MockDataProvider } from './mock-data.js';
 import {
   enrichApp, enrichVersion, enrichBuild, enrichBetaGroup,
@@ -7,16 +8,17 @@ import {
   enrichInvitation, enrichXCProduct, enrichXCWorkflow, enrichXCBuildRun,
 } from '../domain/enrichers.js';
 import { authStatusAffordances } from '../domain/affordances.js';
-import { logCommand, logOutput, logError } from '../presentation/state.js';
-import { showToast } from '../presentation/toast.js';
 
 export const DataProvider = {
   _mode: 'mock', // 'mock' | 'cli'
   _serverUrl: '',
-  _onModeChange: null, // callback set by main.js
+  _onModeChange: null,   // callback: () => void
+  _onCommand: null,       // callback: (cmd) => void
+  _onOutput: null,        // callback: (text) => void
+  _onError: null,         // callback: (text) => void
+  _onNotify: null,        // callback: (message, type) => void
 
   async init() {
-    // Try relative path first (works when served by server.js or GitHub Pages proxy)
     for (const base of ['', 'http://127.0.0.1:8420']) {
       try {
         const controller = new AbortController();
@@ -39,12 +41,12 @@ export const DataProvider = {
 
   setMode(mode) {
     this._mode = mode;
-    showToast(`Switched to ${mode === 'cli' ? 'Live CLI' : 'Mock Data'} mode`, 'info');
+    if (this._onNotify) this._onNotify(`Switched to ${mode === 'cli' ? 'Live CLI' : 'Mock Data'} mode`, 'info');
     if (this._onModeChange) this._onModeChange();
   },
 
   async fetch(command) {
-    logCommand(`asc ${command}`);
+    if (this._onCommand) this._onCommand(`asc ${command}`);
     if (this._mode === 'cli') return this._fetchCLI(command);
     return this._fetchMock(command);
   },
@@ -60,21 +62,21 @@ export const DataProvider = {
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const data = await resp.json();
       if (data.error) {
-        logError(data.error);
-        showToast(`CLI error: ${data.error}`, 'error');
+        if (this._onError) this._onError(data.error);
+        if (this._onNotify) this._onNotify(`CLI error: ${data.error}`, 'error');
         return null;
       }
       if (data.exit_code !== 0) {
-        logError(data.stderr || `Exit code ${data.exit_code}`);
+        if (this._onError) this._onError(data.stderr || `Exit code ${data.exit_code}`);
         return null;
       }
       let result;
       try { result = JSON.parse(data.stdout); } catch { result = data.stdout; }
-      logOutput(JSON.stringify(result, null, 2).substring(0, 500));
+      if (this._onOutput) this._onOutput(JSON.stringify(result, null, 2).substring(0, 500));
       return result;
     } catch (e) {
-      logError(e.message);
-      showToast('CLI connection failed — falling back to mock', 'error');
+      if (this._onError) this._onError(e.message);
+      if (this._onNotify) this._onNotify('CLI connection failed — falling back to mock', 'error');
       this._mode = 'mock';
       if (this._onModeChange) this._onModeChange();
       return this._fetchMock(command);
@@ -182,7 +184,7 @@ export const DataProvider = {
       result = { data: [] };
     }
 
-    logOutput(JSON.stringify(result, null, 2).substring(0, 600));
+    if (this._onOutput) this._onOutput(JSON.stringify(result, null, 2).substring(0, 600));
     return result;
   },
 };

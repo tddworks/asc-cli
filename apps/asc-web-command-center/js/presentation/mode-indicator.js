@@ -1,5 +1,5 @@
 // Presentation: Data source mode indicator
-import { DataProvider } from '../infrastructure/data-provider.js';
+import { DataProvider } from '../../../shared/infrastructure/data-provider.js';
 
 export function updateModeIndicator() {
   const isCLI = DataProvider._mode === 'cli';

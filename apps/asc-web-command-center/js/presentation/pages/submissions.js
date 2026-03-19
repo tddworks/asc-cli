@@ -1,5 +1,5 @@
 // Page: Submissions
-import { DataProvider } from '../../infrastructure/data-provider.js';
+import { DataProvider } from '../../../../shared/infrastructure/data-provider.js';
 import { showToast } from '../toast.js';
 
 export function renderSubmissions() {

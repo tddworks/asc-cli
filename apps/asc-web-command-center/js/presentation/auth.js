@@ -1,5 +1,5 @@
 // Presentation: Auth status check
-import { DataProvider } from '../infrastructure/data-provider.js';
+import { DataProvider } from '../../../shared/infrastructure/data-provider.js';
 import { escapeHTML } from './helpers.js';
 
 export async function checkAuth() {

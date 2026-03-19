@@ -1,5 +1,5 @@
 // Page: Customer Reviews
-import { DataProvider } from '../../infrastructure/data-provider.js';
+import { DataProvider } from '../../../../shared/infrastructure/data-provider.js';
 import { state } from '../state.js';
 import { escapeHTML, formatDate } from '../helpers.js';
 
