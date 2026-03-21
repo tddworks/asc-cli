@@ -72,5 +72,13 @@ document.addEventListener('click', (e) => {
 // Async init — detect server
 detectServer().then(online => {
   const el = document.getElementById('server-url');
-  if (el) el.textContent = online ? getServerUrl() : 'offline — run: asc web-server';
+  if (el) {
+    if (online) {
+      el.textContent = getServerUrl();
+    } else if (window.location.protocol === 'file:') {
+      el.textContent = 'offline — open via http://127.0.0.1:8420/console/';
+    } else {
+      el.textContent = 'offline — run: asc web-server';
+    }
+  }
 });
