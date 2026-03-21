@@ -28,3 +28,7 @@ ignore:
 
   # Version command — prints a constant, no logic to test
   - "Sources/ASCCommand/Commands/Version/VersionCommand.swift"
+
+  # Iris — real browser cookie extraction and HTTP calls, not unit-testable
+  - "Sources/Infrastructure/Iris/BrowserIrisCookieProvider.swift"
+  - "Sources/Infrastructure/Iris/IrisClient.swift"

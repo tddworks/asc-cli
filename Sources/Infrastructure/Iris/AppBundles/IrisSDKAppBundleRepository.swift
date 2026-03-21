@@ -50,7 +50,7 @@ public struct IrisSDKAppBundleRepository: IrisAppBundleRepository, @unchecked Se
         return mapToAppBundle(response.data, fallbackName: name)
     }
 
-    private func mapToAppBundle(_ resource: IrisAppBundleResource, fallbackName: String? = nil) -> AppBundle {
+    func mapToAppBundle(_ resource: IrisAppBundleResource, fallbackName: String? = nil) -> AppBundle {
         AppBundle(
             id: resource.id,
             name: resource.attributes.name ?? fallbackName ?? "",
