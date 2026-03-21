@@ -25,7 +25,13 @@ export function initTerminal() {
 }
 
 export async function detectServer() {
-  for (const base of ['', 'http://localhost:8420']) {
+  // When loaded from HTTPS, try HTTPS localhost first to avoid mixed-content blocking.
+  const isSecure = window.location.protocol === 'https:';
+  const bases = isSecure
+    ? ['https://localhost:8421', 'https://127.0.0.1:8421']
+    : ['', 'http://localhost:8420'];
+
+  for (const base of bases) {
     try {
       const controller = new AbortController();
       setTimeout(() => controller.abort(), 2000);
@@ -106,7 +112,11 @@ export async function executeCommand(cmd) {
     }
   } catch (err) {
     loader.remove();
-    appendText(`Connection error: ${err.message}. Is the server running?\n  asc web-server`, 'var(--danger)');
+    const isSecure = window.location.protocol === 'https:';
+    const hint = isSecure
+      ? 'Run: asc web-server\n  Then visit https://localhost:8421 once to trust the certificate.'
+      : 'Is the server running?\n  asc web-server';
+    appendText(`Connection error: ${err.message}. ${hint}`, 'var(--danger)');
     setStatus('error', 'status-error');
   }
 

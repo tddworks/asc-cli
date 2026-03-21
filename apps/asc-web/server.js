@@ -18,12 +18,18 @@
 //   - Authenticated: `asc auth check` should pass
 
 const http = require('http');
-const { execFile } = require('child_process');
+const https = require('https');
+const { execFile, execFileSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
 const PORT = parseInt(process.argv.find((_, i, a) => a[i - 1] === '--port') || '8420', 10);
+const HTTPS_PORT = PORT + 1; // 8421 by default
 const ASC_BIN = process.argv.find((_, i, a) => a[i - 1] === '--asc-bin') || 'asc';
+const ASC_DIR = path.join(os.homedir(), '.asc');
+const CERT_KEY = path.join(ASC_DIR, 'server.key');
+const CERT_PEM = path.join(ASC_DIR, 'server.crt');
 
 const APPS_DIR = __dirname;
 const MIME_TYPES = {
@@ -82,7 +88,7 @@ function serveStatic(filePath, res) {
   });
 }
 
-const server = http.createServer(async (req, res) => {
+function handleRequest(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -151,20 +157,78 @@ const server = http.createServer(async (req, res) => {
   }
 
   serveStatic(filePath, res);
-});
+}
+
+const server = http.createServer(handleRequest);
+
+// --- Self-signed cert generation for HTTPS (mixed-content support) ---
+
+function ensureSelfSignedCert() {
+  if (fs.existsSync(CERT_KEY) && fs.existsSync(CERT_PEM)) return true;
+  try {
+    fs.mkdirSync(ASC_DIR, { recursive: true });
+    execFileSync('openssl', [
+      'req', '-x509', '-newkey', 'rsa:2048',
+      '-keyout', CERT_KEY, '-out', CERT_PEM,
+      '-days', '825', '-nodes',
+      '-subj', '/CN=localhost',
+      '-addext', 'subjectAltName=DNS:localhost,IP:127.0.0.1',
+    ], { stdio: 'pipe' });
+    // Trust the cert in macOS Keychain so browsers accept it without warnings
+    try {
+      execFileSync('security', [
+        'add-trusted-cert', '-p', 'ssl',
+        '-k', path.join(os.homedir(), 'Library/Keychains/login.keychain-db'),
+        CERT_PEM,
+      ], { stdio: 'pipe' });
+    } catch {
+      console.log('  ⚠ Could not auto-trust cert. Visit https://localhost:' + HTTPS_PORT + ' and accept manually.');
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// --- Start servers ---
 
 server.listen(PORT, () => {
-  console.log(`
-  ┌─────────────────────────────────────────┐
-  │  ASC Web Server                         │
-  │  http://localhost:${String(PORT).padEnd(21)}│
-  │                                         │
-  │  /command-center/  Dashboard            │
-  │  /console/         Terminal             │
-  │  /api/run          CLI bridge           │
-  │                                         │
-  │  Binary: ${ASC_BIN.padEnd(31)}│
-  │  Press Ctrl+C to stop                   │
-  └─────────────────────────────────────────┘
-  `);
+  const httpUrl = `http://localhost:${PORT}`;
+  let httpsUrl = null;
+
+  // Start HTTPS server for mixed-content support (HTTPS sites → localhost)
+  if (ensureSelfSignedCert()) {
+    try {
+      const httpsServer = https.createServer({
+        key: fs.readFileSync(CERT_KEY),
+        cert: fs.readFileSync(CERT_PEM),
+      }, handleRequest);
+      httpsServer.listen(HTTPS_PORT, () => {
+        httpsUrl = `https://localhost:${HTTPS_PORT}`;
+      });
+    } catch {}
+  }
+
+  // Print banner after a tick so HTTPS status is known
+  setTimeout(() => {
+    const lines = [
+      '  ┌─────────────────────────────────────────┐',
+      '  │  ASC Web Server                         │',
+      `  │  ${httpUrl.padEnd(39)}│`,
+    ];
+    if (httpsUrl) {
+      lines.push(`  │  ${httpsUrl.padEnd(39)}│`);
+    }
+    lines.push(
+      '  │                                         │',
+      '  │  /command-center/  Dashboard            │',
+      '  │  /console/         Terminal             │',
+      '  │  /api/run          CLI bridge           │',
+      '  │                                         │',
+      `  │  Binary: ${ASC_BIN.padEnd(31)}│`,
+      '  │  Press Ctrl+C to stop                   │',
+      '  └─────────────────────────────────────────┘',
+    );
+    console.log('\n' + lines.join('\n') + '\n');
+  }, 100);
 });
