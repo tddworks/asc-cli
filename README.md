@@ -45,6 +45,7 @@ asc init --app-id <id> # pin it — skip --app-id on every future command
 | **Game Center** | Manage achievements and leaderboards for your game |
 | **Plugins** | Install executable plugins in `~/.asc/plugins/` for custom event handlers |
 | **Reports** | Sales, subscription, installs, and financial reports; multi-step analytics workflow |
+| **Iris (Private API)** | Cookie-based auth; create apps, list apps via the iris private API that powers the ASC web UI |
 | **AI Agents** | JSON output with CAEOAS affordances — agents navigate without knowing the command tree |
 
 ## Requirements
@@ -402,6 +403,25 @@ asc plugins disable --name slack-notify
 asc plugins run --name slack-notify --event build.uploaded
 ```
 
+### Iris (Private API)
+
+```bash
+# Check cookie session status
+asc iris status --pretty
+
+# List apps via iris
+asc iris apps list --pretty
+
+# Create a new app
+asc iris apps create --name "My App" --bundle-id com.example.app --sku com.example.app --pretty
+
+# Multi-platform with custom version
+asc iris apps create --name "My App" --bundle-id com.example.app --sku MYSKU \
+  --platforms IOS MAC_OS --version 2.0
+```
+
+Authentication: log in to [appstoreconnect.apple.com](https://appstoreconnect.apple.com) in your browser — cookies are extracted automatically. For CI/CD, set `ASC_IRIS_COOKIES`.
+
 ### Output & TUI
 
 ```bash
@@ -468,6 +488,7 @@ Detailed documentation for each feature:
 - [Game Center](docs/features/game-center.md) — achievements (list, create, delete) and leaderboards (list, create, delete)
 - [Power & Performance](docs/features/performance.md) — performance metrics (app/build), diagnostic signatures, diagnostic logs
 - [Reports](docs/features/reports.md) — sales, finance, and analytics reports; TSV parsing, multi-step analytics workflow
+- [Iris (Private API)](docs/features/iris.md) — cookie-based auth; create apps, list apps via the iris private API
 
 ## Design: CAEOAS
 
@@ -517,6 +538,7 @@ Unidirectional dependency: `ASCCommand → Infrastructure → Domain`
 - [swift-argument-parser](https://github.com/apple/swift-argument-parser)
 - [TauTUI](https://github.com/steipete/TauTUI)
 - [Mockable](https://github.com/Kolos65/Mockable)
+- [SweetCookieKit](https://github.com/steipete/SweetCookieKit)
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
 
