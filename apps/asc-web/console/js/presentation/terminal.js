@@ -25,7 +25,7 @@ export function initTerminal() {
 }
 
 export async function detectServer() {
-  for (const base of ['', 'http://127.0.0.1:8420']) {
+  for (const base of ['', 'http://localhost:8420']) {
     try {
       const controller = new AbortController();
       setTimeout(() => controller.abort(), 2000);

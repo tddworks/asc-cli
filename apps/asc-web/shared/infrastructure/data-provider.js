@@ -19,7 +19,7 @@ export const DataProvider = {
   _onNotify: null,        // callback: (message, type) => void
 
   async init() {
-    for (const base of ['', 'http://127.0.0.1:8420']) {
+    for (const base of ['', 'http://localhost:8420']) {
       try {
         const controller = new AbortController();
         setTimeout(() => controller.abort(), 2000);
