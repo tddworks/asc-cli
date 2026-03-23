@@ -13,8 +13,8 @@ asc web-server --port 9000
 ```
 
 Then open either web app:
-- **Command Center:** https://asccli.app/asc-web-command-center/
-- **Console:** https://asccli.app/asc-web-console/
+- **Command Center:** https://asccli.app/command-center
+- **Console:** https://asccli.app/console
 
 **Prerequisites:** Node.js (for the API proxy) and `asc` in your PATH.
 

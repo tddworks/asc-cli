@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **`asc web-server`** — `/command-center/`, `/console/`, and `/` now redirect (302) to the hosted apps at `asccli.app/command-center` and `asccli.app/console` instead of serving local files that no longer exist; startup banner updated to show hosted URLs
+
 ---
 
 ## [0.1.56] - 2026-03-21

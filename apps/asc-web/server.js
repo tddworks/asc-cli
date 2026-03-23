@@ -7,11 +7,10 @@
 //   node server.js --port 3000  # custom port
 //
 // Routes:
-//   /command-center/  → command-center (dashboard)
-//   /console/         → console (terminal)
-//   /shared/          → shared (domain, infrastructure, static)
-//   /                 → appstore-command-center (default)
 //   /api/run          → execute asc CLI commands
+//   /command-center/  → 302 redirect to asccli.app/command-center
+//   /console/         → 302 redirect to asccli.app/console
+//   /                 → 302 redirect to asccli.app/command-center
 //
 // Prerequisites:
 //   - `asc` CLI installed and on PATH (or built: swift run asc)
@@ -31,18 +30,6 @@ const ASC_DIR = path.join(os.homedir(), '.asc');
 const CERT_KEY = path.join(ASC_DIR, 'server.key');
 const CERT_PEM = path.join(ASC_DIR, 'server.crt');
 
-const APPS_DIR = __dirname;
-const MIME_TYPES = {
-  '.html': 'text/html; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.json': 'application/json',
-  '.png': 'image/png',
-  '.webp': 'image/webp',
-  '.svg': 'image/svg+xml',
-  '.ico': 'image/x-icon',
-};
-
 function runASC(command) {
   return new Promise((resolve) => {
     const parts = command.split(/\s+/);
@@ -58,32 +45,6 @@ function runASC(command) {
         stderr: stderr || '',
         exit_code: err ? (err.code || 1) : 0,
       });
-    });
-  });
-}
-
-function serveStatic(filePath, res) {
-  const ext = path.extname(filePath);
-  const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-
-  fs.stat(filePath, (statErr, stats) => {
-    if (statErr || !stats) {
-      res.writeHead(404);
-      res.end('Not found');
-      return;
-    }
-    if (stats.isDirectory()) {
-      serveStatic(path.join(filePath, 'index.html'), res);
-      return;
-    }
-    fs.readFile(filePath, (err, data) => {
-      if (err) {
-        res.writeHead(404);
-        res.end('Not found');
-        return;
-      }
-      res.writeHead(200, { 'Content-Type': contentType });
-      res.end(data);
     });
   });
 }
@@ -131,32 +92,22 @@ function handleRequest(req, res) {
     return;
   }
 
-  // Static file serving with app routing
+  // Redirect to hosted web apps at asccli.app
   const urlPath = decodeURIComponent(req.url.split('?')[0]);
 
-  let filePath;
-  if (urlPath.startsWith('/command-center')) {
-    const subPath = urlPath.slice('/command-center'.length) || '/';
-    filePath = path.join(APPS_DIR, 'command-center', subPath === '/' ? 'index.html' : subPath);
-  } else if (urlPath.startsWith('/console')) {
-    const subPath = urlPath.slice('/console'.length) || '/';
-    filePath = path.join(APPS_DIR, 'console', subPath === '/' ? 'index.html' : subPath);
-  } else if (urlPath.startsWith('/shared')) {
-    filePath = path.join(APPS_DIR, urlPath);
-  } else if (urlPath === '/' || urlPath === '/index.html') {
-    filePath = path.join(APPS_DIR, 'command-center', 'index.html');
-  } else {
-    filePath = path.join(APPS_DIR, 'command-center', urlPath);
+  if (urlPath === '/' || urlPath === '/index.html' || urlPath.startsWith('/command-center')) {
+    res.writeHead(302, { 'Location': 'https://asccli.app/command-center' });
+    res.end();
+    return;
   }
-
-  // Security: block path traversal
-  if (!filePath.startsWith(APPS_DIR)) {
-    res.writeHead(403);
-    res.end('Forbidden');
+  if (urlPath.startsWith('/console')) {
+    res.writeHead(302, { 'Location': 'https://asccli.app/console' });
+    res.end();
     return;
   }
 
-  serveStatic(filePath, res);
+  res.writeHead(404);
+  res.end('Not found');
 }
 
 const server = http.createServer(handleRequest);
@@ -221,8 +172,8 @@ server.listen(PORT, () => {
     }
     lines.push(
       '  │                                         │',
-      '  │  /command-center/  Dashboard            │',
-      '  │  /console/         Terminal             │',
+      '  │  asccli.app/command-center              │',
+      '  │  asccli.app/console                     │',
       '  │  /api/run          CLI bridge           │',
       '  │                                         │',
       `  │  Binary: ${ASC_BIN.padEnd(31)}│`,
