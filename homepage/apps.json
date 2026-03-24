@@ -1,13 +1,18 @@
 [
   {
-    "developerId" : "1725133580",
+    "x" : "itshanrw",
     "developer" : "itshan",
-    "github" : "hanrw",
-    "x" : "itshanrw"
+    "developerId" : "1725133580",
+    "github" : "hanrw"
   },
   {
     "apps" : [
       "https:\/\/apps.apple.com\/app\/id6758156421"
+    ]
+  },
+  {
+    "apps" : [
+      "https:\/\/apps.apple.com\/app\/id6477912895"
     ]
   }
 ]
