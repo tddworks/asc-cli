@@ -1,5 +1,5 @@
 {
-  "generated": "2026-03-24T08:56:46.205Z",
+  "generated": "2026-03-24T09:05:31.389Z",
   "items": [
     {
       "developer": "itshan",
@@ -110,6 +110,26 @@
       "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/64/2c/5e/642c5ec6-37ca-0661-c550-acb29f503b99/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/100x100bb.jpg",
       "primaryGenreName": "Utilities",
       "url": "https://apps.apple.com/app/id6467128147"
+    },
+    {
+      "developer": "亮 鲁",
+      "github": null,
+      "x": null,
+      "trackId": 6477912895,
+      "trackName": "mydots.ideas",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/06/c7/f2/06c7f275-d9cf-d839-c08c-853fb7bfcc68/AppIcon-0-0-1x_U007emarketing-0-8-0-0-85-220.png/100x100bb.jpg",
+      "primaryGenreName": "Utilities",
+      "url": "https://apps.apple.com/app/id6477912895"
+    },
+    {
+      "developer": "亮 鲁",
+      "github": null,
+      "x": null,
+      "trackId": 6752632723,
+      "trackName": "GT Alarm - Weekday Alarm Clock",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/89/f8/a5/89f8a552-c1c7-5c99-9027-c9de3af6cefb/AppIcon-0-0-1x_U007emarketing-0-7-0-85-220.png/100x100bb.jpg",
+      "primaryGenreName": "Utilities",
+      "url": "https://apps.apple.com/app/id6752632723"
     }
   ]
 }
