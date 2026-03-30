@@ -6,6 +6,7 @@ struct BuildsCommand: AsyncParsableCommand {
         abstract: "Manage builds",
         subcommands: [
             BuildsList.self,
+            BuildsNextNumber.self,
             BuildsUpload.self,
             BuildsArchive.self,
             BuildsUploadsCommand.self,

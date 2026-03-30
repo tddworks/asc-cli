@@ -4,12 +4,17 @@ import Foundation
 // MARK: - Agent-first encoding helpers
 
 /// Wraps a list in {"data": [...]} for agent-first JSON responses.
-private struct DataResponse<T: Encodable>: Encodable {
+struct DataResponse<T: Encodable>: Encodable {
     let data: [T]
 }
 
+/// Wraps a single item in {"data": {...}} for agent-first JSON responses.
+struct SingleDataResponse<T: Encodable>: Encodable {
+    let data: T
+}
+
 /// Merges affordances into the JSON encoding of any AffordanceProviding + Encodable item.
-private struct WithAffordances<T: Encodable & AffordanceProviding>: Encodable {
+struct WithAffordances<T: Encodable & AffordanceProviding>: Encodable {
     private let item: T
 
     init(_ item: T) { self.item = item }
