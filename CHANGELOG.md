@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.59] - 2026-03-30
+
 ### Added
 - **`asc builds list --platform`** — filter builds by platform (ios, macos, tvos, visionos)
 - **`asc builds list --version`** — filter builds by marketing version (e.g. 1.0.0)
@@ -557,7 +561,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.58...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.59...HEAD
+[0.1.59]: https://github.com/tddworks/asc-cli/compare/v0.1.58...v0.1.59
 [0.1.58]: https://github.com/tddworks/asc-cli/compare/v0.1.57...v0.1.58
 [0.1.57]: https://github.com/tddworks/asc-cli/compare/v0.1.56...v0.1.57
 [0.1.56]: https://github.com/tddworks/asc-cli/compare/v0.1.55...v0.1.56
