@@ -8,6 +8,8 @@ struct AuthLogout: AsyncParsableCommand {
         abstract: "Remove saved authentication credentials"
     )
 
+    @OptionGroup var globals: GlobalOptions
+
     @Option(name: .long, help: "Account name to remove (defaults to active account)")
     var name: String?
 

@@ -8,6 +8,8 @@ struct AuthUse: AsyncParsableCommand {
         abstract: "Switch the active App Store Connect account"
     )
 
+    @OptionGroup var globals: GlobalOptions
+
     @Argument(help: "Account name to activate")
     var name: String
 

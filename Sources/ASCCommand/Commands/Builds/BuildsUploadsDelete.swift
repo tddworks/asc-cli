@@ -7,6 +7,8 @@ struct BuildsUploadsDelete: AsyncParsableCommand {
         abstract: "Delete a build upload record"
     )
 
+    @OptionGroup var globals: GlobalOptions
+
     @Option(name: .long, help: "Build upload ID")
     var uploadId: String
 

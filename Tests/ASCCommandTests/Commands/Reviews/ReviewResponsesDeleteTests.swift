@@ -6,6 +6,11 @@ import Testing
 @Suite
 struct ReviewResponsesDeleteTests {
 
+    @Test func `accepts global options including pretty`() throws {
+        let cmd = try ReviewResponsesDelete.parse(["--response-id", "r-1", "--pretty"])
+        #expect(cmd.globals.pretty == true)
+    }
+
     @Test func `delete response calls repository`() async throws {
         let mockRepo = MockCustomerReviewRepository()
         given(mockRepo).deleteResponse(responseId: .any).willReturn(())

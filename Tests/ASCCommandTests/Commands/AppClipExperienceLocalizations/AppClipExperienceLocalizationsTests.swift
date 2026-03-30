@@ -113,6 +113,11 @@ struct AppClipExperienceLocalizationsCreateTests {
 @Suite
 struct AppClipExperienceLocalizationsDeleteTests {
 
+    @Test func `accepts global options including pretty`() throws {
+        let cmd = try AppClipExperienceLocalizationsDelete.parse(["--localization-id", "loc-1", "--pretty"])
+        #expect(cmd.globals.pretty == true)
+    }
+
     @Test func `delete localization calls repo with localization id`() async throws {
         let mockRepo = MockAppClipRepository()
         given(mockRepo).deleteLocalization(id: .any).willReturn(())

@@ -7,6 +7,8 @@ struct BuildsAddBetaGroup: AsyncParsableCommand {
         abstract: "Add a beta group to a build for TestFlight distribution"
     )
 
+    @OptionGroup var globals: GlobalOptions
+
     @Option(name: .long, help: "Build ID")
     var buildId: String
 

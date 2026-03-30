@@ -7,6 +7,8 @@ struct BuildsRemoveBetaGroup: AsyncParsableCommand {
         abstract: "Remove a beta group from a build"
     )
 
+    @OptionGroup var globals: GlobalOptions
+
     @Option(name: .long, help: "Build ID")
     var buildId: String
 

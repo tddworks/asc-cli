@@ -6,11 +6,16 @@ import Testing
 @Suite
 struct AuthLogoutTests {
 
+    @Test func `accepts global options including pretty`() throws {
+        let cmd = try AuthLogout.parse(["--pretty"])
+        #expect(cmd.globals.pretty == true)
+    }
+
     @Test func `logout calls delete with nil name when no name provided`() async throws {
         let mockStorage = MockAuthStorage()
         given(mockStorage).delete(name: .any).willReturn()
 
-        var cmd = try AuthLogout.parse([])
+        let cmd = try AuthLogout.parse([])
         try await cmd.execute(storage: mockStorage)
 
         verify(mockStorage).delete(name: .value(nil)).called(.once)
@@ -20,7 +25,7 @@ struct AuthLogoutTests {
         let mockStorage = MockAuthStorage()
         given(mockStorage).delete(name: .any).willReturn()
 
-        var cmd = try AuthLogout.parse(["--name", "work"])
+        let cmd = try AuthLogout.parse(["--name", "work"])
         try await cmd.execute(storage: mockStorage)
 
         verify(mockStorage).delete(name: .value("work")).called(.once)

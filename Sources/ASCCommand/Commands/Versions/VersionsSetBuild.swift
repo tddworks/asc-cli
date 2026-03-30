@@ -7,6 +7,8 @@ struct VersionsSetBuild: AsyncParsableCommand {
         abstract: "Link a build to an App Store version before submission"
     )
 
+    @OptionGroup var globals: GlobalOptions
+
     @Option(name: .long, help: "App Store version ID")
     var versionId: String
 

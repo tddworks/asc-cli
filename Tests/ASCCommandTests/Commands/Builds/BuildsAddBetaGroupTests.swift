@@ -6,6 +6,11 @@ import Testing
 @Suite
 struct BuildsAddBetaGroupTests {
 
+    @Test func `accepts global options including pretty`() throws {
+        let cmd = try BuildsAddBetaGroup.parse(["--build-id", "b-1", "--beta-group-id", "bg-1", "--pretty"])
+        #expect(cmd.globals.pretty == true)
+    }
+
     @Test func `execute adds beta group to build`() async throws {
         let mockRepo = MockBuildRepository()
         given(mockRepo).addBetaGroups(buildId: .any, betaGroupIds: .any).willReturn()

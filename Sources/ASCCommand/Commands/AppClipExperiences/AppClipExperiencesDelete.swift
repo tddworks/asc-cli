@@ -7,6 +7,8 @@ struct AppClipExperiencesDelete: AsyncParsableCommand {
         abstract: "Delete a default experience"
     )
 
+    @OptionGroup var globals: GlobalOptions
+
     @Option(name: .long, help: "Experience ID")
     var experienceId: String
 

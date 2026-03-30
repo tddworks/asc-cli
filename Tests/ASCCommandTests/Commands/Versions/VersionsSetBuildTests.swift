@@ -6,6 +6,11 @@ import Testing
 @Suite
 struct VersionsSetBuildTests {
 
+    @Test func `accepts global options including pretty`() throws {
+        let cmd = try VersionsSetBuild.parse(["--version-id", "v-1", "--build-id", "b-1", "--pretty"])
+        #expect(cmd.globals.pretty == true)
+    }
+
     @Test func `execute links build to version`() async throws {
         let mockRepo = MockVersionRepository()
         given(mockRepo).setBuild(versionId: .any, buildId: .any).willReturn()

@@ -68,6 +68,11 @@ struct AnalyticsReportsListTests {
 @Suite
 struct AnalyticsReportsDeleteTests {
 
+    @Test func `accepts global options including pretty`() throws {
+        let cmd = try AnalyticsReportsDelete.parse(["--request-id", "req-1", "--pretty"])
+        #expect(cmd.globals.pretty == true)
+    }
+
     @Test func `deletes request and outputs confirmation`() async throws {
         let mockRepo = MockAnalyticsReportRepository()
         given(mockRepo).deleteRequest(id: .any).willReturn(())

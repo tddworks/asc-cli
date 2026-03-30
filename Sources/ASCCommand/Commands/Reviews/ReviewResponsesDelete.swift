@@ -7,6 +7,8 @@ struct ReviewResponsesDelete: AsyncParsableCommand {
         abstract: "Delete a response to a customer review"
     )
 
+    @OptionGroup var globals: GlobalOptions
+
     @Option(name: .long, help: "Response ID")
     var responseId: String
 

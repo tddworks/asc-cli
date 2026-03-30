@@ -7,6 +7,8 @@ struct AppClipExperienceLocalizationsDelete: AsyncParsableCommand {
         abstract: "Delete a localization"
     )
 
+    @OptionGroup var globals: GlobalOptions
+
     @Option(name: .long, help: "Localization ID")
     var localizationId: String
 

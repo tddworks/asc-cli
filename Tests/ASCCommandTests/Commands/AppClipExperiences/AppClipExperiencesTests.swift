@@ -134,6 +134,11 @@ struct AppClipExperiencesCreateTests {
 @Suite
 struct AppClipExperiencesDeleteTests {
 
+    @Test func `accepts global options including pretty`() throws {
+        let cmd = try AppClipExperiencesDelete.parse(["--experience-id", "exp-1", "--pretty"])
+        #expect(cmd.globals.pretty == true)
+    }
+
     @Test func `delete experience calls repo with experience id`() async throws {
         let mockRepo = MockAppClipRepository()
         given(mockRepo).deleteExperience(id: .any).willReturn(())

@@ -7,6 +7,8 @@ struct AnalyticsReportsDelete: AsyncParsableCommand {
         abstract: "Delete an analytics report request"
     )
 
+    @OptionGroup var globals: GlobalOptions
+
     @Option(name: .long, help: "Request ID")
     var requestId: String
 
