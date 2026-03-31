@@ -18,7 +18,7 @@
 
 const http = require('http');
 const https = require('https');
-const { execFile, execFileSync } = require('child_process');
+const { execFile, execFileSync, spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -218,38 +218,88 @@ function resolveAxePath() {
 
 const AXE = resolveAxePath();
 
-// --- Capture state ---
-let captureProcess = null;
+// --- Stream state ---
+let streamProcess = null; // { proc, udid }
 let latestFrame = null;
 let mjpegClients = []; // connected MJPEG stream response objects
+let streamBuffer = Buffer.alloc(0);
+let streamHeaderSkipped = false;
 
-function startCapture(udid, fps = 10) {
-  stopCapture();
+function startStream(udid, fps = 15) {
+  stopStream();
   if (!AXE) return;
-  const tmpFile = path.join(os.tmpdir(), `axe-stream-${udid}.png`);
-  const interval = Math.max(1000 / fps, 50);
-  const capture = () => {
-    if (!captureProcess) return;
-    execFile(AXE, ['screenshot', '--output', tmpFile, '--udid', udid], { timeout: 5000, stdio: 'pipe' }, (err) => {
-      if (!err) {
-        try {
-          latestFrame = fs.readFileSync(tmpFile);
-          // Push to all MJPEG stream clients
-          pushMJPEGFrame(latestFrame);
-        } catch {}
-      }
-      if (captureProcess) captureProcess.timer = setTimeout(capture, interval);
-    });
-  };
-  captureProcess = { udid, timer: null };
-  capture();
+  streamBuffer = Buffer.alloc(0);
+  streamHeaderSkipped = false;
+
+  const proc = spawn(AXE, [
+    'stream-video', '--format', 'mjpeg',
+    '--fps', String(fps), '--quality', '70', '--scale', '0.5',
+    '--udid', udid,
+  ], { stdio: ['pipe', 'pipe', 'pipe'] });
+
+  streamProcess = { proc, udid };
+
+  proc.stdout.on('data', (chunk) => {
+    streamBuffer = Buffer.concat([streamBuffer, chunk]);
+
+    // Skip AXe's HTTP header (first line up to \r\n\r\n)
+    if (!streamHeaderSkipped) {
+      const headerEnd = streamBuffer.indexOf('\r\n\r\n');
+      if (headerEnd === -1) return;
+      streamBuffer = streamBuffer.slice(headerEnd + 4);
+      streamHeaderSkipped = true;
+    }
+
+    // Extract complete MJPEG frames and push to clients
+    extractAndPushFrames();
+  });
+
+  proc.on('exit', () => {
+    if (streamProcess && streamProcess.proc === proc) {
+      streamProcess = null;
+    }
+  });
 }
 
-function stopCapture() {
-  if (captureProcess) {
-    clearTimeout(captureProcess.timer);
-    captureProcess = null;
+function stopStream() {
+  if (streamProcess) {
+    streamProcess.proc.kill();
+    streamProcess = null;
     latestFrame = null;
+    streamBuffer = Buffer.alloc(0);
+    streamHeaderSkipped = false;
+  }
+}
+
+const BOUNDARY = Buffer.from('--mjpegstream');
+const HEADER_END = Buffer.from('\r\n\r\n');
+
+function extractAndPushFrames() {
+  // AXe MJPEG format: --mjpegstream\r\nContent-Type: image/jpeg\r\nContent-Length: NNN\r\n\r\n[JPEG]\r\n
+  while (true) {
+    const bIdx = streamBuffer.indexOf(BOUNDARY);
+    if (bIdx === -1) break;
+
+    const afterBoundary = streamBuffer.slice(bIdx + BOUNDARY.length);
+    const hEnd = afterBoundary.indexOf(HEADER_END);
+    if (hEnd === -1) break;
+
+    // Parse Content-Length from frame headers
+    const headerStr = afterBoundary.slice(0, hEnd).toString();
+    const match = headerStr.match(/Content-Length:\s*(\d+)/i);
+    if (!match) { streamBuffer = afterBoundary.slice(hEnd + 4); continue; }
+
+    const contentLen = parseInt(match[1], 10);
+    const frameStart = hEnd + 4;
+    const frameEnd = frameStart + contentLen;
+
+    if (afterBoundary.length < frameEnd) break; // incomplete frame
+
+    const frame = afterBoundary.slice(frameStart, frameEnd);
+    latestFrame = frame;
+    pushMJPEGFrame(frame);
+
+    streamBuffer = afterBoundary.slice(frameEnd);
   }
 }
 
@@ -271,7 +321,7 @@ function pushMJPEGFrame(frameData) {
   const dead = [];
   for (const client of mjpegClients) {
     try {
-      client.write(`--frame\r\nContent-Type: image/png\r\nContent-Length: ${frameData.length}\r\n\r\n`);
+      client.write(`--frame\r\nContent-Type: image/jpeg\r\nContent-Length: ${frameData.length}\r\n\r\n`);
       client.write(frameData);
       client.write('\r\n');
     } catch {
@@ -340,8 +390,8 @@ async function handleSimulator(req, res, urlPath, parsedUrl) {
     mjpegClients.push(res);
     // Send latest frame immediately if available
     if (latestFrame) pushMJPEGFrame(latestFrame);
-    // Start capture if not already running
-    if (!captureProcess) startCapture(udid);
+    // Start stream if not already running
+    if (!streamProcess) startStream(udid);
     // Clean up on disconnect
     req.on('close', () => {
       mjpegClients = mjpegClients.filter(c => c !== res);
@@ -353,9 +403,9 @@ async function handleSimulator(req, res, urlPath, parsedUrl) {
   if (req.method === 'GET' && urlPath === '/api/sim/screenshot') {
     const udid = query.udid;
     if (!udid) return json(res, { error: 'missing udid' }, 400);
-    // Fast path: cached frame from capture loop
+    // Fast path: cached frame from stream (JPEG)
     if (latestFrame) {
-      res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'no-cache', 'Access-Control-Allow-Origin': '*' });
+      res.writeHead(200, { 'Content-Type': 'image/jpeg', 'Cache-Control': 'no-cache', 'Access-Control-Allow-Origin': '*' });
       return res.end(latestFrame);
     }
     // Slow path: single capture
@@ -372,15 +422,15 @@ async function handleSimulator(req, res, urlPath, parsedUrl) {
     const body = await readBody(req);
     if (!body.udid) return json(res, { error: 'missing udid' }, 400);
     if (AXE) {
-      startCapture(body.udid, 10);
-      return json(res, { success: true, method: 'axe-capture' });
+      startStream(body.udid, body.fps || 15);
+      return json(res, { success: true, method: 'axe-stream' });
     }
     return json(res, { success: true, method: 'simctl-polling' });
   }
 
   // POST /api/sim/stream-stop
   if (req.method === 'POST' && urlPath === '/api/sim/stream-stop') {
-    stopCapture();
+    stopStream();
     return json(res, { success: true });
   }
 
