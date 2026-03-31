@@ -49,6 +49,25 @@ public struct SimctlSimulatorRepository: SimulatorRepository, @unchecked Sendabl
     public func shutdownSimulator(udid: String) async throws {
         _ = try await shellRunner.run(command: "xcrun", arguments: ["simctl", "shutdown", udid], environment: nil)
     }
+
+    public func captureScreenshot(udid: String, destination: URL) async throws {
+        try await quietRun(["xcrun", "simctl", "io", udid, "screenshot", "--type=png", destination.path])
+    }
+
+    /// Runs a command suppressing stderr (e.g. simctl's "Wrote screenshot to:" noise).
+    private func quietRun(_ arguments: [String]) async throws {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+        process.arguments = arguments
+        process.standardInput = FileHandle.nullDevice
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        try process.run()
+        process.waitUntilExit()
+        guard process.terminationStatus == 0 else {
+            throw ShellRunnerError.executionFailed(exitCode: process.terminationStatus, stderr: "Screenshot capture failed")
+        }
+    }
 }
 
 // MARK: - simctl JSON Models
