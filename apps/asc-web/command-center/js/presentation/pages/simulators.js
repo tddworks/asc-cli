@@ -485,21 +485,12 @@ window.simStartStream = async function (udid, name) {
     await new Promise(r => setTimeout(r, 500));
   } catch {}
 
-  // Frame polling
-  const loadFrame = () => {
-    if (!simStreamUdid) return;
-    const url = `${getSimAPI()}/screenshot?udid=${udid}&t=${Date.now()}`;
-    const tmp = new Image();
-    tmp.onload = () => {
-      if (tmp.naturalWidth > 0) { simImgNaturalW = tmp.naturalWidth; simImgNaturalH = tmp.naturalHeight; }
-      img.src = tmp.src;
-      simFrameCount++;
-      if (simStreamUdid) simStreamTimer = setTimeout(loadFrame, 100);
-    };
-    tmp.onerror = () => { if (simStreamUdid) simStreamTimer = setTimeout(loadFrame, 500); };
-    tmp.src = url;
+  // MJPEG stream — single connection, server pushes frames continuously
+  img.src = `${getSimAPI()}/stream?udid=${udid}`;
+  img.onload = function () {
+    if (img.naturalWidth > 0) { simImgNaturalW = img.naturalWidth; simImgNaturalH = img.naturalHeight; }
+    simFrameCount++;
   };
-  loadFrame();
 
   simFpsTimer = setInterval(() => {
     const el = document.getElementById('simStreamFps');
@@ -509,8 +500,10 @@ window.simStartStream = async function (udid, name) {
 };
 
 window.simStopStream = function () {
+  // Stop the MJPEG stream by clearing img src
+  const img = document.getElementById('simStreamImg');
+  if (img) img.src = '';
   simStreamUdid = null; simStreamName = null;
-  if (simStreamTimer) { clearTimeout(simStreamTimer); simStreamTimer = null; }
   if (simFpsTimer) { clearInterval(simFpsTimer); simFpsTimer = null; }
   fetch(`${getSimAPI()}/stream-stop`, { method: 'POST' }).catch(() => {});
   document.getElementById('simStreamView').style.display = 'none';

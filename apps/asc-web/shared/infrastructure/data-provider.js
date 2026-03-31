@@ -183,6 +183,16 @@ export const DataProvider = {
       const raw = MockDataProvider.versionLocalizations[vid];
       result = raw ? { data: raw.data } : { data: [] };
     }
+    else if (args[0] === 'screenshot-sets' && args[1] === 'list') {
+      const lid = flag('--localization-id');
+      const raw = MockDataProvider.screenshotSets[lid];
+      result = raw ? { data: raw.data } : { data: [] };
+    }
+    else if (args[0] === 'screenshots' && args[1] === 'list') {
+      const sid = flag('--set-id');
+      const raw = MockDataProvider.screenshots[sid];
+      result = raw ? { data: raw.data } : { data: [] };
+    }
     else if (args[0] === 'auth' && args[1] === 'check') {
       result = { data: [{ ...MockDataProvider.authStatus, affordances: authStatusAffordances() }] };
     }

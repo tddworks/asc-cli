@@ -242,6 +242,72 @@ export const MockDataProvider = {
     },
   },
 
+  // ===== Screenshot Sets — with localizationId parent =====
+  screenshotSets: {
+    'vl-001': {
+      data: [
+        { id: 'ss-001', localizationId: 'vl-001', screenshotDisplayType: 'APP_IPHONE_67', screenshotsCount: 6 },
+        { id: 'ss-002', localizationId: 'vl-001', screenshotDisplayType: 'APP_IPHONE_65', screenshotsCount: 6 },
+        { id: 'ss-003', localizationId: 'vl-001', screenshotDisplayType: 'APP_IPAD_PRO_129', screenshotsCount: 4 },
+      ],
+    },
+    'vl-002': {
+      data: [
+        { id: 'ss-004', localizationId: 'vl-002', screenshotDisplayType: 'APP_IPHONE_67', screenshotsCount: 6 },
+        { id: 'ss-005', localizationId: 'vl-002', screenshotDisplayType: 'APP_IPHONE_65', screenshotsCount: 3 },
+      ],
+    },
+  },
+
+  // ===== Screenshots — with setId parent =====
+  screenshots: {
+    'ss-001': {
+      data: [
+        { id: 'sc-001', setId: 'ss-001', fileName: 'home-screen.png', fileSize: 1245678, assetState: 'COMPLETE', imageWidth: 1290, imageHeight: 2796 },
+        { id: 'sc-002', setId: 'ss-001', fileName: 'search-view.png', fileSize: 987654, assetState: 'COMPLETE', imageWidth: 1290, imageHeight: 2796 },
+        { id: 'sc-003', setId: 'ss-001', fileName: 'detail-view.png', fileSize: 1123456, assetState: 'COMPLETE', imageWidth: 1290, imageHeight: 2796 },
+        { id: 'sc-004', setId: 'ss-001', fileName: 'settings.png', fileSize: 654321, assetState: 'COMPLETE', imageWidth: 1290, imageHeight: 2796 },
+        { id: 'sc-005', setId: 'ss-001', fileName: 'sync-progress.png', fileSize: 876543, assetState: 'COMPLETE', imageWidth: 1290, imageHeight: 2796 },
+        { id: 'sc-006', setId: 'ss-001', fileName: 'share-sheet.png', fileSize: 998877, assetState: 'COMPLETE', imageWidth: 1290, imageHeight: 2796 },
+      ],
+    },
+    'ss-002': {
+      data: [
+        { id: 'sc-007', setId: 'ss-002', fileName: 'home-screen.png', fileSize: 1100234, assetState: 'COMPLETE', imageWidth: 1284, imageHeight: 2778 },
+        { id: 'sc-008', setId: 'ss-002', fileName: 'search-view.png', fileSize: 934567, assetState: 'COMPLETE', imageWidth: 1284, imageHeight: 2778 },
+        { id: 'sc-009', setId: 'ss-002', fileName: 'detail-view.png', fileSize: 1056789, assetState: 'COMPLETE', imageWidth: 1284, imageHeight: 2778 },
+        { id: 'sc-010', setId: 'ss-002', fileName: 'settings.png', fileSize: 612345, assetState: 'UPLOAD_COMPLETE', imageWidth: 1284, imageHeight: 2778 },
+        { id: 'sc-011', setId: 'ss-002', fileName: 'sync-progress.png', fileSize: 845678, assetState: 'COMPLETE', imageWidth: 1284, imageHeight: 2778 },
+        { id: 'sc-012', setId: 'ss-002', fileName: 'share-sheet.png', fileSize: 967890, assetState: 'COMPLETE', imageWidth: 1284, imageHeight: 2778 },
+      ],
+    },
+    'ss-003': {
+      data: [
+        { id: 'sc-013', setId: 'ss-003', fileName: 'home-ipad.png', fileSize: 2345678, assetState: 'COMPLETE', imageWidth: 2048, imageHeight: 2732 },
+        { id: 'sc-014', setId: 'ss-003', fileName: 'search-ipad.png', fileSize: 2123456, assetState: 'COMPLETE', imageWidth: 2048, imageHeight: 2732 },
+        { id: 'sc-015', setId: 'ss-003', fileName: 'detail-ipad.png', fileSize: 2567890, assetState: 'COMPLETE', imageWidth: 2048, imageHeight: 2732 },
+        { id: 'sc-016', setId: 'ss-003', fileName: 'settings-ipad.png', fileSize: 1987654, assetState: 'COMPLETE', imageWidth: 2048, imageHeight: 2732 },
+      ],
+    },
+    'ss-004': {
+      data: [
+        { id: 'sc-017', setId: 'ss-004', fileName: '首页.png', fileSize: 1245678, assetState: 'COMPLETE', imageWidth: 1290, imageHeight: 2796 },
+        { id: 'sc-018', setId: 'ss-004', fileName: '搜索.png', fileSize: 987654, assetState: 'COMPLETE', imageWidth: 1290, imageHeight: 2796 },
+        { id: 'sc-019', setId: 'ss-004', fileName: '详情.png', fileSize: 1123456, assetState: 'COMPLETE', imageWidth: 1290, imageHeight: 2796 },
+        { id: 'sc-020', setId: 'ss-004', fileName: '设置.png', fileSize: 654321, assetState: 'COMPLETE', imageWidth: 1290, imageHeight: 2796 },
+        { id: 'sc-021', setId: 'ss-004', fileName: '同步.png', fileSize: 876543, assetState: 'COMPLETE', imageWidth: 1290, imageHeight: 2796 },
+        { id: 'sc-022', setId: 'ss-004', fileName: '分享.png', fileSize: 998877, assetState: 'COMPLETE', imageWidth: 1290, imageHeight: 2796 },
+      ],
+    },
+    'ss-005': {
+      data: [
+        { id: 'sc-023', setId: 'ss-005', fileName: '首页-65.png', fileSize: 1100234, assetState: 'COMPLETE', imageWidth: 1284, imageHeight: 2778 },
+        { id: 'sc-024', setId: 'ss-005', fileName: '搜索-65.png', fileSize: 934567, assetState: 'COMPLETE', imageWidth: 1284, imageHeight: 2778 },
+        { id: 'sc-025', setId: 'ss-005', fileName: '详情-65.png', fileSize: 1056789, assetState: 'AWAITING_UPLOAD', imageWidth: null, imageHeight: null },
+      ],
+    },
+  },
+
   // ===== Iris Status =====
   irisStatus: {
     data: [

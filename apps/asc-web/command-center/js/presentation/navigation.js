@@ -11,7 +11,7 @@ import { renderBuilds, loadBuilds } from './pages/builds.js';
 import { renderTestFlight, loadTestFlight } from './pages/testflight.js';
 import { renderSubmissions } from './pages/submissions.js';
 import { renderAppInfo } from './pages/app-info.js';
-import { renderScreenshots } from './pages/screenshots.js';
+import { renderScreenshots, loadScreenshots } from './pages/screenshots.js';
 import { renderReviews, loadReviews } from './pages/reviews.js';
 import { renderIAP, loadIAP } from './pages/iap.js';
 import { renderSubscriptions, loadSubscriptions } from './pages/subscriptions.js';
@@ -63,6 +63,7 @@ const loaders = {
   iap: loadIAP,
   subscriptions: loadSubscriptions,
   xcodecloud: loadXcodeCloud,
+  screenshots: loadScreenshots,
   iris: loadIris,
   simulators: loadSimulators,
 };

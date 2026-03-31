@@ -22,6 +22,7 @@
 .text-right { text-align: right; }
 .mb-16 { margin-bottom: 16px; }
 .mb-24 { margin-bottom: 24px; }
+.mt-24 { margin-top: 24px; }
 .gap-8 { gap: 8px; }
 .flex { display: flex; }
 .items-center { align-items: center; }

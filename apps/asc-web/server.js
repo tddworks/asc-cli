@@ -221,6 +221,7 @@ const AXE = resolveAxePath();
 // --- Capture state ---
 let captureProcess = null;
 let latestFrame = null;
+let mjpegClients = []; // connected MJPEG stream response objects
 
 function startCapture(udid, fps = 10) {
   stopCapture();
@@ -231,7 +232,11 @@ function startCapture(udid, fps = 10) {
     if (!captureProcess) return;
     execFile(AXE, ['screenshot', '--output', tmpFile, '--udid', udid], { timeout: 5000, stdio: 'pipe' }, (err) => {
       if (!err) {
-        try { latestFrame = fs.readFileSync(tmpFile); } catch {}
+        try {
+          latestFrame = fs.readFileSync(tmpFile);
+          // Push to all MJPEG stream clients
+          pushMJPEGFrame(latestFrame);
+        } catch {}
       }
       if (captureProcess) captureProcess.timer = setTimeout(capture, interval);
     });
@@ -260,6 +265,20 @@ function captureScreenshot(udid) {
     try { fs.unlinkSync(tmpFile); } catch {}
     return buf;
   } catch { return null; }
+}
+
+function pushMJPEGFrame(frameData) {
+  const dead = [];
+  for (const client of mjpegClients) {
+    try {
+      client.write(`--frame\r\nContent-Type: image/png\r\nContent-Length: ${frameData.length}\r\n\r\n`);
+      client.write(frameData);
+      client.write('\r\n');
+    } catch {
+      dead.push(client);
+    }
+  }
+  if (dead.length) mjpegClients = mjpegClients.filter(c => !dead.includes(c));
 }
 
 // --- AXe actions ---
@@ -306,6 +325,28 @@ async function handleSimulator(req, res, urlPath, parsedUrl) {
     } catch {
       return json(res, { devices: [], axeAvailable: !!AXE });
     }
+  }
+
+  // GET /api/sim/stream?udid=X — MJPEG stream (single connection, server pushes frames)
+  if (req.method === 'GET' && urlPath === '/api/sim/stream') {
+    const udid = query.udid;
+    if (!udid) return json(res, { error: 'missing udid' }, 400);
+    res.writeHead(200, {
+      'Content-Type': 'multipart/x-mixed-replace; boundary=frame',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
+    });
+    mjpegClients.push(res);
+    // Send latest frame immediately if available
+    if (latestFrame) pushMJPEGFrame(latestFrame);
+    // Start capture if not already running
+    if (!captureProcess) startCapture(udid);
+    // Clean up on disconnect
+    req.on('close', () => {
+      mjpegClients = mjpegClients.filter(c => c !== res);
+    });
+    return; // keep connection open
   }
 
   // GET /api/sim/screenshot?udid=X
