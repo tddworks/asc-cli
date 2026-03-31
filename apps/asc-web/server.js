@@ -219,8 +219,13 @@ function resolveAxePath() {
 const AXE = resolveAxePath();
 
 // =============================================================================
-// Frame Capture — captures simulator frames via best available method
+// Frame Capture — captures simulator frames via pluggable strategies (OCP)
 // Responsibilities: start/stop capture, provide latest frame
+//
+// Strategies (selected automatically by priority):
+//   1. AXeStreamStrategy    — axe stream-video MJPEG (continuous, ~6fps)
+//   2. SimctlLoopStrategy   — simctl screenshot --type=jpeg - (fallback, ~7fps)
+//   Future: ScreenCaptureKit (60fps), VNC, scrcpy (Android)
 // =============================================================================
 
 const FrameCapture = {
@@ -230,18 +235,30 @@ const FrameCapture = {
   _buffer: Buffer.alloc(0),
   _headerSkipped: false,
   _onFrame: null, // callback(frameBuffer)
+  _strategies: [],  // registered capture strategies
 
   get latestFrame() { return this._latestFrame; },
   get isRunning() { return this._proc !== null; },
+
+  registerStrategy(strategy) {
+    this._strategies.push(strategy);
+    // Sort by priority (lower = better)
+    this._strategies.sort((a, b) => a.priority - b.priority);
+  },
 
   start(udid, fps = 15) {
     this.stop();
     this._udid = udid;
 
-    // Strategy 1: AXe stream-video (MJPEG, continuous, best when available)
-    if (AXE) return this._startAXeStream(udid, fps);
-    // Strategy 2: simctl screenshot to stdout loop (no AXe needed)
-    this._startSimctlLoop(udid, fps);
+    // Select first available strategy
+    for (const s of this._strategies) {
+      if (s.isAvailable()) {
+        console.log(`  Capture: ${s.name}`);
+        s.start(this, udid, fps);
+        return;
+      }
+    }
+    console.log('  Capture: no strategy available');
   },
 
   stop() {
@@ -259,69 +276,79 @@ const FrameCapture = {
       (err, stdout) => cb(err ? null : stdout));
   },
 
-  _startAXeStream(udid, fps) {
-    this._buffer = Buffer.alloc(0);
-    this._headerSkipped = false;
+  // Called by strategies to deliver a frame
+  pushFrame(frame) {
+    this._latestFrame = frame;
+    if (this._onFrame) this._onFrame(frame);
+  },
+};
+
+// --- Strategy: AXe stream-video (MJPEG, continuous) ---
+FrameCapture.registerStrategy({
+  name: 'axe-stream',
+  priority: 1,
+  isAvailable: () => !!AXE,
+  start(capture, udid, fps) {
+    capture._buffer = Buffer.alloc(0);
+    capture._headerSkipped = false;
     const proc = spawn(AXE, [
       'stream-video', '--format', 'mjpeg',
       '--fps', String(fps), '--quality', '55', '--scale', '0.4',
       '--udid', udid,
     ], { stdio: ['pipe', 'pipe', 'pipe'] });
-    this._proc = proc;
+    capture._proc = proc;
 
-    proc.stdout.on('data', (chunk) => {
-      this._buffer = Buffer.concat([this._buffer, chunk]);
-      if (!this._headerSkipped) {
-        const idx = this._buffer.indexOf('\r\n\r\n');
-        if (idx === -1) return;
-        this._buffer = this._buffer.slice(idx + 4);
-        this._headerSkipped = true;
-      }
-      this._extractMJPEGFrames();
-    });
-    proc.on('exit', () => { if (this._proc === proc) this._proc = null; });
-  },
-
-  _extractMJPEGFrames() {
     const BOUNDARY = Buffer.from('--mjpegstream');
     const HEND = Buffer.from('\r\n\r\n');
-    while (true) {
-      const bi = this._buffer.indexOf(BOUNDARY);
-      if (bi === -1) break;
-      const rest = this._buffer.slice(bi + BOUNDARY.length);
-      const hi = rest.indexOf(HEND);
-      if (hi === -1) break;
-      const hdr = rest.slice(0, hi).toString();
-      const m = hdr.match(/Content-Length:\s*(\d+)/i);
-      if (!m) { this._buffer = rest.slice(hi + 4); continue; }
-      const len = parseInt(m[1], 10);
-      if (rest.length < hi + 4 + len) break;
-      const frame = rest.slice(hi + 4, hi + 4 + len);
-      this._latestFrame = frame;
-      if (this._onFrame) this._onFrame(frame);
-      this._buffer = rest.slice(hi + 4 + len);
-    }
-  },
 
-  _startSimctlLoop(udid, fps) {
+    proc.stdout.on('data', (chunk) => {
+      capture._buffer = Buffer.concat([capture._buffer, chunk]);
+      if (!capture._headerSkipped) {
+        const idx = capture._buffer.indexOf('\r\n\r\n');
+        if (idx === -1) return;
+        capture._buffer = capture._buffer.slice(idx + 4);
+        capture._headerSkipped = true;
+      }
+      // Extract JPEG frames from MJPEG stream
+      while (true) {
+        const bi = capture._buffer.indexOf(BOUNDARY);
+        if (bi === -1) break;
+        const rest = capture._buffer.slice(bi + BOUNDARY.length);
+        const hi = rest.indexOf(HEND);
+        if (hi === -1) break;
+        const m = rest.slice(0, hi).toString().match(/Content-Length:\s*(\d+)/i);
+        if (!m) { capture._buffer = rest.slice(hi + 4); continue; }
+        const len = parseInt(m[1], 10);
+        if (rest.length < hi + 4 + len) break;
+        capture.pushFrame(rest.slice(hi + 4, hi + 4 + len));
+        capture._buffer = rest.slice(hi + 4 + len);
+      }
+    });
+    proc.on('exit', () => { if (capture._proc === proc) capture._proc = null; });
+  },
+});
+
+// --- Strategy: simctl screenshot loop (no AXe needed) ---
+FrameCapture.registerStrategy({
+  name: 'simctl-loop',
+  priority: 2,
+  isAvailable: () => true,
+  start(capture, udid, fps) {
     const interval = Math.max(1000 / fps, 100);
     let running = true;
-    const capture = () => {
+    const loop = () => {
       if (!running) return;
       execFile('xcrun', ['simctl', 'io', udid, 'screenshot', '--type=jpeg', '-'],
         { encoding: 'buffer', maxBuffer: 10 * 1024 * 1024, timeout: 5000 },
         (err, stdout) => {
-          if (!err && stdout && stdout.length > 0) {
-            this._latestFrame = stdout;
-            if (this._onFrame) this._onFrame(stdout);
-          }
-          if (running) setTimeout(capture, interval);
+          if (!err && stdout && stdout.length > 0) capture.pushFrame(stdout);
+          if (running) setTimeout(loop, interval);
         });
     };
-    this._proc = { kill: () => { running = false; } };
-    capture();
+    capture._proc = { kill: () => { running = false; } };
+    loop();
   },
-};
+});
 
 // =============================================================================
 // Stream Broadcaster — manages MJPEG client connections, pushes frames
