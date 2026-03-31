@@ -21,7 +21,8 @@ struct WebServerCommand: AsyncParsableCommand {
 
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-        process.arguments = ["node", serverFile.path, "--port", "\(port)", "--asc-bin", ascBin]
+        let projectDir = FileManager.default.currentDirectoryPath
+        process.arguments = ["node", serverFile.path, "--port", "\(port)", "--asc-bin", ascBin, "--project-dir", projectDir]
 
         let pipe = Pipe()
         process.standardOutput = pipe

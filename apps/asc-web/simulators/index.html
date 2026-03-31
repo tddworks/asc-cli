@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Device Stream POC</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #14141f;
+      --surface2: #1e1e2e;
+      --border: #2a2a3e;
+      --text: #e0e0f0;
+      --text2: #8888aa;
+      --accent: #6366f1;
+      --green: #22c55e;
+      --red: #ef4444;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', system-ui, sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; user-select: none;
+    }
+
+    header {
+      padding: 20px 32px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+    }
+    header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
+    header .badge {
+      font-size: 11px; background: var(--accent); color: white;
+      padding: 2px 8px; border-radius: 10px; font-weight: 500;
+    }
+    .axe-status {
+      margin-left: auto; font-size: 11px; padding: 4px 10px;
+      border-radius: 6px; font-weight: 500;
+    }
+    .axe-status.ok { background: rgba(34,197,94,0.15); color: var(--green); }
+    .axe-status.missing { background: rgba(239,68,68,0.15); color: var(--red); }
+
+    .container { display: flex; height: calc(100vh - 65px); }
+
+    /* Sidebar */
+    .sidebar {
+      width: 320px; border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; flex-shrink: 0;
+    }
+    .sidebar-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .sidebar-header h2 {
+      font-size: 14px; font-weight: 600; color: var(--text2);
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .refresh-btn {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 6px 12px; border-radius: 6px;
+      font-size: 12px; cursor: pointer;
+    }
+    .refresh-btn:hover { background: var(--border); }
+    .device-list { flex: 1; overflow-y: auto; padding: 8px; }
+    .runtime-group { margin-bottom: 4px; }
+    .runtime-label { font-size: 11px; color: var(--text2); padding: 8px 12px 4px; font-weight: 500; }
+    .device-card {
+      padding: 12px 16px; border-radius: 8px; cursor: pointer;
+      transition: all 0.15s; display: flex;
+      justify-content: space-between; align-items: center; gap: 12px;
+    }
+    .device-card:hover { background: var(--surface2); }
+    .device-card.selected { background: var(--accent); color: white; }
+    .device-card.selected .device-state { color: rgba(255,255,255,0.7); }
+    .device-info { flex: 1; min-width: 0; }
+    .device-name {
+      font-size: 13px; font-weight: 500;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .device-state { font-size: 11px; color: var(--text2); margin-top: 2px; }
+    .state-dot {
+      display: inline-block; width: 6px; height: 6px;
+      border-radius: 50%; margin-right: 4px; vertical-align: middle;
+    }
+    .state-dot.booted { background: var(--green); }
+    .state-dot.shutdown { background: var(--text2); }
+    .boot-btn {
+      background: var(--green); color: white; border: none;
+      padding: 4px 10px; border-radius: 5px; font-size: 11px;
+      font-weight: 500; cursor: pointer; opacity: 0; transition: opacity 0.15s;
+    }
+    .device-card:hover .boot-btn { opacity: 1; }
+    .device-card.selected .boot-btn { opacity: 1; background: rgba(255,255,255,0.2); }
+    .filter-bar { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+    .filter-bar select {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 6px 10px; border-radius: 6px; font-size: 12px;
+    }
+
+    /* Main */
+    .main {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 24px; position: relative; overflow: hidden;
+    }
+    .placeholder { text-align: center; color: var(--text2); }
+    .placeholder .icon { font-size: 48px; margin-bottom: 16px; opacity: 0.3; }
+    .placeholder p { font-size: 14px; }
+
+    .stream-container {
+      display: none; flex-direction: column; align-items: center;
+      height: 100%; width: 100%;
+    }
+    .stream-container.active { display: flex; }
+    .stream-toolbar {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 12px; width: 100%;
+    }
+    .stream-title { font-size: 14px; font-weight: 500; flex: 1; }
+    .stream-fps { font-size: 11px; color: var(--text2); font-variant-numeric: tabular-nums; }
+    .stop-btn {
+      background: var(--red); color: white; border: none;
+      padding: 6px 14px; border-radius: 6px; font-size: 12px;
+      font-weight: 500; cursor: pointer;
+    }
+
+    /* Device + controls */
+    .device-area {
+      flex: 1; display: flex; align-items: center;
+      justify-content: center; gap: 20px; width: 100%; min-height: 0;
+    }
+    .device-frame { display: flex; align-items: center; justify-content: center; height: 100%; }
+
+    /* Bezel */
+    .device-bezel {
+      position: relative; background: #1a1a1a; border: 2px solid #333;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 20px 80px rgba(0,0,0,0.6),
+        inset 0 0 0 1px rgba(255,255,255,0.03);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .device-bezel::before {
+      content: ''; position: absolute; right: -4px; top: 18%;
+      width: 3px; height: 10%; background: #2a2a2a; border-radius: 0 2px 2px 0;
+    }
+    .device-bezel::after {
+      content: ''; position: absolute; left: -4px; top: 22%;
+      width: 3px; height: 6%; background: #2a2a2a; border-radius: 2px 0 0 2px;
+      box-shadow: 0 20px 0 0 #2a2a2a;
+    }
+    .dynamic-island {
+      position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+      width: 90px; height: 26px; background: #000; border-radius: 14px; z-index: 5;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.08);
+    }
+    .screen-area {
+      width: 100%; height: 100%; overflow: hidden; position: relative; cursor: crosshair;
+    }
+    .screen-area img {
+      width: 100%; height: 100%; object-fit: fill; display: block; pointer-events: none;
+    }
+    .device-frame img.no-bezel {
+      max-height: 100%; max-width: 100%; object-fit: contain;
+      border-radius: 12px; cursor: crosshair;
+    }
+
+    /* Touch ripple */
+    .touch-ripple {
+      position: absolute; width: 30px; height: 30px;
+      border: 2px solid var(--accent); border-radius: 50%;
+      transform: translate(-50%, -50%); pointer-events: none;
+      animation: ripple 0.4s ease-out forwards;
+    }
+    @keyframes ripple {
+      0% { opacity: 1; width: 10px; height: 10px; }
+      100% { opacity: 0; width: 40px; height: 40px; }
+    }
+
+    /* Coord display */
+    .coord-display {
+      position: absolute; bottom: 8px; right: 8px;
+      font-size: 10px; color: var(--text2);
+      font-family: 'SF Mono', Monaco, monospace;
+      background: rgba(0,0,0,0.6); padding: 3px 6px;
+      border-radius: 4px; pointer-events: none; z-index: 5;
+    }
+
+    /* Control panel */
+    .control-panel {
+      display: flex; flex-direction: column; gap: 12px;
+      width: 200px; flex-shrink: 0; overflow-y: auto; max-height: 100%;
+    }
+    .control-section h3 {
+      font-size: 11px; font-weight: 600; color: var(--text2);
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;
+    }
+    .hw-btn {
+      width: 100%; padding: 8px 12px; background: var(--surface2);
+      border: 1px solid var(--border); color: var(--text);
+      border-radius: 6px; font-size: 12px; cursor: pointer;
+      transition: all 0.15s; text-align: left;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .hw-btn:hover { background: var(--border); }
+    .hw-btn:active { background: var(--accent); }
+    .hw-btn .icon { font-size: 14px; width: 20px; text-align: center; }
+    .btn-row { display: flex; gap: 4px; margin-top: 4px; }
+    .btn-row .hw-btn { width: auto; padding: 6px 10px; justify-content: center; flex: 1; }
+
+    /* Gesture grid */
+    .gesture-grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr; gap: 4px; width: 120px; margin: 0 auto;
+    }
+    .gesture-grid .hw-btn { padding: 8px; justify-content: center; font-size: 16px; }
+    .gesture-grid .center { background: transparent; border-color: transparent; cursor: default; }
+    .gesture-grid .center:hover { background: transparent; }
+
+    /* Text input */
+    .text-input-bar { display: flex; gap: 6px; width: 100%; }
+    .text-input-bar input {
+      flex: 1; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 8px 10px; border-radius: 6px;
+      font-size: 12px; outline: none;
+    }
+    .text-input-bar input:focus { border-color: var(--accent); }
+    .text-input-bar button {
+      background: var(--accent); color: white; border: none;
+      padding: 8px 12px; border-radius: 6px; font-size: 12px;
+      cursor: pointer; font-weight: 500;
+    }
+
+    /* Tap-by-id input */
+    .tap-id-bar { display: flex; gap: 6px; width: 100%; margin-top: 6px; }
+    .tap-id-bar input {
+      flex: 1; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 8px 10px; border-radius: 6px;
+      font-size: 12px; outline: none;
+    }
+    .tap-id-bar input:focus { border-color: var(--accent); }
+    .tap-id-bar button {
+      background: var(--surface2); color: var(--text); border: 1px solid var(--border);
+      padding: 8px 10px; border-radius: 6px; font-size: 11px;
+      cursor: pointer; font-weight: 500; white-space: nowrap;
+    }
+    .tap-id-bar button:hover { background: var(--border); }
+
+    /* Action log */
+    .action-log {
+      max-height: 180px; overflow-y: auto; font-size: 11px;
+      font-family: 'SF Mono', Monaco, monospace; color: var(--text2);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: 8px;
+    }
+    .action-log .entry { padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .action-log .entry .time { color: var(--text2); margin-right: 6px; }
+    .action-log .entry .ok { color: var(--green); }
+    .action-log .entry .err { color: var(--red); }
+
+    .loading-overlay {
+      display: none; position: absolute; inset: 0;
+      background: rgba(10, 10, 15, 0.85);
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 12px; z-index: 10;
+    }
+    .loading-overlay.active { display: flex; }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 13px; color: var(--text2); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Device Stream</h1>
+    <span class="badge">POC</span>
+    <span class="axe-status missing" id="axeStatus">axe: checking...</span>
+  </header>
+
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2>Simulators</h2>
+        <button class="refresh-btn" onclick="loadDevices()">Refresh</button>
+      </div>
+      <div class="filter-bar">
+        <select id="filterState" onchange="renderDevices()">
+          <option value="all">All devices</option>
+          <option value="Booted">Booted only</option>
+          <option value="Shutdown">Shutdown only</option>
+        </select>
+      </div>
+      <div class="device-list" id="deviceList">
+        <div class="placeholder" style="padding:40px 20px"><p>Loading devices...</p></div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="placeholder" id="placeholder">
+        <div class="icon">📱</div>
+        <p>Select a booted simulator to start streaming</p>
+      </div>
+
+      <div class="stream-container" id="streamContainer">
+        <div class="stream-toolbar">
+          <span class="stream-title" id="streamTitle"></span>
+          <span class="stream-fps" id="streamFps"></span>
+          <button class="stop-btn" onclick="stopStream()">Stop</button>
+        </div>
+        <div class="device-area">
+          <div class="device-frame" id="deviceFrame"></div>
+          <div class="control-panel" id="controlPanel">
+
+            <!-- Hardware Buttons -->
+            <div class="control-section">
+              <h3>Hardware</h3>
+              <button class="hw-btn" onclick="pressButton('home')">
+                <span class="icon">&#9711;</span> Home
+              </button>
+              <button class="hw-btn" onclick="pressButton('lock')" style="margin-top:4px">
+                <span class="icon">&#9211;</span> Lock
+              </button>
+              <button class="hw-btn" onclick="pressButton('siri')" style="margin-top:4px">
+                <span class="icon">&#9834;</span> Siri
+              </button>
+            </div>
+
+            <!-- Gesture Presets -->
+            <div class="control-section">
+              <h3>Gestures</h3>
+              <div class="gesture-grid">
+                <div class="hw-btn center"></div>
+                <button class="hw-btn" onclick="gesture('scroll-up')" title="Scroll Up">&#8593;</button>
+                <div class="hw-btn center"></div>
+                <button class="hw-btn" onclick="gesture('scroll-left')" title="Scroll Left">&#8592;</button>
+                <div class="hw-btn center" style="font-size:10px;color:var(--text2)">scroll</div>
+                <button class="hw-btn" onclick="gesture('scroll-right')" title="Scroll Right">&#8594;</button>
+                <div class="hw-btn center"></div>
+                <button class="hw-btn" onclick="gesture('scroll-down')" title="Scroll Down">&#8595;</button>
+                <div class="hw-btn center"></div>
+              </div>
+              <div class="btn-row" style="margin-top:8px">
+                <button class="hw-btn" onclick="gesture('swipe-from-left-edge')" title="Back gesture">&#8676; Edge</button>
+                <button class="hw-btn" onclick="gesture('swipe-from-bottom-edge')" title="Home gesture">&#8679; Home</button>
+              </div>
+            </div>
+
+            <!-- Text & Keyboard -->
+            <div class="control-section">
+              <h3>Text Input</h3>
+              <div class="text-input-bar">
+                <input type="text" id="textInput" placeholder="Type text..."
+                       onkeydown="if(event.key==='Enter')sendText()">
+                <button onclick="sendText()">Send</button>
+              </div>
+              <div class="btn-row" style="margin-top:6px">
+                <button class="hw-btn" onclick="pressKey(40)" title="Return">&#9166;</button>
+                <button class="hw-btn" onclick="pressKey(42)" title="Backspace">&#9003;</button>
+                <button class="hw-btn" onclick="pressKey(43)" title="Tab">&#8677;</button>
+                <button class="hw-btn" onclick="pressKey(41)" title="Escape">Esc</button>
+              </div>
+            </div>
+
+            <!-- Tap by Accessibility -->
+            <div class="control-section">
+              <h3>Tap by Accessibility</h3>
+              <div class="tap-id-bar">
+                <input type="text" id="tapIdInput" placeholder="Identifier or label..."
+                       onkeydown="if(event.key==='Enter')tapById()">
+                <button onclick="tapById()">ID</button>
+                <button onclick="tapByLabel()">Label</button>
+              </div>
+            </div>
+
+            <!-- UI Tree -->
+            <div class="control-section">
+              <h3>Inspect</h3>
+              <button class="hw-btn" onclick="describeUI()">
+                <span class="icon">&#128270;</span> Describe UI
+              </button>
+            </div>
+
+            <!-- Action Log -->
+            <div class="control-section">
+              <h3>Activity</h3>
+              <div class="action-log" id="actionLog">
+                <div class="entry" style="color:var(--text2)">Click device screen to interact</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <span class="loading-text" id="loadingText">Booting simulator...</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allDevices = [];
+    let selectedUdid = null;
+    let selectedName = null;
+    let streaming = false;
+    let frameTimer = null;
+    let frameCount = 0;
+    let fpsTimer = null;
+    let axeAvailable = false;
+    let frameInsets = {};
+
+    // Actual screenshot dimensions (detected from loaded image)
+    let imgNaturalW = 0;
+    let imgNaturalH = 0;
+
+    // Touch state
+    let dragStart = null;
+    let isDragging = false;
+    const SWIPE_THRESHOLD = 10;
+
+    // Map view click coordinates to device points for axe.
+    // axe uses UIKit points (e.g. 440x956 for iPhone 16 Pro Max).
+    // We know the actual screen pixel size from frameInsets, and all modern iPhones are 3x.
+    function viewToDevice(vx, vy, vw, vh) {
+      const inset = selectedName ? frameInsets[selectedName] : null;
+      if (inset) {
+        // Exact: screen pixels = outputSize - 2*inset, device points = screenPixels / 3
+        const screenPxW = inset.outputWidth - inset.screenInsetX * 2;
+        const screenPxH = inset.outputHeight - inset.screenInsetY * 2;
+        const ptW = screenPxW / 3;
+        const ptH = screenPxH / 3;
+        return { x: (vx / vw) * ptW, y: (vy / vh) * ptH };
+      }
+      // Fallback: use screenshot natural dimensions with 3x scale
+      if (imgNaturalW > 0 && imgNaturalH > 0) {
+        // AXe stream may be scaled (e.g. 0.5x), but the aspect ratio is preserved.
+        // Use known device points for common sizes, or estimate.
+        const ptW = 440, ptH = 956; // iPhone Pro Max default
+        return { x: (vx / vw) * ptW, y: (vy / vh) * ptH };
+      }
+      return { x: (vx / vw) * 393, y: (vy / vh) * 852 };
+    }
+
+    // --- Actions ---
+    async function doAction(endpoint, body, method = "POST") {
+      if (!axeAvailable) { logAction("axe not available", true); return null; }
+      try {
+        const opts = method === "GET"
+          ? {}
+          : { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({udid: selectedUdid, ...body}) };
+        if (method === "GET") opts.method = "GET";
+        const res = await fetch(endpoint, opts);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        return data;
+      } catch (e) {
+        logAction(e.message, true);
+        return null;
+      }
+    }
+
+    async function tapAt(vx, vy, screenEl) {
+      const rect = screenEl.getBoundingClientRect();
+      const { x, y } = viewToDevice(vx, vy, rect.width, rect.height);
+      logAction(`tap(${Math.round(x)}, ${Math.round(y)}) [img:${imgNaturalW}x${imgNaturalH}]`);
+      showRipple(screenEl, vx, vy);
+      await doAction("/api/tap", { x: Math.round(x), y: Math.round(y) });
+    }
+
+    async function swipeAt(vx1, vy1, vx2, vy2, screenEl, durationMs) {
+      const rect = screenEl.getBoundingClientRect();
+      const from = viewToDevice(vx1, vy1, rect.width, rect.height);
+      const to = viewToDevice(vx2, vy2, rect.width, rect.height);
+      const dist = Math.sqrt((to.x - from.x)**2 + (to.y - from.y)**2);
+      const delta = Math.max(1, Math.round(dist / 10));
+      const duration = Math.max(0.1, (durationMs || 300) / 1000);
+      logAction(`swipe(${Math.round(from.x)},${Math.round(from.y)} → ${Math.round(to.x)},${Math.round(to.y)})`);
+      await doAction("/api/swipe", { fromX: Math.round(from.x), fromY: Math.round(from.y), toX: Math.round(to.x), toY: Math.round(to.y), duration, delta });
+    }
+
+    async function gesture(name) {
+      logAction(`gesture(${name})`);
+      await doAction("/api/gesture", { gesture: name });
+    }
+
+    async function sendText() {
+      const input = document.getElementById("textInput");
+      const text = input.value;
+      if (!text) return;
+      logAction(`type("${text.length > 20 ? text.slice(0,20)+'...' : text}")`);
+      await doAction("/api/type", { text });
+      input.value = "";
+      input.focus();
+    }
+
+    async function pressButton(button) {
+      logAction(`button(${button})`);
+      await doAction("/api/button", { button });
+    }
+
+    async function pressKey(keycode) {
+      const names = {40:"Return",42:"Backspace",43:"Tab",41:"Escape"};
+      logAction(`key(${names[keycode]||keycode})`);
+      await doAction("/api/key", { keycode });
+    }
+
+    async function tapById() {
+      const id = document.getElementById("tapIdInput").value;
+      if (!id) return;
+      logAction(`tap(id: "${id}")`);
+      await doAction("/api/tap", { id });
+    }
+
+    async function tapByLabel() {
+      const label = document.getElementById("tapIdInput").value;
+      if (!label) return;
+      logAction(`tap(label: "${label}")`);
+      await doAction("/api/tap", { label });
+    }
+
+    async function describeUI() {
+      logAction("describe-ui...");
+      const data = await doAction(`/api/describe?udid=${selectedUdid}`, null, "GET");
+      if (data && data.tree) {
+        logAction(`UI tree: ${data.tree.length} chars`);
+        console.log("=== UI Tree ===\n" + data.tree);
+      }
+    }
+
+    // --- Visual ---
+    function showRipple(el, x, y) {
+      const r = document.createElement("div");
+      r.className = "touch-ripple";
+      r.style.left = x + "px"; r.style.top = y + "px";
+      el.appendChild(r);
+      setTimeout(() => r.remove(), 400);
+    }
+
+    function logAction(msg, isErr) {
+      const log = document.getElementById("actionLog");
+      const t = new Date().toLocaleTimeString("en-US", {hour12:false, hour:"2-digit", minute:"2-digit", second:"2-digit"});
+      const entry = document.createElement("div");
+      entry.className = "entry";
+      entry.innerHTML = `<span class="time">${t}</span><span class="${isErr?'err':'ok'}">${msg}</span>`;
+      if (log.children.length === 1 && !log.children[0].querySelector(".time")) log.innerHTML = "";
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    // --- Touch handlers ---
+    function attachTouchHandlers(el) {
+      let startTime = 0;
+      el.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        const r = el.getBoundingClientRect();
+        dragStart = { x: e.clientX - r.left, y: e.clientY - r.top };
+        startTime = Date.now();
+        isDragging = false;
+      });
+      el.addEventListener("mousemove", (e) => {
+        const r = el.getBoundingClientRect();
+        const cx = e.clientX - r.left, cy = e.clientY - r.top;
+        if (dragStart) {
+          const d = Math.sqrt((cx-dragStart.x)**2 + (cy-dragStart.y)**2);
+          if (d > SWIPE_THRESHOLD) isDragging = true;
+        }
+        const { x, y } = viewToDevice(cx, cy, r.width, r.height);
+        let cd = el.querySelector(".coord-display");
+        if (!cd) { cd = document.createElement("div"); cd.className = "coord-display"; el.appendChild(cd); }
+        cd.textContent = `${Math.round(x)}, ${Math.round(y)} pt`;
+      });
+      el.addEventListener("mouseup", (e) => {
+        if (!dragStart) return;
+        const r = el.getBoundingClientRect();
+        const ex = e.clientX - r.left, ey = e.clientY - r.top;
+        const dur = Date.now() - startTime;
+        if (isDragging) swipeAt(dragStart.x, dragStart.y, ex, ey, el, dur);
+        else tapAt(dragStart.x, dragStart.y, el);
+        dragStart = null; isDragging = false;
+      });
+      el.addEventListener("mouseleave", () => { dragStart = null; isDragging = false; });
+    }
+
+    // --- Bezel builder ---
+    function buildBezelFrame(name, containerId) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = "";
+
+      const frameUrl = `/api/frame?name=${encodeURIComponent(name)}`;
+
+      // Outer wrapper sized to frame aspect ratio
+      const wrapper = document.createElement("div");
+      wrapper.style.cssText = "position:relative; display:inline-block; max-height:85vh;";
+
+      // Frame image defines the overall size
+      const frameImg = document.createElement("img");
+      frameImg.src = frameUrl;
+      frameImg.alt = "";
+      frameImg.draggable = false;
+      frameImg.style.cssText = "display:block; height:100%; max-height:85vh; pointer-events:none; position:relative; z-index:2;";
+      frameImg.onerror = () => {
+        // No frame available — show screenshot directly
+        frameImg.style.display = "none";
+        screenArea.style.cssText = "position:relative; height:100%; max-height:85vh;";
+        img.style.cssText = "display:block; height:100%; max-height:85vh; border-radius:12px; cursor:crosshair;";
+      };
+
+      // Screen area: absolutely positioned inside the frame's screen cutout
+      const screenArea = document.createElement("div");
+      screenArea.style.cssText = "position:absolute; overflow:hidden; cursor:crosshair; border-radius:5.5%/2.8%;";
+
+      // Screenshot image fills the screen area
+      const img = document.createElement("img");
+      img.id = "streamImg";
+      img.alt = "Device screen";
+      img.style.cssText = "display:block; width:100%; height:100%; object-fit:fill;";
+      screenArea.appendChild(img);
+
+      wrapper.appendChild(screenArea);
+      wrapper.appendChild(frameImg);
+
+      // Once frame loads, position the screen area using exact insets from devices.json
+      frameImg.onload = () => {
+        const fw = frameImg.naturalWidth;   // e.g. 1470
+        const fh = frameImg.naturalHeight;  // e.g. 3000
+        // Look up exact insets from devices.json data
+        const inset = frameInsets[name];
+        const ix = inset ? inset.screenInsetX : Math.round(fw * 0.05);
+        const iy = inset ? inset.screenInsetY : Math.round(fh * 0.022);
+        // Convert pixel insets to percentages of frame
+        const insetXPct = (ix / fw) * 100;
+        const insetYPct = (iy / fh) * 100;
+        const widthPct = ((fw - ix * 2) / fw) * 100;
+        const heightPct = ((fh - iy * 2) / fh) * 100;
+        screenArea.style.left = insetXPct + "%";
+        screenArea.style.top = insetYPct + "%";
+        screenArea.style.width = widthPct + "%";
+        screenArea.style.height = heightPct + "%";
+      };
+
+      container.appendChild(wrapper);
+      attachTouchHandlers(screenArea);
+      return { img };
+    }
+
+    // --- Device list ---
+    async function loadDevices() {
+      try {
+        const res = await fetch("/api/sim/devices");
+        const data = await res.json();
+        allDevices = data.devices.filter(d => d.isAvailable);
+        axeAvailable = data.axeAvailable;
+        const s = document.getElementById("axeStatus");
+        if (axeAvailable) { s.className = "axe-status ok"; s.textContent = "axe: ready"; }
+        else { s.className = "axe-status missing"; s.textContent = "axe: not found"; }
+        renderDevices();
+      } catch (e) {
+        document.getElementById("deviceList").innerHTML =
+          '<div class="placeholder" style="padding:40px 20px"><p>Failed to load devices</p></div>';
+      }
+    }
+
+    function renderDevices() {
+      const filter = document.getElementById("filterState").value;
+      const filtered = filter === "all" ? allDevices : allDevices.filter(d => d.state === filter);
+      const groups = {};
+      for (const d of filtered) (groups[d.runtime] = groups[d.runtime] || []).push(d);
+
+      const list = document.getElementById("deviceList");
+      if (!filtered.length) {
+        list.innerHTML = '<div class="placeholder" style="padding:40px 20px"><p>No devices found</p></div>';
+        return;
+      }
+      let html = "";
+      for (const [rt, devs] of Object.entries(groups).sort()) {
+        html += `<div class="runtime-group"><div class="runtime-label">${rt.replace(/-/g," ")}</div>`;
+        for (const d of devs) {
+          const sel = d.udid === selectedUdid ? "selected" : "";
+          const dot = d.state === "Booted" ? "booted" : "shutdown";
+          const act = d.state === "Booted"
+            ? `onclick="startStream('${d.udid}','${d.name}')"`
+            : `onclick="bootAndStream('${d.udid}','${d.name}')"`;
+          html += `<div class="device-card ${sel}" ${act}>
+            <div class="device-info"><div class="device-name">${d.name}</div>
+            <div class="device-state"><span class="state-dot ${dot}"></span>${d.state}</div></div>
+            <button class="boot-btn">${d.state==="Booted"?"Stream":"Boot"}</button></div>`;
+        }
+        html += `</div>`;
+      }
+      list.innerHTML = html;
+    }
+
+    async function bootAndStream(udid, name) {
+      showLoading("Booting " + name + "...");
+      try {
+        const res = await fetch("/api/sim/boot", {
+          method: "POST", headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ udid }),
+        });
+        const data = await res.json();
+        if (!data.success) { alert("Boot failed: " + (data.error||"unknown")); hideLoading(); return; }
+        await loadDevices();
+        showLoading("Waiting for simulator...");
+        await new Promise(r => setTimeout(r, 2000));
+        hideLoading();
+        startStream(udid, name);
+      } catch (e) { alert("Boot failed: " + e.message); hideLoading(); }
+    }
+
+    async function startStream(udid, name) {
+      stopStream();
+      selectedUdid = udid; selectedName = name; streaming = true;
+      document.getElementById("placeholder").style.display = "none";
+      document.getElementById("streamContainer").classList.add("active");
+      document.getElementById("streamTitle").textContent = name;
+      document.getElementById("actionLog").innerHTML =
+        '<div class="entry" style="color:var(--text2)">Click device screen to interact</div>';
+
+      const { img } = buildBezelFrame(name, "deviceFrame");
+      frameCount = 0;
+
+      // Start AXe stream (server caches frames for fast serving)
+      try {
+        const res = await fetch("/api/stream-start", {
+          method: "POST", headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ udid }),
+        });
+        const data = await res.json();
+        if (data.method === "axe-capture") {
+          logAction("Stream: axe capture (fast)");
+          // Give AXe a moment to produce the first frame
+          await new Promise(r => setTimeout(r, 500));
+        } else {
+          logAction("Stream: simctl polling (install axe for smoother)");
+        }
+      } catch (e) {}
+
+      const loadFrame = () => {
+        if (!streaming) return;
+        const url = `/api/screenshot?udid=${udid}&t=${Date.now()}`;
+        const tmp = new Image();
+        tmp.onload = () => {
+          // Capture actual screenshot dimensions for coordinate mapping
+          if (tmp.naturalWidth > 0) {
+            imgNaturalW = tmp.naturalWidth;
+            imgNaturalH = tmp.naturalHeight;
+          }
+          img.src = tmp.src;
+          frameCount++;
+          if (streaming) frameTimer = setTimeout(loadFrame, 100); // faster polling when AXe caches frames
+        };
+        tmp.onerror = () => { if (streaming) frameTimer = setTimeout(loadFrame, 500); };
+        tmp.src = url;
+      };
+      loadFrame();
+
+      fpsTimer = setInterval(() => {
+        document.getElementById("streamFps").textContent = frameCount + " fps";
+        frameCount = 0;
+      }, 1000);
+      renderDevices();
+    }
+
+    function stopStream() {
+      streaming = false; selectedUdid = null; selectedName = null;
+      imgNaturalW = 0; imgNaturalH = 0;
+      if (frameTimer) { clearTimeout(frameTimer); frameTimer = null; }
+      if (fpsTimer) { clearInterval(fpsTimer); fpsTimer = null; }
+      document.getElementById("streamContainer").classList.remove("active");
+      document.getElementById("deviceFrame").innerHTML = "";
+      document.getElementById("placeholder").style.display = "";
+      document.getElementById("streamFps").textContent = "";
+      // Stop AXe stream subprocess
+      fetch("/api/stream-stop", { method: "POST" }).catch(() => {});
+      renderDevices();
+    }
+
+    function showLoading(t) {
+      document.getElementById("loadingText").textContent = t;
+      document.getElementById("loadingOverlay").classList.add("active");
+    }
+    function hideLoading() { document.getElementById("loadingOverlay").classList.remove("active"); }
+
+    fetch("/api/frame-insets").then(r=>r.json()).then(d=>{frameInsets=d}).catch(()=>{});
+    loadDevices();
+  </script>
+</body>
+</html>

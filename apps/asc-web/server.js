@@ -26,6 +26,7 @@ const os = require('os');
 const PORT = parseInt(process.argv.find((_, i, a) => a[i - 1] === '--port') || '8420', 10);
 const HTTPS_PORT = PORT + 1; // 8421 by default
 const ASC_BIN = process.argv.find((_, i, a) => a[i - 1] === '--asc-bin') || 'asc';
+const PROJECT_DIR = process.argv.find((_, i, a) => a[i - 1] === '--project-dir') || process.cwd();
 const ASC_DIR = path.join(os.homedir(), '.asc');
 const CERT_KEY = path.join(ASC_DIR, 'server.key');
 const CERT_PEM = path.join(ASC_DIR, 'server.crt');
@@ -92,8 +93,15 @@ function handleRequest(req, res) {
     return;
   }
 
+  // --- Simulator endpoints (merged stream server) ---
+  const parsedUrl = new URL(req.url, `http://localhost:${PORT}`);
+  const urlPath = decodeURIComponent(parsedUrl.pathname);
+
+  if (urlPath.startsWith('/api/sim/')) {
+    return handleSimulator(req, res, urlPath, parsedUrl);
+  }
+
   // Redirect to hosted web apps at asccli.app
-  const urlPath = decodeURIComponent(req.url.split('?')[0]);
 
   if (urlPath === '/' || urlPath === '/index.html' || urlPath.startsWith('/command-center')) {
     res.writeHead(302, { 'Location': 'https://asccli.app/command-center' });
@@ -175,6 +183,7 @@ server.listen(PORT, () => {
       '  │  asccli.app/command-center              │',
       '  │  asccli.app/console                     │',
       '  │  /api/run          CLI bridge           │',
+      `  │  /api/sim/*        Simulators ${AXE ? '(axe ✓)' : '       '} │`,
       '  │                                         │',
       `  │  Binary: ${ASC_BIN.padEnd(31)}│`,
       '  │  Press Ctrl+C to stop                   │',
@@ -187,3 +196,244 @@ server.listen(PORT, () => {
     execFile(opener, ['https://asccli.app/command-center'], { stdio: 'ignore' }, () => {});
   }, 100);
 });
+
+// =============================================================================
+// Simulator Stream Server (merged)
+// =============================================================================
+
+// --- AXe resolution ---
+function resolveAxePath() {
+  for (const p of ['/opt/homebrew/bin/axe', '/usr/local/bin/axe']) {
+    if (fs.existsSync(p)) return p;
+  }
+  try { return execFileSync('which', ['axe'], { encoding: 'utf-8', timeout: 3000 }).trim(); }
+  catch { return null; }
+}
+
+const AXE = resolveAxePath();
+
+// --- Capture state ---
+let captureProcess = null;
+let latestFrame = null;
+
+function startCapture(udid, fps = 10) {
+  stopCapture();
+  if (!AXE) return;
+  const tmpFile = path.join(os.tmpdir(), `axe-stream-${udid}.png`);
+  const interval = Math.max(1000 / fps, 50);
+  const capture = () => {
+    if (!captureProcess) return;
+    execFile(AXE, ['screenshot', '--output', tmpFile, '--udid', udid], { timeout: 5000, stdio: 'pipe' }, (err) => {
+      if (!err) {
+        try { latestFrame = fs.readFileSync(tmpFile); } catch {}
+      }
+      if (captureProcess) captureProcess.timer = setTimeout(capture, interval);
+    });
+  };
+  captureProcess = { udid, timer: null };
+  capture();
+}
+
+function stopCapture() {
+  if (captureProcess) {
+    clearTimeout(captureProcess.timer);
+    captureProcess = null;
+    latestFrame = null;
+  }
+}
+
+function captureScreenshot(udid) {
+  const tmpFile = path.join(os.tmpdir(), `sim-${udid}-${Date.now()}.png`);
+  try {
+    if (AXE) {
+      execFileSync(AXE, ['screenshot', '--output', tmpFile, '--udid', udid], { timeout: 5000, stdio: 'pipe' });
+    } else {
+      execFileSync('xcrun', ['simctl', 'io', udid, 'screenshot', '--type=png', tmpFile], { timeout: 5000, stdio: 'pipe' });
+    }
+    const buf = fs.readFileSync(tmpFile);
+    try { fs.unlinkSync(tmpFile); } catch {}
+    return buf;
+  } catch { return null; }
+}
+
+// --- AXe actions ---
+function axe(args, opts = {}) {
+  if (!AXE) throw new Error('axe not installed. Run: brew install cameroncooke/axe/axe');
+  return execFileSync(AXE, args.split(/\s+/), { encoding: 'utf-8', timeout: opts.timeout || 10000, stdio: 'pipe' });
+}
+
+function readBody(req) {
+  return new Promise((resolve) => {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => { try { resolve(JSON.parse(body)); } catch { resolve({}); } });
+  });
+}
+
+function json(res, data, status = 200) {
+  res.writeHead(status, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+  res.end(JSON.stringify(data));
+}
+
+// --- Frame assets ---
+const FRAMES_DIR = path.join(PROJECT_DIR, 'apps/remote-device-stream/frames');
+console.log('  Frames dir:', FRAMES_DIR, fs.existsSync(FRAMES_DIR) ? '(exists)' : '(NOT FOUND)');
+let frameInsetsCache = null;
+function loadFrameInsets() {
+  if (frameInsetsCache) return frameInsetsCache;
+  try {
+    frameInsetsCache = JSON.parse(fs.readFileSync(path.join(FRAMES_DIR, 'insets.json'), 'utf-8'));
+  } catch { frameInsetsCache = {}; }
+  return frameInsetsCache;
+}
+
+// --- Route handler ---
+async function handleSimulator(req, res, urlPath, parsedUrl) {
+  const query = Object.fromEntries(parsedUrl.searchParams);
+
+  // GET /api/sim/devices
+  if (req.method === 'GET' && urlPath === '/api/sim/devices') {
+    const result = await runASC('asc simulators list --pretty');
+    try {
+      const data = JSON.parse(result.stdout);
+      return json(res, { devices: data.data || [], axeAvailable: !!AXE });
+    } catch {
+      return json(res, { devices: [], axeAvailable: !!AXE });
+    }
+  }
+
+  // GET /api/sim/screenshot?udid=X
+  if (req.method === 'GET' && urlPath === '/api/sim/screenshot') {
+    const udid = query.udid;
+    if (!udid) return json(res, { error: 'missing udid' }, 400);
+    // Fast path: cached frame from capture loop
+    if (latestFrame) {
+      res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'no-cache', 'Access-Control-Allow-Origin': '*' });
+      return res.end(latestFrame);
+    }
+    // Slow path: single capture
+    const buf = captureScreenshot(udid);
+    if (buf) {
+      res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'no-cache', 'Access-Control-Allow-Origin': '*' });
+      return res.end(buf);
+    }
+    return json(res, { error: 'capture failed' }, 500);
+  }
+
+  // POST /api/sim/stream-start
+  if (req.method === 'POST' && urlPath === '/api/sim/stream-start') {
+    const body = await readBody(req);
+    if (!body.udid) return json(res, { error: 'missing udid' }, 400);
+    if (AXE) {
+      startCapture(body.udid, 10);
+      return json(res, { success: true, method: 'axe-capture' });
+    }
+    return json(res, { success: true, method: 'simctl-polling' });
+  }
+
+  // POST /api/sim/stream-stop
+  if (req.method === 'POST' && urlPath === '/api/sim/stream-stop') {
+    stopCapture();
+    return json(res, { success: true });
+  }
+
+  // POST /api/sim/tap
+  if (req.method === 'POST' && urlPath === '/api/sim/tap') {
+    if (!AXE) return json(res, { error: 'axe not installed' }, 501);
+    try {
+      const { udid, x, y, id, label } = await readBody(req);
+      if (id) { axe(`tap --id ${id} --udid ${udid}`); return json(res, { success: true, action: 'tap', id }); }
+      if (label) { axe(`tap --label ${label} --udid ${udid}`); return json(res, { success: true, action: 'tap', label }); }
+      axe(`tap -x ${Math.round(x)} -y ${Math.round(y)} --udid ${udid}`);
+      return json(res, { success: true, action: 'tap', x, y });
+    } catch (e) { return json(res, { error: e.message }, 500); }
+  }
+
+  // POST /api/sim/swipe
+  if (req.method === 'POST' && urlPath === '/api/sim/swipe') {
+    if (!AXE) return json(res, { error: 'axe not installed' }, 501);
+    try {
+      const { udid, fromX, fromY, toX, toY, duration, delta } = await readBody(req);
+      let args = `swipe --start-x ${Math.round(fromX)} --start-y ${Math.round(fromY)} --end-x ${Math.round(toX)} --end-y ${Math.round(toY)}`;
+      if (duration) args += ` --duration ${duration}`;
+      if (delta) args += ` --delta ${delta}`;
+      axe(`${args} --udid ${udid}`);
+      return json(res, { success: true, action: 'swipe' });
+    } catch (e) { return json(res, { error: e.message }, 500); }
+  }
+
+  // POST /api/sim/gesture
+  if (req.method === 'POST' && urlPath === '/api/sim/gesture') {
+    if (!AXE) return json(res, { error: 'axe not installed' }, 501);
+    try {
+      const { udid, gesture } = await readBody(req);
+      axe(`gesture ${gesture} --udid ${udid}`);
+      return json(res, { success: true, action: 'gesture', gesture });
+    } catch (e) { return json(res, { error: e.message }, 500); }
+  }
+
+  // POST /api/sim/type
+  if (req.method === 'POST' && urlPath === '/api/sim/type') {
+    if (!AXE) return json(res, { error: 'axe not installed' }, 501);
+    try {
+      const { udid, text } = await readBody(req);
+      const escaped = text.replace(/"/g, '\\"');
+      require('child_process').execSync(`echo "${escaped}" | "${AXE}" type --stdin --udid ${udid}`, { timeout: 10000, stdio: 'pipe', shell: true });
+      return json(res, { success: true, action: 'type' });
+    } catch (e) { return json(res, { error: e.message }, 500); }
+  }
+
+  // POST /api/sim/button
+  if (req.method === 'POST' && urlPath === '/api/sim/button') {
+    if (!AXE) return json(res, { error: 'axe not installed' }, 501);
+    try {
+      const { udid, button } = await readBody(req);
+      axe(`button ${button.toLowerCase()} --udid ${udid}`);
+      return json(res, { success: true, action: 'button', button });
+    } catch (e) { return json(res, { error: e.message }, 500); }
+  }
+
+  // POST /api/sim/key
+  if (req.method === 'POST' && urlPath === '/api/sim/key') {
+    if (!AXE) return json(res, { error: 'axe not installed' }, 501);
+    try {
+      const { udid, keycode, duration } = await readBody(req);
+      let args = `key ${keycode}`;
+      if (duration) args += ` --duration ${duration}`;
+      axe(`${args} --udid ${udid}`);
+      return json(res, { success: true, action: 'key', keycode });
+    } catch (e) { return json(res, { error: e.message }, 500); }
+  }
+
+  // GET /api/sim/describe?udid=X&point=x,y
+  if (req.method === 'GET' && urlPath === '/api/sim/describe') {
+    if (!AXE) return json(res, { error: 'axe not installed' }, 501);
+    try {
+      let args = `describe-ui --udid ${query.udid}`;
+      if (query.point) args += ` --point ${query.point}`;
+      const output = axe(args);
+      return json(res, { success: true, tree: output });
+    } catch (e) { return json(res, { error: e.message }, 500); }
+  }
+
+  // GET /api/sim/frame?name=iPhone+16+Pro+Max
+  if (req.method === 'GET' && urlPath === '/api/sim/frame') {
+    const name = query.name;
+    if (!name) return json(res, { error: 'missing name' }, 400);
+    const framePath = path.join(FRAMES_DIR, `${name}.png`);
+    try {
+      const buf = fs.readFileSync(framePath);
+      res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=3600', 'Access-Control-Allow-Origin': '*' });
+      return res.end(buf);
+    } catch {
+      return json(res, { error: `frame not found: ${name}` }, 404);
+    }
+  }
+
+  // GET /api/sim/frame-insets
+  if (req.method === 'GET' && urlPath === '/api/sim/frame-insets') {
+    return json(res, loadFrameInsets());
+  }
+
+  json(res, { error: 'unknown simulator endpoint' }, 404);
+}

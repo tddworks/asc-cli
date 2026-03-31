@@ -20,6 +20,7 @@ import { renderCodeSigning, loadCodeSigning } from './pages/code-signing.js';
 import { renderXcodeCloud, loadXcodeCloud } from './pages/xcode-cloud.js';
 import { renderUsers, loadUsers } from './pages/users.js';
 import { renderIris, loadIris } from './pages/iris.js';
+import { renderSimulators, loadSimulators } from './pages/simulators.js';
 
 const pageTitles = {
   dashboard: 'Dashboard', apps: 'Apps', versions: 'Versions', builds: 'Builds',
@@ -27,6 +28,7 @@ const pageTitles = {
   screenshots: 'Screenshots', reviews: 'Customer Reviews', iap: 'In-App Purchases',
   subscriptions: 'Subscriptions', reports: 'Reports', codesigning: 'Code Signing',
   xcodecloud: 'Xcode Cloud', users: 'Users & Roles', iris: 'Iris (Private API)',
+  simulators: 'Simulators',
 };
 
 const renderers = {
@@ -46,6 +48,7 @@ const renderers = {
   xcodecloud: renderXcodeCloud,
   users: renderUsers,
   iris: renderIris,
+  simulators: renderSimulators,
 };
 
 const loaders = {
@@ -61,6 +64,7 @@ const loaders = {
   subscriptions: loadSubscriptions,
   xcodecloud: loadXcodeCloud,
   iris: loadIris,
+  simulators: loadSimulators,
 };
 
 export function navigate(page) {
