@@ -1,4 +1,4 @@
-// Page: Screenshots — Version → Platform → Locale → Device → Screenshots
+// Page: Screenshots — Version (= platform) → Locale → Device → Screenshots
 import { DataProvider } from '../../../../shared/infrastructure/data-provider.js';
 import { state } from '../state.js';
 import { showToast } from '../toast.js';
@@ -7,66 +7,55 @@ import { escapeHTML } from '../helpers.js';
 // Page-local state
 let versions = [];
 let selectedVersionId = null;
-let selectedPlatform = 'all';
 let localizations = [];
 let activeLocaleIdx = 0;
 let screenshotSets = {}; // localizationId → [sets]
 let screenshots = {};    // setId → [screenshots]
 let expandedSetId = null;
 
-// --- Platform detection from display type ---
+// --- Aspect ratio + grid sizing per display type ---
 
-const platformForType = {
-  APP_IPHONE_67: 'iphone', APP_IPHONE_65: 'iphone', APP_IPHONE_61: 'iphone',
-  APP_IPHONE_58: 'iphone', APP_IPHONE_55: 'iphone', APP_IPHONE_47: 'iphone',
-  APP_IPHONE_40: 'iphone', APP_IPHONE_35: 'iphone',
-  APP_IPAD_PRO_129: 'ipad', APP_IPAD_PRO_3GEN_129: 'ipad', APP_IPAD_PRO_3GEN_11: 'ipad',
-  APP_IPAD_105: 'ipad', APP_IPAD_97: 'ipad',
-  APP_DESKTOP: 'mac',
-  APP_APPLE_TV: 'tv',
-  APP_APPLE_VISION_PRO: 'vision',
-  APP_WATCH_SERIES_10: 'watch', APP_WATCH_SERIES_7: 'watch',
-  APP_WATCH_SERIES_4: 'watch', APP_WATCH_SERIES_3: 'watch',
-  IMESSAGE_APP_IPHONE_67: 'imessage', IMESSAGE_APP_IPHONE_65: 'imessage',
-  IMESSAGE_APP_IPAD_PRO_129: 'imessage',
-};
-
-// Aspect ratio for screenshot thumbnails (width/height for CSS aspect-ratio)
 const aspectRatioForType = {
-  iphone: '9/19.5',     // portrait phone
-  ipad: '3/4',          // portrait tablet
-  mac: '16/10',         // landscape desktop
-  tv: '16/9',           // landscape TV
-  vision: '16/9',       // landscape vision
-  watch: '9/11',        // near-square watch
-  imessage: '9/19.5',   // same as phone
+  iphone: '9/19.5',
+  ipad: '3/4',
+  mac: '16/10',
+  tv: '16/9',
+  vision: '16/9',
+  watch: '9/11',
+  imessage: '9/19.5',
 };
 
-const platformLabels = {
-  all: 'All',
-  iphone: 'iPhone',
-  ipad: 'iPad',
-  mac: 'Mac',
-  tv: 'Apple TV',
-  vision: 'Vision Pro',
-  watch: 'Watch',
-  imessage: 'iMessage',
-};
-
-function getPlatform(displayType) {
-  return platformForType[displayType] || 'iphone';
+function getDeviceCategory(displayType) {
+  if (!displayType) return 'iphone';
+  if (displayType.includes('IPAD')) return 'ipad';
+  if (displayType.includes('DESKTOP') || displayType.includes('MAC')) return 'mac';
+  if (displayType.includes('TV')) return 'tv';
+  if (displayType.includes('VISION')) return 'vision';
+  if (displayType.includes('WATCH')) return 'watch';
+  if (displayType.includes('IMESSAGE')) return 'imessage';
+  return 'iphone';
 }
 
 function getAspectRatio(displayType) {
-  return aspectRatioForType[getPlatform(displayType)] || '9/19.5';
+  return aspectRatioForType[getDeviceCategory(displayType)] || '9/19.5';
 }
 
-// Grid column width varies by platform — landscape screenshots need wider cards
 function getGridMinWidth(displayType) {
-  const p = getPlatform(displayType);
-  if (p === 'mac' || p === 'tv' || p === 'vision') return '220px';
-  if (p === 'ipad') return '150px';
+  const cat = getDeviceCategory(displayType);
+  if (cat === 'mac' || cat === 'tv' || cat === 'vision') return '220px';
+  if (cat === 'ipad') return '150px';
   return '120px';
+}
+
+// --- Version platform display ---
+
+const platformNames = {
+  'IOS': 'iOS', 'MAC_OS': 'macOS', 'TV_OS': 'tvOS',
+  'VISION_OS': 'visionOS', 'WATCH_OS': 'watchOS',
+};
+
+function getSelectedVersion() {
+  return versions.find(v => v.id === selectedVersionId);
 }
 
 export function renderScreenshots() {
@@ -79,6 +68,7 @@ export function renderScreenshots() {
           <span style="font-size:13px;font-weight:600">${escapeHTML(appName)}</span>
         </div>
         <div class="toolbar-right">
+          <span id="ssPlatformBadge" class="platform-badge" style="display:none"></span>
           <label style="font-size:12px;color:var(--text-muted);margin-right:6px">Version:</label>
           <select id="ssVersionPicker" onchange="ssPickVersion(this.value)" style="font-size:13px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text-primary)">
             <option value="">Loading...</option>
@@ -87,11 +77,8 @@ export function renderScreenshots() {
       </div>
     </div>
 
-    <div id="ssPlatformBar" style="display:none" class="mb-24">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <div class="filter-group" id="ssPlatformTabs"></div>
-        <div class="filter-group" id="ssLocaleTabs"></div>
-      </div>
+    <div id="ssLocaleBar" style="display:none" class="mb-24">
+      <div class="filter-group" id="ssLocaleTabs"></div>
     </div>
 
     <div id="ssContent">
@@ -131,16 +118,30 @@ export async function loadScreenshots() {
   const defaultV = editable || versions[0];
   selectedVersionId = defaultV.id;
 
-  picker.innerHTML = versions.map(v =>
-    `<option value="${v.id}" ${v.id === selectedVersionId ? 'selected' : ''}>${escapeHTML(v.versionString)} (${formatState(v.state)})</option>`
-  ).join('');
+  picker.innerHTML = versions.map(v => {
+    const plat = platformNames[v.platform] || v.platform || '';
+    const label = `${v.versionString} ${plat} (${formatState(v.state)})`;
+    return `<option value="${v.id}" ${v.id === selectedVersionId ? 'selected' : ''}>${escapeHTML(label)}</option>`;
+  }).join('');
 
+  updatePlatformBadge();
   await loadLocalizationsForVersion(selectedVersionId);
+}
+
+function updatePlatformBadge() {
+  const badge = document.getElementById('ssPlatformBadge');
+  if (!badge) return;
+  const v = getSelectedVersion();
+  if (v?.platform) {
+    badge.textContent = platformNames[v.platform] || v.platform;
+    badge.style.display = '';
+  } else {
+    badge.style.display = 'none';
+  }
 }
 
 async function loadLocalizationsForVersion(versionId) {
   activeLocaleIdx = 0;
-  selectedPlatform = 'all';
   screenshotSets = {};
   screenshots = {};
   expandedSetId = null;
@@ -151,46 +152,20 @@ async function loadLocalizationsForVersion(versionId) {
   localizations = result?.data || [];
 
   if (localizations.length === 0) {
-    document.getElementById('ssPlatformBar').style.display = 'none';
+    document.getElementById('ssLocaleBar').style.display = 'none';
     document.getElementById('ssContent').innerHTML = `<div class="card"><div class="empty-state"><p style="color:var(--text-muted)">No localizations found. Create one first.</p><button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="showToast('asc version-localizations create --version-id ${versionId} --locale en-US','info')">+ Add Localization</button></div></div>`;
     return;
   }
 
-  // Fetch sets for first locale to discover available platforms
-  const firstLoc = localizations[0];
-  if (!screenshotSets[firstLoc.id]) {
-    const setsResult = await DataProvider.fetch(`screenshot-sets list --localization-id ${firstLoc.id}`);
-    screenshotSets[firstLoc.id] = setsResult?.data || [];
-  }
-
-  renderFilterBars();
-  renderDeviceCards(firstLoc);
-}
-
-function renderFilterBars() {
-  const barEl = document.getElementById('ssPlatformBar');
+  // Render locale tabs
+  const barEl = document.getElementById('ssLocaleBar');
+  const tabsEl = document.getElementById('ssLocaleTabs');
   barEl.style.display = '';
-
-  // Discover platforms from all cached sets
-  const allSets = Object.values(screenshotSets).flat();
-  const platforms = new Set(allSets.map(s => getPlatform(s.screenshotDisplayType)));
-
-  // Platform tabs — only show if more than 1 platform
-  const platformTabsEl = document.getElementById('ssPlatformTabs');
-  if (platforms.size > 1) {
-    const tabs = [['all', 'All'], ...Array.from(platforms).map(p => [p, platformLabels[p] || p])];
-    platformTabsEl.innerHTML = tabs.map(([key, label]) =>
-      `<button class="filter-btn ${key === selectedPlatform ? 'active' : ''}" onclick="ssPickPlatform('${key}', this)">${label}</button>`
-    ).join('');
-  } else {
-    platformTabsEl.innerHTML = '';
-  }
-
-  // Locale tabs
-  const localeTabsEl = document.getElementById('ssLocaleTabs');
-  localeTabsEl.innerHTML = localizations.map((loc, i) =>
-    `<button class="filter-btn ${i === activeLocaleIdx ? 'active' : ''}" onclick="ssPickLocale(${i}, this)">${escapeHTML(loc.locale)}</button>`
+  tabsEl.innerHTML = localizations.map((loc, i) =>
+    `<button class="filter-btn ${i === 0 ? 'active' : ''}" onclick="ssPickLocale(${i}, this)">${escapeHTML(loc.locale)}</button>`
   ).join('');
+
+  await loadSetsForLocale(0);
 }
 
 async function loadSetsForLocale(idx) {
@@ -206,28 +181,17 @@ async function loadSetsForLocale(idx) {
     screenshotSets[loc.id] = result?.data || [];
   }
 
-  // Update platform tabs after loading new locale's sets
-  renderFilterBars();
   renderDeviceCards(loc);
 }
 
 function renderDeviceCards(loc) {
-  let sets = screenshotSets[loc.id] || [];
-
-  // Filter by selected platform
-  if (selectedPlatform !== 'all') {
-    sets = sets.filter(s => getPlatform(s.screenshotDisplayType) === selectedPlatform);
-  }
+  const sets = screenshotSets[loc.id] || [];
 
   if (sets.length === 0) {
-    const allEmpty = (screenshotSets[loc.id] || []).length === 0;
-    const msg = allEmpty
-      ? `No screenshot sets for <strong>${escapeHTML(loc.locale)}</strong>.`
-      : `No <strong>${platformLabels[selectedPlatform] || selectedPlatform}</strong> screenshot sets for <strong>${escapeHTML(loc.locale)}</strong>.`;
     document.getElementById('ssContent').innerHTML = `
       <div class="card">
         <div class="empty-state">
-          <p style="color:var(--text-muted)">${msg}</p>
+          <p style="color:var(--text-muted)">No screenshot sets for <strong>${escapeHTML(loc.locale)}</strong>.</p>
           <button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="showToast('asc screenshot-sets create --localization-id ${loc.id} --display-type APP_IPHONE_67','info')">+ New Screenshot Set</button>
         </div>
       </div>`;
@@ -283,11 +247,13 @@ function renderScreenshotGrid(setId, displayType, shotsList) {
           const dims = sc.imageWidth && sc.imageHeight ? `${sc.imageWidth}\u00d7${sc.imageHeight}` : '';
           const stateClass = sc.assetState === 'COMPLETE' ? 'live' : sc.assetState === 'AWAITING_UPLOAD' ? 'pending' : 'processing';
           const stateLabel = sc.assetState === 'COMPLETE' ? 'Ready' : sc.assetState === 'AWAITING_UPLOAD' ? 'Awaiting' : 'Processing';
+          const hasImage = !!sc.imageUrl;
           return `
             <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg)">
-              <div style="aspect-ratio:${ratio};background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-muted)">
-                ${dims || 'No preview'}
-              </div>
+              ${hasImage
+                ? `<div style="aspect-ratio:${ratio};overflow:hidden;background:var(--border)"><img src="${escapeHTML(sc.imageUrl)}" alt="${escapeHTML(sc.fileName)}" style="width:100%;height:100%;object-fit:cover" loading="lazy" onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;color:var(--text-muted)\\'>${dims || 'No preview'}</div>'"></div>`
+                : `<div style="aspect-ratio:${ratio};background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-muted)">${dims || 'No preview'}</div>`
+              }
               <div style="padding:8px">
                 <div style="font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${escapeHTML(sc.fileName)}">${escapeHTML(sc.fileName)}</div>
                 <div style="font-size:10px;color:var(--text-muted);margin-top:2px">${sizeKB} KB${dims ? ' \u00b7 ' + dims : ''}</div>
@@ -352,16 +318,8 @@ function deviceIcon(dt) {
 
 window.ssPickVersion = async function(versionId) {
   selectedVersionId = versionId;
+  updatePlatformBadge();
   await loadLocalizationsForVersion(versionId);
-};
-
-window.ssPickPlatform = function(platform, btn) {
-  btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  selectedPlatform = platform;
-  expandedSetId = null;
-  const loc = localizations[activeLocaleIdx];
-  if (loc) renderDeviceCards(loc);
 };
 
 window.ssPickLocale = async function(idx, btn) {
