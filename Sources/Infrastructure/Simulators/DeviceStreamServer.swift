@@ -12,12 +12,14 @@ public final class DeviceStreamServer: @unchecked Sendable {
     private let simulatorRepo: any SimulatorRepository
     private let interactionRepo: any SimulatorInteractionRepository
     private let htmlContent: String
+    private let deviceConfigJSON: String
 
     public init(
         port: UInt16 = 8425,
         simulatorRepo: any SimulatorRepository,
         interactionRepo: any SimulatorInteractionRepository,
-        htmlContent: String
+        htmlContent: String,
+        deviceConfigJSON: String = "{}"
     ) throws {
         guard let nwPort = NWEndpoint.Port(rawValue: port) else {
             throw DeviceStreamServerError.invalidPort
@@ -26,6 +28,7 @@ public final class DeviceStreamServer: @unchecked Sendable {
         self.simulatorRepo = simulatorRepo
         self.interactionRepo = interactionRepo
         self.htmlContent = htmlContent
+        self.deviceConfigJSON = deviceConfigJSON
         self.listener = try NWListener(using: .tcp, on: nwPort)
     }
 
@@ -90,6 +93,9 @@ public final class DeviceStreamServer: @unchecked Sendable {
         switch (method, path) {
         case ("GET", "/"), ("GET", "/index.html"):
             sendHTML(connection: connection)
+
+        case ("GET", "/api/device-config"):
+            sendRawJSON(deviceConfigJSON, connection: connection)
 
         case ("GET", "/api/devices"):
             handleDevices(connection: connection)
@@ -353,6 +359,16 @@ public final class DeviceStreamServer: @unchecked Sendable {
     }
 
     // MARK: - Response Helpers
+
+    private func sendRawJSON(_ jsonString: String, connection: NWConnection) {
+        let body = Data(jsonString.utf8)
+        let headers = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: \(body.count)\r\nAccess-Control-Allow-Origin: *\r\nConnection: close\r\n\r\n"
+        var payload = Data(headers.utf8)
+        payload.append(body)
+        connection.send(content: payload, isComplete: true, completion: .contentProcessed { _ in
+            connection.cancel()
+        })
+    }
 
     private func sendHTML(connection: NWConnection) {
         let body = Data(htmlContent.utf8)

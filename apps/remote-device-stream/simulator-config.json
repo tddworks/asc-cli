@@ -1,0 +1,13 @@
+{
+  "devices": {
+    "iPhone 16": { "toolbarHeight": 40, "toolbarOffset": 7.0, "width_points": 393, "height_points": 852, "borderX": 21.0, "borderY": 21.0 },
+    "iPhone 16 Plus": { "toolbarHeight": 40, "toolbarOffset": 7.0, "width_points": 430, "height_points": 932, "borderX": 21.0, "borderY": 21.0 },
+    "iPhone 16 Pro": { "toolbarHeight": 40, "toolbarOffset": 7.0, "width_points": 402, "height_points": 874, "borderX": 21.0, "borderY": 14.0 },
+    "iPhone 16 Pro Max": { "toolbarHeight": 40, "toolbarOffset": 7.0, "width_points": 440, "height_points": 956, "borderX": 21.0, "borderY": 21.0 },
+    "iPhone 16e": { "toolbarHeight": 40, "toolbarOffset": 7.0, "width_points": 390, "height_points": 844, "borderX": 21.0, "borderY": 21.0 },
+    "iPhone 17": { "toolbarHeight": 40, "toolbarOffset": 7.0, "width_points": 402, "height_points": 874, "borderX": 20.0, "borderY": 13.0 },
+    "iPhone 17 Pro": { "toolbarHeight": 40, "toolbarOffset": 7.0, "width_points": 402, "height_points": 874, "borderX": 19.0, "borderY": 18.0 },
+    "iPhone 17 Pro Max": { "toolbarHeight": 40, "toolbarOffset": 7.0, "width_points": 440, "height_points": 956, "borderX": 16.0, "borderY": 10.0 },
+    "iPhone Air": { "toolbarHeight": 40, "toolbarOffset": 7.0, "width_points": 420, "height_points": 912, "borderX": 21.0, "borderY": 21.0 }
+  }
+}

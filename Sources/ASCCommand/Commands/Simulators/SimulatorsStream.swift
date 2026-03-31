@@ -30,14 +30,16 @@ struct SimulatorsStream: AsyncParsableCommand {
             }
         }
 
-        // Load the HTML UI from the bundled file
+        // Load the HTML UI and device config from bundled files
         let htmlContent = Self.loadHTML()
+        let deviceConfig = Self.loadDeviceConfig()
 
         let server = try DeviceStreamServer(
             port: UInt16(port),
             simulatorRepo: simulatorRepo,
             interactionRepo: interactionRepo,
-            htmlContent: htmlContent
+            htmlContent: htmlContent,
+            deviceConfigJSON: deviceConfig
         )
         server.start()
 
@@ -100,5 +102,21 @@ struct SimulatorsStream: AsyncParsableCommand {
         </div>
         </body></html>
         """
+    }
+
+    private static func loadDeviceConfig() -> String {
+        let candidates = [
+            URL(fileURLWithPath: ProcessInfo.processInfo.arguments[0])
+                .deletingLastPathComponent()
+                .appendingPathComponent("../../apps/remote-device-stream/simulator-config.json"),
+            URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+                .appendingPathComponent("apps/remote-device-stream/simulator-config.json"),
+        ]
+        for candidate in candidates {
+            if let content = try? String(contentsOf: candidate, encoding: .utf8) {
+                return content
+            }
+        }
+        return "{}"
     }
 }
