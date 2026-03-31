@@ -67,6 +67,7 @@ struct ASC: AsyncParsableCommand {
             TerritoriesCommand.self,
             WebServerCommand.self,
             IrisCommand.self,
+            SimulatorsCommand.self,
         ]
     )
 }

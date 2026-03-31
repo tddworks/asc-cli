@@ -212,6 +212,12 @@ struct ClientProvider {
         return try factory.makeTerritoryRepository(authProvider: authProvider)
     }
 
+    // MARK: - Simulators
+
+    static func makeSimulatorRepository() -> any SimulatorRepository {
+        ClientFactory().makeSimulatorRepository()
+    }
+
     // MARK: - Skills
 
     static func makeSkillRepository() -> any SkillRepository {

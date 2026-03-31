@@ -236,6 +236,12 @@ public struct ClientFactory: Sendable {
         return SDKTerritoryRepository(client: provider)
     }
 
+    // MARK: - Simulators (no ASC auth needed — local xcrun simctl)
+
+    public func makeSimulatorRepository() -> any SimulatorRepository {
+        SimctlSimulatorRepository()
+    }
+
     // MARK: - Skills (no ASC auth needed — subprocess + local filesystem)
 
     public func makeSkillRepository() -> any SkillRepository {

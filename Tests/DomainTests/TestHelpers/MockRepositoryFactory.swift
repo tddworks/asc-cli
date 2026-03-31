@@ -1220,4 +1220,15 @@ struct MockRepositoryFactory {
     ) -> AnalyticsReportSegment {
         AnalyticsReportSegment(id: id, instanceId: instanceId, checksum: checksum, sizeInBytes: sizeInBytes, url: url)
     }
+
+    // MARK: - Simulators
+
+    static func makeSimulator(
+        id: String = "sim-1",
+        name: String = "iPhone 16 Pro",
+        state: SimulatorState = .shutdown,
+        runtime: String = "com.apple.CoreSimulator.SimRuntime.iOS-18-2"
+    ) -> Simulator {
+        Simulator(id: id, name: name, state: state, runtime: runtime)
+    }
 }
