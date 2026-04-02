@@ -649,50 +649,43 @@ struct MockRepositoryFactory {
     // MARK: - Plugins
 
     static func makePlugin(
-        id: String = "slack-notify",
-        name: String = "slack-notify",
-        version: String = "1.0.0",
-        description: String = "Send Slack notifications for App Store events",
-        author: String? = "Test Author",
-        executablePath: String = "/tmp/slack-notify/run",
-        subscribedEvents: [PluginEvent] = [.buildUploaded, .versionSubmitted],
-        isEnabled: Bool = true
+        id: String = "asc-pro",
+        name: String = "ASC Pro",
+        version: String = "1.0",
+        slug: String = "ASCPro",
+        uiScripts: [String] = ["ui/sim-stream.js"]
     ) -> Plugin {
         Plugin(
             id: id,
             name: name,
             version: version,
+            slug: slug,
+            uiScripts: uiScripts
+        )
+    }
+
+    static func makeMarketPlugin(
+        id: String = "asc-pro",
+        name: String = "ASC Pro",
+        version: String = "1.0",
+        description: String = "Simulator streaming, interaction & tunnel sharing",
+        author: String? = "slamhan",
+        repositoryURL: String? = "https://github.com/slamhan/asc-pro",
+        downloadURL: String = "https://github.com/slamhan/asc-pro/releases/latest/download/ASCPro.plugin.zip",
+        categories: [String] = ["simulators", "streaming"],
+        isInstalled: Bool = false
+    ) -> MarketPlugin {
+        MarketPlugin(
+            id: id,
+            name: name,
+            version: version,
             description: description,
             author: author,
-            executablePath: executablePath,
-            subscribedEvents: subscribedEvents,
-            isEnabled: isEnabled
+            repositoryURL: repositoryURL,
+            downloadURL: downloadURL,
+            categories: categories,
+            isInstalled: isInstalled
         )
-    }
-
-    static func makePluginEventPayload(
-        event: PluginEvent = .buildUploaded,
-        appId: String? = "app-1",
-        versionId: String? = nil,
-        buildId: String? = "build-1",
-        metadata: [String: String] = [:]
-    ) -> PluginEventPayload {
-        PluginEventPayload(
-            event: event,
-            appId: appId,
-            versionId: versionId,
-            buildId: buildId,
-            timestamp: Date(timeIntervalSince1970: 0),
-            metadata: metadata
-        )
-    }
-
-    static func makePluginResult(
-        success: Bool = true,
-        message: String? = "Notification sent",
-        error: String? = nil
-    ) -> PluginResult {
-        PluginResult(success: success, message: message, error: error)
     }
 
     // MARK: - Skills

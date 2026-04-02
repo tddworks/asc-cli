@@ -4,12 +4,10 @@ import Domain
 struct PluginsUninstall: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "uninstall",
-        abstract: "Remove an installed plugin"
+        abstract: "Uninstall a plugin"
     )
 
-    @OptionGroup var globals: GlobalOptions
-
-    @Option(name: .long, help: "Plugin name")
+    @Option(name: .long, help: "Plugin name to uninstall")
     var name: String
 
     func run() async throws {
@@ -18,7 +16,7 @@ struct PluginsUninstall: AsyncParsableCommand {
     }
 
     func execute(repo: any PluginRepository) async throws {
-        try await repo.uninstallPlugin(name: name)
-        print("Plugin '\(name)' uninstalled.")
+        try await repo.uninstall(name: name)
+        print("Plugin '\(name)' uninstalled successfully.")
     }
 }

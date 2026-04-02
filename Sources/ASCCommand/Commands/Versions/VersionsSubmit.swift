@@ -14,21 +14,11 @@ struct VersionsSubmit: AsyncParsableCommand {
 
     func run() async throws {
         let repo = try ClientProvider.makeSubmissionRepository()
-        let eventBus = ClientProvider.makePluginEventBus()
-        print(try await execute(repo: repo, eventBus: eventBus))
+        print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubmissionRepository, eventBus: (any PluginEventBus)? = nil) async throws -> String {
+    func execute(repo: any SubmissionRepository) async throws -> String {
         let submission = try await repo.submitVersion(versionId: versionId)
-
-        try await eventBus?.emit(
-            event: .versionSubmitted,
-            payload: PluginEventPayload(
-                event: .versionSubmitted,
-                appId: submission.appId,
-                versionId: versionId
-            )
-        )
 
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

@@ -15,17 +15,12 @@ struct PluginsList: AsyncParsableCommand {
     }
 
     func execute(repo: any PluginRepository) async throws -> String {
-        let plugins = try await repo.listPlugins()
+        let plugins = try await repo.listInstalled()
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
             plugins,
-            headers: ["Name", "Version", "Enabled", "Events"],
-            rowMapper: { [
-                $0.name,
-                $0.version,
-                $0.isEnabled ? "yes" : "no",
-                $0.subscribedEvents.map(\.rawValue).joined(separator: ", "),
-            ] }
+            headers: ["Name", "Version", "Slug"],
+            rowMapper: { [$0.name, $0.version, $0.slug] }
         )
     }
 }

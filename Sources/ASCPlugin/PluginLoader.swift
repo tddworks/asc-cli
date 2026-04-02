@@ -19,7 +19,10 @@ public enum PluginLoader {
         public let uiScripts: [String]
     }
 
+    private nonisolated(unsafe) static var _cached: [LoadedPlugin]?
+
     public static func discover() -> [LoadedPlugin] {
+        if let cached = _cached { return cached }
         if ProcessInfo.processInfo.environment["ASC_NO_PLUGINS"] != nil { return [] }
 
         let fm = FileManager.default
@@ -52,6 +55,7 @@ public enum PluginLoader {
                 }
             }
         }
+        _cached = results
         return results
     }
 

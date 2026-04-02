@@ -30,11 +30,10 @@ struct BuildsUpload: AsyncParsableCommand {
 
     func run() async throws {
         let repo = try ClientProvider.makeBuildUploadRepository()
-        let eventBus = ClientProvider.makePluginEventBus()
-        print(try await execute(repo: repo, eventBus: eventBus))
+        print(try await execute(repo: repo))
     }
 
-    func execute(repo: any BuildUploadRepository, eventBus: (any PluginEventBus)? = nil) async throws -> String {
+    func execute(repo: any BuildUploadRepository) async throws -> String {
         let fileURL = URL(fileURLWithPath: file)
 
         let resolvedPlatform: BuildUploadPlatform
@@ -58,15 +57,6 @@ struct BuildsUpload: AsyncParsableCommand {
         if wait {
             upload = try await poll(uploadId: upload.id, repo: repo)
         }
-
-        try await eventBus?.emit(
-            event: .buildUploaded,
-            payload: PluginEventPayload(
-                event: .buildUploaded,
-                appId: appId,
-                buildId: upload.id
-            )
-        )
 
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

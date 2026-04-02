@@ -254,20 +254,10 @@ public struct ClientFactory: Sendable {
         FileSkillConfigStorage()
     }
 
-    // MARK: - Plugins (no ASC auth needed — local filesystem + subprocess)
+    // MARK: - Plugins (no ASC auth needed — local filesystem)
 
     public func makePluginRepository() -> any PluginRepository {
-        LocalPluginRepository()
-    }
-
-    public func makePluginRunner() -> any PluginRunner {
-        ProcessPluginRunner()
-    }
-
-    public func makePluginEventBus() -> any PluginEventBus {
-        let repo = makePluginRepository()
-        let runner = makePluginRunner()
-        return LocalPluginEventBus(pluginRepository: repo, pluginRunner: runner)
+        PluginMarketRepository()
     }
 
     // MARK: - Iris (private API, cookie-based auth)
