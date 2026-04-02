@@ -350,10 +350,10 @@ export const MockDataProvider = {
       {
         id: 'asc-pro', name: 'ASC Pro', version: '1.0',
         description: 'Simulator streaming, interaction & tunnel sharing',
-        author: 'slamhan', repositoryURL: 'https://github.com/slamhan/asc-pro',
-        downloadURL: 'https://github.com/slamhan/asc-pro/releases/latest/download/ASCPro.plugin.zip',
+        author: 'slamhan', repositoryURL: 'https://github.com/tddworks/asc-pro',
+        downloadURL: 'https://github.com/tddworks/asc-pro/releases/latest/download/ASCPro.plugin.zip',
         categories: ['simulators', 'streaming'], isInstalled: true,
-        affordances: { uninstall: 'asc plugins uninstall --name asc-pro', listMarket: 'asc plugins market list', viewRepository: 'https://github.com/slamhan/asc-pro' },
+        affordances: { uninstall: 'asc plugins uninstall --name asc-pro', listMarket: 'asc plugins market list', viewRepository: 'https://github.com/tddworks/asc-pro' },
       },
       {
         id: 'asc-analytics', name: 'ASC Analytics', version: '0.5',
