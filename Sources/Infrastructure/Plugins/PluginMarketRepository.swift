@@ -23,13 +23,21 @@ public struct PluginMarketRepository: PluginRepository {
     }
 
     public func listAvailable() async throws -> [MarketPlugin] {
-        let installedSlugs = Set(PluginLoader.discover().map(\.slug))
+        let installed = PluginLoader.discover()
+        let installedIds = Set(
+            installed.flatMap { p in
+                // Match by slug ("ASCPro"), lowercased slug ("ascpro"),
+                // and name-derived id ("asc-pro") to handle registry ID variations
+                [p.slug, p.slug.lowercased(), p.name.lowercased().replacingOccurrences(of: " ", with: "-")]
+            }
+        )
 
         var all: [MarketPlugin] = []
         for source in sources {
             let plugins = try await source.fetchPlugins()
             all.append(contentsOf: plugins.map { plugin in
-                MarketPlugin(
+                let matched = installedIds.contains(plugin.id) || installedIds.contains(plugin.id.lowercased())
+                return MarketPlugin(
                     id: plugin.id,
                     name: plugin.name,
                     version: plugin.version,
@@ -38,7 +46,7 @@ public struct PluginMarketRepository: PluginRepository {
                     repositoryURL: plugin.repositoryURL,
                     downloadURL: plugin.downloadURL,
                     categories: plugin.categories,
-                    isInstalled: installedSlugs.contains(plugin.id)
+                    isInstalled: matched
                 )
             })
         }
