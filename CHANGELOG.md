@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.63] - 2026-04-02
+
 ### Added
 - **Plugin Marketplace** — `asc plugins market list` and `asc plugins market search --query X` to browse and search plugins from [tddworks/asc-registry](https://github.com/tddworks/asc-registry)
 - **Multi-source plugin registry** — `PluginSource` protocol with `GitHubPluginSource` implementation; composable sources in `PluginMarketRepository`
@@ -609,7 +613,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.62...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.63...HEAD
+[0.1.63]: https://github.com/tddworks/asc-cli/compare/v0.1.62...v0.1.63
 [0.1.62]: https://github.com/tddworks/asc-cli/compare/v0.1.61...v0.1.62
 [0.1.61]: https://github.com/tddworks/asc-cli/compare/v0.1.60...v0.1.61
 [0.1.60]: https://github.com/tddworks/asc-cli/compare/v0.1.59...v0.1.60
