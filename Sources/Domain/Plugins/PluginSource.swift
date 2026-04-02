@@ -7,7 +7,7 @@ import Mockable
 /// installed status from `PluginLoader`.
 @Mockable
 public protocol PluginSource: Sendable {
-    /// Human-readable source name (e.g. "GitHub: slamhan/asc-pro").
+    /// Human-readable source name (e.g. "GitHub: tddworks/asc-pro").
     var name: String { get }
 
     /// Fetch all available plugins from this source.

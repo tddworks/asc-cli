@@ -24,7 +24,7 @@ struct PluginSourceTests {
 
     @Test func `source has a human readable name`() {
         let source = MockPluginSource()
-        given(source).name.willReturn("GitHub: slamhan/asc-pro")
-        #expect(source.name == "GitHub: slamhan/asc-pro")
+        given(source).name.willReturn("GitHub: tddworks/asc-pro")
+        #expect(source.name == "GitHub: tddworks/asc-pro")
     }
 }

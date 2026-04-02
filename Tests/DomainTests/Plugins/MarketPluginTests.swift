@@ -11,7 +11,7 @@ struct MarketPluginTests {
         #expect(mp.name == "ASC Pro")
         #expect(mp.version == "1.0")
         #expect(mp.description == "Simulator streaming, interaction & tunnel sharing")
-        #expect(mp.author == "slamhan")
+        #expect(mp.author == "tddworks")
         #expect(mp.downloadURL == "https://github.com/tddworks/asc-pro/releases/latest/download/ASCPro.plugin.zip")
         #expect(mp.categories == ["simulators", "streaming"])
         #expect(mp.isInstalled == false)

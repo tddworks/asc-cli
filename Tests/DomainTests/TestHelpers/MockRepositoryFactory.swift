@@ -669,7 +669,7 @@ struct MockRepositoryFactory {
         name: String = "ASC Pro",
         version: String = "1.0",
         description: String = "Simulator streaming, interaction & tunnel sharing",
-        author: String? = "slamhan",
+        author: String? = "tddworks",
         repositoryURL: String? = "https://github.com/tddworks/asc-pro",
         downloadURL: String = "https://github.com/tddworks/asc-pro/releases/latest/download/ASCPro.plugin.zip",
         categories: [String] = ["simulators", "streaming"],

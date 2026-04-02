@@ -14,7 +14,7 @@ struct PluginsMarketTests {
                 name: "ASC Pro",
                 version: "1.0",
                 description: "Simulator streaming, interaction & tunnel sharing",
-                author: "slamhan",
+                author: "tddworks",
                 repositoryURL: "https://github.com/tddworks/asc-pro",
                 downloadURL: "https://github.com/tddworks/asc-pro/releases/latest/download/ASCPro.plugin.zip",
                 categories: ["simulators", "streaming"],
@@ -34,7 +34,7 @@ struct PluginsMarketTests {
                 "listMarket" : "asc plugins market list",
                 "viewRepository" : "https:\\/\\/github.com\\/tddworks\\/asc-pro"
               },
-              "author" : "slamhan",
+              "author" : "tddworks",
               "categories" : [
                 "simulators",
                 "streaming"

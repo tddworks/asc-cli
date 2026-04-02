@@ -7,8 +7,8 @@ import Testing
 struct GitHubPluginSourceTests {
 
     @Test func `source name includes owner and repo`() {
-        let source = GitHubPluginSource(owner: "slamhan", repo: "asc-plugins")
-        #expect(source.name == "GitHub: slamhan/asc-plugins")
+        let source = GitHubPluginSource(owner: "tddworks", repo: "asc-plugins")
+        #expect(source.name == "GitHub: tddworks/asc-plugins")
     }
 
     @Test func `parses registry JSON into market plugins`() async throws {
@@ -29,7 +29,7 @@ struct GitHubPluginSourceTests {
         }
         """.data(using: .utf8)!
 
-        let source = GitHubPluginSource(owner: "slamhan", repo: "asc-plugins", fetcher: { _ in json })
+        let source = GitHubPluginSource(owner: "tddworks", repo: "asc-plugins", fetcher: { _ in json })
         let plugins = try await source.fetchPlugins()
 
         #expect(plugins.count == 1)
