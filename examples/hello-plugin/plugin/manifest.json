@@ -1,0 +1,6 @@
+{
+  "name": "Hello Plugin",
+  "version": "1.0",
+  "server": "HelloPlugin.dylib",
+  "ui": ["ui/hello.js"]
+}
