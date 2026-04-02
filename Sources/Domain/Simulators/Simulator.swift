@@ -68,4 +68,8 @@ extension Simulator: AffordanceProviding {
         }
         return cmds
     }
+
+    public var registryProperties: [String: String] {
+        ["isBooted": "\(state.isBooted)"]
+    }
 }

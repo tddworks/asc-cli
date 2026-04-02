@@ -5,4 +5,12 @@
 /// command tree.
 public protocol AffordanceProviding {
     var affordances: [String: String] { get }
+
+    /// Properties passed to `AffordanceRegistry` so plugins can make decisions
+    /// (e.g. only show "stream" when `isBooted` is true).
+    var registryProperties: [String: String] { get }
+}
+
+extension AffordanceProviding {
+    public var registryProperties: [String: String] { [:] }
 }

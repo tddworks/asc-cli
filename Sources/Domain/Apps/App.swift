@@ -32,4 +32,8 @@ extension App: AffordanceProviding {
             "listReviews": "asc reviews list --app-id \(id)",
         ]
     }
+
+    public var registryProperties: [String: String] {
+        ["name": name]
+    }
 }

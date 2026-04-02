@@ -41,7 +41,7 @@ struct WithPluginAffordances<T: Encodable & AffordanceProviding & Identifiable>:
         try item.encode(to: encoder)
         var merged = item.affordances
         merged.merge(
-            AffordanceRegistry.affordances(for: T.self, id: "\(item.id)")
+            AffordanceRegistry.affordances(for: T.self, id: "\(item.id)", properties: item.registryProperties)
         ) { _, new in new }
         var container = encoder.container(keyedBy: AffordanceCodingKey.self)
         try container.encode(merged, forKey: .affordances)
