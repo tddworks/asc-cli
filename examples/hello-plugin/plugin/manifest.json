@@ -1,6 +1,10 @@
 {
   "name": "Hello Plugin",
   "version": "1.0",
+  "description": "Example plugin — hello world routes and UI script",
+  "author": "tddworks",
+  "repositoryURL": "https://github.com/tddworks/asc-cli/tree/main/examples/hello-plugin",
+  "categories": ["example", "starter"],
   "server": "HelloPlugin.dylib",
   "ui": ["ui/hello.js"]
 }

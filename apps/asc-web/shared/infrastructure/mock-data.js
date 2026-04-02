@@ -337,9 +337,20 @@ export const MockDataProvider = {
   plugins: {
     data: [
       {
-        id: 'asc-pro', name: 'ASC Pro', version: '1.0', slug: 'ASCPro',
-        uiScripts: ['ui/sim-stream.js'],
-        affordances: { uninstall: 'asc plugins uninstall --name ASCPro', browseMarket: 'asc plugins market list' },
+        id: 'asc-pro', name: 'ASC Pro', version: '1.0',
+        description: 'Simulator streaming, interaction & tunnel sharing',
+        author: 'tddworks', repositoryURL: 'https://github.com/tddworks/asc-registry',
+        categories: ['simulators', 'streaming'], isInstalled: true,
+        slug: 'ASCPro', uiScripts: ['ui/sim-stream.js'],
+        affordances: { uninstall: 'asc plugins uninstall --name ASCPro', browseMarket: 'asc plugins market list', viewRepository: 'https://github.com/tddworks/asc-registry' },
+      },
+      {
+        id: 'hello-plugin', name: 'Hello Plugin', version: '1.0',
+        description: 'Example plugin — hello world routes and UI script',
+        author: 'tddworks', repositoryURL: 'https://github.com/tddworks/asc-cli/tree/main/examples/hello-plugin',
+        categories: ['example', 'starter'], isInstalled: true,
+        slug: 'HelloPlugin', uiScripts: ['ui/hello.js'],
+        affordances: { uninstall: 'asc plugins uninstall --name HelloPlugin', browseMarket: 'asc plugins market list', viewRepository: 'https://github.com/tddworks/asc-cli/tree/main/examples/hello-plugin' },
       },
     ],
   },
@@ -350,10 +361,18 @@ export const MockDataProvider = {
       {
         id: 'asc-pro', name: 'ASC Pro', version: '1.0',
         description: 'Simulator streaming, interaction & tunnel sharing',
-        author: 'tddworks', repositoryURL: 'https://github.com/tddworks/asc-pro',
-        downloadURL: 'https://github.com/tddworks/asc-pro/releases/latest/download/ASCPro.plugin.zip',
+        author: 'tddworks', repositoryURL: 'https://github.com/tddworks/asc-registry',
+        downloadURL: 'https://github.com/tddworks/asc-registry/releases/latest/download/ASCPro.plugin.zip',
         categories: ['simulators', 'streaming'], isInstalled: true,
-        affordances: { uninstall: 'asc plugins uninstall --name asc-pro', listMarket: 'asc plugins market list', viewRepository: 'https://github.com/tddworks/asc-pro' },
+        affordances: { uninstall: 'asc plugins uninstall --name asc-pro', browseMarket: 'asc plugins market list', viewRepository: 'https://github.com/tddworks/asc-registry' },
+      },
+      {
+        id: 'hello-plugin', name: 'Hello Plugin', version: '1.0',
+        description: 'Example plugin — hello world routes and UI script',
+        author: 'tddworks', repositoryURL: 'https://github.com/tddworks/asc-cli/tree/main/examples/hello-plugin',
+        downloadURL: 'https://github.com/tddworks/asc-registry/releases/latest/download/HelloPlugin.plugin.zip',
+        categories: ['example', 'starter'], isInstalled: true,
+        affordances: { uninstall: 'asc plugins uninstall --name hello-plugin', browseMarket: 'asc plugins market list', viewRepository: 'https://github.com/tddworks/asc-cli/tree/main/examples/hello-plugin' },
       },
       {
         id: 'asc-analytics', name: 'ASC Analytics', version: '0.5',
@@ -361,7 +380,7 @@ export const MockDataProvider = {
         author: 'community', repositoryURL: 'https://github.com/example/asc-analytics',
         downloadURL: 'https://github.com/example/asc-analytics/releases/latest/download/ASCAnalytics.plugin.zip',
         categories: ['analytics', 'reports'], isInstalled: false,
-        affordances: { install: 'asc plugins install --name asc-analytics', listMarket: 'asc plugins market list', viewRepository: 'https://github.com/example/asc-analytics' },
+        affordances: { install: 'asc plugins install --name asc-analytics', browseMarket: 'asc plugins market list', viewRepository: 'https://github.com/example/asc-analytics' },
       },
       {
         id: 'asc-notify', name: 'ASC Notify', version: '1.2',
@@ -369,7 +388,7 @@ export const MockDataProvider = {
         author: 'community',
         downloadURL: 'https://github.com/example/asc-notify/releases/latest/download/ASCNotify.plugin.zip',
         categories: ['notifications'], isInstalled: false,
-        affordances: { install: 'asc plugins install --name asc-notify', listMarket: 'asc plugins market list' },
+        affordances: { install: 'asc plugins install --name asc-notify', browseMarket: 'asc plugins market list' },
       },
     ],
   },
