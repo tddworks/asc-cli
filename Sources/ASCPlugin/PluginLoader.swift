@@ -65,19 +65,34 @@ public enum PluginLoader {
         let manifestURL = url.appendingPathComponent("manifest.json")
         guard let data = try? Data(contentsOf: manifestURL),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let name = json["name"] as? String,
-              let serverPath = json["server"] as? String else {
+              let name = json["name"] as? String else {
             return nil
         }
-
-        let dylibPath = url.appendingPathComponent(serverPath).path
-        guard let plugin = loadDylib(at: dylibPath) else { return nil }
 
         let uiScripts = (json["ui"] as? [String]) ?? []
         let slug = (url.lastPathComponent as NSString).deletingPathExtension
 
+        // UI-only plugin (no server/dylib)
+        if json["server"] == nil {
+            let stub = UIOnlyPlugin(name: name)
+            FileHandle.standardError.write(Data("  Plugin: \(name) (\(url.lastPathComponent)) [UI-only]\n".utf8))
+            return LoadedPlugin(plugin: stub, name: name, slug: slug, directory: url, uiScripts: uiScripts)
+        }
+
+        guard let serverPath = json["server"] as? String else { return nil }
+        let dylibPath = url.appendingPathComponent(serverPath).path
+        guard let plugin = loadDylib(at: dylibPath) else { return nil }
+
         FileHandle.standardError.write(Data("  Plugin: \(name) (\(url.lastPathComponent))\n".utf8))
         return LoadedPlugin(plugin: plugin, name: name, slug: slug, directory: url, uiScripts: uiScripts)
+    }
+
+    /// Stub for UI-only plugins that have no server-side dylib.
+    private final class UIOnlyPlugin: NSObject, ASCPluginBase {
+        let name: String
+        var commands: [Any] { [] }
+        init(name: String) { self.name = name }
+        func configureRoutes(_ router: Any) {}
     }
 
     private static func loadDylib(at path: String) -> ASCPluginBase? {

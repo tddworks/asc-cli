@@ -13,6 +13,69 @@ let screenshotSets = {}; // localizationId → [sets]
 let screenshots = {};    // setId → [screenshots]
 let expandedSetId = null;
 
+// --- Screenshot Generation Provider Registry (OCP) ---
+// Plugins register providers via: window.screenshotProviders.push({ id, name, description, render(appId, appName) })
+window.screenshotProviders = window.screenshotProviders || [];
+
+// Built-in provider: asc app-shots
+if (!window.screenshotProviders.some(p => p.id === 'app-shots')) {
+  window.screenshotProviders.push({
+    id: 'app-shots',
+    name: 'asc app-shots',
+    description: 'Generate marketing screenshots with AI using <code>asc app-shots</code>',
+    render(appId, appName) {
+      return `
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary" onclick="showToast('asc app-shots generate --plan plan.json','info')">Generate</button>
+          <button class="btn btn-secondary" onclick="showToast('asc app-shots translate --to zh --to ja','info')">Translate</button>
+          <button class="btn btn-secondary" onclick="showToast('asc app-shots html --plan plan.json','info')">HTML Export</button>
+        </div>`;
+    }
+  });
+}
+
+let selectedProviderId = 'app-shots';
+
+function renderProviderSection(appId, appName) {
+  const providers = window.screenshotProviders || [];
+  if (providers.length === 0) return '';
+
+  const selected = providers.find(p => p.id === selectedProviderId) || providers[0];
+  const pickerHTML = providers.length > 1
+    ? `<select id="ssProviderPicker" onchange="ssPickProvider(this.value)" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text)">
+        ${providers.map(p => `<option value="${escapeHTML(p.id)}" ${p.id === selected.id ? 'selected' : ''}>${escapeHTML(p.name)}</option>`).join('')}
+       </select>`
+    : '';
+
+  return `
+    <div class="card mt-24">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+        <span class="card-title">AI Screenshot Generation</span>
+        ${pickerHTML}
+      </div>
+      <div class="card-body padded">
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">${selected.description}</p>
+        <div id="ssProviderContent">${selected.render(appId, appName)}</div>
+      </div>
+    </div>`;
+}
+
+window.ssPickProvider = function(providerId) {
+  selectedProviderId = providerId;
+  const providers = window.screenshotProviders || [];
+  const selected = providers.find(p => p.id === providerId);
+  if (!selected) return;
+
+  const descEl = document.querySelector('#ssContent + .card .card-body > p');
+  const contentEl = document.getElementById('ssProviderContent');
+  if (descEl) descEl.innerHTML = selected.description;
+  if (contentEl) {
+    const appId = state.selectedApp?.id || '';
+    const appName = state.selectedApp?.name || '';
+    contentEl.innerHTML = selected.render(appId, appName);
+  }
+};
+
 // --- Resolve screenshot image URL ---
 // CLI outputs `sourceUrl` (template with {w}/{h}/{f} placeholders) and computed `imageUrl` is NOT in JSON.
 // Mock data provides `imageUrl` directly. Handle both.
@@ -103,22 +166,12 @@ export function renderScreenshots() {
       <div class="card"><div class="empty-state"><div class="spinner" style="margin:24px auto"></div></div></div>
     </div>
 
-    <div class="card mt-24">
-      <div class="card-header">
-        <span class="card-title">AI Screenshot Generation</span>
-      </div>
-      <div class="card-body padded">
-        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">Generate marketing screenshots with AI using <code>asc app-shots</code></p>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-secondary" onclick="showToast('asc app-shots generate --plan plan.json','info')">Generate</button>
-          <button class="btn btn-secondary" onclick="showToast('asc app-shots translate --to zh --to ja','info')">Translate</button>
-          <button class="btn btn-secondary" onclick="showToast('asc app-shots html --plan plan.json','info')">HTML Export</button>
-        </div>
-      </div>
-    </div>`;
+    ${renderProviderSection(state.selectedApp?.id || '', appName)}`;
 }
 
 export async function loadScreenshots() {
+  loadPluginScripts();
+
   const appId = state.selectedApp?.id || '6449071230';
   const result = await DataProvider.fetch(`versions list --app-id ${appId}`);
   versions = result?.data || [];
@@ -362,3 +415,26 @@ window.ssToggleSet = async function(setId) {
   const loc = localizations[activeLocaleIdx];
   renderDeviceCards(loc);
 };
+
+// --- Plugin Script Loader ---
+
+let pluginScriptsLoaded = false;
+
+async function loadPluginScripts() {
+  if (pluginScriptsLoaded) return;
+  pluginScriptsLoaded = true;
+  try {
+    const res = await fetch(`${DataProvider._serverUrl || ''}/api/plugins`);
+    const data = await res.json();
+    for (const plugin of (data.plugins || [])) {
+      for (const url of (plugin.ui || [])) {
+        const fullUrl = `${DataProvider._serverUrl || ''}${url}`;
+        if (document.querySelector(`script[src="${fullUrl}"]`)) continue;
+        const script = document.createElement('script');
+        script.src = fullUrl;
+        script.async = true;
+        document.head.appendChild(script);
+      }
+    }
+  } catch {}
+}
