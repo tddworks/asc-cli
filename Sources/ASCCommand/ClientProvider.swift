@@ -218,9 +218,7 @@ struct ClientProvider {
         ClientFactory().makeSimulatorRepository()
     }
 
-    static func makeSimulatorInteractionRepository() -> any SimulatorInteractionRepository {
-        ClientFactory().makeSimulatorInteractionRepository()
-    }
+    // SimulatorInteractionRepository moved to ASCPro (pro feature)
 
     // MARK: - Skills
 

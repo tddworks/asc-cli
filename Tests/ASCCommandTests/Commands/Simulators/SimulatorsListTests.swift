@@ -40,7 +40,7 @@ struct SimulatorsListTests {
         """)
     }
 
-    @Test func `booted simulator shows shutdown and stream affordances`() async throws {
+    @Test func `booted simulator shows shutdown affordances`() async throws {
         let mockRepo = MockSimulatorRepository()
         given(mockRepo).listSimulators(filter: .any).willReturn([
             Simulator(
@@ -60,8 +60,7 @@ struct SimulatorsListTests {
             {
               "affordances" : {
                 "listSimulators" : "asc simulators list",
-                "shutdown" : "asc simulators shutdown --udid EFGH-5678",
-                "stream" : "asc simulators stream --udid EFGH-5678"
+                "shutdown" : "asc simulators shutdown --udid EFGH-5678"
               },
               "displayRuntime" : "iOS 17.5",
               "id" : "EFGH-5678",

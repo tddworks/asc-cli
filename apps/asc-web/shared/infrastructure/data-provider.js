@@ -21,9 +21,12 @@ export const DataProvider = {
   async init() {
     // When loaded from HTTPS, try HTTPS localhost first to avoid mixed-content blocking.
     const isSecure = window.location.protocol === 'https:';
+    const isLocalServer = window.location.port === '8420' || window.location.port === '8421';
     const bases = isSecure
       ? ['https://localhost:8421', 'https://127.0.0.1:8421']
-      : ['', 'http://localhost:8420'];
+      : isLocalServer
+        ? ['']  // Already on the server — same origin
+        : ['http://localhost:8420', 'http://127.0.0.1:8420'];
 
     for (const base of bases) {
       try {

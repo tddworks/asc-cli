@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`asc web-server`** — Swift/Hummingbird HTTP+WebSocket server replacing Node.js. Single binary, zero external dependencies, HTTPS with self-signed cert
+- **Plugin architecture** — `.plugin` bundles in `~/.asc/plugins/` extend the CLI with routes, commands, affordances, and UI. Dylibs built with `dynamic_lookup` (~300KB)
+- **`AffordanceRegistry`** — plugins extend domain model affordances at runtime (e.g. pro plugin adds `stream` to booted simulators)
+- **Affordance-driven UI** — web app renders buttons from CAEOAS affordances, not hardcoded features. Plugins register handlers via `window.simAffordanceHandlers`
+- **Command Center Simulators page** — device list with search/filter, stats cards, affordance-driven actions
+
 ---
 
 ## [0.1.61] - 2026-03-31
@@ -15,10 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Screenshot image URLs** — `asc screenshots list` now returns `imageUrl` for each screenshot, so you can view and render real App Store images directly from CLI output
 - **Screenshot platform filtering** — filter and browse screenshots by platform (iPhone, iPad, etc.) in the web UI
 - **Simulator screenshot capture** — capture and browse simulator screenshots in the web gallery
-- **Simulator live streaming** — stream your simulator screen in real-time via MJPEG to the browser
-
-### Changed
-- **Simulator interaction feedback** — improved tap ripple effect and gesture responsiveness in the streaming UI
 
 ---
 
@@ -28,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`asc simulators list [--booted]`** — list available iOS simulators with state-aware affordances
 - **`asc simulators boot --udid <udid>`** — boot a simulator
 - **`asc simulators shutdown --udid <udid>`** — shut down a simulator
-- **`asc simulators stream [--udid <udid>] [--port <port>]`** — interactive simulator streaming to the browser with device bezel frames, tap/swipe/type via [AXe](https://github.com/cameroncooke/AXe), gesture presets, and accessibility inspection
+- **`asc simulators list/boot/shutdown`** — manage local iOS simulators with state-aware affordances
 
 ---
 

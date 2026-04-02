@@ -46,7 +46,7 @@ asc init --app-id <id> # pin it — skip --app-id on every future command
 | **Plugins** | Install executable plugins in `~/.asc/plugins/` for custom event handlers |
 | **Reports** | Sales, subscription, installs, and financial reports; multi-step analytics workflow |
 | **Iris (Private API)** | Cookie-based auth; create apps, list apps via the iris private API that powers the ASC web UI |
-| **Simulators** | List, boot, shutdown local iOS simulators; interactive browser stream with tap, swipe, type via AXe |
+| **Simulators** | List, boot, shutdown local iOS simulators; streaming via plugin |
 | **AI Agents** | JSON output with CAEOAS affordances — agents navigate without knowing the command tree |
 
 ## Requirements
@@ -435,12 +435,11 @@ asc simulators list --booted --pretty
 asc simulators boot --udid <udid>
 asc simulators shutdown --udid <udid>
 
-# Interactive stream to browser (tap, swipe, type via AXe)
-asc simulators stream                           # pick device in browser
-asc simulators stream --udid <udid> --fps 10    # direct stream
+# Start web server (opens asccli.app/command-center)
+asc web-server
 ```
 
-Requires [AXe](https://github.com/cameroncooke/AXe) for interaction: `brew install cameroncooke/axe/axe`
+Streaming and interaction available via the [ASC Pro plugin](docs/features/plugin-ui-architecture.md).
 
 ### Output & TUI
 
@@ -509,7 +508,9 @@ Detailed documentation for each feature:
 - [Power & Performance](docs/features/performance.md) — performance metrics (app/build), diagnostic signatures, diagnostic logs
 - [Reports](docs/features/reports.md) — sales, finance, and analytics reports; TSV parsing, multi-step analytics workflow
 - [Iris (Private API)](docs/features/iris.md) — cookie-based auth; create apps, list apps via the iris private API
-- [Simulators](docs/features/simulators.md) — list, boot, shutdown, interactive browser stream with AXe
+- [Simulators](docs/features/simulators.md) — list, boot, shutdown; streaming via plugin
+- [Web Server](docs/features/web-server-architecture.md) — Hummingbird API server with plugin system
+- [Plugins](docs/features/plugin-ui-architecture.md) — extend CLI with routes, commands, affordances, and UI
 
 ## Design: CAEOAS
 

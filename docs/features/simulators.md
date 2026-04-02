@@ -1,6 +1,8 @@
 # Simulators
 
-Manage local iOS simulators from the CLI — list, boot, shutdown, and stream the device screen to an interactive browser UI with touch, swipe, text input, and accessibility inspection via [AXe](https://github.com/cameroncooke/AXe).
+Manage local iOS simulators from the CLI — list, boot, and shutdown.
+
+Streaming and interaction features are available via the [ASC Pro plugin](plugin-ui-architecture.md).
 
 ## CLI Usage
 
@@ -59,6 +61,8 @@ CF65871E-B600-40CB-8B18-B6B7101D38E1  iPhone 16 Pro Max   Booted    iOS 18.2
 }
 ```
 
+> Note: The `stream` affordance only appears when the ASC Pro plugin is installed.
+
 ---
 
 ### Boot Simulator
@@ -77,48 +81,6 @@ asc simulators shutdown --udid <udid>
 
 ---
 
-### Stream Simulator (Interactive)
-
-Stream the simulator screen to the browser with tap, swipe, type, gesture, and accessibility inspection.
-
-```bash
-asc simulators stream [--udid <udid>] [--port <port>] [--fps <fps>]
-```
-
-**Options:**
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--udid` | _(none)_ | Simulator UDID; omit to pick from browser UI |
-| `--port` | `8425` | HTTP server port |
-| `--fps` | `5` | Target frames per second |
-
-**Examples:**
-
-```bash
-# Open the interactive stream UI (pick device in browser)
-asc simulators stream
-
-# Stream a specific device at 10 fps
-asc simulators stream --udid CF65871E-B600-40CB-8B18-B6B7101D38E1 --fps 10
-```
-
-Opens `http://localhost:8425` in the browser with:
-
-- **Live device screen** inside a realistic device frame bezel
-- **Click to tap** — coordinates auto-mapped to device UIKit points
-- **Drag to swipe** — gesture direction and duration detected
-- **Hardware buttons** — Home, Lock, Siri
-- **Gesture presets** — scroll up/down/left/right, edge swipes
-- **Text input** — type text, send Return/Backspace/Tab/Escape
-- **Tap by accessibility** — tap by ID or label
-- **Describe UI** — dump the accessibility tree for AI agent inspection
-- **Activity log** — real-time log of all actions
-
-Requires [AXe](https://github.com/cameroncooke/AXe) for interaction: `brew install cameroncooke/axe/axe`
-
----
-
 ## Typical Workflow
 
 ```bash
@@ -128,11 +90,8 @@ asc simulators list --output table
 # 2. Boot if needed
 asc simulators boot --udid CF65871E-B600-40CB-8B18-B6B7101D38E1
 
-# 3. Start interactive stream
-asc simulators stream --udid CF65871E-B600-40CB-8B18-B6B7101D38E1
-
-# 4. Interact in the browser: click, type, swipe, inspect
-# 5. Ctrl+C to stop
+# 3. Shutdown when done
+asc simulators shutdown --udid CF65871E-B600-40CB-8B18-B6B7101D38E1
 ```
 
 ---
@@ -143,31 +102,15 @@ asc simulators stream --udid CF65871E-B600-40CB-8B18-B6B7101D38E1
 ┌─────────────────────────────────────────────────┐
 │                  ASCCommand                      │
 │  SimulatorsCommand                               │
-│  ├── SimulatorsList    (list [--booted])         │
-│  ├── SimulatorsBoot    (boot --udid X)           │
-│  ├── SimulatorsShutdown (shutdown --udid X)      │
-│  └── SimulatorsStream  (stream [--udid X])       │
-│         │                                        │
-│         ▼                                        │
-│  DeviceStreamServer (HTTP on :8425)              │
-│  ├── GET  /               → Interactive HTML     │
-│  ├── GET  /api/devices    → Simulator list       │
-│  ├── GET  /api/screenshot → Cached frame (PNG)   │
-│  ├── GET  /api/frame      → Device bezel PNG     │
-│  ├── POST /api/tap        → AXe tap              │
-│  ├── POST /api/swipe      → AXe swipe            │
-│  ├── POST /api/type       → AXe type             │
-│  ├── POST /api/button     → AXe button           │
-│  └── GET  /api/describe   → AXe describe-ui      │
+│  ├── SimulatorsList     (list [--booted])        │
+│  ├── SimulatorsBoot     (boot --udid X)          │
+│  └── SimulatorsShutdown (shutdown --udid X)      │
 └──────────────┬──────────────────────────────────┘
                │ uses
                ▼
 ┌─────────────────────────────────────────────────┐
 │              Infrastructure                      │
 │  SimctlSimulatorRepository (xcrun simctl)        │
-│  AXeInteractionRepository  (axe CLI)             │
-│  AXeStreamManager          (background capture)  │
-│  DeviceStreamServer        (NWListener HTTP)      │
 └──────────────┬──────────────────────────────────┘
                │ implements
                ▼
@@ -175,10 +118,12 @@ asc simulators stream --udid CF65871E-B600-40CB-8B18-B6B7101D38E1
 │              Domain                              │
 │  Simulator, SimulatorState, SimulatorFilter       │
 │  SimulatorRepository (@Mockable)                  │
-│  SimulatorInteractionRepository (@Mockable)       │
-│  SimulatorButton, SimulatorGesture                │
+│  AffordanceRegistry (plugin extensible)           │
 └─────────────────────────────────────────────────┘
 ```
+
+Streaming, interaction, and device bezels are provided by the ASC Pro plugin.
+See [Plugin Architecture](plugin-ui-architecture.md) for details.
 
 ---
 
@@ -212,12 +157,14 @@ public enum SimulatorState: String, Codable {
 }
 ```
 
-### Affordances (state-aware)
+### Affordances
 
-| State | Affordances |
-|-------|-------------|
-| `shutdown` | `boot`, `listSimulators` |
-| `booted` | `shutdown`, `stream`, `listSimulators` |
+Built-in affordances are state-aware. Plugins extend them via `AffordanceRegistry`:
+
+| State | Built-in | Plugin (ASC Pro) |
+|-------|----------|-----------------|
+| `shutdown` | `boot`, `listSimulators` | — |
+| `booted` | `shutdown`, `listSimulators` | `stream` |
 
 ---
 
@@ -230,20 +177,16 @@ Sources/
 ├── Domain/Simulators/
 │   ├── Simulator.swift
 │   ├── SimulatorState.swift
-│   ├── SimulatorRepository.swift
-│   ├── SimulatorInteraction.swift
-│   └── SimulatorInteractionRepository.swift
+│   └── SimulatorRepository.swift
+├── Domain/Shared/
+│   └── AffordanceRegistry.swift
 ├── Infrastructure/Simulators/
-│   ├── SimctlSimulatorRepository.swift
-│   ├── AXeInteractionRepository.swift
-│   ├── AXeStreamManager.swift
-│   └── DeviceStreamServer.swift
+│   └── SimctlSimulatorRepository.swift
 └── ASCCommand/Commands/Simulators/
     ├── SimulatorsCommand.swift
     ├── SimulatorsList.swift
     ├── SimulatorsBoot.swift
-    ├── SimulatorsShutdown.swift
-    └── SimulatorsStream.swift
+    └── SimulatorsShutdown.swift
 ```
 
 ### Tests
@@ -251,34 +194,11 @@ Sources/
 ```
 Tests/
 ├── DomainTests/Simulators/
-│   └── SimulatorTests.swift              (12 tests)
+│   └── SimulatorTests.swift
 └── ASCCommandTests/Commands/Simulators/
-    ├── SimulatorsListTests.swift          (4 tests)
-    ├── SimulatorsBootTests.swift          (1 test)
-    ├── SimulatorsShutdownTests.swift      (1 test)
-    └── SimulatorsStreamTests.swift        (5 tests)
-```
-
-### Wiring
-
-| File | Change |
-|------|--------|
-| `ClientFactory.swift` | `makeSimulatorRepository()`, `makeSimulatorInteractionRepository()` |
-| `ClientProvider.swift` | Static factory methods |
-| `ASC.swift` | Registered `SimulatorsCommand` |
-| `MockRepositoryFactory.swift` | `makeSimulator()` factory |
-
-### Web UI Assets
-
-```
-apps/remote-device-stream/
-├── index.html                    # Interactive stream UI
-├── frames/                       # Device bezel PNGs
-│   ├── iPhone 16 Pro Max.png
-│   ├── iPhone 17 Pro Max.png
-│   ├── ...
-│   └── insets.json               # Screen inset data from devices.json
-└── simulator-config.json         # (deprecated, replaced by frames/)
+    ├── SimulatorsListTests.swift
+    ├── SimulatorsBootTests.swift
+    └── SimulatorsShutdownTests.swift
 ```
 
 ---
@@ -286,12 +206,7 @@ apps/remote-device-stream/
 ## Testing
 
 ```bash
-# Run all simulator tests
 swift test --filter 'Simulator'
-
-# Run specific suite
-swift test --filter 'SimulatorTests'
-swift test --filter 'SimulatorsListTests'
 ```
 
 ---
@@ -299,8 +214,3 @@ swift test --filter 'SimulatorsListTests'
 ## Prerequisites
 
 - **Xcode** — provides `xcrun simctl` for simulator management
-- **AXe** _(optional, recommended)_ — enables tap, swipe, type, and UI inspection in the stream
-
-```bash
-brew install cameroncooke/axe/axe
-```

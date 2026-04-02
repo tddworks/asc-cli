@@ -47,11 +47,11 @@ struct SimulatorTests {
         #expect(sim.affordances["stream"] == nil)
     }
 
-    @Test func `booted simulator affordances include shutdown and stream`() {
+    @Test func `booted simulator affordances include shutdown`() {
         let sim = MockRepositoryFactory.makeSimulator(id: "ABC-123", state: .booted)
         #expect(sim.affordances["shutdown"] == "asc simulators shutdown --udid ABC-123")
-        #expect(sim.affordances["stream"] == "asc simulators stream --udid ABC-123")
         #expect(sim.affordances["boot"] == nil)
+        // "stream" affordance added by pro plugin, not built-in
     }
 
     @Test func `all simulator affordances include listSimulators`() {
@@ -116,24 +116,7 @@ struct SimulatorTests {
         #expect(decoded == sim)
     }
 
-    @Test func `simulator button raw values match axe cli`() {
-        #expect(SimulatorButton.home.rawValue == "home")
-        #expect(SimulatorButton.lock.rawValue == "lock")
-        #expect(SimulatorButton.siri.rawValue == "siri")
-        #expect(SimulatorButton.sideButton.rawValue == "side-button")
-        #expect(SimulatorButton.applePay.rawValue == "apple-pay")
-    }
-
-    @Test func `simulator gesture raw values match axe cli`() {
-        #expect(SimulatorGesture.scrollUp.rawValue == "scroll-up")
-        #expect(SimulatorGesture.scrollDown.rawValue == "scroll-down")
-        #expect(SimulatorGesture.scrollLeft.rawValue == "scroll-left")
-        #expect(SimulatorGesture.scrollRight.rawValue == "scroll-right")
-        #expect(SimulatorGesture.swipeFromLeftEdge.rawValue == "swipe-from-left-edge")
-        #expect(SimulatorGesture.swipeFromRightEdge.rawValue == "swipe-from-right-edge")
-        #expect(SimulatorGesture.swipeFromTopEdge.rawValue == "swipe-from-top-edge")
-        #expect(SimulatorGesture.swipeFromBottomEdge.rawValue == "swipe-from-bottom-edge")
-    }
+    // Button + gesture tests moved to asc-pro (pro feature)
 
     @Test func `simulator filter enum cases exist`() {
         let filters: [SimulatorFilter] = [.all, .booted, .available]

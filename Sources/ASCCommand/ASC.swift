@@ -1,4 +1,7 @@
 import ArgumentParser
+import ASCPlugin
+
+private nonisolated(unsafe) let plugins = PluginLoader.discover()
 
 @main
 struct ASC: AsyncParsableCommand {
@@ -68,6 +71,6 @@ struct ASC: AsyncParsableCommand {
             WebServerCommand.self,
             IrisCommand.self,
             SimulatorsCommand.self,
-        ]
+        ] + plugins.flatMap { $0.plugin.commands.compactMap { $0 as? any ParsableCommand.Type } }
     )
 }

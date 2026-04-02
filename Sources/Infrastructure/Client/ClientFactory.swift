@@ -242,9 +242,7 @@ public struct ClientFactory: Sendable {
         SimctlSimulatorRepository()
     }
 
-    public func makeSimulatorInteractionRepository() -> any SimulatorInteractionRepository {
-        AXeInteractionRepository()
-    }
+    // SimulatorInteractionRepository moved to ASCPro (pro feature)
 
     // MARK: - Skills (no ASC auth needed — subprocess + local filesystem)
 

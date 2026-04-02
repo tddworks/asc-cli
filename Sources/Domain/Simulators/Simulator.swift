@@ -63,10 +63,13 @@ extension Simulator: AffordanceProviding {
         ]
         if state.isBooted {
             cmds["shutdown"] = "asc simulators shutdown --udid \(id)"
-            cmds["stream"] = "asc simulators stream --udid \(id)"
         } else if state == .shutdown {
             cmds["boot"] = "asc simulators boot --udid \(id)"
         }
+        cmds.merge(AffordanceRegistry.affordances(
+            for: Self.self, id: id,
+            properties: ["isBooted": "\(state.isBooted)"]
+        )) { _, new in new }
         return cmds
     }
 }

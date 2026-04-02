@@ -8,7 +8,6 @@ struct SimulatorsCommand: AsyncParsableCommand {
             SimulatorsList.self,
             SimulatorsBoot.self,
             SimulatorsShutdown.self,
-            SimulatorsStream.self,
         ]
     )
 }

@@ -1,45 +1,49 @@
 import ArgumentParser
 import Foundation
+import Domain
+import Infrastructure
+import ASCPlugin
 
 struct WebServerCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "web-server",
-        abstract: "Start the local API proxy for ASC web apps"
+        abstract: "Start the local API server for ASC web apps"
     )
 
     @Option(name: .long, help: "Port to listen on (default: 8420)")
     var port: Int = 8420
 
     func run() async throws {
-        // Write embedded server.js to temp file
-        let tmpDir = FileManager.default.temporaryDirectory.appendingPathComponent("asc-web-server")
-        try FileManager.default.createDirectory(at: tmpDir, withIntermediateDirectories: true)
-        let serverFile = tmpDir.appendingPathComponent("server.js")
-        try EmbeddedServerJS.content.write(to: serverFile, atomically: true, encoding: .utf8)
+        let server = ASCWebServer(port: port, commandRunner: Self.runCommand)
+        try await server.run()
+    }
 
+    /// Execute a CLI command in-process via subprocess.
+    /// We use subprocess here because in-process stdout capture conflicts with
+    /// Hummingbird's server output. The subprocess is the same binary — fast, clean.
+    static func runCommand(_ command: String) async -> (String, Int) {
         let ascBin = ProcessInfo.processInfo.arguments[0]
+        let parts = command.split(separator: " ").map(String.init)
+        let args = parts.first == "asc" ? Array(parts.dropFirst()) : parts
 
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-        let projectDir = FileManager.default.currentDirectoryPath
-        process.arguments = ["node", serverFile.path, "--port", "\(port)", "--asc-bin", ascBin, "--project-dir", projectDir]
+        return await withCheckedContinuation { continuation in
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: ascBin)
+            process.arguments = args
+            process.environment = ProcessInfo.processInfo.environment
 
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = FileHandle.standardError
+            let stdout = Pipe()
+            process.standardOutput = stdout
+            process.standardError = FileHandle.nullDevice
 
-        pipe.fileHandleForReading.readabilityHandler = { handle in
-            let data = handle.availableData
-            if !data.isEmpty {
-                FileHandle.standardOutput.write(data)
+            do {
+                try process.run()
+                process.waitUntilExit()
+                let output = String(data: stdout.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+                continuation.resume(returning: (output.trimmingCharacters(in: .whitespacesAndNewlines), Int(process.terminationStatus)))
+            } catch {
+                continuation.resume(returning: (error.localizedDescription, 1))
             }
-        }
-
-        try process.run()
-        process.waitUntilExit()
-
-        if process.terminationStatus != 0 {
-            throw ValidationError("Server exited with code \(process.terminationStatus)")
         }
     }
 }
