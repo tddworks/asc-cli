@@ -6,6 +6,10 @@ import Testing
 @Suite
 struct SimulatorsListTests {
 
+    init() {
+        AffordanceRegistry.reset()
+    }
+
     @Test func `listed simulators show id name state runtime and affordances`() async throws {
         let mockRepo = MockSimulatorRepository()
         given(mockRepo).listSimulators(filter: .any).willReturn([

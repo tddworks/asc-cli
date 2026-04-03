@@ -30,6 +30,13 @@ public enum AffordanceRegistry {
         lock.unlock()
     }
 
+    /// Remove all registered providers (used by tests to avoid cross-test pollution).
+    public static func reset() {
+        lock.lock()
+        providers.removeAll()
+        lock.unlock()
+    }
+
     /// Get plugin affordances for a model instance.
     public static func affordances<T: AffordanceProviding>(for type: T.Type, id: String, properties: [String: String] = [:]) -> [String: String] {
         let key = String(describing: type)
