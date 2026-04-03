@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "asc-swift",
+    name: "asc-cli",
     platforms: [.macOS(.v14)],
     products: [
         .executable(name: "asc", targets: ["ASCCommand"]),
