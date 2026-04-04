@@ -61,7 +61,7 @@ extension ScreenshotTemplate {
 extension ScreenshotTemplate: AffordanceProviding {
     public var affordances: [String: String] {
         [
-            "preview": "/api/templates/\(id)/preview",
+            "preview": "asc app-shots templates get --id \(id) --preview",
             "apply": "asc app-shots templates apply --id \(id) --screenshot screen.png",
             "detail": "asc app-shots templates get --id \(id)",
             "listAll": "asc app-shots templates list",
