@@ -63,30 +63,6 @@ struct ScreenshotTemplateTests {
         #expect(html.contains("Headline"))
     }
 
-    @Test func `apply produces a ScreenshotDesign with user content`() {
-        let template = MockRepositoryFactory.makeScreenshotTemplate(id: "top-hero")
-        let design = template.apply(
-            appName: "MyApp",
-            headline: "Ship Faster",
-            subtitle: "One command away",
-            screenshotFile: "screen-1.png"
-        )
-        #expect(design.appName == "MyApp")
-        #expect(design.tagline == "Ship Faster")
-        #expect(design.screens.count == 1)
-        #expect(design.screens[0].heading == "Ship Faster")
-        #expect(design.screens[0].subheading == "One command away")
-        #expect(design.screens[0].screenshotFile == "screen-1.png")
-    }
-
-    @Test func `apply maps template category to tone`() {
-        let bold = MockRepositoryFactory.makeScreenshotTemplate(category: .bold)
-        #expect(bold.apply(appName: "A", headline: "H", screenshotFile: "s.png").tone == .bold)
-
-        let minimal = MockRepositoryFactory.makeScreenshotTemplate(category: .minimal)
-        #expect(minimal.apply(appName: "A", headline: "H", screenshotFile: "s.png").tone == .minimal)
-    }
-
     @Test func `template is codable`() throws {
         let template = MockRepositoryFactory.makeScreenshotTemplate()
         let data = try JSONEncoder().encode(template)

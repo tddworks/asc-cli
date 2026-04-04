@@ -37,49 +37,9 @@ public struct ScreenshotTemplate: Sendable, Equatable, Identifiable, Codable {
         self.deviceSlots = deviceSlots
     }
 
-    /// Self-contained HTML page previewing this template.
-    /// Save to `.html` and open in browser, or use as data URI.
+    /// Self-contained HTML page previewing this template with default sample text.
     public var previewHTML: String {
         TemplateHTMLRenderer.renderPage(self)
-    }
-
-    /// Apply user content to this template → `ScreenshotDesign` for generation.
-    public func apply(
-        appName: String,
-        headline: String,
-        subtitle: String? = nil,
-        screenshotFile: String
-    ) -> ScreenshotDesign {
-        let screen = ScreenDesign(
-            heading: headline,
-            subheading: subtitle,
-            imagePrompt: nil,
-            screenshotFile: screenshotFile
-        )
-        let tone: ScreenTone = {
-            switch category {
-            case .bold: return .bold
-            case .minimal: return .minimal
-            case .elegant: return .elegant
-            case .professional: return .professional
-            case .playful: return .playful
-            default: return .professional
-            }
-        }()
-        let colors: ScreenColors = {
-            switch background {
-            case .solid(let color): return ScreenColors(primary: color, accent: color, text: "#FFFFFF", subtext: "#AAAAAA")
-            case .gradient(let from, let to, _): return ScreenColors(primary: from, accent: to, text: "#FFFFFF", subtext: "#AAAAAA")
-            }
-        }()
-        return ScreenshotDesign(
-            appId: "",
-            appName: appName,
-            tagline: headline,
-            tone: tone,
-            colors: colors,
-            screens: [screen]
-        )
     }
 }
 
