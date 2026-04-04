@@ -62,6 +62,44 @@ struct AppShotsTemplatesTests {
             #expect("\(error)".contains("not found"))
         }
     }
+    // MARK: - Apply
+
+    @Test func `apply template returns screen design with preview`() async throws {
+        let mockRepo = MockTemplateRepository()
+        given(mockRepo).getTemplate(id: .value("top-hero")).willReturn(
+            makeTemplate(id: "top-hero", name: "Top Hero")
+        )
+
+        let cmd = try AppShotsTemplatesApply.parse([
+            "--id", "top-hero",
+            "--screenshot", "screen-1.png",
+            "--headline", "Ship Faster",
+            "--app-name", "MyApp",
+            "--pretty"
+        ])
+        let output = try await cmd.execute(repo: mockRepo)
+        #expect(output.contains("\"heading\" : \"Ship Faster\""))
+        #expect(output.contains("\"screenshotFile\" : \"screen-1.png\""))
+        #expect(output.contains("previewHTML"))
+        #expect(output.contains("linear-gradient"))
+    }
+
+    @Test func `apply returns error when template not found`() async throws {
+        let mockRepo = MockTemplateRepository()
+        given(mockRepo).getTemplate(id: .value("nope")).willReturn(nil)
+
+        let cmd = try AppShotsTemplatesApply.parse([
+            "--id", "nope",
+            "--screenshot", "screen.png",
+            "--headline", "Test"
+        ])
+        do {
+            _ = try await cmd.execute(repo: mockRepo)
+            Issue.record("Expected error")
+        } catch {
+            #expect("\(error)".contains("not found"))
+        }
+    }
 }
 
 // MARK: - Helpers
