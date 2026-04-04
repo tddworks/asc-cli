@@ -21,7 +21,7 @@ struct WebServerCommand: AsyncParsableCommand {
     /// Execute a CLI command via subprocess — pipe-safe for large output.
     static func runCommand(_ command: String) async -> (String, Int) {
         let ascBin = ProcessInfo.processInfo.arguments[0]
-        let parts = command.split(separator: " ").map(String.init)
+        let parts = shellSplit(command)
         let args = parts.first == "asc" ? Array(parts.dropFirst()) : parts
 
         let process = Process()
@@ -50,5 +50,34 @@ struct WebServerCommand: AsyncParsableCommand {
         process.waitUntilExit()
         let output = String(data: data, encoding: .utf8) ?? ""
         return (output.trimmingCharacters(in: .whitespacesAndNewlines), Int(process.terminationStatus))
+    }
+
+    /// Split a command string respecting quoted arguments.
+    /// e.g. `--headline "Your Headline"` → ["--headline", "Your Headline"]
+    private static func shellSplit(_ command: String) -> [String] {
+        var args: [String] = []
+        var current = ""
+        var inQuote: Character? = nil
+
+        for ch in command {
+            if let q = inQuote {
+                if ch == q {
+                    inQuote = nil
+                } else {
+                    current.append(ch)
+                }
+            } else if ch == "\"" || ch == "'" {
+                inQuote = ch
+            } else if ch == " " {
+                if !current.isEmpty {
+                    args.append(current)
+                    current = ""
+                }
+            } else {
+                current.append(ch)
+            }
+        }
+        if !current.isEmpty { args.append(current) }
+        return args
     }
 }
