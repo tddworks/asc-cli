@@ -240,6 +240,10 @@ struct ClientProvider {
         GeminiScreenshotGenerationRepository(apiKey: apiKey, model: model)
     }
 
+    static func makeTemplateRepository() -> AggregateTemplateRepository {
+        AggregateTemplateRepository()
+    }
+
     static func makeAppShotsConfigStorage() -> any AppShotsConfigStorage {
         FileAppShotsConfigStorage()
     }
