@@ -52,7 +52,7 @@ struct ScreenshotTemplateTests {
         #expect(template.affordances["apply"] == "asc app-shots templates apply --id top-hero --screenshot screen.png")
         #expect(template.affordances["detail"] == "asc app-shots templates get --id top-hero")
         #expect(template.affordances["listAll"] == "asc app-shots templates list")
-        #expect(template.affordances["preview"]?.contains("<div") == true)
+        #expect(template.affordances["previewHTML"]?.contains("<div") == true)
     }
 
     @Test func `previewHTML contains background and text`() {
