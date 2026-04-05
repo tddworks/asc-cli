@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **HTML-to-PNG export** — `--preview image` option on `asc app-shots templates apply` and `asc app-shots themes apply` renders composed HTML to PNG via WebKit, with `--image-output` for custom output path
+- **`HTMLRenderer` protocol** — `@Mockable` domain protocol for HTML-to-image rendering, implemented by `WebKitHTMLRenderer` using WKWebView snapshot
+
 ---
 
 ## [0.1.63] - 2026-04-02
