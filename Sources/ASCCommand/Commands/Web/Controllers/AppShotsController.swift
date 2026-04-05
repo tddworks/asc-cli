@@ -6,25 +6,33 @@ import ASCPlugin
 import Infrastructure
 import Foundation
 
-/// /api/v1/app-shots — Screenshot template, theme, and export routes.
-/// Read routes delegate to CLI commands. Write routes handle base64 ↔ temp file bridging.
-enum AppShotsController {
-    static func register(on group: RouterGroup<BasicWebSocketRequestContext>) {
+/// /api/v1/app-shots — Screenshot template, theme, export, and AI generation.
+struct AppShotsController: Sendable {
+    let templateRepo: any TemplateRepository
+    let themeRepo: any ThemeRepository
+    let htmlRenderer: any HTMLRenderer
+    let configStorage: any AppShotsConfigStorage
 
-        // MARK: - Read (delegate to commands)
+    func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
+
+        // MARK: - Read
 
         group.get("/app-shots/templates") { _, _ -> Response in
-            try await restExec { try await AppShotsTemplatesList.parse(["--preview", "--pretty"]).execute(repo: ClientProvider.makeTemplateRepository(), affordanceMode: .rest) }
+            try await restExec {
+                try await AppShotsTemplatesList.parse(["--preview", "--pretty"])
+                    .execute(repo: self.templateRepo, affordanceMode: .rest)
+            }
         }
 
         group.get("/app-shots/themes") { _, _ -> Response in
-            try await restExec { try await AppShotsThemesList.parse(["--pretty"]).execute(repo: ClientProvider.makeThemeRepository(), affordanceMode: .rest) }
+            try await restExec {
+                try await AppShotsThemesList.parse(["--pretty"])
+                    .execute(repo: self.themeRepo, affordanceMode: .rest)
+            }
         }
 
-        // MARK: - Write (base64 ↔ temp file bridging)
+        // MARK: - Templates Apply
 
-        // POST /api/v1/app-shots/templates/apply
-        // Accepts: {templateId, screenshot (base64), headline, preview: "html"|"image"}
         group.post("/app-shots/templates/apply") { request, _ -> Response in
             let body = try await request.body.collect(upTo: 10 * 1024 * 1024)
             guard let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
@@ -38,40 +46,29 @@ enum AppShotsController {
             do {
                 let screenshotPath = try writeTempScreenshot(screenshotBase64)
 
-                var args = ["--id", templateId, "--screenshot", screenshotPath, "--headline", headline, "--pretty"]
-                if let subtitle = json["subtitle"] as? String { args += ["--subtitle", subtitle] }
-                if previewFormat == "html" { args += ["--preview", "html"] }
-                if previewFormat == "image" { args += ["--preview", "image"] }
-
-                let repo = ClientProvider.makeTemplateRepository()
-                let cmd = try AppShotsTemplatesApply.parse(args)
-
                 if previewFormat == "image" {
-                    let renderer = ClientProvider.makeHTMLRenderer()
-                    guard let tmpl = try await repo.getTemplate(id: templateId) else {
+                    guard let tmpl = try await self.templateRepo.getTemplate(id: templateId) else {
                         return jsonError("Template not found", status: .notFound)
                     }
                     let content = TemplateContent(headline: headline, subtitle: json["subtitle"] as? String, screenshotFile: screenshotPath)
                     let html = TemplateHTMLRenderer.renderPage(tmpl, content: content, fillViewport: true)
-                    let pngData = try await AppShotsExport.renderToPNG(html: html, renderer: renderer)
+                    let pngData = try await AppShotsExport.renderToPNG(html: html, renderer: self.htmlRenderer)
                     return restResponse(jsonEncode(["png": pngData.base64EncodedString(), "width": 1320, "height": 2868]))
                 }
 
-                // HTML preview: replace file path with data URL for inline display
-                var html = try await cmd.execute(repo: repo)
-                if let b64 = screenshotBase64 {
-                    let dataURL = "data:image/png;base64,\(b64)"
-                    html = html.replacingOccurrences(of: screenshotPath, with: dataURL)
-                    html = html.replacingOccurrences(of: URL(fileURLWithPath: screenshotPath).lastPathComponent, with: dataURL)
-                }
+                var args = ["--id", templateId, "--screenshot", screenshotPath, "--headline", headline, "--preview", "html", "--pretty"]
+                if let subtitle = json["subtitle"] as? String { args += ["--subtitle", subtitle] }
+                let cmd = try AppShotsTemplatesApply.parse(args)
+                var html = try await cmd.execute(repo: self.templateRepo)
+                html = Self.inlineBase64(html, screenshotPath: screenshotPath, base64: screenshotBase64)
                 return restResponse(jsonEncode(["html": html]))
             } catch {
                 return jsonError("Apply failed: \(error.localizedDescription)", status: .internalServerError)
             }
         }
 
-        // POST /api/v1/app-shots/themes/apply
-        // Accepts: {themeId, templateId, screenshot (base64), headline}
+        // MARK: - Themes Apply
+
         group.post("/app-shots/themes/apply") { request, _ -> Response in
             let body = try await request.body.collect(upTo: 10 * 1024 * 1024)
             guard let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
@@ -83,35 +80,22 @@ enum AppShotsController {
             let screenshotBase64 = json["screenshot"] as? String
 
             do {
-                // Screenshot goes to temp file — the Node.js bridge receives HTML via stdin,
-                // so embedding a multi-MB data URL would exceed pipe limits.
                 let screenshotPath = try writeTempScreenshot(screenshotBase64)
-
                 var args = ["--theme", themeId, "--template", templateId,
                             "--screenshot", screenshotPath, "--headline", headline, "--pretty"]
                 if let subtitle = json["subtitle"] as? String { args += ["--subtitle", subtitle] }
 
                 let cmd = try AppShotsThemesApply.parse(args)
-                var themedHTML = try await cmd.execute(
-                    themeRepo: ClientProvider.makeThemeRepository(),
-                    templateRepo: ClientProvider.makeTemplateRepository()
-                )
-
-                // Replace temp file path with data URL so iframe can display inline
-                if let b64 = screenshotBase64 {
-                    let dataURL = "data:image/png;base64,\(b64)"
-                    themedHTML = themedHTML.replacingOccurrences(of: screenshotPath, with: dataURL)
-                    themedHTML = themedHTML.replacingOccurrences(of: URL(fileURLWithPath: screenshotPath).lastPathComponent, with: dataURL)
-                }
-                return restResponse(jsonEncode(["html": themedHTML]))
+                var html = try await cmd.execute(themeRepo: self.themeRepo, templateRepo: self.templateRepo)
+                html = Self.inlineBase64(html, screenshotPath: screenshotPath, base64: screenshotBase64)
+                return restResponse(jsonEncode(["html": html]))
             } catch {
                 return jsonError("Theme apply failed: \(error.localizedDescription)", status: .internalServerError)
             }
         }
 
-        // POST /api/v1/app-shots/export
-        // Accepts: {html, width?, height?}  Returns: {png (base64), width, height}
-        // Reuses AppShotsExport.renderToPNG() — single source of truth for HTML→PNG.
+        // MARK: - Export
+
         group.post("/app-shots/export") { request, _ -> Response in
             let body = try await request.body.collect(upTo: 10 * 1024 * 1024)
             guard let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
@@ -121,15 +105,15 @@ enum AppShotsController {
             do {
                 let width = json["width"] as? Int ?? 1320
                 let height = json["height"] as? Int ?? 2868
-                let pngData = try await AppShotsExport.renderToPNG(html: html, width: width, height: height, renderer: ClientProvider.makeHTMLRenderer())
+                let pngData = try await AppShotsExport.renderToPNG(html: html, width: width, height: height, renderer: self.htmlRenderer)
                 return restResponse(jsonEncode(["png": pngData.base64EncodedString(), "width": width, "height": height]))
             } catch {
                 return jsonError("Export failed: \(error.localizedDescription)", status: .internalServerError)
             }
         }
 
-        // POST /api/v1/app-shots/generate
-        // Accepts: {screenshot (base64), geminiApiKey?, styleReference? (base64), prompt?}
+        // MARK: - Generate
+
         group.post("/app-shots/generate") { request, _ -> Response in
             let body = try await request.body.collect(upTo: 20 * 1024 * 1024)
             guard let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
@@ -138,7 +122,7 @@ enum AppShotsController {
                 return jsonError("Missing screenshot (base64)")
             }
             do {
-                let apiKey = try resolveGeminiApiKey(json)
+                let apiKey = try Self.resolveGeminiApiKey(json, configStorage: self.configStorage)
                 let tmpDir = FileManager.default.temporaryDirectory
                 let screenshotFile = tmpDir.appendingPathComponent("blitz-gen-\(UUID().uuidString).png")
                 try screenshotData.write(to: screenshotFile)
@@ -168,9 +152,18 @@ enum AppShotsController {
 
     // MARK: - Helpers
 
-    private static func resolveGeminiApiKey(_ json: [String: Any]) throws -> String {
+    /// Replace temp file paths with data URLs for inline browser display.
+    private static func inlineBase64(_ html: String, screenshotPath: String, base64: String?) -> String {
+        guard let b64 = base64 else { return html }
+        let dataURL = "data:image/png;base64,\(b64)"
+        var result = html.replacingOccurrences(of: screenshotPath, with: dataURL)
+        result = result.replacingOccurrences(of: URL(fileURLWithPath: screenshotPath).lastPathComponent, with: dataURL)
+        return result
+    }
+
+    private static func resolveGeminiApiKey(_ json: [String: Any], configStorage: any AppShotsConfigStorage) throws -> String {
         if let key = json["geminiApiKey"] as? String, !key.isEmpty { return key }
-        if let config = try? ClientProvider.makeAppShotsConfigStorage().load(), !config.geminiApiKey.isEmpty { return config.geminiApiKey }
+        if let config = try? configStorage.load(), !config.geminiApiKey.isEmpty { return config.geminiApiKey }
         if let key = ProcessInfo.processInfo.environment["GEMINI_API_KEY"] { return key }
         throw ValidationError("No Gemini API key. Pass geminiApiKey or set GEMINI_API_KEY env var.")
     }

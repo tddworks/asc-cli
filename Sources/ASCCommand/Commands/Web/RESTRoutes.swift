@@ -47,8 +47,13 @@ enum RESTRoutes {
             repo: factory.makeTerritoryRepository(authProvider: auth)
         ) { territories.addRoutes(to: v1) }
 
-        // App Shots (still uses command delegation for complex POST routes)
-        AppShotsController.register(on: v1)
+        // App Shots
+        AppShotsController(
+            templateRepo: AggregateTemplateRepository.shared,
+            themeRepo: AggregateThemeRepository.shared,
+            htmlRenderer: WebKitHTMLRenderer(),
+            configStorage: FileAppShotsConfigStorage()
+        ).addRoutes(to: v1)
     }
 }
 
