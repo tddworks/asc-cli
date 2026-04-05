@@ -81,16 +81,18 @@ public final class MyPlugin: NSObject, ASCPluginBase {
 
 ## AffordanceRegistry
 
-Plugins extend domain model affordances at runtime:
+Plugins extend domain model affordances at runtime using structured `Affordance` values that render to both CLI commands and REST `_links`:
 
 ```swift
 AffordanceRegistry.register(Simulator.self) { id, props in
-    if props["isBooted"] == "true" {
-        return ["stream": "asc simulators stream --udid \(id)"]
-    }
-    return [:]
+    guard props["isBooted"] == "true" else { return [] }
+    return [Affordance(key: "stream", command: "simulators", action: "stream", params: ["udid": id])]
 }
 ```
+
+This produces:
+- **CLI**: `"stream": "asc simulators stream --udid <id>"`
+- **REST**: `"stream": {"href": "/api/v1/simulators/<id>/stream", "method": "POST"}`
 
 ## Architecture
 
