@@ -36,7 +36,7 @@ jobs:
       - name: Generate lcov report
         run: |
           BIN_PATH=$(swift build --show-bin-path)
-          XCTEST="$BIN_PATH/asc-swiftPackageTests.xctest/Contents/MacOS/asc-swiftPackageTests"
+          XCTEST="$BIN_PATH/asc-cliPackageTests.xctest/Contents/MacOS/asc-cliPackageTests"
           PROFDATA="$BIN_PATH/codecov/default.profdata"
           xcrun llvm-cov export "$XCTEST" \
             -instr-profile "$PROFDATA" \
