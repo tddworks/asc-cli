@@ -16,10 +16,12 @@ struct AffordanceRegistryTests {
 
     @Test func `register and retrieve affordances for a model type`() {
         AffordanceRegistry.register(StubModel.self) { id, _ in
-            ["test": "asc test --id \(id)"]
+            [Affordance(key: "test", command: "test", action: "run", params: ["id": id])]
         }
         let affordances = AffordanceRegistry.affordances(for: StubModel.self, id: "123")
-        #expect(affordances["test"] == "asc test --id 123")
+        #expect(affordances.count == 1)
+        #expect(affordances[0].key == "test")
+        #expect(affordances[0].cliCommand == "asc test run --id 123")
     }
 
     @Test func `returns empty when no providers registered for type`() {
@@ -32,37 +34,36 @@ struct AffordanceRegistryTests {
 
     @Test func `multiple providers merge affordances`() {
         AffordanceRegistry.register(StubModel.self) { id, _ in
-            ["action1": "cmd1 --id \(id)"]
+            [Affordance(key: "action1", command: "cmd1", action: "run", params: ["id": id])]
         }
         AffordanceRegistry.register(StubModel.self) { id, _ in
-            ["action2": "cmd2 --id \(id)"]
+            [Affordance(key: "action2", command: "cmd2", action: "run", params: ["id": id])]
         }
         let affordances = AffordanceRegistry.affordances(for: StubModel.self, id: "abc")
-        #expect(affordances["action1"] == "cmd1 --id abc")
-        #expect(affordances["action2"] == "cmd2 --id abc")
+        #expect(affordances.count == 2)
+        #expect(affordances.contains { $0.key == "action1" })
+        #expect(affordances.contains { $0.key == "action2" })
     }
 
-    @Test func `later provider overrides earlier for same key`() {
-        AffordanceRegistry.register(StubModel.self) { _, _ in
-            ["key": "old"]
-        }
-        AffordanceRegistry.register(StubModel.self) { _, _ in
-            ["key": "new"]
-        }
-        let affordances = AffordanceRegistry.affordances(for: StubModel.self, id: "x")
-        #expect(affordances["key"] == "new")
-    }
-
-    @Test func `provider receives properties`() {
+    @Test func `provider receives properties and returns conditional affordances`() {
         AffordanceRegistry.register(StubModel.self) { id, props in
-            if props["isBooted"] == "true" {
-                return ["stream": "asc stream --udid \(id)"]
-            }
-            return [:]
+            guard props["isBooted"] == "true" else { return [] }
+            return [Affordance(key: "stream", command: "simulators", action: "stream", params: ["udid": id])]
         }
         let booted = AffordanceRegistry.affordances(for: StubModel.self, id: "u1", properties: ["isBooted": "true"])
         let shutdown = AffordanceRegistry.affordances(for: StubModel.self, id: "u2", properties: ["isBooted": "false"])
-        #expect(booted["stream"] == "asc stream --udid u1")
-        #expect(shutdown["stream"] == nil)
+        #expect(booted.count == 1)
+        #expect(booted[0].cliCommand == "asc simulators stream --udid u1")
+        #expect(shutdown.isEmpty)
+    }
+
+    @Test func `structured affordance renders to REST link`() {
+        AffordanceRegistry.register(StubModel.self) { id, _ in
+            [Affordance(key: "stream", command: "simulators", action: "stream", params: ["udid": id])]
+        }
+        let affordances = AffordanceRegistry.affordances(for: StubModel.self, id: "u1")
+        let link = affordances[0].restLink
+        #expect(link.method == "POST")
+        #expect(link.href.contains("simulators"))
     }
 }
