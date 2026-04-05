@@ -27,7 +27,21 @@ struct AppShotsExport: AsyncParsableCommand {
     }
 
     func execute(renderer: any HTMLRenderer) async throws -> String {
-        let htmlContent = try String(contentsOfFile: html, encoding: .utf8)
+        var htmlContent = try String(contentsOfFile: html, encoding: .utf8)
+
+        // Ensure preview fills the full viewport for image export
+        // Themed HTML from `themes apply` uses width:320px — replace with 100%
+        if htmlContent.contains("width:320px") {
+            htmlContent = htmlContent
+                .replacingOccurrences(of: "width:320px", with: "width:100%;height:100%")
+                .replacingOccurrences(of: "min-height:100vh;background:#111", with: "margin:0;overflow:hidden")
+                .replacingOccurrences(of: "display:flex;justify-content:center;align-items:center;min-height:100vh;background:#111", with: "margin:0;overflow:hidden")
+            // Add html,body height if missing
+            if !htmlContent.contains("html,body{") {
+                htmlContent = htmlContent.replacingOccurrences(of: "box-sizing:border-box}", with: "box-sizing:border-box}html,body{width:100%;height:100%}")
+            }
+        }
+
         let pngData = try await renderer.render(html: htmlContent, width: width, height: height)
 
         let fileURL = URL(fileURLWithPath: output)

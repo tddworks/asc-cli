@@ -61,12 +61,30 @@ public final class WebKitHTMLRenderer: HTMLRenderer, @unchecked Sendable {
             let pathRange = match.range(at: 1)
             let path = nsHTML.substring(with: pathRange)
 
-            // Skip URLs and data URIs
-            if path.hasPrefix("http") || path.hasPrefix("data:") { continue }
+            // Skip data URIs
+            if path.hasPrefix("data:") { continue }
+            // Rewrite /api/files/read URLs back to local paths
+            if path.hasPrefix("http"), path.contains("/api/files/read?path=") {
+                if let urlComps = URLComponents(string: path),
+                   let localPath = urlComps.queryItems?.first(where: { $0.name == "path" })?.value,
+                   let data = FileManager.default.contents(atPath: cwd + "/" + localPath) {
+                    let ext = (localPath as NSString).pathExtension.lowercased()
+                    let mime = ext == "png" ? "image/png" : ext == "jpg" || ext == "jpeg" ? "image/jpeg" : "image/\(ext)"
+                    let dataURL = "data:\(mime);base64,\(data.base64EncodedString())"
+                    let fullRange = match.range(at: 0)
+                    result = (result as NSString).replacingCharacters(in: fullRange, with: "src=\"\(dataURL)\"")
+                }
+                continue
+            }
+            if path.hasPrefix("http") { continue }
 
-            // Resolve relative to cwd
-            let fullPath = path.hasPrefix("/") ? path : cwd + "/" + path
-            guard let data = FileManager.default.contents(atPath: fullPath) else { continue }
+            // Resolve relative to cwd — try direct path then .asc/app-shots/ prefix
+            let candidates = [
+                path.hasPrefix("/") ? path : cwd + "/" + path,
+                cwd + "/.asc/app-shots/" + path,
+            ]
+            guard let fullPath = candidates.first(where: { FileManager.default.fileExists(atPath: $0) }),
+                  let data = FileManager.default.contents(atPath: fullPath) else { continue }
 
             let ext = (path as NSString).pathExtension.lowercased()
             let mime = ext == "png" ? "image/png" : ext == "jpg" || ext == "jpeg" ? "image/jpeg" : "image/\(ext)"
