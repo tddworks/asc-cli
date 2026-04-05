@@ -30,8 +30,8 @@ public final class WebKitHTMLRenderer: HTMLRenderer, @unchecked Sendable {
             objc_setAssociatedObject(webView, "navDelegate", delegate, .OBJC_ASSOCIATION_RETAIN)
         }
 
-        // Allow time for images and CSS to render
-        try await Task.sleep(for: .milliseconds(800))
+        // Brief pause for CSS layout (images are already inlined as data URLs)
+        try await Task.sleep(for: .milliseconds(100))
 
         let snapshotConfig = WKSnapshotConfiguration()
         snapshotConfig.snapshotWidth = NSNumber(value: width)
