@@ -90,4 +90,60 @@ struct AppShotsThemesTests {
         #expect(output.contains("Overall style:"))
         #expect(output.contains("Floating decorative elements to include:"))
     }
+
+    // MARK: - Apply
+
+    @Test func `apply renders template then composes with theme`() async throws {
+        let mockThemeRepo = MockThemeRepository()
+        given(mockThemeRepo).compose(themeId: .value("space"), html: .any, canvasWidth: .any, canvasHeight: .any)
+            .willReturn("<div>themed output</div>")
+
+        let mockTemplateRepo = MockTemplateRepository()
+        given(mockTemplateRepo).getTemplate(id: .value("top-hero")).willReturn(
+            makeTemplate(id: "top-hero", name: "Top Hero")
+        )
+
+        let cmd = try AppShotsThemesApply.parse([
+            "--theme", "space",
+            "--template", "top-hero",
+            "--screenshot", "screen.png",
+            "--headline", "Ship Faster",
+        ])
+        let output = try await cmd.execute(themeRepo: mockThemeRepo, templateRepo: mockTemplateRepo)
+        #expect(output.contains("<div>themed output</div>"))
+    }
+
+    @Test func `apply fails when template not found`() async throws {
+        let mockThemeRepo = MockThemeRepository()
+        let mockTemplateRepo = MockTemplateRepository()
+        given(mockTemplateRepo).getTemplate(id: .value("nope")).willReturn(nil)
+
+        let cmd = try AppShotsThemesApply.parse([
+            "--theme", "space",
+            "--template", "nope",
+            "--screenshot", "screen.png",
+            "--headline", "Test",
+        ])
+        do {
+            _ = try await cmd.execute(themeRepo: mockThemeRepo, templateRepo: mockTemplateRepo)
+            Issue.record("Expected error")
+        } catch {
+            #expect("\(error)".contains("not found"))
+        }
+    }
+}
+
+// MARK: - Helpers
+
+private func makeTemplate(id: String, name: String) -> ScreenshotTemplate {
+    ScreenshotTemplate(
+        id: id,
+        name: name,
+        category: .bold,
+        supportedSizes: [.portrait],
+        description: "Test",
+        background: .gradient(from: "#000", to: "#111", angle: 180),
+        textSlots: [TemplateTextSlot(role: .heading, preview: "Test", x: 0.5, y: 0.04, fontSize: 0.1, color: "#fff")],
+        deviceSlots: [TemplateDeviceSlot(x: 0.5, y: 0.18, scale: 0.85)]
+    )
 }
