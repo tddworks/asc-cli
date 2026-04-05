@@ -123,7 +123,10 @@ enum AppShotsRoutes {
                     return jsonError("Template not found", status: .notFound)
                 }
 
-                // Write screenshot to temp file for bridge subprocess, use placeholder in HTML
+                // Screenshot goes to temp file — the Node.js bridge receives HTML via stdin,
+                // so embedding a multi-MB base64 data URL would exceed pipe limits.
+                // Instead, use a file path in the HTML, let the bridge process it,
+                // then replace the path with a data URL in the response for inline iframe display.
                 var screenshotRef = "screenshot.png"
                 if let b64 = screenshotBase64, let data = Data(base64Encoded: b64) {
                     let tmpFile = FileManager.default.temporaryDirectory.appendingPathComponent("blitz-\(UUID().uuidString).png")
