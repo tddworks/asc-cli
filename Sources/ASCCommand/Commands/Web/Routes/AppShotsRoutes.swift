@@ -123,20 +123,30 @@ enum AppShotsRoutes {
                     return jsonError("Template not found", status: .notFound)
                 }
 
-                // Embed screenshot as data URL so themed HTML renders inline
-                let screenshotDataURL = screenshotBase64.map { "data:image/png;base64,\($0)" } ?? ""
+                // Write screenshot to temp file for bridge subprocess, use placeholder in HTML
+                var screenshotRef = "screenshot.png"
+                if let b64 = screenshotBase64, let data = Data(base64Encoded: b64) {
+                    let tmpFile = FileManager.default.temporaryDirectory.appendingPathComponent("blitz-\(UUID().uuidString).png")
+                    try data.write(to: tmpFile)
+                    screenshotRef = tmpFile.path
+                }
                 let content = TemplateContent(
                     headline: headline,
                     subtitle: json["subtitle"] as? String,
-                    screenshotFile: screenshotDataURL
+                    screenshotFile: screenshotRef
                 )
                 let baseHTML = TemplateHTMLRenderer.renderPage(template, content: content)
-                let themedHTML = try await themeRepo.compose(
+                var themedHTML = try await themeRepo.compose(
                     themeId: themeId,
                     html: baseHTML,
                     canvasWidth: json["canvasWidth"] as? Int ?? 1320,
                     canvasHeight: json["canvasHeight"] as? Int ?? 2868
                 )
+
+                // Replace temp file path with data URL so iframe can display inline
+                if let b64 = screenshotBase64 {
+                    themedHTML = themedHTML.replacingOccurrences(of: screenshotRef, with: "data:image/png;base64,\(b64)")
+                }
 
                 let result = try JSONSerialization.data(
                     withJSONObject: ["html": themedHTML],
