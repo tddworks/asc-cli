@@ -7,7 +7,7 @@ import Foundation
 /// and produce a `ScreenshotDesign` ready for generation.
 ///
 /// Plugins (like Blitz) register their own templates via `TemplateRepository`.
-public struct ScreenshotTemplate: Sendable, Equatable, Identifiable, Codable {
+public struct ScreenshotTemplate: Sendable, Equatable, Identifiable {
     public let id: String
     public let name: String
     public let category: TemplateCategory
@@ -68,6 +68,41 @@ extension ScreenshotTemplate {
 
     /// Number of device slots in this template.
     public var deviceCount: Int { deviceSlots.count }
+}
+
+// MARK: - Codable (includes computed properties for REST/JSON consumers)
+
+extension ScreenshotTemplate: Codable {
+    private enum CodingKeys: String, CodingKey {
+        case id, name, category, supportedSizes, description, background, textSlots, deviceSlots
+        case previewHTML, deviceCount
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        name = try c.decode(String.self, forKey: .name)
+        category = try c.decode(TemplateCategory.self, forKey: .category)
+        supportedSizes = try c.decode([ScreenSize].self, forKey: .supportedSizes)
+        description = try c.decode(String.self, forKey: .description)
+        background = try c.decode(SlideBackground.self, forKey: .background)
+        textSlots = try c.decode([TemplateTextSlot].self, forKey: .textSlots)
+        deviceSlots = try c.decode([TemplateDeviceSlot].self, forKey: .deviceSlots)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(name, forKey: .name)
+        try c.encode(category, forKey: .category)
+        try c.encode(supportedSizes, forKey: .supportedSizes)
+        try c.encode(description, forKey: .description)
+        try c.encode(background, forKey: .background)
+        try c.encode(textSlots, forKey: .textSlots)
+        try c.encode(deviceSlots, forKey: .deviceSlots)
+        try c.encode(previewHTML, forKey: .previewHTML)
+        try c.encode(deviceCount, forKey: .deviceCount)
+    }
 }
 
 // MARK: - Presentable
