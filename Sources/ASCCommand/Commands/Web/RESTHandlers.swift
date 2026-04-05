@@ -235,7 +235,9 @@ enum RESTHandlers {
         let apiKey: String
         if let key = json["geminiApiKey"] as? String, !key.isEmpty {
             apiKey = key
-        } else if let config = try? configStorage.load(), let key = config.geminiApiKey {
+        } else if let config = try? configStorage.load() {
+            let key = config.geminiApiKey
+            guard !key.isEmpty else { throw ValidationError("Gemini API key is empty in config") }
             apiKey = key
         } else if let key = ProcessInfo.processInfo.environment["GEMINI_API_KEY"] {
             apiKey = key
