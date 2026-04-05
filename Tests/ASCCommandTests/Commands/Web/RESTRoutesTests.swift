@@ -109,4 +109,29 @@ struct RESTRoutesTests {
         #expect(normalized.contains("\"_links\""))
         #expect(normalized.contains("\"data\""))
     }
+
+    // MARK: - App Shots
+
+    @Test func `templates list returns data wrapper`() async throws {
+        let mockRepo = MockTemplateRepository()
+        given(mockRepo).listTemplates(size: .any).willReturn([])
+        let output = try await RESTHandlers.listTemplates(repo: mockRepo)
+        #expect(output.contains("\"data\""))
+    }
+
+    @Test func `themes list returns data wrapper`() async throws {
+        let mockRepo = MockThemeRepository()
+        given(mockRepo).listThemes().willReturn([])
+        let output = try await RESTHandlers.listThemes(repo: mockRepo)
+        #expect(output.contains("\"data\""))
+    }
+
+    // MARK: - API Root includes app-shots
+
+    @Test func `api root includes app-shots resources`() throws {
+        let output = try RESTHandlers.apiRoot()
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+        #expect(normalized.contains("appShotsTemplates"))
+        #expect(normalized.contains("appShotsThemes"))
+    }
 }

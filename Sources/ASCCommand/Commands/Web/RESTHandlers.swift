@@ -144,6 +144,28 @@ enum RESTHandlers {
         )
     }
 
+    // MARK: - App Shots
+
+    static func listTemplates(repo: any TemplateRepository) async throws -> String {
+        let templates = try await repo.listTemplates(size: nil)
+        return try formatter.formatAgentItems(
+            templates,
+            headers: [],
+            rowMapper: { _ in [] },
+            affordanceMode: .rest
+        )
+    }
+
+    static func listThemes(repo: any ThemeRepository) async throws -> String {
+        let themes = try await repo.listThemes()
+        return try formatter.formatAgentItems(
+            themes,
+            headers: [],
+            rowMapper: { _ in [] },
+            affordanceMode: .rest
+        )
+    }
+
     // MARK: - Territories
 
     static func listTerritories(repo: any TerritoryRepository) async throws -> String {

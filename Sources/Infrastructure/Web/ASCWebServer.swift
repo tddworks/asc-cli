@@ -105,28 +105,6 @@ public struct ASCWebServer: Sendable {
             return jsonResponse(["stdout": output, "stderr": "", "exit_code": exitCode])
         }
 
-        // /api/files/write — write base64-encoded content to .asc/ paths (sandboxed)
-        router.post("/api/files/write") { request, _ in
-            let body = try await request.body.collect(upTo: 10 * 1024 * 1024)
-            guard let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
-                  let path = json["path"] as? String,
-                  let base64 = json["content"] as? String else {
-                return jsonError("Missing path or content")
-            }
-            // Sandbox: only allow writing under .asc/
-            guard path.hasPrefix(".asc/"), !path.contains("..") else {
-                return jsonError("Path must be under .asc/ and cannot contain ..")
-            }
-            guard let data = Data(base64Encoded: base64) else {
-                return jsonError("Invalid base64 content")
-            }
-            let fileURL = URL(fileURLWithPath: path)
-            let dir = fileURL.deletingLastPathComponent()
-            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-            try data.write(to: fileURL)
-            return jsonResponse(["success": true, "path": path, "bytes": data.count])
-        }
-
         // /api/files/read — serve files from .asc/ paths (sandboxed)
         router.get("/api/files/read") { request, _ in
             guard let path = request.uri.queryParameters.get("path"),

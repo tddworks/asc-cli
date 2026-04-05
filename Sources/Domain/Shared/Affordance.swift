@@ -131,6 +131,10 @@ public enum RESTPathResolver {
 
         // Code signing children
         "bundle-id-profiles": (parentParam: "bundle-id-id", parentSegment: "bundle-ids", segment: "profiles"),
+
+        // App shots (screenshot generation)
+        "app-shots-templates": (parentParam: "", parentSegment: "", segment: "app-shots/templates"),
+        "app-shots-themes": (parentParam: "", parentSegment: "", segment: "app-shots/themes"),
     ]
 
     /// Maps CLI `--{param}-id` to the REST segment for the resource itself (used for get/update/delete).

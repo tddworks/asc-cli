@@ -30,6 +30,10 @@ extension APIRoot: AffordanceProviding {
             // Reference data
             Affordance(key: "territories", command: "territories", action: "list", params: [:]),
             Affordance(key: "appCategories", command: "app-categories", action: "list", params: [:]),
+
+            // App shots (screenshot generation)
+            Affordance(key: "appShotsTemplates", command: "app-shots-templates", action: "list", params: [:]),
+            Affordance(key: "appShotsThemes", command: "app-shots-themes", action: "list", params: [:]),
         ]
     }
 }

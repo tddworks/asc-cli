@@ -20,6 +20,7 @@ enum RESTRoutes {
         SimulatorsRoutes.register(on: v1)
         PluginsRoutes.register(on: v1)
         TerritoriesRoutes.register(on: v1)
+        AppShotsRoutes.register(on: v1)
     }
 }
 
