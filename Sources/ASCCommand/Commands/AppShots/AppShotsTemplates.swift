@@ -161,27 +161,30 @@ struct AppShotsTemplatesApply: AsyncParsableCommand {
 
         let isPreview = preview != nil
 
-        // For preview mode, use just the filename so the HTML works when opened
-        // from the same directory as the screenshot
-        let displayFile = isPreview
-            ? URL(fileURLWithPath: screenshot).lastPathComponent
-            : screenshot
-
         if isPreview {
-            let content = TemplateContent(
-                headline: headline,
-                subtitle: subtitle,
-                tagline: tagline,
-                screenshotFile: displayFile
-            )
-
             if preview == .image, let renderer {
+                // For image export, use full path so WebKit resolves it relative to cwd
+                let content = TemplateContent(
+                    headline: headline,
+                    subtitle: subtitle,
+                    tagline: tagline,
+                    screenshotFile: screenshot
+                )
                 let html = TemplateHTMLRenderer.renderPage(template, content: content, fillViewport: true)
                 return try await renderToImage(html: html, renderer: renderer)
             }
 
+            // For HTML preview, use just filename so it works opened from same directory
+            let content = TemplateContent(
+                headline: headline,
+                subtitle: subtitle,
+                tagline: tagline,
+                screenshotFile: URL(fileURLWithPath: screenshot).lastPathComponent
+            )
             return TemplateHTMLRenderer.renderPage(template, content: content)
         }
+
+        let displayFile = screenshot
 
         let screen = ScreenDesign(
             index: 0,

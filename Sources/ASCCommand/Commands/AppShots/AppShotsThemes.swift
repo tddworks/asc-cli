@@ -132,11 +132,14 @@ struct AppShotsThemesApply: AsyncParsableCommand {
             throw ValidationError("Template '\(template)' not found. Run `asc app-shots templates list` to see available templates.")
         }
 
-        // Use just the filename — HTML lives alongside screenshots
-        let filename = URL(fileURLWithPath: screenshot).lastPathComponent
+        // For image export, use full path so WebKit resolves relative to cwd
+        // For HTML output, use just filename so it works opened from same directory
+        let screenshotFile = (preview == .image)
+            ? screenshot
+            : URL(fileURLWithPath: screenshot).lastPathComponent
 
         // Step 1: Render deterministic HTML from template
-        let content = TemplateContent(headline: headline, subtitle: subtitle, tagline: tagline, screenshotFile: filename)
+        let content = TemplateContent(headline: headline, subtitle: subtitle, tagline: tagline, screenshotFile: screenshotFile)
         let baseHTML = TemplateHTMLRenderer.render(tmpl, content: content)
 
         // Step 2: Compose with theme via provider's AI backend
@@ -148,12 +151,10 @@ struct AppShotsThemesApply: AsyncParsableCommand {
         )
 
         if preview == .image, let renderer {
-            // For image export, preview fills the full viewport
             let html = Self.wrapInPage(themedHTML, width: canvasWidth, height: canvasHeight, fillViewport: true)
             return try await renderToImage(html: html, renderer: renderer)
         }
 
-        // For HTML output, preview is 320px centered (cqi units scale)
         return Self.wrapInPage(themedHTML, width: canvasWidth, height: canvasHeight)
     }
 

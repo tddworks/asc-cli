@@ -19,9 +19,10 @@ public final class WebKitHTMLRenderer: HTMLRenderer, @unchecked Sendable {
     private func renderOnMain(html: String, width: Int, height: Int) async throws -> Data {
         let config = WKWebViewConfiguration()
         let webView = WKWebView(frame: NSRect(x: 0, y: 0, width: width, height: height), configuration: config)
-        webView.setValue(false, forKey: "drawsBackground")
 
-        webView.loadHTMLString(html, baseURL: nil)
+        // Use cwd as base URL so relative image paths (e.g. .asc/app-shots/compose-1.png) resolve
+        let baseURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+        webView.loadHTMLString(html, baseURL: baseURL)
 
         // Wait for navigation to finish
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
