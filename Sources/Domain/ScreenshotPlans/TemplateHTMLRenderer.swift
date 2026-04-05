@@ -68,7 +68,7 @@ public enum TemplateHTMLRenderer {
             switch slot.role {
             case .heading: text = content.headline
             case .subheading: text = content.subtitle ?? ""
-            case .tagline: text = slot.preview
+            case .tagline: text = content.tagline ?? slot.preview
             }
         } else {
             text = slot.preview
