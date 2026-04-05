@@ -118,7 +118,7 @@ asc app-shots themes get --id neon --pretty
 asc app-shots themes get --id space --context  # outputs AI prompt
 ```
 
-### `asc app-shots themes apply` *(planned)*
+### `asc app-shots themes apply`
 
 Apply a theme to a template+screenshot composition. Two-step process:
 1. Renders deterministic HTML from template layout
@@ -131,14 +131,27 @@ Apply a theme to a template+screenshot composition. Two-step process:
 | `--screenshot` | *(required)* | Path to screenshot file |
 | `--headline` | `Your Headline` | Headline text |
 | `--subtitle` | — | Optional subtitle text |
-| `--app-name` | `My App` | App name for context |
+| `--tagline` | — | Tagline text (overrides template default) |
+| `--canvas-width` | `1320` | Canvas width in pixels |
+| `--canvas-height` | `2868` | Canvas height in pixels |
+| `--preview` | — | Preview format: `html` (default) or `image` (renders to PNG) |
+| `--image-output` | `.asc/app-shots/output/screen-0.png` | Output PNG path (for `--preview image`) |
 
 ```bash
+# Output themed HTML (default)
 asc app-shots themes apply \
   --theme space \
   --template top-hero \
   --screenshot .asc/app-shots/screen-0.png \
   --headline "Ship Faster"
+
+# Export directly to PNG
+asc app-shots themes apply \
+  --theme space \
+  --template top-hero \
+  --screenshot .asc/app-shots/screen-0.png \
+  --headline "Ship Faster" \
+  --preview image --image-output marketing-screen.png
 ```
 
 ---

@@ -147,8 +147,10 @@ Apply a template to a screenshot. Returns a `ScreenDesign` with affordances for 
 | `--screenshot` | *(required)* | Path to screenshot file |
 | `--headline` | *(required)* | Headline text |
 | `--subtitle` | — | Subtitle text |
+| `--tagline` | — | Tagline text (overrides template default) |
 | `--app-name` | `My App` | App name |
-| `--preview` | — | Output self-contained HTML preview |
+| `--preview` | — | Preview format: `html` or `image` |
+| `--image-output` | `.asc/app-shots/output/screen-0.png` | Output PNG path (for `--preview image`) |
 
 ```bash
 # Get design JSON with affordances
@@ -157,12 +159,19 @@ asc app-shots templates apply \
   --screenshot screen.png \
   --headline "Ship Faster"
 
-# Preview in browser
+# Preview as HTML in browser
 asc app-shots templates apply \
   --id top-hero \
   --screenshot screen.png \
   --headline "Ship Faster" \
-  --preview > composed.html && open composed.html
+  --preview html > composed.html && open composed.html
+
+# Export directly to PNG
+asc app-shots templates apply \
+  --id top-hero \
+  --screenshot screen.png \
+  --headline "Ship Faster" \
+  --preview image --image-output marketing-screen.png
 ```
 
 **JSON output:**
