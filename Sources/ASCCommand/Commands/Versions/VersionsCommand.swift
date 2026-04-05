@@ -25,7 +25,7 @@ struct VersionsList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any VersionRepository) async throws -> String {
+    func execute(repo: any VersionRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let versions = try await repo.listVersions(appId: appId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
@@ -37,7 +37,8 @@ struct VersionsList: AsyncParsableCommand {
                 $0.versionString,
                 $0.state.displayName,
                 $0.isLive ? "yes" : "no",
-            ] }
+            ] },
+            affordanceMode: affordanceMode
         )
     }
 }

@@ -25,13 +25,14 @@ struct AppShotsThemesList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any ThemeRepository) async throws -> String {
+    func execute(repo: any ThemeRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let themes = try await repo.listThemes()
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
             themes,
             headers: ["ID", "Name", "Icon", "Description"],
-            rowMapper: { [$0.id, $0.name, $0.icon, $0.description] }
+            rowMapper: { [$0.id, $0.name, $0.icon, $0.description] },
+            affordanceMode: affordanceMode
         )
     }
 }

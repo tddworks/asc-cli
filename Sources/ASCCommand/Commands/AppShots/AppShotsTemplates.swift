@@ -32,7 +32,7 @@ struct AppShotsTemplatesList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any TemplateRepository) async throws -> String {
+    func execute(repo: any TemplateRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let templates = try await repo.listTemplates(size: size)
 
         if preview {
@@ -60,7 +60,8 @@ struct AppShotsTemplatesList: AsyncParsableCommand {
         return try formatter.formatAgentItems(
             templates,
             headers: ["ID", "Name", "Category", "Devices"],
-            rowMapper: { [$0.id, $0.name, $0.category.rawValue, "\($0.deviceCount)"] }
+            rowMapper: { [$0.id, $0.name, $0.category.rawValue, "\($0.deviceCount)"] },
+            affordanceMode: affordanceMode
         )
     }
 }

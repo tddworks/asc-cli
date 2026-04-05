@@ -17,14 +17,15 @@ struct CertificatesList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any CertificateRepository) async throws -> String {
+    func execute(repo: any CertificateRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let certType = type.flatMap { CertificateType(rawValue: $0.uppercased()) }
         let items = try await repo.listCertificates(certificateType: certType)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
             items,
             headers: ["ID", "Name", "Type", "Expired"],
-            rowMapper: { [$0.id, $0.name, $0.certificateType.rawValue, $0.isExpired ? "Yes" : "No"] }
+            rowMapper: { [$0.id, $0.name, $0.certificateType.rawValue, $0.isExpired ? "Yes" : "No"] },
+            affordanceMode: affordanceMode
         )
     }
 }

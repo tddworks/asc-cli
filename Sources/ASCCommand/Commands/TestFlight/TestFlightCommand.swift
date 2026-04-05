@@ -39,13 +39,14 @@ struct BetaGroupsList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any TestFlightRepository) async throws -> String {
+    func execute(repo: any TestFlightRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let response = try await repo.listBetaGroups(appId: appId, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
             response.data,
             headers: ["ID", "Name", "Internal", "Public Link"],
-            rowMapper: { [$0.id, $0.name, $0.isInternalGroup ? "Yes" : "No", $0.publicLinkEnabled ? "Yes" : "No"] }
+            rowMapper: { [$0.id, $0.name, $0.isInternalGroup ? "Yes" : "No", $0.publicLinkEnabled ? "Yes" : "No"] },
+            affordanceMode: affordanceMode
         )
     }
 }

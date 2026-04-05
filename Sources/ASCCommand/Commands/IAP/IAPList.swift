@@ -20,13 +20,14 @@ struct IAPList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any InAppPurchaseRepository) async throws -> String {
+    func execute(repo: any InAppPurchaseRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let response = try await repo.listInAppPurchases(appId: appId, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
             response.data,
             headers: ["ID", "Reference Name", "Product ID", "Type", "State"],
-            rowMapper: { [$0.id, $0.referenceName, $0.productId, $0.type.displayName, $0.state.rawValue] }
+            rowMapper: { [$0.id, $0.referenceName, $0.productId, $0.type.displayName, $0.state.rawValue] },
+            affordanceMode: affordanceMode
         )
     }
 }

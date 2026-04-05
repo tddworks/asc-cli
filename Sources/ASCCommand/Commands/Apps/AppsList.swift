@@ -17,13 +17,14 @@ struct AppsList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AppRepository) async throws -> String {
+    func execute(repo: any AppRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let response = try await repo.listApps(limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
             response.data,
             headers: ["ID", "Name", "Bundle ID", "SKU"],
-            rowMapper: { [$0.id, $0.displayName, $0.bundleId, $0.sku ?? "-"] }
+            rowMapper: { [$0.id, $0.displayName, $0.bundleId, $0.sku ?? "-"] },
+            affordanceMode: affordanceMode
         )
     }
 }

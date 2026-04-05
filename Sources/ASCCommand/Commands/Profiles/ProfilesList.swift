@@ -20,14 +20,15 @@ struct ProfilesList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any ProfileRepository) async throws -> String {
+    func execute(repo: any ProfileRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let profileType = type.flatMap { ProfileType(rawValue: $0.uppercased()) }
         let items = try await repo.listProfiles(bundleIdId: bundleIdId, profileType: profileType)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
             items,
             headers: ["ID", "Name", "Type", "State"],
-            rowMapper: { [$0.id, $0.name, $0.profileType.rawValue, $0.profileState.rawValue] }
+            rowMapper: { [$0.id, $0.name, $0.profileType.rawValue, $0.profileState.rawValue] },
+            affordanceMode: affordanceMode
         )
     }
 }

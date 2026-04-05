@@ -20,13 +20,14 @@ struct SubscriptionGroupsList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubscriptionGroupRepository) async throws -> String {
+    func execute(repo: any SubscriptionGroupRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let response = try await repo.listSubscriptionGroups(appId: appId, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
             response.data,
             headers: ["ID", "Reference Name"],
-            rowMapper: { [$0.id, $0.referenceName] }
+            rowMapper: { [$0.id, $0.referenceName] },
+            affordanceMode: affordanceMode
         )
     }
 }

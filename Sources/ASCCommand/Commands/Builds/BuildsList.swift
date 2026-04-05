@@ -26,14 +26,15 @@ struct BuildsList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any BuildRepository) async throws -> String {
+    func execute(repo: any BuildRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let platformFilter = platform.flatMap { BuildUploadPlatform(cliArgument: $0) }
         let response = try await repo.listBuilds(appId: appId, platform: platformFilter, version: version, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
             response.data,
             headers: ["ID", "Version", "Build Number", "Platform", "State", "Expired"],
-            rowMapper: { [$0.id, $0.version, $0.buildNumber ?? "-", $0.platform?.rawValue ?? "-", $0.processingState.rawValue, $0.expired ? "Yes" : "No"] }
+            rowMapper: { [$0.id, $0.version, $0.buildNumber ?? "-", $0.platform?.rawValue ?? "-", $0.processingState.rawValue, $0.expired ? "Yes" : "No"] },
+            affordanceMode: affordanceMode
         )
     }
 }
