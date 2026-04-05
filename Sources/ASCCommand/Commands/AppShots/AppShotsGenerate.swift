@@ -26,6 +26,9 @@ struct AppShotsGenerate: AsyncParsableCommand {
     @Option(name: .long, help: "Style reference image — Gemini replicates its visual style")
     var styleReference: String?
 
+    @Option(name: .long, help: "Named device type — resizes output to exact App Store dimensions. E.g.: APP_IPHONE_67 (1290×2796)")
+    var deviceType: AppShotsDisplayType?
+
     @Option(name: .long, help: "Custom enhancement prompt")
     var prompt: String?
 
@@ -62,11 +65,20 @@ struct AppShotsGenerate: AsyncParsableCommand {
             styleRefData: styleRefData
         )
 
+        // Resize if device type specified
+        let finalData: Data
+        if let deviceType {
+            let dims = deviceType.dimensions
+            finalData = resizeImageData(resultData, toWidth: dims.width, height: dims.height)
+        } else {
+            finalData = resultData
+        }
+
         // Write output
         let outputDirURL = URL(fileURLWithPath: outputDir)
         try FileManager.default.createDirectory(at: outputDirURL, withIntermediateDirectories: true)
         let outputPath = outputDirURL.appendingPathComponent("screen-0.png")
-        try resultData.write(to: outputPath)
+        try finalData.write(to: outputPath)
 
         return formatOutput(path: outputPath.path)
     }

@@ -32,6 +32,12 @@ struct AppShotsGenerateTests {
         #expect(cmd.outputDir == ".asc/app-shots/output")
         #expect(cmd.styleReference == nil)
         #expect(cmd.prompt == nil)
+        #expect(cmd.deviceType == nil)
+    }
+
+    @Test func `generate parses device type`() throws {
+        let cmd = try AppShotsGenerate.parse(["--file", "screen.png", "--device-type", "APP_IPHONE_67"])
+        #expect(cmd.deviceType == .iphone67)
     }
 
     @Test func `execute throws when file not found`() async throws {
