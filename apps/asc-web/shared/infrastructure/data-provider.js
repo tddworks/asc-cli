@@ -1,5 +1,5 @@
-// Infrastructure: Abstraction layer for swapping mock <-> CLI <-> REST API
-// Decoupled from presentation — uses callback hooks for logging/notifications
+// Infrastructure: REST API data provider with mock fallback
+// Uses HATEOAS — navigates resources by following _links from server responses
 import { MockDataProvider } from './mock-data.js';
 import {
   enrichApp, enrichVersion, enrichBuild, enrichBetaGroup,
@@ -46,6 +46,33 @@ export const DataProvider = {
     this._mode = mode;
     if (this._onNotify) this._onNotify(`Switched to ${mode === 'rest' ? 'REST API' : 'Mock Data'} mode`, 'info');
     if (this._onModeChange) this._onModeChange();
+  },
+
+  /// Legacy: execute a CLI command via /api/run (for pages not yet migrated to REST).
+  async fetch(command) {
+    if (this._onCommand) this._onCommand(`asc ${command}`);
+    if (this._mode === 'mock') return this._fetchMock(command);
+    try {
+      const fullCmd = command.startsWith('asc ') ? command : `asc ${command}`;
+      const resp = await fetch(`${this._serverUrl}/api/run`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: fullCmd }),
+      });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+      if (data.exit_code !== 0) {
+        if (this._onError) this._onError(data.stderr || `Exit code ${data.exit_code}`);
+        return null;
+      }
+      let result;
+      try { result = JSON.parse(data.stdout); } catch { result = data.stdout; }
+      if (this._onOutput) this._onOutput(JSON.stringify(result, null, 2).substring(0, 500));
+      return result;
+    } catch (e) {
+      if (this._onError) this._onError(e.message);
+      return null;
+    }
   },
 
   // MARK: - REST API (HATEOAS)

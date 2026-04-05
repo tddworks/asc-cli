@@ -1,5 +1,6 @@
 // Page: Dashboard
 import { DataProvider } from '../../../../shared/infrastructure/data-provider.js';
+import { enrichApp, enrichVersion, enrichBuild } from '../../../../shared/domain/enrichers.js';
 import { state } from '../state.js';
 import { statusBadge, formatDate } from '../helpers.js';
 
@@ -104,26 +105,29 @@ export function renderDashboard() {
 }
 
 export async function loadDashboard() {
-  const result = await DataProvider.fetch('apps list');
+  const result = await DataProvider.get('/api/v1/apps');
   if (result?.data) {
-    state.apps = result.data;
+    state.apps = result.data.map(enrichApp);
     const allVersions = [];
-    for (const app of result.data) {
-      const vr = await DataProvider.fetch(`versions list --app-id ${app.id}`);
-      if (vr?.data) allVersions.push(...vr.data);
+    for (const app of state.apps) {
+      if (!app.affordances?.listVersions) continue;
+      const vr = await DataProvider.follow(app.affordances.listVersions);
+      if (vr?.data) allVersions.push(...vr.data.map(enrichVersion));
     }
     const live = allVersions.filter(v => v.isLive).length;
     const pending = allVersions.filter(v => v.isPending).length;
-    document.getElementById('statApps').textContent = result.data.length;
+    document.getElementById('statApps').textContent = state.apps.length;
     document.getElementById('statLive').textContent = live;
     document.getElementById('statPending').textContent = pending;
-    document.getElementById('statAppsChange').textContent = `${result.data.length} total`;
+    document.getElementById('statAppsChange').textContent = `${state.apps.length} total`;
   }
-  const appId = state.apps[0]?.id || '6449071230';
-  const br = await DataProvider.fetch(`builds list --app-id ${appId}`);
+  const app = state.apps[0];
+  if (!app?.affordances?.listBuilds) return;
+  const br = await DataProvider.follow(app.affordances.listBuilds);
   if (br?.data) {
-    document.getElementById('statBuilds').textContent = br.data.length;
-    document.getElementById('recentActivity').innerHTML = `<table><thead><tr><th>Build</th><th>Version</th><th>Usable</th><th>Status</th><th>Uploaded</th></tr></thead><tbody>${br.data.slice(0, 5).map(b => `<tr>
+    const builds = br.data.map(enrichBuild);
+    document.getElementById('statBuilds').textContent = builds.length;
+    document.getElementById('recentActivity').innerHTML = `<table><thead><tr><th>Build</th><th>Version</th><th>Usable</th><th>Status</th><th>Uploaded</th></tr></thead><tbody>${builds.slice(0, 5).map(b => `<tr>
       <td><span class="cell-primary">#${b.buildNumber}</span></td>
       <td>${b.version}</td>
       <td>${b.isUsable ? '<span class="status live">Yes</span>' : '<span class="status draft">No</span>'}</td>
