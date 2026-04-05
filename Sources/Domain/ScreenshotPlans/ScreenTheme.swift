@@ -132,6 +132,13 @@ public protocol ThemeProvider: Sendable {
 
     /// Return all themes this provider offers.
     func themes() async throws -> [ScreenTheme]
+
+    /// Restyle deterministic HTML with a theme using this provider's AI backend.
+    ///
+    /// Each plugin implements this differently:
+    /// - Blitz: spawns `node compose.mjs` with `mode: "restyle"` → Claude
+    /// - Others: could use Gemini, local LLM, or deterministic CSS transforms
+    func compose(html: String, theme: ScreenTheme, canvasWidth: Int, canvasHeight: Int) async throws -> String
 }
 
 /// Repository for querying visual themes across all providers.
@@ -142,4 +149,7 @@ public protocol ThemeRepository: Sendable {
 
     /// Get a specific theme by ID (searches all providers).
     func getTheme(id: String) async throws -> ScreenTheme?
+
+    /// Compose themed HTML — finds the provider that owns the theme and delegates to it.
+    func compose(themeId: String, html: String, canvasWidth: Int, canvasHeight: Int) async throws -> String
 }

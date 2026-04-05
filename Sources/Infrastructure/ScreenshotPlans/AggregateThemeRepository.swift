@@ -32,4 +32,27 @@ public final actor AggregateThemeRepository: ThemeRepository {
         let all = try await listThemes()
         return all.first { $0.id == id }
     }
+
+    public func compose(themeId: String, html: String, canvasWidth: Int, canvasHeight: Int) async throws -> String {
+        // Find which provider owns this theme
+        for provider in providers {
+            let themes = try await provider.themes()
+            if let theme = themes.first(where: { $0.id == themeId }) {
+                return try await provider.compose(html: html, theme: theme, canvasWidth: canvasWidth, canvasHeight: canvasHeight)
+            }
+        }
+        throw ThemeComposeError.themeNotFound(themeId)
+    }
+}
+
+/// Errors from theme composition.
+public enum ThemeComposeError: Error, CustomStringConvertible {
+    case themeNotFound(String)
+
+    public var description: String {
+        switch self {
+        case .themeNotFound(let id):
+            return "Theme '\(id)' not found. Run `asc app-shots themes list` to see available themes."
+        }
+    }
 }
