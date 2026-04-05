@@ -8,7 +8,7 @@ import Foundation
 
 /// /api/v1/app-shots — Screenshot template, theme, and export routes.
 /// Read routes delegate to CLI commands. Write routes handle base64 ↔ temp file bridging.
-enum AppShotsRoutes {
+enum AppShotsController {
     static func register(on group: RouterGroup<BasicWebSocketRequestContext>) {
 
         // MARK: - Read (delegate to commands)

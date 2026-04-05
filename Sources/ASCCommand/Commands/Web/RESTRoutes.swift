@@ -4,22 +4,51 @@ import Infrastructure
 import ASCPlugin
 import Foundation
 
-/// Composes all REST API v1 route files into a single configurator.
-/// Each domain has its own route file in `Routes/` following OCP —
-/// adding a new domain = add one file, register it here.
+/// Composes all REST API v1 controllers into a single configurator.
+///
+/// Controllers are structs with injected dependencies (Hummingbird controller pattern).
+/// Repos are created once here, not per request.
 enum RESTRoutes {
 
     @Sendable
     static func configure(router: ASCRouter) {
-        RootRoutes.register(on: router)
+        RootController().addRoutes(to: router)
 
         let v1 = router.group("/api/v1")
-        AppsRoutes.register(on: v1)
-        CodeSigningRoutes.register(on: v1)
-        SimulatorsRoutes.register(on: v1)
-        PluginsRoutes.register(on: v1)
-        TerritoriesRoutes.register(on: v1)
-        AppShotsRoutes.register(on: v1)
+
+        // Create shared auth + factory once
+        let auth = CompositeAuthProvider()
+        let factory = ClientFactory()
+
+        // Apps & child resources
+        if let apps = try? AppsController(
+            appRepo: factory.makeAppRepository(authProvider: auth),
+            versionRepo: factory.makeVersionRepository(authProvider: auth),
+            buildRepo: factory.makeBuildRepository(authProvider: auth),
+            testFlightRepo: factory.makeTestFlightRepository(authProvider: auth),
+            reviewRepo: factory.makeCustomerReviewRepository(authProvider: auth),
+            iapRepo: factory.makeInAppPurchaseRepository(authProvider: auth),
+            subscriptionGroupRepo: factory.makeSubscriptionGroupRepository(authProvider: auth)
+        ) { apps.addRoutes(to: v1) }
+
+        // Code signing
+        if let signing = try? CodeSigningController(
+            certRepo: factory.makeCertificateRepository(authProvider: auth),
+            bundleIDRepo: factory.makeBundleIDRepository(authProvider: auth),
+            deviceRepo: factory.makeDeviceRepository(authProvider: auth),
+            profileRepo: factory.makeProfileRepository(authProvider: auth)
+        ) { signing.addRoutes(to: v1) }
+
+        // Non-authenticated resources
+        SimulatorsController(repo: factory.makeSimulatorRepository()).addRoutes(to: v1)
+        PluginsController(repo: factory.makePluginRepository()).addRoutes(to: v1)
+
+        if let territories = try? TerritoriesController(
+            repo: factory.makeTerritoryRepository(authProvider: auth)
+        ) { territories.addRoutes(to: v1) }
+
+        // App Shots (still uses command delegation for complex POST routes)
+        AppShotsController.register(on: v1)
     }
 }
 
