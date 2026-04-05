@@ -22,10 +22,12 @@ public enum TemplateHTMLRenderer {
         let bodyStyle = fillViewport
             ? "margin:0;overflow:hidden"
             : "display:flex;justify-content:center;align-items:center;min-height:100vh;background:#111"
+        let htmlHeight = fillViewport ? "html,body{width:100%;height:100%}" : ""
         return "<!DOCTYPE html><html><head><meta charset=\"utf-8\">" +
             "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
             "<title>\(template.name)</title>" +
             "<style>*{margin:0;padding:0;box-sizing:border-box}" +
+            "\(htmlHeight)" +
             "body{\(bodyStyle)}" +
             ".preview{\(previewStyle)}</style>" +
             "</head><body><div class=\"preview\">\(inner)</div></body></html>"
