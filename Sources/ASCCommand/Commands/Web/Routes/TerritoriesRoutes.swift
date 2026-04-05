@@ -8,7 +8,8 @@ import Domain
 enum TerritoriesRoutes {
     static func register(on group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/territories") { _, _ -> Response in
-            try await restExec { try await TerritoriesList.parse(["--pretty"]).execute(repo: ClientProvider.makeTerritoryRepository(), affordanceMode: .rest) }
+            let territories = try await ClientProvider.makeTerritoryRepository().listTerritories()
+            return try restFormat(territories)
         }
     }
 }

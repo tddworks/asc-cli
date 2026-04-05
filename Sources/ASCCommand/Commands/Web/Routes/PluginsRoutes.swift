@@ -8,11 +8,13 @@ import Domain
 enum PluginsRoutes {
     static func register(on group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/plugins") { _, _ -> Response in
-            try await restExec { try await PluginsList.parse(["--pretty"]).execute(repo: ClientProvider.makePluginRepository(), affordanceMode: .rest) }
+            let plugins = try await ClientProvider.makePluginRepository().listInstalled()
+            return try restFormat(plugins)
         }
 
         group.get("/plugins/market") { _, _ -> Response in
-            try await restExec { try await MarketList.parse(["--pretty"]).execute(repo: ClientProvider.makePluginRepository(), affordanceMode: .rest) }
+            let plugins = try await ClientProvider.makePluginRepository().listAvailable()
+            return try restFormat(plugins)
         }
     }
 }

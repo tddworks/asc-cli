@@ -66,6 +66,15 @@ extension AppStoreVersion: Codable {
     }
 }
 
+extension AppStoreVersion: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Platform", "Version", "State", "Live"]
+    }
+    public var tableRow: [String] {
+        [id, platform.displayName, versionString, state.displayName, isLive ? "Yes" : "No"]
+    }
+}
+
 extension AppStoreVersion: AffordanceProviding {
     public var structuredAffordances: [Affordance] {
         var items: [Affordance] = [

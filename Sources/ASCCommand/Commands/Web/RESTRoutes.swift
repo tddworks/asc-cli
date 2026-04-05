@@ -60,3 +60,19 @@ func jsonEncode(_ dict: [String: Any]) -> String {
     guard let data = try? JSONSerialization.data(withJSONObject: dict, options: [.sortedKeys]) else { return "{}" }
     return String(data: data, encoding: .utf8) ?? "{}"
 }
+
+/// Format Presentable domain models as a REST JSON response.
+/// This is the REST equivalent of CLI's `formatter.formatAgentItems(items)`.
+func restFormat<T: Encodable & AffordanceProviding & Presentable>(
+    _ items: [T]
+) throws -> Response {
+    let formatter = OutputFormatter(format: .json, pretty: true)
+    return restResponse(try formatter.formatAgentItems(items, affordanceMode: .rest))
+}
+
+/// Format a single Presentable domain model as a REST JSON response.
+func restFormat<T: Encodable & AffordanceProviding & Presentable>(
+    _ item: T
+) throws -> Response {
+    try restFormat([item])
+}

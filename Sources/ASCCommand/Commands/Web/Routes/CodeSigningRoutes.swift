@@ -8,19 +8,23 @@ import Domain
 enum CodeSigningRoutes {
     static func register(on group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/certificates") { _, _ -> Response in
-            try await restExec { try await CertificatesList.parse(["--pretty"]).execute(repo: ClientProvider.makeCertificateRepository(), affordanceMode: .rest) }
+            let certs = try await ClientProvider.makeCertificateRepository().listCertificates(certificateType: nil)
+            return try restFormat(certs)
         }
 
         group.get("/bundle-ids") { _, _ -> Response in
-            try await restExec { try await BundleIDsList.parse(["--pretty"]).execute(repo: ClientProvider.makeBundleIDRepository(), affordanceMode: .rest) }
+            let ids = try await ClientProvider.makeBundleIDRepository().listBundleIDs(platform: nil, identifier: nil)
+            return try restFormat(ids)
         }
 
         group.get("/devices") { _, _ -> Response in
-            try await restExec { try await DevicesList.parse(["--pretty"]).execute(repo: ClientProvider.makeDeviceRepository(), affordanceMode: .rest) }
+            let devices = try await ClientProvider.makeDeviceRepository().listDevices(platform: nil)
+            return try restFormat(devices)
         }
 
         group.get("/profiles") { _, _ -> Response in
-            try await restExec { try await ProfilesList.parse(["--pretty"]).execute(repo: ClientProvider.makeProfileRepository(), affordanceMode: .rest) }
+            let profiles = try await ClientProvider.makeProfileRepository().listProfiles(bundleIdId: nil, profileType: nil)
+            return try restFormat(profiles)
         }
     }
 }

@@ -8,7 +8,8 @@ import Domain
 enum SimulatorsRoutes {
     static func register(on group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/simulators") { _, _ -> Response in
-            try await restExec { try await SimulatorsList.parse(["--pretty"]).execute(repo: ClientProvider.makeSimulatorRepository(), affordanceMode: .rest) }
+            let sims = try await ClientProvider.makeSimulatorRepository().listSimulators(filter: .booted)
+            return try restFormat(sims)
         }
     }
 }
