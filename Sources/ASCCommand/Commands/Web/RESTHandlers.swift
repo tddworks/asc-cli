@@ -144,6 +144,52 @@ enum RESTHandlers {
         )
     }
 
+    static func listMarketPlugins(repo: any PluginRepository) async throws -> String {
+        let plugins = try await repo.listAvailable()
+        return try formatter.formatAgentItems(
+            plugins,
+            headers: [],
+            rowMapper: { _ in [] },
+            affordanceMode: .rest
+        )
+    }
+
+    // MARK: - Reviews
+
+    static func listReviews(appId: String, repo: any CustomerReviewRepository) async throws -> String {
+        let reviews = try await repo.listReviews(appId: appId)
+        return try formatter.formatAgentItems(
+            reviews,
+            headers: [],
+            rowMapper: { _ in [] },
+            affordanceMode: .rest
+        )
+    }
+
+    // MARK: - IAP
+
+    static func listIAP(appId: String, repo: any InAppPurchaseRepository) async throws -> String {
+        let iaps = try await repo.listInAppPurchases(appId: appId, limit: nil)
+        return try formatter.formatAgentItems(
+            iaps.data,
+            headers: [],
+            rowMapper: { _ in [] },
+            affordanceMode: .rest
+        )
+    }
+
+    // MARK: - Subscriptions
+
+    static func listSubscriptionGroups(appId: String, repo: any SubscriptionGroupRepository) async throws -> String {
+        let response = try await repo.listSubscriptionGroups(appId: appId, limit: nil)
+        return try formatter.formatAgentItems(
+            response.data,
+            headers: [],
+            rowMapper: { _ in [] },
+            affordanceMode: .rest
+        )
+    }
+
     // MARK: - App Shots
 
     static func listTemplates(repo: any TemplateRepository) async throws -> String {

@@ -67,5 +67,44 @@ enum AppsRoutes {
                 return jsonError("Failed to list beta groups: \(error.localizedDescription)", status: .internalServerError)
             }
         }
+
+        group.get("/apps/:appId/reviews") { _, context -> Response in
+            guard let appId = context.parameters.get("appId") else {
+                return jsonError("Missing appId parameter")
+            }
+            do {
+                let repo = try ClientProvider.makeCustomerReviewRepository()
+                let output = try await RESTHandlers.listReviews(appId: appId, repo: repo)
+                return restResponse(output)
+            } catch {
+                return jsonError("Failed to list reviews: \(error.localizedDescription)", status: .internalServerError)
+            }
+        }
+
+        group.get("/apps/:appId/iap") { _, context -> Response in
+            guard let appId = context.parameters.get("appId") else {
+                return jsonError("Missing appId parameter")
+            }
+            do {
+                let repo = try ClientProvider.makeInAppPurchaseRepository()
+                let output = try await RESTHandlers.listIAP(appId: appId, repo: repo)
+                return restResponse(output)
+            } catch {
+                return jsonError("Failed to list IAP: \(error.localizedDescription)", status: .internalServerError)
+            }
+        }
+
+        group.get("/apps/:appId/subscription-groups") { _, context -> Response in
+            guard let appId = context.parameters.get("appId") else {
+                return jsonError("Missing appId parameter")
+            }
+            do {
+                let repo = try ClientProvider.makeSubscriptionGroupRepository()
+                let output = try await RESTHandlers.listSubscriptionGroups(appId: appId, repo: repo)
+                return restResponse(output)
+            } catch {
+                return jsonError("Failed to list subscription groups: \(error.localizedDescription)", status: .internalServerError)
+            }
+        }
     }
 }
