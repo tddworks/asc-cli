@@ -30,11 +30,6 @@ struct BuildsList: AsyncParsableCommand {
         let platformFilter = platform.flatMap { BuildUploadPlatform(cliArgument: $0) }
         let response = try await repo.listBuilds(appId: appId, platform: platformFilter, version: version, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            response.data,
-            headers: ["ID", "Version", "Build Number", "Platform", "State", "Expired"],
-            rowMapper: { [$0.id, $0.version, $0.buildNumber ?? "-", $0.platform?.rawValue ?? "-", $0.processingState.rawValue, $0.expired ? "Yes" : "No"] },
-            affordanceMode: affordanceMode
-        )
+        return try formatter.formatAgentItems(response.data, affordanceMode: affordanceMode)
     }
 }

@@ -100,6 +100,15 @@ extension Subscription: Codable {
     }
 }
 
+extension Subscription: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Name", "Product ID", "Period", "State"]
+    }
+    public var tableRow: [String] {
+        [id, name, productId, subscriptionPeriod.displayName, state.rawValue]
+    }
+}
+
 extension Subscription: AffordanceProviding {
     public var affordances: [String: String] {
         var result: [String: String] = [

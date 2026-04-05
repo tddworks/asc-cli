@@ -23,11 +23,6 @@ struct SubscriptionGroupsList: AsyncParsableCommand {
     func execute(repo: any SubscriptionGroupRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let response = try await repo.listSubscriptionGroups(appId: appId, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            response.data,
-            headers: ["ID", "Reference Name"],
-            rowMapper: { [$0.id, $0.referenceName] },
-            affordanceMode: affordanceMode
-        )
+        return try formatter.formatAgentItems(response.data, affordanceMode: affordanceMode)
     }
 }

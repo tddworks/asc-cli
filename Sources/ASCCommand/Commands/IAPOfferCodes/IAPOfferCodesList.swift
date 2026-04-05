@@ -20,10 +20,6 @@ struct IAPOfferCodesList: AsyncParsableCommand {
     func execute(repo: any InAppPurchaseOfferCodeRepository) async throws -> String {
         let items = try await repo.listOfferCodes(iapId: iapId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            items,
-            headers: ["ID", "Name", "Eligibilities", "Active"],
-            rowMapper: { [$0.id, $0.name, $0.customerEligibilities.map(\.rawValue).joined(separator: ", "), String($0.isActive)] }
-        )
+        return try formatter.formatAgentItems(items)
     }
 }

@@ -20,10 +20,6 @@ struct BetaReviewSubmissionsList: AsyncParsableCommand {
     func execute(repo: any BetaAppReviewRepository) async throws -> String {
         let submissions = try await repo.listSubmissions(buildId: buildId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            submissions,
-            headers: ["ID", "Build ID", "State", "Submitted Date"],
-            rowMapper: { [$0.id, $0.buildId, $0.state.rawValue, $0.submittedDate?.description ?? "-"] }
-        )
+        return try formatter.formatAgentItems(submissions)
     }
 }

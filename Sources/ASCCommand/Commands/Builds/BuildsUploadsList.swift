@@ -20,10 +20,6 @@ struct BuildsUploadsList: AsyncParsableCommand {
     func execute(repo: any BuildUploadRepository) async throws -> String {
         let uploads = try await repo.listBuildUploads(appId: appId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            uploads,
-            headers: ["ID", "Version", "Build", "State"],
-            rowMapper: { [$0.id, $0.version, $0.buildNumber, $0.state.rawValue] }
-        )
+        return try formatter.formatAgentItems(uploads)
     }
 }

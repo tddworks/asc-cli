@@ -24,6 +24,15 @@ public struct Territory: Sendable, Equatable, Identifiable, Codable {
     }
 }
 
+extension Territory: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Currency"]
+    }
+    public var tableRow: [String] {
+        [id, currency ?? "—"]
+    }
+}
+
 extension Territory: AffordanceProviding {
     public var affordances: [String: String] {
         [

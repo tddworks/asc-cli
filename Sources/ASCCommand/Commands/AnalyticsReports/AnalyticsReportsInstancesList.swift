@@ -24,10 +24,6 @@ struct AnalyticsReportsInstancesList: AsyncParsableCommand {
         let parsed = granularity.flatMap { AnalyticsGranularity(cliArgument: $0) }
         let instances = try await repo.listInstances(reportId: reportId, granularity: parsed)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            instances,
-            headers: ["ID", "Granularity", "Processing Date"],
-            rowMapper: { [$0.id, $0.granularity?.rawValue ?? "", $0.processingDate ?? ""] }
-        )
+        return try formatter.formatAgentItems(instances)
     }
 }

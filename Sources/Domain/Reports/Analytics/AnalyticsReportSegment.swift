@@ -26,6 +26,15 @@ public struct AnalyticsReportSegment: Sendable, Equatable, Identifiable, Afforda
     }
 }
 
+extension AnalyticsReportSegment: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Checksum", "Size (bytes)", "URL"]
+    }
+    public var tableRow: [String] {
+        [id, checksum ?? "", sizeInBytes.map { "\($0)" } ?? "", url ?? ""]
+    }
+}
+
 extension AnalyticsReportSegment: Codable {
     enum CodingKeys: String, CodingKey {
         case id, instanceId, checksum, sizeInBytes, url

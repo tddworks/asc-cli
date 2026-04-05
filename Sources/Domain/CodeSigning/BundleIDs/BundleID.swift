@@ -21,6 +21,15 @@ public struct BundleID: Sendable, Equatable, Identifiable, Codable {
     }
 }
 
+extension BundleID: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Name", "Identifier", "Platform"]
+    }
+    public var tableRow: [String] {
+        [id, name, identifier, platform.displayName]
+    }
+}
+
 extension BundleID: AffordanceProviding {
     public var affordances: [String: String] {
         [

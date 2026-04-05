@@ -45,6 +45,15 @@ extension InAppPurchasePricePoint: Codable {
     }
 }
 
+extension InAppPurchasePricePoint: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Territory", "Customer Price", "Proceeds"]
+    }
+    public var tableRow: [String] {
+        [id, territory ?? "", customerPrice ?? "", proceeds ?? ""]
+    }
+}
+
 extension InAppPurchasePricePoint: AffordanceProviding {
     public var affordances: [String: String] {
         var cmds = ["listPricePoints": "asc iap price-points list --iap-id \(iapId)"]

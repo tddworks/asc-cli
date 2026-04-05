@@ -21,16 +21,6 @@ struct UsersList: AsyncParsableCommand {
         let domainRole = role.flatMap { UserRole(cliArgument: $0) }
         let items = try await repo.listUsers(role: domainRole)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            items,
-            headers: ["ID", "Username", "Name", "Roles", "All Apps"],
-            rowMapper: { [
-                $0.id,
-                $0.username,
-                "\($0.firstName) \($0.lastName)",
-                $0.roles.map(\.rawValue).joined(separator: ", "),
-                $0.isAllAppsVisible ? "Yes" : "No",
-            ] }
-        )
+        return try formatter.formatAgentItems(items)
     }
 }

@@ -56,6 +56,15 @@ extension InAppPurchaseOfferCode: Codable {
     }
 }
 
+extension InAppPurchaseOfferCode: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Name", "Eligibilities", "Active"]
+    }
+    public var tableRow: [String] {
+        [id, name, customerEligibilities.map(\.rawValue).joined(separator: ", "), String(isActive)]
+    }
+}
+
 extension InAppPurchaseOfferCode: AffordanceProviding {
     public var affordances: [String: String] {
         var cmds: [String: String] = [

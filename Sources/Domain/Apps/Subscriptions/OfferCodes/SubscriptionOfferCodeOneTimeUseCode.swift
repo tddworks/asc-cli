@@ -50,6 +50,15 @@ extension SubscriptionOfferCodeOneTimeUseCode: Codable {
     }
 }
 
+extension SubscriptionOfferCodeOneTimeUseCode: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Codes", "Expiration", "Active"]
+    }
+    public var tableRow: [String] {
+        [id, String(numberOfCodes), expirationDate ?? "", String(isActive)]
+    }
+}
+
 extension SubscriptionOfferCodeOneTimeUseCode: AffordanceProviding {
     public var affordances: [String: String] {
         var cmds: [String: String] = [

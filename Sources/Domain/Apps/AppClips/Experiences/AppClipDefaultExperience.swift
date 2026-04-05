@@ -36,6 +36,15 @@ extension AppClipDefaultExperience: Codable {
     }
 }
 
+extension AppClipDefaultExperience: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "App Clip ID", "Action"]
+    }
+    public var tableRow: [String] {
+        [id, appClipId, action?.rawValue ?? ""]
+    }
+}
+
 extension AppClipDefaultExperience: AffordanceProviding {
     public var affordances: [String: String] {
         [

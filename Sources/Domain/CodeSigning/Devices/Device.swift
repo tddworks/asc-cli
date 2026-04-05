@@ -33,6 +33,15 @@ public struct Device: Sendable, Equatable, Identifiable, Codable {
     public var isEnabled: Bool { status == .enabled }
 }
 
+extension Device: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Name", "UDID", "Class", "Status"]
+    }
+    public var tableRow: [String] {
+        [id, name, udid, deviceClass.rawValue, status.rawValue]
+    }
+}
+
 extension Device: AffordanceProviding {
     public var affordances: [String: String] {
         ["listDevices": "asc devices list"]

@@ -34,6 +34,15 @@ extension AppClipDefaultExperienceLocalization: Codable {
     }
 }
 
+extension AppClipDefaultExperienceLocalization: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Experience ID", "Locale", "Subtitle"]
+    }
+    public var tableRow: [String] {
+        [id, experienceId, locale, subtitle ?? ""]
+    }
+}
+
 extension AppClipDefaultExperienceLocalization: AffordanceProviding {
     public var affordances: [String: String] {
         [

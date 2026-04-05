@@ -22,10 +22,6 @@ struct IrisAppsList: AsyncParsableCommand {
         let session = try cookieProvider.resolveSession()
         let apps = try await repo.listAppBundles(session: session)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            apps,
-            headers: ["ID", "Name", "Bundle ID", "SKU", "Platforms"],
-            rowMapper: { [$0.id, $0.name, $0.bundleId, $0.sku, $0.platforms.joined(separator: ",")] }
-        )
+        return try formatter.formatAgentItems(apps)
     }
 }

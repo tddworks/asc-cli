@@ -70,6 +70,15 @@ public enum InAppPurchaseState: String, Sendable, Codable, Equatable {
     public var isPendingReview: Bool { self == .waitingForReview || self == .inReview }
 }
 
+extension InAppPurchase: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Reference Name", "Product ID", "Type", "State"]
+    }
+    public var tableRow: [String] {
+        [id, referenceName, productId, type.displayName, state.rawValue]
+    }
+}
+
 extension InAppPurchase: AffordanceProviding {
     public var affordances: [String: String] {
         var cmds: [String: String] = [

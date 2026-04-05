@@ -56,6 +56,15 @@ public struct Simulator: Sendable, Equatable, Identifiable, Codable {
     }
 }
 
+extension Simulator: Presentable {
+    public static var tableHeaders: [String] {
+        ["UDID", "Name", "State", "Runtime"]
+    }
+    public var tableRow: [String] {
+        [id, name, state.rawValue, displayRuntime]
+    }
+}
+
 extension Simulator: AffordanceProviding {
     public var affordances: [String: String] {
         var cmds: [String: String] = [

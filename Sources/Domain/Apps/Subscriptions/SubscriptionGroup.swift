@@ -11,6 +11,15 @@ public struct SubscriptionGroup: Sendable, Codable, Equatable, Identifiable {
     }
 }
 
+extension SubscriptionGroup: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Reference Name"]
+    }
+    public var tableRow: [String] {
+        [id, referenceName]
+    }
+}
+
 extension SubscriptionGroup: AffordanceProviding {
     public var affordances: [String: String] {
         [

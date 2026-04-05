@@ -84,6 +84,15 @@ public struct BuildUpload: Sendable, Equatable, Identifiable, Codable {
     }
 }
 
+extension BuildUpload: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Version", "Build", "State"]
+    }
+    public var tableRow: [String] {
+        [id, version, buildNumber, state.rawValue]
+    }
+}
+
 extension BuildUpload: AffordanceProviding {
     public var affordances: [String: String] {
         var cmds: [String: String] = [

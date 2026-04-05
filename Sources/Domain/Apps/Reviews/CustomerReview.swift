@@ -49,6 +49,15 @@ public struct CustomerReview: Sendable, Equatable, Identifiable, Codable {
     }
 }
 
+extension CustomerReview: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Rating", "Title", "Reviewer", "Territory"]
+    }
+    public var tableRow: [String] {
+        [id, "\(rating)", title ?? "", reviewerNickname ?? "", territory ?? ""]
+    }
+}
+
 extension CustomerReview: AffordanceProviding {
     public var affordances: [String: String] {
         [

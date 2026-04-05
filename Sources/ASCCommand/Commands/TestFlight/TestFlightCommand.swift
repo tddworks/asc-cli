@@ -42,12 +42,7 @@ struct BetaGroupsList: AsyncParsableCommand {
     func execute(repo: any TestFlightRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let response = try await repo.listBetaGroups(appId: appId, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            response.data,
-            headers: ["ID", "Name", "Internal", "Public Link"],
-            rowMapper: { [$0.id, $0.name, $0.isInternalGroup ? "Yes" : "No", $0.publicLinkEnabled ? "Yes" : "No"] },
-            affordanceMode: affordanceMode
-        )
+        return try formatter.formatAgentItems(response.data, affordanceMode: affordanceMode)
     }
 }
 
@@ -89,11 +84,7 @@ struct BetaTestersList: AsyncParsableCommand {
     func execute(repo: any TestFlightRepository) async throws -> String {
         let response = try await repo.listBetaTesters(groupId: betaGroupId, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            response.data,
-            headers: ["ID", "Name", "Email", "Invite Type"],
-            rowMapper: { [$0.id, $0.displayName, $0.email ?? "-", $0.inviteType?.rawValue ?? "-"] }
-        )
+        return try formatter.formatAgentItems(response.data)
     }
 }
 
@@ -125,11 +116,7 @@ struct BetaTestersAdd: AsyncParsableCommand {
     func execute(repo: any TestFlightRepository) async throws -> String {
         let tester = try await repo.addBetaTester(groupId: betaGroupId, email: email, firstName: firstName, lastName: lastName)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            [tester],
-            headers: ["ID", "Name", "Email"],
-            rowMapper: { [$0.id, $0.displayName, $0.email ?? "-"] }
-        )
+        return try formatter.formatAgentItems([tester])
     }
 }
 
@@ -193,11 +180,7 @@ struct BetaTestersImport: AsyncParsableCommand {
         }
 
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            added,
-            headers: ["ID", "Name", "Email"],
-            rowMapper: { [$0.id, $0.displayName, $0.email ?? "-"] }
-        )
+        return try formatter.formatAgentItems(added)
     }
 
     private struct CSVEntry {

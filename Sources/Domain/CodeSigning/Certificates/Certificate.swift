@@ -36,6 +36,15 @@ public struct Certificate: Sendable, Equatable, Identifiable, Codable {
     }
 }
 
+extension Certificate: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Name", "Type", "Expired"]
+    }
+    public var tableRow: [String] {
+        [id, name, certificateType.rawValue, isExpired ? "Yes" : "No"]
+    }
+}
+
 extension Certificate: AffordanceProviding {
     public var affordances: [String: String] {
         ["revoke": "asc certificates revoke --certificate-id \(id)"]

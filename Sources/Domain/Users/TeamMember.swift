@@ -26,6 +26,15 @@ public struct TeamMember: Sendable, Equatable, Identifiable, Codable {
     }
 }
 
+extension TeamMember: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Username", "Name", "Roles", "All Apps"]
+    }
+    public var tableRow: [String] {
+        [id, username, "\(firstName) \(lastName)", roles.map(\.rawValue).joined(separator: ", "), isAllAppsVisible ? "Yes" : "No"]
+    }
+}
+
 extension TeamMember: AffordanceProviding {
     public var affordances: [String: String] {
         let roleFlags = roles.map { "--role \($0.rawValue)" }.joined(separator: " ")

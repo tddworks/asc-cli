@@ -24,6 +24,15 @@ public struct App: Sendable, Codable, Equatable, Identifiable {
     }
 }
 
+extension App: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Name", "Bundle ID", "SKU"]
+    }
+    public var tableRow: [String] {
+        [id, displayName, bundleId, sku ?? "-"]
+    }
+}
+
 extension App: AffordanceProviding {
     public var structuredAffordances: [Affordance] {
         [

@@ -24,11 +24,6 @@ struct ProfilesList: AsyncParsableCommand {
         let profileType = type.flatMap { ProfileType(rawValue: $0.uppercased()) }
         let items = try await repo.listProfiles(bundleIdId: bundleIdId, profileType: profileType)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            items,
-            headers: ["ID", "Name", "Type", "State"],
-            rowMapper: { [$0.id, $0.name, $0.profileType.rawValue, $0.profileState.rawValue] },
-            affordanceMode: affordanceMode
-        )
+        return try formatter.formatAgentItems(items, affordanceMode: affordanceMode)
     }
 }

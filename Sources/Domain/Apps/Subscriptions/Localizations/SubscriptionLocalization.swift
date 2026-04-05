@@ -57,6 +57,15 @@ extension SubscriptionLocalization: Codable {
     }
 }
 
+extension SubscriptionLocalization: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Locale", "Name", "Description"]
+    }
+    public var tableRow: [String] {
+        [id, locale, name ?? "", description ?? ""]
+    }
+}
+
 extension SubscriptionLocalization: AffordanceProviding {
     public var affordances: [String: String] {
         [

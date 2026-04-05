@@ -79,6 +79,15 @@ extension SubscriptionIntroductoryOffer: Codable {
     }
 }
 
+extension SubscriptionIntroductoryOffer: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Duration", "Mode", "Periods", "Territory"]
+    }
+    public var tableRow: [String] {
+        [id, duration.rawValue, offerMode.rawValue, String(numberOfPeriods), territory ?? ""]
+    }
+}
+
 extension SubscriptionIntroductoryOffer: AffordanceProviding {
     public var affordances: [String: String] {
         [

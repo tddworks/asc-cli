@@ -23,10 +23,6 @@ struct IAPPricePointsList: AsyncParsableCommand {
     func execute(repo: any InAppPurchasePriceRepository) async throws -> String {
         let items = try await repo.listPricePoints(iapId: iapId, territory: territory)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            items,
-            headers: ["ID", "Territory", "Customer Price", "Proceeds"],
-            rowMapper: { [$0.id, $0.territory ?? "", $0.customerPrice ?? "", $0.proceeds ?? ""] }
-        )
+        return try formatter.formatAgentItems(items)
     }
 }

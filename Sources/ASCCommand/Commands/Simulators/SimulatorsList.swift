@@ -21,11 +21,6 @@ struct SimulatorsList: AsyncParsableCommand {
         let filter: SimulatorFilter = booted ? .booted : .available
         let items = try await repo.listSimulators(filter: filter)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            items,
-            headers: ["UDID", "Name", "State", "Runtime"],
-            rowMapper: { [$0.id, $0.name, $0.state.rawValue, $0.displayRuntime] },
-            affordanceMode: affordanceMode
-        )
+        return try formatter.formatAgentItems(items, affordanceMode: affordanceMode)
     }
 }

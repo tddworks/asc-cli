@@ -28,6 +28,15 @@ public struct AppBundle: Sendable, Equatable, Identifiable, Codable {
     }
 }
 
+extension AppBundle: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Name", "Bundle ID", "SKU", "Platforms"]
+    }
+    public var tableRow: [String] {
+        [id, name, bundleId, sku, platforms.joined(separator: ",")]
+    }
+}
+
 extension AppBundle: AffordanceProviding {
     public var affordances: [String: String] {
         [

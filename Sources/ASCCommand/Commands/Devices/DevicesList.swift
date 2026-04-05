@@ -21,11 +21,6 @@ struct DevicesList: AsyncParsableCommand {
         let domainPlatform = platform.flatMap { BundleIDPlatform(cliArgument: $0) }
         let items = try await repo.listDevices(platform: domainPlatform)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            items,
-            headers: ["ID", "Name", "UDID", "Class", "Status"],
-            rowMapper: { [$0.id, $0.name, $0.udid, $0.deviceClass.rawValue, $0.status.rawValue] },
-            affordanceMode: affordanceMode
-        )
+        return try formatter.formatAgentItems(items, affordanceMode: affordanceMode)
     }
 }

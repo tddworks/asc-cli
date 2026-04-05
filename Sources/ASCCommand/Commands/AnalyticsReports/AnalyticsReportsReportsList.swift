@@ -24,10 +24,6 @@ struct AnalyticsReportsReportsList: AsyncParsableCommand {
         let parsed = category.flatMap { AnalyticsCategory(cliArgument: $0) }
         let reports = try await repo.listReports(requestId: requestId, category: parsed)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            reports,
-            headers: ["ID", "Name", "Category"],
-            rowMapper: { [$0.id, $0.name ?? "", $0.category?.rawValue ?? ""] }
-        )
+        return try formatter.formatAgentItems(reports)
     }
 }

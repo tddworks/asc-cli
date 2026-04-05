@@ -27,6 +27,15 @@ public struct AnalyticsReportRequest: Sendable, Equatable, Identifiable, Afforda
     }
 }
 
+extension AnalyticsReportRequest: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "App ID", "Access Type", "Stopped"]
+    }
+    public var tableRow: [String] {
+        [id, appId, accessType.rawValue, isStoppedDueToInactivity.map { "\($0)" } ?? ""]
+    }
+}
+
 extension AnalyticsReportRequest: Codable {
     enum CodingKeys: String, CodingKey {
         case id, appId, accessType, isStoppedDueToInactivity

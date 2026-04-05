@@ -20,10 +20,6 @@ struct AppClipsList: AsyncParsableCommand {
     func execute(repo: any AppClipRepository) async throws -> String {
         let clips = try await repo.listAppClips(appId: appId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            clips,
-            headers: ["ID", "App ID", "Bundle ID"],
-            rowMapper: { [$0.id, $0.appId, $0.bundleId ?? ""] }
-        )
+        return try formatter.formatAgentItems(clips)
     }
 }

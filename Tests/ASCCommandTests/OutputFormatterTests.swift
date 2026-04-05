@@ -197,4 +197,52 @@ struct OutputFormatterTests {
         #expect(output.contains("\"affordances\""))
         #expect(!output.contains("\"_links\""))
     }
+
+    // MARK: - Presentable overload (no headers/rowMapper)
+
+    @Test
+    func `presentable overload produces same json as explicit headers`() throws {
+        let formatter = OutputFormatter(format: .json, pretty: true)
+        let apps = [App(id: "1", name: "Test App", bundleId: "com.test")]
+
+        let explicit = try formatter.formatAgentItems(
+            apps,
+            headers: ["ID", "Name", "Bundle ID", "SKU"],
+            rowMapper: { [$0.id, $0.displayName, $0.bundleId, $0.sku ?? "-"] }
+        )
+        let presentable = try formatter.formatAgentItems(apps)
+
+        #expect(explicit == presentable)
+    }
+
+    @Test
+    func `presentable overload renders table using model tableHeaders and tableRow`() throws {
+        let formatter = OutputFormatter(format: .table)
+        let apps = [App(id: "1", name: "Alpha", bundleId: "com.alpha", sku: "S1")]
+        let output = try formatter.formatAgentItems(apps)
+        #expect(output.contains("ID"))
+        #expect(output.contains("Name"))
+        #expect(output.contains("Bundle ID"))
+        #expect(output.contains("SKU"))
+        #expect(output.contains("Alpha"))
+        #expect(output.contains("S1"))
+    }
+
+    @Test
+    func `presentable overload supports rest affordance mode`() throws {
+        let formatter = OutputFormatter(format: .json, pretty: true)
+        let apps = [App(id: "42", name: "MyApp", bundleId: "com.test")]
+        let output = try formatter.formatAgentItems(apps, affordanceMode: .rest)
+        #expect(output.contains("\"_links\""))
+        #expect(!output.contains("\"affordances\""))
+    }
+
+    @Test
+    func `presentable overload renders markdown using model metadata`() throws {
+        let formatter = OutputFormatter(format: .markdown)
+        let apps = [App(id: "1", name: "My App", bundleId: "com.app")]
+        let output = try formatter.formatAgentItems(apps)
+        #expect(output.contains("| ID | Name | Bundle ID | SKU |"))
+        #expect(output.contains("| 1 | My App | com.app | - |"))
+    }
 }

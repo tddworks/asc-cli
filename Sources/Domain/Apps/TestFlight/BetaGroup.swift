@@ -25,6 +25,11 @@ public struct BetaGroup: Sendable, Codable, Equatable, Identifiable {
     }
 }
 
+extension BetaGroup: Presentable {
+    public static var tableHeaders: [String] { ["ID", "Name", "Internal", "Public Link"] }
+    public var tableRow: [String] { [id, name, isInternalGroup ? "Yes" : "No", publicLinkEnabled ? "Yes" : "No"] }
+}
+
 extension BetaGroup: AffordanceProviding {
     public var affordances: [String: String] {
         [

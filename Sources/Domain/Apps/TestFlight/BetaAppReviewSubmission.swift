@@ -36,6 +36,15 @@ public enum BetaReviewState: String, Sendable, Codable, Equatable {
 
 // MARK: - AffordanceProviding
 
+extension BetaAppReviewSubmission: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Build ID", "State", "Submitted Date"]
+    }
+    public var tableRow: [String] {
+        [id, buildId, state.rawValue, submittedDate?.description ?? "-"]
+    }
+}
+
 extension BetaAppReviewSubmission: AffordanceProviding {
     public var affordances: [String: String] {
         [

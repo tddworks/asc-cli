@@ -20,10 +20,6 @@ struct SubscriptionLocalizationsList: AsyncParsableCommand {
     func execute(repo: any SubscriptionLocalizationRepository) async throws -> String {
         let items = try await repo.listLocalizations(subscriptionId: subscriptionId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            items,
-            headers: ["ID", "Locale", "Name", "Description"],
-            rowMapper: { [$0.id, $0.locale, $0.name ?? "", $0.description ?? ""] }
-        )
+        return try formatter.formatAgentItems(items)
     }
 }

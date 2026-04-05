@@ -24,10 +24,6 @@ struct AnalyticsReportsList: AsyncParsableCommand {
         let parsed = accessType.flatMap { AnalyticsAccessType(cliArgument: $0) }
         let requests = try await repo.listRequests(appId: appId, accessType: parsed)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            requests,
-            headers: ["ID", "App ID", "Access Type", "Stopped"],
-            rowMapper: { [$0.id, $0.appId, $0.accessType.rawValue, $0.isStoppedDueToInactivity.map { "\($0)" } ?? ""] }
-        )
+        return try formatter.formatAgentItems(requests)
     }
 }

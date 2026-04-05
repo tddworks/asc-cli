@@ -42,6 +42,15 @@ public struct Build: Sendable, Codable, Equatable, Identifiable {
     }
 }
 
+extension Build: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Version", "Build Number", "Platform", "State", "Expired"]
+    }
+    public var tableRow: [String] {
+        [id, version, buildNumber ?? "-", platform?.rawValue ?? "-", processingState.rawValue, expired ? "Yes" : "No"]
+    }
+}
+
 extension Build: AffordanceProviding {
     public var affordances: [String: String] {
         guard isUsable else { return [:] }

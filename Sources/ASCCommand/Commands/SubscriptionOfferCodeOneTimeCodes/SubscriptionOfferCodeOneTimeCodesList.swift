@@ -20,10 +20,6 @@ struct SubscriptionOfferCodeOneTimeCodesList: AsyncParsableCommand {
     func execute(repo: any SubscriptionOfferCodeRepository) async throws -> String {
         let items = try await repo.listOneTimeUseCodes(offerCodeId: offerCodeId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            items,
-            headers: ["ID", "Codes", "Expiration", "Active"],
-            rowMapper: { [$0.id, String($0.numberOfCodes), $0.expirationDate ?? "", String($0.isActive)] }
-        )
+        return try formatter.formatAgentItems(items)
     }
 }

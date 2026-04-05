@@ -20,10 +20,6 @@ struct AnalyticsReportsSegmentsList: AsyncParsableCommand {
     func execute(repo: any AnalyticsReportRepository) async throws -> String {
         let segments = try await repo.listSegments(instanceId: instanceId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            segments,
-            headers: ["ID", "Checksum", "Size (bytes)", "URL"],
-            rowMapper: { [$0.id, $0.checksum ?? "", $0.sizeInBytes.map { "\($0)" } ?? "", $0.url ?? ""] }
-        )
+        return try formatter.formatAgentItems(segments)
     }
 }

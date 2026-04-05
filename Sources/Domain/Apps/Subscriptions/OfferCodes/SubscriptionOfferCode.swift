@@ -84,6 +84,15 @@ extension SubscriptionOfferCode: Codable {
     }
 }
 
+extension SubscriptionOfferCode: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Name", "Duration", "Mode", "Periods", "Active"]
+    }
+    public var tableRow: [String] {
+        [id, name, duration.rawValue, offerMode.rawValue, String(numberOfPeriods), String(isActive)]
+    }
+}
+
 extension SubscriptionOfferCode: AffordanceProviding {
     public var affordances: [String: String] {
         var cmds: [String: String] = [

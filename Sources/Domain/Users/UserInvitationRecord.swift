@@ -60,6 +60,15 @@ public struct UserInvitationRecord: Sendable, Equatable, Identifiable, Codable {
     }
 }
 
+extension UserInvitationRecord: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Email", "Name", "Roles", "All Apps"]
+    }
+    public var tableRow: [String] {
+        [id, email, "\(firstName) \(lastName)", roles.map(\.rawValue).joined(separator: ", "), isAllAppsVisible ? "Yes" : "No"]
+    }
+}
+
 extension UserInvitationRecord: AffordanceProviding {
     public var affordances: [String: String] {
         [

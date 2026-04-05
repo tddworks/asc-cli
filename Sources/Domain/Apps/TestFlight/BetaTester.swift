@@ -59,6 +59,11 @@ extension BetaTester: Codable {
     }
 }
 
+extension BetaTester: Presentable {
+    public static var tableHeaders: [String] { ["ID", "Name", "Email", "Invite Type"] }
+    public var tableRow: [String] { [id, displayName, email ?? "-", inviteType?.rawValue ?? "-"] }
+}
+
 extension BetaTester: AffordanceProviding {
     public var affordances: [String: String] {
         [

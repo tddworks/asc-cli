@@ -17,11 +17,6 @@ struct TerritoriesList: AsyncParsableCommand {
     func execute(repo: any TerritoryRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let territories = try await repo.listTerritories()
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            territories,
-            headers: ["ID", "Currency"],
-            rowMapper: { [$0.id, $0.currency ?? "—"] },
-            affordanceMode: affordanceMode
-        )
+        return try formatter.formatAgentItems(territories, affordanceMode: affordanceMode)
     }
 }

@@ -55,6 +55,15 @@ extension SubscriptionOfferCodeCustomCode: Codable {
     }
 }
 
+extension SubscriptionOfferCodeCustomCode: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Custom Code", "Codes", "Expiration", "Active"]
+    }
+    public var tableRow: [String] {
+        [id, customCode, String(numberOfCodes), expirationDate ?? "", String(isActive)]
+    }
+}
+
 extension SubscriptionOfferCodeCustomCode: AffordanceProviding {
     public var affordances: [String: String] {
         var cmds: [String: String] = [

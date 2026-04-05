@@ -34,6 +34,15 @@ public struct Profile: Sendable, Equatable, Identifiable, Codable {
     public var isActive: Bool { profileState == .active }
 }
 
+extension Profile: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Name", "Type", "State"]
+    }
+    public var tableRow: [String] {
+        [id, name, profileType.rawValue, profileState.rawValue]
+    }
+}
+
 extension Profile: AffordanceProviding {
     public var affordances: [String: String] {
         [

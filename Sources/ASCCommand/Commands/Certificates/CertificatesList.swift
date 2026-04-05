@@ -21,11 +21,6 @@ struct CertificatesList: AsyncParsableCommand {
         let certType = type.flatMap { CertificateType(rawValue: $0.uppercased()) }
         let items = try await repo.listCertificates(certificateType: certType)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            items,
-            headers: ["ID", "Name", "Type", "Expired"],
-            rowMapper: { [$0.id, $0.name, $0.certificateType.rawValue, $0.isExpired ? "Yes" : "No"] },
-            affordanceMode: affordanceMode
-        )
+        return try formatter.formatAgentItems(items, affordanceMode: affordanceMode)
     }
 }

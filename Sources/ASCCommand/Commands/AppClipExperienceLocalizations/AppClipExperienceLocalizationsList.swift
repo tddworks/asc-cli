@@ -20,10 +20,6 @@ struct AppClipExperienceLocalizationsList: AsyncParsableCommand {
     func execute(repo: any AppClipRepository) async throws -> String {
         let localizations = try await repo.listLocalizations(experienceId: experienceId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            localizations,
-            headers: ["ID", "Experience ID", "Locale", "Subtitle"],
-            rowMapper: { [$0.id, $0.experienceId, $0.locale, $0.subtitle ?? ""] }
-        )
+        return try formatter.formatAgentItems(localizations)
     }
 }

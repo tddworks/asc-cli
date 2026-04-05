@@ -116,6 +116,16 @@ struct OutputFormatter {
         }
     }
 
+    /// Agent-first format using `Presentable` — no headers/rowMapper needed.
+    /// Delegates to the explicit-headers overload, which picks the `Identifiable`
+    /// variant (with plugin affordances) automatically when `T` conforms.
+    func formatAgentItems<T: Encodable & AffordanceProviding & Presentable>(
+        _ items: [T],
+        affordanceMode: AffordanceMode = .cli
+    ) throws -> String {
+        try formatAgentItems(items, headers: T.tableHeaders, rowMapper: \.tableRow, affordanceMode: affordanceMode)
+    }
+
     /// Agent-first format: {"data": [...]} with affordances merged into each item.
     func formatAgentItems<T: Encodable & AffordanceProviding>(
         _ items: [T],

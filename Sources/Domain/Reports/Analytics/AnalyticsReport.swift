@@ -24,6 +24,15 @@ public struct AnalyticsReport: Sendable, Equatable, Identifiable, AffordanceProv
     }
 }
 
+extension AnalyticsReport: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Name", "Category"]
+    }
+    public var tableRow: [String] {
+        [id, name ?? "", category?.rawValue ?? ""]
+    }
+}
+
 extension AnalyticsReport: Codable {
     enum CodingKeys: String, CodingKey {
         case id, requestId, name, category

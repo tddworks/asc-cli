@@ -20,10 +20,6 @@ struct AppClipExperiencesList: AsyncParsableCommand {
     func execute(repo: any AppClipRepository) async throws -> String {
         let experiences = try await repo.listExperiences(appClipId: appClipId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            experiences,
-            headers: ["ID", "App Clip ID", "Action"],
-            rowMapper: { [$0.id, $0.appClipId, $0.action?.rawValue ?? ""] }
-        )
+        return try formatter.formatAgentItems(experiences)
     }
 }

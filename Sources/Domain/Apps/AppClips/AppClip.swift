@@ -30,6 +30,15 @@ extension AppClip: Codable {
     }
 }
 
+extension AppClip: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "App ID", "Bundle ID"]
+    }
+    public var tableRow: [String] {
+        [id, appId, bundleId ?? ""]
+    }
+}
+
 extension AppClip: AffordanceProviding {
     public var affordances: [String: String] {
         [

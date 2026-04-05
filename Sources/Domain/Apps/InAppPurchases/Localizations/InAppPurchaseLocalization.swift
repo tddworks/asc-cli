@@ -57,6 +57,15 @@ extension InAppPurchaseLocalization: Codable {
     }
 }
 
+extension InAppPurchaseLocalization: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Locale", "Name", "Description"]
+    }
+    public var tableRow: [String] {
+        [id, locale, name ?? "", description ?? ""]
+    }
+}
+
 extension InAppPurchaseLocalization: AffordanceProviding {
     public var affordances: [String: String] {
         [

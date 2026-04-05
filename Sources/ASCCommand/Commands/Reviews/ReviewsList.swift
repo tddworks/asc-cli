@@ -20,11 +20,6 @@ struct ReviewsList: AsyncParsableCommand {
     func execute(repo: any CustomerReviewRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let reviews = try await repo.listReviews(appId: appId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            reviews,
-            headers: ["ID", "Rating", "Title", "Reviewer", "Territory"],
-            rowMapper: { [$0.id, "\($0.rating)", $0.title ?? "", $0.reviewerNickname ?? "", $0.territory ?? ""] },
-            affordanceMode: affordanceMode
-        )
+        return try formatter.formatAgentItems(reviews, affordanceMode: affordanceMode)
     }
 }

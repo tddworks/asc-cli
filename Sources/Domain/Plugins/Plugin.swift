@@ -80,6 +80,15 @@ extension Plugin: Codable {
     }
 }
 
+extension Plugin: Presentable {
+    public static var tableHeaders: [String] {
+        ["Name", "Version", "Author", "Description"]
+    }
+    public var tableRow: [String] {
+        [name, version, author ?? "-", description]
+    }
+}
+
 extension Plugin: AffordanceProviding {
     public var affordances: [String: String] {
         var cmds: [String: String] = [

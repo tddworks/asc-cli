@@ -50,6 +50,15 @@ extension InAppPurchaseOfferCodeOneTimeUseCode: Codable {
     }
 }
 
+extension InAppPurchaseOfferCodeOneTimeUseCode: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Codes", "Expiration", "Active"]
+    }
+    public var tableRow: [String] {
+        [id, String(numberOfCodes), expirationDate ?? "", String(isActive)]
+    }
+}
+
 extension InAppPurchaseOfferCodeOneTimeUseCode: AffordanceProviding {
     public var affordances: [String: String] {
         var cmds: [String: String] = [

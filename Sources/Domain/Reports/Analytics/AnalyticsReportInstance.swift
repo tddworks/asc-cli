@@ -24,6 +24,15 @@ public struct AnalyticsReportInstance: Sendable, Equatable, Identifiable, Afford
     }
 }
 
+extension AnalyticsReportInstance: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Granularity", "Processing Date"]
+    }
+    public var tableRow: [String] {
+        [id, granularity?.rawValue ?? "", processingDate ?? ""]
+    }
+}
+
 extension AnalyticsReportInstance: Codable {
     enum CodingKeys: String, CodingKey {
         case id, reportId, granularity, processingDate
