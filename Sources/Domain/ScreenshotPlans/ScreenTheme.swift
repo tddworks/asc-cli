@@ -54,6 +54,17 @@ extension ScreenTheme {
     public var hasFloatingElements: Bool { !aiHints.floatingElements.isEmpty }
 }
 
+// MARK: - Presentable
+
+extension ScreenTheme: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Name", "Icon", "Description"]
+    }
+    public var tableRow: [String] {
+        [id, name, icon, description]
+    }
+}
+
 // MARK: - Affordances
 
 extension ScreenTheme: AffordanceProviding {

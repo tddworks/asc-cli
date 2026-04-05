@@ -41,6 +41,20 @@ public struct ScreenshotTemplate: Sendable, Equatable, Identifiable, Codable {
     public var previewHTML: String {
         TemplateHTMLRenderer.renderPage(self)
     }
+
+    /// Apply this template with the given content — returns a full HTML page.
+    ///
+    /// This is the core domain operation. Both CLI and REST call this.
+    public func apply(content: TemplateContent? = nil, fillViewport: Bool = false) -> String {
+        TemplateHTMLRenderer.renderPage(self, content: content, fillViewport: fillViewport)
+    }
+
+    /// Render the inner HTML fragment (no page wrapper) for composition pipelines.
+    ///
+    /// Used when the output will be further processed (e.g. theme compose).
+    public func renderFragment(content: TemplateContent? = nil) -> String {
+        TemplateHTMLRenderer.render(self, content: content)
+    }
 }
 
 // MARK: - Semantic Booleans
@@ -54,6 +68,17 @@ extension ScreenshotTemplate {
 
     /// Number of device slots in this template.
     public var deviceCount: Int { deviceSlots.count }
+}
+
+// MARK: - Presentable
+
+extension ScreenshotTemplate: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Name", "Category", "Devices"]
+    }
+    public var tableRow: [String] {
+        [id, name, category.rawValue, "\(deviceCount)"]
+    }
 }
 
 // MARK: - Affordances

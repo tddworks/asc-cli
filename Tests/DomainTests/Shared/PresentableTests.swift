@@ -79,4 +79,30 @@ struct PresentableTests {
         let territory = MockRepositoryFactory.makeTerritory(id: "USA", currency: "USD")
         #expect(territory.tableRow == ["USA", "USD"])
     }
+
+    // MARK: - ScreenshotTemplate
+
+    @Test func `screenshot template table headers`() {
+        #expect(ScreenshotTemplate.tableHeaders == ["ID", "Name", "Category", "Devices"])
+    }
+
+    @Test func `screenshot template table row`() {
+        let tmpl = MockRepositoryFactory.makeScreenshotTemplate(id: "hero", name: "Hero", category: .bold, deviceCount: 2)
+        #expect(tmpl.tableRow == ["hero", "Hero", "bold", "2"])
+    }
+
+    // MARK: - ScreenTheme
+
+    @Test func `screen theme table headers`() {
+        #expect(ScreenTheme.tableHeaders == ["ID", "Name", "Icon", "Description"])
+    }
+
+    @Test func `screen theme table row`() {
+        let theme = ScreenTheme(
+            id: "neon", name: "Neon", icon: "⚡", description: "Vibrant neon glow",
+            accent: "#FF00FF", previewGradient: "linear-gradient(#000,#F0F)",
+            aiHints: ThemeAIHints(style: "", background: "", floatingElements: [], colorPalette: "", textStyle: "")
+        )
+        #expect(theme.tableRow == ["neon", "Neon", "⚡", "Vibrant neon glow"])
+    }
 }

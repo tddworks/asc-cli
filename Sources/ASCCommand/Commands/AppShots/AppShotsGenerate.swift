@@ -38,6 +38,27 @@ struct AppShotsGenerate: AsyncParsableCommand {
         print(try await execute(apiKey: apiKey))
     }
 
+    /// Static entry point — callable without ArgumentParser parsing.
+    /// Both CLI `run()` and REST controller use this.
+    static func run(
+        file: String,
+        apiKey: String,
+        model: String = "gemini-3.1-flash-image-preview",
+        outputDir: String = ".asc/app-shots/output",
+        styleReference: String? = nil,
+        deviceType: AppShotsDisplayType? = nil,
+        prompt: String? = nil
+    ) async throws -> String {
+        var cmd = AppShotsGenerate()
+        cmd.file = file
+        cmd.model = model
+        cmd.outputDir = outputDir
+        cmd.styleReference = styleReference
+        cmd.deviceType = deviceType
+        cmd.prompt = prompt
+        return try await cmd.execute(apiKey: apiKey)
+    }
+
     func execute(apiKey: String) async throws -> String {
         // Read input
         let fileURL = URL(fileURLWithPath: file)

@@ -128,35 +128,23 @@ struct AppShotsThemesApply: AsyncParsableCommand {
     }
 
     func execute(themeRepo: any ThemeRepository, templateRepo: any TemplateRepository, renderer: (any HTMLRenderer)? = nil) async throws -> String {
-        // Resolve template
         guard let tmpl = try await templateRepo.getTemplate(id: template) else {
             throw ValidationError("Template '\(template)' not found. Run `asc app-shots templates list` to see available templates.")
         }
 
-        // For image export, use full path so WebKit resolves relative to cwd
-        // For HTML output, use just filename so it works opened from same directory
-        let screenshotFile = (preview == .image)
-            ? screenshot
-            : URL(fileURLWithPath: screenshot).lastPathComponent
-
-        // Step 1: Render deterministic HTML from template
+        let screenshotFile = (preview == .image) ? screenshot : URL(fileURLWithPath: screenshot).lastPathComponent
         let content = TemplateContent(headline: headline, subtitle: subtitle, tagline: tagline, screenshotFile: screenshotFile)
-        let baseHTML = TemplateHTMLRenderer.render(tmpl, content: content)
 
-        // Step 2: Compose with theme via provider's AI backend
-        let themedHTML = try await themeRepo.compose(
-            themeId: theme,
-            html: baseHTML,
-            canvasWidth: canvasWidth,
-            canvasHeight: canvasHeight
-        )
+        // Domain: template renders fragment, theme repo composes, ThemedPage wraps
+        let fragment = tmpl.renderFragment(content: content)
+        let themedHTML = try await themeRepo.compose(themeId: theme, html: fragment, canvasWidth: canvasWidth, canvasHeight: canvasHeight)
+        let page = ThemedPage(body: themedHTML, width: canvasWidth, height: canvasHeight, fillViewport: preview == .image)
 
         if preview == .image, let renderer {
-            let html = Self.wrapInPage(themedHTML, width: canvasWidth, height: canvasHeight, fillViewport: true)
-            return try await renderToImage(html: html, renderer: renderer)
+            return try await renderToImage(html: page.html, renderer: renderer)
         }
 
-        return Self.wrapInPage(themedHTML, width: canvasWidth, height: canvasHeight)
+        return page.html
     }
 
     private func renderToImage(html: String, renderer: any HTMLRenderer) async throws -> String {
@@ -170,23 +158,5 @@ struct AppShotsThemesApply: AsyncParsableCommand {
         return String(data: data, encoding: .utf8) ?? "{}"
     }
 
-    static func wrapInPage(_ body: String, width: Int, height: Int, fillViewport: Bool = false) -> String {
-        let previewStyle = fillViewport
-            ? "width:100%;height:100%;container-type:inline-size"
-            : "width:320px;aspect-ratio:\(width)/\(height);container-type:inline-size"
-        let bodyStyle = fillViewport
-            ? "margin:0;overflow:hidden"
-            : "display:flex;justify-content:center;align-items:center;min-height:100vh;background:#111"
-        let htmlHeight = fillViewport ? "html,body{width:100%;height:100%}" : ""
-        return """
-        <!DOCTYPE html><html><head><meta charset="utf-8">\
-        <meta name="viewport" content="width=device-width,initial-scale=1">\
-        <title>Themed Screenshot</title>\
-        <style>*{margin:0;padding:0;box-sizing:border-box}\
-        \(htmlHeight)\
-        body{\(bodyStyle)}\
-        .preview{\(previewStyle)}</style>\
-        </head><body><div class="preview">\(body)</div></body></html>
-        """
-    }
+    // wrapInPage logic moved to Domain/ScreenshotPlans/ThemedPage.swift
 }

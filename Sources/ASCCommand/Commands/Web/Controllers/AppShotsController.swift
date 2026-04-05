@@ -18,17 +18,13 @@ struct AppShotsController: Sendable {
         // MARK: - Read
 
         group.get("/app-shots/templates") { _, _ -> Response in
-            try await restExec {
-                try await AppShotsTemplatesList.parse(["--preview", "--pretty"])
-                    .execute(repo: self.templateRepo, affordanceMode: .rest)
-            }
+            let templates = try await self.templateRepo.listTemplates(size: nil)
+            return try restFormat(templates)
         }
 
         group.get("/app-shots/themes") { _, _ -> Response in
-            try await restExec {
-                try await AppShotsThemesList.parse(["--pretty"])
-                    .execute(repo: self.themeRepo, affordanceMode: .rest)
-            }
+            let themes = try await self.themeRepo.listThemes()
+            return try restFormat(themes)
         }
 
         // MARK: - Templates Apply
@@ -45,21 +41,18 @@ struct AppShotsController: Sendable {
 
             do {
                 let screenshotPath = try writeTempScreenshot(screenshotBase64)
+                guard let tmpl = try await self.templateRepo.getTemplate(id: templateId) else {
+                    return jsonError("Template not found", status: .notFound)
+                }
+                let content = TemplateContent(headline: headline, subtitle: json["subtitle"] as? String, screenshotFile: screenshotPath)
 
                 if previewFormat == "image" {
-                    guard let tmpl = try await self.templateRepo.getTemplate(id: templateId) else {
-                        return jsonError("Template not found", status: .notFound)
-                    }
-                    let content = TemplateContent(headline: headline, subtitle: json["subtitle"] as? String, screenshotFile: screenshotPath)
-                    let html = TemplateHTMLRenderer.renderPage(tmpl, content: content, fillViewport: true)
+                    let html = tmpl.apply(content: content, fillViewport: true)
                     let pngData = try await AppShotsExport.renderToPNG(html: html, renderer: self.htmlRenderer)
                     return restResponse(jsonEncode(["png": pngData.base64EncodedString(), "width": 1320, "height": 2868]))
                 }
 
-                var args = ["--id", templateId, "--screenshot", screenshotPath, "--headline", headline, "--preview", "html", "--pretty"]
-                if let subtitle = json["subtitle"] as? String { args += ["--subtitle", subtitle] }
-                let cmd = try AppShotsTemplatesApply.parse(args)
-                var html = try await cmd.execute(repo: self.templateRepo)
+                var html = tmpl.apply(content: content)
                 html = Self.inlineBase64(html, screenshotPath: screenshotPath, base64: screenshotBase64)
                 return restResponse(jsonEncode(["html": html]))
             } catch {
@@ -81,12 +74,13 @@ struct AppShotsController: Sendable {
 
             do {
                 let screenshotPath = try writeTempScreenshot(screenshotBase64)
-                var args = ["--theme", themeId, "--template", templateId,
-                            "--screenshot", screenshotPath, "--headline", headline, "--pretty"]
-                if let subtitle = json["subtitle"] as? String { args += ["--subtitle", subtitle] }
-
-                let cmd = try AppShotsThemesApply.parse(args)
-                var html = try await cmd.execute(themeRepo: self.themeRepo, templateRepo: self.templateRepo)
+                guard let tmpl = try await self.templateRepo.getTemplate(id: templateId) else {
+                    return jsonError("Template not found", status: .notFound)
+                }
+                let content = TemplateContent(headline: headline, subtitle: json["subtitle"] as? String, screenshotFile: screenshotPath)
+                let fragment = tmpl.renderFragment(content: content)
+                let themedHTML = try await self.themeRepo.compose(themeId: themeId, html: fragment, canvasWidth: 1320, canvasHeight: 2868)
+                var html = ThemedPage(body: themedHTML, width: 1320, height: 2868).html
                 html = Self.inlineBase64(html, screenshotPath: screenshotPath, base64: screenshotBase64)
                 return restResponse(jsonEncode(["html": html]))
             } catch {
@@ -127,17 +121,22 @@ struct AppShotsController: Sendable {
                 let screenshotFile = tmpDir.appendingPathComponent("blitz-gen-\(UUID().uuidString).png")
                 try screenshotData.write(to: screenshotFile)
 
-                var args = ["--file", screenshotFile.path, "--gemini-api-key", apiKey, "--output-dir", tmpDir.path]
-                if let deviceType = json["deviceType"] as? String { args += ["--device-type", deviceType] }
-                if let prompt = json["prompt"] as? String { args += ["--prompt", prompt] }
+                var styleFile: String?
                 if let styleB64 = json["styleReference"] as? String, let styleData = Data(base64Encoded: styleB64) {
-                    let styleFile = tmpDir.appendingPathComponent("blitz-style-\(UUID().uuidString).png")
-                    try styleData.write(to: styleFile)
-                    args += ["--style-reference", styleFile.path]
+                    let path = tmpDir.appendingPathComponent("blitz-style-\(UUID().uuidString).png")
+                    try styleData.write(to: path)
+                    styleFile = path.path
                 }
 
-                let cmd = try AppShotsGenerate.parse(args)
-                _ = try await cmd.execute(apiKey: apiKey)
+                let deviceType = (json["deviceType"] as? String).flatMap { AppShotsDisplayType(rawValue: $0) }
+                _ = try await AppShotsGenerate.run(
+                    file: screenshotFile.path,
+                    apiKey: apiKey,
+                    outputDir: tmpDir.path,
+                    styleReference: styleFile,
+                    deviceType: deviceType,
+                    prompt: json["prompt"] as? String
+                )
 
                 let outputFile = tmpDir.appendingPathComponent("screen-0.png")
                 guard let pngData = FileManager.default.contents(atPath: outputFile.path) else {
