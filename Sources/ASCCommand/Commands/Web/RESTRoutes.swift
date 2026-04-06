@@ -24,6 +24,7 @@ enum RESTRoutes {
         if let apps = try? AppsController(
             appRepo: factory.makeAppRepository(authProvider: auth),
             versionRepo: factory.makeVersionRepository(authProvider: auth),
+            localizationRepo: factory.makeVersionLocalizationRepository(authProvider: auth),
             buildRepo: factory.makeBuildRepository(authProvider: auth),
             testFlightRepo: factory.makeTestFlightRepository(authProvider: auth),
             reviewRepo: factory.makeCustomerReviewRepository(authProvider: auth),
