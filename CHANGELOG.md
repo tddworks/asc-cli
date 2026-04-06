@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.65] - 2026-04-06
+
 ### Changed
 - **`Presentable` protocol** — domain models own their table headers and row values; eliminates `headers:`/`rowMapper:` boilerplate from 37 list commands
 - **REST controllers with DI** — routes rewritten as controller structs (`AppsController`, `CodeSigningController`, etc.) with injected repo dependencies; repos created once at server startup, not per request
@@ -634,7 +638,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.64...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.65...HEAD
+[0.1.65]: https://github.com/tddworks/asc-cli/compare/v0.1.64...v0.1.65
 [0.1.64]: https://github.com/tddworks/asc-cli/compare/v0.1.63...v0.1.64
 [0.1.63]: https://github.com/tddworks/asc-cli/compare/v0.1.62...v0.1.63
 [0.1.62]: https://github.com/tddworks/asc-cli/compare/v0.1.61...v0.1.62
