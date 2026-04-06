@@ -36,8 +36,9 @@ public enum TemplateHTMLRenderer {
     /// Render an inline HTML div (for embedding in any container).
     /// The container MUST have `container-type:inline-size` for `cqi` units to work.
     public static func render(_ template: ScreenshotTemplate, content: TemplateContent? = nil) -> String {
-        let bgCSS = backgroundCSS(template.background)
-        let lit = isLightColor(template.background)
+        let bg = content?.background ?? template.background
+        let bgCSS = backgroundCSS(bg)
+        let lit = isLightColor(bg)
         let textHTML = template.textSlots.map { renderText($0, content: content) }.joined()
         let deviceHTML = template.deviceSlots.map { renderDevice($0, lit: lit, screenshotFile: content?.screenshotFile) }.joined()
 
@@ -95,7 +96,7 @@ public enum TemplateHTMLRenderer {
         let fontFamily = "\(font)system-ui,-apple-system,sans-serif"
 
         var s = "position:absolute;top:\(top)%;\(left);text-align:\(align);z-index:2;"
-        s += "color:\(slot.color);"
+        s += "color:\(content?.textColor ?? slot.color);"
         s += "font-size:max(8px,\(size)cqi);"
         s += "font-weight:\(slot.fontWeight);"
         s += "line-height:\(slot.lineHeight ?? 1.1);"

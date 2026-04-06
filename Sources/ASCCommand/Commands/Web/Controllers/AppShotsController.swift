@@ -44,7 +44,8 @@ struct AppShotsController: Sendable {
                 guard let tmpl = try await self.templateRepo.getTemplate(id: templateId) else {
                     return jsonError("Template not found", status: .notFound)
                 }
-                let content = TemplateContent(headline: headline, subtitle: json["subtitle"] as? String, tagline: json["tagline"] as? String, screenshotFile: screenshotPath)
+                let background = Self.parseBackground(json["background"])
+                let content = TemplateContent(headline: headline, subtitle: json["subtitle"] as? String, tagline: json["tagline"] as? String, screenshotFile: screenshotPath, background: background, textColor: json["textColor"] as? String)
 
                 if previewFormat == "image" {
                     let html = tmpl.apply(content: content, fillViewport: true)
@@ -77,7 +78,8 @@ struct AppShotsController: Sendable {
                 guard let tmpl = try await self.templateRepo.getTemplate(id: templateId) else {
                     return jsonError("Template not found", status: .notFound)
                 }
-                let content = TemplateContent(headline: headline, subtitle: json["subtitle"] as? String, tagline: json["tagline"] as? String, screenshotFile: screenshotPath)
+                let background = Self.parseBackground(json["background"])
+                let content = TemplateContent(headline: headline, subtitle: json["subtitle"] as? String, tagline: json["tagline"] as? String, screenshotFile: screenshotPath, background: background, textColor: json["textColor"] as? String)
                 let fragment = tmpl.renderFragment(content: content)
                 let themedHTML = try await self.themeRepo.compose(themeId: themeId, html: fragment, canvasWidth: 1320, canvasHeight: 2868)
                 var html = ThemedPage(body: themedHTML, width: 1320, height: 2868).html
