@@ -42,7 +42,7 @@ public final class AppShot: @unchecked Sendable, Identifiable {
     /// Compose this shot into HTML using a screen template and palette.
     /// Caller decides which template — enables per-shot override.
     public func compose(screenTemplate: ScreenTemplate, palette: GalleryPalette) -> String {
-        GalleryHTMLRenderer.renderPanel(self, screenTemplate: screenTemplate, palette: palette)
+        GalleryHTMLRenderer.renderScreen(self, screenTemplate: screenTemplate, palette: palette)
     }
 }
 

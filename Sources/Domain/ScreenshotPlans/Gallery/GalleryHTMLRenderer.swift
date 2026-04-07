@@ -1,16 +1,13 @@
 import Foundation
 
-/// Renders gallery panels as HTML matching the gallery-templates-poc structure.
+/// Renders App Store screenshot screens as HTML.
 ///
 /// Uses `cqi` units + `container-type:inline-size` for responsive scaling.
-/// Panel aspect ratio: 1320/2868 (iPhone App Store screenshot).
+/// Screen aspect ratio: 1320/2868 (iPhone App Store screenshot).
 public enum GalleryHTMLRenderer {
 
-    /// Render a single AppShot as an inner panel HTML fragment.
-    ///
-    /// This is the `.pi` div contents — background + text + device.
-    /// The caller wraps it in a panel container.
-    public static func renderPanel(
+    /// Render a single AppShot as an HTML fragment for one screen.
+    public static func renderScreen(
         _ shot: AppShot,
         screenTemplate: ScreenTemplate,
         palette: GalleryPalette
@@ -27,11 +24,11 @@ public enum GalleryHTMLRenderer {
         let badgeBorder = isLight ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.15)"
         let trustColor = isLight ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.6)"
 
-        let pad = 5.0  // padding %
+        let pad = 5.0
         var textTop = hl.y * 100
         var textHTML = ""
 
-        // Tagline (small caps above headline)
+        // Tagline
         if let tagline = shot.tagline, !tagline.isEmpty {
             let tgSize = fmt(hl.size * 100 * 0.45)
             textHTML += "<div style=\"position:absolute;top:\(fmt(textTop))%;left:\(fmt(pad))%;right:\(fmt(pad))%;z-index:4;"
@@ -70,11 +67,12 @@ public enum GalleryHTMLRenderer {
             textHTML += "</div>"
         }
 
-        // Floating badges
+        // Floating badges — positioned top-right, stacking down
         if !shot.badges.isEmpty {
+            let badgeTop = hl.y * 100
             for (i, badge) in shot.badges.enumerated() {
-                let bx = 60.0 + Double(i) * 14.0
-                let by = 4.0 + Double(i) * 8.0
+                let bx = hl.align == "left" ? 62.0 + Double(i % 2) * 16.0 : 55.0 + Double(i % 2) * 20.0
+                let by = badgeTop + Double(i) * 9.0
                 let bSize = fmt(hl.size * 100 * 0.3)
                 textHTML += "<div style=\"position:absolute;left:\(fmt(bx))%;top:\(fmt(by))%;z-index:5;"
                 textHTML += "background:\(badgeBg);border:1px solid \(badgeBorder);border-radius:100px;"
@@ -84,22 +82,20 @@ public enum GalleryHTMLRenderer {
             }
         }
 
-        // Device — iPhone frame with screenshot
-        // Device — wireframe phone with screenshot
+        // Device — wireframe phone
         var devHTML = ""
         if let dev = screenTemplate.device {
             let dw = fmt(dev.width * 100)
             let dl = fmt((dev.x - dev.width / 2) * 100)
             let dt = fmt(dev.y * 100)
-            let shadow = isLightBackground(bg) ? "0.12" : "0.35"
-            let frameBg = isLightBackground(bg) ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.08)"
-            let frameBorder = isLightBackground(bg) ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.15)"
-            let scr = isLightBackground(bg) ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.06)"
-            let ui = isLightBackground(bg) ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)"
-            let ui2 = isLightBackground(bg) ? "rgba(0,0,0,0.10)" : "rgba(255,255,255,0.09)"
-            let uitx = isLightBackground(bg) ? "rgba(0,0,0,0.30)" : "rgba(255,255,255,0.25)"
+            let shadow = isLight ? "0.12" : "0.35"
+            let frameBg = isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.08)"
+            let frameBorder2 = isLight ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.15)"
+            let scr = isLight ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.06)"
+            let ui = isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)"
+            let ui2 = isLight ? "rgba(0,0,0,0.10)" : "rgba(255,255,255,0.09)"
+            let uitx = isLight ? "rgba(0,0,0,0.30)" : "rgba(255,255,255,0.25)"
 
-            // Real frame overlay or CSS wireframe
             let frameOverlay: String
             let outerStyle: String
             if let dataURL = phoneFrameDataURL {
@@ -107,12 +103,11 @@ public enum GalleryHTMLRenderer {
                 outerStyle = "aspect-ratio:1470/3000;position:relative;filter:drop-shadow(0 4px 20px rgba(0,0,0,\(shadow)))"
             } else {
                 frameOverlay = ""
-                outerStyle = "aspect-ratio:1470/3000;position:relative;filter:drop-shadow(0 4px 20px rgba(0,0,0,\(shadow)));background:\(frameBg);border-radius:12%/5.5%;border:1.5px solid \(frameBorder);overflow:hidden"
+                outerStyle = "aspect-ratio:1470/3000;position:relative;filter:drop-shadow(0 4px 20px rgba(0,0,0,\(shadow)));background:\(frameBg);border-radius:12%/5.5%;border:1.5px solid \(frameBorder2);overflow:hidden"
             }
 
             devHTML += "<div style=\"position:absolute;left:\(dl)%;top:\(dt)%;width:\(dw)%;z-index:2\">"
             devHTML += "<div style=\"\(outerStyle)\">"
-            // Screen area with wireframe UI
             devHTML += "<div style=\"position:absolute;inset:2.6% 2.2%;background:\(scr);border-radius:8%/4%;overflow:hidden;z-index:1\">"
             devHTML += "<div style=\"padding:5% 5% 0;display:flex;justify-content:space-between\">"
             devHTML += "<div style=\"font-size:max(3.5px,1.6cqi);font-weight:600;color:\(uitx);font-family:system-ui\">9:41</div>"
@@ -120,7 +115,6 @@ public enum GalleryHTMLRenderer {
             devHTML += "<div style=\"width:max(3px,1.2cqi);height:max(3px,1.2cqi);border-radius:50%;background:\(uitx)\"></div>"
             devHTML += "<div style=\"width:max(5px,2cqi);height:max(3px,1.2cqi);border-radius:1px;background:\(uitx)\"></div>"
             devHTML += "</div></div>"
-            // Mock UI cards
             devHTML += "<div style=\"padding:3% 4% 0\">"
             devHTML += "<div style=\"background:\(ui);border-radius:max(3px,1.5cqi);padding:4% 5%;margin-bottom:2%\">"
             devHTML += "<div style=\"display:flex;gap:3%;align-items:center;margin-bottom:3%\">"
@@ -136,49 +130,45 @@ public enum GalleryHTMLRenderer {
             devHTML += "<div style=\"flex:1;aspect-ratio:1;background:\(ui2);border-radius:max(2px,1cqi)\"></div>"
             devHTML += "<div style=\"flex:1;aspect-ratio:1;background:\(ui2);border-radius:max(2px,1cqi)\"></div></div></div>"
             devHTML += "</div>"
-            // Home indicator
             devHTML += "<div style=\"position:absolute;bottom:1.2%;left:30%;right:30%;height:max(1.5px,0.6cqi);background:\(uitx);border-radius:4px\"></div>"
-            devHTML += "</div>" // screen area
+            devHTML += "</div>"
             devHTML += "\(frameOverlay)</div></div>"
         }
 
-        return "<div class=\"pi\" style=\"background:\(bg);position:relative;overflow:hidden;container-type:inline-size;width:100%;height:100%\">"
+        return "<div style=\"background:\(bg);position:relative;overflow:hidden;container-type:inline-size;width:100%;height:100%\">"
             + "\(textHTML)\(devHTML)"
             + "</div>"
     }
 
     // MARK: - Preview
 
-    /// Render a gallery preview page — multiple panels side by side in a horizontal strip.
-    /// The Gallery already has template, palette, and appShots with content.
+    /// Render a gallery preview page — multiple screens in a horizontal strip.
     public static func renderPreviewPage(_ gallery: Gallery) -> String {
-        let panels = gallery.renderAll()
-        guard !panels.isEmpty else { return "" }
+        let screens = gallery.renderAll()
+        guard !screens.isEmpty else { return "" }
 
-        let panelDivs = panels.map { panel in
-            "<div style=\"width:120px;aspect-ratio:1320/2868;border-radius:6px;overflow:hidden;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,0.06),0 4px 12px rgba(0,0,0,0.04)\">\(panel)</div>"
+        let screenDivs = screens.map { screen in
+            "<div style=\"width:120px;aspect-ratio:1320/2868;border-radius:6px;overflow:hidden;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,0.06),0 4px 12px rgba(0,0,0,0.04)\">\(screen)</div>"
         }.joined()
 
         return """
         <!DOCTYPE html><html><head><meta charset="utf-8">
         <style>*{margin:0;padding:0;box-sizing:border-box}
         body{background:#dfe2e8;display:flex;align-items:flex-start;height:100vh;overflow:hidden;font-family:system-ui,-apple-system,sans-serif}
-        .g{display:flex;gap:5px;padding:10px;overflow-x:auto;align-items:flex-start}
+        .g{display:flex;gap:5px;padding:10px;align-items:flex-start}
         </style></head><body>
-        <div class="g">\(panelDivs)</div>
+        <div class="g">\(screenDivs)</div>
         </body></html>
         """
     }
 
     private static func isLightBackground(_ bg: String) -> Bool {
-        // Quick heuristic: if it contains light hex colors or named light colors
-        let lightPatterns = ["#f", "#F", "#e", "#E", "#d", "#D", "#c", "#C", "#b", "#B", "#a8", "#A8"]
-        return lightPatterns.contains(where: { bg.contains($0) })
+        let lightHex = ["#f", "#F", "#e", "#E", "#d", "#D", "#c", "#C", "#b", "#B", "#a8", "#A8", "#9"]
+        return lightHex.contains(where: { bg.contains($0) })
     }
 
     // MARK: - Helpers
 
-    /// Base64 data URL of the iPhone frame PNG. Set by infrastructure at startup.
     nonisolated(unsafe) public static var phoneFrameDataURL: String?
 
     private static func fmt(_ value: Double) -> String {
