@@ -119,6 +119,7 @@ extension Gallery: Codable {
         try c.encode(appShots, forKey: .appShots)
         try c.encodeIfPresent(template, forKey: .template)
         try c.encodeIfPresent(palette, forKey: .palette)
+        try c.encode(previewHTML, forKey: .previewHTML)
     }
 }
 

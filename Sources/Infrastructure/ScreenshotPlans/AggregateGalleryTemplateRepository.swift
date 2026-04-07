@@ -2,9 +2,6 @@ import Domain
 import Foundation
 
 /// Aggregates gallery templates from all registered providers.
-///
-/// Plugins register providers to supply gallery templates.
-/// Use `AggregateGalleryTemplateRepository.shared` as the global registry.
 public final actor AggregateGalleryTemplateRepository: GalleryTemplateRepository {
     public static let shared = AggregateGalleryTemplateRepository()
 
@@ -16,17 +13,17 @@ public final actor AggregateGalleryTemplateRepository: GalleryTemplateRepository
         providers.append(provider)
     }
 
-    public func listGalleryTemplates() async throws -> [GalleryTemplate] {
-        var all: [GalleryTemplate] = []
+    public func listGalleries() async throws -> [Gallery] {
+        var all: [Gallery] = []
         for provider in providers {
-            let templates = try await provider.galleryTemplates()
-            all.append(contentsOf: templates)
+            let galleries = try await provider.galleries()
+            all.append(contentsOf: galleries)
         }
         return all
     }
 
-    public func getGalleryTemplate(id: String) async throws -> GalleryTemplate? {
-        let all = try await listGalleryTemplates()
-        return all.first { $0.id == id }
+    public func getGallery(templateId: String) async throws -> Gallery? {
+        let all = try await listGalleries()
+        return all.first { $0.template?.id == templateId }
     }
 }
