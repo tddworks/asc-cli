@@ -17,6 +17,13 @@ public struct ScreenTemplate: Sendable, Equatable, Codable {
         self.device = device
         self.decorations = decorations
     }
+
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        headline = try c.decode(TextSlot.self, forKey: .headline)
+        device = try c.decodeIfPresent(DeviceSlot.self, forKey: .device)
+        decorations = try c.decodeIfPresent([Decoration].self, forKey: .decorations) ?? []
+    }
 }
 
 /// Where and how text appears in a screen.
