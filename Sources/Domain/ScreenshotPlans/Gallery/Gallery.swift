@@ -52,6 +52,34 @@ public final class Gallery: @unchecked Sendable, Identifiable {
         template != nil && palette != nil && appShots.allSatisfy(\.isConfigured)
     }
 
+    // MARK: - Render
+
+    /// Render all configured shots as HTML.
+    /// Each shot uses the screen template matching its type from the gallery template.
+    public func renderAll() -> [String] {
+        guard let template, let palette else { return [] }
+        return appShots.compactMap { shot in
+            guard shot.isConfigured,
+                  let screenTemplate = template.screens[shot.type] else { return nil }
+            return shot.compose(screenTemplate: screenTemplate, palette: palette)
+        }
+    }
+
+    /// Render a single shot at index.
+    /// Optionally override the screen template (for per-shot customization in the UI).
+    public func renderShot(
+        at index: Int,
+        with overrideTemplate: ScreenTemplate? = nil
+    ) -> String? {
+        guard let template, let palette,
+              appShots.indices.contains(index),
+              appShots[index].isConfigured else { return nil }
+        let shot = appShots[index]
+        let screenTemplate = overrideTemplate ?? template.screens[shot.type]
+        guard let screenTemplate else { return nil }
+        return shot.compose(screenTemplate: screenTemplate, palette: palette)
+    }
+
     public var readiness: GalleryReadiness {
         GalleryReadiness(
             hasPalette: palette != nil,

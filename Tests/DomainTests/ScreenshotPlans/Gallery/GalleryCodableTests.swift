@@ -91,4 +91,38 @@ struct GalleryCodableTests {
         #expect(template.screens[.hero]?.headline.align == "left")
         #expect(template.screens[.feature]?.device?.width == 0.68)
     }
+
+    @Test func `array of gallery templates decodes from JSON`() throws {
+        let json = """
+        [
+          {
+            "id": "neon-pop",
+            "name": "Neon Pop",
+            "screens": {
+              "hero": { "headline": { "y": 0.07, "size": 0.08, "weight": 900, "align": "left" } },
+              "feature": {
+                "headline": { "y": 0.05, "size": 0.08, "weight": 900, "align": "left" },
+                "device": { "x": 0.5, "y": 0.36, "width": 0.68 }
+              }
+            }
+          },
+          {
+            "id": "blue-depth",
+            "name": "Blue Depth",
+            "screens": {
+              "hero": { "headline": { "y": 0.04, "size": 0.11, "weight": 900, "align": "center" } },
+              "feature": {
+                "headline": { "y": 0.025, "size": 0.11, "weight": 900, "align": "center" },
+                "device": { "x": 0.5, "y": 0.14, "width": 0.82 }
+              }
+            }
+          }
+        ]
+        """
+        let templates = try JSONDecoder().decode([GalleryTemplate].self, from: Data(json.utf8))
+        #expect(templates.count == 2)
+        #expect(templates[0].id == "neon-pop")
+        #expect(templates[1].id == "blue-depth")
+        #expect(templates[1].screens[.feature]?.device?.width == 0.82)
+    }
 }
