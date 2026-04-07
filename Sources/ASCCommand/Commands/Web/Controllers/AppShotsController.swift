@@ -29,8 +29,11 @@ struct AppShotsController: Sendable {
         }
 
         group.get("/app-shots/gallery-templates") { _, _ -> Response in
-            let templates = try await self.galleryTemplateRepo.listGalleryTemplates()
-            return try restFormat(templates)
+            let galleries = try await self.galleryTemplateRepo.listGalleries()
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+            let data = try encoder.encode(["data": galleries])
+            return restResponse(String(data: data, encoding: .utf8) ?? "[]")
         }
 
         // MARK: - Templates Apply
