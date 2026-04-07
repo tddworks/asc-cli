@@ -30,19 +30,9 @@ public struct GalleryTemplate: Sendable, Equatable, Identifiable {
 // Custom coding so `screens` serializes as {"hero": {...}, "feature": {...}}
 // instead of Swift's default [key, value, key, value] array encoding.
 
-// MARK: - Preview
-
-extension GalleryTemplate {
-    /// Self-contained HTML preview using the feature screen template with wireframe phone.
-    /// Used in the web UI template browser — same approach as ScreenshotTemplate.previewHTML.
-    public var previewHTML: String {
-        GalleryHTMLRenderer.renderPreviewPage(self)
-    }
-}
-
 extension GalleryTemplate: Codable {
     private enum CodingKeys: String, CodingKey {
-        case id, name, description, background, screens, previewHTML
+        case id, name, description, background, screens
     }
 
     public init(from decoder: any Decoder) throws {
@@ -68,7 +58,6 @@ extension GalleryTemplate: Codable {
         try c.encode(background, forKey: .background)
         let raw = Dictionary(uniqueKeysWithValues: screens.map { ($0.key.rawValue, $0.value) })
         try c.encode(raw, forKey: .screens)
-        try c.encode(previewHTML, forKey: .previewHTML)
     }
 }
 

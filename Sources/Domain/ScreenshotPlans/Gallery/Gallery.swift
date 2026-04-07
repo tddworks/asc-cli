@@ -80,6 +80,11 @@ public final class Gallery: @unchecked Sendable, Identifiable {
         return shot.compose(screenTemplate: screenTemplate, palette: palette)
     }
 
+    /// Self-contained HTML preview showing all panels as a horizontal gallery strip.
+    public var previewHTML: String {
+        GalleryHTMLRenderer.renderPreviewPage(self)
+    }
+
     public var readiness: GalleryReadiness {
         GalleryReadiness(
             hasPalette: palette != nil,
@@ -94,7 +99,7 @@ public final class Gallery: @unchecked Sendable, Identifiable {
 
 extension Gallery: Codable {
     private enum CodingKeys: String, CodingKey {
-        case appName, appShots, template, palette
+        case appName, appShots, template, palette, previewHTML
     }
 
     public convenience init(from decoder: any Decoder) throws {
