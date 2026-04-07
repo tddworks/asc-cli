@@ -150,43 +150,8 @@ public enum GalleryHTMLRenderer {
     // MARK: - Preview
 
     /// Render a gallery preview page — multiple panels side by side in a horizontal strip.
-    /// Creates a mock Gallery with sample content and renders all panels.
-    public static func renderPreviewPage(_ galleryTemplate: GalleryTemplate) -> String {
-        // Mock gallery with realistic sample content
-        let gallery = Gallery(
-            appName: "MyApp",
-            screenshots: ["s0.png", "s1.png", "s2.png", "s3.png"]
-        )
-
-        gallery.appShots[0].tagline = "APPNAME"
-        gallery.appShots[0].headline = "PREMIUM\nDEVICE\nMOCKUPS."
-        gallery.appShots[0].badges = ["iPhone 17", "Ultra 3"]
-        gallery.appShots[0].trustMarks = ["4.9 STARS", "PRO QUALITY", "50K+ DESIGNERS"]
-
-        gallery.appShots[1].tagline = "BACKGROUNDS"
-        gallery.appShots[1].headline = "CUSTOMIZE\nEVERY DETAIL"
-        gallery.appShots[1].body = "Pick from solid colors, gradients, or mesh backgrounds. Precise color matching.\n\nProfessional-grade output."
-        gallery.appShots[1].badges = ["🎨 Mesh", "Gradient"]
-
-        gallery.appShots[2].tagline = "TEMPLATES"
-        gallery.appShots[2].headline = "TEMPLATES\nMADE EASY"
-        gallery.appShots[2].body = "Browse recently used, presets, and saved templates. App Store Ready preset included."
-        gallery.appShots[2].badges = ["📋 Presets", "App Store"]
-
-        gallery.appShots[3].tagline = "DIMENSIONS"
-        gallery.appShots[3].headline = "PERFECT\nDIMENSIONS"
-        gallery.appShots[3].body = "Common ratios at a tap — 1:1, 3:4, 4:5, 16:9, Golden, and more."
-        gallery.appShots[3].badges = ["📐 16:9", "4:5"]
-
-        gallery.template = galleryTemplate
-        gallery.palette = GalleryPalette(
-            id: "preview",
-            name: "Preview",
-            background: galleryTemplate.background.isEmpty
-                ? "linear-gradient(180deg, #1a1d26, #2a2d38)"
-                : galleryTemplate.background
-        )
-
+    /// The Gallery already has template, palette, and appShots with content.
+    public static func renderPreviewPage(_ gallery: Gallery) -> String {
         let panels = gallery.renderAll()
         guard !panels.isEmpty else { return "" }
 
