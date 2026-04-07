@@ -46,6 +46,37 @@ public final class AppShot: @unchecked Sendable, Identifiable {
     }
 }
 
+// MARK: - Codable
+
+extension AppShot: Codable {
+    private enum CodingKeys: String, CodingKey {
+        case screenshot, type, tagline, headline, body, badges, trustMarks
+    }
+
+    public convenience init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let screenshot = try c.decode(String.self, forKey: .screenshot)
+        let type = try c.decodeIfPresent(ScreenType.self, forKey: .type) ?? .feature
+        self.init(screenshot: screenshot, type: type)
+        self.tagline = try c.decodeIfPresent(String.self, forKey: .tagline)
+        self.headline = try c.decodeIfPresent(String.self, forKey: .headline)
+        self.body = try c.decodeIfPresent(String.self, forKey: .body)
+        self.badges = try c.decodeIfPresent([String].self, forKey: .badges) ?? []
+        self.trustMarks = try c.decodeIfPresent([String].self, forKey: .trustMarks)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(screenshot, forKey: .screenshot)
+        try c.encode(type, forKey: .type)
+        try c.encodeIfPresent(tagline, forKey: .tagline)
+        try c.encodeIfPresent(headline, forKey: .headline)
+        try c.encodeIfPresent(body, forKey: .body)
+        if !badges.isEmpty { try c.encode(badges, forKey: .badges) }
+        try c.encodeIfPresent(trustMarks, forKey: .trustMarks)
+    }
+}
+
 /// The type of screen in an App Store screenshot gallery.
 public enum ScreenType: String, Sendable, Equatable, Codable {
     case hero       // first impression — branding, trust marks, big headline

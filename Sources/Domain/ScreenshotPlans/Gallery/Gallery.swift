@@ -90,6 +90,33 @@ public final class Gallery: @unchecked Sendable, Identifiable {
     }
 }
 
+// MARK: - Codable
+
+extension Gallery: Codable {
+    private enum CodingKeys: String, CodingKey {
+        case appName, appShots, template, palette
+    }
+
+    public convenience init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let appName = try c.decode(String.self, forKey: .appName)
+        // Decode appShots directly — they carry their own screenshot/type/content
+        let shots = try c.decode([AppShot].self, forKey: .appShots)
+        self.init(appName: appName, screenshots: [])
+        self.appShots = shots
+        self.template = try c.decodeIfPresent(GalleryTemplate.self, forKey: .template)
+        self.palette = try c.decodeIfPresent(GalleryPalette.self, forKey: .palette)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(appName, forKey: .appName)
+        try c.encode(appShots, forKey: .appShots)
+        try c.encodeIfPresent(template, forKey: .template)
+        try c.encodeIfPresent(palette, forKey: .palette)
+    }
+}
+
 /// Progress check for a gallery.
 public struct GalleryReadiness: Sendable, Equatable {
     public let hasPalette: Bool
