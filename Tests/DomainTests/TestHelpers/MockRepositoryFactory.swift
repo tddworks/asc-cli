@@ -1199,6 +1199,53 @@ struct MockRepositoryFactory {
 
     // MARK: - Screenshot Templates
 
+    // MARK: - Gallery
+
+    static func makeAppShot(
+        screenshot: String = "screen-0.png",
+        type: ScreenType = .feature,
+        headline: String? = nil,
+        badges: [String] = [],
+        trustMarks: [String]? = nil
+    ) -> AppShot {
+        let shot = AppShot(screenshot: screenshot, type: type)
+        shot.headline = headline
+        shot.badges = badges
+        shot.trustMarks = trustMarks
+        return shot
+    }
+
+    static func makeGallery(
+        appName: String = "Test App",
+        screenshots: [String] = ["screen-0.png", "screen-1.png"]
+    ) -> Gallery {
+        Gallery(appName: appName, screenshots: screenshots)
+    }
+
+    static func makeGalleryTemplate(
+        id: String = "walkthrough",
+        name: String = "Feature Walkthrough",
+        screens: [ScreenType: ScreenTemplate] = [:]
+    ) -> GalleryTemplate {
+        GalleryTemplate(id: id, name: name, screens: screens)
+    }
+
+    static func makeGalleryPalette(
+        id: String = "green-mint",
+        name: String = "Green Mint",
+        background: String = "linear-gradient(135deg, #c4f7a0, #a0f7e0)"
+    ) -> GalleryPalette {
+        GalleryPalette(id: id, name: name, background: background)
+    }
+
+    static func makeScreenTemplate(
+        headline: TextSlot = TextSlot(y: 0.02, size: 0.10),
+        device: DeviceSlot? = DeviceSlot(y: 0.15, width: 0.85),
+        decorations: [Decoration] = []
+    ) -> ScreenTemplate {
+        ScreenTemplate(headline: headline, device: device, decorations: decorations)
+    }
+
     static func makeScreenshotTemplate(
         id: String = "top-hero",
         name: String = "Top Hero",
