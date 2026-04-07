@@ -8,37 +8,39 @@ struct GalleryTemplateRepositoryTests {
 
     // ── User: "I browse gallery templates" ──
 
-    @Test func `list returns all gallery templates`() async throws {
+    @Test func `list returns all galleries`() async throws {
         let repo = MockGalleryTemplateRepository()
-        given(repo).listGalleryTemplates().willReturn([
-            MockRepositoryFactory.makeGalleryTemplate(id: "neon-pop", name: "Neon Pop"),
-            MockRepositoryFactory.makeGalleryTemplate(id: "blue-depth", name: "Blue Depth"),
-        ])
+        let g1 = Gallery(appName: "App1", screenshots: ["s.png"])
+        g1.template = MockRepositoryFactory.makeGalleryTemplate(id: "neon-pop")
+        let g2 = Gallery(appName: "App2", screenshots: ["s.png"])
+        g2.template = MockRepositoryFactory.makeGalleryTemplate(id: "blue-depth")
 
-        let templates = try await repo.listGalleryTemplates()
-        #expect(templates.count == 2)
-        #expect(templates[0].id == "neon-pop")
-        #expect(templates[1].id == "blue-depth")
+        given(repo).listGalleries().willReturn([g1, g2])
+
+        let galleries = try await repo.listGalleries()
+        #expect(galleries.count == 2)
+        #expect(galleries[0].template?.id == "neon-pop")
+        #expect(galleries[1].template?.id == "blue-depth")
     }
 
     // ── User: "I pick a specific gallery template" ──
 
-    @Test func `get returns template by id`() async throws {
+    @Test func `get returns gallery by template id`() async throws {
         let repo = MockGalleryTemplateRepository()
-        given(repo).getGalleryTemplate(id: .value("neon-pop")).willReturn(
-            MockRepositoryFactory.makeGalleryTemplate(id: "neon-pop", name: "Neon Pop")
-        )
+        let g = Gallery(appName: "App", screenshots: ["s.png"])
+        g.template = MockRepositoryFactory.makeGalleryTemplate(id: "neon-pop", name: "Neon Pop")
 
-        let template = try await repo.getGalleryTemplate(id: "neon-pop")
-        #expect(template?.id == "neon-pop")
-        #expect(template?.name == "Neon Pop")
+        given(repo).getGallery(templateId: .value("neon-pop")).willReturn(g)
+
+        let gallery = try await repo.getGallery(templateId: "neon-pop")
+        #expect(gallery?.template?.id == "neon-pop")
     }
 
     @Test func `get returns nil for unknown id`() async throws {
         let repo = MockGalleryTemplateRepository()
-        given(repo).getGalleryTemplate(id: .value("unknown")).willReturn(nil)
+        given(repo).getGallery(templateId: .value("unknown")).willReturn(nil)
 
-        let template = try await repo.getGalleryTemplate(id: "unknown")
-        #expect(template == nil)
+        let gallery = try await repo.getGallery(templateId: "unknown")
+        #expect(gallery == nil)
     }
 }
