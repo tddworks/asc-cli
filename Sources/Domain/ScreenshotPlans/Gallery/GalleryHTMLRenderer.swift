@@ -95,61 +95,46 @@ public enum GalleryHTMLRenderer {
 
     // MARK: - Preview
 
-    /// Render a full HTML preview page for a gallery template — same wireframe phone
-    /// as the single template previews. Used in the template browser UI.
-    /// Render a full HTML preview page for a gallery template.
-    /// Uses the template's actual background and layout to show a realistic preview
-    /// with the same wireframe phone + real bezel as single template previews.
+    /// Render a gallery preview page — multiple panels side by side in a horizontal strip.
+    /// Creates a mock Gallery with sample content and renders all panels.
     public static func renderPreviewPage(_ galleryTemplate: GalleryTemplate) -> String {
-        let screenTemplate = galleryTemplate.screens[.feature]
-            ?? galleryTemplate.screens[.hero]
-            ?? galleryTemplate.screens.values.first
-        guard let st = screenTemplate else { return "" }
-
-        let hl = st.headline
-        let bg = galleryTemplate.background
-        let isLight = isLightBackground(bg)
-        let textColor = isLight ? "#111111" : "#FFFFFF"
-
-        let textSlots = [
-            TemplateTextSlot(
-                role: .heading,
-                preview: galleryTemplate.name,
-                x: hl.align == "left" ? 0.06 : 0.5,
-                y: hl.y,
-                fontSize: hl.size,
-                fontWeight: hl.weight,
-                color: textColor,
-                textAlign: hl.align
-            )
-        ]
-        let deviceSlots: [TemplateDeviceSlot]
-        if let dev = st.device {
-            deviceSlots = [TemplateDeviceSlot(x: dev.x, y: dev.y, scale: dev.width)]
-        } else {
-            deviceSlots = []
-        }
-
-        // Parse background — try as CSS value, fall back to gradient
-        let slideBg: SlideBackground
-        if bg.contains("gradient") || bg.contains("#") || bg.contains("rgb") {
-            // Use solid with the raw CSS value — TemplateHTMLRenderer will output it directly
-            slideBg = .solid(bg)
-        } else {
-            slideBg = .gradient(from: "#1a1d26", to: "#2a2d38", angle: 180)
-        }
-
-        let template = ScreenshotTemplate(
-            id: "gallery-preview-\(galleryTemplate.id)",
-            name: galleryTemplate.name,
-            category: .custom,
-            supportedSizes: [.portrait],
-            description: galleryTemplate.description,
-            background: slideBg,
-            textSlots: textSlots,
-            deviceSlots: deviceSlots
+        // Mock gallery with sample screenshots
+        let gallery = Gallery(
+            appName: "MyApp",
+            screenshots: ["s0.png", "s1.png", "s2.png", "s3.png"]
         )
-        return template.previewHTML
+        gallery.appShots[0].headline = "YOUR\nAPP\nHERE"
+        gallery.appShots[1].headline = "FEATURE\nONE"
+        gallery.appShots[2].headline = "FEATURE\nTWO"
+        gallery.appShots[3].headline = "FEATURE\nTHREE"
+
+        gallery.template = galleryTemplate
+        gallery.palette = GalleryPalette(
+            id: "preview",
+            name: "Preview",
+            background: galleryTemplate.background.isEmpty
+                ? "linear-gradient(180deg, #1a1d26, #2a2d38)"
+                : galleryTemplate.background
+        )
+
+        let panels = gallery.renderAll()
+        guard !panels.isEmpty else { return "" }
+
+        let panelDivs = panels.map { panel in
+            "<div style=\"width:160px;aspect-ratio:1320/2868;border-radius:8px;overflow:hidden;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,0.06),0 4px 12px rgba(0,0,0,0.04)\">\(panel)</div>"
+        }.joined()
+
+        let galleryBg = galleryTemplate.background.isEmpty ? "#dfe2e8" : "#dfe2e8"
+
+        return """
+        <!DOCTYPE html><html><head><meta charset="utf-8">
+        <style>*{margin:0;padding:0;box-sizing:border-box}
+        body{background:\(galleryBg);display:flex;align-items:center;height:100vh;overflow:hidden;font-family:system-ui,-apple-system,sans-serif}
+        .g{display:flex;gap:6px;padding:12px;overflow:hidden}
+        </style></head><body>
+        <div class="g">\(panelDivs)</div>
+        </body></html>
+        """
     }
 
     private static func isLightBackground(_ bg: String) -> Bool {
