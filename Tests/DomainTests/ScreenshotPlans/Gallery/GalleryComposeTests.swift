@@ -23,7 +23,7 @@ struct GalleryComposeTests {
 
         let html = shot.compose(screenTemplate: screenTemplate, palette: palette)
         #expect(html.contains("CUSTOMIZE EVERY DETAIL"))
-        #expect(html.contains("screen-0.png"))
+        #expect(html.contains("9:41"))  // wireframe phone status bar
         #expect(html.contains("linear-gradient"))
     }
 
@@ -63,7 +63,7 @@ struct GalleryComposeTests {
 
         let html = shot.compose(screenTemplate: featureTemplate, palette: palette)
         #expect(html.contains("Friends"))
-        #expect(html.contains("screen-1.png"))
+        #expect(html.contains("9:41"))  // wireframe phone
     }
 
     // ── User: "Gallery renders all my shots at once" ──
