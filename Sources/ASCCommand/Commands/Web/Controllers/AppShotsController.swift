@@ -12,6 +12,7 @@ struct AppShotsController: Sendable {
     let themeRepo: any ThemeRepository
     let htmlRenderer: any HTMLRenderer
     let configStorage: any AppShotsConfigStorage
+    let galleryTemplateRepo: any GalleryTemplateRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
 
@@ -25,6 +26,11 @@ struct AppShotsController: Sendable {
         group.get("/app-shots/themes") { _, _ -> Response in
             let themes = try await self.themeRepo.listThemes()
             return try restFormat(themes)
+        }
+
+        group.get("/app-shots/gallery-templates") { _, _ -> Response in
+            let templates = try await self.galleryTemplateRepo.listGalleryTemplates()
+            return try restFormat(templates)
         }
 
         // MARK: - Templates Apply

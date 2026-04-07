@@ -50,3 +50,25 @@ extension GalleryTemplate: Codable {
         try c.encode(raw, forKey: .screens)
     }
 }
+
+// MARK: - Presentable
+
+extension GalleryTemplate: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Name", "Screen Types"]
+    }
+    public var tableRow: [String] {
+        [id, name, screens.keys.map(\.rawValue).sorted().joined(separator: ", ")]
+    }
+}
+
+// MARK: - Affordances
+
+extension GalleryTemplate: AffordanceProviding {
+    public var affordances: [String: String] {
+        [
+            "detail": "asc app-shots gallery-templates get --id \(id)",
+            "listAll": "asc app-shots gallery-templates list",
+        ]
+    }
+}
