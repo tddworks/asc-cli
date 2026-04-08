@@ -295,20 +295,25 @@ public enum GalleryHTMLRenderer {
 
     /// Wrap a rendered screen fragment in a full HTML page.
     public static func wrapPage(_ inner: String, fillViewport: Bool = false) -> String {
-        let previewStyle = fillViewport
-            ? "width:100%;height:100%;container-type:inline-size"
-            : "width:320px;aspect-ratio:1320/2868;container-type:inline-size"
-        let bodyStyle = fillViewport
-            ? "margin:0;overflow:hidden"
-            : "display:flex;justify-content:center;align-items:center;min-height:100vh;background:#111"
-        let htmlHeight = fillViewport ? "html,body{width:100%;height:100%}" : ""
+        let styles = buildPageStyles(
+            previewStyle: fillViewport
+                ? "width:100%;height:100%;container-type:inline-size"
+                : "width:320px;aspect-ratio:1320/2868;container-type:inline-size",
+            bodyStyle: fillViewport
+                ? "margin:0;overflow:hidden"
+                : "display:flex;justify-content:center;align-items:center;min-height:100vh;background:#111",
+            htmlHeight: fillViewport ? "html,body{width:100%;height:100%}" : ""
+        )
         let template = loadTemplate("page-wrapper")
         return HTMLComposer.render(template, with: [
-            "previewStyle": previewStyle,
-            "bodyStyle": bodyStyle,
-            "htmlHeight": htmlHeight,
+            "styles": styles,
             "inner": inner,
         ])
+    }
+
+    /// Build the full CSS string for page-wrapper. Shared with `ThemedPage`.
+    public static func buildPageStyles(previewStyle: String, bodyStyle: String, htmlHeight: String) -> String {
+        "*{margin:0;padding:0;box-sizing:border-box}\(htmlHeight)body{\(bodyStyle)}.preview{\(previewStyle)}"
     }
 
     // MARK: - Preview
@@ -354,8 +359,13 @@ public enum GalleryHTMLRenderer {
         ])
     }
 
+    /// Load the page-wrapper template. Shared by `wrapPage()` and `ThemedPage`.
+    public static func loadPageWrapperTemplate() -> String {
+        loadTemplate("page-wrapper")
+    }
+
     /// Load an HTML template by name, falling back to empty string.
-    private static func loadTemplate(_ name: String) -> String {
+    static func loadTemplate(_ name: String) -> String {
         templateRepository.template(named: name) ?? ""
     }
 }
