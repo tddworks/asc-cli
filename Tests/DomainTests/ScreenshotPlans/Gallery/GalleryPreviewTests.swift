@@ -21,8 +21,8 @@ struct GalleryPreviewTests {
         gallery.template = GalleryTemplate(
             id: templateId, name: templateName, background: background,
             screens: [
-                .hero: ScreenTemplate(headline: TextSlot(y: 0.07, size: 0.08, weight: 900, align: "left")),
-                .feature: ScreenTemplate(headline: TextSlot(y: 0.05, size: 0.08), devices: featureDevices),
+                .hero: ScreenLayout(headline: TextSlot(y: 0.07, size: 0.08, weight: 900, align: "left")),
+                .feature: ScreenLayout(headline: TextSlot(y: 0.05, size: 0.08), devices: featureDevices),
             ]
         )
         gallery.palette = GalleryPalette(id: "p", name: "P", background: background)

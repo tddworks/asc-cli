@@ -9,11 +9,11 @@ public enum GalleryHTMLRenderer {
     /// Render a single AppShot as an HTML fragment for one screen.
     public static func renderScreen(
         _ shot: AppShot,
-        screenTemplate: ScreenTemplate,
+        screenLayout: ScreenLayout,
         palette: GalleryPalette
     ) -> String {
         let bg = palette.background
-        let hl = screenTemplate.headline
+        let hl = screenLayout.headline
         let hlSize = fmt(hl.size * 100)
         let isLight = isLightBackground(bg)
         let headlineColor = isLight ? "#000" : "#fff"
@@ -28,7 +28,7 @@ public enum GalleryHTMLRenderer {
         var textHTML = ""
 
         // Tagline — from slot position, content from AppShot or TextSlot.preview
-        if let tgSlot = screenTemplate.tagline {
+        if let tgSlot = screenLayout.tagline {
             let tgText = shot.tagline ?? tgSlot.preview ?? ""
             if !tgText.isEmpty {
                 let tgSize = fmt(tgSlot.size * 100)
@@ -50,7 +50,7 @@ public enum GalleryHTMLRenderer {
         }
 
         // Subheading — from slot position, content from AppShot.body or TextSlot.preview
-        if let subSlot = screenTemplate.subheading {
+        if let subSlot = screenLayout.subheading {
             let subText = shot.body ?? subSlot.preview ?? ""
             if !subText.isEmpty {
                 let subSize = fmt(subSlot.size * 100)
@@ -90,9 +90,9 @@ public enum GalleryHTMLRenderer {
 
         // Devices — real screenshots or wireframe phones (supports multi-device)
         var devHTML = ""
-        let devSlots = screenTemplate.devices.isEmpty && shot.type == .hero
+        let devSlots = screenLayout.devices.isEmpty && shot.type == .hero
             ? [DeviceSlot(x: 0.5, y: 0.42, width: 0.65)]
-            : screenTemplate.devices
+            : screenLayout.devices
         for (devIndex, dev) in devSlots.enumerated() {
             let screenshotFile = devIndex < shot.screenshots.count ? shot.screenshots[devIndex] : ""
             let hasScreenshot = !screenshotFile.isEmpty

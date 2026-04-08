@@ -11,7 +11,7 @@ struct GalleryComposeTests {
         let shot = AppShot(screenshot: "screen-0.png", type: .feature)
         shot.headline = "CUSTOMIZE EVERY DETAIL"
 
-        let screenTemplate = ScreenTemplate(
+        let screenLayout = ScreenLayout(
             headline: TextSlot(y: 0.05, size: 0.08, weight: 900, align: "left"),
             device: DeviceSlot(y: 0.36, width: 0.68)
         )
@@ -21,7 +21,7 @@ struct GalleryComposeTests {
             background: "linear-gradient(165deg, #a8ff78, #78ffd6)"
         )
 
-        let html = shot.compose(screenTemplate: screenTemplate, palette: palette)
+        let html = shot.compose(screenLayout: screenLayout, palette: palette)
         #expect(html.contains("CUSTOMIZE EVERY DETAIL"))
         #expect(html.contains("screen-0.png"))  // real screenshot in device
         #expect(html.contains("linear-gradient"))
@@ -31,7 +31,7 @@ struct GalleryComposeTests {
         let shot = AppShot(screenshot: "screen-0.png", type: .hero)
         shot.headline = "PREMIUM DEVICE MOCKUPS."
 
-        let heroTemplate = ScreenTemplate(
+        let heroTemplate = ScreenLayout(
             headline: TextSlot(y: 0.07, size: 0.08, weight: 900, align: "left")
             // no device — hero uses screenshot as background
         )
@@ -41,7 +41,7 @@ struct GalleryComposeTests {
             background: "linear-gradient(165deg, #a8ff78, #78ffd6)"
         )
 
-        let html = shot.compose(screenTemplate: heroTemplate, palette: palette)
+        let html = shot.compose(screenLayout: heroTemplate, palette: palette)
         #expect(html.contains("PREMIUM DEVICE MOCKUPS."))
         // hero with screenshot shows real image in device
         #expect(html.contains("screen-0.png"))
@@ -50,9 +50,9 @@ struct GalleryComposeTests {
     @Test func `hero shot without screenshot shows wireframe`() {
         let shot = AppShot(screenshot: "", type: .hero)
         shot.headline = "HERO"
-        let heroTemplate = ScreenTemplate(headline: TextSlot(y: 0.07, size: 0.08))
+        let heroTemplate = ScreenLayout(headline: TextSlot(y: 0.07, size: 0.08))
         let palette = GalleryPalette(id: "g", name: "G", background: "#fff")
-        let html = shot.compose(screenTemplate: heroTemplate, palette: palette)
+        let html = shot.compose(screenLayout: heroTemplate, palette: palette)
         #expect(html.contains("HERO"))
         #expect(html.contains("9:41"))
     }
@@ -61,7 +61,7 @@ struct GalleryComposeTests {
         let shot = AppShot(screenshot: "screen-1.png", type: .feature)
         shot.headline = "Friends"
 
-        let featureTemplate = ScreenTemplate(
+        let featureTemplate = ScreenLayout(
             headline: TextSlot(y: 0.02, size: 0.10, weight: 900, align: "center"),
             device: DeviceSlot(y: 0.15, width: 0.85)
         )
@@ -71,7 +71,7 @@ struct GalleryComposeTests {
             background: "#edf1f8"
         )
 
-        let html = shot.compose(screenTemplate: featureTemplate, palette: palette)
+        let html = shot.compose(screenLayout: featureTemplate, palette: palette)
         #expect(html.contains("Friends"))
         #expect(html.contains("screen-1.png"))  // real screenshot in device
     }
@@ -91,8 +91,8 @@ struct GalleryComposeTests {
             id: "neon-pop",
             name: "Neon Pop",
             screens: [
-                .hero: ScreenTemplate(headline: TextSlot(y: 0.07, size: 0.08)),
-                .feature: ScreenTemplate(
+                .hero: ScreenLayout(headline: TextSlot(y: 0.07, size: 0.08)),
+                .feature: ScreenLayout(
                     headline: TextSlot(y: 0.05, size: 0.08),
                     device: DeviceSlot(y: 0.36, width: 0.68)
                 ),
@@ -120,8 +120,8 @@ struct GalleryComposeTests {
         // s1 has no headline — not configured
 
         gallery.template = GalleryTemplate(id: "t", name: "T", screens: [
-            .hero: ScreenTemplate(headline: TextSlot(y: 0.05, size: 0.08)),
-            .feature: ScreenTemplate(headline: TextSlot(y: 0.05, size: 0.08)),
+            .hero: ScreenLayout(headline: TextSlot(y: 0.05, size: 0.08)),
+            .feature: ScreenLayout(headline: TextSlot(y: 0.05, size: 0.08)),
         ])
         gallery.palette = GalleryPalette(id: "p", name: "P", background: "#fff")
 
@@ -151,18 +151,18 @@ struct GalleryComposeTests {
         let shot = AppShot(screenshot: "screen-0.png")
         shot.headline = "Custom"
 
-        let templateA = ScreenTemplate(
+        let templateA = ScreenLayout(
             headline: TextSlot(y: 0.02, size: 0.10, weight: 900, align: "center"),
             device: DeviceSlot(y: 0.15, width: 0.85)
         )
-        let templateB = ScreenTemplate(
+        let templateB = ScreenLayout(
             headline: TextSlot(y: 0.25, size: 0.12, weight: 700, align: "left"),
             device: DeviceSlot(y: 0.30, width: 0.70)
         )
         let palette = GalleryPalette(id: "p", name: "P", background: "#000")
 
-        let htmlA = shot.compose(screenTemplate: templateA, palette: palette)
-        let htmlB = shot.compose(screenTemplate: templateB, palette: palette)
+        let htmlA = shot.compose(screenLayout: templateA, palette: palette)
+        let htmlB = shot.compose(screenLayout: templateB, palette: palette)
 
         // Same content, different layouts — both contain the headline
         #expect(htmlA.contains("Custom"))

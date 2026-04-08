@@ -80,14 +80,14 @@ struct PresentableTests {
         #expect(territory.tableRow == ["USA", "USD"])
     }
 
-    // MARK: - ScreenshotTemplate
+    // MARK: - AppShotTemplate
 
     @Test func `screenshot template table headers`() {
-        #expect(ScreenshotTemplate.tableHeaders == ["ID", "Name", "Category", "Devices"])
+        #expect(AppShotTemplate.tableHeaders == ["ID", "Name", "Category", "Devices"])
     }
 
     @Test func `screenshot template table row`() {
-        let tmpl = MockRepositoryFactory.makeScreenshotTemplate(id: "hero", name: "Hero", category: .bold)
+        let tmpl = MockRepositoryFactory.makeAppShotTemplate(id: "hero", name: "Hero", category: .bold)
         #expect(tmpl.tableRow == ["hero", "Hero", "bold", "1"])
     }
 

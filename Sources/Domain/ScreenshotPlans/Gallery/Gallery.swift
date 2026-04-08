@@ -67,9 +67,9 @@ public final class Gallery: @unchecked Sendable, Identifiable {
     /// - Returns: Array of screenshot groups. Each group fills one screen's devices.
     public static func distributeScreenshots(
         _ screenshots: [String],
-        screenTemplate: ScreenTemplate
+        screenLayout: ScreenLayout
     ) -> [[String]] {
-        let devicesPerScreen = max(1, screenTemplate.deviceCount)
+        let devicesPerScreen = max(1, screenLayout.deviceCount)
         var result: [[String]] = []
         var i = 0
         while i < screenshots.count {
@@ -102,8 +102,8 @@ public final class Gallery: @unchecked Sendable, Identifiable {
         guard let template, let palette else { return [] }
         return appShots.compactMap { shot in
             guard shot.isConfigured,
-                  let screenTemplate = template.screens[shot.type] else { return nil }
-            return shot.compose(screenTemplate: screenTemplate, palette: palette)
+                  let screenLayout = template.screens[shot.type] else { return nil }
+            return shot.compose(screenLayout: screenLayout, palette: palette)
         }
     }
 
@@ -111,15 +111,15 @@ public final class Gallery: @unchecked Sendable, Identifiable {
     /// Optionally override the screen template (for per-shot customization in the UI).
     public func renderShot(
         at index: Int,
-        with overrideTemplate: ScreenTemplate? = nil
+        with overrideTemplate: ScreenLayout? = nil
     ) -> String? {
         guard let template, let palette,
               appShots.indices.contains(index),
               appShots[index].isConfigured else { return nil }
         let shot = appShots[index]
-        let screenTemplate = overrideTemplate ?? template.screens[shot.type]
-        guard let screenTemplate else { return nil }
-        return shot.compose(screenTemplate: screenTemplate, palette: palette)
+        let screenLayout = overrideTemplate ?? template.screens[shot.type]
+        guard let screenLayout else { return nil }
+        return shot.compose(screenLayout: screenLayout, palette: palette)
     }
 
     /// Self-contained HTML preview showing all panels as a horizontal gallery strip.

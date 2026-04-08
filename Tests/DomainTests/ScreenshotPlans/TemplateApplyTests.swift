@@ -6,7 +6,7 @@ import Testing
 struct TemplateApplyTests {
 
     @Test func `template apply returns HTML with headline`() {
-        let template = MockRepositoryFactory.makeScreenshotTemplate(id: "hero", name: "Hero")
+        let template = MockRepositoryFactory.makeAppShotTemplate(id: "hero", name: "Hero")
         let shot = AppShot(screenshot: "screen.png", type: .feature)
         shot.headline = "Hello World"
         let html = template.apply(shot: shot)
@@ -15,7 +15,7 @@ struct TemplateApplyTests {
     }
 
     @Test func `template apply for viewport returns full-page HTML`() {
-        let template = MockRepositoryFactory.makeScreenshotTemplate(id: "hero", name: "Hero")
+        let template = MockRepositoryFactory.makeAppShotTemplate(id: "hero", name: "Hero")
         let shot = AppShot(screenshot: "screen.png", type: .feature)
         shot.headline = "Test"
         let html = template.apply(shot: shot, fillViewport: true)
@@ -23,7 +23,7 @@ struct TemplateApplyTests {
     }
 
     @Test func `template previewHTML uses template name`() {
-        let template = MockRepositoryFactory.makeScreenshotTemplate(id: "hero", name: "Hero")
+        let template = MockRepositoryFactory.makeAppShotTemplate(id: "hero", name: "Hero")
         let html = template.previewHTML
         #expect(html.contains("<!DOCTYPE html>"))
         #expect(html.contains("Hero"))

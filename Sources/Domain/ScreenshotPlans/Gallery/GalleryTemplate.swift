@@ -2,21 +2,21 @@ import Foundation
 
 /// Defines WHERE things go in each screen type — pure layout, no colors.
 ///
-/// A gallery template contains a `ScreenTemplate` for each screen type
+/// A gallery template contains a `ScreenLayout` for each screen type
 /// (hero, feature, social). Same template works with any palette.
 public struct GalleryTemplate: Sendable, Equatable, Identifiable {
     public let id: String
     public let name: String
     public let description: String
     public let background: String
-    public let screens: [ScreenType: ScreenTemplate]
+    public let screens: [ScreenType: ScreenLayout]
 
     public init(
         id: String,
         name: String,
         description: String = "",
         background: String = "",
-        screens: [ScreenType: ScreenTemplate] = [:]
+        screens: [ScreenType: ScreenLayout] = [:]
     ) {
         self.id = id
         self.name = name
@@ -41,8 +41,8 @@ extension GalleryTemplate: Codable {
         name = try c.decode(String.self, forKey: .name)
         description = try c.decodeIfPresent(String.self, forKey: .description) ?? ""
         background = try c.decodeIfPresent(String.self, forKey: .background) ?? ""
-        let raw = try c.decode([String: ScreenTemplate].self, forKey: .screens)
-        var mapped: [ScreenType: ScreenTemplate] = [:]
+        let raw = try c.decode([String: ScreenLayout].self, forKey: .screens)
+        var mapped: [ScreenType: ScreenLayout] = [:]
         for (key, value) in raw {
             guard let screenType = ScreenType(rawValue: key) else { continue }
             mapped[screenType] = value

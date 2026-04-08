@@ -8,7 +8,7 @@ struct GalleryCodableTests {
     // ── User: "I can save and load a gallery template as JSON" ──
 
     @Test func `screen template round-trips through JSON`() throws {
-        let template = ScreenTemplate(
+        let template = ScreenLayout(
             headline: TextSlot(y: 0.02, size: 0.10, weight: 900, align: "center"),
             device: DeviceSlot(y: 0.15, width: 0.85),
             decorations: [
@@ -16,16 +16,16 @@ struct GalleryCodableTests {
             ]
         )
         let data = try JSONEncoder().encode(template)
-        let decoded = try JSONDecoder().decode(ScreenTemplate.self, from: data)
+        let decoded = try JSONDecoder().decode(ScreenLayout.self, from: data)
         #expect(decoded == template)
     }
 
     @Test func `screen template without device round-trips`() throws {
-        let hero = ScreenTemplate(
+        let hero = ScreenLayout(
             headline: TextSlot(y: 0.25, size: 0.12)
         )
         let data = try JSONEncoder().encode(hero)
-        let decoded = try JSONDecoder().decode(ScreenTemplate.self, from: data)
+        let decoded = try JSONDecoder().decode(ScreenLayout.self, from: data)
         #expect(decoded.devices.isEmpty)
         #expect(decoded.headline.size == 0.12)
     }
@@ -35,8 +35,8 @@ struct GalleryCodableTests {
             id: "neon-pop",
             name: "Neon Pop",
             screens: [
-                .hero: ScreenTemplate(headline: TextSlot(y: 0.25, size: 0.08)),
-                .feature: ScreenTemplate(
+                .hero: ScreenLayout(headline: TextSlot(y: 0.25, size: 0.08)),
+                .feature: ScreenLayout(
                     headline: TextSlot(y: 0.02, size: 0.10),
                     device: DeviceSlot(y: 0.36, width: 0.68)
                 ),
@@ -108,8 +108,8 @@ struct GalleryCodableTests {
             id: "neon-pop", name: "Neon Pop",
             background: "linear-gradient(165deg, #a8ff78, #78ffd6)",
             screens: [
-                .hero: ScreenTemplate(headline: TextSlot(y: 0.07, size: 0.08, weight: 900, align: "left")),
-                .feature: ScreenTemplate(headline: TextSlot(y: 0.05, size: 0.08), device: DeviceSlot(y: 0.36, width: 0.68)),
+                .hero: ScreenLayout(headline: TextSlot(y: 0.07, size: 0.08, weight: 900, align: "left")),
+                .feature: ScreenLayout(headline: TextSlot(y: 0.05, size: 0.08), device: DeviceSlot(y: 0.36, width: 0.68)),
             ]
         )
         gallery.palette = GalleryPalette(id: "green", name: "Green", background: "linear-gradient(165deg, #a8ff78, #78ffd6)")

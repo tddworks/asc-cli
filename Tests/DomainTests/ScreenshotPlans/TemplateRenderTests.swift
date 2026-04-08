@@ -6,7 +6,7 @@ import Testing
 struct TemplateRenderTests {
 
     @Test func `template renderFragment returns inner HTML with content`() {
-        let template = MockRepositoryFactory.makeScreenshotTemplate(id: "hero", name: "Hero")
+        let template = MockRepositoryFactory.makeAppShotTemplate(id: "hero", name: "Hero")
         let shot = AppShot(screenshot: "screen.png", type: .feature)
         shot.headline = "Buy Now"
         let html = template.renderFragment(shot: shot)
@@ -26,7 +26,7 @@ struct TemplateRenderTests {
     }
 
     @Test func `template JSON encoding includes previewHTML`() throws {
-        let template = MockRepositoryFactory.makeScreenshotTemplate(id: "hero", name: "Hero")
+        let template = MockRepositoryFactory.makeAppShotTemplate(id: "hero", name: "Hero")
         let data = try JSONEncoder().encode(template)
         let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
         #expect(json["previewHTML"] as? String != nil)
@@ -34,7 +34,7 @@ struct TemplateRenderTests {
     }
 
     @Test func `template JSON encoding includes deviceCount`() throws {
-        let template = MockRepositoryFactory.makeScreenshotTemplate(id: "hero", name: "Hero")
+        let template = MockRepositoryFactory.makeAppShotTemplate(id: "hero", name: "Hero")
         let data = try JSONEncoder().encode(template)
         let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
         #expect(json["deviceCount"] as? Int == 1)

@@ -40,10 +40,10 @@ struct AppShotsControllerTests {
 
 // MARK: - Helpers
 
-private func makeTemplate(id: String, name: String) -> ScreenshotTemplate {
-    ScreenshotTemplate(
+private func makeTemplate(id: String, name: String) -> AppShotTemplate {
+    AppShotTemplate(
         id: id, name: name, category: .bold, supportedSizes: [.portrait], description: "Test",
-        screenTemplate: ScreenTemplate(headline: TextSlot(y: 0.04, size: 0.1, weight: 700, align: "center"), device: DeviceSlot(x: 0.5, y: 0.18, width: 0.85)),
+        screenLayout: ScreenLayout(headline: TextSlot(y: 0.04, size: 0.1, weight: 700, align: "center"), device: DeviceSlot(x: 0.5, y: 0.18, width: 0.85)),
         palette: GalleryPalette(id: id, name: name, background: "linear-gradient(180deg,#000,#111)")
     )
 }

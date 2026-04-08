@@ -1205,7 +1205,7 @@ struct MockRepositoryFactory {
     static func makeGalleryTemplate(
         id: String = "walkthrough",
         name: String = "Feature Walkthrough",
-        screens: [ScreenType: ScreenTemplate] = [:]
+        screens: [ScreenType: ScreenLayout] = [:]
     ) -> GalleryTemplate {
         GalleryTemplate(id: id, name: name, screens: screens)
     }
@@ -1218,15 +1218,15 @@ struct MockRepositoryFactory {
         GalleryPalette(id: id, name: name, background: background)
     }
 
-    static func makeScreenTemplate(
+    static func makeScreenLayout(
         headline: TextSlot = TextSlot(y: 0.02, size: 0.10),
         devices: [DeviceSlot] = [DeviceSlot(y: 0.15, width: 0.85)],
         decorations: [Decoration] = []
-    ) -> ScreenTemplate {
-        ScreenTemplate(headline: headline, devices: devices, decorations: decorations)
+    ) -> ScreenLayout {
+        ScreenLayout(headline: headline, devices: devices, decorations: decorations)
     }
 
-    static func makeScreenshotTemplate(
+    static func makeAppShotTemplate(
         id: String = "top-hero",
         name: String = "Top Hero",
         category: TemplateCategory = .bold,
@@ -1234,15 +1234,15 @@ struct MockRepositoryFactory {
         description: String = "Indigo gradient with bold headline",
         background: String = "linear-gradient(150deg,#4338CA,#6D28D9)",
         hasDevice: Bool = true
-    ) -> ScreenshotTemplate {
+    ) -> AppShotTemplate {
         let devices = hasDevice ? [DeviceSlot(x: 0.5, y: 0.18, width: 0.85)] : []
-        return ScreenshotTemplate(
+        return AppShotTemplate(
             id: id,
             name: name,
             category: category,
             supportedSizes: supportedSizes,
             description: description,
-            screenTemplate: ScreenTemplate(
+            screenLayout: ScreenLayout(
                 headline: TextSlot(y: 0.04, size: 0.10, weight: 700, align: "center", preview: name),
                 devices: devices
             ),

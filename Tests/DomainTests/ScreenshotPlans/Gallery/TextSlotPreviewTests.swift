@@ -16,7 +16,7 @@ struct TextSlotPreviewTests {
     }
 
     @Test func `screen template has tagline and subheading slots`() {
-        let template = ScreenTemplate(
+        let template = ScreenLayout(
             tagline: TextSlot(y: 0.03, size: 0.04, preview: "APP MANAGEMENT"),
             headline: TextSlot(y: 0.07, size: 0.085, preview: "Submit new\nversions in\nseconds."),
             subheading: TextSlot(y: 0.92, size: 0.055, preview: "Try it free →"),
@@ -28,7 +28,7 @@ struct TextSlotPreviewTests {
     }
 
     @Test func `screen template tagline and subheading are optional`() {
-        let template = ScreenTemplate(
+        let template = ScreenLayout(
             headline: TextSlot(y: 0.04, size: 0.10),
             device: DeviceSlot(y: 0.18, width: 0.85)
         )
@@ -37,7 +37,7 @@ struct TextSlotPreviewTests {
     }
 
     @Test func `preview HTML uses TextSlot preview text when AppShot has no content`() {
-        let template = ScreenTemplate(
+        let template = ScreenLayout(
             tagline: TextSlot(y: 0.03, size: 0.04, preview: "SCREENSHOTS"),
             headline: TextSlot(y: 0.07, size: 0.085, preview: "Generate App\nStore shots"),
             device: DeviceSlot(y: 0.28, width: 0.85)
@@ -45,13 +45,13 @@ struct TextSlotPreviewTests {
         let palette = GalleryPalette(id: "t", name: "T", background: "#4338CA")
         let shot = AppShot(screenshot: "", type: .feature)
         // No headline set on shot — renderer uses TextSlot.preview
-        let html = GalleryHTMLRenderer.renderScreen(shot, screenTemplate: template, palette: palette)
+        let html = GalleryHTMLRenderer.renderScreen(shot, screenLayout: template, palette: palette)
         #expect(html.contains("SCREENSHOTS"))
         #expect(html.contains("Generate App"))
     }
 
     @Test func `render uses AppShot content over TextSlot preview`() {
-        let template = ScreenTemplate(
+        let template = ScreenLayout(
             tagline: TextSlot(y: 0.03, size: 0.04, preview: "DEFAULT TAGLINE"),
             headline: TextSlot(y: 0.07, size: 0.085, preview: "Default Headline")
         )
@@ -59,7 +59,7 @@ struct TextSlotPreviewTests {
         let shot = AppShot(screenshot: "", type: .feature)
         shot.tagline = "MY TAGLINE"
         shot.headline = "My Real Headline"
-        let html = GalleryHTMLRenderer.renderScreen(shot, screenTemplate: template, palette: palette)
+        let html = GalleryHTMLRenderer.renderScreen(shot, screenLayout: template, palette: palette)
         #expect(html.contains("MY TAGLINE"))
         #expect(html.contains("My Real Headline"))
         #expect(!html.contains("DEFAULT TAGLINE"))
