@@ -86,15 +86,34 @@ struct AppShotsController: Sendable {
                   let headline = json["headline"] as? String else {
                 return jsonError("Missing templateId or headline")
             }
-            let screenshotBase64 = json["screenshot"] as? String
             let previewFormat = json["preview"] as? String ?? "html"
+            // Support both single "screenshot" and multi "screenshots"
+            let screenshotsB64: [String]
+            if let arr = json["screenshots"] as? [String] {
+                screenshotsB64 = arr
+            } else if let single = json["screenshot"] as? String {
+                screenshotsB64 = [single]
+            } else {
+                screenshotsB64 = []
+            }
 
             do {
-                let screenshotPath = try writeTempScreenshot(screenshotBase64)
+                // Write each screenshot to temp and build data URL map
+                var paths: [String] = []
+                var dataURLs: [String: String] = [:]
+                for (i, b64) in screenshotsB64.enumerated() {
+                    guard let data = Data(base64Encoded: b64) else { continue }
+                    let path = FileManager.default.temporaryDirectory
+                        .appendingPathComponent("tmpl-\(UUID().uuidString)-\(i).png")
+                    try data.write(to: path)
+                    paths.append(path.path)
+                    dataURLs[path.path] = "data:image/png;base64,\(b64)"
+                }
+
                 guard let tmpl = try await self.templateRepo.getTemplate(id: templateId) else {
                     return jsonError("Template not found", status: .notFound)
                 }
-                let shot = AppShot(screenshot: screenshotPath, type: .feature)
+                let shot = AppShot(screenshots: paths, type: .feature)
                 shot.headline = headline
                 shot.body = json["subtitle"] as? String
                 shot.tagline = json["tagline"] as? String
@@ -106,7 +125,7 @@ struct AppShotsController: Sendable {
                 }
 
                 var html = tmpl.apply(shot: shot)
-                html = Self.inlineBase64(html, screenshotPath: screenshotPath, base64: screenshotBase64)
+                for (path, url) in dataURLs { html = html.replacingOccurrences(of: path, with: url) }
                 return restResponse(jsonEncode(["html": html]))
             } catch {
                 return jsonError("Apply failed: \(error.localizedDescription)", status: .internalServerError)
