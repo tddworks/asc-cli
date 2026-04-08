@@ -43,7 +43,17 @@ struct GalleryComposeTests {
 
         let html = shot.compose(screenTemplate: heroTemplate, palette: palette)
         #expect(html.contains("PREMIUM DEVICE MOCKUPS."))
-        // hero still shows wireframe phone as placeholder
+        // hero with screenshot shows real image in device
+        #expect(html.contains("screen-0.png"))
+    }
+
+    @Test func `hero shot without screenshot shows wireframe`() {
+        let shot = AppShot(screenshot: "", type: .hero)
+        shot.headline = "HERO"
+        let heroTemplate = ScreenTemplate(headline: TextSlot(y: 0.07, size: 0.08))
+        let palette = GalleryPalette(id: "g", name: "G", background: "#fff")
+        let html = shot.compose(screenTemplate: heroTemplate, palette: palette)
+        #expect(html.contains("HERO"))
         #expect(html.contains("9:41"))
     }
 
@@ -63,7 +73,7 @@ struct GalleryComposeTests {
 
         let html = shot.compose(screenTemplate: featureTemplate, palette: palette)
         #expect(html.contains("Friends"))
-        #expect(html.contains("9:41"))  // wireframe phone
+        #expect(html.contains("screen-1.png"))  // real screenshot in device
     }
 
     // ── User: "Gallery renders all my shots at once" ──
