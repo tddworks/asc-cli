@@ -18,13 +18,9 @@ public struct ThemedPage: Sendable, Equatable {
     /// The full HTML page ready for rendering or display.
     public var html: String {
         let styles = GalleryHTMLRenderer.buildPageStyles(
-            previewStyle: fillViewport
-                ? "width:100%;height:100%;container-type:inline-size"
-                : "width:320px;aspect-ratio:\(width)/\(height);container-type:inline-size",
-            bodyStyle: fillViewport
-                ? "margin:0;overflow:hidden"
-                : "display:flex;justify-content:center;align-items:center;min-height:100vh;background:#111",
-            htmlHeight: fillViewport ? "html,body{width:100%;height:100%}" : ""
+            fillViewport: fillViewport,
+            width: width,
+            height: height
         )
         let template = GalleryHTMLRenderer.loadPageWrapperTemplate()
         return HTMLComposer.render(template, with: [
