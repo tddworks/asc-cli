@@ -117,10 +117,10 @@ ASCCommand                       Domain                                  Infrast
 +------------------------------+ |   renderAll(), previewHTML            |
                                   |                                      |
                                   | GalleryTemplate                      |
-                                  |   screens: [ScreenType: ScreenTemplate]|
+                                  |   screens: [ScreenType: ScreenLayout]|
                                   |   id, name, description, background  |
                                   |                                      |
-                                  | ScreenTemplate                       |
+                                  | ScreenLayout                       |
                                   |   headline: TextSlot                 |
                                   |   devices: [DeviceSlot]              |
                                   |   decorations: [Decoration]          |
@@ -128,8 +128,8 @@ ASCCommand                       Domain                                  Infrast
                                   | GalleryPalette                       |
                                   |   id, name, background (CSS)         |
                                   |                                      |
-                                  | ScreenshotTemplate                   |
-                                  |   screenTemplate + palette            |
+                                  | AppShotTemplate                   |
+                                  |   screenLayout + palette            |
                                   |   category, supportedSizes           |
                                   |                                      |
                                   | GalleryHTMLRenderer                  |
@@ -141,7 +141,7 @@ ASCCommand                       Domain                                  Infrast
 
 **Dependency flow:** `ASCCommand → Domain ← Infrastructure`
 
-**Unified rendering:** Everything renders through `GalleryHTMLRenderer.renderScreen()`. Both `Gallery.renderAll()` and `ScreenshotTemplate.apply()` delegate to it.
+**Unified rendering:** Everything renders through `GalleryHTMLRenderer.renderScreen()`. Both `Gallery.renderAll()` and `AppShotTemplate.apply()` delegate to it.
 
 ---
 
@@ -163,7 +163,7 @@ A single designed App Store screenshot — the core content unit.
 
 **Computed:** `isConfigured` (has headline), `isHero`, `isStandalone`
 
-**Key method:** `compose(screenTemplate:, palette:) → String` — renders HTML
+**Key method:** `compose(screenLayout:, palette:) → String` — renders HTML
 
 ### `Gallery`
 
@@ -192,9 +192,9 @@ Layout rules per screen type. A gallery template defines WHERE things go.
 | `name` | `String` | Display name |
 | `description` | `String` | Human-readable description |
 | `background` | `String` | CSS background (shared by all screens) |
-| `screens` | `[ScreenType: ScreenTemplate]` | Layout per type |
+| `screens` | `[ScreenType: ScreenLayout]` | Layout per type |
 
-### `ScreenTemplate`
+### `ScreenLayout`
 
 Layout for one screen type. Supports single, side-by-side, and triple-fan device arrangements.
 
@@ -214,13 +214,13 @@ Color scheme — HOW things look.
 | `name` | `String` | Display name |
 | `background` | `String` | CSS background value |
 
-### `ScreenshotTemplate`
+### `AppShotTemplate`
 
-Convenience wrapper for single-shot templates. Wraps `ScreenTemplate` + `GalleryPalette` with filter metadata.
+Convenience wrapper for single-shot templates. Wraps `ScreenLayout` + `GalleryPalette` with filter metadata.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `screenTemplate` | `ScreenTemplate` | Layout |
+| `screenLayout` | `ScreenLayout` | Layout |
 | `palette` | `GalleryPalette` | Colors |
 | `category` | `TemplateCategory` | `bold`, `minimal`, `elegant`, etc. |
 | `supportedSizes` | `[ScreenSize]` | `portrait`, `landscape`, etc. |
@@ -240,7 +240,7 @@ public enum ScreenSize { portrait, portrait43, landscape, square }
 ### Protocols
 
 ```swift
-@Mockable protocol TemplateProvider { func templates() async throws -> [ScreenshotTemplate] }
+@Mockable protocol TemplateProvider { func templates() async throws -> [AppShotTemplate] }
 @Mockable protocol TemplateRepository { func listTemplates(size:) ... ; func getTemplate(id:) ... }
 @Mockable protocol GalleryTemplateProvider { func galleries() async throws -> [Gallery] }
 @Mockable protocol GalleryTemplateRepository { func listGalleries() ... ; func getGallery(templateId:) ... }
@@ -260,10 +260,10 @@ Sources/
 │   │   ├── Gallery.swift                    # Aggregate (appShots + template + palette)
 │   │   ├── GalleryTemplate.swift            # Per-screen-type layouts
 │   │   ├── GalleryPalette.swift             # Color scheme
-│   │   ├── ScreenTemplate.swift             # TextSlot, DeviceSlot, Decoration
+│   │   ├── ScreenLayout.swift             # TextSlot, DeviceSlot, Decoration
 │   │   ├── GalleryHTMLRenderer.swift        # Unified renderer (renderScreen, wrapPage)
 │   │   └── GalleryTemplateRepository.swift  # Provider + Repository protocols
-│   ├── ScreenshotTemplate.swift             # Single-shot template (wraps ScreenTemplate + Palette)
+│   ├── AppShotTemplate.swift             # Single-shot template (wraps ScreenLayout + Palette)
 │   ├── TemplateRepository.swift             # Single template protocols
 │   ├── ScreenTheme.swift                    # AI theme hints
 │   ├── ThemedPage.swift                     # Themed HTML page wrapper
@@ -294,9 +294,9 @@ Tests/
 │   │   ├── GalleryCodableTests.swift        # 10 tests
 │   │   ├── GalleryPreviewTests.swift        # 4 tests
 │   │   ├── GalleryPreviewOutputTests.swift  # 1 test (visual verification)
-│   │   ├── ScreenTemplateTests.swift        # 6 tests
+│   │   ├── ScreenLayoutTests.swift        # 6 tests
 │   │   └── GalleryTemplateRepositoryTests.swift  # 3 tests
-│   ├── ScreenshotTemplateTests.swift        # 8 tests
+│   ├── AppShotTemplateTests.swift        # 8 tests
 │   ├── TemplateApplyTests.swift
 │   └── TemplateRenderTests.swift
 └── ASCCommandTests/Commands/AppShots/
@@ -313,6 +313,6 @@ swift test --filter 'AppShotTests'              # AppShot domain (11)
 swift test --filter 'GalleryTests'              # Gallery domain (11)
 swift test --filter 'GalleryComposeTests'       # Compose flow (8)
 swift test --filter 'GalleryCodableTests'       # JSON round-trip (10)
-swift test --filter 'ScreenshotTemplateTests'   # Single template (8)
+swift test --filter 'AppShotTemplateTests'   # Single template (8)
 swift test --filter 'AppShots'                  # All app-shots tests
 ```
