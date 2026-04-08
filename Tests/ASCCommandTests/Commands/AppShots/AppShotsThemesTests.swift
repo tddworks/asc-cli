@@ -165,6 +165,65 @@ struct AppShotsThemesTests {
         #expect(output.contains("<!DOCTYPE html>"))
     }
 
+    @Test func `apply with design-only outputs ThemeDesign JSON`() async throws {
+        let mockThemeRepo = MockThemeRepository()
+        let design = ThemeDesign(
+            palette: GalleryPalette(id: "space", name: "Space",
+                                     background: "linear-gradient(135deg, #0f172a, #7c3aed)",
+                                     textColor: "#ffffff"),
+            decorations: [
+                Decoration(shape: .label("✨"), x: 0.85, y: 0.12, size: 0.04, opacity: 0.6,
+                           color: "#fff", background: "rgba(255,255,255,0.1)",
+                           borderRadius: "50%", animation: .twinkle),
+            ]
+        )
+        given(mockThemeRepo).design(themeId: .value("space")).willReturn(design)
+
+        let mockTemplateRepo = MockTemplateRepository()
+
+        let cmd = try AppShotsThemesApply.parse([
+            "--theme", "space",
+            "--template", "top-hero",
+            "--screenshot", "screen.png",
+            "--design-only",
+        ])
+        let output = try await cmd.execute(themeRepo: mockThemeRepo, templateRepo: mockTemplateRepo)
+        #expect(output.contains("\"palette\""))
+        #expect(output.contains("#ffffff"))
+        #expect(output.contains("\"decorations\""))
+    }
+
+    @Test func `apply with apply-design uses cached design file`() async throws {
+        // Write a design JSON file
+        let design = ThemeDesign(
+            palette: GalleryPalette(id: "dark", name: "Dark", background: "#1a1a2e", textColor: "#e0e7ff"),
+            decorations: []
+        )
+        let designPath = NSTemporaryDirectory() + "test-design.json"
+        let data = try JSONEncoder().encode(design)
+        try data.write(to: URL(fileURLWithPath: designPath))
+
+        let mockThemeRepo = MockThemeRepository()
+        let mockTemplateRepo = MockTemplateRepository()
+        given(mockTemplateRepo).getTemplate(id: .value("top-hero")).willReturn(
+            makeTemplate(id: "top-hero", name: "Top Hero")
+        )
+
+        let cmd = try AppShotsThemesApply.parse([
+            "--theme", "space",
+            "--template", "top-hero",
+            "--screenshot", "screen.png",
+            "--headline", "Test",
+            "--apply-design", designPath,
+        ])
+        let output = try await cmd.execute(themeRepo: mockThemeRepo, templateRepo: mockTemplateRepo)
+        // Should contain the applied design colors, not call compose
+        #expect(output.contains("#1a1a2e"))
+        #expect(output.contains("<!DOCTYPE html>"))
+
+        try? FileManager.default.removeItem(atPath: designPath)
+    }
+
     @Test func `apply fails when template not found`() async throws {
         let mockThemeRepo = MockThemeRepository()
         let mockTemplateRepo = MockTemplateRepository()

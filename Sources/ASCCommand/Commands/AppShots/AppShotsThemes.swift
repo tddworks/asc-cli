@@ -116,6 +116,12 @@ struct AppShotsThemesApply: AsyncParsableCommand {
     @Option(name: .long, help: "Output PNG path (for --preview image)")
     var imageOutput: String?
 
+    @Flag(name: .long, help: "Output ThemeDesign JSON (generate once, apply to many screenshots)")
+    var designOnly: Bool = false
+
+    @Option(name: .long, help: "Apply a cached ThemeDesign JSON file instead of calling AI")
+    var applyDesign: String?
+
     func run() async throws {
         let themeRepo = ClientProvider.makeThemeRepository()
         let templateRepo = ClientProvider.makeTemplateRepository()
@@ -128,6 +134,15 @@ struct AppShotsThemesApply: AsyncParsableCommand {
     }
 
     func execute(themeRepo: any ThemeRepository, templateRepo: any TemplateRepository, renderer: (any HTMLRenderer)? = nil) async throws -> String {
+        // Design-only mode: generate ThemeDesign JSON from AI
+        if designOnly {
+            let design = try await themeRepo.design(themeId: theme)
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+            let data = try encoder.encode(design)
+            return String(data: data, encoding: .utf8) ?? "{}"
+        }
+
         guard let tmpl = try await templateRepo.getTemplate(id: template) else {
             throw ValidationError("Template '\(template)' not found. Run `asc app-shots templates list` to see available templates.")
         }
@@ -138,9 +153,17 @@ struct AppShotsThemesApply: AsyncParsableCommand {
         shot.body = subtitle
         shot.tagline = tagline
 
-        // Domain: template renders fragment, theme repo composes, ThemedPage wraps
-        let fragment = tmpl.renderFragment(shot: shot)
-        let themedHTML = try await themeRepo.compose(themeId: theme, html: fragment, canvasWidth: canvasWidth, canvasHeight: canvasHeight)
+        // Apply cached design (re-render through pipeline) or compose via AI
+        let themedHTML: String
+        if let designPath = applyDesign {
+            let designData = try Data(contentsOf: URL(fileURLWithPath: designPath))
+            let design = try JSONDecoder().decode(ThemeDesign.self, from: designData)
+            themedHTML = ThemeDesignApplier.apply(design, shot: shot, screenLayout: tmpl.screenLayout)
+        } else {
+            let fragment = tmpl.renderFragment(shot: shot)
+            themedHTML = try await themeRepo.compose(themeId: theme, html: fragment, canvasWidth: canvasWidth, canvasHeight: canvasHeight)
+        }
+
         let page = ThemedPage(body: themedHTML, width: canvasWidth, height: canvasHeight, fillViewport: preview == .image)
 
         if preview == .image, let renderer {

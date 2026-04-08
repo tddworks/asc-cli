@@ -70,6 +70,31 @@ struct ScreenThemeTests {
         #expect(context.contains("twinkling stars (varying sizes), small planets, comet trails"))
     }
 
+    // MARK: - Build Design Context
+
+    @Test func `buildDesignContext includes JSON schema instruction`() {
+        let theme = makeTheme()
+        let context = theme.buildDesignContext()
+        #expect(context.contains("\"palette\""))
+        #expect(context.contains("\"textColor\""))
+        #expect(context.contains("\"decorations\""))
+        #expect(context.contains("JSON"))
+    }
+
+    @Test func `buildDesignContext specifies normalized positions`() {
+        let theme = makeTheme()
+        let context = theme.buildDesignContext()
+        #expect(context.contains("0-1"))
+        #expect(context.contains("cqi"))
+    }
+
+    @Test func `buildDesignContext includes theme name and style`() {
+        let theme = makeTheme()
+        let context = theme.buildDesignContext()
+        #expect(context.contains("Space"))
+        #expect(context.contains("cosmic"))
+    }
+
     // MARK: - Codable
 
     @Test func `theme is codable`() throws {

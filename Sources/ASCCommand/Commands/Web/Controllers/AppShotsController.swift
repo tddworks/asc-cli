@@ -207,6 +207,66 @@ struct AppShotsController: Sendable {
             }
         }
 
+        // MARK: - Themes Design (generate once, apply many)
+
+        group.post("/app-shots/themes/design") { request, _ -> Response in
+            let body = try await request.body.collect(upTo: 1024 * 1024)
+            guard let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
+                  let themeId = json["themeId"] as? String else {
+                return jsonError("Missing themeId")
+            }
+            do {
+                let design = try await self.themeRepo.design(themeId: themeId)
+                let encoder = JSONEncoder()
+                encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+                let data = try encoder.encode(design)
+                return restResponse(String(data: data, encoding: .utf8) ?? "{}")
+            } catch {
+                return jsonError("Theme design failed: \(error.localizedDescription)", status: .internalServerError)
+            }
+        }
+
+        group.post("/app-shots/themes/apply-design") { request, _ -> Response in
+            let body = try await request.body.collect(upTo: 10 * 1024 * 1024)
+            guard let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
+                  let templateId = json["templateId"] as? String,
+                  let headline = json["headline"] as? String,
+                  let designJSON = json["design"] as? [String: Any] else {
+                return jsonError("Missing templateId, headline, or design")
+            }
+            let screenshotBase64 = json["screenshot"] as? String
+
+            do {
+                let designData = try JSONSerialization.data(withJSONObject: designJSON)
+                let design = try JSONDecoder().decode(ThemeDesign.self, from: designData)
+
+                let screenshotPath = try writeTempScreenshot(screenshotBase64)
+                let shot = AppShot(screenshot: screenshotPath, type: .feature)
+                shot.headline = headline
+                shot.body = json["subtitle"] as? String
+                shot.tagline = json["tagline"] as? String
+
+                // Resolve screen layout from single or gallery template
+                let screenLayout: ScreenLayout
+                if let tmpl = try await self.templateRepo.getTemplate(id: templateId) {
+                    screenLayout = tmpl.screenLayout
+                } else if let gallery = try await self.galleryTemplateRepo.getGallery(templateId: templateId),
+                          let tmpl = gallery.template {
+                    screenLayout = tmpl.screens[.feature] ?? tmpl.screens[.hero] ?? ScreenLayout(headline: TextSlot(y: 0.04, size: 0.10))
+                } else {
+                    return jsonError("Template not found", status: .notFound)
+                }
+
+                // Re-render through the standard pipeline with design palette + decorations
+                let themedHTML = ThemeDesignApplier.apply(design, shot: shot, screenLayout: screenLayout)
+                var html = GalleryHTMLRenderer.wrapPage(themedHTML, fillViewport: false)
+                html = Self.inlineBase64(html, screenshotPath: screenshotPath, base64: screenshotBase64)
+                return restResponse(jsonEncode(["html": html]))
+            } catch {
+                return jsonError("Apply design failed: \(error.localizedDescription)", status: .internalServerError)
+            }
+        }
+
         // MARK: - Export
 
         group.post("/app-shots/export") { request, _ -> Response in

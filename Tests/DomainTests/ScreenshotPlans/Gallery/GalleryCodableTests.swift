@@ -192,6 +192,78 @@ struct GalleryCodableTests {
         #expect(galleries[1].appShots[0].headline == "BezelBlend")
     }
 
+    // ── Palette with textColor ──
+
+    @Test func `palette with textColor round-trips`() throws {
+        let palette = GalleryPalette(
+            id: "space", name: "Space",
+            background: "linear-gradient(135deg, #0f172a, #7c3aed)",
+            textColor: "#e0e7ff"
+        )
+        let data = try JSONEncoder().encode(palette)
+        let decoded = try JSONDecoder().decode(GalleryPalette.self, from: data)
+        #expect(decoded == palette)
+        #expect(decoded.textColor == "#e0e7ff")
+    }
+
+    @Test func `palette without textColor decodes as nil`() throws {
+        let json = """
+        {"id":"g","name":"G","background":"#000"}
+        """
+        let palette = try JSONDecoder().decode(GalleryPalette.self, from: Data(json.utf8))
+        #expect(palette.textColor == nil)
+    }
+
+    // ── Decoration with label shape and styling ──
+
+    @Test func `label decoration round-trips`() throws {
+        let deco = Decoration(
+            shape: .label("✨"), x: 0.85, y: 0.12, size: 0.04, opacity: 0.6,
+            color: "#fff", background: "rgba(255,255,255,0.1)",
+            borderRadius: "50%", animation: .twinkle
+        )
+        let data = try JSONEncoder().encode(deco)
+        let decoded = try JSONDecoder().decode(Decoration.self, from: data)
+        #expect(decoded == deco)
+        #expect(decoded.shape == .label("✨"))
+        #expect(decoded.animation == .twinkle)
+    }
+
+    @Test func `decoration without new fields decodes with defaults`() throws {
+        let json = """
+        {"shape":"gem","x":0.9,"y":0.06,"size":0.06,"opacity":0.8}
+        """
+        let deco = try JSONDecoder().decode(Decoration.self, from: Data(json.utf8))
+        #expect(deco.shape == .gem)
+        #expect(deco.color == nil)
+        #expect(deco.animation == nil)
+    }
+
+    @Test func `label decoration decodes from JSON`() throws {
+        let json = """
+        {"shape":{"label":"🎯"},"x":0.1,"y":0.2,"size":0.03,"opacity":0.5,
+         "color":"#fff","background":"rgba(0,0,0,0.1)","borderRadius":"8px","animation":"float"}
+        """
+        let deco = try JSONDecoder().decode(Decoration.self, from: Data(json.utf8))
+        #expect(deco.shape == .label("🎯"))
+        #expect(deco.color == "#fff")
+        #expect(deco.animation == .float)
+    }
+
+    // ── ScreenLayout.withDecorations ──
+
+    @Test func `screenLayout withDecorations returns copy with new decorations`() {
+        let layout = ScreenLayout(
+            headline: TextSlot(y: 0.04, size: 0.10),
+            device: DeviceSlot(y: 0.42, width: 0.85)
+        )
+        let decos = [Decoration(shape: .label("✨"), x: 0.8, y: 0.1, size: 0.04)]
+        let themed = layout.withDecorations(decos)
+        #expect(themed.decorations.count == 1)
+        #expect(themed.headline == layout.headline)
+        #expect(themed.devices == layout.devices)
+    }
+
     @Test func `array of gallery templates decodes from JSON`() throws {
         let json = """
         [

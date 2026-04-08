@@ -95,6 +95,42 @@ extension ScreenTheme {
             "IMPORTANT: Integrate the floating elements naturally — they should enhance the design without covering the device screenshot or text. Use CSS animations (float, drift, pulse, spin) for movement. Vary sizes (small to medium) and opacity (0.15–0.7) for depth.",
         ].joined(separator: "\n")
     }
+
+
+    /// Produces a prompt that instructs AI to return a `ThemeDesign` JSON object.
+    ///
+    /// Unlike `buildContext()` which expects full HTML back, this asks for structured
+    /// JSON with normalized 0-1 positions and container-relative sizes rendered as `cqi`.
+    /// The resulting `ThemeDesign` can be applied deterministically to any template fragment.
+    public func buildDesignContext() -> String {
+        [
+            "Visual theme: \"\(name)\" — \(description)",
+            "Overall style: \(aiHints.style)",
+            "Background: \(aiHints.background)",
+            "Floating decorative elements to include: \(aiHints.floatingElements.joined(separator: ", "))",
+            "Color palette: \(aiHints.colorPalette)",
+            "Text styling: \(aiHints.textStyle)",
+            "",
+            "Output ONLY a JSON object matching this schema (no markdown, no explanation):",
+            "{",
+            "  \"palette\": {\"id\": \"theme-id\", \"name\": \"Theme Name\", \"background\": \"CSS background value\", \"textColor\": \"#hex\"},",
+            "  \"decorations\": [",
+            "    {\"shape\": {\"label\": \"emoji or text\"}, \"x\": 0-1, \"y\": 0-1, \"size\": 0.02-0.06, \"opacity\": 0.15-0.7,",
+            "     \"color\": \"#hex\", \"background\": \"css color\", \"borderRadius\": \"css value\",",
+            "     \"animation\": \"float\"|\"drift\"|\"pulse\"|\"spin\"|\"twinkle\"|null}",
+            "  ]",
+            "}",
+            "",
+            "Rules:",
+            "- palette.background: CSS value (e.g. \"linear-gradient(135deg, #0f172a, #7c3aed)\" or \"#1a1a2e\")",
+            "- palette.textColor: hex color for text (must contrast with background)",
+            "- Positions (x, y) are normalized 0-1 (0=left/top, 1=right/bottom)",
+            "- Size is relative to container width (0.04 = 4% of width), rendered as cqi units",
+            "- Include 4-8 decorations that match the theme",
+            "- Place decorations away from center to avoid covering device screenshots or text",
+            "- Use varied sizes (0.02-0.06) and opacity (0.15-0.7) for depth",
+        ].joined(separator: "\n")
+    }
 }
 
 // MARK: - ThemeAIHints
@@ -150,6 +186,31 @@ public protocol ThemeProvider: Sendable {
     /// - Blitz: spawns `node compose.mjs` with `mode: "restyle"` → Claude
     /// - Others: could use Gemini, local LLM, or deterministic CSS transforms
     func compose(html: String, theme: ScreenTheme, canvasWidth: Int, canvasHeight: Int) async throws -> String
+
+    /// Generate a `ThemeDesign` for a theme — called once, applied to all screenshots.
+    ///
+    /// Returns a structured design (colors, floats) that can be applied deterministically
+    /// via `ThemeDesignApplier` without additional AI calls.
+    func design(theme: ScreenTheme) async throws -> ThemeDesign
+}
+
+/// Default implementation: providers that don't implement `design()` yet.
+extension ThemeProvider {
+    public func design(theme: ScreenTheme) async throws -> ThemeDesign {
+        // Fallback: compose a minimal fragment and parse the result
+        // Plugins should override this with a proper `buildDesignContext()` call
+        throw ThemeDesignError.notSupported
+    }
+}
+
+public enum ThemeDesignError: Error, CustomStringConvertible {
+    case notSupported
+
+    public var description: String {
+        switch self {
+        case .notSupported: return "This theme provider does not support design generation yet"
+        }
+    }
 }
 
 /// Repository for querying visual themes across all providers.
@@ -163,4 +224,7 @@ public protocol ThemeRepository: Sendable {
 
     /// Compose themed HTML — finds the provider that owns the theme and delegates to it.
     func compose(themeId: String, html: String, canvasWidth: Int, canvasHeight: Int) async throws -> String
+
+    /// Generate a `ThemeDesign` — called once, applied to all screenshots via `ThemeDesignApplier`.
+    func design(themeId: String) async throws -> ThemeDesign
 }
