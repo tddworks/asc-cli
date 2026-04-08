@@ -36,6 +36,74 @@ struct AppShotsController: Sendable {
             return restResponse(String(data: data, encoding: .utf8) ?? "[]")
         }
 
+        // MARK: - Gallery Compose
+
+        group.post("/app-shots/gallery/compose") { request, _ -> Response in
+            let body = try await request.body.collect(upTo: 50 * 1024 * 1024)
+            guard let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
+                  let templateId = json["templateId"] as? String,
+                  let screenshotsB64 = json["screenshots"] as? [String] else {
+                return jsonError("Missing templateId or screenshots array")
+            }
+
+            do {
+                // Find gallery template
+                guard let sampleGallery = try await self.galleryTemplateRepo.getGallery(templateId: templateId) else {
+                    return jsonError("Gallery template not found", status: .notFound)
+                }
+                guard let template = sampleGallery.template, let palette = sampleGallery.palette else {
+                    return jsonError("Gallery template missing template or palette")
+                }
+
+                // Write screenshots to temp files and create Gallery
+                var screenshotPaths: [String] = []
+                var dataURLs: [String: String] = [:] // path → data URL
+                for (i, b64) in screenshotsB64.enumerated() {
+                    guard let data = Data(base64Encoded: b64) else { continue }
+                    let path = FileManager.default.temporaryDirectory
+                        .appendingPathComponent("gallery-\(UUID().uuidString)-\(i).png")
+                    try data.write(to: path)
+                    screenshotPaths.append(path.path)
+                    dataURLs[path.path] = "data:image/png;base64,\(b64)"
+                }
+
+                let gallery = Gallery(appName: sampleGallery.appName, screenshots: screenshotPaths)
+                gallery.template = template
+                gallery.palette = palette
+
+                // Copy content from sample gallery to the new gallery
+                for (i, shot) in gallery.appShots.enumerated() {
+                    if i < sampleGallery.appShots.count {
+                        let sample = sampleGallery.appShots[i]
+                        shot.headline = sample.headline
+                        shot.tagline = sample.tagline
+                        shot.body = sample.body
+                        shot.badges = sample.badges
+                        shot.trustMarks = sample.trustMarks
+                    }
+                }
+
+                // Render all screens
+                let htmls = gallery.renderAll()
+
+                // Replace temp file paths with data URLs for browser display
+                let inlinedHTMLs = htmls.map { html in
+                    var result = html
+                    for (path, dataURL) in dataURLs {
+                        result = result.replacingOccurrences(of: path, with: dataURL)
+                    }
+                    return result
+                }
+
+                // Wrap each in a page
+                let pages = inlinedHTMLs.map { GalleryHTMLRenderer.wrapPage($0) }
+
+                return restResponse(jsonEncode(["screens": pages]))
+            } catch {
+                return jsonError("Gallery compose failed: \(error.localizedDescription)", status: .internalServerError)
+            }
+        }
+
         // MARK: - Templates Apply
 
         group.post("/app-shots/templates/apply") { request, _ -> Response in
