@@ -26,7 +26,7 @@ struct GalleryCodableTests {
         )
         let data = try JSONEncoder().encode(hero)
         let decoded = try JSONDecoder().decode(ScreenTemplate.self, from: data)
-        #expect(decoded.device == nil)
+        #expect(decoded.devices.isEmpty)
         #expect(decoded.headline.size == 0.12)
     }
 
@@ -45,8 +45,8 @@ struct GalleryCodableTests {
         let data = try JSONEncoder().encode(template)
         let decoded = try JSONDecoder().decode(GalleryTemplate.self, from: data)
         #expect(decoded.id == "neon-pop")
-        #expect(decoded.screens[.hero]?.device == nil)
-        #expect(decoded.screens[.feature]?.device?.width == 0.68)
+        #expect(decoded.screens[.hero]?.devices.isEmpty == true)
+        #expect(decoded.screens[.feature]?.devices.first?.width == 0.68)
     }
 
     @Test func `gallery palette round-trips through JSON`() throws {
@@ -89,7 +89,7 @@ struct GalleryCodableTests {
         #expect(template.id == "neon-pop")
         #expect(template.screens.count == 2)
         #expect(template.screens[.hero]?.headline.align == "left")
-        #expect(template.screens[.feature]?.device?.width == 0.68)
+        #expect(template.screens[.feature]?.devices.first?.width == 0.68)
     }
 
     // ── User: "I can save and load a Gallery as JSON" ──
@@ -223,6 +223,6 @@ struct GalleryCodableTests {
         #expect(templates.count == 2)
         #expect(templates[0].id == "neon-pop")
         #expect(templates[1].id == "blue-depth")
-        #expect(templates[1].screens[.feature]?.device?.width == 0.82)
+        #expect(templates[1].screens[.feature]?.devices.first?.width == 0.82)
     }
 }

@@ -31,7 +31,7 @@ struct ScreenTemplateGalleryTests {
         let hero = ScreenTemplate(
             headline: TextSlot(y: 0.25, size: 0.12)
         )
-        #expect(hero.device == nil)
+        #expect(hero.devices.isEmpty)
     }
 
     // ── User: "Feature screen has a device frame" ──
@@ -41,8 +41,8 @@ struct ScreenTemplateGalleryTests {
             headline: TextSlot(y: 0.02, size: 0.10),
             device: DeviceSlot(y: 0.15, width: 0.85)
         )
-        #expect(feature.device != nil)
-        #expect(feature.device?.width == 0.85)
+        #expect(feature.devices.count == 1)
+        #expect(feature.devices.first?.width == 0.85)
     }
 
     // ── User: "Templates can have decorative shapes" ──

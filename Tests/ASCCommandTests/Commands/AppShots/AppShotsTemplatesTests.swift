@@ -80,7 +80,7 @@ struct AppShotsTemplatesTests {
         let output = try await cmd.execute(repo: mockRepo)
         #expect(output.contains("Ship Faster"))
         #expect(output.contains("screen-1.png"))
-        #expect(output.contains("asc app-shots generate"))
+        #expect(output.contains("asc app-shots templates"))
     }
 
     @Test func `apply with preview image renders HTML to PNG and writes file`() async throws {

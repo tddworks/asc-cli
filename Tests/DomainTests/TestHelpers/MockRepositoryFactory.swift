@@ -1235,7 +1235,7 @@ struct MockRepositoryFactory {
         background: String = "linear-gradient(150deg,#4338CA,#6D28D9)",
         hasDevice: Bool = true
     ) -> ScreenshotTemplate {
-        let device = hasDevice ? DeviceSlot(x: 0.5, y: 0.18, width: 0.85) : nil
+        let devices = hasDevice ? [DeviceSlot(x: 0.5, y: 0.18, width: 0.85)] : []
         return ScreenshotTemplate(
             id: id,
             name: name,
@@ -1244,7 +1244,7 @@ struct MockRepositoryFactory {
             description: description,
             screenTemplate: ScreenTemplate(
                 headline: TextSlot(y: 0.04, size: 0.10, weight: 700, align: "center"),
-                device: device
+                devices: devices
             ),
             palette: GalleryPalette(id: id, name: name, background: background)
         )
