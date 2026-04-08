@@ -171,20 +171,21 @@ public enum GalleryHTMLRenderer {
 
     // MARK: - Page Wrapper
 
-    /// Wrap a rendered screen fragment in a full HTML page at 1320×2868.
-    /// Always renders at full export size — preview iframes scale it down.
+    /// Wrap a rendered screen fragment in a full HTML page.
     public static func wrapPage(_ inner: String, fillViewport: Bool = false) -> String {
-        if fillViewport {
-            return "<!DOCTYPE html><html><head><meta charset=\"utf-8\">" +
-                "<style>*{margin:0;padding:0;box-sizing:border-box}" +
-                "html,body{width:100%;height:100%;margin:0;overflow:hidden}" +
-                ".preview{width:100%;height:100%;container-type:inline-size}</style>" +
-                "</head><body><div class=\"preview\">\(inner)</div></body></html>"
-        }
+        let previewStyle = fillViewport
+            ? "width:100%;height:100%;container-type:inline-size"
+            : "width:320px;aspect-ratio:1320/2868;container-type:inline-size"
+        let bodyStyle = fillViewport
+            ? "margin:0;overflow:hidden"
+            : "display:flex;justify-content:center;align-items:center;min-height:100vh;background:#111"
+        let htmlHeight = fillViewport ? "html,body{width:100%;height:100%}" : ""
         return "<!DOCTYPE html><html><head><meta charset=\"utf-8\">" +
+            "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
             "<style>*{margin:0;padding:0;box-sizing:border-box}" +
-            "body{margin:0;overflow:hidden;width:1320px;height:2868px}" +
-            ".preview{width:1320px;height:2868px;container-type:inline-size}</style>" +
+            "\(htmlHeight)" +
+            "body{\(bodyStyle)}" +
+            ".preview{\(previewStyle)}</style>" +
             "</head><body><div class=\"preview\">\(inner)</div></body></html>"
     }
 

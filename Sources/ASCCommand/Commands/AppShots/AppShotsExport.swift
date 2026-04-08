@@ -43,15 +43,13 @@ struct AppShotsExport: AsyncParsableCommand {
     static func renderToPNG(html: String, width: Int = 1320, height: Int = 2868, renderer: any HTMLRenderer) async throws -> Data {
         var htmlContent = html
 
-        // Ensure preview fills the full viewport for image export
-        // Themed HTML from `themes apply` uses width:320px — replace with 100%
+        // Convert 320px preview container to fill viewport for export
         if htmlContent.contains("width:320px") {
             htmlContent = htmlContent
-                .replacingOccurrences(of: "width:320px", with: "width:100%;height:100%")
-                .replacingOccurrences(of: "min-height:100vh;background:#111", with: "margin:0;overflow:hidden")
+                .replacingOccurrences(of: "width:320px;aspect-ratio:1320/2868;container-type:inline-size", with: "width:100%;height:100%;container-type:inline-size")
                 .replacingOccurrences(of: "display:flex;justify-content:center;align-items:center;min-height:100vh;background:#111", with: "margin:0;overflow:hidden")
             if !htmlContent.contains("html,body{") {
-                htmlContent = htmlContent.replacingOccurrences(of: "box-sizing:border-box}", with: "box-sizing:border-box}html,body{width:100%;height:100%}")
+                htmlContent = htmlContent.replacingOccurrences(of: "box-sizing:border-box}", with: "box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden}")
             }
         }
 
