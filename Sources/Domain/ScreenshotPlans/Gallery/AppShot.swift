@@ -13,7 +13,7 @@ import Foundation
 /// ```
 public final class AppShot: @unchecked Sendable, Identifiable {
     public let id: String
-    public let screenshot: String
+    public let screenshots: [String]
     public private(set) var type: ScreenType
 
     public var tagline: String?
@@ -22,15 +22,27 @@ public final class AppShot: @unchecked Sendable, Identifiable {
     public var badges: [String]
     public var trustMarks: [String]?
 
+    /// First screenshot (convenience for single-device templates).
+    public var screenshot: String { screenshots.first ?? "" }
+
     public init(
+        id: String = UUID().uuidString,
+        screenshots: [String],
+        type: ScreenType = .feature
+    ) {
+        self.id = id
+        self.screenshots = screenshots
+        self.type = type
+        self.badges = []
+    }
+
+    /// Convenience: single screenshot.
+    public convenience init(
         id: String = UUID().uuidString,
         screenshot: String,
         type: ScreenType = .feature
     ) {
-        self.id = id
-        self.screenshot = screenshot
-        self.type = type
-        self.badges = []
+        self.init(id: id, screenshots: [screenshot], type: type)
     }
 
     /// Whether this app shot has enough content to render.
@@ -50,14 +62,22 @@ public final class AppShot: @unchecked Sendable, Identifiable {
 
 extension AppShot: Codable {
     private enum CodingKeys: String, CodingKey {
-        case screenshot, type, tagline, headline, body, badges, trustMarks
+        case screenshot, screenshots, type, tagline, headline, body, badges, trustMarks
     }
 
     public convenience init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
-        let screenshot = try c.decode(String.self, forKey: .screenshot)
+        // Support both "screenshot" (single) and "screenshots" (array)
+        let shots: [String]
+        if let arr = try? c.decode([String].self, forKey: .screenshots) {
+            shots = arr
+        } else if let single = try? c.decode(String.self, forKey: .screenshot) {
+            shots = [single]
+        } else {
+            shots = []
+        }
         let type = try c.decodeIfPresent(ScreenType.self, forKey: .type) ?? .feature
-        self.init(screenshot: screenshot, type: type)
+        self.init(screenshots: shots, type: type)
         self.tagline = try c.decodeIfPresent(String.self, forKey: .tagline)
         self.headline = try c.decodeIfPresent(String.self, forKey: .headline)
         self.body = try c.decodeIfPresent(String.self, forKey: .body)
@@ -67,7 +87,11 @@ extension AppShot: Codable {
 
     public func encode(to encoder: any Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(screenshot, forKey: .screenshot)
+        if screenshots.count > 1 {
+            try c.encode(screenshots, forKey: .screenshots)
+        } else {
+            try c.encode(screenshot, forKey: .screenshot)
+        }
         try c.encode(type, forKey: .type)
         try c.encodeIfPresent(tagline, forKey: .tagline)
         try c.encodeIfPresent(headline, forKey: .headline)

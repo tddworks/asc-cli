@@ -38,6 +38,27 @@ public final class Gallery: @unchecked Sendable, Identifiable {
         }
     }
 
+    // MARK: - Screenshot Distribution
+
+    /// Distribute screenshots across screens based on device count per screen.
+    /// Multi-device templates consume multiple screenshots per screen.
+    ///
+    /// - Returns: Array of screenshot groups. Each group fills one screen's devices.
+    public static func distributeScreenshots(
+        _ screenshots: [String],
+        screenTemplate: ScreenTemplate
+    ) -> [[String]] {
+        let devicesPerScreen = max(1, screenTemplate.deviceCount)
+        var result: [[String]] = []
+        var i = 0
+        while i < screenshots.count {
+            let end = min(i + devicesPerScreen, screenshots.count)
+            result.append(Array(screenshots[i..<end]))
+            i = end
+        }
+        return result
+    }
+
     // MARK: - Queries
 
     public var shotCount: Int { appShots.count }

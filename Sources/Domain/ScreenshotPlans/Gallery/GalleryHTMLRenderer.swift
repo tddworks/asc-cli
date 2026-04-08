@@ -82,12 +82,14 @@ public enum GalleryHTMLRenderer {
             }
         }
 
-        // Devices — wireframe phones (supports multi-device side-by-side)
+        // Devices — real screenshots or wireframe phones (supports multi-device)
         var devHTML = ""
         let devSlots = screenTemplate.devices.isEmpty && shot.type == .hero
             ? [DeviceSlot(x: 0.5, y: 0.42, width: 0.65)]
             : screenTemplate.devices
-        for dev in devSlots {
+        for (devIndex, dev) in devSlots.enumerated() {
+            let screenshotFile = devIndex < shot.screenshots.count ? shot.screenshots[devIndex] : ""
+            let hasScreenshot = !screenshotFile.isEmpty
             let dw = fmt(dev.width * 100)
             let dl = fmt((dev.x - dev.width / 2) * 100)
             let dt = fmt(dev.y * 100)
@@ -111,30 +113,40 @@ public enum GalleryHTMLRenderer {
 
             devHTML += "<div style=\"position:absolute;left:\(dl)%;top:\(dt)%;width:\(dw)%;z-index:2\">"
             devHTML += "<div style=\"\(outerStyle)\">"
-            devHTML += "<div style=\"position:absolute;inset:2.6% 2.2%;background:\(scr);border-radius:8%/4%;overflow:hidden;z-index:1\">"
-            devHTML += "<div style=\"padding:5% 5% 0;display:flex;justify-content:space-between\">"
-            devHTML += "<div style=\"font-size:max(3.5px,1.6cqi);font-weight:600;color:\(uitx);font-family:system-ui\">9:41</div>"
-            devHTML += "<div style=\"display:flex;gap:1px;align-items:center\">"
-            devHTML += "<div style=\"width:max(3px,1.2cqi);height:max(3px,1.2cqi);border-radius:50%;background:\(uitx)\"></div>"
-            devHTML += "<div style=\"width:max(5px,2cqi);height:max(3px,1.2cqi);border-radius:1px;background:\(uitx)\"></div>"
-            devHTML += "</div></div>"
-            devHTML += "<div style=\"padding:3% 4% 0\">"
-            devHTML += "<div style=\"background:\(ui);border-radius:max(3px,1.5cqi);padding:4% 5%;margin-bottom:2%\">"
-            devHTML += "<div style=\"display:flex;gap:3%;align-items:center;margin-bottom:3%\">"
-            devHTML += "<div style=\"width:max(6px,3cqi);height:max(6px,3cqi);border-radius:50%;background:\(ui2)\"></div>"
-            devHTML += "<div><div style=\"height:max(1.5px,0.7cqi);width:max(14px,7cqi);background:\(ui2);border-radius:1px;margin-bottom:2px\"></div>"
-            devHTML += "<div style=\"height:max(1px,0.5cqi);width:max(9px,4.5cqi);background:\(ui2);border-radius:1px\"></div></div></div>"
-            devHTML += "<div style=\"aspect-ratio:16/9;background:\(ui2);border-radius:max(2px,1cqi);margin-bottom:3%\"></div>"
-            devHTML += "<div style=\"height:max(1.5px,0.7cqi);width:80%;background:\(ui2);border-radius:1px;margin-bottom:2%\"></div>"
-            devHTML += "<div style=\"height:max(1px,0.5cqi);width:55%;background:\(ui2);border-radius:1px\"></div></div>"
-            devHTML += "<div style=\"background:\(ui);border-radius:max(3px,1.5cqi);padding:4% 5%;margin-bottom:2%\">"
-            devHTML += "<div style=\"display:flex;gap:3%\">"
-            devHTML += "<div style=\"flex:1;aspect-ratio:1;background:\(ui2);border-radius:max(2px,1cqi)\"></div>"
-            devHTML += "<div style=\"flex:1;aspect-ratio:1;background:\(ui2);border-radius:max(2px,1cqi)\"></div>"
-            devHTML += "<div style=\"flex:1;aspect-ratio:1;background:\(ui2);border-radius:max(2px,1cqi)\"></div></div></div>"
-            devHTML += "</div>"
-            devHTML += "<div style=\"position:absolute;bottom:1.2%;left:30%;right:30%;height:max(1.5px,0.6cqi);background:\(uitx);border-radius:4px\"></div>"
-            devHTML += "</div>"
+
+            if hasScreenshot {
+                // Real screenshot inside device frame
+                devHTML += "<div style=\"position:absolute;inset:2.6% 2.2%;border-radius:8%/4%;overflow:hidden;z-index:1;background:#000\">"
+                devHTML += "<img src=\"\(screenshotFile)\" style=\"width:100%;height:100%;object-fit:cover;display:block\" alt=\"\">"
+                devHTML += "</div>"
+            } else {
+                // Wireframe mock UI
+                devHTML += "<div style=\"position:absolute;inset:2.6% 2.2%;background:\(scr);border-radius:8%/4%;overflow:hidden;z-index:1\">"
+                devHTML += "<div style=\"padding:5% 5% 0;display:flex;justify-content:space-between\">"
+                devHTML += "<div style=\"font-size:max(3.5px,1.6cqi);font-weight:600;color:\(uitx);font-family:system-ui\">9:41</div>"
+                devHTML += "<div style=\"display:flex;gap:1px;align-items:center\">"
+                devHTML += "<div style=\"width:max(3px,1.2cqi);height:max(3px,1.2cqi);border-radius:50%;background:\(uitx)\"></div>"
+                devHTML += "<div style=\"width:max(5px,2cqi);height:max(3px,1.2cqi);border-radius:1px;background:\(uitx)\"></div>"
+                devHTML += "</div></div>"
+                devHTML += "<div style=\"padding:3% 4% 0\">"
+                devHTML += "<div style=\"background:\(ui);border-radius:max(3px,1.5cqi);padding:4% 5%;margin-bottom:2%\">"
+                devHTML += "<div style=\"display:flex;gap:3%;align-items:center;margin-bottom:3%\">"
+                devHTML += "<div style=\"width:max(6px,3cqi);height:max(6px,3cqi);border-radius:50%;background:\(ui2)\"></div>"
+                devHTML += "<div><div style=\"height:max(1.5px,0.7cqi);width:max(14px,7cqi);background:\(ui2);border-radius:1px;margin-bottom:2px\"></div>"
+                devHTML += "<div style=\"height:max(1px,0.5cqi);width:max(9px,4.5cqi);background:\(ui2);border-radius:1px\"></div></div></div>"
+                devHTML += "<div style=\"aspect-ratio:16/9;background:\(ui2);border-radius:max(2px,1cqi);margin-bottom:3%\"></div>"
+                devHTML += "<div style=\"height:max(1.5px,0.7cqi);width:80%;background:\(ui2);border-radius:1px;margin-bottom:2%\"></div>"
+                devHTML += "<div style=\"height:max(1px,0.5cqi);width:55%;background:\(ui2);border-radius:1px\"></div></div>"
+                devHTML += "<div style=\"background:\(ui);border-radius:max(3px,1.5cqi);padding:4% 5%;margin-bottom:2%\">"
+                devHTML += "<div style=\"display:flex;gap:3%\">"
+                devHTML += "<div style=\"flex:1;aspect-ratio:1;background:\(ui2);border-radius:max(2px,1cqi)\"></div>"
+                devHTML += "<div style=\"flex:1;aspect-ratio:1;background:\(ui2);border-radius:max(2px,1cqi)\"></div>"
+                devHTML += "<div style=\"flex:1;aspect-ratio:1;background:\(ui2);border-radius:max(2px,1cqi)\"></div></div></div>"
+                devHTML += "</div>"
+                devHTML += "<div style=\"position:absolute;bottom:1.2%;left:30%;right:30%;height:max(1.5px,0.6cqi);background:\(uitx);border-radius:4px\"></div>"
+                devHTML += "</div>"
+            }
+
             devHTML += "\(frameOverlay)</div></div>"
         }
 
