@@ -126,9 +126,27 @@ public enum HTMLComposer {
         guard let openEnd = template[openStart.upperBound...].range(of: "}}") else { return nil }
         let key = String(template[openStart.upperBound..<openEnd.lowerBound]).trimmingCharacters(in: .whitespaces)
         let closeTag = "{{/\(tag)}}"
-        guard let closeRange = template[openEnd.upperBound...].range(of: closeTag) else { return nil }
-        let body = String(template[openEnd.upperBound..<closeRange.lowerBound])
-        let fullRange = openStart.lowerBound..<closeRange.upperBound
-        return BlockMatch(key: key, body: body, fullRange: fullRange)
+        // Find the matching close tag, accounting for nesting
+        var searchFrom = openEnd.upperBound
+        var depth = 1
+        while depth > 0 {
+            // Find next open or close tag, whichever comes first
+            let nextOpen = template[searchFrom...].range(of: openPrefix)
+            let nextClose = template[searchFrom...].range(of: closeTag)
+            guard let close = nextClose else { return nil }
+            if let open = nextOpen, open.lowerBound < close.lowerBound {
+                depth += 1
+                searchFrom = open.upperBound
+            } else {
+                depth -= 1
+                if depth == 0 {
+                    let body = String(template[openEnd.upperBound..<close.lowerBound])
+                    let fullRange = openStart.lowerBound..<close.upperBound
+                    return BlockMatch(key: key, body: body, fullRange: fullRange)
+                }
+                searchFrom = close.upperBound
+            }
+        }
+        return nil
     }
 }

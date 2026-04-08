@@ -113,6 +113,40 @@ struct HTMLComposerTests {
         """)
     }
 
+    // MARK: - Nested If Blocks
+
+    @Test func `nested if blocks resolve correctly`() {
+        let template = "{{#if outer}}A{{#if inner}}B{{/if}}C{{/if}}"
+        let result = HTMLComposer.render(template, with: ["outer": "1", "inner": "1"])
+        #expect(result == "ABC")
+    }
+
+    @Test func `nested if outer true inner false`() {
+        let template = "{{#if outer}}A{{#if inner}}B{{/if}}C{{/if}}"
+        let result = HTMLComposer.render(template, with: ["outer": "1"])
+        #expect(result == "AC")
+    }
+
+    @Test func `nested if outer false hides all`() {
+        let template = "{{#if outer}}A{{#if inner}}B{{/if}}C{{/if}}"
+        let result = HTMLComposer.render(template, with: [:])
+        #expect(result == "")
+    }
+
+    @Test func `multiple nested ifs in sequence`() {
+        let template = "{{#if w}}[{{#if a}}A{{/if}}{{#if b}}B{{/if}}]{{/if}}"
+        let result = HTMLComposer.render(template, with: ["w": "1", "b": "1"])
+        #expect(result == "[B]")
+    }
+
+    @Test func `nested if inside each`() {
+        let template = "{{#each items}}{{#if flag}}Y{{/if}}{{#if other}}N{{/if}}-{{/each}}"
+        let result = HTMLComposer.render(template, with: [
+            "items": [["flag": "1"], ["other": "1"]] as [[String: Any]]
+        ])
+        #expect(result == "Y-N-")
+    }
+
     // MARK: - Complex Template
 
     @Test func `renders screen-like template`() {

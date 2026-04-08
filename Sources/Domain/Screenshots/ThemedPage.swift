@@ -17,15 +17,13 @@ public struct ThemedPage: Sendable, Equatable {
 
     /// The full HTML page ready for rendering or display.
     public var html: String {
-        let styles = GalleryHTMLRenderer.buildPageStyles(
+        let template = GalleryHTMLRenderer.loadTemplate("page-wrapper")
+        let ctx = GalleryHTMLRenderer.pageContext(
+            inner: body,
             fillViewport: fillViewport,
             width: width,
             height: height
         )
-        let template = GalleryHTMLRenderer.loadPageWrapperTemplate()
-        return HTMLComposer.render(template, with: [
-            "styles": styles,
-            "inner": body,
-        ])
+        return HTMLComposer.render(template, with: ctx)
     }
 }

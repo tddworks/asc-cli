@@ -130,7 +130,10 @@ public enum GalleryHTMLRenderer {
         guard !screens.isEmpty else { return "" }
         let screenTemplate = loadTemplate("preview-screen")
         let screenDivs = screens.map { HTMLComposer.render(screenTemplate, with: ["screen": $0]) }.joined()
-        return HTMLComposer.render(loadTemplate("preview-page"), with: ["screenDivs": screenDivs])
+        return HTMLComposer.render(loadTemplate("preview-page"), with: [
+            "screenDivs": screenDivs,
+            "themeVars": loadTemplate("theme-vars"),
+        ])
     }
 
     // MARK: - Context Builders (pure data mapping)
