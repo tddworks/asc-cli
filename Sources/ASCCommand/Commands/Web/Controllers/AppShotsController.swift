@@ -126,21 +126,38 @@ struct AppShotsController: Sendable {
                     dataURLs[path.path] = "data:image/png;base64,\(b64)"
                 }
 
-                guard let tmpl = try await self.templateRepo.getTemplate(id: templateId) else {
-                    return jsonError("Template not found", status: .notFound)
-                }
                 let shot = AppShot(screenshots: paths, type: .feature)
                 shot.headline = headline
                 shot.body = json["subtitle"] as? String
                 shot.tagline = json["tagline"] as? String
 
+                // Resolve screenLayout + palette from single or gallery template
+                let screenLayout: ScreenLayout
+                let palette: GalleryPalette
+                if let tmpl = try await self.templateRepo.getTemplate(id: templateId) {
+                    screenLayout = tmpl.screenLayout
+                    palette = tmpl.palette
+                } else if let gallery = try await self.galleryTemplateRepo.getGallery(templateId: templateId),
+                          let tmpl = gallery.template,
+                          let p = gallery.palette {
+                    screenLayout = tmpl.screens[.feature] ?? tmpl.screens[.hero] ?? ScreenLayout(headline: TextSlot(y: 0.04, size: 0.10))
+                    palette = p
+                } else {
+                    return jsonError("Template not found", status: .notFound)
+                }
+
+                let renderHTML = { (fillViewport: Bool) -> String in
+                    let html = GalleryHTMLRenderer.renderScreen(shot, screenLayout: screenLayout, palette: palette)
+                    return GalleryHTMLRenderer.wrapPage(html, fillViewport: fillViewport)
+                }
+
                 if previewFormat == "image" {
-                    let html = tmpl.apply(shot: shot, fillViewport: true)
+                    let html = renderHTML(true)
                     let pngData = try await AppShotsExport.renderToPNG(html: html, renderer: self.htmlRenderer)
                     return restResponse(jsonEncode(["png": pngData.base64EncodedString(), "width": 1320, "height": 2868]))
                 }
 
-                var html = tmpl.apply(shot: shot)
+                var html = renderHTML(false)
                 for (path, url) in dataURLs { html = html.replacingOccurrences(of: path, with: url) }
                 return restResponse(jsonEncode(["html": html]))
             } catch {
