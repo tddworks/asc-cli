@@ -185,10 +185,18 @@ struct AppShotsController: Sendable {
                 shot.body = json["subtitle"] as? String
                 shot.tagline = json["tagline"] as? String
 
-                guard let tmpl = try await self.templateRepo.getTemplate(id: templateId) else {
+                // Resolve template from single or gallery
+                let fragment: String
+                if let tmpl = try await self.templateRepo.getTemplate(id: templateId) {
+                    fragment = tmpl.renderFragment(shot: shot)
+                } else if let gallery = try await self.galleryTemplateRepo.getGallery(templateId: templateId),
+                          let tmpl = gallery.template,
+                          let p = gallery.palette {
+                    let layout = tmpl.screens[.feature] ?? tmpl.screens[.hero] ?? ScreenLayout(headline: TextSlot(y: 0.04, size: 0.10))
+                    fragment = GalleryHTMLRenderer.renderScreen(shot, screenLayout: layout, palette: p)
+                } else {
                     return jsonError("Template not found", status: .notFound)
                 }
-                let fragment = tmpl.renderFragment(shot: shot)
 
                 let themedHTML = try await self.themeRepo.compose(themeId: themeId, html: fragment, canvasWidth: 1320, canvasHeight: 2868)
                 var html = ThemedPage(body: themedHTML, width: 1320, height: 2868).html
