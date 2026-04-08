@@ -32,6 +32,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Mockable", package: "Mockable"),
             ],
+            resources: [.copy("Screenshots/Gallery/Resources")],
             swiftSettings: [.define("MOCKING")]
         ),
         .target(
