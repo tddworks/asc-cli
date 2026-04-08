@@ -94,7 +94,6 @@ extension ScreenshotTemplate: Codable {
         description = try c.decodeIfPresent(String.self, forKey: .description) ?? ""
         screenTemplate = try c.decode(ScreenTemplate.self, forKey: .screenTemplate)
         palette = try c.decode(GalleryPalette.self, forKey: .palette)
-        sampleShot = try c.decodeIfPresent(AppShot.self, forKey: .sampleShot)
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -106,7 +105,6 @@ extension ScreenshotTemplate: Codable {
         try c.encode(description, forKey: .description)
         try c.encode(screenTemplate, forKey: .screenTemplate)
         try c.encode(palette, forKey: .palette)
-        try c.encodeIfPresent(sampleShot, forKey: .sampleShot)
         try c.encode(previewHTML, forKey: .previewHTML)
         try c.encode(deviceCount, forKey: .deviceCount)
     }

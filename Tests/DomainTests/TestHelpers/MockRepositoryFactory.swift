@@ -1243,7 +1243,7 @@ struct MockRepositoryFactory {
             supportedSizes: supportedSizes,
             description: description,
             screenTemplate: ScreenTemplate(
-                headline: TextSlot(y: 0.04, size: 0.10, weight: 700, align: "center"),
+                headline: TextSlot(y: 0.04, size: 0.10, weight: 700, align: "center", preview: name),
                 devices: devices
             ),
             palette: GalleryPalette(id: id, name: name, background: background)
