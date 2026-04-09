@@ -19,6 +19,7 @@ Separate **layout** (deterministic) from **styling** (AI-driven):
 1. **Step 1 — Deterministic HTML**: Render the template using `GalleryHTMLRenderer.renderScreen()` with Mustache templates → exact pixel-perfect layout
 2. **Step 2 — ThemeDesign**: Generate a `ThemeDesign` (palette + decorations) via 1 AI call (`ThemeProvider.design()`)
 3. **Step 3 — Deterministic Apply**: Apply `ThemeDesign` to all slides via `ThemeDesignApplier` — no additional AI calls
+4. **Fallback — Full AI Restyle**: If `design()` unavailable, falls back to `ThemeProvider.compose()` which does per-slide AI restyle via `/themes/apply`
 
 Themes live in Domain as a data model (`ScreenTheme` + `ThemeAIHints`), registered by plugins via `ThemeProvider` (same pattern as `TemplateProvider`).
 
