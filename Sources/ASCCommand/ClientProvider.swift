@@ -240,6 +240,10 @@ struct ClientProvider {
         AggregateTemplateRepository.shared
     }
 
+    static func makeGalleryTemplateRepository() -> AggregateGalleryTemplateRepository {
+        AggregateGalleryTemplateRepository.shared
+    }
+
     static func makeThemeRepository() -> AggregateThemeRepository {
         AggregateThemeRepository.shared
     }

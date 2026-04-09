@@ -19,8 +19,8 @@ public final actor AggregateTemplateRepository: TemplateRepository {
         providers.append(provider)
     }
 
-    public func listTemplates(size: ScreenSize?) async throws -> [ScreenshotTemplate] {
-        var all: [ScreenshotTemplate] = []
+    public func listTemplates(size: ScreenSize?) async throws -> [AppShotTemplate] {
+        var all: [AppShotTemplate] = []
         for provider in providers {
             let templates = try await provider.templates()
             all.append(contentsOf: templates)
@@ -32,7 +32,7 @@ public final actor AggregateTemplateRepository: TemplateRepository {
         return all
     }
 
-    public func getTemplate(id: String) async throws -> ScreenshotTemplate? {
+    public func getTemplate(id: String) async throws -> AppShotTemplate? {
         let all = try await listTemplates(size: nil)
         return all.first { $0.id == id }
     }

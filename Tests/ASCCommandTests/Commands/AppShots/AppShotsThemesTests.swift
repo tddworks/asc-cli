@@ -165,6 +165,58 @@ struct AppShotsThemesTests {
         #expect(output.contains("<!DOCTYPE html>"))
     }
 
+    // MARK: - Design (separate subcommand)
+
+    @Test func `design outputs ThemeDesign JSON from AI`() async throws {
+        let mockThemeRepo = MockThemeRepository()
+        let design = ThemeDesign(
+            palette: GalleryPalette(id: "space", name: "Space",
+                                     background: "linear-gradient(135deg, #0f172a, #7c3aed)",
+                                     textColor: "#ffffff"),
+            decorations: [
+                Decoration(shape: .label("✨"), x: 0.85, y: 0.12, size: 0.04, opacity: 0.6,
+                           color: "#fff", background: "rgba(255,255,255,0.1)",
+                           borderRadius: "50%", animation: .twinkle),
+            ]
+        )
+        given(mockThemeRepo).design(themeId: .value("space")).willReturn(design)
+
+        let cmd = try AppShotsThemesDesign.parse(["--id", "space"])
+        let output = try await cmd.execute(themeRepo: mockThemeRepo)
+        #expect(output.contains("\"palette\""))
+        #expect(output.contains("#ffffff"))
+        #expect(output.contains("\"decorations\""))
+    }
+
+    // MARK: - Apply Design (separate subcommand)
+
+    @Test func `apply-design renders themed HTML from design JSON`() async throws {
+        let design = ThemeDesign(
+            palette: GalleryPalette(id: "dark", name: "Dark", background: "#1a1a2e", textColor: "#e0e7ff"),
+            decorations: []
+        )
+        let designPath = NSTemporaryDirectory() + "test-design.json"
+        let data = try JSONEncoder().encode(design)
+        try data.write(to: URL(fileURLWithPath: designPath))
+
+        let mockTemplateRepo = MockTemplateRepository()
+        given(mockTemplateRepo).getTemplate(id: .value("top-hero")).willReturn(
+            makeTemplate(id: "top-hero", name: "Top Hero")
+        )
+
+        let cmd = try AppShotsThemesApplyDesign.parse([
+            "--design", designPath,
+            "--template", "top-hero",
+            "--screenshot", "screen.png",
+            "--headline", "Test",
+        ])
+        let output = try await cmd.execute(templateRepo: mockTemplateRepo)
+        #expect(output.contains("#1a1a2e"))
+        #expect(output.contains("<!DOCTYPE html>"))
+
+        try? FileManager.default.removeItem(atPath: designPath)
+    }
+
     @Test func `apply fails when template not found`() async throws {
         let mockThemeRepo = MockThemeRepository()
         let mockTemplateRepo = MockTemplateRepository()
@@ -187,15 +239,17 @@ struct AppShotsThemesTests {
 
 // MARK: - Helpers
 
-private func makeTemplate(id: String, name: String) -> ScreenshotTemplate {
-    ScreenshotTemplate(
+private func makeTemplate(id: String, name: String) -> AppShotTemplate {
+    AppShotTemplate(
         id: id,
         name: name,
         category: .bold,
         supportedSizes: [.portrait],
         description: "Test",
-        background: .gradient(from: "#000", to: "#111", angle: 180),
-        textSlots: [TemplateTextSlot(role: .heading, preview: "Test", x: 0.5, y: 0.04, fontSize: 0.1, color: "#fff")],
-        deviceSlots: [TemplateDeviceSlot(x: 0.5, y: 0.18, scale: 0.85)]
+        screenLayout: ScreenLayout(
+            headline: TextSlot(y: 0.04, size: 0.1, weight: 700, align: "center"),
+            device: DeviceSlot(x: 0.5, y: 0.18, width: 0.85)
+        ),
+        palette: GalleryPalette(id: id, name: name, background: "linear-gradient(180deg,#000,#111)")
     )
 }

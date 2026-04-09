@@ -11,7 +11,7 @@ public protocol TemplateProvider: Sendable {
     var providerId: String { get }
 
     /// Return all templates this provider offers.
-    func templates() async throws -> [ScreenshotTemplate]
+    func templates() async throws -> [AppShotTemplate]
 }
 
 /// Repository for querying screenshot templates.
@@ -21,8 +21,8 @@ public protocol TemplateProvider: Sendable {
 @Mockable
 public protocol TemplateRepository: Sendable {
     /// List all templates from all providers, optionally filtered by screen size.
-    func listTemplates(size: ScreenSize?) async throws -> [ScreenshotTemplate]
+    func listTemplates(size: ScreenSize?) async throws -> [AppShotTemplate]
 
     /// Get a specific template by ID (searches all providers).
-    func getTemplate(id: String) async throws -> ScreenshotTemplate?
+    func getTemplate(id: String) async throws -> AppShotTemplate?
 }

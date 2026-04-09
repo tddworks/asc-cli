@@ -43,6 +43,16 @@ public final actor AggregateThemeRepository: ThemeRepository {
         }
         throw ThemeComposeError.themeNotFound(themeId)
     }
+
+    public func design(themeId: String) async throws -> ThemeDesign {
+        for provider in providers {
+            let themes = try await provider.themes()
+            if let theme = themes.first(where: { $0.id == themeId }) {
+                return try await provider.design(theme: theme)
+            }
+        }
+        throw ThemeComposeError.themeNotFound(themeId)
+    }
 }
 
 /// Errors from theme composition.

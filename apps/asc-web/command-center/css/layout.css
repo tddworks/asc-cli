@@ -85,7 +85,7 @@
 .auth-info span { display: block; font-weight: 600; }
 
 /* ========== MAIN ========== */
-.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; min-width: 0; overflow: hidden; }
 
 /* ========== HEADER ========== */
 .header {

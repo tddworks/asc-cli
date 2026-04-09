@@ -160,23 +160,30 @@ struct AppShotsTemplatesApply: AsyncParsableCommand {
             throw ValidationError("Template '\(id)' not found. Run `asc app-shots templates list` to see available templates.")
         }
 
+        let shot = AppShot(screenshot: screenshot, type: .feature)
+        shot.headline = headline
+        shot.body = subtitle
+        shot.tagline = tagline
+
         if preview == .image, let renderer {
-            let content = TemplateContent(headline: headline, subtitle: subtitle, tagline: tagline, screenshotFile: screenshot)
-            let html = template.apply(content: content, fillViewport: true)
+            let html = template.apply(shot: shot, fillViewport: true)
             return try await renderToImage(html: html, renderer: renderer)
         }
 
         if preview == .html {
-            let content = TemplateContent(headline: headline, subtitle: subtitle, tagline: tagline, screenshotFile: URL(fileURLWithPath: screenshot).lastPathComponent)
-            return template.apply(content: content)
+            let shotForHTML = AppShot(screenshot: URL(fileURLWithPath: screenshot).lastPathComponent, type: .feature)
+            shotForHTML.headline = headline
+            shotForHTML.body = subtitle
+            shotForHTML.tagline = tagline
+            return template.apply(shot: shotForHTML)
         }
 
-        let screen = ScreenDesign(index: 0, template: template, screenshotFile: screenshot, heading: headline, subheading: subtitle ?? "")
+        // Return the shot as JSON output
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
-            [screen],
-            headers: ["Heading", "Screenshot", "Template", "Complete"],
-            rowMapper: { [$0.heading, $0.screenshotFile, $0.template?.name ?? "-", $0.isComplete ? "✓" : "✗"] }
+            [shot],
+            headers: ["Headline", "Screenshot", "Template", "Configured"],
+            rowMapper: { [$0.headline ?? "-", $0.screenshot, template.name, $0.isConfigured ? "✓" : "✗"] }
         )
     }
 

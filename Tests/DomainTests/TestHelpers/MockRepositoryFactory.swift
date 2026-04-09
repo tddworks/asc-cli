@@ -600,32 +600,12 @@ struct MockRepositoryFactory {
         )
     }
 
-    // MARK: - ScreenshotPlans
+    // MARK: - Screenshots
 
     static func makeAppShotsConfig(
         geminiApiKey: String = "test-key-123"
     ) -> AppShotsConfig {
         AppShotsConfig(geminiApiKey: geminiApiKey)
-    }
-
-    static func makeScreenDesign(
-        index: Int = 0,
-        screenshotFile: String = "screen1.png",
-        heading: String = "Work Smarter",
-        subheading: String = "Organize your tasks effortlessly",
-        layoutMode: LayoutMode = .center,
-        visualDirection: String = "Main dashboard with task list",
-        imagePrompt: String = "Clean dark UI with colorful task cards"
-    ) -> ScreenDesign {
-        ScreenDesign(
-            index: index,
-            screenshotFile: screenshotFile,
-            heading: heading,
-            subheading: subheading,
-            layoutMode: layoutMode,
-            visualDirection: visualDirection,
-            imagePrompt: imagePrompt
-        )
     }
 
     // MARK: - Plugins
@@ -1199,30 +1179,74 @@ struct MockRepositoryFactory {
 
     // MARK: - Screenshot Templates
 
-    static func makeScreenshotTemplate(
+    // MARK: - Gallery
+
+    static func makeAppShot(
+        screenshot: String = "screen-0.png",
+        type: ScreenType = .feature,
+        headline: String? = nil,
+        badges: [String] = [],
+        trustMarks: [String]? = nil
+    ) -> AppShot {
+        let shot = AppShot(screenshot: screenshot, type: type)
+        shot.headline = headline
+        shot.badges = badges
+        shot.trustMarks = trustMarks
+        return shot
+    }
+
+    static func makeGallery(
+        appName: String = "Test App",
+        screenshots: [String] = ["screen-0.png", "screen-1.png"]
+    ) -> Gallery {
+        Gallery(appName: appName, screenshots: screenshots)
+    }
+
+    static func makeGalleryTemplate(
+        id: String = "walkthrough",
+        name: String = "Feature Walkthrough",
+        screens: [ScreenType: ScreenLayout] = [:]
+    ) -> GalleryTemplate {
+        GalleryTemplate(id: id, name: name, screens: screens)
+    }
+
+    static func makeGalleryPalette(
+        id: String = "green-mint",
+        name: String = "Green Mint",
+        background: String = "linear-gradient(135deg, #c4f7a0, #a0f7e0)"
+    ) -> GalleryPalette {
+        GalleryPalette(id: id, name: name, background: background)
+    }
+
+    static func makeScreenLayout(
+        headline: TextSlot = TextSlot(y: 0.02, size: 0.10),
+        devices: [DeviceSlot] = [DeviceSlot(y: 0.15, width: 0.85)],
+        decorations: [Decoration] = []
+    ) -> ScreenLayout {
+        ScreenLayout(headline: headline, devices: devices, decorations: decorations)
+    }
+
+    static func makeAppShotTemplate(
         id: String = "top-hero",
         name: String = "Top Hero",
         category: TemplateCategory = .bold,
         supportedSizes: [ScreenSize] = [.portrait],
         description: String = "Indigo gradient with bold headline",
-        background: SlideBackground = .gradient(from: "#4338CA", to: "#6D28D9", angle: 150),
-        deviceCount: Int = 1
-    ) -> ScreenshotTemplate {
-        let textSlots = [
-            TemplateTextSlot(role: .heading, preview: "Your\nHeadline", x: 0.5, y: 0.04, fontSize: 0.10, color: "#FFFFFF")
-        ]
-        let deviceSlots = (0..<deviceCount).map { i in
-            TemplateDeviceSlot(x: 0.5, y: 0.18, scale: 0.85)
-        }
-        return ScreenshotTemplate(
+        background: String = "linear-gradient(150deg,#4338CA,#6D28D9)",
+        hasDevice: Bool = true
+    ) -> AppShotTemplate {
+        let devices = hasDevice ? [DeviceSlot(x: 0.5, y: 0.18, width: 0.85)] : []
+        return AppShotTemplate(
             id: id,
             name: name,
             category: category,
             supportedSizes: supportedSizes,
             description: description,
-            background: background,
-            textSlots: textSlots,
-            deviceSlots: deviceSlots
+            screenLayout: ScreenLayout(
+                headline: TextSlot(y: 0.04, size: 0.10, weight: 700, align: "center", preview: name),
+                devices: devices
+            ),
+            palette: GalleryPalette(id: id, name: name, background: background)
         )
     }
 }

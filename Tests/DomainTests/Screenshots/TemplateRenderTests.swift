@@ -5,17 +5,14 @@ import Testing
 @Suite
 struct TemplateRenderTests {
 
-    // MARK: - renderFragment (inner HTML, no page wrapper)
-
     @Test func `template renderFragment returns inner HTML with content`() {
-        let template = MockRepositoryFactory.makeScreenshotTemplate(id: "hero", name: "Hero")
-        let content = TemplateContent(headline: "Buy Now", screenshotFile: "screen.png")
-        let html = template.renderFragment(content: content)
+        let template = MockRepositoryFactory.makeAppShotTemplate(id: "hero", name: "Hero")
+        let shot = AppShot(screenshot: "screen.png", type: .feature)
+        shot.headline = "Buy Now"
+        let html = template.renderFragment(shot: shot)
         #expect(html.contains("Buy Now"))
         #expect(!html.contains("<!DOCTYPE html>"))
     }
-
-    // MARK: - ThemedPage wraps body in full HTML page
 
     @Test func `themed page wraps body in full HTML`() {
         let page = ThemedPage(body: "<div>styled</div>", width: 1320, height: 2868)
@@ -28,10 +25,8 @@ struct TemplateRenderTests {
         #expect(page.html.contains("width:100%"))
     }
 
-    // MARK: - Codable includes computed properties
-
     @Test func `template JSON encoding includes previewHTML`() throws {
-        let template = MockRepositoryFactory.makeScreenshotTemplate(id: "hero", name: "Hero")
+        let template = MockRepositoryFactory.makeAppShotTemplate(id: "hero", name: "Hero")
         let data = try JSONEncoder().encode(template)
         let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
         #expect(json["previewHTML"] as? String != nil)
@@ -39,9 +34,9 @@ struct TemplateRenderTests {
     }
 
     @Test func `template JSON encoding includes deviceCount`() throws {
-        let template = MockRepositoryFactory.makeScreenshotTemplate(id: "hero", name: "Hero", deviceCount: 2)
+        let template = MockRepositoryFactory.makeAppShotTemplate(id: "hero", name: "Hero")
         let data = try JSONEncoder().encode(template)
         let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
-        #expect(json["deviceCount"] as? Int == 2)
+        #expect(json["deviceCount"] as? Int == 1)
     }
 }

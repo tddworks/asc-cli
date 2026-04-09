@@ -12,6 +12,7 @@ struct AppShotsController: Sendable {
     let themeRepo: any ThemeRepository
     let htmlRenderer: any HTMLRenderer
     let configStorage: any AppShotsConfigStorage
+    let galleryTemplateRepo: any GalleryTemplateRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
 
@@ -27,6 +28,71 @@ struct AppShotsController: Sendable {
             return try restFormat(themes)
         }
 
+        group.get("/app-shots/gallery-templates") { _, _ -> Response in
+            let galleries = try await self.galleryTemplateRepo.listGalleries()
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+            let data = try encoder.encode(["data": galleries])
+            return restResponse(String(data: data, encoding: .utf8) ?? "[]")
+        }
+
+        // MARK: - Gallery Compose
+
+        group.post("/app-shots/gallery/compose") { request, _ -> Response in
+            let body = try await request.body.collect(upTo: 50 * 1024 * 1024)
+            guard let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
+                  let templateId = json["templateId"] as? String,
+                  let screenshotsB64 = json["screenshots"] as? [String] else {
+                return jsonError("Missing templateId or screenshots array")
+            }
+
+            do {
+                guard let sampleGallery = try await self.galleryTemplateRepo.getGallery(templateId: templateId) else {
+                    return jsonError("Gallery template not found", status: .notFound)
+                }
+
+                // Write screenshots to temp and build data URL map
+                var paths: [String] = []
+                var dataURLs: [String: String] = [:]
+                for (i, b64) in screenshotsB64.enumerated() {
+                    guard let data = Data(base64Encoded: b64) else { continue }
+                    let path = FileManager.default.temporaryDirectory
+                        .appendingPathComponent("gallery-\(UUID().uuidString)-\(i).png")
+                    try data.write(to: path)
+                    paths.append(path.path)
+                    dataURLs[path.path] = "data:image/png;base64,\(b64)"
+                }
+
+                // Domain does the work
+                let gallery = sampleGallery.applyScreenshots(paths)
+
+                // Override with AI-generated headlines if provided
+                if let headlines = json["headlines"] as? [[String: Any]] {
+                    for (i, h) in headlines.enumerated() where i < gallery.appShots.count {
+                        if let headline = h["headline"] as? String, !headline.isEmpty {
+                            gallery.appShots[i].headline = headline
+                        }
+                        if let tagline = h["tagline"] as? String, !tagline.isEmpty {
+                            gallery.appShots[i].tagline = tagline
+                        }
+                        if let body = h["body"] as? String, !body.isEmpty {
+                            gallery.appShots[i].body = body
+                        }
+                    }
+                }
+
+                let pages = gallery.renderAll().map { html in
+                    var inlined = html
+                    for (path, url) in dataURLs { inlined = inlined.replacingOccurrences(of: path, with: url) }
+                    return GalleryHTMLRenderer.wrapPage(inlined)
+                }
+
+                return restResponse(jsonEncode(["screens": pages]))
+            } catch {
+                return jsonError("Gallery compose failed: \(error.localizedDescription)", status: .internalServerError)
+            }
+        }
+
         // MARK: - Templates Apply
 
         group.post("/app-shots/templates/apply") { request, _ -> Response in
@@ -36,25 +102,63 @@ struct AppShotsController: Sendable {
                   let headline = json["headline"] as? String else {
                 return jsonError("Missing templateId or headline")
             }
-            let screenshotBase64 = json["screenshot"] as? String
             let previewFormat = json["preview"] as? String ?? "html"
+            // Support both single "screenshot" and multi "screenshots"
+            let screenshotsB64: [String]
+            if let arr = json["screenshots"] as? [String] {
+                screenshotsB64 = arr
+            } else if let single = json["screenshot"] as? String {
+                screenshotsB64 = [single]
+            } else {
+                screenshotsB64 = []
+            }
 
             do {
-                let screenshotPath = try writeTempScreenshot(screenshotBase64)
-                guard let tmpl = try await self.templateRepo.getTemplate(id: templateId) else {
+                // Write each screenshot to temp and build data URL map
+                var paths: [String] = []
+                var dataURLs: [String: String] = [:]
+                for (i, b64) in screenshotsB64.enumerated() {
+                    guard let data = Data(base64Encoded: b64) else { continue }
+                    let path = FileManager.default.temporaryDirectory
+                        .appendingPathComponent("tmpl-\(UUID().uuidString)-\(i).png")
+                    try data.write(to: path)
+                    paths.append(path.path)
+                    dataURLs[path.path] = "data:image/png;base64,\(b64)"
+                }
+
+                let shot = AppShot(screenshots: paths, type: .feature)
+                shot.headline = headline
+                shot.body = json["subtitle"] as? String
+                shot.tagline = json["tagline"] as? String
+
+                // Resolve screenLayout + palette from single or gallery template
+                let screenLayout: ScreenLayout
+                let palette: GalleryPalette
+                if let tmpl = try await self.templateRepo.getTemplate(id: templateId) {
+                    screenLayout = tmpl.screenLayout
+                    palette = tmpl.palette
+                } else if let gallery = try await self.galleryTemplateRepo.getGallery(templateId: templateId),
+                          let tmpl = gallery.template,
+                          let p = gallery.palette {
+                    screenLayout = tmpl.screens[.feature] ?? tmpl.screens[.hero] ?? ScreenLayout(headline: TextSlot(y: 0.04, size: 0.10))
+                    palette = p
+                } else {
                     return jsonError("Template not found", status: .notFound)
                 }
-                let background = Self.parseBackground(json["background"])
-                let content = TemplateContent(headline: headline, subtitle: json["subtitle"] as? String, tagline: json["tagline"] as? String, screenshotFile: screenshotPath, background: background, textColor: json["textColor"] as? String)
+
+                let renderHTML = { (fillViewport: Bool) -> String in
+                    let html = GalleryHTMLRenderer.renderScreen(shot, screenLayout: screenLayout, palette: palette)
+                    return GalleryHTMLRenderer.wrapPage(html, fillViewport: fillViewport)
+                }
 
                 if previewFormat == "image" {
-                    let html = tmpl.apply(content: content, fillViewport: true)
+                    let html = renderHTML(true)
                     let pngData = try await AppShotsExport.renderToPNG(html: html, renderer: self.htmlRenderer)
                     return restResponse(jsonEncode(["png": pngData.base64EncodedString(), "width": 1320, "height": 2868]))
                 }
 
-                var html = tmpl.apply(content: content)
-                html = Self.inlineBase64(html, screenshotPath: screenshotPath, base64: screenshotBase64)
+                var html = renderHTML(false)
+                for (path, url) in dataURLs { html = html.replacingOccurrences(of: path, with: url) }
                 return restResponse(jsonEncode(["html": html]))
             } catch {
                 return jsonError("Apply failed: \(error.localizedDescription)", status: .internalServerError)
@@ -75,18 +179,91 @@ struct AppShotsController: Sendable {
 
             do {
                 let screenshotPath = try writeTempScreenshot(screenshotBase64)
-                guard let tmpl = try await self.templateRepo.getTemplate(id: templateId) else {
+
+                let shot = AppShot(screenshot: screenshotPath, type: .feature)
+                shot.headline = headline
+                shot.body = json["subtitle"] as? String
+                shot.tagline = json["tagline"] as? String
+
+                // Resolve template from single or gallery
+                let fragment: String
+                if let tmpl = try await self.templateRepo.getTemplate(id: templateId) {
+                    fragment = tmpl.renderFragment(shot: shot)
+                } else if let gallery = try await self.galleryTemplateRepo.getGallery(templateId: templateId),
+                          let tmpl = gallery.template,
+                          let p = gallery.palette {
+                    let layout = tmpl.screens[.feature] ?? tmpl.screens[.hero] ?? ScreenLayout(headline: TextSlot(y: 0.04, size: 0.10))
+                    fragment = GalleryHTMLRenderer.renderScreen(shot, screenLayout: layout, palette: p)
+                } else {
                     return jsonError("Template not found", status: .notFound)
                 }
-                let background = Self.parseBackground(json["background"])
-                let content = TemplateContent(headline: headline, subtitle: json["subtitle"] as? String, tagline: json["tagline"] as? String, screenshotFile: screenshotPath, background: background, textColor: json["textColor"] as? String)
-                let fragment = tmpl.renderFragment(content: content)
+
                 let themedHTML = try await self.themeRepo.compose(themeId: themeId, html: fragment, canvasWidth: 1320, canvasHeight: 2868)
                 var html = ThemedPage(body: themedHTML, width: 1320, height: 2868).html
                 html = Self.inlineBase64(html, screenshotPath: screenshotPath, base64: screenshotBase64)
                 return restResponse(jsonEncode(["html": html]))
             } catch {
                 return jsonError("Theme apply failed: \(error.localizedDescription)", status: .internalServerError)
+            }
+        }
+
+        // MARK: - Themes Design (generate once, apply many)
+
+        group.post("/app-shots/themes/design") { request, _ -> Response in
+            let body = try await request.body.collect(upTo: 1024 * 1024)
+            guard let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
+                  let themeId = json["themeId"] as? String else {
+                return jsonError("Missing themeId")
+            }
+            do {
+                let design = try await self.themeRepo.design(themeId: themeId)
+                let encoder = JSONEncoder()
+                encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+                let data = try encoder.encode(design)
+                return restResponse(String(data: data, encoding: .utf8) ?? "{}")
+            } catch {
+                return jsonError("Theme design failed: \(error.localizedDescription)", status: .internalServerError)
+            }
+        }
+
+        group.post("/app-shots/themes/apply-design") { request, _ -> Response in
+            let body = try await request.body.collect(upTo: 10 * 1024 * 1024)
+            guard let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
+                  let templateId = json["templateId"] as? String,
+                  let headline = json["headline"] as? String,
+                  let designJSON = json["design"] as? [String: Any] else {
+                return jsonError("Missing templateId, headline, or design")
+            }
+            let screenshotBase64 = json["screenshot"] as? String
+
+            do {
+                let designData = try JSONSerialization.data(withJSONObject: designJSON)
+                let design = try JSONDecoder().decode(ThemeDesign.self, from: designData)
+
+                let screenshotPath = try writeTempScreenshot(screenshotBase64)
+                let shot = AppShot(screenshot: screenshotPath, type: .feature)
+                shot.headline = headline
+                shot.body = json["subtitle"] as? String
+                shot.tagline = json["tagline"] as? String
+
+                // Resolve screen layout from single or gallery template
+                let screenLayout: ScreenLayout
+                if let tmpl = try await self.templateRepo.getTemplate(id: templateId) {
+                    screenLayout = tmpl.screenLayout
+                } else if let gallery = try await self.galleryTemplateRepo.getGallery(templateId: templateId),
+                          let tmpl = gallery.template {
+                    screenLayout = tmpl.screens[.feature] ?? tmpl.screens[.hero] ?? ScreenLayout(headline: TextSlot(y: 0.04, size: 0.10))
+                } else {
+                    return jsonError("Template not found", status: .notFound)
+                }
+
+                // Re-render through the standard pipeline with design palette + decorations
+                let themedHTML = ThemeDesignApplier.apply(design, shot: shot, screenLayout: screenLayout)
+                var html = GalleryHTMLRenderer.wrapPage(themedHTML, fillViewport: false)
+                html = Self.inlineBase64(html, screenshotPath: screenshotPath, base64: screenshotBase64)
+                return restResponse(jsonEncode(["html": html]))
+            } catch {
+                return jsonError("Apply design failed: \(error.localizedDescription)", status: .internalServerError)
             }
         }
 
@@ -152,22 +329,6 @@ struct AppShotsController: Sendable {
     }
 
     // MARK: - Helpers
-
-    /// Parse a background JSON object into a SlideBackground.
-    private static func parseBackground(_ value: Any?) -> SlideBackground? {
-        guard let dict = value as? [String: Any],
-              let type = dict["type"] as? String else { return nil }
-        if type == "gradient",
-           let from = dict["from"] as? String,
-           let to = dict["to"] as? String {
-            let angle = dict["angle"] as? Int ?? 180
-            return .gradient(from: from, to: to, angle: angle)
-        }
-        if let color = dict["color"] as? String {
-            return .solid(color)
-        }
-        return nil
-    }
 
     /// Replace temp file paths with data URLs for inline browser display.
     private static func inlineBase64(_ html: String, screenshotPath: String, base64: String?) -> String {

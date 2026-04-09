@@ -53,7 +53,8 @@ enum RESTRoutes {
             templateRepo: AggregateTemplateRepository.shared,
             themeRepo: AggregateThemeRepository.shared,
             htmlRenderer: WebKitHTMLRenderer(),
-            configStorage: FileAppShotsConfigStorage()
+            configStorage: FileAppShotsConfigStorage(),
+            galleryTemplateRepo: AggregateGalleryTemplateRepository.shared
         ).addRoutes(to: v1)
     }
 }

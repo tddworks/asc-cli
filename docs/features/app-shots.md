@@ -1,99 +1,42 @@
 # App Shots
 
-Create professional App Store marketing screenshots from raw app screenshots. Three approaches:
+Create professional App Store marketing screenshots. Two modes:
 
-| | **Enhance** | **Compose + Enhance** | **Theme + Compose** |
-|---|---|---|---|
-| **What you do** | Feed a screenshot to Gemini AI | Pick a template, apply it, then enhance with AI | Pick a template + theme, AI restyles |
-| **Command** | `asc app-shots generate` | `templates apply` → `generate` | `themes apply` → compose bridge |
-| **AI required** | Yes (Gemini) | Yes (Gemini) | Yes (Claude via compose bridge) |
-| **Control level** | Low — AI decides layout | Medium — you pick the template | High — exact layout + themed styling |
-
-See [App Shots Themes](app-shots-themes.md) for the full theme system design.
+| | **Gallery** | **Single Template** |
+|---|---|---|
+| **What you do** | Upload screenshots → pick a gallery style → all shots styled as a coordinated set | Pick a template → apply to one screenshot |
+| **Output** | Hero + feature screens matching App Store gallery | One styled screenshot |
+| **AI enhance** | Optional: Stage 1 CSS polish + Stage 2 Gemini photorealistic | Optional: Gemini enhance |
 
 ---
 
 ## Quick Start
 
 ```bash
-# 1. Save your Gemini API key (one-time)
-asc app-shots config --gemini-api-key AIzaSy...
+# Gallery mode — all screenshots at once
+asc app-shots gallery create \
+  --app-name "BezelBlend" \
+  --screenshots screen-0.png screen-1.png screen-2.png screen-3.png
 
-# 2. Enhance a screenshot
-asc app-shots generate --file .asc/app-shots/screen-0.png
-
-# Output: .asc/app-shots/output/screen-0.png
+# Single template mode — one screenshot
+asc app-shots templates apply \
+  --id top-hero \
+  --screenshot screen-0.png \
+  --headline "Ship Faster" \
+  --preview html > preview.html && open preview.html
 ```
-
-That's it. Gemini analyzes your screenshot, wraps it in a photorealistic iPhone mockup, adds marketing text, and outputs a polished App Store image.
 
 ---
 
 ## CLI Reference
 
-### `asc app-shots generate`
-
-Enhance a single screenshot into a marketing image using Gemini AI.
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--file` | *(required)* | Screenshot file to enhance |
-| `--device-type` | — | Named device type — resizes output to exact App Store dimensions |
-| `--style-reference` | — | Reference image whose visual style Gemini replicates |
-| `--prompt` | — | Custom prompt (overrides the built-in auto-enhance prompt) |
-| `--gemini-api-key` | — | Gemini API key (falls back to `GEMINI_API_KEY` env, then saved config) |
-| `--model` | `gemini-3.1-flash-image-preview` | Gemini model |
-| `--output-dir` | `.asc/app-shots/output` | Directory for generated PNGs |
-
-```bash
-# Auto-enhance — AI analyzes and designs everything
-asc app-shots generate --file screen.png
-
-# Resize to exact App Store dimensions
-asc app-shots generate --file screen.png --device-type APP_IPHONE_67
-
-# Style transfer — match another screenshot's look
-asc app-shots generate --file screen.png --style-reference competitor.png
-
-# Custom prompt — tell Gemini exactly what you want
-asc app-shots generate --file screen.png \
-  --prompt "Add warm glow, deepen shadows, make text pop"
-
-# Generate multiple device sizes
-asc app-shots generate --file screen.png --device-type APP_IPHONE_69 --output-dir output/69
-asc app-shots generate --file screen.png --device-type APP_IPHONE_67 --output-dir output/67
-asc app-shots generate --file screen.png --device-type APP_IPAD_PRO_129 --output-dir output/ipad
-```
-
-**JSON output:**
-```json
-{
-  "generated" : ".asc/app-shots/output/screen-0.png"
-}
-```
-
-**How the built-in prompt works:**
-
-The default auto-enhance prompt tells Gemini to:
-- Analyze the app screenshot (purpose, features, color scheme)
-- Replace flat device frames with a photorealistic iPhone 15 Pro mockup
-- Find the most compelling UI panel and "break it out" from the device with a drop shadow
-- Add a bold 2-4 word ACTION VERB headline (e.g. "TRACK WEATHER") if none exists
-- Apply a clean gradient background complementing the app's colors
-- Add 1-2 subtle supporting elements (badges, stats)
-
-For better results, use the **`asc-app-shots-prompt` skill** in Claude Code — it reads your screenshot, identifies exact UI panels and colors, and generates a targeted `--prompt` that names specific elements instead of letting Gemini guess.
-
----
-
 ### `asc app-shots templates list`
 
-List available screenshot templates. Templates are provided by plugins (e.g. Blitz Screenshots ships 23 built-in templates).
+List available single-shot templates.
 
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--size` | — | Filter by size: `portrait`, `landscape`, `portrait43`, `square` |
-| `--preview` | — | Include self-contained HTML preview for each template |
 | `--output` | `json` | Output format: `json`, `table`, `markdown` |
 | `--pretty` | — | Pretty-print JSON |
 
@@ -102,158 +45,118 @@ asc app-shots templates list
 asc app-shots templates list --size portrait --output table
 ```
 
-**JSON output:**
-```json
-{
-  "data": [
-    {
-      "id": "top-hero",
-      "name": "Top Hero",
-      "category": "bold",
-      "supportedSizes": ["portrait"],
-      "deviceCount": 1,
-      "affordances": {
-        "preview": "asc app-shots templates get --id top-hero --preview",
-        "apply": "asc app-shots templates apply --id top-hero --screenshot screen.png",
-        "detail": "asc app-shots templates get --id top-hero",
-        "listAll": "asc app-shots templates list"
-      }
-    }
-  ]
-}
-```
-
-### `asc app-shots templates get`
-
-Get details of a specific template.
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--id` | *(required)* | Template ID |
-| `--preview` | — | Output self-contained HTML preview page |
-
-```bash
-asc app-shots templates get --id top-hero
-asc app-shots templates get --id top-hero --preview > preview.html && open preview.html
-```
-
 ### `asc app-shots templates apply`
 
-Apply a template to a screenshot. Returns a `ScreenDesign` with affordances for next steps.
+Apply a template to a screenshot. Returns an `AppShot` with affordances.
 
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--id` | *(required)* | Template ID |
 | `--screenshot` | *(required)* | Path to screenshot file |
 | `--headline` | *(required)* | Headline text |
-| `--subtitle` | — | Subtitle text |
-| `--tagline` | — | Tagline text (overrides template default) |
-| `--app-name` | `My App` | App name |
+| `--subtitle` | — | Body text |
+| `--tagline` | — | Tagline text |
 | `--preview` | — | Preview format: `html` or `image` |
-| `--image-output` | `.asc/app-shots/output/screen-0.png` | Output PNG path (for `--preview image`) |
+| `--image-output` | `.asc/app-shots/output/screen-0.png` | Output PNG path |
 
 ```bash
-# Get design JSON with affordances
+# Preview as HTML
 asc app-shots templates apply \
-  --id top-hero \
-  --screenshot screen.png \
-  --headline "Ship Faster"
-
-# Preview as HTML in browser
-asc app-shots templates apply \
-  --id top-hero \
-  --screenshot screen.png \
-  --headline "Ship Faster" \
+  --id top-hero --screenshot screen.png --headline "Ship Faster" \
   --preview html > composed.html && open composed.html
 
-# Export directly to PNG
+# Export to PNG
 asc app-shots templates apply \
-  --id top-hero \
-  --screenshot screen.png \
-  --headline "Ship Faster" \
-  --preview image --image-output marketing-screen.png
+  --id top-hero --screenshot screen.png --headline "Ship Faster" \
+  --preview image --image-output marketing.png
 ```
 
-**JSON output:**
-```json
-{
-  "data": [
-    {
-      "heading": "Ship Faster",
-      "screenshotFile": "screen.png",
-      "isComplete": true,
-      "affordances": {
-        "generate": "asc app-shots generate --design design.json",
-        "preview": "asc app-shots templates apply --id top-hero --screenshot screen.png --headline \"Ship Faster\"",
-        "changeTemplate": "asc app-shots templates list",
-        "templateDetail": "asc app-shots templates get --id top-hero"
-      }
-    }
-  ]
-}
+### `asc app-shots gallery-templates list`
+
+List gallery templates (multi-screen sets with sample content).
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--output` | `json` | Output format: `json`, `table`, `markdown` |
+| `--pretty` | — | Pretty-print JSON |
+
+```bash
+asc app-shots gallery-templates list
+asc app-shots gallery-templates list --output table
 ```
 
----
+### `asc app-shots gallery-templates get`
+
+Get a specific gallery template.
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--id` | *(required)* | Gallery template ID |
+| `--preview` | — | Output self-contained HTML gallery preview page |
+
+```bash
+asc app-shots gallery-templates get --id neon-pop --pretty
+asc app-shots gallery-templates get --id neon-pop --preview > preview.html && open preview.html
+```
+
+### `asc app-shots themes design`
+
+Generate a ThemeDesign (palette + decorations) from AI — one call, reusable across slides.
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--id` | *(required)* | Theme ID |
+
+```bash
+asc app-shots themes design --id luxury > design.json
+```
+
+### `asc app-shots themes apply-design`
+
+Apply a cached ThemeDesign deterministically — no AI call.
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--design` | *(required)* | Path to ThemeDesign JSON file |
+| `--template` | *(required)* | Template ID |
+| `--screenshot` | *(required)* | Path to screenshot file |
+| `--headline` | `Your Headline` | Headline text |
+| `--preview` | — | Preview format: `html` or `image` |
+| `--image-output` | `.asc/app-shots/output/screen-0.png` | Output PNG path |
+
+```bash
+# Two-step workflow: generate once, apply many
+asc app-shots themes design --id luxury > design.json
+asc app-shots themes apply-design --design design.json \
+  --template top-hero --screenshot screen.png --headline "Ship Faster" \
+  --preview html > themed.html
+```
+
+### `asc app-shots generate`
+
+Enhance a screenshot with Gemini AI.
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--file` | *(required)* | Screenshot file to enhance |
+| `--device-type` | — | Resize output to App Store dimensions |
+| `--style-reference` | — | Reference image for style transfer |
+| `--prompt` | — | Custom Gemini prompt |
+| `--gemini-api-key` | — | API key (falls back to env/config) |
+
+```bash
+asc app-shots generate --file screen.png
+asc app-shots generate --file screen.png --device-type APP_IPHONE_67
+```
 
 ### `asc app-shots config`
 
-Manage the stored Gemini API key.
+Manage Gemini API key.
 
 ```bash
 asc app-shots config --gemini-api-key AIzaSy...   # Save
-asc app-shots config                                # Show (masked)
+asc app-shots config                                # Show
 asc app-shots config --remove                       # Delete
-```
-
-**Key resolution order:** `--gemini-api-key` flag → `$GEMINI_API_KEY` env var → `~/.asc/app-shots-config.json`
-
----
-
-## Typical Workflows
-
-### Workflow 1: Quick Enhance (simplest)
-
-```bash
-# One command — AI handles everything
-asc app-shots generate --file .asc/app-shots/screen-0.png
-
-# Resize to required App Store dimensions
-asc app-shots generate --file .asc/app-shots/screen-0.png --device-type APP_IPHONE_67
-```
-
-### Workflow 2: Template + Enhance (recommended)
-
-```bash
-# 1. Browse templates
-asc app-shots templates list --output table
-
-# 2. Preview one
-asc app-shots templates get --id top-hero --preview > preview.html
-open preview.html
-
-# 3. Apply to your screenshot
-asc app-shots templates apply \
-  --id top-hero \
-  --screenshot .asc/app-shots/screen-0.png \
-  --headline "Ship Faster" \
-  --preview > composed.html
-open composed.html
-
-# 4. Enhance the composed result with AI
-asc app-shots generate --file .asc/app-shots/output/screen-0.png --device-type APP_IPHONE_67
-```
-
-### Workflow 3: Skill-driven (Claude writes the prompt)
-
-```bash
-# In Claude Code, use the asc-app-shots-prompt skill:
-# "Analyze this screenshot and generate a prompt for app-shots"
-# → Claude reads the image, generates a targeted --prompt
-
-# Then generate
-asc app-shots generate --file screen.png \
-  --prompt '<generated prompt>' \
-  --device-type APP_IPHONE_67
 ```
 
 ---
@@ -261,138 +164,232 @@ asc app-shots generate --file screen.png \
 ## Architecture
 
 ```
-ASCCommand                            Domain                              Infrastructure
-+-----------------------------------+ +-----------------------------------+ +-----------------------------------+
-| AppShotsCommand                   | | ScreenDesign                      | | AggregateTemplateRepository       |
-|   ├── templates                   | |   index, heading, subheading      | |   (actor)                         |
-|   │   ├── list  (TemplateRepo)    | |   template?, screenshotFile       | |   Aggregates TemplateProviders    |
-|   │   ├── get   (TemplateRepo)    | |   isComplete, previewHTML         | +-----------------------------------+
-|   │   └── apply (TemplateRepo)    | |   affordances: generate, preview  | | FileAppShotsConfigStorage         |
-|   ├── generate  (Gemini direct)   | |                                   | |   ~/.asc/app-shots-config.json    |
-|   └── config    (ConfigStorage)   | | ScreenshotTemplate                | +-----------------------------------+
-+-----------------------------------+ |   id, name, category, background  |
-                                      |   textSlots[], deviceSlots[]      |
-                                      |   isPortrait, deviceCount         |
-                                      |   previewHTML, affordances        |
-                                      |                                   |
-                                      | SlideBackground                   |
-                                      |   .solid(color)                   |
-                                      |   .gradient(from, to, angle)      |
-                                      |                                   |
-                                      | TemplateProvider (protocol)       |
-                                      | TemplateRepository (protocol)     |
-                                      | AppShotsConfigStorage (protocol)  |
-                                      +-----------------------------------+
+ASCCommand                       Domain                                  Infrastructure
++------------------------------+ +--------------------------------------+ +----------------------------------+
+| AppShotsCommand              | | AppShot                              | | AggregateTemplateRepository      |
+|   ├── templates              | |   screenshot, headline, tagline      | |   Aggregates TemplateProviders   |
+|   │   ├── list               | |   body, badges, trustMarks           | +----------------------------------+
+|   │   ├── get                | |   type: .hero | .feature | .social   | | AggregateGalleryTemplateRepo     |
+|   │   └── apply              | |   isConfigured, compose()            | |   Aggregates GalleryProviders    |
+|   ├── gallery-templates      | |                                      | +----------------------------------+
+|   │   └── list               | | Gallery                              | | FileAppShotsConfigStorage        |
+|   ├── generate (Gemini)      | |   appName, appShots: [AppShot]       | |   ~/.asc/app-shots-config.json   |
+|   └── config                 | |   template, palette                  | +----------------------------------+
++------------------------------+ |   renderAll(), previewHTML            |
+                                  |                                      |
+                                  | GalleryTemplate                      |
+                                  |   screens: [ScreenType: ScreenLayout]|
+                                  |   id, name, description, background  |
+                                  |                                      |
+                                  | ScreenLayout                       |
+                                  |   headline: TextSlot                 |
+                                  |   devices: [DeviceSlot]              |
+                                  |   decorations: [Decoration]          |
+                                  |                                      |
+                                  | GalleryPalette                       |
+                                  |   id, name, background (CSS)         |
+                                  |                                      |
+                                  | AppShotTemplate                   |
+                                  |   screenLayout + palette            |
+                                  |   category, supportedSizes           |
+                                  |                                      |
+                                  | GalleryHTMLRenderer                  |
+                                  |   renderScreen() — context builder   |
+                                  |   renderPreviewPage()                |
+                                  |   wrapPage()                         |
+                                  |   cachedPreview() — preview cache    |
+                                  |                                      |
+                                  | HTMLComposer (Mustache)              |
+                                  |   render(template:, with:)           |
+                                  |   Pre-compiled MustacheLibrary       |
+                                  |                                      |
+                                  | .mustache templates (Resources/)     |
+                                  |   screen, wireframe, page-wrapper    |
+                                  |   theme-vars, keyframes, preview-*   |
+                                  +--------------------------------------+
 ```
 
 **Dependency flow:** `ASCCommand → Domain ← Infrastructure`
 
-**Key design note:** `generate` calls the Gemini API directly via `URLSession` — no repository abstraction. This keeps the single-file enhancement path simple. When `--device-type` is specified, output is resized to exact App Store dimensions via CoreGraphics.
+**Unified rendering:** Everything renders through `GalleryHTMLRenderer.renderScreen()`. Both `Gallery.renderAll()` and `AppShotTemplate.apply()` delegate to it.
+
+### Responsive Sizing (`cqi` Units)
+
+All text and element sizing uses CSS Container Query Inline-size (`cqi`) units. This ensures consistent proportions between preview (320px container) and export (full viewport).
+
+```
+1cqi = 1% of the container's inline size
+```
+
+`GalleryHTMLRenderer` builds context dictionaries from domain models and delegates all HTML rendering to Mustache templates:
+
+| Entry Point | Template | Purpose |
+|-------------|----------|---------|
+| `renderScreen()` | `screen.mustache` | Full screen: text, devices, badges, decorations |
+| `wrapPage()` | `page-wrapper.mustache` | HTML document wrapper |
+| `renderPreviewPage()` | `preview-page.mustache` + `preview-screen.mustache` | Gallery preview strip |
+| (inline) | `wireframe.mustache` | Phone wireframe mockup |
+| (inline) | `theme-vars.mustache` | CSS custom properties for light/dark themes |
+| (inline) | `keyframes.mustache` | CSS animation keyframes |
+
+**SRP:** The renderer only builds data contexts — zero HTML, zero colors, zero CSS. All presentation lives in `.mustache` templates. Color scheme (light/dark) is handled by CSS custom properties in `theme-vars.mustache`.
+
+### Mustache Template System
+
+Templates use [swift-mustache](https://github.com/hummingbird-project/swift-mustache) (from Hummingbird). All templates are pre-compiled into a `MustacheLibrary` at startup for fast rendering.
+
+```swift
+// Named template rendering (pre-compiled)
+HTMLComposer.render(template: "screen", with: context)
+
+// Inline template rendering
+HTMLComposer.render("Hello {{name}}!", with: ["name": "World"])
+// → "Hello World!"
+
+// Replace the template library (e.g. from a plugin)
+HTMLComposer.setLibrary(customLibrary)
+```
+
+Standard Mustache syntax: `{{var}}`, `{{{raw}}}`, `{{#section}}...{{/section}}`, `{{^inverted}}...{{/inverted}}`.
+
+### Verification
+
+```bash
+# Preview a template as HTML — open in browser to visually verify
+asc app-shots templates apply --id top-hero --screenshot screen.png --headline "Test" \
+  --preview html > preview.html && open preview.html
+
+# Export to PNG and verify sizing consistency
+asc app-shots templates apply --id top-hero --screenshot screen.png --headline "Test" \
+  --preview image --image-output export.png
+```
 
 ---
 
 ## Domain Models
 
-### `ScreenDesign`
+### `AppShot`
 
-A single screen — knows its template, content, and how to preview itself.
+A single designed App Store screenshot — the core content unit.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `index` | `Int` | Screen order (0-based) |
-| `template` | `ScreenshotTemplate?` | Applied template (runtime only, excluded from Codable) |
-| `screenshotFile` | `String` | Source screenshot path |
-| `heading` | `String` | Main headline |
-| `subheading` | `String` | Supporting text |
-| `layoutMode` | `LayoutMode` | Layout hint (legacy) |
-| `visualDirection` | `String` | Visual description (legacy) |
-| `imagePrompt` | `String` | Per-screen Gemini prompt (legacy) |
+| `screenshot` | `String` | Source screenshot file path |
+| `type` | `ScreenType` | `.hero`, `.feature`, `.social` |
+| `headline` | `String?` | Main headline text |
+| `tagline` | `String?` | Small caps text above headline |
+| `body` | `String?` | Description paragraph below headline |
+| `badges` | `[String]` | Feature badge pills (e.g. "iPhone 17", "Mesh") |
+| `trustMarks` | `[String]?` | Trust badges (hero only, e.g. "4.9 STARS") |
 
-**Computed properties:**
-| Property | Type | Description |
-|----------|------|-------------|
-| `isComplete` | `Bool` | `template != nil && !heading.isEmpty && !screenshotFile.isEmpty` |
-| `previewHTML` | `String` | Self-contained HTML preview (empty if no template) |
+**Computed:** `isConfigured` (has headline), `isHero`, `isStandalone`
 
-**Affordances** (state-aware):
-| Key | When | Command |
-|-----|------|---------|
-| `generate` | `isComplete` | `asc app-shots generate --design design.json` |
-| `preview` | `isComplete` | `asc app-shots templates apply --id {id} ...` |
-| `changeTemplate` | always | `asc app-shots templates list` |
-| `templateDetail` | has template | `asc app-shots templates get --id {id}` |
+**Key method:** `compose(screenLayout:, palette:) → String` — renders HTML
 
-### `ScreenshotTemplate`
+### `Gallery`
 
-Reusable template for composing screenshots. Registered by plugins via `TemplateProvider`.
+A coordinated set of App Store screenshots. Created from screenshot files, first becomes hero.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `appName` | `String` | App name |
+| `appShots` | `[AppShot]` | Screenshots with content (first = hero) |
+| `template` | `GalleryTemplate?` | Layout per screen type |
+| `palette` | `GalleryPalette?` | Color scheme |
+
+**Computed:** `isReady`, `readiness`, `shotCount`, `heroShot`, `unconfiguredShots`, `previewHTML`
+
+**Key method:** `renderAll() → [String]` — renders all configured shots
+
+**Codable:** Gallery serializes to/from JSON. `gallery-templates.json` is `[Gallery]`.
+
+### `GalleryTemplate`
+
+Layout rules per screen type. A gallery template defines WHERE things go.
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `id` | `String` | Unique identifier |
 | `name` | `String` | Display name |
-| `category` | `TemplateCategory` | `bold`, `minimal`, `elegant`, `professional`, `playful`, `showcase`, `custom` |
-| `supportedSizes` | `[ScreenSize]` | `portrait`, `landscape`, `portrait43`, `square` |
 | `description` | `String` | Human-readable description |
-| `background` | `SlideBackground` | `.solid(color)` or `.gradient(from, to, angle)` |
-| `textSlots` | `[TemplateTextSlot]` | Text positions with role, preview, style |
-| `deviceSlots` | `[TemplateDeviceSlot]` | Device positions with scale, rotation |
+| `background` | `String` | CSS background (shared by all screens) |
+| `screens` | `[ScreenType: ScreenLayout]` | Layout per type |
 
-**Semantic booleans:** `isPortrait`, `isLandscape`, `deviceCount`
+### `ScreenLayout`
 
-**Affordances:** `preview`, `apply`, `detail`, `listAll`
+Layout for one screen type. Supports tagline/headline/subheading text slots, single/side-by-side/triple-fan device arrangements.
 
-### `SlideBackground`
+| Field | Type | Description |
+|-------|------|-------------|
+| `tagline` | `TextSlot?` | Small caps text above headline |
+| `headline` | `TextSlot` | Main headline position and style |
+| `subheading` | `TextSlot?` | Supporting text below headline |
+| `devices` | `[DeviceSlot]` | Device positions (empty = no device) |
+| `decorations` | `[Decoration]` | Ambient shapes |
+
+### `GalleryPalette`
+
+Color scheme — HOW things look.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `String` | Identifier |
+| `name` | `String` | Display name |
+| `background` | `String` | CSS background value |
+
+### `AppShotTemplate`
+
+Convenience wrapper for single-shot templates. Wraps `ScreenLayout` + `GalleryPalette` with filter metadata.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `screenLayout` | `ScreenLayout` | Layout |
+| `palette` | `GalleryPalette` | Colors |
+| `category` | `TemplateCategory` | `bold`, `minimal`, `elegant`, etc. |
+| `supportedSizes` | `[ScreenSize]` | `portrait`, `landscape`, etc. |
+
+### Supporting Types
 
 ```swift
-public enum SlideBackground: Sendable, Equatable, Codable {
-    case solid(String)
-    case gradient(from: String, to: String, angle: Int)
-}
+public struct TextSlot { y, size, weight, align, preview? }
+public struct DeviceSlot { x, y, width }
+public struct Decoration { shape, x, y, size, opacity, color?, background?, borderRadius?, animation? }
+public enum DecorationShape { gem, orb, sparkle, arrow, label(String) }  // .displayCharacter computed property
+public enum DecorationAnimation { float, drift, pulse, spin, twinkle }
+public enum ScreenType { hero, feature, social }
+public enum TemplateCategory { bold, minimal, elegant, professional, playful, showcase, custom }
+public enum ScreenSize { portrait, portrait43, landscape, square }
+```
+
+### `GalleryPalette` — Derived Colors
+
+`GalleryPalette` owns theme detection and derived text colors:
+
+```swift
+palette.isLight        // heuristic from background hex values
+palette.headlineColor  // explicit textColor or auto-detected from isLight
+```
+
+### `HTMLComposer` (Mustache)
+
+Wraps `MustacheLibrary` from [swift-mustache](https://github.com/hummingbird-project/swift-mustache). Templates are pre-compiled at startup.
+
+```swift
+// Named template (pre-compiled, fast)
+HTMLComposer.render(template: "screen", with: context)
+
+// Inline template
+HTMLComposer.render("Hello {{name}}!", with: ["name": "World"])
 ```
 
 ### Protocols
 
 ```swift
-@Mockable
-public protocol TemplateProvider: Sendable {
-    var providerId: String { get }
-    func templates() async throws -> [ScreenshotTemplate]
-}
-
-@Mockable
-public protocol TemplateRepository: Sendable {
-    func listTemplates(size: ScreenSize?) async throws -> [ScreenshotTemplate]
-    func getTemplate(id: String) async throws -> ScreenshotTemplate?
-}
-
-@Mockable
-public protocol AppShotsConfigStorage: Sendable {
-    func load() throws -> AppShotsConfig?
-    func save(_ config: AppShotsConfig) throws
-    func delete() throws
-}
+@Mockable protocol TemplateProvider { func templates() async throws -> [AppShotTemplate] }
+@Mockable protocol TemplateRepository { func listTemplates(size:) ... ; func getTemplate(id:) ... }
+@Mockable protocol GalleryTemplateProvider { func galleries() async throws -> [Gallery] }
+@Mockable protocol GalleryTemplateRepository { func listGalleries() ... ; func getGallery(templateId:) ... }
 ```
-
----
-
-## Device Sizes
-
-Use `--device-type` on `generate` to resize output to exact App Store dimensions.
-
-| Display Type | Device | Width | Height |
-|---|---|---|---|
-| `APP_IPHONE_69` | iPhone 6.9" | 1320 | 2868 |
-| `APP_IPHONE_67` | iPhone 6.7" | 1290 | 2796 |
-| `APP_IPHONE_65` | iPhone 6.5" | 1260 | 2736 |
-| `APP_IPHONE_61` | iPhone 6.1" | 1179 | 2556 |
-| `APP_IPHONE_58` | iPhone 5.8" | 1125 | 2436 |
-| `APP_IPHONE_55` | iPhone 5.5" | 1242 | 2208 |
-| `APP_IPHONE_47` | iPhone 4.7" | 750 | 1334 |
-| `APP_IPAD_PRO_129` | iPad 13" | 2048 | 2732 |
-| `APP_IPAD_PRO_3GEN_11` | iPad 11" | 1668 | 2388 |
-| `APP_APPLE_TV` | Apple TV | 1920 | 1080 |
-| `APP_DESKTOP` | Mac | 2560 | 1600 |
-| `APP_APPLE_VISION_PRO` | Vision Pro | 3840 | 2160 |
 
 ---
 
@@ -402,40 +399,72 @@ Use `--device-type` on `generate` to resize output to exact App Store dimensions
 
 ```
 Sources/
-├── Domain/ScreenshotPlans/
-│   ├── ScreenDesign.swift                  # Single screen (rich domain, carries template)
-│   ├── ScreenshotTemplate.swift            # Template model + SlideBackground, TemplateCategory, ScreenSize, TextSlot, DeviceSlot
-│   ├── TemplateRepository.swift            # TemplateProvider + TemplateRepository protocols
-│   ├── TemplateHTMLRenderer.swift          # Renders template previews as HTML
-│   ├── TemplateContent.swift               # Content to fill into a template
-│   ├── AppShotsConfig.swift                # Gemini API key model
-│   ├── AppShotsConfigStorage.swift         # @Mockable config storage protocol
-│   └── LayoutMode.swift                    # center, left, right (legacy)
-├── Infrastructure/ScreenshotPlans/
-│   ├── AggregateTemplateRepository.swift   # Actor aggregating TemplateProviders
-│   └── FileAppShotsConfigStorage.swift     # ~/.asc/app-shots-config.json
+├── Domain/Screenshots/
+│   ├── Gallery/
+│   │   ├── AppShot.swift                    # Content unit (headline, badges, trustMarks)
+│   │   ├── Gallery.swift                    # Aggregate (appShots + template + palette)
+│   │   ├── GalleryTemplate.swift            # Per-screen-type layouts
+│   │   ├── GalleryPalette.swift             # Color scheme
+│   │   ├── ScreenLayout.swift             # TextSlot, DeviceSlot, Decoration
+│   │   ├── GalleryHTMLRenderer.swift        # Context builder → Mustache templates (renderScreen, wrapPage)
+│   │   ├── HTMLComposer.swift               # Mustache wrapper (MustacheLibrary, cached compilation)
+│   │   ├── GalleryTemplateRepository.swift  # Provider + Repository protocols
+│   │   └── Resources/                      # Mustache template files
+│   │       ├── screen.mustache              #   Full screen: text, devices, badges, decorations
+│   │       ├── wireframe.mustache           #   Phone wireframe mockup (CSS vars)
+│   │       ├── theme-vars.mustache          #   CSS custom properties for light/dark themes
+│   │       ├── keyframes.mustache           #   CSS animation keyframes
+│   │       ├── page-wrapper.mustache        #   Full HTML document wrapper
+│   │       ├── preview-page.mustache        #   Gallery preview page
+│   │       └── preview-screen.mustache      #   Preview screen card
+│   ├── AppShotTemplate.swift             # Single-shot template (wraps ScreenLayout + Palette)
+│   ├── TemplateRepository.swift             # Single template protocols
+│   ├── ScreenTheme.swift                    # AI theme hints + buildDesignContext()
+│   ├── ThemeDesign.swift                    # ThemeDesign + ThemeBackground + ThemeFloat
+│   ├── ThemeDesignApplier.swift             # Deterministic theme applier (cqi units)
+│   ├── ThemedPage.swift                     # Themed HTML page wrapper
+│   ├── AppShotsConfig.swift                 # Gemini API key model
+│   └── AppShotsConfigStorage.swift          # Config storage protocol
+├── Infrastructure/Screenshots/
+│   ├── AggregateTemplateRepository.swift    # Single template aggregator
+│   ├── AggregateGalleryTemplateRepository.swift  # Gallery aggregator
+│   └── FileAppShotsConfigStorage.swift      # ~/.asc/app-shots-config.json
 └── ASCCommand/Commands/AppShots/
-    ├── AppShotsCommand.swift               # Entry point, registers subcommands
-    ├── AppShotsGenerate.swift              # Single-file AI enhancement (direct Gemini call)
-    ├── AppShotsTemplates.swift             # list, get, apply subcommands
-    ├── AppShotsConfig.swift                # Gemini key management
-    ├── AppShotsDisplayType.swift           # Device type enum with dimensions
-    └── AppShotsUtils.swift                 # resolveGeminiApiKey(), resizeImageData()
+    ├── AppShotsCommand.swift                # Entry point
+    ├── AppShotsTemplates.swift              # templates: list, get, apply
+    ├── AppShotsGalleryTemplates.swift       # gallery-templates: list, get
+    ├── AppShotsThemes.swift                 # themes: list, get, design, apply-design, apply
+    ├── AppShotsGenerate.swift               # Gemini AI enhancement
+    ├── AppShotsConfig.swift                 # Key management
+    ├── AppShotsDisplayType.swift            # Device dimensions
+    └── AppShotsExport.swift                 # HTML → PNG rendering
 ```
 
 ### Tests
 
 ```
 Tests/
-├── DomainTests/ScreenshotPlans/
-│   └── AppShotsConfigTests.swift
-├── InfrastructureTests/ScreenshotPlans/
-│   └── FileAppShotsConfigStorageTests.swift
+├── DomainTests/Screenshots/
+│   ├── Gallery/
+│   │   ├── AppShotTests.swift               # 11 tests
+│   │   ├── GalleryTests.swift               # 11 tests
+│   │   ├── GalleryComposeTests.swift        # 8 tests
+│   │   ├── GalleryCodableTests.swift        # 10 tests
+│   │   ├── GalleryPreviewTests.swift        # 4 tests
+│   │   ├── GalleryPreviewOutputTests.swift  # 1 test (visual verification)
+│   │   ├── ScreenLayoutTests.swift        # 6 tests
+│   │   └── GalleryTemplateRepositoryTests.swift  # 3 tests
+│   │   ├── GalleryHTMLRendererTests.swift    # 15 tests (Mustache-backed rendering)
+│   │   └── HTMLComposerTests.swift          # 19 tests (Mustache wrapper)
+│   ├── AppShotTemplateTests.swift        # 8 tests
+│   ├── ThemeDesignTests.swift               # 9 tests
+│   ├── ThemeDesignApplierTests.swift        # 10 tests
+│   ├── TemplateApplyTests.swift
+│   └── TemplateRenderTests.swift
 └── ASCCommandTests/Commands/AppShots/
-    ├── AppShotsGenerateTests.swift
     ├── AppShotsTemplatesTests.swift
-    ├── AppShotsConfigTests.swift
-    └── AppShotsDisplayTypeTests.swift
+    ├── AppShotsThemesTests.swift            # 11 tests
+    └── AppShotsGenerateTests.swift
 ```
 
 ---
@@ -443,25 +472,12 @@ Tests/
 ## Testing
 
 ```bash
-swift test --filter 'AppShotsGenerate'              # Generate command (10)
-swift test --filter 'AppShotsTemplates'              # Template commands
-swift test --filter 'AppShotsDisplayType'            # Device types
-swift test --filter 'AppShotsConfig'                 # Config management
-swift test --filter 'AppShots'                       # All app-shots tests
+swift test --filter 'AppShotTests'              # AppShot domain (11)
+swift test --filter 'GalleryTests'              # Gallery domain (11)
+swift test --filter 'GalleryComposeTests'       # Compose flow (8)
+swift test --filter 'GalleryCodableTests'       # JSON round-trip (10)
+swift test --filter 'AppShotTemplateTests'   # Single template (8)
+swift test --filter 'HTMLComposerTests'           # Mustache wrapper (19)
+swift test --filter 'GalleryHTMLRendererTests'    # Mustache-backed renderer (15)
+swift test --filter 'AppShots'                    # All app-shots tests
 ```
-
----
-
-## Available Templates
-
-Templates are provided by plugins. The Blitz Screenshots plugin provides 23 built-in templates:
-
-| Category | Templates |
-|----------|-----------|
-| **Bold** | Top Hero, Bold CTA, Tilted Hero, Midnight Bold |
-| **Minimal** | Minimal Light, Device Only |
-| **Elegant** | Dark Premium, Sage Editorial, Cream Serif, Ocean Calm, Blush Editorial |
-| **Professional** | Top & Bottom, Left Aligned, Bottom Text |
-| **Playful** | Warm Sunset, Sky Soft, Cartoon Peach, Cartoon Mint, Cartoon Lavender |
-| **Showcase** | Duo Devices, Triple Fan, Side by Side |
-| **Custom** | Custom Blank |

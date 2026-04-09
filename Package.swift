@@ -17,6 +17,7 @@ let package = Package(
         .package(url: "https://github.com/steipete/SweetCookieKit.git", from: "0.3.0"),
         .package(url: "https://github.com/hummingbird-project/hummingbird.git", exact: "2.21.1"),
         .package(url: "https://github.com/hummingbird-project/hummingbird-websocket.git", from: "2.6.0"),
+        .package(url: "https://github.com/hummingbird-project/swift-mustache.git", from: "2.0.2"),
     ],
     targets: [
         .target(
@@ -31,7 +32,9 @@ let package = Package(
             name: "Domain",
             dependencies: [
                 .product(name: "Mockable", package: "Mockable"),
+                .product(name: "Mustache", package: "swift-mustache"),
             ],
+            resources: [.copy("Screenshots/Gallery/Resources")],
             swiftSettings: [.define("MOCKING")]
         ),
         .target(
