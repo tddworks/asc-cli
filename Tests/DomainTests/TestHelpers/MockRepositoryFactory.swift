@@ -600,7 +600,7 @@ struct MockRepositoryFactory {
         )
     }
 
-    // MARK: - ScreenshotPlans
+    // MARK: - Screenshots
 
     static func makeAppShotsConfig(
         geminiApiKey: String = "test-key-123"
