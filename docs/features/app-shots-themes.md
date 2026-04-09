@@ -16,8 +16,9 @@ Themes are **plugin-provided** — each plugin registers its own themes with its
 
 Separate **layout** (deterministic) from **styling** (AI-driven):
 
-1. **Step 1 — Deterministic HTML**: Render the template using `TemplateHTMLRenderer` → exact pixel-perfect layout
-2. **Step 2 — AI Restyle**: Send that HTML + theme context to the plugin's AI provider → restyles while **preserving all positions**
+1. **Step 1 — Deterministic HTML**: Render the template using `GalleryHTMLRenderer.renderScreen()` with Mustache templates → exact pixel-perfect layout
+2. **Step 2 — ThemeDesign**: Generate a `ThemeDesign` (palette + decorations) via 1 AI call (`ThemeProvider.design()`)
+3. **Step 3 — Deterministic Apply**: Apply `ThemeDesign` to all slides via `ThemeDesignApplier` — no additional AI calls
 
 Themes live in Domain as a data model (`ScreenTheme` + `ThemeAIHints`), registered by plugins via `ThemeProvider` (same pattern as `TemplateProvider`).
 
@@ -28,17 +29,17 @@ Themes live in Domain as a data model (`ScreenTheme` + `ThemeAIHints`), register
 ### Plugin UI
 
 ```
-Capture → Design (pick template) → Compose (pick theme → Auto-Compose) → Export
+Capture → Design (pick template) → Pick Theme → Export
 ```
 
 1. User captures screenshots
-2. User picks a template (defines layout: text slots, device slots)
-3. User picks a theme (visual style)
-4. Auto-Compose:
-   - `TemplateHTMLRenderer.render(template, content)` → deterministic HTML
-   - Send HTML + `ScreenTheme.buildContext()` to plugin's AI provider → restyles
-   - Result: themed HTML with exact template layout preserved
-5. Export PNGs
+2. User picks a template (defines layout: text slots, device slots) → preview HTML rendered immediately
+3. User picks a theme → triggers:
+   - `POST /themes/design {themeId}` → 1 AI call → returns `ThemeDesign` JSON (palette + decorations)
+   - For each slide: `ThemeDesignApplier.apply(design, shot, layout)` → deterministic re-render (no AI)
+4. Export PNGs
+
+**No auto-compose required.** Theme applies immediately to slides with existing preview HTML.
 
 ### CLI / Agent
 

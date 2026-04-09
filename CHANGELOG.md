@@ -21,9 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **REST endpoints** — `POST /app-shots/themes/design` and `POST /app-shots/themes/apply-design`
 
 ### Changed
-- **`GalleryHTMLRenderer` now uses external HTML templates** — HTML structure extracted from Swift into 13 `.html` template files in `Sources/Domain/Screenshots/Gallery/Resources/`. Rendering uses `HTMLComposer` (lightweight template engine with `{{var}}`, `{{#if}}`, `{{#each}}` syntax) and `HTMLTemplateRepository` protocol. Plugins can override templates via `GalleryHTMLRenderer.templateRepository`. Public API is unchanged.
-- **`GalleryHTMLRenderer` extracted into testable functions** — `renderHeadline()`, `renderTagline()`, `renderSubheading()`, `renderBadges()`, `renderTrustMarks()`, `renderDevice()`, `renderDecorations()` are now public and independently testable
+- **`GalleryHTMLRenderer` refactored to Mustache templates** — all HTML extracted from Swift into 7 `.mustache` template files using [swift-mustache](https://github.com/hummingbird-project/swift-mustache). The renderer only builds context dictionaries; all HTML, CSS colors (via CSS custom properties in `theme-vars.mustache`), and keyframe animations live in templates. Templates are pre-compiled at startup via `MustacheLibrary` for performance. Preview rendering is cached per template ID.
+- **`DecorationShape.displayCharacter`** — computed property on the model instead of renderer logic
+- **`GalleryPalette.isLight` + `headlineColor`** — theme detection and text color derivation moved from renderer to palette
 - **`Decoration` extended** — new optional fields: `color`, `background`, `borderRadius`, `animation`
+- **Theme selection no longer requires auto-compose** — clicking a theme applies immediately to slides with existing preview HTML via `ThemeDesign` (1 AI call for design, then deterministic apply to all slides)
+- **Blitz plugin: `design()` implemented** — generates `ThemeDesign` via compose bridge `mode: "design"`, enabling the fast design→apply-design flow
 
 ---
 
