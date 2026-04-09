@@ -34,7 +34,7 @@ asc init --app-id <id> # pin it — skip --app-id on every future command
 | **App Info** | Set per-locale name, subtitle, privacy policy; manage categories and age rating |
 | **Screenshots** | Create screenshot sets and upload images |
 | **App Previews** | Upload video previews (`.mp4`, `.mov`, `.m4v`) per locale and device size |
-| **App Shots** | AI-powered screenshot generation via Gemini; translate to any locale in one command |
+| **App Shots** | AI-powered screenshot generation — single templates, gallery sets, plugin-provided themes (colors, decorations, animations), Gemini enhancement; two-step ThemeDesign workflow for batch styling without extra AI calls |
 | **TestFlight** | Manage beta groups; add/remove/import/export testers; submit builds for beta review |
 | **Monetization** | IAPs (consumable, non-consumable, non-renewing); subscriptions, offers, pricing, offer codes |
 | **Code Signing** | Bundle IDs, certificates, devices, provisioning profiles |
@@ -270,17 +270,48 @@ asc app-previews upload --set-id <id> --file ./preview.mp4 [--preview-frame-time
 
 ### App Shots (AI screenshot generation)
 
+Two modes: **Gallery** (all screenshots styled as a coordinated set) and **Single Template** (one screenshot at a time). Optional AI themes via plugins add colors, backgrounds, and floating decorations.
+
 ```bash
-asc app-shots config --gemini-api-key KEY               # save key once
+# --- Templates (single shot) ---
+asc app-shots templates list                              # browse available templates
+asc app-shots templates list --size portrait --output table
+asc app-shots templates apply --id top-hero \
+  --screenshot screen.png --headline "Ship Faster" \
+  --preview html > preview.html && open preview.html      # preview in browser
+asc app-shots templates apply --id top-hero \
+  --screenshot screen.png --headline "Ship Faster" \
+  --preview image --image-output marketing.png            # export to PNG
 
-asc app-shots generate                                   # iPhone 6.9" at 1320×2868 (default)
-asc app-shots generate --device-type APP_IPHONE_67      # iPhone 6.7"
-asc app-shots generate --device-type APP_IPAD_PRO_129   # iPad 13"
-asc app-shots generate --style-reference ~/ref.png      # match visual style of reference image
+# --- Gallery templates (multi-screen sets) ---
+asc app-shots gallery-templates list --output table
+asc app-shots gallery-templates get --id neon-pop --preview > gallery.html && open gallery.html
 
-asc app-shots translate --to zh --to ja                 # localize all screens in parallel
-asc app-shots translate --to ko --device-type APP_IPHONE_67
-asc app-shots translate --to zh --style-reference ~/ref.png
+# --- Gallery mode (all screenshots at once) ---
+asc app-shots gallery create \
+  --app-name "MyApp" \
+  --screenshots screen-0.png screen-1.png screen-2.png
+
+# --- Themes (plugin-provided, AI-powered styling) ---
+asc app-shots themes list                                 # browse themes
+asc app-shots themes get --id space --pretty              # theme detail
+asc app-shots themes apply --theme space --template top-hero \
+  --screenshot screen.png --headline "Ship Faster"        # AI-styled HTML
+
+# Two-step workflow: generate ThemeDesign once, apply to many (no extra AI calls)
+asc app-shots themes design --id luxury > design.json
+asc app-shots themes apply-design --design design.json \
+  --template top-hero --screenshot screen-0.png --headline "Feature 1" \
+  --preview html > s0.html
+asc app-shots themes apply-design --design design.json \
+  --template top-hero --screenshot screen-1.png --headline "Feature 2" \
+  --preview image --image-output s1.png
+
+# --- Gemini AI enhancement ---
+asc app-shots config --gemini-api-key KEY                 # save key once
+asc app-shots generate --file screen.png                  # enhance with Gemini
+asc app-shots generate --file screen.png --device-type APP_IPHONE_67
+asc app-shots generate --file screen.png --style-reference ~/ref.png
 ```
 
 ### Monetization
@@ -499,7 +530,8 @@ Detailed documentation for each feature:
 - [Code Signing](docs/features/code-signing.md) — bundle IDs, certificates, devices, profiles
 - [Version Check-Readiness](docs/features/version-check-readiness.md) — pre-flight submission checks
 - [In-App Purchases & Subscriptions](docs/features/iap-subscriptions.md) — IAPs, subscriptions, offers, pricing
-- [App Shots](docs/features/app-shots.md) — AI-powered screenshot generation and localization
+- [App Shots](docs/features/app-shots.md) — templates, galleries, Gemini enhancement, and export
+- [App Shots Themes](docs/features/app-shots-themes.md) — plugin-provided visual themes with two-step ThemeDesign workflow
 - [Plugins](docs/features/plugins.md) — custom event handlers (Slack, Telegram, webhooks)
 - [App Wall](docs/features/app-wall.md) — community showcase; `apps.json` format and architecture
 - [Users & Roles](docs/features/users.md) — team member management, role assignment, invitation lifecycle; directory integration for automated access control
