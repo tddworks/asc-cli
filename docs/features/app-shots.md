@@ -133,15 +133,75 @@ ASCCommand                       Domain                                  Infrast
                                   |   category, supportedSizes           |
                                   |                                      |
                                   | GalleryHTMLRenderer                  |
-                                  |   renderScreen() — one renderer      |
+                                  |   renderScreen() — context builder   |
                                   |   renderPreviewPage()                |
                                   |   wrapPage()                         |
+                                  |   cachedPreview() — preview cache    |
+                                  |                                      |
+                                  | HTMLComposer (Mustache)              |
+                                  |   render(template:, with:)           |
+                                  |   Pre-compiled MustacheLibrary       |
+                                  |                                      |
+                                  | .mustache templates (Resources/)     |
+                                  |   screen, wireframe, page-wrapper    |
+                                  |   theme-vars, keyframes, preview-*   |
                                   +--------------------------------------+
 ```
 
 **Dependency flow:** `ASCCommand → Domain ← Infrastructure`
 
 **Unified rendering:** Everything renders through `GalleryHTMLRenderer.renderScreen()`. Both `Gallery.renderAll()` and `AppShotTemplate.apply()` delegate to it.
+
+### Responsive Sizing (`cqi` Units)
+
+All text and element sizing uses CSS Container Query Inline-size (`cqi`) units. This ensures consistent proportions between preview (320px container) and export (full viewport).
+
+```
+1cqi = 1% of the container's inline size
+```
+
+`GalleryHTMLRenderer` builds context dictionaries from domain models and delegates all HTML rendering to Mustache templates:
+
+| Entry Point | Template | Purpose |
+|-------------|----------|---------|
+| `renderScreen()` | `screen.mustache` | Full screen: text, devices, badges, decorations |
+| `wrapPage()` | `page-wrapper.mustache` | HTML document wrapper |
+| `renderPreviewPage()` | `preview-page.mustache` + `preview-screen.mustache` | Gallery preview strip |
+| (inline) | `wireframe.mustache` | Phone wireframe mockup |
+| (inline) | `theme-vars.mustache` | CSS custom properties for light/dark themes |
+| (inline) | `keyframes.mustache` | CSS animation keyframes |
+
+**SRP:** The renderer only builds data contexts — zero HTML, zero colors, zero CSS. All presentation lives in `.mustache` templates. Color scheme (light/dark) is handled by CSS custom properties in `theme-vars.mustache`.
+
+### Mustache Template System
+
+Templates use [swift-mustache](https://github.com/hummingbird-project/swift-mustache) (from Hummingbird). All templates are pre-compiled into a `MustacheLibrary` at startup for fast rendering.
+
+```swift
+// Named template rendering (pre-compiled)
+HTMLComposer.render(template: "screen", with: context)
+
+// Inline template rendering
+HTMLComposer.render("Hello {{name}}!", with: ["name": "World"])
+// → "Hello World!"
+
+// Replace the template library (e.g. from a plugin)
+HTMLComposer.setLibrary(customLibrary)
+```
+
+Standard Mustache syntax: `{{var}}`, `{{{raw}}}`, `{{#section}}...{{/section}}`, `{{^inverted}}...{{/inverted}}`.
+
+### Verification
+
+```bash
+# Preview a template as HTML — open in browser to visually verify
+asc app-shots templates apply --id top-hero --screenshot screen.png --headline "Test" \
+  --preview html > preview.html && open preview.html
+
+# Export to PNG and verify sizing consistency
+asc app-shots templates apply --id top-hero --screenshot screen.png --headline "Test" \
+  --preview image --image-output export.png
+```
 
 ---
 
@@ -232,11 +292,33 @@ Convenience wrapper for single-shot templates. Wraps `ScreenLayout` + `GalleryPa
 ```swift
 public struct TextSlot { y, size, weight, align, preview? }
 public struct DeviceSlot { x, y, width }
-public struct Decoration { shape, x, y, size, opacity }
-public enum DecorationShape { gem, orb, sparkle, arrow }
+public struct Decoration { shape, x, y, size, opacity, color?, background?, borderRadius?, animation? }
+public enum DecorationShape { gem, orb, sparkle, arrow, label(String) }  // .displayCharacter computed property
+public enum DecorationAnimation { float, drift, pulse, spin, twinkle }
 public enum ScreenType { hero, feature, social }
 public enum TemplateCategory { bold, minimal, elegant, professional, playful, showcase, custom }
 public enum ScreenSize { portrait, portrait43, landscape, square }
+```
+
+### `GalleryPalette` — Derived Colors
+
+`GalleryPalette` owns theme detection and derived text colors:
+
+```swift
+palette.isLight        // heuristic from background hex values
+palette.headlineColor  // explicit textColor or auto-detected from isLight
+```
+
+### `HTMLComposer` (Mustache)
+
+Wraps `MustacheLibrary` from [swift-mustache](https://github.com/hummingbird-project/swift-mustache). Templates are pre-compiled at startup.
+
+```swift
+// Named template (pre-compiled, fast)
+HTMLComposer.render(template: "screen", with: context)
+
+// Inline template
+HTMLComposer.render("Hello {{name}}!", with: ["name": "World"])
 ```
 
 ### Protocols
@@ -263,11 +345,22 @@ Sources/
 │   │   ├── GalleryTemplate.swift            # Per-screen-type layouts
 │   │   ├── GalleryPalette.swift             # Color scheme
 │   │   ├── ScreenLayout.swift             # TextSlot, DeviceSlot, Decoration
-│   │   ├── GalleryHTMLRenderer.swift        # Unified renderer (renderScreen, wrapPage)
-│   │   └── GalleryTemplateRepository.swift  # Provider + Repository protocols
+│   │   ├── GalleryHTMLRenderer.swift        # Context builder → Mustache templates (renderScreen, wrapPage)
+│   │   ├── HTMLComposer.swift               # Mustache wrapper (MustacheLibrary, cached compilation)
+│   │   ├── GalleryTemplateRepository.swift  # Provider + Repository protocols
+│   │   └── Resources/                      # Mustache template files
+│   │       ├── screen.mustache              #   Full screen: text, devices, badges, decorations
+│   │       ├── wireframe.mustache           #   Phone wireframe mockup (CSS vars)
+│   │       ├── theme-vars.mustache          #   CSS custom properties for light/dark themes
+│   │       ├── keyframes.mustache           #   CSS animation keyframes
+│   │       ├── page-wrapper.mustache        #   Full HTML document wrapper
+│   │       ├── preview-page.mustache        #   Gallery preview page
+│   │       └── preview-screen.mustache      #   Preview screen card
 │   ├── AppShotTemplate.swift             # Single-shot template (wraps ScreenLayout + Palette)
 │   ├── TemplateRepository.swift             # Single template protocols
-│   ├── ScreenTheme.swift                    # AI theme hints
+│   ├── ScreenTheme.swift                    # AI theme hints + buildDesignContext()
+│   ├── ThemeDesign.swift                    # ThemeDesign + ThemeBackground + ThemeFloat
+│   ├── ThemeDesignApplier.swift             # Deterministic theme applier (cqi units)
 │   ├── ThemedPage.swift                     # Themed HTML page wrapper
 │   ├── AppShotsConfig.swift                 # Gemini API key model
 │   └── AppShotsConfigStorage.swift          # Config storage protocol
@@ -298,11 +391,16 @@ Tests/
 │   │   ├── GalleryPreviewOutputTests.swift  # 1 test (visual verification)
 │   │   ├── ScreenLayoutTests.swift        # 6 tests
 │   │   └── GalleryTemplateRepositoryTests.swift  # 3 tests
+│   │   ├── GalleryHTMLRendererTests.swift    # 15 tests (Mustache-backed rendering)
+│   │   └── HTMLComposerTests.swift          # 19 tests (Mustache wrapper)
 │   ├── AppShotTemplateTests.swift        # 8 tests
+│   ├── ThemeDesignTests.swift               # 9 tests
+│   ├── ThemeDesignApplierTests.swift        # 10 tests
 │   ├── TemplateApplyTests.swift
 │   └── TemplateRenderTests.swift
 └── ASCCommandTests/Commands/AppShots/
     ├── AppShotsTemplatesTests.swift
+    ├── AppShotsThemesTests.swift            # 11 tests
     └── AppShotsGenerateTests.swift
 ```
 
@@ -316,5 +414,7 @@ swift test --filter 'GalleryTests'              # Gallery domain (11)
 swift test --filter 'GalleryComposeTests'       # Compose flow (8)
 swift test --filter 'GalleryCodableTests'       # JSON round-trip (10)
 swift test --filter 'AppShotTemplateTests'   # Single template (8)
-swift test --filter 'AppShots'                  # All app-shots tests
+swift test --filter 'HTMLComposerTests'           # Mustache wrapper (19)
+swift test --filter 'GalleryHTMLRendererTests'    # Mustache-backed renderer (15)
+swift test --filter 'AppShots'                    # All app-shots tests
 ```
