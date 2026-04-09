@@ -6,7 +6,13 @@ struct AppShotsThemesCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "themes",
         abstract: "Browse visual themes for screenshot composition",
-        subcommands: [AppShotsThemesList.self, AppShotsThemesGet.self, AppShotsThemesApply.self]
+        subcommands: [
+            AppShotsThemesList.self,
+            AppShotsThemesGet.self,
+            AppShotsThemesDesign.self,
+            AppShotsThemesApplyDesign.self,
+            AppShotsThemesApply.self,
+        ]
     )
 }
 
@@ -76,12 +82,125 @@ struct AppShotsThemesGet: AsyncParsableCommand {
     }
 }
 
-// MARK: - Apply
+// MARK: - Design (generate ThemeDesign JSON — 1 AI call)
+
+struct AppShotsThemesDesign: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "design",
+        abstract: "Generate a ThemeDesign (palette + decorations) from AI — one call, reusable"
+    )
+
+    @OptionGroup var globals: GlobalOptions
+
+    @Option(name: .long, help: "Theme ID")
+    var id: String
+
+    func run() async throws {
+        let repo = ClientProvider.makeThemeRepository()
+        print(try await execute(themeRepo: repo))
+    }
+
+    func execute(themeRepo: any ThemeRepository) async throws -> String {
+        let design = try await themeRepo.design(themeId: id)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        let data = try encoder.encode(design)
+        return String(data: data, encoding: .utf8) ?? "{}"
+    }
+}
+
+// MARK: - Apply Design (deterministic — no AI)
+
+struct AppShotsThemesApplyDesign: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "apply-design",
+        abstract: "Apply a cached ThemeDesign to a template — deterministic, no AI"
+    )
+
+    @OptionGroup var globals: GlobalOptions
+
+    @Option(name: .long, help: "Path to ThemeDesign JSON file")
+    var design: String
+
+    @Option(name: .long, help: "Template ID")
+    var template: String
+
+    @Option(name: .long, help: "Path to screenshot file")
+    var screenshot: String
+
+    @Option(name: .long, help: "Headline text")
+    var headline: String = "Your Headline"
+
+    @Option(name: .long, help: "Subtitle text")
+    var subtitle: String?
+
+    @Option(name: .long, help: "Tagline text")
+    var tagline: String?
+
+    @Option(name: .long, help: "Preview format: html (default) or image")
+    var preview: PreviewFormat?
+
+    @Option(name: .long, help: "Output PNG path (for --preview image)")
+    var imageOutput: String?
+
+    @Option(name: .long, help: "Canvas width in pixels")
+    var canvasWidth: Int = 1320
+
+    @Option(name: .long, help: "Canvas height in pixels")
+    var canvasHeight: Int = 2868
+
+    func run() async throws {
+        let templateRepo = ClientProvider.makeTemplateRepository()
+        if preview == .image {
+            let renderer = ClientProvider.makeHTMLRenderer()
+            print(try await execute(templateRepo: templateRepo, renderer: renderer))
+        } else {
+            print(try await execute(templateRepo: templateRepo))
+        }
+    }
+
+    func execute(templateRepo: any TemplateRepository, renderer: (any HTMLRenderer)? = nil) async throws -> String {
+        let designData = try Data(contentsOf: URL(fileURLWithPath: design))
+        let themeDesign = try JSONDecoder().decode(ThemeDesign.self, from: designData)
+
+        guard let tmpl = try await templateRepo.getTemplate(id: template) else {
+            throw ValidationError("Template '\(template)' not found.")
+        }
+
+        let screenshotFile = (preview == .image) ? screenshot : URL(fileURLWithPath: screenshot).lastPathComponent
+        let shot = AppShot(screenshot: screenshotFile, type: .feature)
+        shot.headline = headline
+        shot.body = subtitle
+        shot.tagline = tagline
+
+        let themedHTML = ThemeDesignApplier.apply(themeDesign, shot: shot, screenLayout: tmpl.screenLayout)
+        let page = ThemedPage(body: themedHTML, width: canvasWidth, height: canvasHeight, fillViewport: preview == .image)
+
+        if preview == .image, let renderer {
+            return try await renderToImage(html: page.html, renderer: renderer)
+        }
+
+        return page.html
+    }
+
+    private func renderToImage(html: String, renderer: any HTMLRenderer) async throws -> String {
+        let pngData = try await renderer.render(html: html, width: canvasWidth, height: canvasHeight)
+        let outputPath = imageOutput ?? ".asc/app-shots/output/screen-0.png"
+        let fileURL = URL(fileURLWithPath: outputPath)
+        try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try pngData.write(to: fileURL)
+        let result: [String: Any] = ["exported": outputPath, "width": canvasWidth, "height": canvasHeight, "bytes": pngData.count]
+        let data = try JSONSerialization.data(withJSONObject: result, options: [.prettyPrinted, .sortedKeys])
+        return String(data: data, encoding: .utf8) ?? "{}"
+    }
+}
+
+// MARK: - Apply (full AI restyle — fallback)
 
 struct AppShotsThemesApply: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "apply",
-        abstract: "Apply a theme to a template — renders deterministic layout, then AI restyles"
+        abstract: "Apply a theme via full AI restyle"
     )
 
     @OptionGroup var globals: GlobalOptions
@@ -116,12 +235,6 @@ struct AppShotsThemesApply: AsyncParsableCommand {
     @Option(name: .long, help: "Output PNG path (for --preview image)")
     var imageOutput: String?
 
-    @Flag(name: .long, help: "Output ThemeDesign JSON (generate once, apply to many screenshots)")
-    var designOnly: Bool = false
-
-    @Option(name: .long, help: "Apply a cached ThemeDesign JSON file instead of calling AI")
-    var applyDesign: String?
-
     func run() async throws {
         let themeRepo = ClientProvider.makeThemeRepository()
         let templateRepo = ClientProvider.makeTemplateRepository()
@@ -134,15 +247,6 @@ struct AppShotsThemesApply: AsyncParsableCommand {
     }
 
     func execute(themeRepo: any ThemeRepository, templateRepo: any TemplateRepository, renderer: (any HTMLRenderer)? = nil) async throws -> String {
-        // Design-only mode: generate ThemeDesign JSON from AI
-        if designOnly {
-            let design = try await themeRepo.design(themeId: theme)
-            let encoder = JSONEncoder()
-            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-            let data = try encoder.encode(design)
-            return String(data: data, encoding: .utf8) ?? "{}"
-        }
-
         guard let tmpl = try await templateRepo.getTemplate(id: template) else {
             throw ValidationError("Template '\(template)' not found. Run `asc app-shots templates list` to see available templates.")
         }
@@ -153,17 +257,8 @@ struct AppShotsThemesApply: AsyncParsableCommand {
         shot.body = subtitle
         shot.tagline = tagline
 
-        // Apply cached design (re-render through pipeline) or compose via AI
-        let themedHTML: String
-        if let designPath = applyDesign {
-            let designData = try Data(contentsOf: URL(fileURLWithPath: designPath))
-            let design = try JSONDecoder().decode(ThemeDesign.self, from: designData)
-            themedHTML = ThemeDesignApplier.apply(design, shot: shot, screenLayout: tmpl.screenLayout)
-        } else {
-            let fragment = tmpl.renderFragment(shot: shot)
-            themedHTML = try await themeRepo.compose(themeId: theme, html: fragment, canvasWidth: canvasWidth, canvasHeight: canvasHeight)
-        }
-
+        let fragment = tmpl.renderFragment(shot: shot)
+        let themedHTML = try await themeRepo.compose(themeId: theme, html: fragment, canvasWidth: canvasWidth, canvasHeight: canvasHeight)
         let page = ThemedPage(body: themedHTML, width: canvasWidth, height: canvasHeight, fillViewport: preview == .image)
 
         if preview == .image, let renderer {
@@ -183,6 +278,4 @@ struct AppShotsThemesApply: AsyncParsableCommand {
         let data = try JSONSerialization.data(withJSONObject: result, options: [.prettyPrinted, .sortedKeys])
         return String(data: data, encoding: .utf8) ?? "{}"
     }
-
-    // wrapInPage logic moved to Domain/ScreenshotPlans/ThemedPage.swift
 }
