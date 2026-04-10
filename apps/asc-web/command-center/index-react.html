@@ -1,184 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ASC Command Center</title>
+  <title>ASC Manager — App Store Connect</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../shared/static/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../shared/static/favicon-16x16.png" />
+  <link rel="apple-touch-icon" href="../shared/static/logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #0a0a0a;
-      --bg-surface: #141414;
-      --bg-elevated: #1e1e1e;
-      --text: #e8e8e8;
-      --text-secondary: #888;
-      --border: #2a2a2a;
-      --accent: #3b82f6;
-      --accent-hover: #2563eb;
-      --green: #22c55e;
-      --yellow: #eab308;
-      --red: #ef4444;
-      --blue: #3b82f6;
-      --radius: 8px;
-      --font: 'Plus Jakarta Sans', -apple-system, sans-serif;
-    }
-
-    body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-    }
-
-    .app-layout {
-      display: flex;
-      min-height: 100vh;
-    }
-
-    /* ── Sidebar ── */
-    .sidebar {
-      width: 240px;
-      background: var(--bg-surface);
-      border-right: 1px solid var(--border);
-      padding: 16px 0;
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      overflow-y: auto;
-    }
-
-    .sidebar-section { padding: 8px 16px; }
-    .sidebar-section-title {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-secondary);
-      margin-bottom: 4px;
-    }
-
-    .sidebar ul { list-style: none; }
-    .sidebar li a {
-      display: block;
-      padding: 6px 12px;
-      border-radius: var(--radius);
-      color: var(--text);
-      text-decoration: none;
-      font-size: 14px;
-      transition: background 0.15s;
-    }
-    .sidebar li a:hover { background: var(--bg-elevated); }
-    .sidebar li a.active {
-      background: var(--accent);
-      color: white;
-      font-weight: 500;
-    }
-
-    /* ── Main ── */
-    .app-main {
-      margin-left: 240px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .header {
-      padding: 16px 24px;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg-surface);
-    }
-    .header h1 { font-size: 18px; font-weight: 600; }
-
-    .page-content { padding: 24px; }
-
-    /* ── Components ── */
-    h2 { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 16px;
-    }
-
-    .card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-    }
-    .card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
-    .card .sku { font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px; }
-
-    .badge {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 12px;
-      background: var(--bg-elevated);
-      color: var(--text-secondary);
-      margin-right: 4px;
-    }
-    .badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
-    .badge-yellow { background: rgba(234,179,8,0.15); color: var(--yellow); }
-    .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
-    .badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
-
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-    .data-table th, .data-table td {
-      text-align: left;
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--border);
-    }
-    .data-table th {
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--text-secondary);
-    }
-
-    .affordance-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-    .affordance-btn {
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      background: var(--bg-elevated);
-      color: var(--text);
-      cursor: pointer;
-      transition: background 0.15s;
-      font-family: var(--font);
-    }
-    .affordance-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
-
-    .btn { font-family: var(--font); cursor: pointer; }
-    .btn-sm {
-      font-size: 12px;
-      padding: 4px 12px;
-      border-radius: var(--radius);
-      border: 1px solid var(--accent);
-      background: var(--accent);
-      color: white;
-      margin-left: 6px;
-    }
-
-    .spinner { color: var(--text-secondary); padding: 40px; text-align: center; }
-    .error { color: var(--red); padding: 20px; }
-    .empty-state { color: var(--text-secondary); padding: 40px; text-align: center; }
-  </style>
+  <link rel="stylesheet" href="css/theme.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/utilities.css" />
 </head>
 <body>
   <div id="root"></div>
+  <div id="toastContainer"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
