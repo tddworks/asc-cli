@@ -25,6 +25,14 @@ const CodeSigningPage = lazy(() => import('./code-signing/pages/CodeSigningPage.
 const SubmissionPage = lazy(() => import('./submission/pages/SubmissionPage.tsx'));
 const XcodeCloudPage = lazy(() => import('./xcode-cloud/pages/XcodeCloudPage.tsx'));
 const ReportsPage = lazy(() => import('./report/pages/ReportsPage.tsx'));
+const SimulatorPage = lazy(() => import('./simulator/pages/SimulatorPage.tsx'));
+const UserPage = lazy(() => import('./user/pages/UserPage.tsx'));
+const IrisPage = lazy(() => import('./iris/pages/IrisPage.tsx'));
+const IAPPage = lazy(() => import('./iap/pages/IAPPage.tsx'));
+const SubscriptionPage = lazy(() => import('./subscription/pages/SubscriptionPage.tsx'));
+const AppInfoPage = lazy(() => import('./app-info/pages/AppInfoPage.tsx'));
+const ScreenshotPage = lazy(() => import('./screenshot/pages/ScreenshotPage.tsx'));
+const PluginsPage = lazy(() => import('./plugin/pages/PluginsPage.tsx'));
 
 function LoadingSpinner() {
   return <div className="spinner">Loading...</div>;
@@ -71,6 +79,14 @@ function AppShell() {
                   <Route path="/submissions" element={<SubmissionPage />} />
                   <Route path="/xcode-cloud" element={<XcodeCloudPage />} />
                   <Route path="/reports" element={<ReportsPage />} />
+                  <Route path="/simulators" element={<SimulatorPage />} />
+                  <Route path="/users" element={<UserPage />} />
+                  <Route path="/iris" element={<IrisPage />} />
+                  <Route path="/iap" element={<IAPPage />} />
+                  <Route path="/subscriptions" element={<SubscriptionPage />} />
+                  <Route path="/app-info" element={<AppInfoPage />} />
+                  <Route path="/screenshots" element={<ScreenshotPage />} />
+                  <Route path="/plugins" element={<PluginsPage />} />
 
                   {pluginPages.map((page) => {
                     const LazyComponent = lazy(page.component);
