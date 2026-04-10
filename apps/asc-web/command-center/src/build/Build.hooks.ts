@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Build } from './Build.ts';
 import { fetchBuilds } from './infrastructure/Build.api.ts';
-import { useDataMode } from '../shared/api-client.ts';
+import { useDataMode } from '../shared/api-client.tsx';
 
 export function useBuilds(appId: string) {
   const [builds, setBuilds] = useState<Build[]>([]);

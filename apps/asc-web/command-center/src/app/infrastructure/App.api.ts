@@ -1,6 +1,6 @@
 import { App } from '../App.ts';
-import { apiClient } from '../../shared/api-client.ts';
-import type { DataMode } from '../../shared/api-client.ts';
+import { apiClient } from '../../shared/api-client.tsx';
+import type { DataMode } from '../../shared/api-client.tsx';
 
 export async function fetchApps(mode: DataMode): Promise<App[]> {
   if (mode === 'mock') {

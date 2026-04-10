@@ -1,6 +1,6 @@
 import { Version } from '../Version.ts';
-import { apiClient } from '../../shared/api-client.ts';
-import type { DataMode } from '../../shared/api-client.ts';
+import { apiClient } from '../../shared/api-client.tsx';
+import type { DataMode } from '../../shared/api-client.tsx';
 
 export async function fetchVersions(appId: string, mode: DataMode): Promise<Version[]> {
   if (mode === 'mock') {

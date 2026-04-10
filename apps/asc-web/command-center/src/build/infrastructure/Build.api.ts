@@ -1,5 +1,5 @@
 import { Build } from '../Build.ts';
-import { apiClient, type DataMode } from '../../shared/api-client.ts';
+import { apiClient, type DataMode } from '../../shared/api-client.tsx';
 
 export async function fetchBuilds(appId: string, mode: DataMode): Promise<Build[]> {
   if (mode === 'mock') {

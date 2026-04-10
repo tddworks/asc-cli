@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BetaGroup } from './BetaGroup.ts';
 import { fetchBetaGroups } from './infrastructure/TestFlight.api.ts';
-import { useDataMode } from '../shared/api-client.ts';
+import { useDataMode } from '../shared/api-client.tsx';
 
 export function useTestFlight(appId: string) {
   const [betaGroups, setBetaGroups] = useState<BetaGroup[]>([]);

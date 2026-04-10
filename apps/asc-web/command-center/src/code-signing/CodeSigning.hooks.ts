@@ -4,7 +4,7 @@ import { BundleID } from './BundleID.ts';
 import { Profile } from './Profile.ts';
 import { Device } from './Device.ts';
 import { fetchCertificates, fetchBundleIds, fetchProfiles, fetchDevices } from './infrastructure/CodeSigning.api.ts';
-import { useDataMode } from '../shared/api-client.ts';
+import { useDataMode } from '../shared/api-client.tsx';
 
 export function useCertificates() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);

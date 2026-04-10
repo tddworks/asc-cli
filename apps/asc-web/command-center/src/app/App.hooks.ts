@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { App } from './App.ts';
 import { fetchApps, fetchApp } from './infrastructure/App.api.ts';
-import { useDataMode } from '../shared/api-client.ts';
+import { useDataMode } from '../shared/api-client.tsx';
 
 export function useApps() {
   const [apps, setApps] = useState<App[]>([]);

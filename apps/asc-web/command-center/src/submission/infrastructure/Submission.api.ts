@@ -1,5 +1,5 @@
 import { Submission } from '../Submission.ts';
-import { apiClient, type DataMode } from '../../shared/api-client.ts';
+import { apiClient, type DataMode } from '../../shared/api-client.tsx';
 
 export async function fetchSubmission(versionId: string, mode: DataMode): Promise<Submission> {
   if (mode === 'mock') {

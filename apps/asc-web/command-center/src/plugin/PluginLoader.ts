@@ -1,4 +1,4 @@
-import { apiClient } from '../shared/api-client.ts';
+import { apiClient } from '../shared/api-client.tsx';
 import { pluginRegistry } from './PluginRegistry.ts';
 
 interface PluginManifest {

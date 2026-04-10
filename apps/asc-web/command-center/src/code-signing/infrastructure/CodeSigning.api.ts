@@ -2,7 +2,7 @@ import { Certificate } from '../Certificate.ts';
 import { BundleID } from '../BundleID.ts';
 import { Profile } from '../Profile.ts';
 import { Device } from '../Device.ts';
-import { apiClient, type DataMode } from '../../shared/api-client.ts';
+import { apiClient, type DataMode } from '../../shared/api-client.tsx';
 
 export async function fetchCertificates(mode: DataMode): Promise<Certificate[]> {
   if (mode === 'mock') {

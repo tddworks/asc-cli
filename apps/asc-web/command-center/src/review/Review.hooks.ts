@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Review } from './Review.ts';
 import { fetchReviews } from './infrastructure/Review.api.ts';
-import { useDataMode } from '../shared/api-client.ts';
+import { useDataMode } from '../shared/api-client.tsx';
 
 export function useReviews(appId: string) {
   const [reviews, setReviews] = useState<Review[]>([]);

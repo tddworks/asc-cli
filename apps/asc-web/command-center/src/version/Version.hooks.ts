@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Version } from './Version.ts';
 import { fetchVersions } from './infrastructure/Version.api.ts';
-import { useDataMode } from '../shared/api-client.ts';
+import { useDataMode } from '../shared/api-client.tsx';
 
 export function useVersions(appId: string) {
   const [versions, setVersions] = useState<Version[]>([]);

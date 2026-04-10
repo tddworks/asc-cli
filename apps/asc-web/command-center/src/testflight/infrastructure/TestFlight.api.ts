@@ -1,5 +1,5 @@
 import { BetaGroup } from '../BetaGroup.ts';
-import { apiClient, type DataMode } from '../../shared/api-client.ts';
+import { apiClient, type DataMode } from '../../shared/api-client.tsx';
 
 export async function fetchBetaGroups(appId: string, mode: DataMode): Promise<BetaGroup[]> {
   if (mode === 'mock') {

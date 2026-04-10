@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Submission } from './Submission.ts';
 import { fetchSubmission, fetchSubmissions } from './infrastructure/Submission.api.ts';
-import { useDataMode } from '../shared/api-client.ts';
+import { useDataMode } from '../shared/api-client.tsx';
 
 export function useSubmission(versionId: string) {
   const [submission, setSubmission] = useState<Submission | null>(null);

@@ -1,8 +1,14 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useState, useCallback } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { PluginProvider } from './plugin/PluginContext.tsx';
 import { pluginRegistry } from './plugin/PluginRegistry.ts';
-import { DataModeProvider } from './shared/api-client.ts';
+import {
+  DataModeProviderComponent,
+  CommandLogProvider,
+  useDataMode,
+  useToggleMode,
+  useCommandLog,
+} from './shared/api-client.tsx';
 import { Sidebar } from './shared/layout/Sidebar.tsx';
 import { Header } from './shared/layout/Header.tsx';
 
@@ -22,53 +28,85 @@ function LoadingSpinner() {
   return <div className="spinner">Loading...</div>;
 }
 
-export function App() {
+/** Inner shell that can use context hooks (must be rendered inside providers) */
+function AppShell() {
+  const mode = useDataMode();
+  const toggleMode = useToggleMode();
+  const { entries: _commandLogEntries } = useCommandLog();
+
+  const [commandLogOpen, setCommandLogOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleToggleTheme = useCallback(() => {
+    document.documentElement.classList.toggle('light');
+  }, []);
+
+  const handleRefresh = useCallback(() => {
+    window.location.reload();
+  }, []);
+
   const pluginPages = pluginRegistry.getPages();
 
   return (
-    <DataModeProvider value="mock">
-      <BrowserRouter>
-        <PluginProvider>
-          <div className="app">
-            <Sidebar />
-            <div className="main">
-              <Header />
-              <div className="content">
-                <Suspense fallback={<LoadingSpinner />}>
-                  <Routes>
-                    <Route path="/" element={<DashboardPage />} />
-                    <Route path="/apps" element={<AppList />} />
-                    <Route path="/apps/:appId" element={<AppDetail />} />
-                    <Route path="/apps/:appId/versions" element={<VersionList />} />
-                    <Route path="/builds" element={<BuildList />} />
-                    <Route path="/reviews" element={<ReviewList />} />
-                    <Route path="/testflight" element={<TestFlightPage />} />
-                    <Route path="/code-signing" element={<CodeSigningPage />} />
-                    <Route path="/submissions" element={<SubmissionPage />} />
-                    <Route path="/xcode-cloud" element={<XcodeCloudPage />} />
-                    <Route path="/reports" element={<ReportsPage />} />
+    <BrowserRouter>
+      <PluginProvider>
+        <div className="app">
+          <Sidebar />
+          <div className="main">
+            <Header
+              title="Command Center"
+              mode={mode}
+              onToggleMode={toggleMode}
+              onToggleTheme={handleToggleTheme}
+              onRefresh={handleRefresh}
+              onOpenCommandLog={() => setCommandLogOpen(!commandLogOpen)}
+              onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+            />
+            <div className="content">
+              <Suspense fallback={<LoadingSpinner />}>
+                <Routes>
+                  <Route path="/" element={<DashboardPage />} />
+                  <Route path="/apps" element={<AppList />} />
+                  <Route path="/apps/:appId" element={<AppDetail />} />
+                  <Route path="/apps/:appId/versions" element={<VersionList />} />
+                  <Route path="/builds" element={<BuildList />} />
+                  <Route path="/reviews" element={<ReviewList />} />
+                  <Route path="/testflight" element={<TestFlightPage />} />
+                  <Route path="/code-signing" element={<CodeSigningPage />} />
+                  <Route path="/submissions" element={<SubmissionPage />} />
+                  <Route path="/xcode-cloud" element={<XcodeCloudPage />} />
+                  <Route path="/reports" element={<ReportsPage />} />
 
-                    {pluginPages.map((page) => {
-                      const LazyComponent = lazy(page.component);
-                      return (
-                        <Route
-                          key={page.path}
-                          path={page.path}
-                          element={
-                            <Suspense fallback={<LoadingSpinner />}>
-                              <LazyComponent />
-                            </Suspense>
-                          }
-                        />
-                      );
-                    })}
-                  </Routes>
-                </Suspense>
-              </div>
+                  {pluginPages.map((page) => {
+                    const LazyComponent = lazy(page.component);
+                    return (
+                      <Route
+                        key={page.path}
+                        path={page.path}
+                        element={
+                          <Suspense fallback={<LoadingSpinner />}>
+                            <LazyComponent />
+                          </Suspense>
+                        }
+                      />
+                    );
+                  })}
+                </Routes>
+              </Suspense>
             </div>
           </div>
-        </PluginProvider>
-      </BrowserRouter>
-    </DataModeProvider>
+        </div>
+      </PluginProvider>
+    </BrowserRouter>
+  );
+}
+
+export function App() {
+  return (
+    <DataModeProviderComponent>
+      <CommandLogProvider>
+        <AppShell />
+      </CommandLogProvider>
+    </DataModeProviderComponent>
   );
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Report } from './Report.ts';
 import { fetchReports } from './infrastructure/Report.api.ts';
-import { useDataMode } from '../shared/api-client.ts';
+import { useDataMode } from '../shared/api-client.tsx';
 
 export function useReports() {
   const [reports, setReports] = useState<Report[]>([]);

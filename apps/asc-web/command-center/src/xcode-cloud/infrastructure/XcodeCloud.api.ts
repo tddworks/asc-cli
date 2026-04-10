@@ -1,6 +1,6 @@
 import { CiProduct } from '../CiProduct.ts';
 import { CiWorkflow } from '../CiWorkflow.ts';
-import { apiClient, type DataMode } from '../../shared/api-client.ts';
+import { apiClient, type DataMode } from '../../shared/api-client.tsx';
 
 export async function fetchProducts(mode: DataMode): Promise<CiProduct[]> {
   if (mode === 'mock') {

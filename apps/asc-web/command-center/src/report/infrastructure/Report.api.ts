@@ -1,5 +1,5 @@
 import { Report } from '../Report.ts';
-import { type DataMode } from '../../shared/api-client.ts';
+import { type DataMode } from '../../shared/api-client.tsx';
 
 export async function fetchReports(mode: DataMode): Promise<Report[]> {
   if (mode === 'mock') {

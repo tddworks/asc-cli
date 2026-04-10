@@ -5,7 +5,7 @@ import { Version } from '../version/Version.ts';
 import { fetchApps } from '../app/infrastructure/App.api.ts';
 import { fetchBuilds } from '../build/infrastructure/Build.api.ts';
 import { fetchVersions } from '../version/infrastructure/Version.api.ts';
-import { useDataMode } from '../shared/api-client.ts';
+import { useDataMode } from '../shared/api-client.tsx';
 
 interface DashboardData {
   apps: App[];
