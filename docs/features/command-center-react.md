@@ -101,176 +101,191 @@ apps/asc-web/command-center/
 ├── tsconfig.json
 ├── index.html                              # Vite entry HTML (minimal)
 │
-└── src/
-    ├── main.tsx                            # ReactDOM.createRoot + App
-    ├── App.tsx                             # Router + PluginContext + ThemeProvider
-    │
-    │── ── ── ── Domain Slices ── ── ── ──
-    │
-    ├── app/                                # 🍰 App
-    │   ├── App.ts                          # class App — rich domain model
+├── src/                                    # Production code
+│   ├── main.tsx                            # ReactDOM.createRoot + App
+│   ├── App.tsx                             # Router + PluginContext + ThemeProvider
+│   │
+│   │── ── ── ── Domain Slices ── ── ── ──
+│   │
+│   ├── app/                                # 🍰 App
+│   │   ├── App.ts                          # class App — rich domain model
+│   │   ├── App.hooks.ts                    # useApps(), useApp(id) — thin lifecycle
+│   │   ├── infrastructure/
+│   │   │   ├── App.api.ts                  # GET /api/v1/apps — hydrates App class
+│   │   │   └── App.mock.ts                 # Static mock data
+│   │   ├── components/
+│   │   │   └── AppCard.tsx                 # Reusable card (used by dashboard)
+│   │   └── pages/
+│   │       ├── AppList.tsx                 # Route: /apps
+│   │       └── AppDetail.tsx              # Route: /apps/:id
+│   │
+│   ├── version/                            # 🍰 Version
+│   │   ├── Version.ts                      # class Version — state machine, semantic booleans
+│   │   ├── Version.hooks.ts
+│   │   ├── infrastructure/
+│   │   │   ├── Version.api.ts
+│   │   │   └── Version.mock.ts
+│   │   ├── components/
+│   │   │   ├── VersionBadge.tsx
+│   │   │   └── VersionRow.tsx
+│   │   └── pages/
+│   │       ├── VersionList.tsx
+│   │       └── VersionDetail.tsx
+│   │
+│   ├── build/                              # 🍰 Build
+│   │   ├── Build.ts
+│   │   ├── Build.hooks.ts
+│   │   ├── infrastructure/
+│   │   │   ├── Build.api.ts
+│   │   │   └── Build.mock.ts
+│   │   ├── components/
+│   │   │   └── BuildRow.tsx
+│   │   └── pages/
+│   │       └── BuildList.tsx
+│   │
+│   ├── screenshot/                         # 🍰 Screenshot
+│   │   ├── Screenshot.ts
+│   │   ├── Screenshot.hooks.ts
+│   │   ├── infrastructure/
+│   │   │   ├── Screenshot.api.ts
+│   │   │   └── Screenshot.mock.ts
+│   │   ├── components/
+│   │   │   └── ScreenshotGrid.tsx
+│   │   └── pages/
+│   │       └── ScreenshotManager.tsx
+│   │
+│   ├── review/                             # 🍰 Review
+│   │   ├── Review.ts
+│   │   ├── Review.hooks.ts
+│   │   ├── infrastructure/
+│   │   │   ├── Review.api.ts
+│   │   │   └── Review.mock.ts
+│   │   ├── components/
+│   │   │   └── ReviewCard.tsx
+│   │   └── pages/
+│   │       └── ReviewList.tsx
+│   │
+│   ├── testflight/                         # 🍰 TestFlight
+│   │   ├── BetaGroup.ts
+│   │   ├── BetaTester.ts
+│   │   ├── TestFlight.hooks.ts
+│   │   ├── infrastructure/
+│   │   │   ├── TestFlight.api.ts
+│   │   │   └── TestFlight.mock.ts
+│   │   ├── components/
+│   │   │   ├── BetaGroupCard.tsx
+│   │   │   └── TesterRow.tsx
+│   │   └── pages/
+│   │       └── TestFlightPage.tsx
+│   │
+│   ├── code-signing/                       # 🍰 Code Signing
+│   │   ├── Certificate.ts
+│   │   ├── Profile.ts
+│   │   ├── BundleID.ts
+│   │   ├── Device.ts
+│   │   ├── CodeSigning.hooks.ts
+│   │   ├── infrastructure/
+│   │   │   ├── CodeSigning.api.ts
+│   │   │   └── CodeSigning.mock.ts
+│   │   ├── components/
+│   │   │   └── CertificateRow.tsx
+│   │   └── pages/
+│   │       └── CodeSigningPage.tsx
+│   │
+│   ├── submission/                         # 🍰 Submission
+│   │   ├── Submission.ts
+│   │   ├── Submission.hooks.ts
+│   │   ├── infrastructure/
+│   │   │   ├── Submission.api.ts
+│   │   │   └── Submission.mock.ts
+│   │   └── pages/
+│   │       └── SubmissionPage.tsx
+│   │
+│   ├── xcode-cloud/                        # 🍰 Xcode Cloud
+│   │   ├── CiWorkflow.ts
+│   │   ├── CiBuildRun.ts
+│   │   ├── XcodeCloud.hooks.ts
+│   │   ├── infrastructure/
+│   │   │   ├── XcodeCloud.api.ts
+│   │   │   └── XcodeCloud.mock.ts
+│   │   ├── components/
+│   │   │   └── WorkflowCard.tsx
+│   │   └── pages/
+│   │       └── XcodeCloudPage.tsx
+│   │
+│   ├── report/                             # 🍰 Reports
+│   │   ├── Report.ts
+│   │   ├── Report.hooks.ts
+│   │   ├── infrastructure/
+│   │   │   ├── Report.api.ts
+│   │   │   └── Report.mock.ts
+│   │   └── pages/
+│   │       └── ReportsPage.tsx
+│   │
+│   ├── dashboard/                          # 🍰 Dashboard (cross-cutting)
+│   │   ├── Dashboard.hooks.ts              # Aggregates from app/, build/, review/
+│   │   └── pages/
+│   │       └── DashboardPage.tsx           # Imports AppCard, BuildRow from siblings
+│   │
+│   │── ── ── ── Plugin System ── ── ── ──
+│   │
+│   ├── plugin/                             # 🍰 Plugin System
+│   │   ├── Plugin.ts                       # PluginRegistration, PluginPage, PluginWidget
+│   │   ├── PluginRegistry.ts               # Singleton: register/query extensions
+│   │   ├── PluginLoader.ts                 # Discover from /api/plugins, dynamic import
+│   │   ├── PluginContext.tsx                # React context providing registry
+│   │   ├── infrastructure/
+│   │   │   └── Plugin.api.ts               # GET /api/plugins
+│   │   ├── components/
+│   │   │   └── PluginSlot.tsx              # <PluginSlot name="dashboard.top" />
+│   │   └── pages/
+│   │       └── PluginsPage.tsx             # Install/uninstall/marketplace
+│   │
+│   │── ── ── ── Shared Kernel ── ── ── ──
+│   │
+│   └── shared/                             # Cross-cutting (used by every slice)
+│       ├── api-client.ts                   # fetch wrapper, base URL, error handling
+│       ├── affordances.ts                  # AffordanceProviding type
+│       ├── types.ts                        # PaginatedResponse, OutputFormat
+│       ├── components/
+│       │   ├── AffordanceBar.tsx            # Renders affordances as action buttons
+│       │   ├── DataTable.tsx                # Generic sortable table
+│       │   ├── Toast.tsx
+│       │   ├── Modal.tsx
+│       │   ├── ThemeToggle.tsx
+│       │   └── ModeIndicator.tsx
+│       └── layout/
+│           ├── Sidebar.tsx                 # Core items + dynamic plugin items
+│           ├── PageLayout.tsx
+│           └── Header.tsx
+│
+└── tests/                                  # Tests — mirrors src/ structure
+    ├── app/
     │   ├── App.test.ts                     # Domain tests (pure, no React)
-    │   ├── App.hooks.ts                    # useApps(), useApp(id) — thin lifecycle
-    │   ├── infrastructure/
-    │   │   ├── App.api.ts                  # GET /api/v1/apps — hydrates App class
-    │   │   └── App.mock.ts                 # Static mock data
-    │   ├── components/
-    │   │   ├── AppCard.tsx                  # Reusable card (used by dashboard)
-    │   │   └── AppCard.test.tsx             # Component test
-    │   └── pages/
-    │       ├── AppList.tsx                  # Route: /apps
-    │       └── AppDetail.tsx               # Route: /apps/:id
-    │
-    ├── version/                            # 🍰 Version
-    │   ├── Version.ts                      # class Version — state machine, semantic booleans
-    │   ├── Version.test.ts                 # Domain tests
-    │   ├── Version.hooks.ts
-    │   ├── infrastructure/
-    │   │   ├── Version.api.ts
-    │   │   └── Version.mock.ts
-    │   ├── components/
-    │   │   ├── VersionBadge.tsx
-    │   │   └── VersionRow.tsx
-    │   └── pages/
-    │       ├── VersionList.tsx
-    │       └── VersionDetail.tsx
-    │
-    ├── build/                              # 🍰 Build
-    │   ├── Build.ts
-    │   ├── Build.test.ts
-    │   ├── Build.hooks.ts
-    │   ├── infrastructure/
-    │   │   ├── Build.api.ts
-    │   │   └── Build.mock.ts
-    │   ├── components/
-    │   │   └── BuildRow.tsx
-    │   └── pages/
-    │       └── BuildList.tsx
-    │
-    ├── screenshot/                         # 🍰 Screenshot
-    │   ├── Screenshot.ts
-    │   ├── Screenshot.test.ts
-    │   ├── Screenshot.hooks.ts
-    │   ├── infrastructure/
-    │   │   ├── Screenshot.api.ts
-    │   │   └── Screenshot.mock.ts
-    │   ├── components/
-    │   │   └── ScreenshotGrid.tsx
-    │   └── pages/
-    │       └── ScreenshotManager.tsx
-    │
-    ├── review/                             # 🍰 Review
-    │   ├── Review.ts
-    │   ├── Review.test.ts
-    │   ├── Review.hooks.ts
-    │   ├── infrastructure/
-    │   │   ├── Review.api.ts
-    │   │   └── Review.mock.ts
-    │   ├── components/
-    │   │   └── ReviewCard.tsx
-    │   └── pages/
-    │       └── ReviewList.tsx
-    │
-    ├── testflight/                         # 🍰 TestFlight
-    │   ├── BetaGroup.ts
-    │   ├── BetaTester.ts
-    │   ├── TestFlight.test.ts
-    │   ├── TestFlight.hooks.ts
-    │   ├── infrastructure/
-    │   │   ├── TestFlight.api.ts
-    │   │   └── TestFlight.mock.ts
-    │   ├── components/
-    │   │   ├── BetaGroupCard.tsx
-    │   │   └── TesterRow.tsx
-    │   └── pages/
-    │       └── TestFlightPage.tsx
-    │
-    ├── code-signing/                       # 🍰 Code Signing
-    │   ├── Certificate.ts
-    │   ├── Profile.ts
-    │   ├── BundleID.ts
-    │   ├── Device.ts
-    │   ├── CodeSigning.test.ts
-    │   ├── CodeSigning.hooks.ts
-    │   ├── infrastructure/
-    │   │   ├── CodeSigning.api.ts
-    │   │   └── CodeSigning.mock.ts
-    │   ├── components/
-    │   │   └── CertificateRow.tsx
-    │   └── pages/
-    │       └── CodeSigningPage.tsx
-    │
-    ├── submission/                         # 🍰 Submission
-    │   ├── Submission.ts
-    │   ├── Submission.test.ts
-    │   ├── Submission.hooks.ts
-    │   ├── infrastructure/
-    │   │   ├── Submission.api.ts
-    │   │   └── Submission.mock.ts
-    │   └── pages/
-    │       └── SubmissionPage.tsx
-    │
-    ├── xcode-cloud/                        # 🍰 Xcode Cloud
-    │   ├── CiWorkflow.ts
-    │   ├── CiBuildRun.ts
-    │   ├── XcodeCloud.test.ts
-    │   ├── XcodeCloud.hooks.ts
-    │   ├── infrastructure/
-    │   │   ├── XcodeCloud.api.ts
-    │   │   └── XcodeCloud.mock.ts
-    │   ├── components/
-    │   │   └── WorkflowCard.tsx
-    │   └── pages/
-    │       └── XcodeCloudPage.tsx
-    │
-    ├── report/                             # 🍰 Reports
-    │   ├── Report.ts
-    │   ├── Report.test.ts
-    │   ├── Report.hooks.ts
-    │   ├── infrastructure/
-    │   │   ├── Report.api.ts
-    │   │   └── Report.mock.ts
-    │   └── pages/
-    │       └── ReportsPage.tsx
-    │
-    ├── dashboard/                          # 🍰 Dashboard (cross-cutting)
-    │   ├── Dashboard.hooks.ts              # Aggregates from app/, build/, review/
-    │   └── pages/
-    │       └── DashboardPage.tsx           # Imports AppCard, BuildRow from siblings
-    │
-    │── ── ── ── Plugin System ── ── ── ──
-    │
-    ├── plugin/                             # 🍰 Plugin System
-    │   ├── Plugin.ts                       # PluginRegistration, PluginPage, PluginWidget
-    │   ├── PluginRegistry.ts               # Singleton: register/query extensions
-    │   ├── PluginRegistry.test.ts          # Registry tests
-    │   ├── PluginLoader.ts                 # Discover from /api/plugins, dynamic import
-    │   ├── PluginContext.tsx                # React context providing registry
-    │   ├── infrastructure/
-    │   │   └── Plugin.api.ts               # GET /api/plugins
-    │   ├── components/
-    │   │   └── PluginSlot.tsx              # <PluginSlot name="dashboard.top" />
-    │   └── pages/
-    │       └── PluginsPage.tsx             # Install/uninstall/marketplace
-    │
-    │── ── ── ── Shared Kernel ── ── ── ──
-    │
-    └── shared/                             # Cross-cutting (used by every slice)
-        ├── api-client.ts                   # fetch wrapper, base URL, error handling
-        ├── affordances.ts                  # AffordanceProviding type
-        ├── types.ts                        # PaginatedResponse, OutputFormat
-        ├── components/
-        │   ├── AffordanceBar.tsx            # Renders affordances as action buttons
-        │   ├── AffordanceBar.test.tsx        # Component test
-        │   ├── DataTable.tsx                # Generic sortable table
-        │   ├── Toast.tsx
-        │   ├── Modal.tsx
-        │   ├── ThemeToggle.tsx
-        │   └── ModeIndicator.tsx
-        └── layout/
-            ├── Sidebar.tsx                 # Core items + dynamic plugin items
-            ├── PageLayout.tsx
-            └── Header.tsx
+    │   └── AppCard.test.tsx                # Component test
+    ├── version/
+    │   ├── Version.test.ts                 # Semantic booleans, capability checks
+    │   └── VersionBadge.test.tsx           # Component rendering
+    ├── build/
+    │   └── Build.test.ts
+    ├── screenshot/
+    │   └── Screenshot.test.ts
+    ├── review/
+    │   └── Review.test.ts
+    ├── testflight/
+    │   └── TestFlight.test.ts
+    ├── code-signing/
+    │   └── CodeSigning.test.ts
+    ├── submission/
+    │   └── Submission.test.ts
+    ├── xcode-cloud/
+    │   └── XcodeCloud.test.ts
+    ├── report/
+    │   └── Report.test.ts
+    ├── plugin/
+    │   └── PluginRegistry.test.ts          # Registry logic tests
+    └── shared/
+        └── AffordanceBar.test.tsx          # Shared component tests
 ```
 
 ### The Cake Pattern
@@ -278,34 +293,31 @@ apps/asc-web/command-center/
 Every domain slice follows the same internal structure:
 
 ```
-feature/
-├── Feature.ts                 # Domain — WHAT it is (rich model class)
-│                              #   Class with semantic booleans
-│                              #   Capability checks derived from affordances
-│                              #   State enum
-│                              #   static fromJSON() factory
+src/feature/                       # Production code
+├── Feature.ts                     #   Domain — WHAT it is (rich model class)
+│                                  #   Class with semantic booleans
+│                                  #   Capability checks derived from affordances
+│                                  #   State enum + static fromJSON() factory
 │
-├── Feature.test.ts            # Domain tests — pure, no React, no HTTP
-│                              #   Test semantic booleans
-│                              #   Test capability checks
-│                              #   Test fromJSON hydration
+├── Feature.hooks.ts               #   React lifecycle — THIN wrapper
+│                                  #   useFeatures(), useFeature(id)
+│                                  #   Only manages loading/error/data state
+│                                  #   No domain logic — the model owns that
 │
-├── Feature.hooks.ts           # React lifecycle — THIN wrapper
-│                              #   useFeatures(), useFeature(id)
-│                              #   Only manages loading/error/data state
-│                              #   No domain logic — the model owns that
+├── infrastructure/
+│   ├── Feature.api.ts             #   REST calls → hydrates into rich model class
+│   └── Feature.mock.ts            #   Static data for offline/demo mode
 │
-├── infrastructure/            # HOW to get/send data
-│   ├── Feature.api.ts         #   REST calls → hydrates into rich model class
-│   └── Feature.mock.ts        #   Static data for offline/demo mode
+├── components/
+│   └── FeatureCard.tsx            #   Components ASK the model, never decide
 │
-├── components/                # Reusable pieces (importable by other slices)
-│   ├── FeatureCard.tsx        #   Components ASK the model, never decide
-│   └── FeatureCard.test.tsx   #   Component rendering tests
-│
-└── pages/                     # Route-level (only referenced by router)
+└── pages/
     ├── FeatureList.tsx
     └── FeatureDetail.tsx
+
+tests/feature/                     # Tests — mirrors src/, same slice name
+├── Feature.test.ts                #   Domain: semantic booleans, capabilities, fromJSON
+└── FeatureCard.test.tsx           #   Component: renders based on model state
 ```
 
 **Rule:** `components/` are public exports. `pages/` are private to the slice.
@@ -997,9 +1009,9 @@ Each slice has up to 3 test layers, written in this order:
 Test the rich model class in isolation. No HTTP, no React, no DOM.
 
 ```typescript
-// version/Version.test.ts
+// version/__tests__/Version.test.ts
 import { describe, it, expect } from 'vitest';
-import { Version, VersionState } from './Version';
+import { Version, VersionState } from '../Version';
 
 describe('Version', () => {
 
@@ -1107,9 +1119,9 @@ describe('Version', () => {
 ### Layer 2: Plugin Registry Tests (Pure — No React)
 
 ```typescript
-// plugin/PluginRegistry.test.ts
+// plugin/__tests__/PluginRegistry.test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
-import { PluginRegistry } from './PluginRegistry';
+import { PluginRegistry } from '../PluginRegistry';
 
 describe('PluginRegistry', () => {
   let registry: PluginRegistry;
@@ -1174,10 +1186,10 @@ describe('PluginRegistry', () => {
 ### Layer 3: Component Tests (React + DOM)
 
 ```tsx
-// version/components/VersionBadge.test.tsx
+// version/__tests__/VersionBadge.test.tsx
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { VersionBadge } from './VersionBadge';
+import { VersionBadge } from '../components/VersionBadge';
 import { Version, VersionState } from '../Version';
 
 describe('VersionBadge', () => {
@@ -1213,10 +1225,10 @@ describe('VersionBadge', () => {
 ### Layer 4: AffordanceBar Tests
 
 ```tsx
-// shared/components/AffordanceBar.test.tsx
+// shared/__tests__/AffordanceBar.test.tsx
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { AffordanceBar } from './AffordanceBar';
+import { AffordanceBar } from '../components/AffordanceBar';
 
 describe('AffordanceBar', () => {
 
@@ -1248,26 +1260,26 @@ describe('AffordanceBar', () => {
 ### TDD Cycle Per Slice
 
 ```
-1. Write Version.test.ts          → RED   (class doesn't exist)
-2. Write Version.ts               → GREEN (semantic booleans + capability checks pass)
-3. Write VersionBadge.test.tsx     → RED   (component doesn't exist)
-4. Write VersionBadge.tsx          → GREEN (renders based on model)
-5. Wire Version.hooks.ts           → connects model to React lifecycle
-6. Wire VersionList.tsx            → page uses hook + components
-7. npx vitest                      → ALL GREEN
+1. Write __tests__/Version.test.ts       → RED   (class doesn't exist)
+2. Write Version.ts                      → GREEN (semantic booleans + capability checks pass)
+3. Write __tests__/VersionBadge.test.tsx  → RED   (component doesn't exist)
+4. Write components/VersionBadge.tsx      → GREEN (renders based on model)
+5. Wire Version.hooks.ts                  → connects model to React lifecycle
+6. Wire pages/VersionList.tsx             → page uses hook + components
+7. npx vitest                             → ALL GREEN
 ```
 
 ### What Gets Tested Where
 
 | What | Test file | React needed? |
 |------|-----------|---------------|
-| `isLive`, `isEditable`, `isPending` | `Version.test.ts` | No |
-| `canSubmit`, `canRelease` (from affordances) | `Version.test.ts` | No |
-| `canTransitionTo()` | `Version.test.ts` | No |
-| `fromJSON()` hydration | `Version.test.ts` | No |
-| Plugin registration, slot resolution | `PluginRegistry.test.ts` | No |
-| Badge renders correctly per state | `VersionBadge.test.tsx` | Yes |
-| Affordance buttons appear/disappear | `AffordanceBar.test.tsx` | Yes |
+| `isLive`, `isEditable`, `isPending` | `version/__tests__/Version.test.ts` | No |
+| `canSubmit`, `canRelease` (from affordances) | `version/__tests__/Version.test.ts` | No |
+| `canTransitionTo()` | `version/__tests__/Version.test.ts` | No |
+| `fromJSON()` hydration | `version/__tests__/Version.test.ts` | No |
+| Plugin registration, slot resolution | `plugin/__tests__/PluginRegistry.test.ts` | No |
+| Badge renders correctly per state | `version/__tests__/VersionBadge.test.tsx` | Yes |
+| Affordance buttons appear/disappear | `shared/__tests__/AffordanceBar.test.tsx` | Yes |
 | Data fetching lifecycle | `Version.hooks.ts` | Tested via page integration |
 
 **Most tests are pure TypeScript.** The rich domain model concentrates logic where it can be tested without React, DOM, or mocking. Component tests are thin — they just verify the component asks the model correctly.
