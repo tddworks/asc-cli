@@ -5,36 +5,46 @@ import { App } from '../../src/app/App.ts';
 
 describe('AppCard', () => {
 
-  it('renders app display name', () => {
+  it('renders app name', () => {
     const app = new App('a-1', 'WeatherApp', 'com.example.weather', 'SKU001', 'en-US', true, {});
 
     render(<AppCard app={app} />);
 
-    expect(screen.getByText('WeatherApp (com.example.weather)')).toBeInTheDocument();
+    expect(screen.getByText('WeatherApp')).toBeInTheDocument();
   });
 
-  it('renders SKU', () => {
+  it('renders bundle id', () => {
     const app = new App('a-1', 'WeatherApp', 'com.example.weather', 'SKU001', 'en-US', true, {});
 
     render(<AppCard app={app} />);
 
-    expect(screen.getByText('SKU001')).toBeInTheDocument();
+    expect(screen.getByText('com.example.weather')).toBeInTheDocument();
   });
 
-  it('shows content rights badge when app has content rights', () => {
-    const app = new App('a-1', 'App', 'com.x', 'SKU', 'en-US', true, {}, 'USES_THIRD_PARTY_CONTENT');
+  it('renders primary locale as meta item', () => {
+    const app = new App('a-1', 'WeatherApp', 'com.example.weather', 'SKU001', 'en-US', true, {});
 
     render(<AppCard app={app} />);
 
-    expect(screen.getByText('Content Rights')).toBeInTheDocument();
+    expect(screen.getByText('en-US')).toBeInTheDocument();
   });
 
-  it('does not show content rights badge when absent', () => {
-    const app = new App('a-1', 'App', 'com.x', 'SKU', 'en-US', true, {});
+  it('renders app id as meta item', () => {
+    const app = new App('a-1', 'WeatherApp', 'com.example.weather', 'SKU001', 'en-US', true, {});
 
     render(<AppCard app={app} />);
 
-    expect(screen.queryByText('Content Rights')).not.toBeInTheDocument();
+    expect(screen.getByText('a-1')).toBeInTheDocument();
+  });
+
+  it('renders app icon with first letter', () => {
+    const app = new App('a-1', 'WeatherApp', 'com.example.weather', 'SKU001', 'en-US', true, {});
+
+    const { container } = render(<AppCard app={app} />);
+
+    const icon = container.querySelector('.app-icon');
+    expect(icon).not.toBeNull();
+    expect(icon!.textContent).toBe('W');
   });
 
   it('renders affordance buttons', () => {

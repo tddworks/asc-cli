@@ -1,11 +1,20 @@
 import { useReports } from '../Report.hooks.ts';
 
-const categoryColors: Record<string, string> = {
-  sales: '#22c55e',
-  finance: '#3b82f6',
-  analytics: '#a855f7',
-  performance: '#f59e0b',
+const categoryIcons: Record<string, string> = {
+  sales: '📊',
+  finance: '💰',
+  analytics: '📈',
+  performance: '⚡',
 };
+
+const perfMetrics = [
+  { label: 'App Hang Rate', key: 'hang' },
+  { label: 'Launch Time', key: 'launch' },
+  { label: 'Memory Usage', key: 'memory' },
+  { label: 'Disk Writes', key: 'disk' },
+  { label: 'Battery Usage', key: 'battery' },
+  { label: 'Scrolling', key: 'scroll' },
+];
 
 export default function ReportsPage() {
   const { reports, loading, error } = useReports();
@@ -16,54 +25,28 @@ export default function ReportsPage() {
   return (
     <div>
       <h2>Reports</h2>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: 16,
-        }}
-      >
+      <div className="grid-3">
         {reports.map((r) => (
-          <div
-            key={r.id}
-            style={{
-              border: '1px solid var(--border)',
-              borderRadius: 8,
-              padding: 20,
-              background: 'var(--surface)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 12,
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontWeight: 600 }}>{r.name}</span>
-              <span
-                style={{
-                  padding: '2px 10px',
-                  borderRadius: 12,
-                  fontSize: 11,
-                  fontWeight: 600,
-                  background: categoryColors[r.category] ?? 'var(--border)',
-                  color: 'white',
-                  textTransform: 'uppercase',
-                }}
-              >
-                {r.category}
-              </span>
+          <div key={r.id} className="card">
+            <div className="card-body" style={{ textAlign: 'center', padding: 24 }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>{categoryIcons[r.category] ?? '📄'}</div>
+              <h3>{r.name}</h3>
+              <p style={{ color: 'var(--text-muted)', marginBottom: 16 }}>{r.description}</p>
+              <button className="btn btn-primary btn-sm" title={r.command}>Download</button>
             </div>
-            <div style={{ fontSize: 14, color: 'var(--text-secondary)', flex: 1 }}>
-              {r.description}
-            </div>
-            <button
-              className="affordance-btn"
-              title={r.command}
-              style={{ alignSelf: 'flex-start' }}
-            >
-              Run
-            </button>
           </div>
         ))}
+      </div>
+
+      <div className="card" style={{ marginTop: 24 }}>
+        <div className="card-header">
+          <h3>Performance Metrics</h3>
+        </div>
+        <div className="card-body" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {perfMetrics.map((m) => (
+            <button key={m.key} className="btn btn-sm">{m.label}</button>
+          ))}
+        </div>
       </div>
     </div>
   );

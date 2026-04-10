@@ -5,36 +5,52 @@ import { Version, VersionState } from '../../src/version/Version.ts';
 
 describe('VersionBadge', () => {
 
-  it('shows green Live badge for ready for sale version', () => {
+  it('shows Ready for Sale status for live version', () => {
     const v = new Version('v-1', 'app-1', '2.0', VersionState.ReadyForSale, 'IOS', {});
 
     render(<VersionBadge version={v} />);
 
-    expect(screen.getByText('Live')).toBeInTheDocument();
+    expect(screen.getByText('Ready for Sale')).toBeInTheDocument();
   });
 
-  it('shows Editable badge for prepare for submission', () => {
+  it('shows Prepare for Submission status for editable version', () => {
     const v = new Version('v-1', 'app-1', '2.0', VersionState.PrepareForSubmission, 'IOS', {});
 
     render(<VersionBadge version={v} />);
 
-    expect(screen.getByText('Editable')).toBeInTheDocument();
+    expect(screen.getByText('Prepare for Submission')).toBeInTheDocument();
   });
 
-  it('shows Pending badge when waiting for review', () => {
+  it('shows Waiting for Review status', () => {
     const v = new Version('v-1', 'app-1', '2.0', VersionState.WaitingForReview, 'IOS', {});
 
     render(<VersionBadge version={v} />);
 
-    expect(screen.getByText('Pending')).toBeInTheDocument();
+    expect(screen.getByText('Waiting for Review')).toBeInTheDocument();
   });
 
-  it('shows Rejected badge for rejected version', () => {
+  it('shows Rejected status for rejected version', () => {
     const v = new Version('v-1', 'app-1', '2.0', VersionState.Rejected, 'IOS', {});
 
     render(<VersionBadge version={v} />);
 
     expect(screen.getByText('Rejected')).toBeInTheDocument();
+  });
+
+  it('applies live css class for ready for sale', () => {
+    const v = new Version('v-1', 'app-1', '2.0', VersionState.ReadyForSale, 'IOS', {});
+
+    const { container } = render(<VersionBadge version={v} />);
+
+    expect(container.querySelector('.status.live')).not.toBeNull();
+  });
+
+  it('applies rejected css class for rejected', () => {
+    const v = new Version('v-1', 'app-1', '2.0', VersionState.Rejected, 'IOS', {});
+
+    const { container } = render(<VersionBadge version={v} />);
+
+    expect(container.querySelector('.status.rejected')).not.toBeNull();
   });
 
   it('shows Submit button when version can submit', () => {

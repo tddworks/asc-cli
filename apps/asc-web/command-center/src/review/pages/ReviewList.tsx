@@ -23,21 +23,24 @@ export default function ReviewList({ appId = 'app-1' }: { appId?: string }) {
   const filtered = applyFilter(reviews, filter);
 
   return (
-    <div>
-      <h2>Customer Reviews</h2>
-      <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
-        {([['all', 'All'], ['5star', '5 Stars'], ['needsReply', 'Needs Reply']] as [Filter, string][]).map(([f, label]) => (
-          <button
-            key={f}
-            className="affordance-btn"
-            onClick={() => setFilter(f)}
-            style={filter === f ? { background: 'var(--accent)', color: 'white', borderColor: 'var(--accent)' } : {}}
-          >
-            {label}
-          </button>
-        ))}
+    <div className="card">
+      <div className="toolbar">
+        <div className="toolbar-left">
+          <h3>Customer Reviews</h3>
+          <div className="filter-group">
+            {([['all', 'All'], ['5star', '5 Stars'], ['needsReply', 'Needs Reply']] as [Filter, string][]).map(([f, label]) => (
+              <button
+                key={f}
+                className={`filter-btn ${f === filter ? 'active' : ''}`}
+                onClick={() => setFilter(f)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="card-body" style={{ padding: 0 }}>
         {filtered.map((r) => <ReviewCard key={r.id} review={r} />)}
       </div>
     </div>

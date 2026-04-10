@@ -7,22 +7,15 @@ interface Props {
 
 export function BetaGroupCard({ group }: Props) {
   return (
-    <div className="card">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-        <h3 style={{ margin: 0 }}>{group.name}</h3>
-        <span className={`badge ${group.isInternal ? 'badge-blue' : 'badge-green'}`}>
-          {group.typeBadge}
+    <tr>
+      <td>{group.name}</td>
+      <td>
+        <span className={`status ${group.isInternal ? 'review' : 'live'}`}>
+          {group.isInternal ? 'Internal' : 'External'}
         </span>
-        {group.hasPublicLink && (
-          <span className="badge badge-yellow">Public Link</span>
-        )}
-      </div>
-      {group.hasPublicLink && (
-        <p style={{ fontSize: '0.85em', color: 'var(--text-muted)', margin: '4px 0' }}>
-          {group.publicLink}
-        </p>
-      )}
-      <AffordanceBar affordances={group.affordances} />
-    </div>
+      </td>
+      <td>{group.hasPublicLink ? 'Enabled' : 'Disabled'}</td>
+      <td><AffordanceBar affordances={group.affordances} /></td>
+    </tr>
   );
 }

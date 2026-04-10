@@ -5,9 +5,5 @@ interface Props {
 }
 
 export function PageLayout({ children }: Props) {
-  return (
-    <main className="page-content">
-      {children}
-    </main>
-  );
+  return <>{children}</>;
 }

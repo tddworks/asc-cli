@@ -9,11 +9,11 @@ export function AffordanceBar({ affordances }: Props) {
   if (entries.length === 0) return null;
 
   return (
-    <div className="affordance-bar">
+    <div>
       {entries.map(([label, command]) => (
         <button
           key={label}
-          className="affordance-btn"
+          className="btn btn-secondary btn-sm"
           title={command}
         >
           {formatLabel(label)}

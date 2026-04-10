@@ -9,11 +9,17 @@ export default function AppList() {
 
   return (
     <div>
-      <h2>Apps</h2>
-      <div className="grid-3">
-        {apps.map((app) => (
-          <AppCard key={app.id} app={app} />
-        ))}
+      <div className="card">
+        <div className="toolbar">
+          <div className="toolbar-left"><h3>Apps</h3></div>
+        </div>
+        <div className="card-body" style={{ padding: 0 }}>
+          <div className="grid-3" style={{ padding: 16 }}>
+            {apps.map((app) => (
+              <AppCard key={app.id} app={app} />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

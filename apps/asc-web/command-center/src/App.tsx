@@ -4,7 +4,6 @@ import { PluginProvider } from './plugin/PluginContext.tsx';
 import { pluginRegistry } from './plugin/PluginRegistry.ts';
 import { DataModeProvider } from './shared/api-client.ts';
 import { Sidebar } from './shared/layout/Sidebar.tsx';
-import { PageLayout } from './shared/layout/PageLayout.tsx';
 import { Header } from './shared/layout/Header.tsx';
 
 const DashboardPage = lazy(() => import('./dashboard/pages/DashboardPage.tsx'));
@@ -30,11 +29,11 @@ export function App() {
     <DataModeProvider value="mock">
       <BrowserRouter>
         <PluginProvider>
-          <div className="app-layout">
+          <div className="app">
             <Sidebar />
-            <div className="app-main">
+            <div className="main">
               <Header />
-              <PageLayout>
+              <div className="content">
                 <Suspense fallback={<LoadingSpinner />}>
                   <Routes>
                     <Route path="/" element={<DashboardPage />} />
@@ -65,7 +64,7 @@ export function App() {
                     })}
                   </Routes>
                 </Suspense>
-              </PageLayout>
+              </div>
             </div>
           </div>
         </PluginProvider>

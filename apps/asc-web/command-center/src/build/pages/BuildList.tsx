@@ -24,35 +24,44 @@ export default function BuildList({ appId = 'app-1' }: { appId?: string }) {
   const filtered = applyFilter(builds, filter);
 
   return (
-    <div>
-      <h2>Builds</h2>
-      <div className="filter-bar" style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
-        {(['all', 'valid', 'processing', 'invalid'] as Filter[]).map((f) => (
-          <button
-            key={f}
-            className={`affordance-btn ${filter === f ? 'active' : ''}`}
-            onClick={() => setFilter(f)}
-            style={filter === f ? { background: 'var(--accent)', color: 'white', borderColor: 'var(--accent)' } : {}}
-          >
-            {f.charAt(0).toUpperCase() + f.slice(1)}
-          </button>
-        ))}
+    <div className="card">
+      <div className="toolbar">
+        <div className="toolbar-left">
+          <h3>Builds</h3>
+          <div className="filter-group">
+            {(['all', 'valid', 'processing', 'invalid'] as Filter[]).map((f) => (
+              <button
+                key={f}
+                className={`filter-btn ${filter === f ? 'active' : ''}`}
+                onClick={() => setFilter(f)}
+              >
+                {f.charAt(0).toUpperCase() + f.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="toolbar-right">
+          <button className="btn btn-primary">Upload Build</button>
+        </div>
       </div>
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th>Build</th>
-            <th>Usable</th>
-            <th>Status</th>
-            <th>Expired</th>
-            <th>Uploaded</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map((b) => <BuildRow key={b.id} build={b} />)}
-        </tbody>
-      </table>
+      <div className="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Build</th>
+              <th>Version</th>
+              <th>Usable</th>
+              <th>Status</th>
+              <th>Expired</th>
+              <th>Uploaded</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((b) => <BuildRow key={b.id} build={b} />)}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

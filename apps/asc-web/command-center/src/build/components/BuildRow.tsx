@@ -5,18 +5,26 @@ interface Props {
   build: Build;
 }
 
+function statusBadge(build: Build): [string, string] {
+  switch (build.processingState) {
+    case 'VALID': return ['live', 'Valid'];
+    case 'PROCESSING': return ['processing', 'Processing'];
+    case 'INVALID': return ['rejected', 'Invalid'];
+    case 'FAILED': return ['rejected', 'Failed'];
+    default: return ['draft', build.processingState];
+  }
+}
+
 export function BuildRow({ build }: Props) {
+  const [cls, label] = statusBadge(build);
+
   return (
     <tr>
-      <td className="cell-mono">{build.displayName}</td>
-      <td>{build.isUsable ? 'Yes' : 'No'}</td>
-      <td>
-        {build.isValid && <span className="badge badge-green">Valid</span>}
-        {build.isProcessing && <span className="badge badge-yellow">Processing</span>}
-        {build.processingState === 'INVALID' && <span className="badge badge-red">Invalid</span>}
-        {build.processingState === 'FAILED' && <span className="badge badge-red">Failed</span>}
-      </td>
-      <td>{build.isExpired ? <span className="badge badge-red">Expired</span> : 'No'}</td>
+      <td className="cell-primary">{build.version}</td>
+      <td>{build.preReleaseVersion}</td>
+      <td><span className={`status ${build.isUsable ? 'live' : 'draft'}`}>{build.isUsable ? 'Yes' : 'No'}</span></td>
+      <td><span className={`status ${cls}`}>{label}</span></td>
+      <td><span className={`status ${build.isExpired ? 'rejected' : 'live'}`}>{build.isExpired ? 'Expired' : 'Active'}</span></td>
       <td>{build.uploadedDate}</td>
       <td><AffordanceBar affordances={build.affordances} /></td>
     </tr>

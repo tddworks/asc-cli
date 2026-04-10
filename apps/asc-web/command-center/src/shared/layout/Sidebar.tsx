@@ -17,28 +17,31 @@ const coreItems: { section: string; items: NavItem[] }[] = [
   {
     section: 'Release',
     items: [
+      { path: '/apps/app-1/versions', label: 'Versions' },
       { path: '/builds', label: 'Builds' },
+      { path: '/testflight', label: 'TestFlight' },
       { path: '/submissions', label: 'Submissions' },
     ],
   },
   {
     section: 'Metadata',
     items: [
+      { path: '/screenshots', label: 'Screenshots' },
       { path: '/reviews', label: 'Reviews' },
+    ],
+  },
+  {
+    section: 'Monetization',
+    items: [
+      { path: '/reports', label: 'Reports' },
     ],
   },
   {
     section: 'Infrastructure',
     items: [
-      { path: '/testflight', label: 'TestFlight' },
       { path: '/code-signing', label: 'Code Signing' },
       { path: '/xcode-cloud', label: 'Xcode Cloud' },
-    ],
-  },
-  {
-    section: 'Analytics',
-    items: [
-      { path: '/reports', label: 'Reports' },
+      { path: '/plugins', label: 'Plugins' },
     ],
   },
 ];
@@ -48,41 +51,43 @@ export function Sidebar() {
   const pluginItems = registry.getSidebarItems();
 
   return (
-    <nav className="sidebar">
-      <div style={{ padding: '12px 16px 16px', borderBottom: '1px solid var(--border)' }}>
-        <span style={{ fontWeight: 700, fontSize: 15 }}>ASC</span>
-        <span style={{ color: 'var(--text-secondary)', fontSize: 13, marginLeft: 6 }}>Command Center</span>
+    <aside className="sidebar">
+      <div className="sidebar-brand">
+        <h2>ASC Manager</h2>
+        <span className="sidebar-subtitle">App Store Connect</span>
       </div>
-
-      {coreItems.map(({ section, items }) => (
-        <div key={section} className="sidebar-section">
-          <h4 className="sidebar-section-title">{section}</h4>
-          <ul>
+      <nav className="sidebar-nav">
+        {coreItems.map(({ section, items }) => (
+          <div key={section} className="nav-section">
+            <div className="nav-section-title">{section}</div>
             {items.map((item) => (
-              <li key={item.path}>
-                <NavLink to={item.path} className={({ isActive }) => isActive ? 'active' : ''} end={item.path === '/'}>
-                  {item.label}
-                </NavLink>
-              </li>
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                end={item.path === '/'}
+              >
+                {item.label}
+              </NavLink>
             ))}
-          </ul>
-        </div>
-      ))}
+          </div>
+        ))}
 
-      {pluginItems.length > 0 && (
-        <div className="sidebar-section">
-          <h4 className="sidebar-section-title">Plugins</h4>
-          <ul>
+        {pluginItems.length > 0 && (
+          <div className="nav-section">
+            <div className="nav-section-title">Plugins</div>
             {pluginItems.map((item) => (
-              <li key={item.id}>
-                <NavLink to={item.path} className={({ isActive }) => isActive ? 'active' : ''}>
-                  {item.label}
-                </NavLink>
-              </li>
+              <NavLink
+                key={item.id}
+                to={item.path}
+                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+              >
+                {item.label}
+              </NavLink>
             ))}
-          </ul>
-        </div>
-      )}
-    </nav>
+          </div>
+        )}
+      </nav>
+    </aside>
   );
 }
