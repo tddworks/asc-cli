@@ -1009,9 +1009,9 @@ Each slice has up to 3 test layers, written in this order:
 Test the rich model class in isolation. No HTTP, no React, no DOM.
 
 ```typescript
-// version/__tests__/Version.test.ts
+// tests/version/Version.test.ts
 import { describe, it, expect } from 'vitest';
-import { Version, VersionState } from '../Version';
+import { Version, VersionState } from '../../src/version/Version';
 
 describe('Version', () => {
 
@@ -1119,9 +1119,9 @@ describe('Version', () => {
 ### Layer 2: Plugin Registry Tests (Pure — No React)
 
 ```typescript
-// plugin/__tests__/PluginRegistry.test.ts
+// tests/plugin/PluginRegistry.test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
-import { PluginRegistry } from '../PluginRegistry';
+import { PluginRegistry } from '../../src/plugin/PluginRegistry';
 
 describe('PluginRegistry', () => {
   let registry: PluginRegistry;
@@ -1186,11 +1186,11 @@ describe('PluginRegistry', () => {
 ### Layer 3: Component Tests (React + DOM)
 
 ```tsx
-// version/__tests__/VersionBadge.test.tsx
+// tests/version/VersionBadge.test.tsx
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { VersionBadge } from '../components/VersionBadge';
-import { Version, VersionState } from '../Version';
+import { VersionBadge } from '../../src/version/components/VersionBadge';
+import { Version, VersionState } from '../../src/version/Version';
 
 describe('VersionBadge', () => {
 
@@ -1225,10 +1225,10 @@ describe('VersionBadge', () => {
 ### Layer 4: AffordanceBar Tests
 
 ```tsx
-// shared/__tests__/AffordanceBar.test.tsx
+// tests/shared/AffordanceBar.test.tsx
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { AffordanceBar } from '../components/AffordanceBar';
+import { AffordanceBar } from '../../src/shared/components/AffordanceBar';
 
 describe('AffordanceBar', () => {
 
