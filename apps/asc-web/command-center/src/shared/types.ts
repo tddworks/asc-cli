@@ -1,4 +1,4 @@
-/** Affordances map: action name → CLI command string, provided by the API */
+/** Affordances map: action name → command or URL string */
 export type Affordances = Record<string, string>;
 
 /** Standard paginated API response */

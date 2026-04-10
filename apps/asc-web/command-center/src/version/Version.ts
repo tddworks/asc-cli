@@ -68,10 +68,10 @@ export class Version {
   static fromJSON(json: Record<string, unknown>): Version {
     return new Version(
       json.id as string,
-      json.appId as string,
-      json.versionString as string,
+      (json.appId as string) ?? '',
+      (json.versionString as string) ?? '',
       json.state as VersionState,
-      json.platform as string,
+      (json.platform as string) ?? 'IOS',
       (json.affordances as Affordances) ?? {},
     );
   }

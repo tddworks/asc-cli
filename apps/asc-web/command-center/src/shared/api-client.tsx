@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 
 export type DataMode = 'mock' | 'rest';
 
@@ -12,6 +12,22 @@ const DataModeContext = createContext<{
 export function DataModeProviderComponent({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<DataMode>('mock');
   const toggleMode = useCallback(() => setMode(m => m === 'mock' ? 'rest' : 'mock'), []);
+
+  // Auto-detect backend on mount — probe /api/v1
+  useEffect(() => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2000);
+
+    fetch('/api/v1', { signal: controller.signal })
+      .then(resp => {
+        if (resp.ok) setMode('rest');
+      })
+      .catch(() => {
+        // Backend not running — stay in mock mode
+      })
+      .finally(() => clearTimeout(timeout));
+  }, []);
+
   return (
     <DataModeContext.Provider value={{ mode, toggleMode }}>
       {children}
@@ -59,11 +75,33 @@ class ApiError extends Error {
   }
 }
 
+/** Convert REST _links to flat affordances on every item in a response */
+function normalizeLinks(data: unknown): unknown {
+  if (Array.isArray(data)) return data.map(normalizeLinks);
+  if (data && typeof data === 'object') {
+    const obj = data as Record<string, unknown>;
+    // Convert _links → affordances
+    if (obj._links && !obj.affordances) {
+      const links = obj._links as Record<string, { href: string }>;
+      const affordances: Record<string, string> = {};
+      for (const [key, val] of Object.entries(links)) {
+        affordances[key] = typeof val === 'string' ? val : val.href;
+      }
+      obj.affordances = affordances;
+    }
+    // Recurse into nested data
+    if (obj.data) obj.data = normalizeLinks(obj.data);
+    return obj;
+  }
+  return data;
+}
+
 export const apiClient = {
   async get<T>(path: string): Promise<T> {
     const res = await fetch(path);
     if (!res.ok) throw new ApiError(res.status, await res.text());
-    return res.json();
+    const json = await res.json();
+    return normalizeLinks(json) as T;
   },
 
   async post<T>(path: string, body: unknown): Promise<T> {

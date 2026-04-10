@@ -55,13 +55,13 @@ export class Build {
   static fromJSON(json: Record<string, unknown>): Build {
     return new Build(
       json.id as string,
-      json.appId as string,
-      json.version as string,
-      json.preReleaseVersion as string,
-      json.processingState as BuildProcessingState,
-      json.expired as boolean,
-      json.usesNonExemptEncryption as boolean,
-      json.uploadedDate as string,
+      (json.appId as string) ?? '',
+      (json.version ?? json.buildNumber ?? '') as string,
+      (json.preReleaseVersion ?? json.version ?? '') as string,
+      (json.processingState as BuildProcessingState) ?? BuildProcessingState.Valid,
+      (json.expired as boolean) ?? false,
+      (json.usesNonExemptEncryption as boolean) ?? false,
+      (json.uploadedDate as string) ?? '',
       (json.affordances as Affordances) ?? {},
     );
   }

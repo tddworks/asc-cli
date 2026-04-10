@@ -39,11 +39,11 @@ export class App {
   static fromJSON(json: Record<string, unknown>): App {
     return new App(
       json.id as string,
-      json.name as string,
-      json.bundleId as string,
-      json.sku as string,
-      json.primaryLocale as string,
-      json.isAvailableInNewTerritories as boolean,
+      (json.name as string) ?? '',
+      (json.bundleId as string) ?? '',
+      (json.sku as string) ?? '',
+      (json.primaryLocale as string) ?? 'en-US',
+      (json.isAvailableInNewTerritories as boolean) ?? true,
       (json.affordances as Affordances) ?? {},
       json.contentRightsDeclaration as string | undefined,
     );
