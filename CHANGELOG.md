@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.68] - 2026-04-14
+
 ### Added
 - **`asc testflight groups create`** — create external or internal TestFlight beta groups (`--internal` flag toggles internal; `--public-link-enabled` / `--feedback-enabled` for external groups)
 - **`asc init` review contact flags** — `--contact-first-name`, `--contact-last-name`, `--contact-phone`, `--contact-email` save review contact info to `.asc/project.json` for reuse across versions
@@ -676,7 +680,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.67...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.68...HEAD
+[0.1.68]: https://github.com/tddworks/asc-cli/compare/v0.1.67...v0.1.68
 [0.1.67]: https://github.com/tddworks/asc-cli/compare/v0.1.66...v0.1.67
 [0.1.66]: https://github.com/tddworks/asc-cli/compare/v0.1.65...v0.1.66
 [0.1.65]: https://github.com/tddworks/asc-cli/compare/v0.1.64...v0.1.65
