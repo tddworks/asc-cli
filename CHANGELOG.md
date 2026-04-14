@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`asc init` review contact flags** — `--contact-first-name`, `--contact-last-name`, `--contact-phone`, `--contact-email` save review contact info to `.asc/project.json` for reuse across versions
+- **`ProjectConfig` review contact fields** — optional `contactFirstName`, `contactLastName`, `contactPhone`, `contactEmail` with `hasReviewContact` computed property
+- **`setReviewContact` / `updateReviewContact` affordances** — `ProjectConfig` now suggests setting review contact when missing
+
 ---
 
 ## [0.1.66] - 2026-04-09
