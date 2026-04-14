@@ -8,9 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **`asc testflight groups create`** — create external or internal TestFlight beta groups (`--internal` flag toggles internal; `--public-link-enabled` / `--feedback-enabled` for external groups)
 - **`asc init` review contact flags** — `--contact-first-name`, `--contact-last-name`, `--contact-phone`, `--contact-email` save review contact info to `.asc/project.json` for reuse across versions
 - **`ProjectConfig` review contact fields** — optional `contactFirstName`, `contactLastName`, `contactPhone`, `contactEmail` with `hasReviewContact` computed property
 - **`setReviewContact` / `updateReviewContact` affordances** — `ProjectConfig` now suggests setting review contact when missing
+
+---
+
+## [0.1.67] - 2026-04-13
+
+### Changed
+- Bug fixes and improvements.
 
 ---
 
@@ -668,7 +676,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.66...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.67...HEAD
+[0.1.67]: https://github.com/tddworks/asc-cli/compare/v0.1.66...v0.1.67
 [0.1.66]: https://github.com/tddworks/asc-cli/compare/v0.1.65...v0.1.66
 [0.1.65]: https://github.com/tddworks/asc-cli/compare/v0.1.64...v0.1.65
 [0.1.64]: https://github.com/tddworks/asc-cli/compare/v0.1.63...v0.1.64

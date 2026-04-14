@@ -52,6 +52,78 @@ struct BetaGroupsListTests {
 }
 
 @Suite
+struct BetaGroupsCreateTests {
+
+    @Test func `groups create external returns group with affordances`() async throws {
+        let mockRepo = MockTestFlightRepository()
+        given(mockRepo)
+            .createBetaGroup(appId: .any, name: .any, isInternalGroup: .any, publicLinkEnabled: .any, feedbackEnabled: .any)
+            .willReturn(BetaGroup(id: "g-new", appId: "app-1", name: "External Beta", isInternalGroup: false, publicLinkEnabled: true))
+
+        let cmd = try BetaGroupsCreate.parse([
+            "--app-id", "app-1",
+            "--name", "External Beta",
+            "--public-link-enabled",
+            "--pretty",
+        ])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "exportTesters" : "asc testflight testers export --beta-group-id g-new",
+                "importTesters" : "asc testflight testers import --beta-group-id g-new --file testers.csv",
+                "listTesters" : "asc testflight testers list --beta-group-id g-new"
+              },
+              "appId" : "app-1",
+              "id" : "g-new",
+              "isInternalGroup" : false,
+              "name" : "External Beta",
+              "publicLinkEnabled" : true
+            }
+          ]
+        }
+        """)
+    }
+
+    @Test func `groups create internal flag marks group as internal`() async throws {
+        let mockRepo = MockTestFlightRepository()
+        given(mockRepo)
+            .createBetaGroup(appId: .any, name: .any, isInternalGroup: .any, publicLinkEnabled: .any, feedbackEnabled: .any)
+            .willReturn(BetaGroup(id: "g-int", appId: "app-1", name: "Company Team", isInternalGroup: true))
+
+        let cmd = try BetaGroupsCreate.parse([
+            "--app-id", "app-1",
+            "--name", "Company Team",
+            "--internal",
+            "--pretty",
+        ])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "exportTesters" : "asc testflight testers export --beta-group-id g-int",
+                "importTesters" : "asc testflight testers import --beta-group-id g-int --file testers.csv",
+                "listTesters" : "asc testflight testers list --beta-group-id g-int"
+              },
+              "appId" : "app-1",
+              "id" : "g-int",
+              "isInternalGroup" : true,
+              "name" : "Company Team",
+              "publicLinkEnabled" : false
+            }
+          ]
+        }
+        """)
+    }
+}
+
+@Suite
 struct BetaTestersListTests {
 
     @Test func `testers list includes affordances and groupId in json output`() async throws {

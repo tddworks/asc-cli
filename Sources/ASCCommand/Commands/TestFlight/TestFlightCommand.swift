@@ -16,7 +16,7 @@ struct BetaGroupsCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "groups",
         abstract: "Manage beta groups",
-        subcommands: [BetaGroupsList.self]
+        subcommands: [BetaGroupsList.self, BetaGroupsCreate.self]
     )
 }
 
@@ -43,6 +43,47 @@ struct BetaGroupsList: AsyncParsableCommand {
         let response = try await repo.listBetaGroups(appId: appId, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(response.data, affordanceMode: affordanceMode)
+    }
+}
+
+struct BetaGroupsCreate: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "create",
+        abstract: "Create a beta group (external by default; use --internal for an internal group)"
+    )
+
+    @OptionGroup var globals: GlobalOptions
+
+    @Option(name: .long, help: "App ID that owns the group")
+    var appId: String
+
+    @Option(name: .long, help: "Group name")
+    var name: String
+
+    @Flag(name: .customLong("internal"), help: "Create an internal beta group (testers must be members of your App Store Connect team). Default: external.")
+    var isInternal: Bool = false
+
+    @Flag(name: .long, inversion: .prefixedNo, exclusivity: .exclusive, help: "Enable the public TestFlight link (external groups only)")
+    var publicLinkEnabled: Bool = false
+
+    @Flag(name: .long, inversion: .prefixedNo, exclusivity: .exclusive, help: "Enable tester feedback (external groups only)")
+    var feedbackEnabled: Bool = false
+
+    func run() async throws {
+        let repo = try ClientProvider.makeTestFlightRepository()
+        print(try await execute(repo: repo))
+    }
+
+    func execute(repo: any TestFlightRepository) async throws -> String {
+        let group = try await repo.createBetaGroup(
+            appId: appId,
+            name: name,
+            isInternalGroup: isInternal,
+            publicLinkEnabled: isInternal ? nil : publicLinkEnabled,
+            feedbackEnabled: isInternal ? nil : feedbackEnabled
+        )
+        let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
+        return try formatter.formatAgentItems([group])
     }
 }
 

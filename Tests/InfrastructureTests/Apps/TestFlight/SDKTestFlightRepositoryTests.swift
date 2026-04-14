@@ -116,6 +116,58 @@ struct SDKTestFlightRepositoryTests {
         #expect(tester.groupId == "g-1")
     }
 
+    @Test func `createBetaGroup external returns group with appId injected`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(BetaGroupResponse(
+            data: BetaGroup(
+                type: .betaGroups,
+                id: "g-new",
+                attributes: .init(name: "External Beta", isInternalGroup: false, isPublicLinkEnabled: true)
+            ),
+            links: .init(this: "")
+        ))
+
+        let repo = SDKTestFlightRepository(client: stub)
+        let group = try await repo.createBetaGroup(
+            appId: "app-1",
+            name: "External Beta",
+            isInternalGroup: false,
+            publicLinkEnabled: true,
+            feedbackEnabled: nil
+        )
+
+        #expect(group.id == "g-new")
+        #expect(group.name == "External Beta")
+        #expect(group.appId == "app-1")
+        #expect(group.isInternalGroup == false)
+        #expect(group.publicLinkEnabled == true)
+    }
+
+    @Test func `createBetaGroup internal returns group with isInternalGroup true`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(BetaGroupResponse(
+            data: BetaGroup(
+                type: .betaGroups,
+                id: "g-int",
+                attributes: .init(name: "Company Team", isInternalGroup: true)
+            ),
+            links: .init(this: "")
+        ))
+
+        let repo = SDKTestFlightRepository(client: stub)
+        let group = try await repo.createBetaGroup(
+            appId: "app-7",
+            name: "Company Team",
+            isInternalGroup: true,
+            publicLinkEnabled: nil,
+            feedbackEnabled: nil
+        )
+
+        #expect(group.id == "g-int")
+        #expect(group.appId == "app-7")
+        #expect(group.isInternalGroup == true)
+    }
+
     @Test func `removeBetaTester calls void delete endpoint`() async throws {
         let stub = StubAPIClient()
 

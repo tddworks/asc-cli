@@ -24,6 +24,29 @@ public struct SDKTestFlightRepository: TestFlightRepository, @unchecked Sendable
         return PaginatedResponse(data: groups, nextCursor: nextCursor)
     }
 
+    public func createBetaGroup(
+        appId: String,
+        name: String,
+        isInternalGroup: Bool,
+        publicLinkEnabled: Bool?,
+        feedbackEnabled: Bool?
+    ) async throws -> Domain.BetaGroup {
+        let body = BetaGroupCreateRequest(data: .init(
+            type: .betaGroups,
+            attributes: .init(
+                name: name,
+                isInternalGroup: isInternalGroup,
+                isPublicLinkEnabled: publicLinkEnabled,
+                isFeedbackEnabled: feedbackEnabled
+            ),
+            relationships: .init(
+                app: .init(data: .init(type: .apps, id: appId))
+            )
+        ))
+        let response = try await client.request(APIEndpoint.v1.betaGroups.post(body))
+        return mapBetaGroup(response.data, appIdHint: appId)
+    }
+
     public func listBetaTesters(groupId: String, limit: Int?) async throws -> PaginatedResponse<Domain.BetaTester> {
         let request = APIEndpoint.v1.betaTesters.get(parameters: .init(
             filterBetaGroups: [groupId],
