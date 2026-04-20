@@ -1,7 +1,9 @@
+import Foundation
 import Hummingbird
 import HummingbirdWebSocket
 import ASCPlugin
 import Domain
+import Infrastructure
 
 /// /api/v1/certificates, bundle-ids, devices, profiles — Code signing routes.
 struct CodeSigningController: Sendable {
@@ -11,9 +13,26 @@ struct CodeSigningController: Sendable {
     let profileRepo: any ProfileRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
-        group.get("/certificates") { _, _ -> Response in
-            let certs = try await self.certRepo.listCertificates(certificateType: nil, limit: nil)
-            return try restFormat(certs)
+        group.get("/certificates") { request, _ -> Response in
+            let query = request.uri.queryParameters
+            let certType = query["type"].flatMap { CertificateType(rawValue: String($0).uppercased()) }
+            let limit = query["limit"].flatMap { Int($0) }
+            let expiredOnly = ["true", "1", "yes"].contains(String(query["expired-only"] ?? "").lowercased())
+
+            var items = try await self.certRepo.listCertificates(certificateType: certType, limit: limit)
+            if expiredOnly {
+                items = items.filter(\.isExpired)
+            }
+            if let beforeRaw = query["before"] {
+                guard let cutoff = ISO8601DateFormatter().date(from: String(beforeRaw)) else {
+                    return jsonError("'before' must be an ISO8601 date (e.g. 2026-11-01T00:00:00Z)")
+                }
+                items = items.filter { cert in
+                    guard let exp = cert.expirationDate else { return false }
+                    return exp < cutoff
+                }
+            }
+            return try restFormat(items)
         }
 
         group.get("/bundle-ids") { _, _ -> Response in

@@ -40,6 +40,11 @@ enum RESTRoutes {
             profileRepo: factory.makeProfileRepository(authProvider: auth)
         ) { signing.addRoutes(to: v1) }
 
+        // Review submissions
+        if let submissions = try? ReviewSubmissionsController(
+            submissionRepo: factory.makeSubmissionRepository(authProvider: auth)
+        ) { submissions.addRoutes(to: v1) }
+
         // Non-authenticated resources
         SimulatorsController(repo: factory.makeSimulatorRepository()).addRoutes(to: v1)
         PluginsController(repo: factory.makePluginRepository()).addRoutes(to: v1)

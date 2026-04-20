@@ -28,7 +28,18 @@ public struct ReviewSubmission: Sendable, Equatable, Identifiable, Codable {
 }
 
 extension ReviewSubmission: AffordanceProviding {
-    public var affordances: [String: String] {
-        ["listVersions": "asc versions list --app-id \(appId)"]
+    public var structuredAffordances: [Affordance] {
+        [
+            Affordance(key: "listVersions", command: "versions", action: "list", params: ["app-id": appId]),
+        ]
+    }
+}
+
+extension ReviewSubmission: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "App ID", "Platform", "State"]
+    }
+    public var tableRow: [String] {
+        [id, appId, platform.rawValue, state.rawValue]
     }
 }

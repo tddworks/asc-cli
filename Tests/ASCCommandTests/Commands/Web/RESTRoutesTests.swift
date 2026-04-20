@@ -128,6 +128,41 @@ struct RESTRoutesTests {
         #expect(output.contains("\"data\""))
     }
 
+    // MARK: - Review Submissions
+
+    @Test func `review submissions list returns JSON with _links`() async throws {
+        let mockRepo = MockSubmissionRepository()
+        given(mockRepo).listSubmissions(appId: .any, states: .any, limit: .any).willReturn([
+            ReviewSubmission(id: "sub-1", appId: "42", platform: .iOS, state: .waitingForReview),
+        ])
+        let output = try await ReviewSubmissionsList
+            .parse(["--app-id", "42", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/apps/42/versions"))
+        #expect(!normalized.contains("\"affordances\""))
+    }
+
+    @Test func `api root includes reviewSubmissions resource`() throws {
+        let output = try Self.formatter.formatAgentItems([APIRoot()], headers: [], rowMapper: { _ in [] }, affordanceMode: .rest)
+        #expect(output.contains("reviewSubmissions"))
+    }
+
+    // MARK: - Certificates REST filters
+
+    @Test func `certificates list accepts limit via rest mode`() async throws {
+        let mockRepo = MockCertificateRepository()
+        given(mockRepo).listCertificates(certificateType: .any, limit: .value(200)).willReturn([
+            Certificate(id: "cert-1", name: "Dist", certificateType: .iosDistribution),
+        ])
+        let output = try await CertificatesList
+            .parse(["--limit", "200", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        #expect(output.contains("\"_links\""))
+        #expect(output.contains("cert-1"))
+    }
+
     @Test func `api root includes app-shots resources`() throws {
         let output = try Self.formatter.formatAgentItems([APIRoot()], headers: [], rowMapper: { _ in [] }, affordanceMode: .rest)
         let normalized = output.replacingOccurrences(of: "\\/", with: "/")

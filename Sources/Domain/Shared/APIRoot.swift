@@ -16,6 +16,7 @@ extension APIRoot: AffordanceProviding {
             // App management
             Affordance(key: "apps", command: "apps", action: "list", params: [:]),
             Affordance(key: "builds", command: "builds", action: "list", params: [:]),
+            Affordance(key: "reviewSubmissions", command: "review-submissions", action: "list", params: [:]),
 
             // Code signing
             Affordance(key: "certificates", command: "certificates", action: "list", params: [:]),

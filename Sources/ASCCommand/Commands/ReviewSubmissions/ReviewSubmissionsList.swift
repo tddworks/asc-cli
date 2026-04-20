@@ -24,7 +24,7 @@ struct ReviewSubmissionsList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubmissionRepository) async throws -> String {
+    func execute(repo: any SubmissionRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let parsedStates = state.map { csv in
             csv.split(separator: ",").compactMap {
                 ReviewSubmissionState(rawValue: String($0).trimmingCharacters(in: .whitespaces).uppercased())
@@ -32,10 +32,6 @@ struct ReviewSubmissionsList: AsyncParsableCommand {
         }
         let items = try await repo.listSubmissions(appId: appId, states: parsedStates, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            items,
-            headers: ["ID", "App ID", "Platform", "State"],
-            rowMapper: { [$0.id, $0.appId, $0.platform.rawValue, $0.state.rawValue] }
-        )
+        return try formatter.formatAgentItems(items, affordanceMode: affordanceMode)
     }
 }
