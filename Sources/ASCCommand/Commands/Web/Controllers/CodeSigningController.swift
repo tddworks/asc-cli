@@ -12,7 +12,7 @@ struct CodeSigningController: Sendable {
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/certificates") { _, _ -> Response in
-            let certs = try await self.certRepo.listCertificates(certificateType: nil)
+            let certs = try await self.certRepo.listCertificates(certificateType: nil, limit: nil)
             return try restFormat(certs)
         }
 

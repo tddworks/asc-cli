@@ -8,12 +8,13 @@ public struct SDKCertificateRepository: CertificateRepository, @unchecked Sendab
         self.client = client
     }
 
-    public func listCertificates(certificateType: Domain.CertificateType?) async throws -> [Domain.Certificate] {
+    public func listCertificates(certificateType: Domain.CertificateType?, limit: Int?) async throws -> [Domain.Certificate] {
         let filterType = certificateType.flatMap {
             APIEndpoint.V1.Certificates.GetParameters.FilterCertificateType(rawValue: $0.rawValue)
         }
         let request = APIEndpoint.v1.certificates.get(parameters: .init(
-            filterCertificateType: filterType.map { [$0] }
+            filterCertificateType: filterType.map { [$0] },
+            limit: limit
         ))
         let response = try await client.request(request)
         return response.data.map(mapCertificate)

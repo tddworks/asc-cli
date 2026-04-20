@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`asc review-submissions list`** — list App Store review submissions for an app. Required `--app-id`; optional `--state <CSV>` (e.g. `WAITING_FOR_REVIEW,IN_REVIEW,READY_FOR_REVIEW` or `UNRESOLVED_ISSUES`) and `--limit`. Backed by `SubmissionRepository.listSubmissions(appId:states:limit:)`
+- **`asc certificates list` filtering flags** — `--limit` (server-side), `--expired-only` (client-side, drops unexpired certs), `--before <ISO8601>` (client-side, keeps certs with expirationDate strictly before the cutoff)
+
+### Changed
+- **`CertificateRepository.listCertificates`** signature now takes `(certificateType:limit:)` — forwards `limit` to the SDK
+
 ---
 
 ## [0.1.68] - 2026-04-14

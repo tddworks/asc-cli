@@ -64,6 +64,7 @@ struct ASC: AsyncParsableCommand {
             DiagnosticsCommand.self,
             DiagnosticLogsCommand.self,
             BetaReviewCommand.self,
+            ReviewSubmissionsCommand.self,
             AppAvailabilityCommand.self,
             IAPAvailabilityCommand.self,
             SubscriptionAvailabilityCommand.self,

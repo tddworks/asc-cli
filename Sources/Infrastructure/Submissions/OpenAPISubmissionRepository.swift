@@ -67,6 +67,42 @@ public struct OpenAPISubmissionRepository: SubmissionRepository, @unchecked Send
         return try await patchSubmitted(id: submissionId, appId: appId, platform: platform)
     }
 
+    public func listSubmissions(
+        appId: String,
+        states: [Domain.ReviewSubmissionState]?,
+        limit: Int?
+    ) async throws -> [Domain.ReviewSubmission] {
+        let filterState = states?.compactMap {
+            APIEndpoint.V1.ReviewSubmissions.GetParameters.FilterState(rawValue: $0.rawValue)
+        }
+        let request = APIEndpoint.v1.reviewSubmissions.get(parameters: .init(
+            filterState: filterState,
+            filterApp: [appId],
+            limit: limit
+        ))
+        let response = try await client.request(request)
+        return response.data.map { mapListedSubmission($0, appId: appId) }
+    }
+
+    private func mapListedSubmission(
+        _ sdkSubmission: AppStoreConnect_Swift_SDK.ReviewSubmission,
+        appId: String
+    ) -> Domain.ReviewSubmission {
+        let platform = sdkSubmission.attributes?.platform.flatMap {
+            Domain.AppStorePlatform(rawValue: $0.rawValue)
+        } ?? .iOS
+        let state = sdkSubmission.attributes?.state.flatMap {
+            Domain.ReviewSubmissionState(rawValue: $0.rawValue)
+        } ?? .readyForReview
+        return Domain.ReviewSubmission(
+            id: sdkSubmission.id,
+            appId: appId,
+            platform: platform,
+            state: state,
+            submittedDate: sdkSubmission.attributes?.submittedDate
+        )
+    }
+
     private func patchSubmitted(
         id: String,
         appId: String,

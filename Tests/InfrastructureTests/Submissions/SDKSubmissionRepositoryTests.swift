@@ -1,4 +1,5 @@
 @preconcurrency import AppStoreConnect_Swift_SDK
+import Foundation
 import Testing
 @testable import Infrastructure
 @testable import Domain
@@ -149,5 +150,60 @@ struct SDKSubmissionRepositoryTests {
         #expect(result.id == "sub-existing")
         #expect(result.appId == "app-42")
         #expect(result.state == .waitingForReview)
+    }
+
+    @Test func `listSubmissions maps sdk submissions and injects appId from param`() async throws {
+        let stub = SequencedStubAPIClient()
+        stub.enqueue(ReviewSubmissionsResponse(
+            data: [
+                ReviewSubmission(
+                    type: .reviewSubmissions,
+                    id: "sub-1",
+                    attributes: .init(platform: .ios, state: .waitingForReview),
+                    relationships: .init(app: .init(data: .init(type: .apps, id: "app-42")))
+                ),
+                ReviewSubmission(
+                    type: .reviewSubmissions,
+                    id: "sub-2",
+                    attributes: .init(platform: .ios, state: .unresolvedIssues),
+                    relationships: .init(app: .init(data: .init(type: .apps, id: "app-42")))
+                ),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = OpenAPISubmissionRepository(client: stub)
+        let results = try await repo.listSubmissions(appId: "app-42", states: nil, limit: nil)
+
+        #expect(results.count == 2)
+        #expect(results.allSatisfy { $0.appId == "app-42" })
+        #expect(results.first?.id == "sub-1")
+        #expect(results.first?.state == .waitingForReview)
+        #expect(results.last?.state == .unresolvedIssues)
+    }
+
+    @Test func `listSubmissions maps all states and preserves submittedDate`() async throws {
+        let stub = SequencedStubAPIClient()
+        let date = Date(timeIntervalSince1970: 1_700_000_000)
+        stub.enqueue(ReviewSubmissionsResponse(
+            data: [ReviewSubmission(
+                type: .reviewSubmissions,
+                id: "sub-9",
+                attributes: .init(platform: .macOs, submittedDate: date, state: .inReview),
+                relationships: .init(app: .init(data: .init(type: .apps, id: "app-9")))
+            )],
+            links: .init(this: "")
+        ))
+
+        let repo = OpenAPISubmissionRepository(client: stub)
+        let results = try await repo.listSubmissions(
+            appId: "app-9",
+            states: [.inReview, .waitingForReview],
+            limit: 50
+        )
+
+        #expect(results.first?.platform == .macOS)
+        #expect(results.first?.submittedDate == date)
+        #expect(results.first?.state == .inReview)
     }
 }

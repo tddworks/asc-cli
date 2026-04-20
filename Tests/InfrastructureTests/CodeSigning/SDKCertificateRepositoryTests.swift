@@ -26,7 +26,7 @@ struct SDKCertificateRepositoryTests {
         ))
 
         let repo = SDKCertificateRepository(client: stub)
-        let result = try await repo.listCertificates(certificateType: nil)
+        let result = try await repo.listCertificates(certificateType: nil, limit: nil)
 
         #expect(result[0].id == "cert-1")
         #expect(result[0].name == "iOS Distribution")
@@ -50,7 +50,7 @@ struct SDKCertificateRepositoryTests {
         ))
 
         let repo = SDKCertificateRepository(client: stub)
-        let result = try await repo.listCertificates(certificateType: nil)
+        let result = try await repo.listCertificates(certificateType: nil, limit: nil)
 
         #expect(result[0].expirationDate == expiration)
     }

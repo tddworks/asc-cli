@@ -164,6 +164,8 @@ asc beta-review submissions create --build-id <id>
 asc beta-review submissions get --submission-id <id>
 asc beta-review detail get --app-id <id>
 asc beta-review detail update --detail-id <id> [--contact-first-name <name>] [--notes <text>]
+
+asc review-submissions list --app-id <id> [--state WAITING_FOR_REVIEW,IN_REVIEW,READY_FOR_REVIEW] [--limit 200]
 ```
 
 ### Xcode Cloud
@@ -364,7 +366,7 @@ asc bundle-ids list [--platform ios|macos|universal] [--identifier com.example.a
 asc bundle-ids create --name "My App" --identifier com.example.app --platform ios
 asc bundle-ids delete --bundle-id-id <id>
 
-asc certificates list [--type IOS_DISTRIBUTION]
+asc certificates list [--type IOS_DISTRIBUTION] [--limit 200] [--expired-only] [--before 2026-11-01T00:00:00Z]
 asc certificates create --type IOS_DISTRIBUTION --csr-content "$(cat MyApp.certSigningRequest)"
 asc certificates revoke --certificate-id <id>
 
@@ -524,6 +526,7 @@ Detailed documentation for each feature:
 - [App Info](docs/features/app-infos.md) — name, subtitle, privacy policy, categories, age rating
 - [TestFlight](docs/features/testflight.md) — beta groups, tester management, CSV import/export
 - [Beta Review](docs/features/beta-review.md) — submit builds for beta app review, manage review contact details
+- [Review Submissions](docs/features/review-submissions.md) — list App Store review submissions filtered by state
 - [Xcode Cloud](docs/features/xcode-cloud.md) — products, workflows, build runs, start builds
 - [Builds Archive](docs/features/builds-archive.md) — archive Xcode projects, export IPA/PKG, optional upload chaining
 - [Builds Upload](docs/features/builds-upload.md) — upload IPA/PKG, TestFlight distribution, beta notes
