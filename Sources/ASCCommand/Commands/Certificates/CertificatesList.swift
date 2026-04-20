@@ -19,7 +19,7 @@ struct CertificatesList: AsyncParsableCommand {
     @Flag(name: .long, help: "Only return certificates whose expirationDate has passed")
     var expiredOnly: Bool = false
 
-    @Option(name: .long, help: "Only return certificates with expirationDate strictly before this ISO8601 date")
+    @Option(name: .long, help: "Only return certificates with expirationDate strictly before this date. Accepts `YYYY-MM-DD` (midnight UTC) or full ISO8601 (`2026-11-01T00:00:00Z`)")
     var before: String?
 
     func run() async throws {

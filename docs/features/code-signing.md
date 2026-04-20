@@ -71,12 +71,15 @@ asc bundle-ids delete --bundle-id-id <id>
 #### list
 
 ```
-asc certificates list [--type <type>]
+asc certificates list [--type <type>] [--limit <n>] [--expired-only] [--before <iso8601>]
 ```
 
 | Flag | Required | Description |
 |------|----------|-------------|
 | `--type` | No | Filter by type (e.g. `IOS_DISTRIBUTION`, `MAC_APP_STORE`) |
+| `--limit` | No | Maximum number of certificates the server returns |
+| `--expired-only` | No | Client-side filter; drops certificates whose `expirationDate` is in the future |
+| `--before` | No | Client-side filter; keeps certificates whose `expirationDate` is strictly before this ISO8601 date (e.g. `2026-11-01T00:00:00Z`) |
 
 #### create
 
@@ -374,7 +377,7 @@ Tests/
 | List bundle IDs | `GET /v1/bundleIds` | `APIEndpoint.v1.bundleIDs.get(parameters:)` | `listBundleIDs(platform:identifier:)` |
 | Create bundle ID | `POST /v1/bundleIds` | `APIEndpoint.v1.bundleIDs.post(_)` | `createBundleID(name:identifier:platform:)` |
 | Delete bundle ID | `DELETE /v1/bundleIds/{id}` | `APIEndpoint.v1.bundleIDs.id(id).delete` | `deleteBundleID(id:)` |
-| List certificates | `GET /v1/certificates` | `APIEndpoint.v1.certificates.get(parameters:)` | `listCertificates(certificateType:)` |
+| List certificates | `GET /v1/certificates` | `APIEndpoint.v1.certificates.get(parameters:)` | `listCertificates(certificateType:limit:)` |
 | Create certificate | `POST /v1/certificates` | `APIEndpoint.v1.certificates.post(_)` | `createCertificate(certificateType:csrContent:)` |
 | Revoke certificate | `DELETE /v1/certificates/{id}` | `APIEndpoint.v1.certificates.id(id).delete` | `revokeCertificate(id:)` |
 | List devices | `GET /v1/devices` | `APIEndpoint.v1.devices.get(parameters:)` | `listDevices(platform:)` |
