@@ -80,6 +80,22 @@ struct CertificatesListTests {
         #expect(!output.contains("cert-late"))
     }
 
+    @Test func `before flag accepts date-only YYYY-MM-DD`() async throws {
+        let earlier = Date(timeIntervalSince1970: 1_600_000_000) // 2020-09
+        let later = Date(timeIntervalSince1970: 2_000_000_000)   // 2033-05
+        let mockRepo = MockCertificateRepository()
+        given(mockRepo).listCertificates(certificateType: .any, limit: .any).willReturn([
+            Certificate(id: "cert-early", name: "Early", certificateType: .iosDistribution, expirationDate: earlier),
+            Certificate(id: "cert-late", name: "Late", certificateType: .iosDistribution, expirationDate: later),
+        ])
+
+        let cmd = try CertificatesList.parse(["--before", "2026-11-01"])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output.contains("cert-early"))
+        #expect(!output.contains("cert-late"))
+    }
+
     @Test func `limit flag is forwarded to repository`() async throws {
         let mockRepo = MockCertificateRepository()
         given(mockRepo).listCertificates(certificateType: .any, limit: .value(200)).willReturn([])

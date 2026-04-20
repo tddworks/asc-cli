@@ -144,11 +144,6 @@ struct RESTRoutesTests {
         #expect(!normalized.contains("\"affordances\""))
     }
 
-    @Test func `api root includes reviewSubmissions resource`() throws {
-        let output = try Self.formatter.formatAgentItems([APIRoot()], headers: [], rowMapper: { _ in [] }, affordanceMode: .rest)
-        #expect(output.contains("reviewSubmissions"))
-    }
-
     // MARK: - Certificates REST filters
 
     @Test func `certificates list accepts limit via rest mode`() async throws {

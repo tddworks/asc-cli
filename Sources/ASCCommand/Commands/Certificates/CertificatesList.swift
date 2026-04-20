@@ -35,8 +35,8 @@ struct CertificatesList: AsyncParsableCommand {
             items = items.filter(\.isExpired)
         }
         if let before {
-            guard let cutoff = ISO8601DateFormatter().date(from: before) else {
-                throw ValidationError("--before must be an ISO8601 date (e.g. 2025-11-14T22:13:20Z)")
+            guard let cutoff = parseFlexibleISO8601(before) else {
+                throw ValidationError("--before must be an ISO8601 date (e.g. 2026-11-01 or 2026-11-01T00:00:00Z)")
             }
             items = items.filter { cert in
                 guard let exp = cert.expirationDate else { return false }

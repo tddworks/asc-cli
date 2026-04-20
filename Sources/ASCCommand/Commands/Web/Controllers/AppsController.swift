@@ -46,6 +46,22 @@ struct AppsController: Sendable {
             return try restFormat(builds)
         }
 
+        // Fleet listing — ASC builds endpoint allows filtering by app or listing all.
+        group.get("/builds") { request, _ -> Response in
+            let query = request.uri.queryParameters
+            let appId = query["app-id"].map(String.init)
+            let platform = query["platform"].flatMap { BuildUploadPlatform(cliArgument: String($0)) }
+            let version = query["version"].map(String.init)
+            let limit = query["limit"].flatMap { Int($0) }
+            let builds = try await self.buildRepo.listBuilds(
+                appId: appId,
+                platform: platform,
+                version: version,
+                limit: limit
+            ).data
+            return try restFormat(builds)
+        }
+
         group.get("/apps/:appId/testflight") { _, context -> Response in
             guard let appId = context.parameters.get("appId") else { return jsonError("Missing appId") }
             let groups = try await self.testFlightRepo.listBetaGroups(appId: appId, limit: nil).data

@@ -6,6 +6,10 @@ import Domain
 import Infrastructure
 
 /// /api/v1/apps/{appId}/review-submissions — App Store review submissions.
+///
+/// No top-level `/review-submissions` route: Apple's OpenAPI spec marks
+/// `filter[app]` as required, so fleet listing isn't possible without
+/// aggregating per-app on the client side.
 struct ReviewSubmissionsController: Sendable {
     let submissionRepo: any SubmissionRepository
 

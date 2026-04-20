@@ -24,8 +24,8 @@ struct CodeSigningController: Sendable {
                 items = items.filter(\.isExpired)
             }
             if let beforeRaw = query["before"] {
-                guard let cutoff = ISO8601DateFormatter().date(from: String(beforeRaw)) else {
-                    return jsonError("'before' must be an ISO8601 date (e.g. 2026-11-01T00:00:00Z)")
+                guard let cutoff = parseFlexibleISO8601(String(beforeRaw)) else {
+                    return jsonError("'before' must be an ISO8601 date (e.g. 2026-11-01 or 2026-11-01T00:00:00Z)")
                 }
                 items = items.filter { cert in
                     guard let exp = cert.expirationDate else { return false }
