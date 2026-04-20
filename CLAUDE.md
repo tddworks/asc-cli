@@ -49,6 +49,7 @@ Adapts `appstoreconnect-swift-sdk` to Domain protocols. The critical pattern: ma
 - `GlobalOptions.swift` — `--output` (default: json), `--pretty`, `--timeout`
 - `OutputFormatter.swift` — JSON/table/markdown rendering; `formatAgentItems()` merges affordances
 - `ClientProvider.swift` — factory wiring auth → authenticated repositories
+- `Commands/Web/` — `asc web-server` serves the REST API; `RESTRoutes.configure` composes `*Controller` structs (Hummingbird). Every new list/read command **must** also be exposed here (see "REST exposure" below)
 
 ## Key Design Patterns
 
@@ -64,6 +65,27 @@ protocol AffordanceProviding {
 ```
 
 `OutputFormatter.formatAgentItems()` merges affordances into the encoded JSON output.
+
+### REST exposure (every feature must ship both CLI and REST)
+
+The `asc web-server` command exposes the same functionality as the CLI over HTTP so an agent can drive it as a REST service. **A feature is not complete until it is reachable via REST.**
+
+Required steps when adding a new list/read command (or any command that returns data an agent might want over HTTP):
+
+1. **Make the domain model `Presentable`** — `tableHeaders` + `tableRow`. Needed because `restFormat` is `<T: Encodable & AffordanceProviding & Presentable>`
+2. **Use `structuredAffordances` (not raw `affordances`)** on the model — the REST renderer derives `_links` from `Affordance` values; returning a plain `[String: String]` leaves `_links` empty
+3. **Give the command an `affordanceMode` parameter** — `func execute(repo:…, affordanceMode: AffordanceMode = .cli)` forwards to `formatter.formatAgentItems(items, affordanceMode: affordanceMode)`. The same `execute` runs for both `cli` and `rest` modes
+4. **Add/extend a controller** under `Sources/ASCCommand/Commands/Web/Controllers/` — inject the repository, register a `group.get("/…")` route, parse query params via `request.uri.queryParameters` (use the same names as the CLI flags, e.g. `?state=&limit=&expired-only=&before=`), call the repository, return `try restFormat(items)`
+5. **Wire the controller** in `Sources/ASCCommand/Commands/Web/RESTRoutes.swift` (construct with `factory.make…Repository(authProvider: auth)`)
+6. **Advertise the resource** from `APIRoot.structuredAffordances` so `GET /api/v1` lists the new top-level resource
+7. **Add a REST test** in `Tests/ASCCommandTests/Commands/Web/RESTRoutesTests.swift` — call `execute(repo:affordanceMode: .rest)` and assert the output contains `"_links"` and the resolved REST paths
+8. **CLI and REST query-param names must match** — if the CLI uses `--expired-only`, the REST query param is `?expired-only=true`; both go through the same repository method
+
+Shared helpers (all in `Sources/ASCCommand/Commands/Web/RESTRoutes.swift`):
+- `restFormat(items)` — REST equivalent of `formatter.formatAgentItems(items, affordanceMode: .rest)`
+- `jsonError(message, status:)` — JSON error response (lives in `Infrastructure/Web/ASCWebServer.swift`; `import Infrastructure`)
+
+Controllers are structs with dependencies injected at init (Hummingbird pattern). Repositories are constructed once in `RESTRoutes.configure`, never per request.
 
 ### Resource Hierarchy
 
@@ -172,7 +194,7 @@ After every code change — new feature, improvement, or bug fix — update all 
 
 | Change type | Files to update |
 |-------------|-----------------|
-| New feature / command | `docs/features/<feature>.md` (create), `CHANGELOG.md` ([Unreleased]), `README.md` (feature list + CLI examples), `skills/` (relevant skill files) |
+| New feature / command | `docs/features/<feature>.md` (create, include a **REST Endpoints** section), `CHANGELOG.md` ([Unreleased]), `README.md` (feature list + CLI examples), `skills/` (relevant skill files), `Sources/ASCCommand/Commands/Web/Controllers/` (new or extended controller), `Sources/ASCCommand/Commands/Web/RESTRoutes.swift` (wire controller), `Sources/Domain/Shared/APIRoot.swift` (advertise new top-level resource), `Tests/ASCCommandTests/Commands/Web/RESTRoutesTests.swift` (REST test) |
 | Improvement / enhancement | `docs/features/<feature>.md` (update affected sections), `CHANGELOG.md` ([Unreleased]) |
 | Bug fix | `CHANGELOG.md` ([Unreleased]) |
 | Architecture / API change | `CLAUDE.md` (update architecture / patterns sections), `docs/features/<feature>.md` |
@@ -182,13 +204,14 @@ After every code change — new feature, improvement, or bug fix — update all 
 
 **`docs/features/<feature>.md`** — write from actual code (read files first, never from memory). Structure:
 1. CLI Usage — flags table + examples + output samples (json + table)
-2. Typical Workflow — end-to-end bash script showing the happy path
-3. Architecture — three-layer ASCII diagram + dependency note
-4. Domain Models — every public struct/enum/protocol with fields, computed properties, affordances
-5. File Map — `Sources/` and `Tests/` trees + wiring files table
-6. API Reference — endpoint → SDK call → repository method
-7. Testing — representative test snippet + `swift test` command
-8. Extending — natural next steps with stub code
+2. REST Endpoints — path table + query-param mapping (CLI flag → REST query) + curl example
+3. Typical Workflow — end-to-end bash script showing the happy path
+4. Architecture — three-layer ASCII diagram + dependency note
+5. Domain Models — every public struct/enum/protocol with fields, computed properties, affordances
+6. File Map — `Sources/` and `Tests/` trees + wiring files table (must list the REST controller)
+7. API Reference — endpoint → SDK call → repository method
+8. Testing — representative test snippet + `swift test` command
+9. Extending — natural next steps with stub code
 
 **`CHANGELOG.md`** — add entry under `[Unreleased]` using Keep a Changelog format:
 - `### Added` for new features/commands

@@ -10,9 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **`asc review-submissions list`** — list App Store review submissions for an app. Required `--app-id`; optional `--state <CSV>` (e.g. `WAITING_FOR_REVIEW,IN_REVIEW,READY_FOR_REVIEW` or `UNRESOLVED_ISSUES`) and `--limit`. Backed by `SubmissionRepository.listSubmissions(appId:states:limit:)`
 - **`asc certificates list` filtering flags** — `--limit` (server-side), `--expired-only` (client-side, drops unexpired certs), `--before <ISO8601>` (client-side, keeps certs with expirationDate strictly before the cutoff)
+- **REST endpoint `GET /api/v1/apps/{appId}/review-submissions`** — new `ReviewSubmissionsController` in the `asc web-server`. Supports `?state=…&limit=…` query params; mirrors the CLI
+- **REST endpoint `GET /api/v1/certificates` query params** — now honours `?type=&limit=&expired-only=&before=` (previously ignored). Same filter semantics as the CLI
+- **`reviewSubmissions` affordance on `GET /api/v1`** — API root now advertises the review-submissions resource
 
 ### Changed
 - **`CertificateRepository.listCertificates`** signature now takes `(certificateType:limit:)` — forwards `limit` to the SDK
+- **`ReviewSubmission` REST links** — affordance migrated from raw `affordances` dictionary to `structuredAffordances`, so REST responses now render `_links` correctly (e.g. `/api/v1/apps/{appId}/versions`)
 
 ---
 
