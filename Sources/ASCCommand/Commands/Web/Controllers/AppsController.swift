@@ -19,6 +19,7 @@ struct AppsController: Sendable {
     let appInfoRepo: any AppInfoRepository
     let appCategoryRepo: any AppCategoryRepository
     let ageRatingRepo: any AgeRatingDeclarationRepository
+    let screenshotRepo: any ScreenshotRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/apps") { request, _ -> Response in
@@ -121,6 +122,18 @@ struct AppsController: Sendable {
             guard let appInfoId = context.parameters.get("appInfoId") else { return jsonError("Missing appInfoId") }
             let declaration = try await self.ageRatingRepo.getDeclaration(appInfoId: appInfoId)
             return try restFormat(declaration)
+        }
+
+        group.get("/version-localizations/:localizationId/screenshot-sets") { _, context -> Response in
+            guard let localizationId = context.parameters.get("localizationId") else { return jsonError("Missing localizationId") }
+            let sets = try await self.screenshotRepo.listScreenshotSets(localizationId: localizationId)
+            return try restFormat(sets)
+        }
+
+        group.get("/screenshot-sets/:setId/screenshots") { _, context -> Response in
+            guard let setId = context.parameters.get("setId") else { return jsonError("Missing setId") }
+            let shots = try await self.screenshotRepo.listScreenshots(setId: setId)
+            return try restFormat(shots)
         }
 
         group.patch("/app-infos/:appInfoId") { request, context -> Response in

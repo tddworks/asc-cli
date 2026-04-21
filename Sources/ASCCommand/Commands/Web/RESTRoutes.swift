@@ -32,7 +32,8 @@ enum RESTRoutes {
             subscriptionGroupRepo: factory.makeSubscriptionGroupRepository(authProvider: auth),
             appInfoRepo: factory.makeAppInfoRepository(authProvider: auth),
             appCategoryRepo: factory.makeAppCategoryRepository(authProvider: auth),
-            ageRatingRepo: factory.makeAgeRatingDeclarationRepository(authProvider: auth)
+            ageRatingRepo: factory.makeAgeRatingDeclarationRepository(authProvider: auth),
+            screenshotRepo: factory.makeScreenshotRepository(authProvider: auth)
         ) { apps.addRoutes(to: v1) }
 
         // Code signing
