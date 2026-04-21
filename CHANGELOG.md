@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`GET /api/v1/apps?include=icon`** — enriches each app in the response with its primary build's `iconAsset` (`templateUrl`, `width`, `height`). Icon fetch is opt-in to keep the default list-apps path fast. Without `?include=icon`, behaviour is unchanged. Template URL placeholders (`{w}`, `{h}`, `{f}`) can be substituted client-side to render at any size (e.g. `120x120bb.png`).
 - **Domain types `ImageAsset`, `App.iconAsset`** — new optional `iconAsset` on `App` (omitted from JSON when nil), new `ImageAsset` value type under `Domain/Shared/` with `url(maxSize:format:)` helper. Populated from SDK `Build.iconAssetToken` via `/v1/apps/{id}/appStoreVersions?include=build`
 - **`AppRepository.fetchAppIcon(appId:)`** — returns `ImageAsset?` by joining the latest app version to its build. Returns `nil` when no version has an attached build
+- **`GET /api/v1/apps/{appId}/app-infos`** — new REST route backed by `AppInfoRepository`. Previously the affordance on `App` advertised this path but the controller returned 404. `AppInfo` is now `Presentable` and uses `structuredAffordances`, so responses include `_links` to app-info localizations, age rating, and the enclosing app-infos list
 
 ---
 
