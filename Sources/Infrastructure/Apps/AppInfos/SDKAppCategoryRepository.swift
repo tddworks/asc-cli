@@ -26,6 +26,12 @@ public struct SDKAppCategoryRepository: AppCategoryRepository, @unchecked Sendab
         return topLevel + subcategories
     }
 
+    public func getCategory(id: String) async throws -> Domain.AppCategory {
+        let request = APIEndpoint.v1.appCategories.id(id).get()
+        let response = try await client.request(request)
+        return mapCategory(response.data)
+    }
+
     // MARK: - Mapper
 
     private func mapCategory(_ sdkCategory: AppStoreConnect_Swift_SDK.AppCategory) -> Domain.AppCategory {

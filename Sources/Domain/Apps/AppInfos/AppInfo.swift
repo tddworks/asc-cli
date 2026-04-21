@@ -64,11 +64,26 @@ extension AppInfo: Presentable {
 
 extension AppInfo: AffordanceProviding {
     public var structuredAffordances: [Affordance] {
-        [
+        var items: [Affordance] = [
             Affordance(key: "listLocalizations", command: "app-info-localizations", action: "list", params: ["app-info-id": id]),
             Affordance(key: "listAppInfos", command: "app-infos", action: "list", params: ["app-id": appId]),
             Affordance(key: "getAgeRating", command: "age-rating", action: "get", params: ["app-info-id": id]),
             Affordance(key: "updateCategories", command: "app-infos", action: "update", params: ["app-info-id": id]),
         ]
+        for (key, categoryId) in categoryAffordancePairs {
+            items.append(Affordance(key: key, command: "app-categories", action: "get", params: ["category-id": categoryId]))
+        }
+        return items
+    }
+
+    private var categoryAffordancePairs: [(String, String)] {
+        var pairs: [(String, String)] = []
+        if let id = primaryCategoryId { pairs.append(("getPrimaryCategory", id)) }
+        if let id = primarySubcategoryOneId { pairs.append(("getPrimarySubcategoryOne", id)) }
+        if let id = primarySubcategoryTwoId { pairs.append(("getPrimarySubcategoryTwo", id)) }
+        if let id = secondaryCategoryId { pairs.append(("getSecondaryCategory", id)) }
+        if let id = secondarySubcategoryOneId { pairs.append(("getSecondarySubcategoryOne", id)) }
+        if let id = secondarySubcategoryTwoId { pairs.append(("getSecondarySubcategoryTwo", id)) }
+        return pairs
     }
 }

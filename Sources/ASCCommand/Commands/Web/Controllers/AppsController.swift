@@ -16,6 +16,7 @@ struct AppsController: Sendable {
     let iapRepo: any InAppPurchaseRepository
     let subscriptionGroupRepo: any SubscriptionGroupRepository
     let appInfoRepo: any AppInfoRepository
+    let appCategoryRepo: any AppCategoryRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/apps") { request, _ -> Response in
@@ -100,6 +101,18 @@ struct AppsController: Sendable {
             guard let appInfoId = context.parameters.get("appInfoId") else { return jsonError("Missing appInfoId") }
             let items = try await self.appInfoRepo.listLocalizations(appInfoId: appInfoId)
             return try restFormat(items)
+        }
+
+        group.get("/app-categories") { request, _ -> Response in
+            let platform = request.uri.queryParameters["platform"].map(String.init)
+            let categories = try await self.appCategoryRepo.listCategories(platform: platform)
+            return try restFormat(categories)
+        }
+
+        group.get("/app-categories/:categoryId") { _, context -> Response in
+            guard let categoryId = context.parameters.get("categoryId") else { return jsonError("Missing categoryId") }
+            let category = try await self.appCategoryRepo.getCategory(id: categoryId)
+            return try restFormat(category)
         }
     }
 

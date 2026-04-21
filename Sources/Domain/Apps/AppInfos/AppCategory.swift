@@ -14,13 +14,25 @@ public struct AppCategory: Sendable, Equatable, Identifiable, Codable {
     }
 }
 
+extension AppCategory: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Platforms", "Parent ID"]
+    }
+    public var tableRow: [String] {
+        [id, platforms.joined(separator: ","), parentId ?? "-"]
+    }
+}
+
 extension AppCategory: AffordanceProviding {
-    public var affordances: [String: String] {
-        ["listCategories": "asc app-categories list"]
+    public var structuredAffordances: [Affordance] {
+        [
+            Affordance(key: "listCategories", command: "app-categories", action: "list", params: [:]),
+        ]
     }
 }
 
 @Mockable
 public protocol AppCategoryRepository: Sendable {
     func listCategories(platform: String?) async throws -> [AppCategory]
+    func getCategory(id: String) async throws -> AppCategory
 }

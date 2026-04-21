@@ -62,4 +62,36 @@ struct AppInfoTests {
         let info = AppInfo(id: "info-1", appId: "app-1")
         #expect(info.appStoreAgeRating == nil)
     }
+
+    @Test func `appInfo affordances include getPrimaryCategory when set`() {
+        let info = AppInfo(id: "info-1", appId: "app-1", primaryCategoryId: "6014")
+        #expect(info.affordances["getPrimaryCategory"] == "asc app-categories get --category-id 6014")
+    }
+
+    @Test func `appInfo has no getPrimaryCategory affordance when category is nil`() {
+        let info = AppInfo(id: "info-1", appId: "app-1")
+        #expect(info.affordances["getPrimaryCategory"] == nil)
+    }
+
+    @Test func `appInfo affordances include getSecondaryCategory when set`() {
+        let info = AppInfo(id: "info-1", appId: "app-1", secondaryCategoryId: "6005")
+        #expect(info.affordances["getSecondaryCategory"] == "asc app-categories get --category-id 6005")
+    }
+
+    @Test func `appInfo affordances include subcategory getters when set`() {
+        let info = AppInfo(
+            id: "info-1",
+            appId: "app-1",
+            primaryCategoryId: "6014",
+            primarySubcategoryOneId: "7001",
+            primarySubcategoryTwoId: "7002",
+            secondaryCategoryId: "6005",
+            secondarySubcategoryOneId: "7003",
+            secondarySubcategoryTwoId: "7004"
+        )
+        #expect(info.affordances["getPrimarySubcategoryOne"] == "asc app-categories get --category-id 7001")
+        #expect(info.affordances["getPrimarySubcategoryTwo"] == "asc app-categories get --category-id 7002")
+        #expect(info.affordances["getSecondarySubcategoryOne"] == "asc app-categories get --category-id 7003")
+        #expect(info.affordances["getSecondarySubcategoryTwo"] == "asc app-categories get --category-id 7004")
+    }
 }
