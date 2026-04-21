@@ -324,14 +324,10 @@ struct AffordanceTests {
         RESTPathResolver.removeRoute(command: "custom-widgets")
     }
 
-    @Test func `custom resource registered at runtime resolves for get`() {
+    @Test func `get action on custom command resolves to segment matching the command name`() {
         // singularize("custom-widgets") → "custom-widget" → param "custom-widget-id"
-        RESTPathResolver.registerResource(param: "custom-widget-id", segment: "custom-widgets")
         let a = Affordance(key: "getWidget", command: "custom-widgets", action: "get", params: ["custom-widget-id": "w-1"])
         #expect(a.restLink.href == "/api/v1/custom-widgets/w-1")
-
-        // Clean up
-        RESTPathResolver.removeResource(param: "custom-widget-id")
     }
 
     @Test func `update action uses command segment when cli flag differs from singularized name`() {

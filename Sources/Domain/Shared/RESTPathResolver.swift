@@ -1,10 +1,15 @@
 import Foundation
 
-/// Resolves CLI command + params into a REST API path.
+/// Resolves a CLI command + params tuple into a REST API path.
 ///
-/// **Open-Closed**: the resolver never needs editing to add routes.
-/// Each domain registers its own routes via `RESTPathResolver.registerRoute()`
-/// — typically in the same file as its `AffordanceProviding` conformance.
+/// **Single rule for resource actions (get/update/delete/submit/…):**
+///  the command *is* the REST segment. Whatever `-id` flag appears in
+///  `params` names the resource being acted on — the flag shape is a
+///  CLI concern, not a REST one.
+///
+/// **Single rule for list/create under a parent:** domains register a
+/// route up-front (`registerRoute`) declaring the parent param and the
+/// child segment.
 ///
 /// Example (in `App.swift`):
 /// ```swift
@@ -30,7 +35,6 @@ public final class RESTPathResolver: @unchecked Sendable {
 
     private static let lock = NSLock()
     nonisolated(unsafe) private static var routes: [String: Route] = [:]
-    nonisolated(unsafe) private static var resources: [String: String] = [:]
     nonisolated(unsafe) private static var initialized = false
 
     // MARK: - Registration API (called by domain modules)
@@ -42,25 +46,11 @@ public final class RESTPathResolver: @unchecked Sendable {
         routes[command] = Route(parentParam: parentParam, parentSegment: parentSegment, segment: segment)
     }
 
-    /// Register a resource ID mapping (for get/update/delete actions).
-    public static func registerResource(param: String, segment: String) {
-        lock.lock()
-        defer { lock.unlock() }
-        resources[param] = segment
-    }
-
     /// Remove a route (for testing cleanup).
     public static func removeRoute(command: String) {
         lock.lock()
         defer { lock.unlock() }
         routes.removeValue(forKey: command)
-    }
-
-    /// Remove a resource mapping (for testing cleanup).
-    public static func removeResource(param: String) {
-        lock.lock()
-        defer { lock.unlock() }
-        resources.removeValue(forKey: param)
     }
 
     // MARK: - Resolution
@@ -70,38 +60,50 @@ public final class RESTPathResolver: @unchecked Sendable {
 
         lock.lock()
         let currentRoutes = routes
-        let currentResources = resources
         lock.unlock()
 
         let base = "/api/v1"
 
-        // Actions on an existing resource by its own ID (get, update, delete, submit, etc.)
-        if action != "list" && action != "create" {
-            // Preferred: the flag matches the singularized command (e.g. `--version-id` for
-            // `versions`) and may be aliased via a global mapping (e.g. `product-id → xcode-cloud`).
-            let derivedIdParam = "\(singularize(command))-id"
-            if let idValue = params[derivedIdParam] {
-                let segment = currentResources[derivedIdParam] ?? command
-                return resourcePath(base: base, segment: segment, id: idValue, action: action)
-            }
-            // Fallback: the CLI may use a shorter alias shared between resources
-            // (e.g. `--localization-id` in both version-localizations and app-info-localizations).
-            // The command name alone determines the segment — global alias tables are ambiguous here.
-            if let key = params.keys.filter({ $0.hasSuffix("-id") }).sorted().first,
-               let idValue = params[key] {
-                return resourcePath(base: base, segment: command, id: idValue, action: action)
-            }
+        // Actions on a resource by its own id (get, update, delete, submit, …).
+        if action != "list", action != "create",
+           let idValue = resourceId(in: params, command: command) {
+            return resourcePath(base: base, segment: command, id: idValue, action: action)
         }
 
-        // List/create under parent
-        if let route = currentRoutes[command] {
-            if let parentId = params[route.parentParam] {
-                return "\(base)/\(route.parentSegment)/\(parentId)/\(route.segment)"
-            }
+        // List/create under a parent resource.
+        if let route = currentRoutes[command],
+           let parentId = params[route.parentParam] {
+            return "\(base)/\(route.parentSegment)/\(parentId)/\(route.segment)"
         }
 
-        // Top-level resource (e.g. apps list)
+        // Top-level (list/create on the resource itself).
         return "\(base)/\(command)"
+    }
+
+    // MARK: - Helpers
+
+    /// Pick the id value for a resource action. Prefers the singularized-from-command
+    /// name (`version-id` for `versions`, `certificate-id` for `certificates`), otherwise
+    /// accepts any `*-id` key — CLI flags can be short aliases shared across commands
+    /// (`--localization-id`, `--product-id`) and the *command* is the authoritative segment.
+    private static func resourceId(in params: [String: String], command: String) -> String? {
+        if let value = params["\(singularize(command))-id"] { return value }
+        guard let key = params.keys.filter({ $0.hasSuffix("-id") }).sorted().first else { return nil }
+        return params[key]
+    }
+
+    private static func resourcePath(base: String, segment: String, id: String, action: String) -> String {
+        if action == "get" || action == "update" || action == "delete" {
+            return "\(base)/\(segment)/\(id)"
+        }
+        return "\(base)/\(segment)/\(id)/\(action)"
+    }
+
+    private static func singularize(_ command: String) -> String {
+        if command.hasSuffix("s") {
+            return String(command.dropLast())
+        }
+        return command
     }
 
     // MARK: - Lazy initialization
@@ -125,20 +127,5 @@ public final class RESTPathResolver: @unchecked Sendable {
         _ = _xcodeCloudRoutes
         _ = _codeSigningRoutes
         _ = _appShotsRoutes
-        _ = _resourceMappings
-    }
-
-    private static func resourcePath(base: String, segment: String, id: String, action: String) -> String {
-        if action == "get" || action == "update" || action == "delete" {
-            return "\(base)/\(segment)/\(id)"
-        }
-        return "\(base)/\(segment)/\(id)/\(action)"
-    }
-
-    private static func singularize(_ command: String) -> String {
-        if command.hasSuffix("s") {
-            return String(command.dropLast())
-        }
-        return command
     }
 }
