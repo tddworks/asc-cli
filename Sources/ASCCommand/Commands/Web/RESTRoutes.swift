@@ -20,21 +20,45 @@ enum RESTRoutes {
         let auth = CompositeAuthProvider()
         let factory = ClientFactory()
 
-        // Apps & child resources
-        if let apps = try? AppsController(
-            appRepo: factory.makeAppRepository(authProvider: auth),
-            versionRepo: factory.makeVersionRepository(authProvider: auth),
-            localizationRepo: factory.makeVersionLocalizationRepository(authProvider: auth),
-            buildRepo: factory.makeBuildRepository(authProvider: auth),
-            testFlightRepo: factory.makeTestFlightRepository(authProvider: auth),
-            reviewRepo: factory.makeCustomerReviewRepository(authProvider: auth),
-            iapRepo: factory.makeInAppPurchaseRepository(authProvider: auth),
-            subscriptionGroupRepo: factory.makeSubscriptionGroupRepository(authProvider: auth),
-            appInfoRepo: factory.makeAppInfoRepository(authProvider: auth),
-            appCategoryRepo: factory.makeAppCategoryRepository(authProvider: auth),
-            ageRatingRepo: factory.makeAgeRatingDeclarationRepository(authProvider: auth),
-            screenshotRepo: factory.makeScreenshotRepository(authProvider: auth)
-        ) { apps.addRoutes(to: v1) }
+        // App resource hierarchy — one focused controller per resource type.
+        // Order is incidental; each controller registers its own routes.
+        if let appRepo = try? factory.makeAppRepository(authProvider: auth) {
+            AppsController(repo: appRepo).addRoutes(to: v1)
+        }
+        if let versionRepo = try? factory.makeVersionRepository(authProvider: auth) {
+            VersionsController(repo: versionRepo).addRoutes(to: v1)
+        }
+        if let localizationRepo = try? factory.makeVersionLocalizationRepository(authProvider: auth) {
+            VersionLocalizationsController(repo: localizationRepo).addRoutes(to: v1)
+        }
+        if let screenshotRepo = try? factory.makeScreenshotRepository(authProvider: auth) {
+            ScreenshotSetsController(repo: screenshotRepo).addRoutes(to: v1)
+            ScreenshotsController(repo: screenshotRepo).addRoutes(to: v1)
+        }
+        if let buildRepo = try? factory.makeBuildRepository(authProvider: auth) {
+            BuildsController(repo: buildRepo).addRoutes(to: v1)
+        }
+        if let testFlightRepo = try? factory.makeTestFlightRepository(authProvider: auth) {
+            TestFlightController(repo: testFlightRepo).addRoutes(to: v1)
+        }
+        if let reviewRepo = try? factory.makeCustomerReviewRepository(authProvider: auth) {
+            CustomerReviewsController(repo: reviewRepo).addRoutes(to: v1)
+        }
+        if let iapRepo = try? factory.makeInAppPurchaseRepository(authProvider: auth) {
+            IAPController(repo: iapRepo).addRoutes(to: v1)
+        }
+        if let subscriptionGroupRepo = try? factory.makeSubscriptionGroupRepository(authProvider: auth) {
+            SubscriptionGroupsController(repo: subscriptionGroupRepo).addRoutes(to: v1)
+        }
+        if let appInfoRepo = try? factory.makeAppInfoRepository(authProvider: auth) {
+            AppInfosController(repo: appInfoRepo).addRoutes(to: v1)
+        }
+        if let appCategoryRepo = try? factory.makeAppCategoryRepository(authProvider: auth) {
+            AppCategoriesController(repo: appCategoryRepo).addRoutes(to: v1)
+        }
+        if let ageRatingRepo = try? factory.makeAgeRatingDeclarationRepository(authProvider: auth) {
+            AgeRatingController(repo: ageRatingRepo).addRoutes(to: v1)
+        }
 
         // Code signing
         if let signing = try? CodeSigningController(
