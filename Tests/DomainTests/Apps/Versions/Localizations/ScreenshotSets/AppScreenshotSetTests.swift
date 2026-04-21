@@ -107,6 +107,22 @@ struct AppScreenshotSetTests {
         }
     }
 
+    @Test
+    func `set apiLinks include listScreenshots resolving to rest path`() {
+        let set = MockRepositoryFactory.makeScreenshotSet(id: "set-1", localizationId: "loc-1")
+        let link = set.apiLinks["listScreenshots"]
+        #expect(link?.href == "/api/v1/screenshot-sets/set-1/screenshots")
+        #expect(link?.method == "GET")
+    }
+
+    @Test
+    func `set apiLinks include listScreenshotSets resolving to parent path`() {
+        let set = MockRepositoryFactory.makeScreenshotSet(id: "set-1", localizationId: "loc-1")
+        let link = set.apiLinks["listScreenshotSets"]
+        #expect(link?.href == "/api/v1/version-localizations/loc-1/screenshot-sets")
+        #expect(link?.method == "GET")
+    }
+
     // MARK: - Codable round-trip
 
     @Test

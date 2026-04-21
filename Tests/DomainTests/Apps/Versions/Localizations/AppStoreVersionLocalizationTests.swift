@@ -64,6 +64,13 @@ struct AppStoreVersionLocalizationTests {
         #expect(loc.tableRow == ["loc-1", "en-US", "A great app", ""])
     }
 
+    @Test func `localization apiLinks include listScreenshotSets under this localization`() {
+        let loc = MockRepositoryFactory.makeLocalization(id: "loc-1", versionId: "v-1")
+        let link = loc.apiLinks["listScreenshotSets"]
+        #expect(link?.href == "/api/v1/version-localizations/loc-1/screenshot-sets")
+        #expect(link?.method == "GET")
+    }
+
     @Test func `localization round trips through JSON`() throws {
         let original = MockRepositoryFactory.makeLocalization(
             id: "loc-1",

@@ -109,4 +109,12 @@ struct AppScreenshotTests {
         let s = MockRepositoryFactory.makeScreenshot(id: "1", sourceUrl: template)
         #expect(s.sourceUrl == template)
     }
+
+    @Test
+    func `screenshot apiLinks include listScreenshots under its set`() {
+        let s = MockRepositoryFactory.makeScreenshot(id: "shot-1", setId: "set-42")
+        let link = s.apiLinks["listScreenshots"]
+        #expect(link?.href == "/api/v1/screenshot-sets/set-42/screenshots")
+        #expect(link?.method == "GET")
+    }
 }
