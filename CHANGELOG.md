@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.17.0] - 2026-04-21
+
 ### Added
 - **`GET /api/v1/apps?include=icon`** — enriches each app in the response with its primary build's `iconAsset` (`templateUrl`, `width`, `height`). Icon fetch is opt-in to keep the default list-apps path fast. Without `?include=icon`, behaviour is unchanged. Template URL placeholders (`{w}`, `{h}`, `{f}`) can be substituted client-side to render at any size (e.g. `120x120bb.png`).
 - **Domain types `ImageAsset`, `App.iconAsset`** — new optional `iconAsset` on `App` (omitted from JSON when nil), new `ImageAsset` value type under `Domain/Shared/` with `url(maxSize:format:)` helper. Populated from SDK `Build.iconAssetToken` via `/v1/apps/{id}/appStoreVersions?include=build`
@@ -720,7 +724,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.16.9...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/tddworks/asc-cli/compare/v0.16.9...v0.17.0
 [0.16.9]: https://github.com/tddworks/asc-cli/compare/v0.1.68...v0.16.9
 [0.1.68]: https://github.com/tddworks/asc-cli/compare/v0.1.67...v0.1.68
 [0.1.67]: https://github.com/tddworks/asc-cli/compare/v0.1.66...v0.1.67
