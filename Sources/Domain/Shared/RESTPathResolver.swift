@@ -77,13 +77,19 @@ public final class RESTPathResolver: @unchecked Sendable {
 
         // Actions on an existing resource by its own ID (get, update, delete, submit, etc.)
         if action != "list" && action != "create" {
-            let idParam = "\(singularize(command))-id"
-            if let idValue = params[idParam] {
-                let segment = currentResources[idParam] ?? command
-                if action == "get" || action == "update" || action == "delete" {
-                    return "\(base)/\(segment)/\(idValue)"
-                }
-                return "\(base)/\(segment)/\(idValue)/\(action)"
+            // Preferred: the flag matches the singularized command (e.g. `--version-id` for
+            // `versions`) and may be aliased via a global mapping (e.g. `product-id → xcode-cloud`).
+            let derivedIdParam = "\(singularize(command))-id"
+            if let idValue = params[derivedIdParam] {
+                let segment = currentResources[derivedIdParam] ?? command
+                return resourcePath(base: base, segment: segment, id: idValue, action: action)
+            }
+            // Fallback: the CLI may use a shorter alias shared between resources
+            // (e.g. `--localization-id` in both version-localizations and app-info-localizations).
+            // The command name alone determines the segment — global alias tables are ambiguous here.
+            if let key = params.keys.filter({ $0.hasSuffix("-id") }).sorted().first,
+               let idValue = params[key] {
+                return resourcePath(base: base, segment: command, id: idValue, action: action)
             }
         }
 
@@ -120,6 +126,13 @@ public final class RESTPathResolver: @unchecked Sendable {
         _ = _codeSigningRoutes
         _ = _appShotsRoutes
         _ = _resourceMappings
+    }
+
+    private static func resourcePath(base: String, segment: String, id: String, action: String) -> String {
+        if action == "get" || action == "update" || action == "delete" {
+            return "\(base)/\(segment)/\(id)"
+        }
+        return "\(base)/\(segment)/\(id)/\(action)"
     }
 
     private static func singularize(_ command: String) -> String {

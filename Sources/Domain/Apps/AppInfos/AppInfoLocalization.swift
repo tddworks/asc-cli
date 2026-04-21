@@ -30,12 +30,21 @@ public struct AppInfoLocalization: Sendable, Equatable, Identifiable, Codable {
     }
 }
 
+extension AppInfoLocalization: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Locale", "Name", "Subtitle"]
+    }
+    public var tableRow: [String] {
+        [id, locale, name ?? "-", subtitle ?? "-"]
+    }
+}
+
 extension AppInfoLocalization: AffordanceProviding {
-    public var affordances: [String: String] {
+    public var structuredAffordances: [Affordance] {
         [
-            "delete": "asc app-info-localizations delete --localization-id \(id)",
-            "listLocalizations": "asc app-info-localizations list --app-info-id \(appInfoId)",
-            "updateLocalization": "asc app-info-localizations update --localization-id \(id)",
+            Affordance(key: "listLocalizations", command: "app-info-localizations", action: "list", params: ["app-info-id": appInfoId]),
+            Affordance(key: "updateLocalization", command: "app-info-localizations", action: "update", params: ["localization-id": id]),
+            Affordance(key: "delete", command: "app-info-localizations", action: "delete", params: ["localization-id": id]),
         ]
     }
 }

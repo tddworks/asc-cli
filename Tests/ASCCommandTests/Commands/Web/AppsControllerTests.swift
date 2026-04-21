@@ -48,6 +48,32 @@ struct AppsControllerTests {
         #expect(!normalized.contains("\"affordances\""))
     }
 
+    @Test func `app info localizations list returns JSON with _links and fields`() async throws {
+        let mockRepo = MockAppInfoRepository()
+        given(mockRepo).listLocalizations(appInfoId: .any).willReturn([
+            AppInfoLocalization(
+                id: "loc-1",
+                appInfoId: "ai-1",
+                locale: "en-US",
+                name: "My App",
+                subtitle: "Does things",
+                privacyPolicyUrl: "https://example.com/privacy"
+            ),
+        ])
+        let items = try await mockRepo.listLocalizations(appInfoId: "ai-1")
+
+        let formatter = OutputFormatter(format: .json, pretty: true)
+        let output = try formatter.formatAgentItems(items, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("\"data\""))
+        #expect(normalized.contains("\"locale\" : \"en-US\""))
+        #expect(normalized.contains("\"name\" : \"My App\""))
+        #expect(normalized.contains("/api/v1/app-infos/ai-1/localizations"))
+        #expect(normalized.contains("/api/v1/app-info-localizations/loc-1"))
+        #expect(!normalized.contains("\"affordances\""))
+    }
+
     @Test func `apps list without include icon omits iconAsset`() async throws {
         let mockRepo = MockAppRepository()
         given(mockRepo).listApps(limit: .any).willReturn(

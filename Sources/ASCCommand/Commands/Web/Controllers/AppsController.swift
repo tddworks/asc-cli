@@ -95,6 +95,12 @@ struct AppsController: Sendable {
             let infos = try await self.appInfoRepo.listAppInfos(appId: appId)
             return try restFormat(infos)
         }
+
+        group.get("/app-infos/:appInfoId/localizations") { _, context -> Response in
+            guard let appInfoId = context.parameters.get("appInfoId") else { return jsonError("Missing appInfoId") }
+            let items = try await self.appInfoRepo.listLocalizations(appInfoId: appInfoId)
+            return try restFormat(items)
+        }
     }
 
     /// Load apps and, when requested, enrich each one with its icon asset.

@@ -333,4 +333,28 @@ struct AffordanceTests {
         // Clean up
         RESTPathResolver.removeResource(param: "custom-widget-id")
     }
+
+    @Test func `update action uses command segment when cli flag differs from singularized name`() {
+        // `app-info-localizations` uses `--localization-id` (not `--app-info-localization-id`).
+        // The resolver should still route `update` to `/api/v1/app-info-localizations/:id`.
+        let a = Affordance(
+            key: "updateLocalization",
+            command: "app-info-localizations",
+            action: "update",
+            params: ["localization-id": "loc-1"]
+        )
+        #expect(a.restLink.href == "/api/v1/app-info-localizations/loc-1")
+        #expect(a.restLink.method == "PATCH")
+    }
+
+    @Test func `delete action uses command segment when cli flag differs from singularized name`() {
+        let a = Affordance(
+            key: "deleteLocalization",
+            command: "app-info-localizations",
+            action: "delete",
+            params: ["localization-id": "loc-1"]
+        )
+        #expect(a.restLink.href == "/api/v1/app-info-localizations/loc-1")
+        #expect(a.restLink.method == "DELETE")
+    }
 }
