@@ -34,6 +34,7 @@ public final class RESTPathResolver: @unchecked Sendable {
     }
 
     private static let lock = NSLock()
+    private static let initLock = NSLock()
     nonisolated(unsafe) private static var routes: [String: Route] = [:]
     nonisolated(unsafe) private static var initialized = false
 
@@ -110,11 +111,15 @@ public final class RESTPathResolver: @unchecked Sendable {
 
     /// Triggers all domain route registrations on first use.
     /// Each domain adds a static `_*Routes: Void` property via extension.
+    ///
+    /// Must hold the lock for the whole registration sequence so concurrent callers
+    /// don't observe `initialized == true` while the `routes` dictionary is still empty.
     private static func ensureInitialized() {
-        lock.lock()
-        guard !initialized else { lock.unlock(); return }
-        initialized = true
-        lock.unlock()
+        // Separate from `lock` so the domain `registerRoute` calls triggered below
+        // can acquire `lock` without re-entering this critical section.
+        initLock.lock()
+        defer { initLock.unlock() }
+        guard !initialized else { return }
 
         // Touch each domain's lazy registration property.
         // OCP: add one line here when adding a new domain.
@@ -127,5 +132,7 @@ public final class RESTPathResolver: @unchecked Sendable {
         _ = _xcodeCloudRoutes
         _ = _codeSigningRoutes
         _ = _appShotsRoutes
+
+        initialized = true
     }
 }
