@@ -17,8 +17,11 @@ struct AppsController: Sendable {
     let subscriptionGroupRepo: any SubscriptionGroupRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
-        group.get("/apps") { _, _ -> Response in
-            let apps = try await self.appRepo.listApps(limit: nil).data
+        group.get("/apps") { request, _ -> Response in
+            let includeIcon = (request.uri.queryParameters["include"].map(String.init) ?? "")
+                .split(separator: ",")
+                .contains("icon")
+            let apps = try await Self.loadApps(repo: self.appRepo, includeIcon: includeIcon)
             return try restFormat(apps)
         }
 
@@ -85,5 +88,28 @@ struct AppsController: Sendable {
             let groups = try await self.subscriptionGroupRepo.listSubscriptionGroups(appId: appId, limit: nil).data
             return try restFormat(groups)
         }
+    }
+
+    /// Load apps and, when requested, enrich each one with its icon asset.
+    /// Icon fetch is parallel across apps; nil icons are tolerated.
+    static func loadApps(repo: any AppRepository, includeIcon: Bool) async throws -> [App] {
+        let apps = try await repo.listApps(limit: nil).data
+        guard includeIcon else { return apps }
+
+        let icons = await withTaskGroup(of: (String, ImageAsset?).self) { group in
+            for app in apps {
+                group.addTask {
+                    let icon = try? await repo.fetchAppIcon(appId: app.id)
+                    return (app.id, icon ?? nil)
+                }
+            }
+            var byId: [String: ImageAsset] = [:]
+            for await (id, asset) in group {
+                if let asset { byId[id] = asset }
+            }
+            return byId
+        }
+
+        return apps.map { $0.with(iconAsset: icons[$0.id]) }
     }
 }

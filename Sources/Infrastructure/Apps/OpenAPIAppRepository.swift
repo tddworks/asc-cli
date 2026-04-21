@@ -24,6 +24,35 @@ public struct SDKAppRepository: AppRepository, @unchecked Sendable {
         return mapApp(response.data)
     }
 
+    public func fetchAppIcon(appId: String) async throws -> Domain.ImageAsset? {
+        let request = APIEndpoint.v1.apps.id(appId).appStoreVersions.get(
+            parameters: .init(
+                fieldsBuilds: [.iconAssetToken],
+                include: [.build]
+            )
+        )
+        let response = try await client.request(request)
+
+        var buildsById: [String: AppStoreConnect_Swift_SDK.Build] = [:]
+        for item in response.included ?? [] {
+            if case .build(let build) = item {
+                buildsById[build.id] = build
+            }
+        }
+
+        for version in response.data {
+            guard let buildId = version.relationships?.build?.data?.id,
+                  let build = buildsById[buildId],
+                  let token = build.attributes?.iconAssetToken,
+                  let templateURL = token.templateURL,
+                  let width = token.width,
+                  let height = token.height
+            else { continue }
+            return Domain.ImageAsset(templateUrl: templateURL, width: width, height: height)
+        }
+        return nil
+    }
+
     private func mapApp(_ sdkApp: AppStoreConnect_Swift_SDK.App) -> Domain.App {
         Domain.App(
             id: sdkApp.id,
