@@ -32,6 +32,22 @@ struct AppsControllerTests {
         #expect(normalized.contains("\"_links\""))
     }
 
+    @Test func `app infos list returns JSON with _links and data wrapper`() async throws {
+        let mockRepo = MockAppInfoRepository()
+        given(mockRepo).listAppInfos(appId: .any).willReturn([
+            AppInfo(id: "ai-1", appId: "42", primaryCategoryId: "6014"),
+        ])
+        let infos = try await mockRepo.listAppInfos(appId: "42")
+
+        let formatter = OutputFormatter(format: .json, pretty: true)
+        let output = try formatter.formatAgentItems(infos, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("\"data\""))
+        #expect(normalized.contains("/api/v1/app-infos/ai-1/localizations"))
+        #expect(!normalized.contains("\"affordances\""))
+    }
+
     @Test func `apps list without include icon omits iconAsset`() async throws {
         let mockRepo = MockAppRepository()
         given(mockRepo).listApps(limit: .any).willReturn(

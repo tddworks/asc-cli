@@ -30,13 +30,22 @@ public struct AppInfo: Sendable, Equatable, Identifiable, Codable {
     }
 }
 
+extension AppInfo: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "App ID", "Primary Category", "Secondary Category"]
+    }
+    public var tableRow: [String] {
+        [id, appId, primaryCategoryId ?? "-", secondaryCategoryId ?? "-"]
+    }
+}
+
 extension AppInfo: AffordanceProviding {
-    public var affordances: [String: String] {
+    public var structuredAffordances: [Affordance] {
         [
-            "listLocalizations": "asc app-info-localizations list --app-info-id \(id)",
-            "listAppInfos": "asc app-infos list --app-id \(appId)",
-            "getAgeRating": "asc age-rating get --app-info-id \(id)",
-            "updateCategories": "asc app-infos update --app-info-id \(id)",
+            Affordance(key: "listLocalizations", command: "app-info-localizations", action: "list", params: ["app-info-id": id]),
+            Affordance(key: "listAppInfos", command: "app-infos", action: "list", params: ["app-id": appId]),
+            Affordance(key: "getAgeRating", command: "age-rating", action: "get", params: ["app-info-id": id]),
+            Affordance(key: "updateCategories", command: "app-infos", action: "update", params: ["app-info-id": id]),
         ]
     }
 }
