@@ -199,11 +199,20 @@ extension AgeRatingDeclaration: Codable {
     }
 }
 
+extension AgeRatingDeclaration: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "App Info ID", "Kids Age Band", "Override"]
+    }
+    public var tableRow: [String] {
+        [id, appInfoId, kidsAgeBand?.rawValue ?? "-", ageRatingOverride?.rawValue ?? "-"]
+    }
+}
+
 extension AgeRatingDeclaration: AffordanceProviding {
-    public var affordances: [String: String] {
+    public var structuredAffordances: [Affordance] {
         [
-            "update": "asc age-rating update --declaration-id \(id)",
-            "getAgeRating": "asc age-rating get --app-info-id \(appInfoId)",
+            Affordance(key: "getAgeRating", command: "age-rating", action: "get", params: ["app-info-id": appInfoId]),
+            Affordance(key: "update", command: "age-rating", action: "update", params: ["declaration-id": id]),
         ]
     }
 }

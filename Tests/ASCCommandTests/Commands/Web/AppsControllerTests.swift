@@ -74,6 +74,62 @@ struct AppsControllerTests {
         #expect(!normalized.contains("\"affordances\""))
     }
 
+    @Test func `age rating get returns JSON with _links and data wrapper`() async throws {
+        let mockRepo = MockAgeRatingDeclarationRepository()
+        given(mockRepo).getDeclaration(appInfoId: .any).willReturn(
+            AgeRatingDeclaration(id: "rating-1", appInfoId: "ai-1", isGambling: false)
+        )
+        let decl = try await mockRepo.getDeclaration(appInfoId: "ai-1")
+
+        let formatter = OutputFormatter(format: .json, pretty: true)
+        let output = try formatter.formatAgentItems([decl], affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("\"data\""))
+        #expect(normalized.contains("\"id\" : \"rating-1\""))
+        #expect(normalized.contains("\"appInfoId\" : \"ai-1\""))
+        #expect(normalized.contains("/api/v1/age-rating/ai-1"))
+        #expect(!normalized.contains("\"affordances\""))
+    }
+
+    @Test func `app info update returns updated record with category ids`() async throws {
+        let mockRepo = MockAppInfoRepository()
+        given(mockRepo)
+            .updateCategories(
+                id: .any,
+                primaryCategoryId: .any,
+                primarySubcategoryOneId: .any,
+                primarySubcategoryTwoId: .any,
+                secondaryCategoryId: .any,
+                secondarySubcategoryOneId: .any,
+                secondarySubcategoryTwoId: .any
+            )
+            .willReturn(AppInfo(
+                id: "ai-1",
+                appId: "app-1",
+                primaryCategoryId: "FINANCE",
+                secondaryCategoryId: "LIFESTYLE"
+            ))
+
+        let updated = try await mockRepo.updateCategories(
+            id: "ai-1",
+            primaryCategoryId: "FINANCE",
+            primarySubcategoryOneId: nil,
+            primarySubcategoryTwoId: nil,
+            secondaryCategoryId: "LIFESTYLE",
+            secondarySubcategoryOneId: nil,
+            secondarySubcategoryTwoId: nil
+        )
+
+        let formatter = OutputFormatter(format: .json, pretty: true)
+        let output = try formatter.formatAgentItems([updated], affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+        #expect(normalized.contains("\"primaryCategoryId\" : \"FINANCE\""))
+        #expect(normalized.contains("\"secondaryCategoryId\" : \"LIFESTYLE\""))
+        #expect(normalized.contains("/api/v1/app-categories/FINANCE"))
+        #expect(normalized.contains("/api/v1/app-categories/LIFESTYLE"))
+    }
+
     @Test func `apps list without include icon omits iconAsset`() async throws {
         let mockRepo = MockAppRepository()
         given(mockRepo).listApps(limit: .any).willReturn(

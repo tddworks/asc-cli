@@ -17,6 +17,7 @@ struct AppsController: Sendable {
     let subscriptionGroupRepo: any SubscriptionGroupRepository
     let appInfoRepo: any AppInfoRepository
     let appCategoryRepo: any AppCategoryRepository
+    let ageRatingRepo: any AgeRatingDeclarationRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/apps") { request, _ -> Response in
@@ -113,6 +114,28 @@ struct AppsController: Sendable {
             guard let categoryId = context.parameters.get("categoryId") else { return jsonError("Missing categoryId") }
             let category = try await self.appCategoryRepo.getCategory(id: categoryId)
             return try restFormat(category)
+        }
+
+        group.get("/age-rating/:appInfoId") { _, context -> Response in
+            guard let appInfoId = context.parameters.get("appInfoId") else { return jsonError("Missing appInfoId") }
+            let declaration = try await self.ageRatingRepo.getDeclaration(appInfoId: appInfoId)
+            return try restFormat(declaration)
+        }
+
+        group.patch("/app-infos/:appInfoId") { request, context -> Response in
+            guard let appInfoId = context.parameters.get("appInfoId") else { return jsonError("Missing appInfoId") }
+            let body = try await request.body.collect(upTo: 64 * 1024)
+            let json = (try? JSONSerialization.jsonObject(with: body) as? [String: Any]) ?? [:]
+            let updated = try await self.appInfoRepo.updateCategories(
+                id: appInfoId,
+                primaryCategoryId: json["primaryCategoryId"] as? String,
+                primarySubcategoryOneId: json["primarySubcategoryOneId"] as? String,
+                primarySubcategoryTwoId: json["primarySubcategoryTwoId"] as? String,
+                secondaryCategoryId: json["secondaryCategoryId"] as? String,
+                secondarySubcategoryOneId: json["secondarySubcategoryOneId"] as? String,
+                secondarySubcategoryTwoId: json["secondarySubcategoryTwoId"] as? String
+            )
+            return try restFormat(updated)
         }
     }
 

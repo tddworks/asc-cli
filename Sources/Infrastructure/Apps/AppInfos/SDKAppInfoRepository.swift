@@ -9,11 +9,17 @@ public struct SDKAppInfoRepository: AppInfoRepository, @unchecked Sendable {
     }
 
     public func listAppInfos(appId: String) async throws -> [Domain.AppInfo] {
-        // Explicitly request state + category relationship fields — ASC omits them by default.
+        // `fields[appInfos]` alone returns only relationship `links`, not `data.id`.
+        // `include=...` forces ASC to populate `data` so we can read the category ids.
         let request = APIEndpoint.v1.apps.id(appId).appInfos.get(
             parameters: .init(
                 fieldsAppInfos: [
                     .appStoreState, .state, .appStoreAgeRating,
+                    .primaryCategory, .primarySubcategoryOne, .primarySubcategoryTwo,
+                    .secondaryCategory, .secondarySubcategoryOne, .secondarySubcategoryTwo,
+                ],
+                fieldsAppCategories: [.parent],
+                include: [
                     .primaryCategory, .primarySubcategoryOne, .primarySubcategoryTwo,
                     .secondaryCategory, .secondarySubcategoryOne, .secondarySubcategoryTwo,
                 ]
