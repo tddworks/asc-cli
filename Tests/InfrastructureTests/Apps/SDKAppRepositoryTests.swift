@@ -25,6 +25,64 @@ struct SDKAppRepositoryTests {
         #expect(result.bundleId == "com.single")
     }
 
+    @Test func `fetchAppIcon maps iconAssetToken from primary build`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(AppStoreVersionsResponse(
+            data: [
+                AppStoreConnect_Swift_SDK.AppStoreVersion(
+                    type: .appStoreVersions,
+                    id: "v-1",
+                    attributes: .init(versionString: "1.0"),
+                    relationships: .init(
+                        build: .init(data: .init(type: .builds, id: "b-1"))
+                    )
+                )
+            ],
+            included: [
+                .build(AppStoreConnect_Swift_SDK.Build(
+                    type: .builds,
+                    id: "b-1",
+                    attributes: .init(
+                        iconAssetToken: AppStoreConnect_Swift_SDK.ImageAsset(
+                            templateURL: "https://cdn.example.com/a/{w}x{h}bb.{f}",
+                            width: 1024,
+                            height: 1024
+                        )
+                    )
+                ))
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKAppRepository(client: stub)
+        let icon = try await repo.fetchAppIcon(appId: "app-1")
+
+        #expect(icon?.templateUrl == "https://cdn.example.com/a/{w}x{h}bb.{f}")
+        #expect(icon?.width == 1024)
+        #expect(icon?.height == 1024)
+    }
+
+    @Test func `fetchAppIcon returns nil when no build is attached`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(AppStoreVersionsResponse(
+            data: [
+                AppStoreConnect_Swift_SDK.AppStoreVersion(
+                    type: .appStoreVersions,
+                    id: "v-1",
+                    attributes: .init(versionString: "1.0"),
+                    relationships: .init()
+                )
+            ],
+            included: nil,
+            links: .init(this: "")
+        ))
+
+        let repo = SDKAppRepository(client: stub)
+        let icon = try await repo.fetchAppIcon(appId: "app-1")
+
+        #expect(icon == nil)
+    }
+
     @Test func `listApps maps name bundleId and sku from SDK attributes`() async throws {
         let stub = StubAPIClient()
         stub.willReturn(AppsResponse(

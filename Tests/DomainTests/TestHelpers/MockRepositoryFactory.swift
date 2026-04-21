@@ -25,9 +25,18 @@ struct MockRepositoryFactory {
         name: String = "Test App",
         bundleId: String = "com.test.app",
         sku: String? = nil,
-        primaryLocale: String? = "en-US"
+        primaryLocale: String? = "en-US",
+        iconAsset: ImageAsset? = nil
     ) -> App {
-        App(id: id, name: name, bundleId: bundleId, sku: sku, primaryLocale: primaryLocale)
+        App(id: id, name: name, bundleId: bundleId, sku: sku, primaryLocale: primaryLocale, iconAsset: iconAsset)
+    }
+
+    static func makeImageAsset(
+        templateUrl: String = "https://cdn.example.com/abc/{w}x{h}bb.{f}",
+        width: Int = 1024,
+        height: Int = 1024
+    ) -> ImageAsset {
+        ImageAsset(templateUrl: templateUrl, width: width, height: height)
     }
 
     static func makeBuild(

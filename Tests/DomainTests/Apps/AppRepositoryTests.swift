@@ -35,6 +35,27 @@ struct AppRepositoryTests {
     }
 
     @Test
+    func `fetch app icon returns image asset when build has icon`() async throws {
+        let mock = MockAppRepository()
+        let asset = MockRepositoryFactory.makeImageAsset(width: 1024, height: 1024)
+
+        given(mock).fetchAppIcon(appId: .value("42")).willReturn(asset)
+
+        let result = try await mock.fetchAppIcon(appId: "42")
+        #expect(result?.templateUrl == "https://cdn.example.com/abc/{w}x{h}bb.{f}")
+        #expect(result?.width == 1024)
+    }
+
+    @Test
+    func `fetch app icon returns nil when no build has icon`() async throws {
+        let mock = MockAppRepository()
+        given(mock).fetchAppIcon(appId: .any).willReturn(nil)
+
+        let result = try await mock.fetchAppIcon(appId: "no-builds")
+        #expect(result == nil)
+    }
+
+    @Test
     func `list apps with pagination cursor`() async throws {
         let mock = MockAppRepository()
         let response = PaginatedResponse(
