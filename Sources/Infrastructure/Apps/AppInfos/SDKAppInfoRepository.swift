@@ -13,7 +13,7 @@ public struct SDKAppInfoRepository: AppInfoRepository, @unchecked Sendable {
         let request = APIEndpoint.v1.apps.id(appId).appInfos.get(
             parameters: .init(
                 fieldsAppInfos: [
-                    .appStoreState, .state,
+                    .appStoreState, .state, .appStoreAgeRating,
                     .primaryCategory, .primarySubcategoryOne, .primarySubcategoryTwo,
                     .secondaryCategory, .secondarySubcategoryOne, .secondarySubcategoryTwo,
                 ]
@@ -92,6 +92,7 @@ public struct SDKAppInfoRepository: AppInfoRepository, @unchecked Sendable {
             appId: appId,
             appStoreState: sdkInfo.attributes?.appStoreState?.rawValue,
             state: sdkInfo.attributes?.state?.rawValue,
+            appStoreAgeRating: sdkInfo.attributes?.appStoreAgeRating?.rawValue,
             primaryCategoryId: sdkInfo.relationships?.primaryCategory?.data?.id,
             primarySubcategoryOneId: sdkInfo.relationships?.primarySubcategoryOne?.data?.id,
             primarySubcategoryTwoId: sdkInfo.relationships?.primarySubcategoryTwo?.data?.id,

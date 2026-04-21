@@ -52,4 +52,14 @@ struct AppInfoTests {
         #expect(info.appStoreState == nil)
         #expect(info.state == nil)
     }
+
+    @Test func `appInfo carries appStoreAgeRating`() {
+        let info = AppInfo(id: "info-1", appId: "app-1", appStoreAgeRating: "FOUR_PLUS")
+        #expect(info.appStoreAgeRating == "FOUR_PLUS")
+    }
+
+    @Test func `appInfo appStoreAgeRating defaults to nil`() {
+        let info = AppInfo(id: "info-1", appId: "app-1")
+        #expect(info.appStoreAgeRating == nil)
+    }
 }

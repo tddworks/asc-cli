@@ -7,6 +7,8 @@ public struct AppInfo: Sendable, Equatable, Identifiable, Codable {
     public let appStoreState: String?
     /// Preferred lifecycle enum (e.g. `READY_FOR_DISTRIBUTION`, `PREPARE_FOR_SUBMISSION`).
     public let state: String?
+    /// Computed App Store age rating displayed on the listing (e.g. `FOUR_PLUS`, `SEVENTEEN_PLUS`).
+    public let appStoreAgeRating: String?
     public let primaryCategoryId: String?
     public let primarySubcategoryOneId: String?
     public let primarySubcategoryTwoId: String?
@@ -19,6 +21,7 @@ public struct AppInfo: Sendable, Equatable, Identifiable, Codable {
         appId: String,
         appStoreState: String? = nil,
         state: String? = nil,
+        appStoreAgeRating: String? = nil,
         primaryCategoryId: String? = nil,
         primarySubcategoryOneId: String? = nil,
         primarySubcategoryTwoId: String? = nil,
@@ -30,6 +33,7 @@ public struct AppInfo: Sendable, Equatable, Identifiable, Codable {
         self.appId = appId
         self.appStoreState = appStoreState
         self.state = state
+        self.appStoreAgeRating = appStoreAgeRating
         self.primaryCategoryId = primaryCategoryId
         self.primarySubcategoryOneId = primarySubcategoryOneId
         self.primarySubcategoryTwoId = primarySubcategoryTwoId

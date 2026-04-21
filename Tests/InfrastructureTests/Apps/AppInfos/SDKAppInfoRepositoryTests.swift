@@ -25,6 +25,25 @@ struct SDKAppInfoRepositoryTests {
         #expect(result.allSatisfy { $0.appId == "app-99" })
     }
 
+    @Test func `listAppInfos maps appStoreAgeRating from attributes`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(AppInfosResponse(
+            data: [
+                AppInfo(
+                    type: .appInfos,
+                    id: "info-1",
+                    attributes: .init(appStoreAgeRating: .fourPlus)
+                ),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKAppInfoRepository(client: stub)
+        let result = try await repo.listAppInfos(appId: "app-1")
+
+        #expect(result[0].appStoreAgeRating == "FOUR_PLUS")
+    }
+
     @Test func `listAppInfos maps appStoreState and state from attributes`() async throws {
         let stub = StubAPIClient()
         stub.willReturn(AppInfosResponse(
