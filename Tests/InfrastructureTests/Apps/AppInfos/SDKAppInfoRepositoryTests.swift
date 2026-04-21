@@ -25,6 +25,26 @@ struct SDKAppInfoRepositoryTests {
         #expect(result.allSatisfy { $0.appId == "app-99" })
     }
 
+    @Test func `listAppInfos maps appStoreState and state from attributes`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(AppInfosResponse(
+            data: [
+                AppInfo(
+                    type: .appInfos,
+                    id: "info-1",
+                    attributes: .init(appStoreState: .readyForSale, state: .readyForDistribution)
+                ),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKAppInfoRepository(client: stub)
+        let result = try await repo.listAppInfos(appId: "app-1")
+
+        #expect(result[0].appStoreState == "READY_FOR_SALE")
+        #expect(result[0].state == "READY_FOR_DISTRIBUTION")
+    }
+
     @Test func `listAppInfos maps primary and secondary category ids from relationships`() async throws {
         let stub = StubAPIClient()
         stub.willReturn(AppInfosResponse(

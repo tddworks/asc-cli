@@ -35,4 +35,21 @@ struct AppInfoTests {
         let info = AppInfo(id: "info-42", appId: "app-1")
         #expect(info.affordances["updateCategories"] == "asc app-infos update --app-info-id info-42")
     }
+
+    @Test func `appInfo carries appStoreState and state`() {
+        let info = AppInfo(
+            id: "info-1",
+            appId: "app-1",
+            appStoreState: "READY_FOR_SALE",
+            state: "READY_FOR_DISTRIBUTION"
+        )
+        #expect(info.appStoreState == "READY_FOR_SALE")
+        #expect(info.state == "READY_FOR_DISTRIBUTION")
+    }
+
+    @Test func `appInfo state defaults to nil`() {
+        let info = AppInfo(id: "info-1", appId: "app-1")
+        #expect(info.appStoreState == nil)
+        #expect(info.state == nil)
+    }
 }

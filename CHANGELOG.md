@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Domain types `ImageAsset`, `App.iconAsset`** — new optional `iconAsset` on `App` (omitted from JSON when nil), new `ImageAsset` value type under `Domain/Shared/` with `url(maxSize:format:)` helper. Populated from SDK `Build.iconAssetToken` via `/v1/apps/{id}/appStoreVersions?include=build`
 - **`AppRepository.fetchAppIcon(appId:)`** — returns `ImageAsset?` by joining the latest app version to its build. Returns `nil` when no version has an attached build
 - **`GET /api/v1/apps/{appId}/app-infos`** — new REST route backed by `AppInfoRepository`. Previously the affordance on `App` advertised this path but the controller returned 404. `AppInfo` is now `Presentable` and uses `structuredAffordances`, so responses include `_links` to app-info localizations, age rating, and the enclosing app-infos list
+- **`AppInfo.appStoreState` / `AppInfo.state`** — app-infos responses now include lifecycle fields (`appStoreState` uses legacy ASC version states like `READY_FOR_SALE`; `state` uses the newer `AppInfo.State` enum like `READY_FOR_DISTRIBUTION`, `PREPARE_FOR_SUBMISSION`). Agents can use these to pick the live-version app-info vs the version-being-prepared. Computed booleans `isLive` and `isEditable` expose the common decisions
+
+### Fixed
+- **`AppInfo.primaryCategoryId` / secondary categories missing from `/v1/apps/{id}/appInfos`** — the ASC API returns relationship `data` sparsely unless the client requests the explicit sparse fieldset. `SDKAppInfoRepository.listAppInfos` now passes `fields[appInfos]=primaryCategory,primarySubcategoryOne,primarySubcategoryTwo,secondaryCategory,secondarySubcategoryOne,secondarySubcategoryTwo`, so the mapped `AppInfo` carries the category IDs
 
 ---
 

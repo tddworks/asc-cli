@@ -2,6 +2,11 @@ public struct AppInfo: Sendable, Equatable, Identifiable, Codable {
     public let id: String
     /// Parent app identifier — always present so agents can correlate responses.
     public let appId: String
+    /// Legacy lifecycle enum (e.g. `READY_FOR_SALE`, `PREPARE_FOR_SUBMISSION`).
+    /// Uses `AppStoreVersionState` values in the ASC API.
+    public let appStoreState: String?
+    /// Preferred lifecycle enum (e.g. `READY_FOR_DISTRIBUTION`, `PREPARE_FOR_SUBMISSION`).
+    public let state: String?
     public let primaryCategoryId: String?
     public let primarySubcategoryOneId: String?
     public let primarySubcategoryTwoId: String?
@@ -12,6 +17,8 @@ public struct AppInfo: Sendable, Equatable, Identifiable, Codable {
     public init(
         id: String,
         appId: String,
+        appStoreState: String? = nil,
+        state: String? = nil,
         primaryCategoryId: String? = nil,
         primarySubcategoryOneId: String? = nil,
         primarySubcategoryTwoId: String? = nil,
@@ -21,6 +28,8 @@ public struct AppInfo: Sendable, Equatable, Identifiable, Codable {
     ) {
         self.id = id
         self.appId = appId
+        self.appStoreState = appStoreState
+        self.state = state
         self.primaryCategoryId = primaryCategoryId
         self.primarySubcategoryOneId = primarySubcategoryOneId
         self.primarySubcategoryTwoId = primarySubcategoryTwoId
@@ -28,14 +37,24 @@ public struct AppInfo: Sendable, Equatable, Identifiable, Codable {
         self.secondarySubcategoryOneId = secondarySubcategoryOneId
         self.secondarySubcategoryTwoId = secondarySubcategoryTwoId
     }
+
+    /// True when this app info corresponds to the version currently on sale.
+    public var isLive: Bool {
+        appStoreState == "READY_FOR_SALE" || state == "READY_FOR_DISTRIBUTION"
+    }
+
+    /// True when this app info belongs to a version still in preparation.
+    public var isEditable: Bool {
+        state == "PREPARE_FOR_SUBMISSION" || appStoreState == "PREPARE_FOR_SUBMISSION"
+    }
 }
 
 extension AppInfo: Presentable {
     public static var tableHeaders: [String] {
-        ["ID", "App ID", "Primary Category", "Secondary Category"]
+        ["ID", "App ID", "State", "Primary Category", "Secondary Category"]
     }
     public var tableRow: [String] {
-        [id, appId, primaryCategoryId ?? "-", secondaryCategoryId ?? "-"]
+        [id, appId, state ?? appStoreState ?? "-", primaryCategoryId ?? "-", secondaryCategoryId ?? "-"]
     }
 }
 
