@@ -73,8 +73,19 @@ public struct AppScreenshot: Sendable, Codable, Equatable, Identifiable {
     }
 }
 
+extension AppScreenshot: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "File Name", "State", "Dimensions"]
+    }
+    public var tableRow: [String] {
+        [id, fileName, assetState?.displayName ?? "-", dimensionsDescription ?? "-"]
+    }
+}
+
 extension AppScreenshot: AffordanceProviding {
-    public var affordances: [String: String] {
-        ["listScreenshots": "asc screenshots list --set-id \(setId)"]
+    public var structuredAffordances: [Affordance] {
+        [
+            Affordance(key: "listScreenshots", command: "screenshots", action: "list", params: ["set-id": setId]),
+        ]
     }
 }

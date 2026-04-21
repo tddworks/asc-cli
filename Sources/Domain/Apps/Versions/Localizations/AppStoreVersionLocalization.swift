@@ -82,11 +82,11 @@ extension AppStoreVersionLocalization: Presentable {
 // MARK: - AffordanceProviding
 
 extension AppStoreVersionLocalization: AffordanceProviding {
-    public var affordances: [String: String] {
+    public var structuredAffordances: [Affordance] {
         [
-            "listScreenshotSets": "asc screenshot-sets list --localization-id \(id)",
-            "listLocalizations": "asc version-localizations list --version-id \(versionId)",
-            "updateLocalization": "asc version-localizations update --localization-id \(id)",
+            Affordance(key: "listScreenshotSets", command: "screenshot-sets", action: "list", params: ["localization-id": id]),
+            Affordance(key: "listLocalizations", command: "version-localizations", action: "list", params: ["version-id": versionId]),
+            Affordance(key: "updateLocalization", command: "version-localizations", action: "update", params: ["localization-id": id]),
         ]
     }
 }

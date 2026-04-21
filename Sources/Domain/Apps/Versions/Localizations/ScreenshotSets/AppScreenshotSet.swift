@@ -83,13 +83,24 @@ extension AppScreenshotSet: Codable {
     }
 }
 
+// MARK: - Presentable
+
+extension AppScreenshotSet: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Display Type", "Screenshots"]
+    }
+    public var tableRow: [String] {
+        [id, screenshotDisplayType.rawValue, String(screenshotsCount)]
+    }
+}
+
 // MARK: - AffordanceProviding
 
 extension AppScreenshotSet: AffordanceProviding {
-    public var affordances: [String: String] {
+    public var structuredAffordances: [Affordance] {
         [
-            "listScreenshots": "asc screenshots list --set-id \(id)",
-            "listScreenshotSets": "asc screenshot-sets list --localization-id \(localizationId)",
+            Affordance(key: "listScreenshots", command: "screenshots", action: "list", params: ["set-id": id]),
+            Affordance(key: "listScreenshotSets", command: "screenshot-sets", action: "list", params: ["localization-id": localizationId]),
         ]
     }
 }
