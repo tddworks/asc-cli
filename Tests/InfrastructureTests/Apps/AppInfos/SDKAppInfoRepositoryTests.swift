@@ -25,6 +25,37 @@ struct SDKAppInfoRepositoryTests {
         #expect(result.allSatisfy { $0.appId == "app-99" })
     }
 
+    @Test func `listAppInfos maps primary and secondary category ids from relationships`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(AppInfosResponse(
+            data: [
+                AppInfo(
+                    type: .appInfos,
+                    id: "info-1",
+                    relationships: .init(
+                        primaryCategory: .init(data: .init(type: .appCategories, id: "6014")),
+                        primarySubcategoryOne: .init(data: .init(type: .appCategories, id: "7001")),
+                        primarySubcategoryTwo: .init(data: .init(type: .appCategories, id: "7002")),
+                        secondaryCategory: .init(data: .init(type: .appCategories, id: "6015")),
+                        secondarySubcategoryOne: .init(data: .init(type: .appCategories, id: "7003")),
+                        secondarySubcategoryTwo: .init(data: .init(type: .appCategories, id: "7004"))
+                    )
+                ),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKAppInfoRepository(client: stub)
+        let result = try await repo.listAppInfos(appId: "app-1")
+
+        #expect(result[0].primaryCategoryId == "6014")
+        #expect(result[0].primarySubcategoryOneId == "7001")
+        #expect(result[0].primarySubcategoryTwoId == "7002")
+        #expect(result[0].secondaryCategoryId == "6015")
+        #expect(result[0].secondarySubcategoryOneId == "7003")
+        #expect(result[0].secondarySubcategoryTwoId == "7004")
+    }
+
     @Test func `listAppInfos maps id from SDK response`() async throws {
         let stub = StubAPIClient()
         stub.willReturn(AppInfosResponse(

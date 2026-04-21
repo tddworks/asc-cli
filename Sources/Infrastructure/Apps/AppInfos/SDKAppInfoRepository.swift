@@ -9,7 +9,15 @@ public struct SDKAppInfoRepository: AppInfoRepository, @unchecked Sendable {
     }
 
     public func listAppInfos(appId: String) async throws -> [Domain.AppInfo] {
-        let request = APIEndpoint.v1.apps.id(appId).appInfos.get()
+        // Explicitly request category relationship fields — ASC omits them by default.
+        let request = APIEndpoint.v1.apps.id(appId).appInfos.get(
+            parameters: .init(
+                fieldsAppInfos: [
+                    .primaryCategory, .primarySubcategoryOne, .primarySubcategoryTwo,
+                    .secondaryCategory, .secondarySubcategoryOne, .secondarySubcategoryTwo,
+                ]
+            )
+        )
         let response = try await client.request(request)
         return response.data.map { mapAppInfo($0, appId: appId) }
     }
