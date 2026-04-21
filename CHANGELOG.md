@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.16.9] - 2026-04-20
+
 ### Added
 - **`asc review-submissions list`** — list App Store review submissions for an app. Required `--app-id`; optional `--state <CSV>` (e.g. `WAITING_FOR_REVIEW,IN_REVIEW,READY_FOR_REVIEW` or `UNRESOLVED_ISSUES`) and `--limit`. Backed by `SubmissionRepository.listSubmissions(appId:states:limit:)`
 - **`asc certificates list` filtering flags** — `--limit` (server-side), `--expired-only` (client-side, drops unexpired certs), `--before <ISO8601>` (client-side, keeps certs with expirationDate strictly before the cutoff)
@@ -691,7 +695,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.68...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.16.9...HEAD
+[0.16.9]: https://github.com/tddworks/asc-cli/compare/v0.1.68...v0.16.9
 [0.1.68]: https://github.com/tddworks/asc-cli/compare/v0.1.67...v0.1.68
 [0.1.67]: https://github.com/tddworks/asc-cli/compare/v0.1.66...v0.1.67
 [0.1.66]: https://github.com/tddworks/asc-cli/compare/v0.1.65...v0.1.66
