@@ -1,4 +1,5 @@
 import Domain
+import Foundation
 import Hummingbird
 import HummingbirdWebSocket
 import ASCPlugin
