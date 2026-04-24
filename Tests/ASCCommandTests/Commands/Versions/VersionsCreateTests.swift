@@ -24,7 +24,8 @@ struct VersionsCreateTests {
                 "getReviewDetail" : "asc version-review-detail get --version-id v-new",
                 "listLocalizations" : "asc version-localizations list --version-id v-new",
                 "listVersions" : "asc versions list --app-id app-1",
-                "submitForReview" : "asc versions submit --version-id v-new"
+                "submitForReview" : "asc versions submit --version-id v-new",
+                "updateVersion" : "asc versions update --version-id v-new"
               },
               "appId" : "app-1",
               "id" : "v-new",
@@ -55,7 +56,8 @@ struct VersionsCreateTests {
                 "getReviewDetail" : "asc version-review-detail get --version-id v-1",
                 "listLocalizations" : "asc version-localizations list --version-id v-1",
                 "listVersions" : "asc versions list --app-id app-42",
-                "submitForReview" : "asc versions submit --version-id v-1"
+                "submitForReview" : "asc versions submit --version-id v-1",
+                "updateVersion" : "asc versions update --version-id v-1"
               },
               "appId" : "app-42",
               "id" : "v-1",
