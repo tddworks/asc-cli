@@ -32,6 +32,7 @@ struct AppInfosUpdateTests {
           "data" : [
             {
               "affordances" : {
+                "createLocalization" : "asc app-info-localizations create --app-info-id info-1",
                 "getAgeRating" : "asc age-rating get --app-info-id info-1",
                 "getPrimaryCategory" : "asc app-categories get --category-id 6014",
                 "listAppInfos" : "asc app-infos list --app-id app-1",

@@ -20,6 +20,7 @@ struct AppInfosListTests {
           "data" : [
             {
               "affordances" : {
+                "createLocalization" : "asc app-info-localizations create --app-info-id info-1",
                 "getAgeRating" : "asc age-rating get --app-info-id info-1",
                 "listAppInfos" : "asc app-infos list --app-id app-1",
                 "listLocalizations" : "asc app-info-localizations list --app-info-id info-1",

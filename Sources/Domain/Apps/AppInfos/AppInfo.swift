@@ -66,6 +66,7 @@ extension AppInfo: AffordanceProviding {
     public var structuredAffordances: [Affordance] {
         var items: [Affordance] = [
             Affordance(key: "listLocalizations", command: "app-info-localizations", action: "list", params: ["app-info-id": id]),
+            Affordance(key: "createLocalization", command: "app-info-localizations", action: "create", params: ["app-info-id": id]),
             Affordance(key: "listAppInfos", command: "app-infos", action: "list", params: ["app-id": appId]),
             Affordance(key: "getAgeRating", command: "age-rating", action: "get", params: ["app-info-id": id]),
             Affordance(key: "updateCategories", command: "app-infos", action: "update", params: ["app-info-id": id]),

@@ -279,6 +279,19 @@ struct AffordancesTests {
         #expect(info.affordances["updateCategories"] == "asc app-infos update --app-info-id info-1")
     }
 
+    @Test
+    func `app info affordances include createLocalization command`() {
+        let info = MockRepositoryFactory.makeAppInfo(id: "info-1", appId: "app-abc")
+        #expect(info.affordances["createLocalization"] == "asc app-info-localizations create --app-info-id info-1")
+    }
+
+    @Test
+    func `app info apiLinks expose createLocalization as POST`() {
+        let info = MockRepositoryFactory.makeAppInfo(id: "info-1", appId: "app-abc")
+        #expect(info.apiLinks["createLocalization"]?.href == "/api/v1/app-infos/info-1/localizations")
+        #expect(info.apiLinks["createLocalization"]?.method == "POST")
+    }
+
     // MARK: - AppInfoLocalization delete affordance
 
     @Test
