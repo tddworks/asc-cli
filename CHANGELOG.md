@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.17.1] - 2026-04-24
+
 ### Added
 - **`createVersion` affordance on `App`** — every app response now advertises `asc versions create --app-id <id>` (REST: `POST /api/v1/apps/{appId}/versions`). Frontends driven by affordances (e.g. the command center UI) can use the presence of this key to enable a "Create Version" action without hard-coding capabilities.
 - **`updateVersion` affordance on editable `AppStoreVersion`** — versions in `prepareForSubmission` state expose `asc versions update --version-id <id>` (REST: `PATCH /api/v1/versions/{id}`). Live and pending versions omit it, giving the UI a state-aware signal for the edit dialog.
@@ -738,7 +742,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.17.0...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.17.1...HEAD
+[0.17.1]: https://github.com/tddworks/asc-cli/compare/v0.17.0...v0.17.1
 [0.17.0]: https://github.com/tddworks/asc-cli/compare/v0.16.9...v0.17.0
 [0.16.9]: https://github.com/tddworks/asc-cli/compare/v0.1.68...v0.16.9
 [0.1.68]: https://github.com/tddworks/asc-cli/compare/v0.1.67...v0.1.68
