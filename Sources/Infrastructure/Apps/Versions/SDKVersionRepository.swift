@@ -45,6 +45,22 @@ public struct SDKVersionRepository: VersionRepository, @unchecked Sendable {
         return version
     }
 
+    public func updateVersion(id: String, versionString: String) async throws -> Domain.AppStoreVersion {
+        let body = AppStoreVersionUpdateRequest(
+            data: .init(
+                type: .appStoreVersions,
+                id: id,
+                attributes: .init(versionString: versionString)
+            )
+        )
+        let response = try await client.request(APIEndpoint.v1.appStoreVersions.id(id).patch(body))
+        let appId = response.data.relationships?.app?.data?.id ?? ""
+        guard let version = mapVersion(response.data, appId: appId) else {
+            throw Domain.APIError.unknown("Failed to map updated version \(id)")
+        }
+        return version
+    }
+
     public func setBuild(versionId: String, buildId: String) async throws {
         let body = AppStoreVersionUpdateRequest(
             data: .init(

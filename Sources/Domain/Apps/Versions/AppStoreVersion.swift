@@ -84,6 +84,7 @@ extension AppStoreVersion: AffordanceProviding {
             Affordance(key: "getReviewDetail", command: "version-review-detail", action: "get", params: ["version-id": id]),
         ]
         if isEditable {
+            items.append(Affordance(key: "updateVersion", command: "versions", action: "update", params: ["version-id": id]))
             items.append(Affordance(key: "submitForReview", command: "versions", action: "submit", params: ["version-id": id]))
         }
         return items
