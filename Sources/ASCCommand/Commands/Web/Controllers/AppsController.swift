@@ -1,4 +1,5 @@
 import Domain
+import Foundation
 import Hummingbird
 import HummingbirdWebSocket
 import Infrastructure
@@ -20,6 +21,24 @@ struct AppsController: Sendable {
             guard let appId = context.parameters.get("appId") else { return jsonError("Missing appId") }
             let app = try await self.repo.getApp(id: appId)
             return try restFormat(app)
+        }
+
+        group.patch("/apps/:appId") { request, context -> Response in
+            guard let appId = context.parameters.get("appId") else { return jsonError("Missing appId") }
+            let body = try await request.body.collect(upTo: 64 * 1024)
+            let json = (try? JSONSerialization.jsonObject(with: body) as? [String: Any]) ?? [:]
+            let rawDeclaration = json["contentRightsDeclaration"] as? String
+            let declaration: ContentRightsDeclaration?
+            if let raw = rawDeclaration {
+                guard let parsed = ContentRightsDeclaration(rawValue: raw) else {
+                    return jsonError("Unknown contentRightsDeclaration '\(raw)'", status: .badRequest)
+                }
+                declaration = parsed
+            } else {
+                declaration = nil
+            }
+            let updated = try await self.repo.updateContentRights(appId: appId, declaration: declaration)
+            return try restFormat(updated)
         }
     }
 

@@ -4,6 +4,6 @@ struct AppsCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "apps",
         abstract: "Manage apps",
-        subcommands: [AppsList.self]
+        subcommands: [AppsList.self, AppsUpdate.self]
     )
 }
