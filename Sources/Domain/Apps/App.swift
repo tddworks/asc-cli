@@ -75,6 +75,7 @@ extension App: AffordanceProviding {
     public var structuredAffordances: [Affordance] {
         [
             Affordance(key: "listVersions", command: "versions", action: "list", params: ["app-id": id]),
+            Affordance(key: "createVersion", command: "versions", action: "create", params: ["app-id": id]),
             Affordance(key: "listAppInfos", command: "app-infos", action: "list", params: ["app-id": id]),
             Affordance(key: "listReviews", command: "reviews", action: "list", params: ["app-id": id]),
         ]

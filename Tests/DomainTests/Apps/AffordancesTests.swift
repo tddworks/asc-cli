@@ -89,6 +89,40 @@ struct AffordancesTests {
         #expect(app.affordances["listAppInfos"] == "asc app-infos list --app-id app-1")
     }
 
+    @Test
+    func `app affordances include createVersion command`() {
+        let app = App(id: "app-7", name: "My App", bundleId: "com.example")
+        #expect(app.affordances["createVersion"] == "asc versions create --app-id app-7")
+    }
+
+    @Test
+    func `app apiLinks expose createVersion as POST`() {
+        let app = App(id: "app-7", name: "My App", bundleId: "com.example")
+        #expect(app.apiLinks["createVersion"]?.href == "/api/v1/apps/app-7/versions")
+        #expect(app.apiLinks["createVersion"]?.method == "POST")
+    }
+
+    // MARK: - AppStoreVersion updateVersion affordance
+
+    @Test
+    func `editable version affordances include updateVersion command`() {
+        let editable = MockRepositoryFactory.makeVersion(id: "v-1", state: .prepareForSubmission)
+        #expect(editable.affordances["updateVersion"] == "asc versions update --version-id v-1")
+    }
+
+    @Test
+    func `live version affordances omit updateVersion command`() {
+        let live = MockRepositoryFactory.makeVersion(id: "v-2", state: .readyForSale)
+        #expect(live.affordances["updateVersion"] == nil)
+    }
+
+    @Test
+    func `editable version apiLinks expose updateVersion as PATCH`() {
+        let editable = MockRepositoryFactory.makeVersion(id: "v-1", state: .prepareForSubmission)
+        #expect(editable.apiLinks["updateVersion"]?.href == "/api/v1/versions/v-1")
+        #expect(editable.apiLinks["updateVersion"]?.method == "PATCH")
+    }
+
     // MARK: - AppInfo affordances
 
     @Test
