@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`updateVersion` affordance on editable `AppStoreVersion`** — versions in `prepareForSubmission` state expose `asc versions update --version-id <id>` (REST: `PATCH /api/v1/versions/{id}`). Live and pending versions omit it, giving the UI a state-aware signal for the edit dialog.
 - **`asc versions update --version-id <id> --version <string>`** — new CLI command to update an existing App Store version's version string. Backed by new `VersionRepository.updateVersion(id:versionString:)` which maps to the ASC SDK `AppStoreVersionUpdateRequest`.
 - **`POST /api/v1/apps/{appId}/versions`** and **`PATCH /api/v1/versions/{versionId}`** — REST endpoints for version create/update on `VersionsController`. Request body: `{ "versionString": "...", "platform": "IOS" }` for create, `{ "versionString": "..." }` for update.
+- **`createLocalization` affordance on `AppInfo`** — every app-info response now advertises the locale-add endpoint. Unblocks the frontend's "+ Add Locale" button, which previously had no link to POST against.
+- **`POST /api/v1/app-infos/{appInfoId}/localizations`** — create an `AppInfoLocalization` via REST. Body: `{ "locale": "fr-FR", "name": "..." }`. Returns the new row with its `_links` (`updateLocalization`, `delete`, `listLocalizations`).
+- **`PATCH /api/v1/app-info-localizations/{localizationId}`** — update `name`, `subtitle`, `privacyPolicyUrl`, `privacyChoicesUrl`, `privacyPolicyText`. Missing keys mean "don't change"; sending an empty string clears the field. Fixes the `404` the frontend was seeing when saving per-locale name / subtitle / privacy URLs.
+- **`DELETE /api/v1/app-info-localizations/{localizationId}`** — delete a locale, returns `204 No Content`. Backs the "trash" button on the localization row.
+- **`App.contentRightsDeclaration` + `ContentRightsDeclaration` enum** — apps now carry the third-party-content declaration (`USES_THIRD_PARTY_CONTENT` / `DOES_NOT_USE_THIRD_PARTY_CONTENT`). Field is optional and omitted from JSON when unset. This is the ASC-accurate mapping — the declaration lives on `App`, not on `AppInfo`.
+- **`asc apps update --app-id <id> --content-rights-declaration <value>`** + **`PATCH /api/v1/apps/{appId}`** — update content rights declaration via CLI or REST. Backed by new `AppRepository.updateContentRights(appId:declaration:)` which maps to the ASC SDK `AppUpdateRequest`.
+- **`updateContentRights` affordance on `App`** — every app response advertises the new PATCH endpoint so frontends can wire the declaration switch without hard-coding the URL.
 
 ---
 
