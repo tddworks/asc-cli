@@ -45,6 +45,20 @@ struct RESTRoutesTests {
         #expect(normalized.contains("/api/v1/versions/v-1/localizations"))
     }
 
+    @Test func `age-rating update returns JSON with _links`() async throws {
+        let mockRepo = MockAgeRatingDeclarationRepository()
+        given(mockRepo).updateDeclaration(id: .any, update: .any).willReturn(
+            AgeRatingDeclaration(id: "decl-1", appInfoId: "info-42", isAdvertising: false)
+        )
+        let output = try await AgeRatingUpdate
+            .parse(["--declaration-id", "decl-1", "--advertising", "false", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/age-rating/decl-1"))
+        #expect(!normalized.contains("\"affordances\""))
+    }
+
     @Test func `apps update returns JSON with _links and contentRightsDeclaration`() async throws {
         let mockRepo = MockAppRepository()
         given(mockRepo).updateContentRights(appId: .any, declaration: .any).willReturn(

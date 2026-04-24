@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`App.contentRightsDeclaration` + `ContentRightsDeclaration` enum** — apps now carry the third-party-content declaration (`USES_THIRD_PARTY_CONTENT` / `DOES_NOT_USE_THIRD_PARTY_CONTENT`). Field is optional and omitted from JSON when unset. This is the ASC-accurate mapping — the declaration lives on `App`, not on `AppInfo`.
 - **`asc apps update --app-id <id> --content-rights-declaration <value>`** + **`PATCH /api/v1/apps/{appId}`** — update content rights declaration via CLI or REST. Backed by new `AppRepository.updateContentRights(appId:declaration:)` which maps to the ASC SDK `AppUpdateRequest`.
 - **`updateContentRights` affordance on `App`** — every app response advertises the new PATCH endpoint so frontends can wire the declaration switch without hard-coding the URL.
+- **`PATCH /api/v1/age-rating/{declarationId}`** — update an age rating declaration via REST. Body accepts any subset of the `AgeRatingDeclarationUpdate` fields (boolean flags, `ContentIntensity` values, `kidsAgeBand`, `ageRatingOverride`, `koreaAgeRatingOverride`). Fixes the `404` the frontend was seeing when following the `update` `_link` on an `AgeRatingDeclaration` response. Matches the affordance key already advertised by `AgeRatingDeclaration.structuredAffordances`.
 
 ---
 

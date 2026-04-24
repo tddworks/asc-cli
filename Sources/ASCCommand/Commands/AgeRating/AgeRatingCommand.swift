@@ -134,7 +134,7 @@ struct AgeRatingUpdate: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AgeRatingDeclarationRepository) async throws -> String {
+    func execute(repo: any AgeRatingDeclarationRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         var update = AgeRatingDeclarationUpdate()
         update.isAdvertising = advertising
         update.isGambling = gambling
@@ -167,7 +167,8 @@ struct AgeRatingUpdate: AsyncParsableCommand {
         return try formatter.formatAgentItems(
             [declaration],
             headers: ["ID", "App Info ID", "Kids Age Band", "Age Rating Override"],
-            rowMapper: { [$0.id, $0.appInfoId, $0.kidsAgeBand?.rawValue ?? "-", $0.ageRatingOverride?.rawValue ?? "-"] }
+            rowMapper: { [$0.id, $0.appInfoId, $0.kidsAgeBand?.rawValue ?? "-", $0.ageRatingOverride?.rawValue ?? "-"] },
+            affordanceMode: affordanceMode
         )
     }
 }
