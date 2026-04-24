@@ -134,16 +134,52 @@ public struct ASCWebServer: Sendable {
             return jsonResponse(["devices": [], "axeAvailable": false])
         }
 
-        // /api/plugins — list plugin UI scripts for the web app to load
+        // /api/plugins — list plugin UI scripts for the web app to load.
+        // Shape: { plugins: [{ name, slug, ui: [...], apiVersion? }] }
+        // `ui` is a list of raw relative paths (e.g. "ui/sim-stream.js").
+        // The browser bootstrap composes the URL as
+        // `/api/plugins/<slug>/<ui-path>` so plugins can be re-bundled
+        // without the host caring about the URL shape.
         let pluginJSON: Data = {
-            let manifests = plugins.map { p in
-                ["name": p.name, "ui": p.uiScripts.map { "/api/plugins/\(p.slug)/\($0)" }] as [String: Any]
+            let manifests = plugins.map { p -> [String: Any] in
+                var m: [String: Any] = [
+                    "name": p.name,
+                    "slug": p.slug,
+                    "ui":   p.uiScripts,
+                ]
+                if let v = p.apiVersion { m["apiVersion"] = v }
+                return m
             }
             return (try? JSONSerialization.data(withJSONObject: ["plugins": manifests])) ?? Data("{}".utf8)
         }()
         router.get("/api/plugins") { _, _ in
             Response(status: .ok, headers: [.contentType: "application/json"],
                      body: .init(byteBuffer: ByteBuffer(data: pluginJSON)))
+        }
+
+        // /api/plugin-settings/:id — plaintext plugin settings store.
+        // GET returns { settings: {...} }; PUT replaces with the body's
+        // `settings` field. File lives at ~/.asc/plugin-settings/<id>.json.
+        let settingsStore = PluginSettingsStore()
+        router.get("/api/plugin-settings/:id") { request, _ in
+            let id = request.uri.path.split(separator: "/").last.map(String.init) ?? ""
+            let settings = settingsStore.load(pluginId: id)
+            return jsonResponse(["settings": settings])
+        }
+        router.put("/api/plugin-settings/:id") { request, context in
+            let id = request.uri.path.split(separator: "/").last.map(String.init) ?? ""
+            var buffer = try await request.body.collect(upTo: context.maxUploadSize)
+            let bytes = buffer.readBytes(length: buffer.readableBytes) ?? []
+            guard let obj = try? JSONSerialization.jsonObject(with: Data(bytes)) as? [String: Any],
+                  let value = obj["settings"] as? [String: Any] else {
+                return jsonError("expected { settings: {...} }", status: .badRequest)
+            }
+            do {
+                try settingsStore.save(pluginId: id, value: value)
+            } catch {
+                return jsonError("save failed: \(error.localizedDescription)", status: .internalServerError)
+            }
+            return jsonResponse(["settings": value])
         }
 
         // Serve each plugin UI file at its exact path

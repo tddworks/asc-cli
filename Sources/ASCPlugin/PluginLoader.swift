@@ -17,6 +17,25 @@ public enum PluginLoader {
         public let slug: String  // URL-safe identifier (directory name without extension)
         public let directory: URL
         public let uiScripts: [String]
+        /// Host plugin-API version this plugin targets, from manifest.json
+        /// `apiVersion` field. nil means legacy plugin with no contract.
+        public let apiVersion: String?
+
+        public init(
+            plugin: ASCPluginBase,
+            name: String,
+            slug: String,
+            directory: URL,
+            uiScripts: [String],
+            apiVersion: String? = nil
+        ) {
+            self.plugin = plugin
+            self.name = name
+            self.slug = slug
+            self.directory = directory
+            self.uiScripts = uiScripts
+            self.apiVersion = apiVersion
+        }
     }
 
     private nonisolated(unsafe) static var _cached: [LoadedPlugin]?
@@ -71,12 +90,13 @@ public enum PluginLoader {
 
         let uiScripts = (json["ui"] as? [String]) ?? []
         let slug = (url.lastPathComponent as NSString).deletingPathExtension
+        let apiVersion = json["apiVersion"] as? String
 
         // UI-only plugin (no server/dylib)
         if json["server"] == nil {
             let stub = UIOnlyPlugin(name: name)
             FileHandle.standardError.write(Data("  Plugin: \(name) (\(url.lastPathComponent)) [UI-only]\n".utf8))
-            return LoadedPlugin(plugin: stub, name: name, slug: slug, directory: url, uiScripts: uiScripts)
+            return LoadedPlugin(plugin: stub, name: name, slug: slug, directory: url, uiScripts: uiScripts, apiVersion: apiVersion)
         }
 
         guard let serverPath = json["server"] as? String else { return nil }
@@ -84,7 +104,7 @@ public enum PluginLoader {
         guard let plugin = loadDylib(at: dylibPath) else { return nil }
 
         FileHandle.standardError.write(Data("  Plugin: \(name) (\(url.lastPathComponent))\n".utf8))
-        return LoadedPlugin(plugin: plugin, name: name, slug: slug, directory: url, uiScripts: uiScripts)
+        return LoadedPlugin(plugin: plugin, name: name, slug: slug, directory: url, uiScripts: uiScripts, apiVersion: apiVersion)
     }
 
     /// Stub for UI-only plugins that have no server-side dylib.
