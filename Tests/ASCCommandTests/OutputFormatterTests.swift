@@ -80,6 +80,7 @@ struct OutputFormatterTests {
           "data" : [
             {
               "affordances" : {
+                "createVersion" : "asc versions create --app-id 1",
                 "listAppInfos" : "asc app-infos list --app-id 1",
                 "listReviews" : "asc reviews list --app-id 1",
                 "listVersions" : "asc versions list --app-id 1"
@@ -107,6 +108,7 @@ struct OutputFormatterTests {
           "data" : [
             {
               "affordances" : {
+                "createVersion" : "asc versions create --app-id app-1",
                 "listAppInfos" : "asc app-infos list --app-id app-1",
                 "listReviews" : "asc reviews list --app-id app-1",
                 "listVersions" : "asc versions list --app-id app-1"
