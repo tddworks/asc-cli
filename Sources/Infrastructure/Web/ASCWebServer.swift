@@ -188,12 +188,17 @@ public struct ASCWebServer: Sendable {
             for script in p.uiScripts {
                 let routePath = "/api/plugins/\(p.slug)/\(script)"
                 let filePath = pluginDir.appendingPathComponent(script).path
+                // Pick Content-Type from the file extension so plugins can
+                // ship PNGs, HTML, JSON etc. alongside their JS bundles.
+                // Only JS was ever served before, which is why PNG frames
+                // rendered as text in the browser.
+                let contentType = contentType(forExtension: URL(fileURLWithPath: script).pathExtension)
                 router.get(RouterPath(routePath)) { _, _ in
                     guard let data = FileManager.default.contents(atPath: filePath) else {
                         return jsonError("not found", status: .notFound)
                     }
                     return Response(status: .ok,
-                                    headers: [.contentType: "application/javascript", .cacheControl: "no-cache"],
+                                    headers: [.contentType: contentType, .cacheControl: "no-cache"],
                                     body: .init(byteBuffer: ByteBuffer(data: data)))
                 }
             }
@@ -222,4 +227,26 @@ public func jsonResponse(_ dict: [String: Any], status: HTTPResponse.Status = .o
 
 public func jsonError(_ message: String, status: HTTPResponse.Status = .badRequest) -> Response {
     jsonResponse(["error": message], status: status)
+}
+
+/// Minimal extension → Content-Type mapping for plugin asset serving.
+/// Only the handful of types plugins actually ship today; unknowns fall
+/// back to `application/octet-stream` which browsers treat as a download.
+private func contentType(forExtension ext: String) -> String {
+    switch ext.lowercased() {
+    case "js":                       return "application/javascript"
+    case "json":                     return "application/json"
+    case "html", "htm":              return "text/html; charset=utf-8"
+    case "css":                      return "text/css; charset=utf-8"
+    case "png":                      return "image/png"
+    case "jpg", "jpeg":              return "image/jpeg"
+    case "gif":                      return "image/gif"
+    case "svg":                      return "image/svg+xml"
+    case "webp":                     return "image/webp"
+    case "map":                      return "application/json"
+    case "wasm":                     return "application/wasm"
+    case "woff":                     return "font/woff"
+    case "woff2":                    return "font/woff2"
+    default:                         return "application/octet-stream"
+    }
 }
