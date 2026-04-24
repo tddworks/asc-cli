@@ -53,13 +53,31 @@ public struct SDKAppRepository: AppRepository, @unchecked Sendable {
         return nil
     }
 
+    public func updateContentRights(appId: String, declaration: Domain.ContentRightsDeclaration?) async throws -> Domain.App {
+        let sdkDeclaration = declaration.map { AppUpdateRequest.Data.Attributes.ContentRightsDeclaration(rawValue: $0.rawValue) } ?? nil
+        let body = AppUpdateRequest(
+            data: .init(
+                type: .apps,
+                id: appId,
+                attributes: .init(contentRightsDeclaration: sdkDeclaration)
+            )
+        )
+        let response = try await client.request(APIEndpoint.v1.apps.id(appId).patch(body))
+        return mapApp(response.data)
+    }
+
     private func mapApp(_ sdkApp: AppStoreConnect_Swift_SDK.App) -> Domain.App {
-        Domain.App(
+        let rights: Domain.ContentRightsDeclaration? = {
+            guard let raw = sdkApp.attributes?.contentRightsDeclaration?.rawValue else { return nil }
+            return Domain.ContentRightsDeclaration(rawValue: raw)
+        }()
+        return Domain.App(
             id: sdkApp.id,
             name: sdkApp.attributes?.name ?? "",
             bundleId: sdkApp.attributes?.bundleID ?? "",
             sku: sdkApp.attributes?.sku,
-            primaryLocale: sdkApp.attributes?.primaryLocale
+            primaryLocale: sdkApp.attributes?.primaryLocale,
+            contentRightsDeclaration: rights
         )
     }
 }

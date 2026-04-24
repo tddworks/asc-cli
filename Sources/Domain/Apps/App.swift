@@ -1,3 +1,8 @@
+public enum ContentRightsDeclaration: String, Sendable, Equatable, Codable, CaseIterable {
+    case usesThirdPartyContent = "USES_THIRD_PARTY_CONTENT"
+    case doesNotUseThirdPartyContent = "DOES_NOT_USE_THIRD_PARTY_CONTENT"
+}
+
 public struct App: Sendable, Codable, Equatable, Identifiable {
     public let id: String
     public let name: String
@@ -5,6 +10,7 @@ public struct App: Sendable, Codable, Equatable, Identifiable {
     public let sku: String?
     public let primaryLocale: String?
     public let iconAsset: ImageAsset?
+    public let contentRightsDeclaration: ContentRightsDeclaration?
 
     public init(
         id: String,
@@ -12,7 +18,8 @@ public struct App: Sendable, Codable, Equatable, Identifiable {
         bundleId: String,
         sku: String? = nil,
         primaryLocale: String? = nil,
-        iconAsset: ImageAsset? = nil
+        iconAsset: ImageAsset? = nil,
+        contentRightsDeclaration: ContentRightsDeclaration? = nil
     ) {
         self.id = id
         self.name = name
@@ -20,6 +27,7 @@ public struct App: Sendable, Codable, Equatable, Identifiable {
         self.sku = sku
         self.primaryLocale = primaryLocale
         self.iconAsset = iconAsset
+        self.contentRightsDeclaration = contentRightsDeclaration
     }
 
     public var displayName: String {
@@ -33,12 +41,13 @@ public struct App: Sendable, Codable, Equatable, Identifiable {
             bundleId: bundleId,
             sku: sku,
             primaryLocale: primaryLocale,
-            iconAsset: iconAsset
+            iconAsset: iconAsset,
+            contentRightsDeclaration: contentRightsDeclaration
         )
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, name, bundleId, sku, primaryLocale, iconAsset
+        case id, name, bundleId, sku, primaryLocale, iconAsset, contentRightsDeclaration
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -49,6 +58,7 @@ public struct App: Sendable, Codable, Equatable, Identifiable {
         try container.encodeIfPresent(sku, forKey: .sku)
         try container.encodeIfPresent(primaryLocale, forKey: .primaryLocale)
         try container.encodeIfPresent(iconAsset, forKey: .iconAsset)
+        try container.encodeIfPresent(contentRightsDeclaration, forKey: .contentRightsDeclaration)
     }
 
     public init(from decoder: Decoder) throws {
@@ -59,6 +69,7 @@ public struct App: Sendable, Codable, Equatable, Identifiable {
         self.sku = try container.decodeIfPresent(String.self, forKey: .sku)
         self.primaryLocale = try container.decodeIfPresent(String.self, forKey: .primaryLocale)
         self.iconAsset = try container.decodeIfPresent(ImageAsset.self, forKey: .iconAsset)
+        self.contentRightsDeclaration = try container.decodeIfPresent(ContentRightsDeclaration.self, forKey: .contentRightsDeclaration)
     }
 }
 
@@ -78,6 +89,7 @@ extension App: AffordanceProviding {
             Affordance(key: "createVersion", command: "versions", action: "create", params: ["app-id": id]),
             Affordance(key: "listAppInfos", command: "app-infos", action: "list", params: ["app-id": id]),
             Affordance(key: "listReviews", command: "reviews", action: "list", params: ["app-id": id]),
+            Affordance(key: "updateContentRights", command: "apps", action: "update", params: ["app-id": id]),
         ]
     }
 

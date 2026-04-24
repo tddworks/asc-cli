@@ -45,6 +45,21 @@ struct RESTRoutesTests {
         #expect(normalized.contains("/api/v1/versions/v-1/localizations"))
     }
 
+    @Test func `apps update returns JSON with _links and contentRightsDeclaration`() async throws {
+        let mockRepo = MockAppRepository()
+        given(mockRepo).updateContentRights(appId: .any, declaration: .any).willReturn(
+            App(id: "42", name: "Bakery", bundleId: "com.example", contentRightsDeclaration: .doesNotUseThirdPartyContent)
+        )
+        let output = try await AppsUpdate
+            .parse(["--app-id", "42", "--content-rights-declaration", "DOES_NOT_USE_THIRD_PARTY_CONTENT", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/apps/42"))
+        #expect(normalized.contains("\"contentRightsDeclaration\" : \"DOES_NOT_USE_THIRD_PARTY_CONTENT\""))
+        #expect(!normalized.contains("\"affordances\""))
+    }
+
     @Test func `versions update returns JSON with _links`() async throws {
         let mockRepo = MockVersionRepository()
         given(mockRepo).updateVersion(id: .any, versionString: .any).willReturn(

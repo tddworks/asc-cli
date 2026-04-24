@@ -102,6 +102,19 @@ struct AffordancesTests {
         #expect(app.apiLinks["createVersion"]?.method == "POST")
     }
 
+    @Test
+    func `app affordances include updateContentRights command`() {
+        let app = App(id: "app-9", name: "My App", bundleId: "com.example")
+        #expect(app.affordances["updateContentRights"] == "asc apps update --app-id app-9")
+    }
+
+    @Test
+    func `app apiLinks expose updateContentRights as PATCH on the app`() {
+        let app = App(id: "app-9", name: "My App", bundleId: "com.example")
+        #expect(app.apiLinks["updateContentRights"]?.href == "/api/v1/apps/app-9")
+        #expect(app.apiLinks["updateContentRights"]?.method == "PATCH")
+    }
+
     // MARK: - AppStoreVersion updateVersion affordance
 
     @Test
