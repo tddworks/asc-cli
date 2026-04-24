@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`createVersion` affordance on `App`** — every app response now advertises `asc versions create --app-id <id>` (REST: `POST /api/v1/apps/{appId}/versions`). Frontends driven by affordances (e.g. the command center UI) can use the presence of this key to enable a "Create Version" action without hard-coding capabilities.
+- **`updateVersion` affordance on editable `AppStoreVersion`** — versions in `prepareForSubmission` state expose `asc versions update --version-id <id>` (REST: `PATCH /api/v1/versions/{id}`). Live and pending versions omit it, giving the UI a state-aware signal for the edit dialog.
+- **`asc versions update --version-id <id> --version <string>`** — new CLI command to update an existing App Store version's version string. Backed by new `VersionRepository.updateVersion(id:versionString:)` which maps to the ASC SDK `AppStoreVersionUpdateRequest`.
+- **`POST /api/v1/apps/{appId}/versions`** and **`PATCH /api/v1/versions/{versionId}`** — REST endpoints for version create/update on `VersionsController`. Request body: `{ "versionString": "...", "platform": "IOS" }` for create, `{ "versionString": "..." }` for update.
+
 ---
 
 ## [0.17.0] - 2026-04-21
