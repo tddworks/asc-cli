@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Plugins REST install/uninstall/search** — `PluginsController` now mirrors the full `asc plugins` CLI:
+  - `POST /api/v1/plugins` — install a plugin from the marketplace. Body: `{ "name": "Hello.plugin" }`. Returns the installed `Plugin` with `isInstalled: true`.
+  - `DELETE /api/v1/plugins/:name` — uninstall by name (or slug). Returns `204 No Content`.
+  - `GET /api/v1/plugins/market?q=<query>` — search the marketplace. Without `q`, behaves like the existing list. With `q`, calls `PluginRepository.searchAvailable`. Same response shape as `GET /api/v1/plugins/market`.
+  - These endpoints back the install/uninstall/search affordances already advertised on `Plugin.affordances` — frontends following affordances no longer hit a 404.
+- **Auth REST endpoints** — `asc auth` is now drivable from a web client. New `AuthController` exposes:
+  - `POST /api/v1/auth/accounts` (login) — body `{ keyId, issuerId, privateKeyPEM, name?, vendorNumber? }`. Saves to `~/.asc/credentials.json` and marks active. Returns the new `AuthStatus`.
+  - `GET /api/v1/auth/accounts` (list) — returns all saved `ConnectAccount` records.
+  - `GET /api/v1/auth/accounts/active` (check) — returns the active account's `AuthStatus`.
+  - `PATCH /api/v1/auth/accounts/active` (use) — body `{ name }` switches the active account, returns updated `AuthStatus`.
+  - `PATCH /api/v1/auth/accounts/:name` (update) — body `{ vendorNumber }` updates a stored account.
+  - `DELETE /api/v1/auth/accounts/active` and `DELETE /api/v1/auth/accounts/:name` (logout) — return `204 No Content`.
+  - **Security:** the controller writes API key PEMs to disk via `AuthStorage`. Run `asc web-server` bound to loopback only when this controller is enabled; the request body is sensitive.
+  - `AuthStatus` and `ConnectAccount` now conform to `Presentable` so REST responses share the `{"data":[…]}` shape used elsewhere.
+
 ---
 
 ## [0.17.1] - 2026-04-24
@@ -24,15 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`asc apps update --app-id <id> --content-rights-declaration <value>`** + **`PATCH /api/v1/apps/{appId}`** — update content rights declaration via CLI or REST. Backed by new `AppRepository.updateContentRights(appId:declaration:)` which maps to the ASC SDK `AppUpdateRequest`.
 - **`updateContentRights` affordance on `App`** — every app response advertises the new PATCH endpoint so frontends can wire the declaration switch without hard-coding the URL.
 - **`PATCH /api/v1/age-rating/{declarationId}`** — update an age rating declaration via REST. Body accepts any subset of the `AgeRatingDeclarationUpdate` fields (boolean flags, `ContentIntensity` values, `kidsAgeBand`, `ageRatingOverride`, `koreaAgeRatingOverride`). Fixes the `404` the frontend was seeing when following the `update` `_link` on an `AgeRatingDeclaration` response. Matches the affordance key already advertised by `AgeRatingDeclaration.structuredAffordances`.
-- **Auth REST endpoints** — `asc auth` is now drivable from a web client. New `AuthController` exposes:
-  - `POST /api/v1/auth/accounts` (login) — body `{ keyId, issuerId, privateKeyPEM, name?, vendorNumber? }`. Saves to `~/.asc/credentials.json` and marks active. Returns the new `AuthStatus`.
-  - `GET /api/v1/auth/accounts` (list) — returns all saved `ConnectAccount` records.
-  - `GET /api/v1/auth/accounts/active` (check) — returns the active account's `AuthStatus`.
-  - `PATCH /api/v1/auth/accounts/active` (use) — body `{ name }` switches the active account, returns updated `AuthStatus`.
-  - `PATCH /api/v1/auth/accounts/:name` (update) — body `{ vendorNumber }` updates a stored account.
-  - `DELETE /api/v1/auth/accounts/active` and `DELETE /api/v1/auth/accounts/:name` (logout) — return `204 No Content`.
-  - **Security:** the controller writes API key PEMs to disk via `AuthStorage`. Run `asc web-server` bound to loopback only when this controller is enabled; the request body is sensitive.
-  - `AuthStatus` and `ConnectAccount` now conform to `Presentable` so REST responses share the `{"data":[…]}` shape used elsewhere.
 
 ---
 
