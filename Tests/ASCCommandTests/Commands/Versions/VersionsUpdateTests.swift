@@ -8,7 +8,13 @@ struct VersionsUpdateTests {
 
     @Test func `updated version returns new version string with editable affordances`() async throws {
         let mockRepo = MockVersionRepository()
-        given(mockRepo).updateVersion(id: .any, versionString: .any).willReturn(
+        given(mockRepo).updateVersion(
+            id: .any,
+            versionString: .any,
+            copyright: .any,
+            releaseType: .any,
+            earliestReleaseDate: .any
+        ).willReturn(
             AppStoreVersion(id: "v-1", appId: "app-7", versionString: "2.5.0", platform: .iOS, state: .prepareForSubmission)
         )
 

@@ -21,7 +21,13 @@ struct VersionsUpdate: AsyncParsableCommand {
     }
 
     func execute(repo: any VersionRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
-        let updated = try await repo.updateVersion(id: versionId, versionString: version)
+        let updated = try await repo.updateVersion(
+            id: versionId,
+            versionString: version,
+            copyright: nil,
+            releaseType: nil,
+            earliestReleaseDate: nil
+        )
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
             [updated],
