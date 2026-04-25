@@ -45,6 +45,29 @@ struct RESTRoutesTests {
         #expect(normalized.contains("/api/v1/versions/v-1/localizations"))
     }
 
+    @Test func `plugins install returns the installed plugin in data wrapper`() async throws {
+        let mockRepo = MockPluginRepository()
+        given(mockRepo).install(name: .any).willReturn(
+            Plugin(id: "Hello.plugin", name: "Hello", version: "1.0", author: "me", isInstalled: true, slug: "Hello.plugin")
+        )
+        let output = try await PluginsInstall.parse(["--name", "Hello.plugin", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        #expect(output.contains("\"data\""))
+        #expect(output.contains("\"name\" : \"Hello\""))
+        #expect(output.contains("\"isInstalled\" : true"))
+    }
+
+    @Test func `plugins market search returns filtered list under data wrapper`() async throws {
+        let mockRepo = MockPluginRepository()
+        given(mockRepo).searchAvailable(query: .value("hello")).willReturn([
+            Plugin(id: "Hello.plugin", name: "Hello", version: "1.0", author: "me"),
+        ])
+        let output = try await MarketSearch.parse(["--query", "hello", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        #expect(output.contains("\"data\""))
+        #expect(output.contains("\"name\" : \"Hello\""))
+    }
+
     @Test func `auth list returns accounts JSON wrapped in data`() async throws {
         let storage = MockAuthStorage()
         given(storage).loadAll().willReturn([

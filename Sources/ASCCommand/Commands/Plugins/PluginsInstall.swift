@@ -17,13 +17,14 @@ struct PluginsInstall: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any PluginRepository) async throws -> String {
+    func execute(repo: any PluginRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let plugin = try await repo.install(name: name)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
             [plugin],
             headers: ["Name", "Version", "Author"],
-            rowMapper: { [$0.name, $0.version, $0.author ?? "-"] }
+            rowMapper: { [$0.name, $0.version, $0.author ?? "-"] },
+            affordanceMode: affordanceMode
         )
     }
 }
