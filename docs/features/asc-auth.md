@@ -181,6 +181,39 @@ asc auth check --pretty
 
 ---
 
+## REST Endpoints
+
+The same operations are reachable over HTTP via `asc web-server` so a local web app (e.g. an Electron/SPA setup wizard) can drive auth without spawning the CLI.
+
+| CLI | REST | Body |
+|-----|------|------|
+| `asc auth login` | `POST /api/v1/auth/accounts` | `{ "keyId": "...", "issuerId": "...", "privateKeyPEM": "...", "name"?: "...", "vendorNumber"?: "..." }` |
+| `asc auth list` | `GET /api/v1/auth/accounts` | — |
+| `asc auth check` | `GET /api/v1/auth/accounts/active` | — |
+| `asc auth use NAME` | `PATCH /api/v1/auth/accounts/active` | `{ "name": "personal" }` |
+| `asc auth update --vendor-number N` | `PATCH /api/v1/auth/accounts/:name` | `{ "vendorNumber": "12345678" }` |
+| `asc auth logout` | `DELETE /api/v1/auth/accounts/active` | — |
+| `asc auth logout --name X` | `DELETE /api/v1/auth/accounts/:name` | — |
+
+**Example — login from a web client:**
+
+```bash
+curl -X POST http://localhost:5173/api/v1/auth/accounts \
+  -H 'content-type: application/json' \
+  -d '{
+    "keyId": "KEYID123",
+    "issuerId": "abc-def-456",
+    "privateKeyPEM": "-----BEGIN PRIVATE KEY-----\nMIGTA...\n-----END PRIVATE KEY-----",
+    "name": "personal"
+  }'
+```
+
+Response: `200 OK` with the same `{ "data": [{ ...AuthStatus }] }` shape returned by `asc auth login`.
+
+**Security:** these routes write the API key PEM to `~/.asc/credentials.json`. Bind `asc web-server` to loopback only (`127.0.0.1`) when the controller is enabled — never expose it on a routable interface.
+
+---
+
 ## Credential Resolution Priority
 
 `CompositeAuthProvider` tries credentials in this order:

@@ -51,3 +51,12 @@ extension ConnectAccount: AffordanceProviding {
         return result
     }
 }
+
+extension ConnectAccount: Presentable {
+    public static var tableHeaders: [String] {
+        ["Name", "Key ID", "Issuer ID", "Active", "Vendor Number"]
+    }
+    public var tableRow: [String] {
+        [name, keyID, issuerID, isActive ? "*" : "", vendorNumber ?? "-"]
+    }
+}

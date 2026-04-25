@@ -50,3 +50,12 @@ extension AuthStatus: AffordanceProviding {
         ]
     }
 }
+
+extension AuthStatus: Presentable {
+    public static var tableHeaders: [String] {
+        ["Name", "Key ID", "Issuer ID", "Source", "Vendor Number"]
+    }
+    public var tableRow: [String] {
+        [name ?? "", keyID, issuerID, source.rawValue, vendorNumber ?? "-"]
+    }
+}

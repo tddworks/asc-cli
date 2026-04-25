@@ -65,7 +65,7 @@ struct RESTRoutesTests {
         let output = try await AuthLogin.parse([
             "--key-id", "KEY",
             "--issuer-id", "ISSUER",
-            "--private-key", "-----BEGIN PRIVATE KEY-----\nA\n-----END PRIVATE KEY-----",
+            "--private-key=-----BEGIN PRIVATE KEY-----\nA\n-----END PRIVATE KEY-----",
             "--name", "personal",
             "--pretty",
         ]).execute(storage: storage, affordanceMode: .rest)
