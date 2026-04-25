@@ -8,6 +8,8 @@ struct PluginsCommand: AsyncParsableCommand {
             PluginsList.self,
             PluginsInstall.self,
             PluginsUninstall.self,
+            PluginsUpdates.self,
+            PluginsUpdate.self,
             PluginsMarket.self,
         ]
     )
