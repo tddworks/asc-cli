@@ -9,17 +9,17 @@ struct AgeRatingController: Sendable {
     let repo: any AgeRatingDeclarationRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
-        // GET accepts appInfoId because the declaration is discovered by its parent.
-        group.get("/age-rating/:appInfoId") { _, context -> Response in
-            guard let appInfoId = context.parameters.get("appInfoId") else { return jsonError("Missing appInfoId") }
+        // Shared path param name — Hummingbird rejects the same path template with
+        // different param names. GET interprets it as an appInfoId (parent lookup);
+        // PATCH interprets it as the declaration's own id (per the update _link).
+        group.get("/age-rating/:id") { _, context -> Response in
+            guard let appInfoId = context.parameters.get("id") else { return jsonError("Missing appInfoId") }
             let declaration = try await self.repo.getDeclaration(appInfoId: appInfoId)
             return try restFormat(declaration)
         }
 
-        // PATCH takes the declaration's own id — matches the `update` _link produced
-        // by AgeRatingDeclaration.structuredAffordances.
-        group.patch("/age-rating/:declarationId") { request, context -> Response in
-            guard let declarationId = context.parameters.get("declarationId") else { return jsonError("Missing declarationId") }
+        group.patch("/age-rating/:id") { request, context -> Response in
+            guard let declarationId = context.parameters.get("id") else { return jsonError("Missing declarationId") }
             let body = try await request.body.collect(upTo: 64 * 1024)
             let json = (try? JSONSerialization.jsonObject(with: body) as? [String: Any]) ?? [:]
             var update = AgeRatingDeclarationUpdate()

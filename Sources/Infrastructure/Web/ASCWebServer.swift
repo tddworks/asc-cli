@@ -186,12 +186,20 @@ public struct ASCWebServer: Sendable {
         for p in plugins {
             let pluginDir = p.directory
             for script in p.uiScripts {
-                let routePath = "/api/plugins/\(p.slug)/\(script)"
+                // Hummingbird's RouterPath matches raw (non-decoded) request
+                // paths, so a route registered with spaces like
+                // "frames/iPhone 17 Pro Max.png" will never match the
+                // `%20`-encoded request the browser actually sends. Encode
+                // the path so the route literal equals what arrives on the
+                // wire. `.urlPathAllowed` keeps `/` intact.
+                let encodedScript = script
+                    .addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? script
+                let routePath = "/api/plugins/\(p.slug)/\(encodedScript)"
                 let filePath = pluginDir.appendingPathComponent(script).path
                 // Pick Content-Type from the file extension so plugins can
                 // ship PNGs, HTML, JSON etc. alongside their JS bundles.
                 // Only JS was ever served before, which is why PNG frames
-                // rendered as text in the browser.
+                // previously rendered as text in the browser.
                 let contentType = contentType(forExtension: URL(fileURLWithPath: script).pathExtension)
                 router.get(RouterPath(routePath)) { _, _ in
                     guard let data = FileManager.default.contents(atPath: filePath) else {
