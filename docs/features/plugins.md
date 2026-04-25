@@ -59,6 +59,38 @@ Browse all available plugins. See [Plugin Market](market.md).
 
 Search marketplace by keyword. See [Plugin Market](market.md).
 
+### `asc plugins updates`
+
+List installed plugins that have a newer version available in the marketplace. Inspired by Sparkle's appcast — each entry pairs the installed version with the latest marketplace version.
+
+```bash
+asc plugins updates --pretty
+```
+
+```json
+{
+  "data": [
+    {
+      "affordances": {
+        "list": "asc plugins updates",
+        "update": "asc plugins update --name Hello"
+      },
+      "installedVersion": "1.0.0",
+      "latestVersion": "1.2.0",
+      "name": "Hello"
+    }
+  ]
+}
+```
+
+### `asc plugins update --name <name>`
+
+Apply a marketplace update by uninstalling the named plugin and reinstalling the latest version. Returns the freshly installed `Plugin` record.
+
+```bash
+asc plugins update --name Hello
+```
+
 ## REST Endpoints
 
 The same operations are reachable over HTTP via `asc web-server`:
@@ -70,6 +102,8 @@ The same operations are reachable over HTTP via `asc web-server`:
 | `asc plugins uninstall --name X` | `DELETE /api/v1/plugins/:name` | — (returns `204`) |
 | `asc plugins market list` | `GET /api/v1/plugins/market` | — |
 | `asc plugins market search --query Q` | `GET /api/v1/plugins/market?q=Q` | — |
+| `asc plugins updates` | `GET /api/v1/plugins/updates` | — |
+| `asc plugins update --name X` | `POST /api/v1/plugins/:name/update` | — |
 
 **Example:**
 
@@ -84,6 +118,12 @@ curl "http://localhost:5173/api/v1/plugins/market?q=hello"
 
 # Uninstall
 curl -X DELETE http://localhost:5173/api/v1/plugins/Hello.plugin
+
+# Check for updates (Sparkle-style appcast)
+curl http://localhost:5173/api/v1/plugins/updates
+
+# Apply an update
+curl -X POST http://localhost:5173/api/v1/plugins/Hello/update
 ```
 
 ## Plugin Protocol
