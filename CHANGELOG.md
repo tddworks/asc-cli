@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.17.2] - 2026-04-25
+
 ### Added
 - **Plugin update workflow (Sparkle-style)** — check for and apply plugin updates via CLI or REST:
   - `asc plugins updates` (CLI) and `GET /api/v1/plugins/updates` (REST) — list every installed plugin where the marketplace has a newer version. Each entry is a `PluginUpdate { name, installedVersion, latestVersion, repositoryURL?, downloadURL? }` with affordances pointing at `asc plugins update --name X` (CLI) and `POST /api/v1/plugins/:name/update` (REST).
@@ -763,7 +767,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.17.1...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.17.2...HEAD
+[0.17.2]: https://github.com/tddworks/asc-cli/compare/v0.17.1...v0.17.2
 [0.17.1]: https://github.com/tddworks/asc-cli/compare/v0.17.0...v0.17.1
 [0.17.0]: https://github.com/tddworks/asc-cli/compare/v0.16.9...v0.17.0
 [0.16.9]: https://github.com/tddworks/asc-cli/compare/v0.1.68...v0.16.9
