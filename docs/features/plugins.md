@@ -59,6 +59,33 @@ Browse all available plugins. See [Plugin Market](market.md).
 
 Search marketplace by keyword. See [Plugin Market](market.md).
 
+## REST Endpoints
+
+The same operations are reachable over HTTP via `asc web-server`:
+
+| CLI | REST | Body / Query |
+|-----|------|--------------|
+| `asc plugins list` | `GET /api/v1/plugins` | — |
+| `asc plugins install --name X` | `POST /api/v1/plugins` | `{ "name": "X" }` |
+| `asc plugins uninstall --name X` | `DELETE /api/v1/plugins/:name` | — (returns `204`) |
+| `asc plugins market list` | `GET /api/v1/plugins/market` | — |
+| `asc plugins market search --query Q` | `GET /api/v1/plugins/market?q=Q` | — |
+
+**Example:**
+
+```bash
+# Install
+curl -X POST http://localhost:5173/api/v1/plugins \
+  -H 'content-type: application/json' \
+  -d '{"name":"Hello.plugin"}'
+
+# Search
+curl "http://localhost:5173/api/v1/plugins/market?q=hello"
+
+# Uninstall
+curl -X DELETE http://localhost:5173/api/v1/plugins/Hello.plugin
+```
+
 ## Plugin Protocol
 
 Plugins export a C entry point and conform to `ASCPluginBase`:
