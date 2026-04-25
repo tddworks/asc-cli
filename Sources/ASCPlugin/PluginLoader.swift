@@ -40,6 +40,15 @@ public enum PluginLoader {
 
     private nonisolated(unsafe) static var _cached: [LoadedPlugin]?
 
+    /// Invalidate the in-memory plugin cache so the next `discover()` re-scans
+    /// the filesystem. Call this after install / uninstall mutates
+    /// `~/.asc/plugins`, otherwise list endpoints will keep returning the
+    /// stale list (the asc REST `GET /api/v1/plugins` and the web UI's
+    /// post-uninstall refresh both hit this issue).
+    public static func invalidateCache() {
+        _cached = nil
+    }
+
     public static func discover() -> [LoadedPlugin] {
         if let cached = _cached { return cached }
         if ProcessInfo.processInfo.environment["ASC_NO_PLUGINS"] != nil { return [] }

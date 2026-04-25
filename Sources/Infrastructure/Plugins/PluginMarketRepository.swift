@@ -98,6 +98,10 @@ public struct PluginMarketRepository: PluginRepository {
             throw PluginMarketError.installFailed(name)
         }
 
+        // Drop the in-memory plugin cache so the next `listInstalled()`
+        // re-scans `~/.asc/plugins` and includes the new bundle.
+        PluginLoader.invalidateCache()
+
         return Plugin(
             id: name,
             name: entry.name,
