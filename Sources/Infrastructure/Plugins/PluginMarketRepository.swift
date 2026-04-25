@@ -121,6 +121,10 @@ public struct PluginMarketRepository: PluginRepository {
         let exactPath = pluginsDir.appendingPathComponent("\(name).plugin")
         if FileManager.default.fileExists(atPath: exactPath.path) {
             try FileManager.default.removeItem(at: exactPath)
+            // Drop the in-memory plugin cache so the next `listInstalled()`
+            // re-scans the disk and excludes this entry. Without this the
+            // REST list endpoint keeps returning the just-deleted plugin.
+            PluginLoader.invalidateCache()
             return
         }
         // Scan installed plugins — match by slug or name-derived id
@@ -141,6 +145,7 @@ public struct PluginMarketRepository: PluginRepository {
 
             if slugLower == nameLower || nameId == nameLower {
                 try fm.removeItem(at: pluginsDir.appendingPathComponent(entry))
+                PluginLoader.invalidateCache()
                 return
             }
         }
