@@ -10,6 +10,16 @@ public struct AppStoreVersion: Sendable, Equatable, Identifiable {
     public let createdDate: Date?
     /// Linked build ID, if a build has been associated with this version.
     public let buildId: String?
+    /// Copyright string shown on the App Store page.
+    public let copyright: String?
+    /// Apple's release-type enum, kept as the raw string ("MANUAL",
+    /// "AFTER_APPROVAL", "SCHEDULED") so the Domain doesn't have to
+    /// mirror Apple's enum and stay in sync with their additions.
+    public let releaseType: String?
+    /// ISO-8601 timestamp for SCHEDULED releases. Stays as a string so
+    /// JSON in/out is lossless and the Domain doesn't pull a Date
+    /// formatter into its public API.
+    public let earliestReleaseDate: String?
 
     public init(
         id: String,
@@ -18,7 +28,10 @@ public struct AppStoreVersion: Sendable, Equatable, Identifiable {
         platform: AppStorePlatform,
         state: AppStoreVersionState,
         createdDate: Date? = nil,
-        buildId: String? = nil
+        buildId: String? = nil,
+        copyright: String? = nil,
+        releaseType: String? = nil,
+        earliestReleaseDate: String? = nil
     ) {
         self.id = id
         self.appId = appId
@@ -27,6 +40,9 @@ public struct AppStoreVersion: Sendable, Equatable, Identifiable {
         self.state = state
         self.createdDate = createdDate
         self.buildId = buildId
+        self.copyright = copyright
+        self.releaseType = releaseType
+        self.earliestReleaseDate = earliestReleaseDate
     }
 
     public var isLive: Bool { state.isLive }
@@ -41,6 +57,7 @@ public struct AppStoreVersion: Sendable, Equatable, Identifiable {
 extension AppStoreVersion: Codable {
     enum CodingKeys: String, CodingKey {
         case id, appId, versionString, platform, state, createdDate, buildId
+        case copyright, releaseType, earliestReleaseDate
     }
 
     public init(from decoder: any Decoder) throws {
@@ -52,6 +69,9 @@ extension AppStoreVersion: Codable {
         state = try c.decode(AppStoreVersionState.self, forKey: .state)
         createdDate = try c.decodeIfPresent(Date.self, forKey: .createdDate)
         buildId = try c.decodeIfPresent(String.self, forKey: .buildId)
+        copyright = try c.decodeIfPresent(String.self, forKey: .copyright)
+        releaseType = try c.decodeIfPresent(String.self, forKey: .releaseType)
+        earliestReleaseDate = try c.decodeIfPresent(String.self, forKey: .earliestReleaseDate)
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -63,6 +83,9 @@ extension AppStoreVersion: Codable {
         try c.encode(state, forKey: .state)
         try c.encodeIfPresent(createdDate, forKey: .createdDate)
         try c.encodeIfPresent(buildId, forKey: .buildId)
+        try c.encodeIfPresent(copyright, forKey: .copyright)
+        try c.encodeIfPresent(releaseType, forKey: .releaseType)
+        try c.encodeIfPresent(earliestReleaseDate, forKey: .earliestReleaseDate)
     }
 }
 

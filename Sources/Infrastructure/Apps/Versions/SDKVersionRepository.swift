@@ -45,12 +45,30 @@ public struct SDKVersionRepository: VersionRepository, @unchecked Sendable {
         return version
     }
 
-    public func updateVersion(id: String, versionString: String) async throws -> Domain.AppStoreVersion {
+    public func updateVersion(
+        id: String,
+        versionString: String?,
+        copyright: String?,
+        releaseType: String?,
+        earliestReleaseDate: String?
+    ) async throws -> Domain.AppStoreVersion {
+        // Only send the fields the caller actually wants to change. Apple's
+        // SDK uses `encodeIfPresent`, so nil keys never reach the wire and
+        // unchanged attributes are preserved server-side.
+        let parsedReleaseType = releaseType.flatMap {
+            AppStoreVersionUpdateRequest.Data.Attributes.ReleaseType(rawValue: $0)
+        }
+        let parsedReleaseDate: Date? = earliestReleaseDate.flatMap { ISO8601DateFormatter().date(from: $0) }
         let body = AppStoreVersionUpdateRequest(
             data: .init(
                 type: .appStoreVersions,
                 id: id,
-                attributes: .init(versionString: versionString)
+                attributes: .init(
+                    versionString: versionString,
+                    copyright: copyright,
+                    releaseType: parsedReleaseType,
+                    earliestReleaseDate: parsedReleaseDate
+                )
             )
         )
         let response = try await client.request(APIEndpoint.v1.appStoreVersions.id(id).patch(body))
@@ -85,13 +103,23 @@ public struct SDKVersionRepository: VersionRepository, @unchecked Sendable {
         let state = Domain.AppStoreVersionState(
             rawValue: sdkVersion.attributes?.appStoreState?.rawValue ?? ""
         ) ?? .prepareForSubmission
+        // Hoist the three editable attributes onto the Domain so the web
+        // client's GET /versions/:id round-trip reflects what was just
+        // PATCHed. ISO-formatting `earliestReleaseDate` keeps the Domain
+        // free of Date plumbing.
+        let isoFormatter = ISO8601DateFormatter()
+        let earliestReleaseDate: String? = sdkVersion.attributes?.earliestReleaseDate
+            .map { isoFormatter.string(from: $0) }
         return Domain.AppStoreVersion(
             id: sdkVersion.id,
             appId: appId,
             versionString: sdkVersion.attributes?.versionString ?? "",
             platform: platform,
             state: state,
-            buildId: buildId
+            buildId: buildId,
+            copyright: sdkVersion.attributes?.copyright,
+            releaseType: sdkVersion.attributes?.releaseType?.rawValue,
+            earliestReleaseDate: earliestReleaseDate
         )
     }
 }

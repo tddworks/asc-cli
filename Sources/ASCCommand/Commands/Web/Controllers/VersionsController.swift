@@ -34,10 +34,20 @@ struct VersionsController: Sendable {
             guard let versionId = context.parameters.get("versionId") else { return jsonError("Missing versionId") }
             let body = try await request.body.collect(upTo: 64 * 1024)
             let json = (try? JSONSerialization.jsonObject(with: body) as? [String: Any]) ?? [:]
-            guard let versionString = json["versionString"] as? String else {
-                return jsonError("Missing versionString", status: .badRequest)
-            }
-            let updated = try await self.repo.updateVersion(id: versionId, versionString: versionString)
+            // All attributes are optional on PATCH — the client may be
+            // editing just one field. JSON `null` is normalized to nil
+            // (Swift's `as? String` returns nil for NSNull anyway).
+            let versionString = json["versionString"] as? String
+            let copyright = json["copyright"] as? String
+            let releaseType = json["releaseType"] as? String
+            let earliestReleaseDate = json["earliestReleaseDate"] as? String
+            let updated = try await self.repo.updateVersion(
+                id: versionId,
+                versionString: versionString,
+                copyright: copyright,
+                releaseType: releaseType,
+                earliestReleaseDate: earliestReleaseDate
+            )
             return try restFormat(updated)
         }
     }
