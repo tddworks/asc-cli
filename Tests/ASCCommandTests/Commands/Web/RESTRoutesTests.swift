@@ -45,6 +45,35 @@ struct RESTRoutesTests {
         #expect(normalized.contains("/api/v1/versions/v-1/localizations"))
     }
 
+    @Test func `auth list returns accounts JSON wrapped in data`() async throws {
+        let storage = MockAuthStorage()
+        given(storage).loadAll().willReturn([
+            ConnectAccount(name: "personal", keyID: "K1", issuerID: "I1", isActive: true),
+            ConnectAccount(name: "work", keyID: "K2", issuerID: "I2", isActive: false),
+        ])
+        let output = try await AuthList.parse(["--pretty"]).execute(storage: storage, affordanceMode: .rest)
+        #expect(output.contains("\"data\""))
+        #expect(output.contains("\"name\" : \"personal\""))
+        #expect(output.contains("\"name\" : \"work\""))
+        #expect(output.contains("\"isActive\" : true"))
+    }
+
+    @Test func `auth login returns AuthStatus with the saved name`() async throws {
+        let storage = MockAuthStorage()
+        given(storage).save(.any, name: .any).willReturn(())
+        given(storage).setActive(name: .any).willReturn(())
+        let output = try await AuthLogin.parse([
+            "--key-id", "KEY",
+            "--issuer-id", "ISSUER",
+            "--private-key", "-----BEGIN PRIVATE KEY-----\nA\n-----END PRIVATE KEY-----",
+            "--name", "personal",
+            "--pretty",
+        ]).execute(storage: storage, affordanceMode: .rest)
+        #expect(output.contains("\"name\" : \"personal\""))
+        #expect(output.contains("\"keyID\" : \"KEY\""))
+        #expect(output.contains("\"source\" : \"file\""))
+    }
+
     @Test func `age-rating update returns JSON with _links`() async throws {
         let mockRepo = MockAgeRatingDeclarationRepository()
         given(mockRepo).updateDeclaration(id: .any, update: .any).willReturn(

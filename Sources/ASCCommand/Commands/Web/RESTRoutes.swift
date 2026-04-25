@@ -73,6 +73,9 @@ enum RESTRoutes {
             submissionRepo: factory.makeSubmissionRepository(authProvider: auth)
         ) { submissions.addRoutes(to: v1) }
 
+        // Auth — manages the credential store the rest of the controllers consume.
+        AuthController(storage: FileAuthStorage()).addRoutes(to: v1)
+
         // Non-authenticated resources
         SimulatorsController(repo: factory.makeSimulatorRepository()).addRoutes(to: v1)
         PluginsController(repo: factory.makePluginRepository()).addRoutes(to: v1)
