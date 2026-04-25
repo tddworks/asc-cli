@@ -21,7 +21,7 @@ struct AuthUpdate: AsyncParsableCommand {
         print(try await execute(storage: storage))
     }
 
-    func execute(storage: any AuthStorage) async throws -> String {
+    func execute(storage: any AuthStorage, affordanceMode: AffordanceMode = .cli) async throws -> String {
         guard vendorNumber != nil else {
             throw ValidationError("Provide at least one field to update (e.g. --vendor-number)")
         }
@@ -60,7 +60,8 @@ struct AuthUpdate: AsyncParsableCommand {
         return try formatter.formatAgentItems(
             [status],
             headers: ["Name", "Key ID", "Issuer ID", "Source", "Vendor Number"],
-            rowMapper: { [$0.name ?? "", $0.keyID, $0.issuerID, $0.source.rawValue, $0.vendorNumber ?? ""] }
+            rowMapper: { [$0.name ?? "", $0.keyID, $0.issuerID, $0.source.rawValue, $0.vendorNumber ?? ""] },
+            affordanceMode: affordanceMode
         )
     }
 }

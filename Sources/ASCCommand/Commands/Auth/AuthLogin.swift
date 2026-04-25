@@ -34,7 +34,7 @@ struct AuthLogin: AsyncParsableCommand {
         print(try await execute(storage: storage))
     }
 
-    func execute(storage: any AuthStorage) async throws -> String {
+    func execute(storage: any AuthStorage, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let privateKeyPEM: String
 
         if let path = privateKeyPath {
@@ -61,7 +61,8 @@ struct AuthLogin: AsyncParsableCommand {
         return try formatter.formatAgentItems(
             [status],
             headers: ["Name", "Key ID", "Issuer ID", "Source"],
-            rowMapper: { [$0.name ?? "", $0.keyID, $0.issuerID, $0.source.rawValue] }
+            rowMapper: { [$0.name ?? "", $0.keyID, $0.issuerID, $0.source.rawValue] },
+            affordanceMode: affordanceMode
         )
     }
 }

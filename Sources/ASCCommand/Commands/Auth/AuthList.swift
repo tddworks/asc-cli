@@ -15,13 +15,14 @@ struct AuthList: AsyncParsableCommand {
         print(try await execute(storage: storage))
     }
 
-    func execute(storage: any AuthStorage) async throws -> String {
+    func execute(storage: any AuthStorage, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let accounts = try storage.loadAll()
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
             accounts,
             headers: ["Name", "Key ID", "Issuer ID", "Active"],
-            rowMapper: { [$0.name, $0.keyID, $0.issuerID, $0.isActive ? "*" : ""] }
+            rowMapper: { [$0.name, $0.keyID, $0.issuerID, $0.isActive ? "*" : ""] },
+            affordanceMode: affordanceMode
         )
     }
 }
