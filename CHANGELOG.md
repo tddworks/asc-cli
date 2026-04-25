@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Plugin update workflow (Sparkle-style)** — check for and apply plugin updates via CLI or REST:
+  - `asc plugins updates` (CLI) and `GET /api/v1/plugins/updates` (REST) — list every installed plugin where the marketplace has a newer version. Each entry is a `PluginUpdate { name, installedVersion, latestVersion, repositoryURL?, downloadURL? }` with affordances pointing at `asc plugins update --name X` (CLI) and `POST /api/v1/plugins/:name/update` (REST).
+  - `asc plugins update --name X` (CLI) and `POST /api/v1/plugins/:name/update` (REST) — uninstall the named plugin and reinstall the latest marketplace version. Returns the freshly installed `Plugin`.
+  - `Plugin.affordances` adds `checkUpdate → asc plugins updates` for installed plugins so frontends can wire a "Check for updates" entry without hard-coding the path.
+  - New `PluginRepository.listOutdated()` and `update(name:)` methods on the repository protocol; implemented in `PluginMarketRepository` by zipping `listInstalled()` with `listAvailable()` on `name`.
 - **Plugins REST install/uninstall/search** — `PluginsController` now mirrors the full `asc plugins` CLI:
   - `POST /api/v1/plugins` — install a plugin from the marketplace. Body: `{ "name": "Hello.plugin" }`. Returns the installed `Plugin` with `isInstalled: true`.
   - `DELETE /api/v1/plugins/:name` — uninstall by name (or slug). Returns `204 No Content`.
