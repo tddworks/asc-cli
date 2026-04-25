@@ -48,5 +48,16 @@ struct PluginsController: Sendable {
             }
             return try restFormat(plugins)
         }
+
+        group.get("/plugins/updates") { _, _ -> Response in
+            let updates = try await self.repo.listOutdated()
+            return try restFormat(updates)
+        }
+
+        group.post("/plugins/:name/update") { _, context -> Response in
+            guard let name = context.parameters.get("name") else { return jsonError("Missing name") }
+            let updated = try await self.repo.update(name: name)
+            return try restFormat(updated)
+        }
     }
 }

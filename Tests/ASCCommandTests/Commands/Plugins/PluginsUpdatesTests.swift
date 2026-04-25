@@ -12,8 +12,7 @@ struct PluginsUpdatesTests {
             PluginUpdate(
                 name: "Hello",
                 installedVersion: "1.0.0",
-                latestVersion: "1.2.0",
-                repositoryURL: "https://github.com/me/Hello"
+                latestVersion: "1.2.0"
             ),
         ])
 
@@ -26,13 +25,11 @@ struct PluginsUpdatesTests {
             {
               "affordances" : {
                 "list" : "asc plugins updates",
-                "update" : "asc plugins update --name Hello",
-                "viewRepository" : "https://github.com/me/Hello"
+                "update" : "asc plugins update --name Hello"
               },
               "installedVersion" : "1.0.0",
               "latestVersion" : "1.2.0",
-              "name" : "Hello",
-              "repositoryURL" : "https://github.com/me/Hello"
+              "name" : "Hello"
             }
           ]
         }

@@ -45,6 +45,29 @@ struct RESTRoutesTests {
         #expect(normalized.contains("/api/v1/versions/v-1/localizations"))
     }
 
+    @Test func `plugins updates list returns outdated entries with apply links`() async throws {
+        let mockRepo = MockPluginRepository()
+        given(mockRepo).listOutdated().willReturn([
+            PluginUpdate(name: "Hello", installedVersion: "1.0.0", latestVersion: "1.2.0"),
+        ])
+        let output = try await PluginsUpdates.parse(["--pretty"]).execute(repo: mockRepo, affordanceMode: .rest)
+        #expect(output.contains("\"_links\""))
+        #expect(output.contains("\"name\" : \"Hello\""))
+        #expect(output.contains("\"installedVersion\" : \"1.0.0\""))
+        #expect(output.contains("\"latestVersion\" : \"1.2.0\""))
+    }
+
+    @Test func `plugins update returns the freshly installed plugin`() async throws {
+        let mockRepo = MockPluginRepository()
+        given(mockRepo).update(name: .value("Hello")).willReturn(
+            Plugin(id: "Hello.plugin", name: "Hello", version: "1.2.0", isInstalled: true, slug: "Hello.plugin")
+        )
+        let output = try await PluginsUpdate.parse(["--name", "Hello", "--pretty"]).execute(repo: mockRepo, affordanceMode: .rest)
+        #expect(output.contains("\"_links\""))
+        #expect(output.contains("\"version\" : \"1.2.0\""))
+        #expect(output.contains("\"isInstalled\" : true"))
+    }
+
     @Test func `plugins install returns the installed plugin in data wrapper`() async throws {
         let mockRepo = MockPluginRepository()
         given(mockRepo).install(name: .any).willReturn(

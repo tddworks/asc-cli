@@ -31,6 +31,7 @@ struct PluginsUpdateTests {
                 "checkUpdate" : "asc plugins updates",
                 "uninstall" : "asc plugins uninstall --name Hello.plugin"
               },
+              "author" : "me",
               "categories" : [
 
               ],
@@ -42,8 +43,7 @@ struct PluginsUpdateTests {
               "uiScripts" : [
 
               ],
-              "version" : "1.2.0",
-              "author" : "me"
+              "version" : "1.2.0"
             }
           ]
         }
