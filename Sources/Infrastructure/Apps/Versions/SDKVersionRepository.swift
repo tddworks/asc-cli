@@ -1,5 +1,6 @@
 @preconcurrency import AppStoreConnect_Swift_SDK
 import Domain
+import Foundation
 
 public struct SDKVersionRepository: VersionRepository, @unchecked Sendable {
     private let client: any APIClient

@@ -151,7 +151,13 @@ struct RESTRoutesTests {
 
     @Test func `versions update returns JSON with _links`() async throws {
         let mockRepo = MockVersionRepository()
-        given(mockRepo).updateVersion(id: .any, versionString: .any).willReturn(
+        given(mockRepo).updateVersion(
+            id: .any,
+            versionString: .any,
+            copyright: .any,
+            releaseType: .any,
+            earliestReleaseDate: .any
+        ).willReturn(
             AppStoreVersion(id: "v-1", appId: "42", versionString: "1.5", platform: .iOS, state: .prepareForSubmission)
         )
         let output = try await VersionsUpdate
