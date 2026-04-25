@@ -96,6 +96,7 @@ extension Plugin: AffordanceProviding {
         ]
         if isInstalled {
             cmds["uninstall"] = "asc plugins uninstall --name \(slug ?? id)"
+            cmds["checkUpdate"] = "asc plugins updates"
         } else {
             cmds["install"] = "asc plugins install --name \(id)"
         }

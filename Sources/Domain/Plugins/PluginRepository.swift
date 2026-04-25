@@ -8,4 +8,8 @@ public protocol PluginRepository: Sendable {
     func searchAvailable(query: String) async throws -> [Plugin]
     func install(name: String) async throws -> Plugin
     func uninstall(name: String) async throws
+    /// Diff installed plugins against the marketplace; emit one entry per outdated plugin.
+    func listOutdated() async throws -> [PluginUpdate]
+    /// Reinstall the named plugin with the latest marketplace version.
+    func update(name: String) async throws -> Plugin
 }

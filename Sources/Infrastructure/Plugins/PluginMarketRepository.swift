@@ -152,6 +152,40 @@ public struct PluginMarketRepository: PluginRepository {
         throw PluginMarketError.pluginNotFound(name)
     }
 
+    public func listOutdated() async throws -> [PluginUpdate] {
+        let installed = try await listInstalled()
+        let available = try await listAvailable()
+        var availableByName: [String: Plugin] = [:]
+        for plugin in available {
+            availableByName[plugin.name] = plugin
+        }
+        return installed.compactMap { local in
+            guard let remote = availableByName[local.name],
+                  remote.version != local.version else { return nil }
+            return PluginUpdate(
+                name: local.name,
+                installedVersion: local.version,
+                latestVersion: remote.version,
+                repositoryURL: remote.repositoryURL ?? local.repositoryURL,
+                downloadURL: remote.downloadURL
+            )
+        }
+    }
+
+    public func update(name: String) async throws -> Plugin {
+        // Find the marketplace entry that matches the installed plugin's name or id.
+        let installed = try await listInstalled()
+        guard let local = installed.first(where: { $0.name == name || $0.slug == name || $0.id == name }) else {
+            throw PluginMarketError.pluginNotFound(name)
+        }
+        let available = try await listAvailable()
+        guard let remote = available.first(where: { $0.name == local.name }) else {
+            throw PluginMarketError.pluginNotFound(local.name)
+        }
+        try await uninstall(name: local.slug ?? local.id)
+        return try await install(name: remote.id)
+    }
+
     // MARK: - Private
 
     private func readManifest(at directory: URL) -> [String: Any]? {
