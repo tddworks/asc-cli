@@ -55,14 +55,26 @@ extension SubscriptionReviewScreenshot: Presentable {
 }
 
 extension SubscriptionReviewScreenshot: AffordanceProviding {
-    public var affordances: [String: String] {
-        var cmds = [
-            "get": "asc subscription-review-screenshot get --subscription-id \(subscriptionId)",
+    public var structuredAffordances: [Affordance] {
+        _ = RESTPathResolver._subscriptionReviewAssetRoutes
+        var items: [Affordance] = [
+            Affordance(key: "get", command: "subscription-review-screenshot", action: "get", params: ["subscription-id": subscriptionId]),
+            Affordance(key: "upload", command: "subscription-review-screenshot", action: "upload", params: ["subscription-id": subscriptionId, "file": "<path>"]),
         ]
         if assetState?.isComplete ?? false || assetState?.hasFailed ?? false {
-            cmds["delete"] = "asc subscription-review-screenshot delete --screenshot-id \(id)"
+            items.append(Affordance(key: "delete", command: "subscription-review-screenshot", action: "delete", params: ["screenshot-id": id]))
         }
-        cmds["upload"] = "asc subscription-review-screenshot upload --subscription-id \(subscriptionId) --file <path>"
-        return cmds
+        return items
     }
+}
+
+extension RESTPathResolver {
+    static let _subscriptionReviewAssetRoutes: Void = {
+        registerRoute(
+            command: "subscription-review-screenshot",
+            parentParam: "subscription-id",
+            parentSegment: "subscriptions",
+            segment: "review-screenshot"
+        )
+    }()
 }

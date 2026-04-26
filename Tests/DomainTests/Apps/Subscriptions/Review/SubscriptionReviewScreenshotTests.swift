@@ -14,7 +14,7 @@ struct SubscriptionReviewScreenshotTests {
                                              fileSize: 1234, assetState: .complete)
         #expect(s.affordances["get"] == "asc subscription-review-screenshot get --subscription-id sub-1")
         #expect(s.affordances["delete"] == "asc subscription-review-screenshot delete --screenshot-id rs-1")
-        #expect(s.affordances["upload"] == "asc subscription-review-screenshot upload --subscription-id sub-1 --file <path>")
+        #expect(s.affordances["upload"] == "asc subscription-review-screenshot upload --file <path> --subscription-id sub-1")
     }
 
     @Test func `delete affordance suppressed while awaiting upload`() {

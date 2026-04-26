@@ -33,7 +33,7 @@ struct SubscriptionPricePointsListTests {
             {
               "affordances" : {
                 "listPricePoints" : "asc subscriptions price-points list --subscription-id sub-1",
-                "setPrice" : "asc subscriptions prices set --subscription-id sub-1 --territory USA --price-point-id pp-tier1"
+                "setPrice" : "asc subscriptions prices set --price-point-id pp-tier1 --subscription-id sub-1 --territory USA"
               },
               "customerPrice" : "9.99",
               "id" : "pp-tier1",

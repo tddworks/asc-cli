@@ -17,9 +17,12 @@ struct SubscriptionReviewScreenshotGet: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubscriptionReviewRepository) async throws -> String {
+    func execute(
+        repo: any SubscriptionReviewRepository,
+        affordanceMode: AffordanceMode = .cli
+    ) async throws -> String {
         let item = try await repo.getReviewScreenshot(subscriptionId: subscriptionId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(item.map { [$0] } ?? [])
+        return try formatter.formatAgentItems(item.map { [$0] } ?? [], affordanceMode: affordanceMode)
     }
 }

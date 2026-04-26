@@ -14,7 +14,7 @@ struct InAppPurchaseReviewScreenshotTests {
                                               fileSize: 1234, assetState: .complete)
         #expect(s.affordances["get"] == "asc iap-review-screenshot get --iap-id iap-1")
         #expect(s.affordances["delete"] == "asc iap-review-screenshot delete --screenshot-id rs-1")
-        #expect(s.affordances["upload"] == "asc iap-review-screenshot upload --iap-id iap-1 --file <path>")
+        #expect(s.affordances["upload"] == "asc iap-review-screenshot upload --file <path> --iap-id iap-1")
     }
 
     @Test func `delete affordance is suppressed while awaiting upload`() {
@@ -22,7 +22,7 @@ struct InAppPurchaseReviewScreenshotTests {
                                               fileSize: 1234, assetState: .awaitingUpload)
         #expect(s.affordances["delete"] == nil)
         // Re-uploading is always offered as recovery
-        #expect(s.affordances["upload"] == "asc iap-review-screenshot upload --iap-id iap-1 --file <path>")
+        #expect(s.affordances["upload"] == "asc iap-review-screenshot upload --file <path> --iap-id iap-1")
     }
 
     @Test func `delete is offered after a failed upload as recovery`() {

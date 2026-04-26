@@ -18,7 +18,7 @@ struct SubscriptionPricePointTests {
 
     @Test func `affordances include setPrice when territory present`() {
         let pp = SubscriptionPricePoint(id: "pp-1", subscriptionId: "sub-1", territory: "USA")
-        #expect(pp.affordances["setPrice"] == "asc subscriptions prices set --subscription-id sub-1 --territory USA --price-point-id pp-1")
+        #expect(pp.affordances["setPrice"] == "asc subscriptions prices set --price-point-id pp-1 --subscription-id sub-1 --territory USA")
     }
 
     @Test func `affordances omit setPrice when territory absent`() {

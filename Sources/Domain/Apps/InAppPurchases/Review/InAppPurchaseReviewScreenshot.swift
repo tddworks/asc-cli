@@ -55,19 +55,19 @@ extension InAppPurchaseReviewScreenshot: Presentable {
 }
 
 extension InAppPurchaseReviewScreenshot: AffordanceProviding {
-    public var affordances: [String: String] {
-        var cmds = [
-            "get": "asc iap-review-screenshot get --iap-id \(iapId)",
+    public var structuredAffordances: [Affordance] {
+        _ = RESTPathResolver._iapReviewAssetRoutes
+        var items: [Affordance] = [
+            Affordance(key: "get", command: "iap-review-screenshot", action: "get", params: ["iap-id": iapId]),
+            Affordance(key: "upload", command: "iap-review-screenshot", action: "upload", params: ["iap-id": iapId, "file": "<path>"]),
         ]
         // Delete is offered once the asset is reachable (upload finished or failed).
         // While `awaitingUpload`, the slot is reserved but the asset isn't there
         // yet — re-uploading is the natural recovery path.
         if assetState?.isComplete ?? false || assetState?.hasFailed ?? false {
-            cmds["delete"] = "asc iap-review-screenshot delete --screenshot-id \(id)"
+            items.append(Affordance(key: "delete", command: "iap-review-screenshot", action: "delete", params: ["screenshot-id": id]))
         }
-        // Re-uploading is always legal — replaces the existing slot.
-        cmds["upload"] = "asc iap-review-screenshot upload --iap-id \(iapId) --file <path>"
-        return cmds
+        return items
     }
 }
 
@@ -131,15 +131,36 @@ extension InAppPurchasePromotionalImage: Presentable {
 }
 
 extension InAppPurchasePromotionalImage: AffordanceProviding {
-    public var affordances: [String: String] {
-        var cmds = [
-            "listSiblings": "asc iap-images list --iap-id \(iapId)",
+    public var structuredAffordances: [Affordance] {
+        _ = RESTPathResolver._iapReviewAssetRoutes
+        var items: [Affordance] = [
+            Affordance(key: "listSiblings", command: "iap-images", action: "list", params: ["iap-id": iapId]),
         ]
         // Delete is suppressed while App Review is looking at the image — submitting
         // a delete during review is a 409 conflict in ASC.
         if !(state?.isPendingReview ?? false) {
-            cmds["delete"] = "asc iap-images delete --image-id \(id)"
+            items.append(Affordance(key: "delete", command: "iap-images", action: "delete", params: ["image-id": id]))
         }
-        return cmds
+        return items
     }
+}
+
+extension RESTPathResolver {
+    static let _iapReviewAssetRoutes: Void = {
+        // Single review screenshot per IAP — represented as a 1-element collection at
+        // /api/v1/apps/{iapId}/iap-review-screenshot. Conceptually a singleton, but the
+        // shape mirrors other nested resources for agent navigation.
+        registerRoute(
+            command: "iap-review-screenshot",
+            parentParam: "iap-id",
+            parentSegment: "iap",
+            segment: "review-screenshot"
+        )
+        registerRoute(
+            command: "iap-images",
+            parentParam: "iap-id",
+            parentSegment: "iap",
+            segment: "images"
+        )
+    }()
 }
