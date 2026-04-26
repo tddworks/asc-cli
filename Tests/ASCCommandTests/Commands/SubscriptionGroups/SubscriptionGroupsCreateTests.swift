@@ -27,8 +27,10 @@ struct SubscriptionGroupsCreateTests {
           "data" : [
             {
               "affordances" : {
+                "createLocalization" : "asc subscription-group-localizations create --group-id grp-new --locale en-US --name <name>",
                 "createSubscription" : "asc subscriptions create --group-id grp-new --name <name> --product-id <id> --period ONE_MONTH",
                 "delete" : "asc subscription-groups delete --group-id grp-new",
+                "listLocalizations" : "asc subscription-group-localizations list --group-id grp-new",
                 "listSubscriptions" : "asc subscriptions list --group-id grp-new",
                 "update" : "asc subscription-groups update --group-id grp-new --reference-name <name>"
               },

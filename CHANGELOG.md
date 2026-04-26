@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Subscription group localizations** — per-locale display name and Custom App Name for a subscription group. New CLI command tree under `asc subscription-group-localizations`:
+  - `list --group-id <id>`, `create --group-id <id> --locale <code> --name <name> [--custom-app-name <name>]`, `update --localization-id <id> [--name <name>] [--custom-app-name <name>]`, and `delete --localization-id <id>`.
+  - New `SubscriptionGroupLocalization` domain type ({id, groupId, locale, name?, customAppName?, state?}) with `listSiblings`/`update`/`delete` affordances. New `SubscriptionGroupLocalizationRepository` `@Mockable` protocol, SDK adapter on `/v1/subscriptionGroupLocalizations`.
+  - `SubscriptionGroup` now advertises `createLocalization`/`listLocalizations` so an agent navigating from a group can discover the localization tree.
 - **Offer code prices + one-time code values** — completes the offer-code feature so an agent can read back per-territory pricing and download distributable redemption codes:
   - `asc iap-offer-codes prices list --offer-code-id <id>` and `asc subscription-offer-codes prices list --offer-code-id <id>` — returns each price with `territory` and `pricePointId` (IAP) or `subscriptionPricePointId` (Subscription). Backed by `GET /v1/inAppPurchaseOfferCodes/{id}/prices` and `GET /v1/subscriptionOfferCodes/{id}/prices`.
   - `asc iap-offer-code-one-time-codes values --one-time-code-id <id>` and `asc subscription-offer-code-one-time-codes values --one-time-code-id <id>` — fetches the raw CSV body of one-time-use redemption codes for distribution. Backed by `GET /v1/.../oneTimeUseCodes/{id}/values` (`Request<String>`).
