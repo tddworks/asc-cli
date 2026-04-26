@@ -36,7 +36,7 @@ asc init --app-id <id> # pin it — skip --app-id on every future command
 | **App Previews** | Upload video previews (`.mp4`, `.mov`, `.m4v`) per locale and device size |
 | **App Shots** | AI-powered screenshot generation — single templates, gallery sets, plugin-provided themes (colors, decorations, animations), Gemini enhancement; two-step ThemeDesign workflow for batch styling without extra AI calls |
 | **TestFlight** | Manage beta groups; add/remove/import/export testers; submit builds for beta review |
-| **Monetization** | IAPs (consumable, non-consumable, non-renewing); subscriptions, offers, pricing, offer codes |
+| **Monetization** | IAPs (consumable, non-consumable, non-renewing); subscriptions, intro offers, **promotional offers**, **win-back offers**, offer codes (3-level), **promoted purchases**; full lifecycle (update/delete/unsubmit), per-territory pricing (with `proceedsYear2`), review screenshots, and 1024×1024 promotional images |
 | **Code Signing** | Bundle IDs, certificates, devices, provisioning profiles |
 | **Authentication** | Multi-account credential management; named accounts, active-account switching |
 | **Project Init** | `asc init` pins app context to `.asc/project.json`; auto-detects from `.xcodeproj` |
@@ -319,45 +319,118 @@ asc app-shots generate --file screen.png --style-reference ~/ref.png
 ### Monetization
 
 ```bash
-# In-App Purchases
-asc iap list --app-id <id>
+# IAP lifecycle
+asc iap list   --app-id <id>
 asc iap create --app-id <id> --reference-name <n> --product-id <id> --type consumable
-asc iap submit --iap-id <id>
+asc iap update --iap-id <id> [--reference-name <n>] [--review-note <note>] [--family-sharable | --not-family-sharable]
+asc iap delete --iap-id <id>
+asc iap submit   --iap-id <id>
+asc iap unsubmit --submission-id <id>
+
+# IAP pricing (single base territory; Apple auto-equalizes)
 asc iap price-points list --iap-id <id> [--territory USA]
 asc iap prices set --iap-id <id> --base-territory USA --price-point-id <id>
-asc iap-localizations list --iap-id <id>
-asc iap-localizations create --iap-id <id> --locale en-US --name <n>
 
-# Subscriptions
-asc subscription-groups list --app-id <id>
+# IAP localizations
+asc iap-localizations list   --iap-id <id>
+asc iap-localizations create --iap-id <id> --locale en-US --name <n> [--description <d>]
+asc iap-localizations update --localization-id <id> [--name <n>] [--description <d>]
+asc iap-localizations delete --localization-id <id>
+
+# IAP review assets — reserve → upload chunks → commit-with-MD5
+asc iap-review-screenshot get    --iap-id <id>
+asc iap-review-screenshot upload --iap-id <id> --file ./review.png
+asc iap-review-screenshot delete --screenshot-id <id>
+asc iap-images list   --iap-id <id>                              # 1024×1024 promotional images
+asc iap-images upload --iap-id <id> --file ./promo-1024.png
+asc iap-images delete --image-id <id>
+
+# Subscription Groups + group localizations (Custom App Name per locale)
+asc subscription-groups list   --app-id <id>
 asc subscription-groups create --app-id <id> --reference-name <n>
-asc subscriptions list --group-id <id>
+asc subscription-groups update --group-id <id> --reference-name <n>
+asc subscription-groups delete --group-id <id>
+asc subscription-group-localizations list   --group-id <id>
+asc subscription-group-localizations create --group-id <id> --locale en-US --name <n> [--custom-app-name <c>]
+asc subscription-group-localizations update --localization-id <id> [--name <n>] [--custom-app-name <c>]
+asc subscription-group-localizations delete --localization-id <id>
+
+# Subscriptions lifecycle
+asc subscriptions list   --group-id <id>
 asc subscriptions create --group-id <id> --name <n> --product-id <id> --period ONE_MONTH
-asc subscriptions submit --subscription-id <id>
-asc subscription-localizations list --subscription-id <id>
-asc subscription-localizations create --subscription-id <id> --locale en-US --name <n>
-asc subscription-offers list --subscription-id <id>
+asc subscriptions update --subscription-id <id> [--name <n>] [--family-sharable | --not-family-sharable] [--group-level <n>] [--review-note <note>]
+asc subscriptions delete --subscription-id <id>
+asc subscriptions submit   --subscription-id <id>
+asc subscriptions unsubmit --submission-id <id>
+
+# Subscription pricing (per-territory; price points include proceedsYear2)
+asc subscriptions price-points list --subscription-id <id> [--territory USA]
+asc subscriptions prices set --subscription-id <id> --territory USA --price-point-id <pp> [--start-date 2026-06-01] [--preserve-current-price]
+
+# Subscription localizations
+asc subscription-localizations list   --subscription-id <id>
+asc subscription-localizations create --subscription-id <id> --locale en-US --name <n> [--description <d>]
+asc subscription-localizations update --localization-id <id> [--name <n>] [--description <d>]
+asc subscription-localizations delete --localization-id <id>
+
+# Introductory offers
+asc subscription-offers list   --subscription-id <id>
 asc subscription-offers create --subscription-id <id> --duration ONE_MONTH --mode FREE_TRIAL --periods 1
 asc subscription-offers create --subscription-id <id> --duration THREE_MONTHS --mode PAY_AS_YOU_GO --periods 3 --price-point-id <id>
+asc subscription-offers delete --offer-id <id>
 
-# Subscription Offer Codes
-asc subscription-offer-codes list --subscription-id <id>
+# Promotional offers (in-app, with per-territory inline pricing)
+asc subscription-promotional-offers list   --subscription-id <id>
+asc subscription-promotional-offers create --subscription-id <id> --name <n> --offer-code <c> --duration ONE_MONTH --mode PAY_AS_YOU_GO --periods 1 --price USA=spp-1 --price GBR=spp-2
+asc subscription-promotional-offers delete --offer-id <id>
+asc subscription-promotional-offers prices list --offer-id <id>
+
+# Win-back offers (lapsed subscribers, with eligibility rules + per-territory pricing)
+asc win-back-offers list --subscription-id <id>
+asc win-back-offers create --subscription-id <id> --reference-name <n> --offer-id <code> \
+  --duration ONE_MONTH --mode FREE_TRIAL --periods 1 \
+  --paid-months 3 --since-min 1 --since-max 6 --wait-months 2 \
+  --start-date 2026-04-01 --end-date 2026-12-31 --priority HIGH --promotion-intent USE_AUTO_GENERATED_ASSETS
+asc win-back-offers update --offer-id <id> [--priority HIGH|NORMAL] [--start-date ...] [--end-date ...]
+asc win-back-offers delete --offer-id <id>
+asc win-back-offers prices list --offer-id <id>
+
+# Subscription review screenshot
+asc subscription-review-screenshot get    --subscription-id <id>
+asc subscription-review-screenshot upload --subscription-id <id> --file ./review.png
+asc subscription-review-screenshot delete --screenshot-id <id>
+
+# Subscription Offer Codes (3-level + redemption CSV download)
+asc subscription-offer-codes list   --subscription-id <id>
 asc subscription-offer-codes create --subscription-id <id> --name "SUMMER2026" --duration ONE_MONTH --mode FREE_TRIAL --periods 1 --eligibility NEW --offer-eligibility STACKABLE
-asc subscription-offer-codes update --offer-code-id <id> --active false
-asc subscription-offer-code-custom-codes list --offer-code-id <id>
+asc subscription-offer-codes update      --offer-code-id <id> --active false
+asc subscription-offer-codes prices list --offer-code-id <id>
+asc subscription-offer-code-custom-codes list   --offer-code-id <id>
 asc subscription-offer-code-custom-codes create --offer-code-id <id> --custom-code "SUMMER2026" --number-of-codes 1000
-asc subscription-offer-code-one-time-codes list --offer-code-id <id>
+asc subscription-offer-code-one-time-codes list   --offer-code-id <id>
 asc subscription-offer-code-one-time-codes create --offer-code-id <id> --number-of-codes 5000 --expiration-date 2026-12-31
+asc subscription-offer-code-one-time-codes values --one-time-code-id <id>      # CSV of redemption codes
 
-# IAP Offer Codes
-asc iap-offer-codes list --iap-id <id>
+# IAP Offer Codes (3-level + redemption CSV download)
+asc iap-offer-codes list   --iap-id <id>
 asc iap-offer-codes create --iap-id <id> --name "FREEGEMS" --eligibility NON_SPENDER
-asc iap-offer-codes update --offer-code-id <id> --active false
-asc iap-offer-code-custom-codes list --offer-code-id <id>
+asc iap-offer-codes update      --offer-code-id <id> --active false
+asc iap-offer-codes prices list --offer-code-id <id>
+asc iap-offer-code-custom-codes list   --offer-code-id <id>
 asc iap-offer-code-custom-codes create --offer-code-id <id> --custom-code "FREEGEMS100" --number-of-codes 500
-asc iap-offer-code-one-time-codes list --offer-code-id <id>
+asc iap-offer-code-one-time-codes list   --offer-code-id <id>
 asc iap-offer-code-one-time-codes create --offer-code-id <id> --number-of-codes 3000 --expiration-date 2026-06-30
+asc iap-offer-code-one-time-codes values --one-time-code-id <id>               # CSV of redemption codes
+
+# Promoted purchases (App Store product page slots)
+asc promoted-purchases list   --app-id <id>
+asc promoted-purchases create --app-id <id> --iap-id <iap_id> --visible --enabled
+asc promoted-purchases create --app-id <id> --subscription-id <sub_id> --visible --enabled
+asc promoted-purchases update --promoted-id <id> [--visible | --hidden] [--enabled | --disabled]
+asc promoted-purchases delete --promoted-id <id>
 ```
+
+> See [docs/features/iap-subscriptions.md](docs/features/iap-subscriptions.md) for the full domain reference, REST endpoints, and per-feature subdocs (lifecycle, pricing, offer-codes, group-localizations, promotional-offers, win-back-offers, review-assets). Promoted purchases live in [docs/features/promoted-purchases.md](docs/features/promoted-purchases.md).
 
 ### Code Signing
 
