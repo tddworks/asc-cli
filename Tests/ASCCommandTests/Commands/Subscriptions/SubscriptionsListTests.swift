@@ -31,11 +31,13 @@ struct SubscriptionsListTests {
               "affordances" : {
                 "createIntroductoryOffer" : "asc subscription-offers create --subscription-id sub-1 --duration ONE_MONTH --mode FREE_TRIAL --periods 1",
                 "createLocalization" : "asc subscription-localizations create --subscription-id sub-1 --locale en-US --name <name>",
+                "createPromotionalOffer" : "asc subscription-promotional-offers create --subscription-id sub-1 --name <name> --offer-code <code> --duration ONE_MONTH --mode PAY_AS_YOU_GO --periods 1",
                 "delete" : "asc subscriptions delete --subscription-id sub-1",
                 "getAvailability" : "asc subscription-availability get --subscription-id sub-1",
                 "listIntroductoryOffers" : "asc subscription-offers list --subscription-id sub-1",
                 "listLocalizations" : "asc subscription-localizations list --subscription-id sub-1",
                 "listOfferCodes" : "asc subscription-offer-codes list --subscription-id sub-1",
+                "listPromotionalOffers" : "asc subscription-promotional-offers list --subscription-id sub-1",
                 "update" : "asc subscriptions update --subscription-id sub-1 --name <name>"
               },
               "groupId" : "grp-1",
