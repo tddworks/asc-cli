@@ -288,4 +288,51 @@ struct RESTRoutesTests {
         #expect(normalized.contains("appShotsTemplates"))
         #expect(normalized.contains("appShotsThemes"))
     }
+
+    // MARK: - Promoted Purchases
+
+    @Test func `promoted purchases list returns JSON with _links pointing at REST paths`() async throws {
+        let mockRepo = MockPromotedPurchaseRepository()
+        given(mockRepo).listPromotedPurchases(appId: .any, limit: .any).willReturn(
+            PaginatedResponse(data: [
+                PromotedPurchase(
+                    id: "pp-1", appId: "app-42",
+                    isVisibleForAllUsers: true, isEnabled: true,
+                    state: .approved, inAppPurchaseId: "iap-1"
+                )
+            ], nextCursor: nil)
+        )
+
+        let output = try await PromotedPurchasesList.parse(["--app-id", "app-42", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/apps/app-42/promoted-purchases"))
+        #expect(normalized.contains("/api/v1/promoted-purchases/pp-1"))
+        #expect(!normalized.contains("\"affordances\""))
+    }
+
+    @Test func `promoted purchases REST suppresses update and delete links while in review`() async throws {
+        let mockRepo = MockPromotedPurchaseRepository()
+        given(mockRepo).listPromotedPurchases(appId: .any, limit: .any).willReturn(
+            PaginatedResponse(data: [
+                PromotedPurchase(
+                    id: "pp-1", appId: "app-42",
+                    isVisibleForAllUsers: true, isEnabled: true,
+                    state: .inReview, inAppPurchaseId: "iap-1"
+                )
+            ], nextCursor: nil)
+        )
+
+        let output = try await PromotedPurchasesList.parse(["--app-id", "app-42", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        // listSiblings link still appears
+        #expect(normalized.contains("/api/v1/apps/app-42/promoted-purchases"))
+        // Update + delete are suppressed by isLocked guard
+        #expect(!normalized.contains("\"update\""))
+        #expect(!normalized.contains("\"delete\""))
+    }
 }

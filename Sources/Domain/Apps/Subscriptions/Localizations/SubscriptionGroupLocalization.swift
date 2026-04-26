@@ -67,11 +67,23 @@ extension SubscriptionGroupLocalization: Presentable {
 }
 
 extension SubscriptionGroupLocalization: AffordanceProviding {
-    public var affordances: [String: String] {
-        [
-            "delete": "asc subscription-group-localizations delete --localization-id \(id)",
-            "listSiblings": "asc subscription-group-localizations list --group-id \(groupId)",
-            "update": "asc subscription-group-localizations update --localization-id \(id) --name <name>",
+    public var structuredAffordances: [Affordance] {
+        _ = RESTPathResolver._subscriptionGroupLocalizationRoutes
+        return [
+            Affordance(key: "delete", command: "subscription-group-localizations", action: "delete", params: ["localization-id": id]),
+            Affordance(key: "listSiblings", command: "subscription-group-localizations", action: "list", params: ["group-id": groupId]),
+            Affordance(key: "update", command: "subscription-group-localizations", action: "update", params: ["localization-id": id, "name": "<name>"]),
         ]
     }
+}
+
+extension RESTPathResolver {
+    static let _subscriptionGroupLocalizationRoutes: Void = {
+        registerRoute(
+            command: "subscription-group-localizations",
+            parentParam: "group-id",
+            parentSegment: "subscription-groups",
+            segment: "subscription-group-localizations"
+        )
+    }()
 }

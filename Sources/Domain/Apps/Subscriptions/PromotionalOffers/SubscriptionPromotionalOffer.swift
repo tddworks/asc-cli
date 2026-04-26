@@ -43,11 +43,29 @@ extension SubscriptionPromotionalOffer: Presentable {
 }
 
 extension SubscriptionPromotionalOffer: AffordanceProviding {
-    public var affordances: [String: String] {
-        [
-            "delete": "asc subscription-promotional-offers delete --offer-id \(id)",
-            "listOffers": "asc subscription-promotional-offers list --subscription-id \(subscriptionId)",
-            "listPrices": "asc subscription-promotional-offers prices list --offer-id \(id)",
+    public var structuredAffordances: [Affordance] {
+        _ = RESTPathResolver._subscriptionPromotionalOfferRoutes
+        return [
+            Affordance(key: "delete", command: "subscription-promotional-offers", action: "delete", params: ["offer-id": id]),
+            Affordance(key: "listOffers", command: "subscription-promotional-offers", action: "list", params: ["subscription-id": subscriptionId]),
+            Affordance(key: "listPrices", command: "subscription-promotional-offers prices", action: "list", params: ["offer-id": id]),
         ]
     }
+}
+
+extension RESTPathResolver {
+    static let _subscriptionPromotionalOfferRoutes: Void = {
+        registerRoute(
+            command: "subscription-promotional-offers",
+            parentParam: "subscription-id",
+            parentSegment: "subscriptions",
+            segment: "subscription-promotional-offers"
+        )
+        registerRoute(
+            command: "subscription-promotional-offers prices",
+            parentParam: "offer-id",
+            parentSegment: "subscription-promotional-offers",
+            segment: "prices"
+        )
+    }()
 }
