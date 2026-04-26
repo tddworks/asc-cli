@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **IAP & Subscription review screenshots + IAP promotional images** — closes the upload-heavy feature parity gap. New CLI commands implement the standard ASC reserve → upload chunks → commit-with-MD5 protocol on top of `URLSession`:
+  - `asc iap-review-screenshot get|upload|delete` — single review screenshot per IAP. `get` returns an empty `data: []` array when no screenshot is present, mirroring CAEOAS conventions.
+  - `asc iap-images list|upload|delete` — 1024×1024 promotional images for an IAP, with state semantic booleans (`isApproved`, `isPendingReview`).
+  - `asc subscription-review-screenshot get|upload|delete` — single review screenshot per subscription.
+  - New domain types: `InAppPurchaseReviewScreenshot`, `InAppPurchasePromotionalImage` (with `ImageState` enum), `SubscriptionReviewScreenshot`. New repository protocols `InAppPurchaseReviewRepository` + `SubscriptionReviewRepository`, both `@Mockable`.
+  - `InAppPurchase` now advertises `getReviewScreenshot` + `listImages`; `Subscription` advertises `getReviewScreenshot`.
+- **Promoted purchases** — App Store product page promoted slot CRUD. New CLI commands under `asc promoted-purchases`:
+  - `list --app-id <id>`, `create --app-id <id> (--iap-id <id> | --subscription-id <id>) [--visible|--hidden] [--enabled|--disabled]`, `update --promoted-id <id> ...`, `delete --promoted-id <id>`.
+  - New `PromotedPurchase` domain type carrying `appId` + either `inAppPurchaseId` or `subscriptionId` (mutually exclusive at create time, validated in the command). State enum `PromotedPurchaseState` with raw values matching ASC.
+  - Backed by `GET/POST /v1/apps/{id}/promotedPurchases` and `PATCH/DELETE /v1/promotedPurchases/{id}`.
+- **Win-back offers** — full CRUD with eligibility rules, priority, promotion intent, and per-territory pricing. New CLI command tree under `asc win-back-offers`:
+  - `list --subscription-id <id>`, `delete --offer-id <id>`, `update --offer-id <id> [--priority HIGH|NORMAL] [--start-date ...] [--end-date ...] [--paid-months n] [--since-min n] [--since-max n] [--wait-months n] [--promotion-intent ...]`, `prices list --offer-id <id>`.
+  - `create --subscription-id <id> --reference-name <name> --offer-id <id> --duration <d> --mode <m> --periods <n> --paid-months <n> --since-min <n> --since-max <n> --start-date <YYYY-MM-DD> --priority HIGH|NORMAL [--end-date ...] [--wait-months n] [--promotion-intent ...] [--price USA=spp-1 --price GBR=spp-2 ...]` — bypasses the generated SDK's incomplete `WinBackOfferPriceInlineCreate` (missing relationships) by encoding the body manually with type-erased `AnyCodable`.
+  - Domain types: `WinBackOffer` (with `customerEligibilityTimeSinceLastSubscribed` min/max, `WinBackOfferPriority`, `WinBackOfferPromotionIntent`), `WinBackOfferPrice`, `WinBackOfferPriceInput`. `Subscription` advertises `listWinBackOffers`.
+- **Subscription promotional offers** — CRUD plus per-territory inline price creation. New CLI commands under `asc subscription-promotional-offers`:
+  - `list --subscription-id <id>`, `delete --offer-id <id>`, `prices list --offer-id <id>`.
+  - `create --subscription-id <id> --name <name> --offer-code <code> --duration <d> --mode <m> --periods <n> [--price USA=spp-1 ...]` — uses `${newPromoOfferPrice-N}` 1-based local IDs in the `included` array, matching the ASC web UI request shape.
+  - Domain types: `SubscriptionPromotionalOffer`, `SubscriptionPromotionalOfferPrice`, shared `PromotionalOfferPriceInput`. `Subscription` advertises `createPromotionalOffer` + `listPromotionalOffers`.
 - **Subscription group localizations** — per-locale display name and Custom App Name for a subscription group. New CLI command tree under `asc subscription-group-localizations`:
   - `list --group-id <id>`, `create --group-id <id> --locale <code> --name <name> [--custom-app-name <name>]`, `update --localization-id <id> [--name <name>] [--custom-app-name <name>]`, and `delete --localization-id <id>`.
   - New `SubscriptionGroupLocalization` domain type ({id, groupId, locale, name?, customAppName?, state?}) with `listSiblings`/`update`/`delete` affordances. New `SubscriptionGroupLocalizationRepository` `@Mockable` protocol, SDK adapter on `/v1/subscriptionGroupLocalizations`.
