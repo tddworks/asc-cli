@@ -60,11 +60,30 @@ extension SubscriptionPricePoint: Presentable {
 }
 
 extension SubscriptionPricePoint: AffordanceProviding {
-    public var affordances: [String: String] {
-        var cmds = ["listPricePoints": "asc subscriptions price-points list --subscription-id \(subscriptionId)"]
+    public var structuredAffordances: [Affordance] {
+        _ = RESTPathResolver._subscriptionPricePointRoutes
+        var items: [Affordance] = [
+            Affordance(key: "listPricePoints", command: "subscriptions price-points", action: "list", params: ["subscription-id": subscriptionId]),
+        ]
         if let territory {
-            cmds["setPrice"] = "asc subscriptions prices set --subscription-id \(subscriptionId) --territory \(territory) --price-point-id \(id)"
+            items.append(Affordance(
+                key: "setPrice",
+                command: "subscriptions prices",
+                action: "set",
+                params: ["subscription-id": subscriptionId, "territory": territory, "price-point-id": id]
+            ))
         }
-        return cmds
+        return items
     }
+}
+
+extension RESTPathResolver {
+    static let _subscriptionPricePointRoutes: Void = {
+        registerRoute(
+            command: "subscriptions price-points",
+            parentParam: "subscription-id",
+            parentSegment: "subscriptions",
+            segment: "price-points"
+        )
+    }()
 }
