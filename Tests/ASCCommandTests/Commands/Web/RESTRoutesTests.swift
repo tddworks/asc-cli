@@ -313,6 +313,166 @@ struct RESTRoutesTests {
         #expect(!normalized.contains("\"affordances\""))
     }
 
+    // MARK: - Subscription Group Localizations
+
+    @Test func `subscription group localizations REST exposes nested path under group`() async throws {
+        let mockRepo = MockSubscriptionGroupLocalizationRepository()
+        given(mockRepo).listLocalizations(groupId: .any).willReturn([
+            SubscriptionGroupLocalization(id: "loc-1", groupId: "grp-7", locale: "en-US", name: "Premium")
+        ])
+
+        let output = try await SubscriptionGroupLocalizationsList.parse(["--group-id", "grp-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/subscription-groups/grp-7/subscription-group-localizations"))
+        #expect(normalized.contains("/api/v1/subscription-group-localizations/loc-1"))
+    }
+
+    // MARK: - Subscription Pricing
+
+    @Test func `subscription price-points REST exposes nested path under subscription`() async throws {
+        let mockRepo = MockSubscriptionPriceRepository()
+        given(mockRepo).listPricePoints(subscriptionId: .any, territory: .any).willReturn([
+            SubscriptionPricePoint(id: "spp-1", subscriptionId: "sub-7", territory: "USA",
+                                   customerPrice: "9.99", proceeds: "6.99")
+        ])
+
+        let output = try await SubscriptionPricePointsList.parse(["--subscription-id", "sub-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/subscriptions/sub-7/price-points"))
+    }
+
+    // MARK: - Subscription Promotional Offers
+
+    @Test func `subscription promotional offers REST exposes nested paths`() async throws {
+        let mockRepo = MockSubscriptionPromotionalOfferRepository()
+        given(mockRepo).listPromotionalOffers(subscriptionId: .any).willReturn([
+            SubscriptionPromotionalOffer(
+                id: "po-1", subscriptionId: "sub-7", name: "Winback",
+                offerCode: "wb25", duration: .oneMonth, offerMode: .payAsYouGo, numberOfPeriods: 1
+            )
+        ])
+
+        let output = try await SubscriptionPromotionalOffersList.parse(["--subscription-id", "sub-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/subscriptions/sub-7/subscription-promotional-offers"))
+        #expect(normalized.contains("/api/v1/subscription-promotional-offers/po-1"))
+        #expect(normalized.contains("/api/v1/subscription-promotional-offers/po-1/prices"))
+    }
+
+    // MARK: - Win-Back Offers
+
+    @Test func `win-back offers REST exposes nested paths under subscription`() async throws {
+        let mockRepo = MockWinBackOfferRepository()
+        given(mockRepo).listWinBackOffers(subscriptionId: .any).willReturn([
+            WinBackOffer(
+                id: "wb-1", subscriptionId: "sub-7",
+                referenceName: "Lapsed", offerId: "lapsed25",
+                duration: .oneMonth, offerMode: .freeTrial, periodCount: 1,
+                customerEligibilityPaidSubscriptionDurationInMonths: 3,
+                customerEligibilityTimeSinceLastSubscribedMin: 1,
+                customerEligibilityTimeSinceLastSubscribedMax: 6,
+                startDate: "2026-04-01", priority: .high
+            )
+        ])
+
+        let output = try await WinBackOffersList.parse(["--subscription-id", "sub-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/subscriptions/sub-7/win-back-offers"))
+        #expect(normalized.contains("/api/v1/win-back-offers/wb-1"))
+        #expect(normalized.contains("/api/v1/win-back-offers/wb-1/prices"))
+    }
+
+    // MARK: - Offer Code Prices
+
+    @Test func `iap offer code prices REST exposes nested path under offer code`() async throws {
+        let mockRepo = MockInAppPurchaseOfferCodeRepository()
+        given(mockRepo).listPrices(offerCodeId: .any).willReturn([
+            InAppPurchaseOfferCodePrice(id: "p-1", offerCodeId: "oc-7", territory: "USA", pricePointId: "pp-1")
+        ])
+
+        let output = try await IAPOfferCodesPricesList.parse(["--offer-code-id", "oc-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/iap-offer-codes/oc-7/prices"))
+    }
+
+    @Test func `subscription offer code prices REST exposes nested path under offer code`() async throws {
+        let mockRepo = MockSubscriptionOfferCodeRepository()
+        given(mockRepo).listPrices(offerCodeId: .any).willReturn([
+            SubscriptionOfferCodePrice(id: "p-1", offerCodeId: "oc-7", territory: "USA", subscriptionPricePointId: "spp-1")
+        ])
+
+        let output = try await SubscriptionOfferCodesPricesList.parse(["--offer-code-id", "oc-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/subscription-offer-codes/oc-7/prices"))
+    }
+
+    // MARK: - IAP Review Assets
+
+    @Test func `IAP review screenshot REST returns nested path under iap`() async throws {
+        let mockRepo = MockInAppPurchaseReviewRepository()
+        given(mockRepo).getReviewScreenshot(iapId: .any).willReturn(
+            InAppPurchaseReviewScreenshot(id: "rs-1", iapId: "iap-7", fileName: "review.png",
+                                          fileSize: 1234, assetState: .complete)
+        )
+
+        let output = try await IAPReviewScreenshotGet.parse(["--iap-id", "iap-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/iap/iap-7/review-screenshot"))
+    }
+
+    @Test func `IAP images REST returns nested path under iap`() async throws {
+        let mockRepo = MockInAppPurchaseReviewRepository()
+        given(mockRepo).listImages(iapId: .any).willReturn([
+            InAppPurchasePromotionalImage(id: "img-1", iapId: "iap-7", fileName: "promo.png",
+                                          fileSize: 9999, state: .approved)
+        ])
+
+        let output = try await IAPImagesList.parse(["--iap-id", "iap-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/iap/iap-7/images"))
+    }
+
+    // MARK: - Subscription Review Asset
+
+    @Test func `subscription review screenshot REST returns nested path under subscription`() async throws {
+        let mockRepo = MockSubscriptionReviewRepository()
+        given(mockRepo).getReviewScreenshot(subscriptionId: .any).willReturn(
+            SubscriptionReviewScreenshot(id: "rs-1", subscriptionId: "sub-7", fileName: "review.png",
+                                         fileSize: 1234, assetState: .complete)
+        )
+
+        let output = try await SubscriptionReviewScreenshotGet.parse(["--subscription-id", "sub-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/subscriptions/sub-7/review-screenshot"))
+    }
+
     @Test func `promoted purchases REST suppresses update and delete links while in review`() async throws {
         let mockRepo = MockPromotedPurchaseRepository()
         given(mockRepo).listPromotedPurchases(appId: .any, limit: .any).willReturn(
