@@ -1,603 +1,279 @@
 # In-App Purchases & Subscriptions
 
-Manage in-app purchases and auto-renewable subscriptions via App Store Connect.
+End-to-end management of in-app purchases (consumable, non-consumable, non-renewing subscriptions) and auto-renewable subscriptions, with full lifecycle, pricing, offer-code, promotional/win-back offer, and review-asset coverage.
+
+Every command also serves as a REST endpoint when running `asc web-server`. Affordances embedded in JSON output are state-aware — they only suggest the next legal action.
+
+---
 
 ## CLI Usage
 
-### `asc iap list`
+Each section lists the flags and shows representative output. JSON output omits nil fields and includes an `affordances` map (CLI mode) or `_links` map (REST mode).
 
-List in-app purchases for an app.
+### IAP lifecycle
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--app-id` | ✓ | App ID |
-| `--limit` | | Max results |
-| `--output` | | `json` (default) or `table` |
-| `--pretty` | | Pretty-print JSON |
+| Command | Required flags | Notes |
+|---------|---------------|-------|
+| `asc iap list --app-id <id>` | `--app-id` | Add `--limit <n>` for pagination. |
+| `asc iap create --app-id <id> --reference-name <n> --product-id <p> --type <t>` | all four | `--type` ∈ `consumable`, `non-consumable`, `non-renewing-subscription`. |
+| `asc iap update --iap-id <id>` | `--iap-id` | Optional: `--reference-name`, `--review-note`, `--family-sharable | --not-family-sharable`. |
+| `asc iap delete --iap-id <id>` | `--iap-id` | |
+| `asc iap submit --iap-id <id>` | `--iap-id` | Affordance only appears when `state == READY_TO_SUBMIT`. |
+| `asc iap unsubmit --submission-id <id>` | `--submission-id` | Manual `Request<Void>` — generated SDK lacks DELETE for `inAppPurchaseSubmissions`. |
 
-```bash
-asc iap list --app-id A123
-asc iap list --app-id A123 --pretty
-```
+### IAP localizations
 
-**JSON output:**
-```json
-{
-  "data": [
-    {
-      "affordances": {
-        "createLocalization": "asc iap-localizations create --iap-id iap-1 --locale en-US --name <name>",
-        "listLocalizations": "asc iap-localizations list --iap-id iap-1",
-        "listOfferCodes": "asc iap-offer-codes list --iap-id iap-1"
-      },
-      "appId": "A123",
-      "id": "iap-1",
-      "productId": "com.app.goldcoins",
-      "referenceName": "Gold Coins",
-      "state": "MISSING_METADATA",
-      "type": "CONSUMABLE"
-    }
-  ]
-}
-```
+| Command | Required flags |
+|---------|----------------|
+| `asc iap-localizations list --iap-id <id>` | `--iap-id` |
+| `asc iap-localizations create --iap-id <id> --locale <code> --name <n> [--description <d>]` | first three |
+| `asc iap-localizations update --localization-id <id> [--name <n>] [--description <d>]` | `--localization-id` |
+| `asc iap-localizations delete --localization-id <id>` | `--localization-id` |
 
----
+### IAP pricing
 
-### `asc iap create`
+| Command | Required flags | Notes |
+|---------|----------------|-------|
+| `asc iap price-points list --iap-id <id> [--territory <code>]` | `--iap-id` | `--territory` filters to a single territory (e.g. `USA`). |
+| `asc iap prices set --iap-id <id> --base-territory <code> --price-point-id <pp>` | all three | Single base territory; Apple auto-equalizes the rest. |
 
-Create a new in-app purchase.
+### IAP availability
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--app-id` | ✓ | App ID |
-| `--reference-name` | ✓ | Internal name (not shown to users) |
-| `--product-id` | ✓ | Product ID (e.g. `com.app.goldcoins`) |
-| `--type` | ✓ | `consumable`, `non-consumable`, `non-renewing-subscription` |
+| Command | Required flags |
+|---------|----------------|
+| `asc iap-availability get --iap-id <id>` | `--iap-id` |
+| `asc iap-availability create --iap-id <id> --available-in-new-territories <bool> --territory <code>...` | `--iap-id`, at least one `--territory` |
 
-```bash
-asc iap create --app-id A123 --reference-name "Gold Coins" --product-id "com.app.goldcoins" --type consumable
-```
+### IAP offer codes (3-level hierarchy)
 
----
+| Command | Required flags |
+|---------|----------------|
+| `asc iap-offer-codes list --iap-id <id>` | `--iap-id` |
+| `asc iap-offer-codes create --iap-id <id> --name <n> --eligibility <e>...` | first two; `--eligibility` repeatable, ∈ `NON_SPENDER`, `ACTIVE_SPENDER`, `CHURNED_SPENDER` |
+| `asc iap-offer-codes update --offer-code-id <id> --active <bool>` | both |
+| `asc iap-offer-codes prices list --offer-code-id <id>` | `--offer-code-id` |
+| `asc iap-offer-code-custom-codes list/create/update` | `--offer-code-id` (or `--custom-code-id` for update) |
+| `asc iap-offer-code-one-time-codes list/create/update` | `--offer-code-id` (or `--one-time-code-id` for update) |
+| `asc iap-offer-code-one-time-codes values --one-time-code-id <id>` | `--one-time-code-id`. Returns CSV of redemption codes (raw `String`). |
 
-### `asc iap-localizations list`
+### IAP review assets
 
-List localizations for an in-app purchase.
+| Command | Required flags | Notes |
+|---------|----------------|-------|
+| `asc iap-review-screenshot get --iap-id <id>` | `--iap-id` | Returns empty `data: []` when no screenshot. |
+| `asc iap-review-screenshot upload --iap-id <id> --file <path>` | both | Reserve → upload chunks → commit with MD5. |
+| `asc iap-review-screenshot delete --screenshot-id <id>` | `--screenshot-id` | Affordance suppressed while `assetState == AWAITING_UPLOAD`. |
+| `asc iap-images list --iap-id <id>` | `--iap-id` | 1024×1024 promotional images. |
+| `asc iap-images upload --iap-id <id> --file <path>` | both | |
+| `asc iap-images delete --image-id <id>` | `--image-id` | Affordance suppressed while `state.isPendingReview`. |
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--iap-id` | ✓ | IAP ID |
+### Subscription Groups
 
-```bash
-asc iap-localizations list --iap-id iap-1
-```
+| Command | Required flags |
+|---------|----------------|
+| `asc subscription-groups list --app-id <id>` | `--app-id` |
+| `asc subscription-groups create --app-id <id> --reference-name <n>` | both |
+| `asc subscription-groups update --group-id <id> --reference-name <n>` | both |
+| `asc subscription-groups delete --group-id <id>` | `--group-id` |
 
----
+### Subscription Group localizations
 
-### `asc iap-localizations create`
+| Command | Required flags |
+|---------|----------------|
+| `asc subscription-group-localizations list --group-id <id>` | `--group-id` |
+| `asc subscription-group-localizations create --group-id <id> --locale <code> --name <n> [--custom-app-name <c>]` | first three |
+| `asc subscription-group-localizations update --localization-id <id> [--name <n>] [--custom-app-name <c>]` | `--localization-id` |
+| `asc subscription-group-localizations delete --localization-id <id>` | `--localization-id` |
 
-Create a per-locale name and description for an IAP.
+### Subscriptions
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--iap-id` | ✓ | IAP ID |
-| `--locale` | ✓ | Locale code (e.g. `en-US`, `zh-Hans`) |
-| `--name` | ✓ | Display name shown to users |
-| `--description` | | Optional description |
+| Command | Required flags | Notes |
+|---------|----------------|-------|
+| `asc subscriptions list --group-id <id>` | `--group-id` | |
+| `asc subscriptions create --group-id <id> --name <n> --product-id <p> --period <P>` | first four | `--period` ∈ `ONE_WEEK`, `ONE_MONTH`, `TWO_MONTHS`, `THREE_MONTHS`, `SIX_MONTHS`, `ONE_YEAR`. Optional `--family-sharable`, `--group-level <n>`. |
+| `asc subscriptions update --subscription-id <id>` | `--subscription-id` | Optional: `--name`, `--family-sharable | --not-family-sharable`, `--group-level`, `--review-note`. |
+| `asc subscriptions delete --subscription-id <id>` | `--subscription-id` | |
+| `asc subscriptions submit --subscription-id <id>` | `--subscription-id` | Affordance only when `state == READY_TO_SUBMIT`. |
+| `asc subscriptions unsubmit --submission-id <id>` | `--submission-id` | Manual `Request<Void>`. |
+| `asc subscriptions price-points list --subscription-id <id> [--territory <code>]` | `--subscription-id` | `proceedsYear2` field on each row. |
+| `asc subscriptions prices set --subscription-id <id> --territory <code> --price-point-id <pp>` | all three | Per-territory (no base). |
 
-```bash
-asc iap-localizations create --iap-id iap-1 --locale en-US --name "Gold Coins" --description "In-game currency"
-asc iap-localizations create --iap-id iap-1 --locale zh-Hans --name "金币"
-```
+### Subscription localizations
 
----
+| Command | Required flags |
+|---------|----------------|
+| `asc subscription-localizations list --subscription-id <id>` | `--subscription-id` |
+| `asc subscription-localizations create --subscription-id <id> --locale <code> --name <n> [--description <d>]` | first three |
+| `asc subscription-localizations update --localization-id <id> [--name <n>] [--description <d>]` | `--localization-id` |
+| `asc subscription-localizations delete --localization-id <id>` | `--localization-id` |
 
-### `asc iap submit`
+### Subscription availability
 
-Submit an in-app purchase for App Store review.
+| Command | Required flags |
+|---------|----------------|
+| `asc subscription-availability get --subscription-id <id>` | `--subscription-id` |
+| `asc subscription-availability create --subscription-id <id> --available-in-new-territories <bool> --territory <code>...` | first one + at least one territory |
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--iap-id` | ✓ | IAP ID |
+### Introductory Offers
 
-```bash
-asc iap submit --iap-id iap-1
-```
+| Command | Required flags |
+|---------|----------------|
+| `asc subscription-offers list --subscription-id <id>` | `--subscription-id` |
+| `asc subscription-offers create --subscription-id <id> --duration <d> --mode <m> --periods <n>` | first four |
+| `asc subscription-offers delete --offer-id <id>` | `--offer-id` |
 
----
+`--mode` ∈ `FREE_TRIAL`, `PAY_AS_YOU_GO`, `PAY_UP_FRONT`. The latter two require `--price-point-id`.
 
-### `asc iap price-points list`
+### Promotional Offers (with per-territory pricing)
 
-List available price points for an in-app purchase, optionally filtered by territory.
+| Command | Required flags |
+|---------|----------------|
+| `asc subscription-promotional-offers list --subscription-id <id>` | `--subscription-id` |
+| `asc subscription-promotional-offers create --subscription-id <id> --name <n> --offer-code <c> --duration <d> --mode <m> --periods <n> [--price USA=spp-1 ...]` | all but `--price` |
+| `asc subscription-promotional-offers delete --offer-id <id>` | `--offer-id` |
+| `asc subscription-promotional-offers prices list --offer-id <id>` | `--offer-id` |
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--iap-id` | ✓ | IAP ID |
-| `--territory` | | Filter by territory code (e.g. `USA`) |
-| `--output` | | `json` (default) or `table` |
-| `--pretty` | | Pretty-print JSON |
+The `--price` flag is repeatable: `TERRITORY=PRICE_POINT_ID`. Internally encoded as `${newPromoOfferPrice-N}` 1-based local IDs in the SDK's `included` array — matches the ASC web UI request shape.
 
-```bash
-asc iap price-points list --iap-id iap-1
-asc iap price-points list --iap-id iap-1 --territory USA --pretty
-```
+### Win-Back Offers
 
-**JSON output:**
-```json
-{
-  "data": [
-    {
-      "affordances": {
-        "listPricePoints": "asc iap price-points list --iap-id iap-1",
-        "setPrice": "asc iap prices set --iap-id iap-1 --base-territory USA --price-point-id pp-tier1"
-      },
-      "customerPrice": "0.99",
-      "iapId": "iap-1",
-      "id": "pp-tier1",
-      "proceeds": "0.70",
-      "territory": "USA"
-    }
-  ]
-}
-```
+| Command | Required flags |
+|---------|----------------|
+| `asc win-back-offers list --subscription-id <id>` | `--subscription-id` |
+| `asc win-back-offers create --subscription-id <id> --reference-name <n> --offer-id <code> --duration <d> --mode <m> --periods <n> --paid-months <n> --since-min <n> --since-max <n> --start-date <YYYY-MM-DD> --priority HIGH|NORMAL [--end-date ...] [--wait-months n] [--promotion-intent ...] [--price ...]` | all without brackets |
+| `asc win-back-offers update --offer-id <id> [--start-date ...] [--end-date ...] [--priority ...] [--promotion-intent ...] [--paid-months n] [--since-min n] [--since-max n] [--wait-months n]` | `--offer-id` |
+| `asc win-back-offers delete --offer-id <id>` | `--offer-id` |
+| `asc win-back-offers prices list --offer-id <id>` | `--offer-id` |
 
----
+The win-back create body is encoded by hand because the generated `WinBackOfferPriceInlineCreate` is missing `territory` + `subscriptionPricePoint` relationships.
 
-### `asc iap prices set`
+`--priority` ∈ `HIGH`, `NORMAL`. `--promotion-intent` ∈ `NOT_PROMOTED`, `USE_AUTO_GENERATED_ASSETS`. `--paid-months` is `customerEligibilityPaidSubscriptionDurationInMonths`. `--since-min`/`--since-max` are `customerEligibilityTimeSinceLastSubscribedInMonths`.
 
-Set the price schedule for an in-app purchase (base territory + auto-pricing for all other territories).
+### Subscription Offer Codes (3-level hierarchy)
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--iap-id` | ✓ | IAP ID |
-| `--base-territory` | ✓ | Base territory code (e.g. `USA`) |
-| `--price-point-id` | ✓ | Price point ID from `asc iap price-points list` |
+| Command | Required flags |
+|---------|----------------|
+| `asc subscription-offer-codes list --subscription-id <id>` | `--subscription-id` |
+| `asc subscription-offer-codes create --subscription-id <id> --name <n> --duration <d> --mode <m> --periods <n> --eligibility <e>... --offer-eligibility <oe>` | all |
+| `asc subscription-offer-codes update --offer-code-id <id> --active <bool>` | both |
+| `asc subscription-offer-codes prices list --offer-code-id <id>` | `--offer-code-id` |
+| `asc subscription-offer-code-custom-codes list/create/update` | as IAP equivalents |
+| `asc subscription-offer-code-one-time-codes list/create/update` | as IAP equivalents |
+| `asc subscription-offer-code-one-time-codes values --one-time-code-id <id>` | `--one-time-code-id`. CSV of redemption codes. |
 
-```bash
-PRICE_ID=$(asc iap price-points list --iap-id iap-1 --territory USA \
-  | jq -r '.data[] | select(.customerPrice == "0.99") | .id')
-asc iap prices set --iap-id iap-1 --base-territory USA --price-point-id "$PRICE_ID"
-```
+`--eligibility` ∈ `NEW`, `LAPSED`, `WIN_BACK`, `PAID_SUBSCRIBER`. `--offer-eligibility` ∈ `STACKABLE`, `INTRODUCTORY`, `SUBSCRIPTION_OFFER`.
 
----
+### Subscription review screenshot
 
-### `asc subscription-groups list`
-
-List subscription groups for an app.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--app-id` | ✓ | App ID |
-| `--limit` | | Max results |
-
-```bash
-asc subscription-groups list --app-id A123
-```
+| Command | Required flags |
+|---------|----------------|
+| `asc subscription-review-screenshot get --subscription-id <id>` | `--subscription-id` |
+| `asc subscription-review-screenshot upload --subscription-id <id> --file <path>` | both |
+| `asc subscription-review-screenshot delete --screenshot-id <id>` | `--screenshot-id` |
 
 ---
 
-### `asc subscription-groups create`
+## REST Endpoints
 
-Create a new subscription group.
+Every CLI list/read command above has a corresponding REST endpoint. Query params match CLI flag names verbatim.
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--app-id` | ✓ | App ID |
-| `--reference-name` | ✓ | Internal reference name for the group |
+### IAP
 
-```bash
-asc subscription-groups create --app-id A123 --reference-name "Premium Plans"
-```
+| Path | Method |
+|------|--------|
+| `/api/v1/apps/:appId/iap` | GET |
+| `/api/v1/iap/:iapId/review-screenshot` | GET |
+| `/api/v1/iap/:iapId/images` | GET |
+| `/api/v1/iap-offer-codes/:offerCodeId/prices` | GET |
 
----
+### Subscriptions
 
-### `asc subscriptions list`
+| Path | Method |
+|------|--------|
+| `/api/v1/apps/:appId/subscription-groups` | GET |
+| `/api/v1/subscription-groups/:groupId/subscription-group-localizations` | GET |
+| `/api/v1/subscriptions/:subscriptionId/price-points?territory=` | GET |
+| `/api/v1/subscriptions/:subscriptionId/subscription-promotional-offers` | GET |
+| `/api/v1/subscription-promotional-offers/:offerId/prices` | GET |
+| `/api/v1/subscriptions/:subscriptionId/win-back-offers` | GET |
+| `/api/v1/win-back-offers/:offerId/prices` | GET |
+| `/api/v1/subscription-offer-codes/:offerCodeId/prices` | GET |
+| `/api/v1/subscriptions/:subscriptionId/review-screenshot` | GET |
 
-List subscriptions in a group.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--group-id` | ✓ | Subscription group ID |
-| `--limit` | | Max results |
-
-```bash
-asc subscriptions list --group-id grp-1
-```
-
----
-
-### `asc subscriptions create`
-
-Create a subscription tier within a group.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--group-id` | ✓ | Subscription group ID |
-| `--name` | ✓ | Display name |
-| `--product-id` | ✓ | Product ID (e.g. `com.app.monthly`) |
-| `--period` | ✓ | `ONE_WEEK`, `ONE_MONTH`, `TWO_MONTHS`, `THREE_MONTHS`, `SIX_MONTHS`, `ONE_YEAR` |
-| `--family-sharable` | | Enable Family Sharing (flag) |
-| `--group-level` | | Level for upgrade/downgrade ordering |
-
-```bash
-asc subscriptions create --group-id grp-1 --name "Monthly Premium" --product-id "com.app.monthly" --period ONE_MONTH
-asc subscriptions create --group-id grp-1 --name "Annual Premium" --product-id "com.app.annual" --period ONE_YEAR --family-sharable --group-level 1
-```
+JSON responses include a `_links` field instead of `affordances`. Each link is `{ "href": "/api/v1/…", "method": "GET|POST|PATCH|DELETE" }`.
 
 ---
 
-### `asc subscription-localizations list`
+## Typical Workflows
 
-List localizations for a subscription.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--subscription-id` | ✓ | Subscription ID |
-
-```bash
-asc subscription-localizations list --subscription-id sub-1
-```
-
----
-
-### `asc subscription-localizations create`
-
-Create a per-locale name and description for a subscription.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--subscription-id` | ✓ | Subscription ID |
-| `--locale` | ✓ | Locale code |
-| `--name` | ✓ | Display name in App Store |
-| `--description` | | Optional description |
-
-```bash
-asc subscription-localizations create --subscription-id sub-1 --locale en-US --name "Monthly Premium" --description "Full access to all features"
-```
-
----
-
-### `asc subscriptions submit`
-
-Submit a subscription for App Store review.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--subscription-id` | ✓ | Subscription ID |
-| `--pretty` | | Pretty-print JSON |
-
-```bash
-asc subscriptions submit --subscription-id sub-1
-```
-
-> The `submit` affordance appears in `Subscription` JSON only when `state == READY_TO_SUBMIT`.
-
----
-
-### `asc subscription-offers list`
-
-List introductory offers for a subscription.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--subscription-id` | ✓ | Subscription ID |
-| `--output` | | `json` (default) or `table` |
-| `--pretty` | | Pretty-print JSON |
-
-```bash
-asc subscription-offers list --subscription-id sub-1 --pretty
-```
-
----
-
-### `asc subscription-offers create`
-
-Create an introductory offer for a subscription.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--subscription-id` | ✓ | Subscription ID |
-| `--duration` | ✓ | `THREE_DAYS`, `ONE_WEEK`, `TWO_WEEKS`, `ONE_MONTH`, `TWO_MONTHS`, `THREE_MONTHS`, `SIX_MONTHS`, `ONE_YEAR` |
-| `--mode` | ✓ | `FREE_TRIAL`, `PAY_AS_YOU_GO`, `PAY_UP_FRONT` |
-| `--periods` | ✓ | Number of periods (integer) |
-| `--territory` | | Territory code (e.g. `USA`) |
-| `--price-point-id` | ✓ for PAY_AS_YOU_GO / PAY_UP_FRONT | Subscription price point ID |
-| `--start-date` | | Start date `YYYY-MM-DD` |
-| `--end-date` | | End date `YYYY-MM-DD` |
-| `--pretty` | | Pretty-print JSON |
-
-```bash
-# Free trial — 1 month
-asc subscription-offers create \
-  --subscription-id sub-1 \
-  --duration ONE_MONTH \
-  --mode FREE_TRIAL \
-  --periods 1 \
-  --pretty
-
-# Discounted price — requires price point ID
-asc subscription-offers create \
-  --subscription-id sub-1 \
-  --duration THREE_MONTHS \
-  --mode PAY_AS_YOU_GO \
-  --periods 3 \
-  --territory USA \
-  --price-point-id pp-123 \
-  --pretty
-```
-
----
-
-### `asc subscription-offer-codes list`
-
-List offer codes for a subscription.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--subscription-id` | ✓ | Subscription ID |
-| `--output` | | `json` (default) or `table` |
-| `--pretty` | | Pretty-print JSON |
-
-```bash
-asc subscription-offer-codes list --subscription-id sub-1 --pretty
-```
-
----
-
-### `asc subscription-offer-codes create`
-
-Create a new offer code for a subscription.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--subscription-id` | ✓ | Subscription ID |
-| `--name` | ✓ | Offer code name (e.g. `SUMMER2026`) |
-| `--duration` | ✓ | `THREE_DAYS`, `ONE_WEEK`, `TWO_WEEKS`, `ONE_MONTH`, `TWO_MONTHS`, `THREE_MONTHS`, `SIX_MONTHS`, `ONE_YEAR` |
-| `--mode` | ✓ | `FREE_TRIAL`, `PAY_AS_YOU_GO`, `PAY_UP_FRONT` |
-| `--periods` | ✓ | Number of periods |
-| `--eligibility` | ✓ | Customer eligibility (repeatable): `NEW`, `LAPSED`, `WIN_BACK`, `PAID_SUBSCRIBER` |
-| `--offer-eligibility` | ✓ | `STACKABLE`, `INTRODUCTORY`, `SUBSCRIPTION_OFFER` |
-
-```bash
-asc subscription-offer-codes create \
-  --subscription-id sub-1 \
-  --name "SUMMER2026" \
-  --duration ONE_MONTH \
-  --mode FREE_TRIAL \
-  --periods 1 \
-  --eligibility NEW \
-  --eligibility LAPSED \
-  --offer-eligibility STACKABLE
-```
-
----
-
-### `asc subscription-offer-codes update`
-
-Activate or deactivate an offer code.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--offer-code-id` | ✓ | Offer code ID |
-| `--active` | ✓ | `true` or `false` |
-
-```bash
-asc subscription-offer-codes update --offer-code-id oc-1 --active false
-```
-
----
-
-### `asc subscription-offer-code-custom-codes list`
-
-List custom redeemable codes for an offer code.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--offer-code-id` | ✓ | Offer code ID |
-
-```bash
-asc subscription-offer-code-custom-codes list --offer-code-id oc-1
-```
-
----
-
-### `asc subscription-offer-code-custom-codes create`
-
-Create a custom redeemable code for an offer code.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--offer-code-id` | ✓ | Offer code ID |
-| `--custom-code` | ✓ | Custom code string (e.g. `SUMMER2026`) |
-| `--number-of-codes` | ✓ | Number of redemptions allowed |
-| `--expiration-date` | | Expiration date `YYYY-MM-DD` |
-
-```bash
-asc subscription-offer-code-custom-codes create \
-  --offer-code-id oc-1 \
-  --custom-code "SUMMER2026" \
-  --number-of-codes 1000 \
-  --expiration-date 2026-12-31
-```
-
----
-
-### `asc subscription-offer-code-custom-codes update`
-
-Activate or deactivate a custom code.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--custom-code-id` | ✓ | Custom code ID |
-| `--active` | ✓ | `true` or `false` |
-
-```bash
-asc subscription-offer-code-custom-codes update --custom-code-id cc-1 --active false
-```
-
----
-
-### `asc subscription-offer-code-one-time-codes list`
-
-List one-time use code batches for an offer code.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--offer-code-id` | ✓ | Offer code ID |
-
-```bash
-asc subscription-offer-code-one-time-codes list --offer-code-id oc-1
-```
-
----
-
-### `asc subscription-offer-code-one-time-codes create`
-
-Generate a batch of one-time use codes.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--offer-code-id` | ✓ | Offer code ID |
-| `--number-of-codes` | ✓ | Number of codes to generate |
-| `--expiration-date` | ✓ | Expiration date `YYYY-MM-DD` |
-
-```bash
-asc subscription-offer-code-one-time-codes create \
-  --offer-code-id oc-1 \
-  --number-of-codes 5000 \
-  --expiration-date 2026-12-31
-```
-
----
-
-### `asc subscription-offer-code-one-time-codes update`
-
-Activate or deactivate a one-time code batch.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--one-time-code-id` | ✓ | One-time code ID |
-| `--active` | ✓ | `true` or `false` |
-
-```bash
-asc subscription-offer-code-one-time-codes update --one-time-code-id otc-1 --active false
-```
-
----
-
-### `asc iap-offer-codes list`
-
-List offer codes for an in-app purchase.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--iap-id` | ✓ | IAP ID |
-
-```bash
-asc iap-offer-codes list --iap-id iap-1
-```
-
----
-
-### `asc iap-offer-codes create`
-
-Create a new offer code for an in-app purchase.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--iap-id` | ✓ | IAP ID |
-| `--name` | ✓ | Offer code name |
-| `--eligibility` | ✓ | Customer eligibility (repeatable): `NON_SPENDER`, `ACTIVE_SPENDER`, `CHURNED_SPENDER` |
-
-```bash
-asc iap-offer-codes create \
-  --iap-id iap-1 \
-  --name "FREEGEMS" \
-  --eligibility NON_SPENDER \
-  --eligibility CHURNED_SPENDER
-```
-
----
-
-### `asc iap-offer-codes update`
-
-Activate or deactivate an IAP offer code.
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--offer-code-id` | ✓ | Offer code ID |
-| `--active` | ✓ | `true` or `false` |
-
-```bash
-asc iap-offer-codes update --offer-code-id oc-1 --active false
-```
-
----
-
-### `asc iap-offer-code-custom-codes list/create/update`
-
-Same interface as subscription custom codes — `--offer-code-id`, `--custom-code`, `--number-of-codes`, `--expiration-date`, `--custom-code-id`, `--active`.
-
----
-
-### `asc iap-offer-code-one-time-codes list/create/update`
-
-Same interface as subscription one-time codes — `--offer-code-id`, `--number-of-codes`, `--expiration-date`, `--one-time-code-id`, `--active`.
-
----
-
-## Typical Workflow
+### Ship a new in-app purchase
 
 ```bash
 APP_ID="A123456789"
 
-# 1. Create a consumable IAP
-IAP_ID=$(asc iap create \
-  --app-id "$APP_ID" \
-  --reference-name "Gold Coins" \
-  --product-id "com.app.goldcoins" \
-  --type consumable \
-  | jq -r '.data[0].id')
-
-# 2. Add localizations
+# 1. Create + localize
+IAP_ID=$(asc iap create --app-id "$APP_ID" --reference-name "Gold Coins" \
+  --product-id "com.app.goldcoins" --type consumable | jq -r '.data[0].id')
 asc iap-localizations create --iap-id "$IAP_ID" --locale en-US --name "Gold Coins" --description "In-game currency"
-asc iap-localizations create --iap-id "$IAP_ID" --locale zh-Hans --name "金币" --description "游戏货币"
+asc iap-localizations create --iap-id "$IAP_ID" --locale zh-Hans --name "金币"
 
-# 3. Set pricing (Tier 1 in USA, Apple auto-calculates other territories)
+# 2. Set price (Tier 1 USA, Apple auto-equalizes)
 PRICE_ID=$(asc iap price-points list --iap-id "$IAP_ID" --territory USA \
   | jq -r '.data[] | select(.customerPrice == "0.99") | .id')
 asc iap prices set --iap-id "$IAP_ID" --base-territory USA --price-point-id "$PRICE_ID"
 
+# 3. Add review screenshot + promo image
+asc iap-review-screenshot upload --iap-id "$IAP_ID" --file ./review.png
+asc iap-images upload --iap-id "$IAP_ID" --file ./promo-1024.png
+
 # 4. Submit for review
 asc iap submit --iap-id "$IAP_ID"
+```
 
-# 5. Create a subscription group
-GROUP_ID=$(asc subscription-groups create \
-  --app-id "$APP_ID" \
-  --reference-name "Premium Plans" \
+### Launch a subscription with a promotional offer
+
+```bash
+APP_ID="A123456789"
+
+# 1. Group + tier
+GROUP_ID=$(asc subscription-groups create --app-id "$APP_ID" --reference-name "Premium" \
   | jq -r '.data[0].id')
+SUB_ID=$(asc subscriptions create --group-id "$GROUP_ID" --name "Monthly Premium" \
+  --product-id "com.app.monthly" --period ONE_MONTH | jq -r '.data[0].id')
 
-# 4. Create subscription tiers
-MONTHLY_ID=$(asc subscriptions create \
-  --group-id "$GROUP_ID" \
-  --name "Monthly Premium" \
-  --product-id "com.app.monthly" \
-  --period ONE_MONTH \
-  --group-level 1 \
-  | jq -r '.data[0].id')
+# 2. Localize the group + the tier
+asc subscription-group-localizations create --group-id "$GROUP_ID" --locale en-US \
+  --name "Premium Plans" --custom-app-name "Premium App"
+asc subscription-localizations create --subscription-id "$SUB_ID" --locale en-US \
+  --name "Monthly Premium" --description "Unlock everything"
 
-ANNUAL_ID=$(asc subscriptions create \
-  --group-id "$GROUP_ID" \
-  --name "Annual Premium" \
-  --product-id "com.app.annual" \
-  --period ONE_YEAR \
-  --family-sharable \
-  --group-level 2 \
-  | jq -r '.data[0].id')
+# 3. Set per-territory pricing
+USA_PP=$(asc subscriptions price-points list --subscription-id "$SUB_ID" --territory USA \
+  | jq -r '.data[] | select(.customerPrice == "9.99") | .id')
+asc subscriptions prices set --subscription-id "$SUB_ID" --territory USA --price-point-id "$USA_PP"
 
-# 5. Add subscription localizations
-asc subscription-localizations create --subscription-id "$MONTHLY_ID" --locale en-US --name "Monthly Premium" --description "Full access, billed monthly"
-asc subscription-localizations create --subscription-id "$ANNUAL_ID" --locale en-US --name "Annual Premium" --description "Full access, billed annually — save 30%"
+# 4. Promotional offer with per-territory pricing
+asc subscription-promotional-offers create --subscription-id "$SUB_ID" \
+  --name "Loyalty25" --offer-code loyalty25 \
+  --duration THREE_MONTHS --mode PAY_AS_YOU_GO --periods 3 \
+  --price USA=$USA_PP
+
+# 5. Submit
+asc subscriptions submit --subscription-id "$SUB_ID"
+```
+
+### Run a win-back campaign
+
+```bash
+SUB_ID="sub-42"
+
+# Eligibility: paid 3 months, lapsed 1-6 months, wait 2 months between offers, expires Dec 31.
+asc win-back-offers create --subscription-id "$SUB_ID" \
+  --reference-name "Lapsed Q4" --offer-id lapsedQ4 \
+  --duration ONE_MONTH --mode FREE_TRIAL --periods 1 \
+  --paid-months 3 --since-min 1 --since-max 6 --wait-months 2 \
+  --start-date 2026-04-01 --end-date 2026-12-31 \
+  --priority HIGH --promotion-intent USE_AUTO_GENERATED_ASSETS
 ```
 
 ---
@@ -605,221 +281,112 @@ asc subscription-localizations create --subscription-id "$ANNUAL_ID" --locale en
 ## Architecture
 
 ```
-ASCCommand                       Infrastructure                       Domain
-────────────────────────────────────────────────────────────────────────────
-IAPList / IAPCreate              SDKInAppPurchaseRepository           InAppPurchase
-IAPSubmit                        SDKInAppPurchaseSubmissionRepository InAppPurchaseSubmission
-IAPPricePointsList               SDKInAppPurchasePriceRepository      InAppPurchasePricePoint
-IAPPricesSet                     SDKInAppPurchasePriceRepository      InAppPurchasePriceSchedule
-IAPLocalizationsList/Create      SDKIAPLocalizationRepo               InAppPurchaseLocalization
-SubscriptionGroupsList/Create    SDKSubscriptionGroupRepo             SubscriptionGroup
-SubscriptionsList/Create         SDKSubscriptionRepository            Subscription
-SubLocalizationsList/Create      SDKSubLocalizationRepo               SubscriptionLocalization
-SubOfferCodesList/Create/Update  SDKSubscriptionOfferCodeRepo         SubscriptionOfferCode
-SubOfferCodeCustomCodesList/     SDKSubscriptionOfferCodeRepo         SubscriptionOfferCodeCustomCode
-  Create/Update
-SubOfferCodeOneTimeCodesList/    SDKSubscriptionOfferCodeRepo         SubscriptionOfferCodeOneTimeUseCode
-  Create/Update
-IAPOfferCodesList/Create/Update  SDKIAPOfferCodeRepo                  InAppPurchaseOfferCode
-IAPOfferCodeCustomCodesList/     SDKIAPOfferCodeRepo                  InAppPurchaseOfferCodeCustomCode
-  Create/Update
-IAPOfferCodeOneTimeCodesList/    SDKIAPOfferCodeRepo                  InAppPurchaseOfferCodeOneTimeUseCode
-  Create/Update
+ASCCommand                            Infrastructure                            Domain
+─────────────────────────────────────────────────────────────────────────────────────────
+IAP*                                  SDKInAppPurchaseRepository                InAppPurchase
+IAPSubmit / Unsubmit                  SDKInAppPurchaseSubmissionRepository      InAppPurchaseSubmission
+IAPLocalizations*                     SDKInAppPurchaseLocalizationRepository    InAppPurchaseLocalization
+IAPPricePointsList / IAPPricesSet     SDKInAppPurchasePriceRepository           InAppPurchasePricePoint, PriceSchedule
+IAPOfferCodes*                        SDKInAppPurchaseOfferCodeRepository       InAppPurchaseOfferCode + Custom + OneTime + Price
+IAPReviewScreenshot* / IAPImages*     SDKInAppPurchaseReviewRepository          InAppPurchaseReviewScreenshot, PromotionalImage
+IAPAvailability*                      SDKInAppPurchaseAvailabilityRepository    InAppPurchaseAvailability
+
+SubscriptionGroups*                   SDKSubscriptionGroupRepository            SubscriptionGroup
+SubscriptionGroupLocalizations*       SDKSubscriptionGroupLocalizationRepository SubscriptionGroupLocalization
+Subscriptions*                        SDKSubscriptionRepository                 Subscription
+SubscriptionsSubmit / Unsubmit        SDKSubscriptionSubmissionRepository       SubscriptionSubmission
+SubscriptionLocalizations*            SDKSubscriptionLocalizationRepository     SubscriptionLocalization
+SubscriptionPricePointsList /         SDKSubscriptionPriceRepository            SubscriptionPricePoint, SubscriptionPrice
+  SubscriptionPricesSet                                                         (proceedsYear2)
+SubscriptionOffers* (intro)           SDKSubscriptionIntroductoryOfferRepository SubscriptionIntroductoryOffer
+SubscriptionPromotionalOffers*        SDKSubscriptionPromotionalOfferRepository SubscriptionPromotionalOffer + Price + Input
+WinBackOffers*                        SDKWinBackOfferRepository                 WinBackOffer + Price + Input
+SubscriptionOfferCodes*               SDKSubscriptionOfferCodeRepository        SubscriptionOfferCode + Custom + OneTime + Price
+SubscriptionReviewScreenshot*         SDKSubscriptionReviewRepository           SubscriptionReviewScreenshot
+SubscriptionAvailability*             SDKSubscriptionAvailabilityRepository     SubscriptionAvailability
+
+Web/Controllers/                      RESTRoutes wires repos →                  AffordanceProviding
+  IAPController, IAPReviewController,   controllers; APIRoot                      .structuredAffordances
+  SubscriptionGroupsController, …       advertises top-level resources            renders to both CLI + REST
 ```
 
-All Infrastructure repositories inject the parent ID from the request parameter since the ASC API does not return it in responses.
+**Dependency direction:** `ASCCommand → Infrastructure → Domain`. Domain has zero I/O.
 
-**API versions used:**
-- List IAPs: `GET /v1/apps/{id}/inAppPurchasesV2` (SDK v1)
-- Create IAP: `POST /v2/inAppPurchases` (SDK v2)
-- List IAP localizations: `GET /v2/inAppPurchases/{id}/inAppPurchaseLocalizations` (SDK v2)
-- Create IAP localization: `POST /v1/inAppPurchaseLocalizations` (SDK v1)
-- Subscription groups: `GET/POST /v1/subscriptionGroups` (SDK v1)
-- Subscriptions: `GET /v1/subscriptionGroups/{id}/subscriptions`, `POST /v1/subscriptions` (SDK v1)
-- Subscription localizations: `GET /v1/subscriptions/{id}/subscriptionLocalizations`, `POST /v1/subscriptionLocalizations` (SDK v1)
+**Two SDK gaps work around with manual `Request<Void>`:**
+- `DELETE /v1/inAppPurchaseSubmissions/{id}` — used by `iap unsubmit`
+- `DELETE /v1/subscriptionSubmissions/{id}` — used by `subscriptions unsubmit`
+
+**One SDK gap works around with hand-encoded JSON body:**
+- `WinBackOfferPriceInlineCreate` — missing `territory` + `subscriptionPricePoint` relationships, so `win-back-offers create` builds the body via a type-erased `AnyCodable` enum.
 
 ---
 
-## Domain Models
+## State-aware affordances
 
-### `InAppPurchase`
+Affordances suppress themselves when the action wouldn't succeed:
+
+| Aggregate | Trigger | Affordance suppressed |
+|-----------|---------|-----------------------|
+| `InAppPurchase` / `Subscription` | `state != .readyToSubmit` | `submit` |
+| `InAppPurchasePromotionalImage` | `state.isPendingReview == true` | `delete` |
+| `InAppPurchaseReviewScreenshot` / `SubscriptionReviewScreenshot` | `assetState == .awaitingUpload` | `delete` (only `upload` offered as recovery) |
+| `SubscriptionPricePoint` | `territory == nil` | `setPrice` |
+| `IAP*OfferCode*` / `Subscription*OfferCode*` custom & one-time codes | `isActive == false` | `deactivate` |
+
+---
+
+## Key Domain Models
+
+A representative subset — read the source for full surface.
 
 ```swift
 public struct InAppPurchase: Sendable, Codable, Equatable, Identifiable {
     public let id: String
-    public let appId: String          // parent — injected by Infrastructure
+    public let appId: String          // injected by Infrastructure
     public let referenceName: String
     public let productId: String
     public let type: InAppPurchaseType
     public let state: InAppPurchaseState
 }
-```
+// State semantic booleans: isApproved, isLive, isEditable, isPendingReview
 
-**`InAppPurchaseType`** raw values: `CONSUMABLE`, `NON_CONSUMABLE`, `NON_RENEWING_SUBSCRIPTION`
-CLI arguments: `consumable`, `non-consumable`, `non-renewing-subscription`
-
-**`InAppPurchaseState`** semantic booleans:
-- `isApproved` / `isLive` — `true` when `APPROVED`
-- `isEditable` — `true` when `MISSING_METADATA`, `REJECTED`, or `DEVELOPER_ACTION_NEEDED`
-- `isPendingReview` — `true` when `WAITING_FOR_REVIEW` or `IN_REVIEW`
-
-**Affordances:** `listLocalizations`, `createLocalization`, `listOfferCodes`, `listPricePoints` (always); `submit` only when `state == .readyToSubmit`
-
----
-
-### `InAppPurchaseSubmission`
-
-```swift
-public struct InAppPurchaseSubmission: Sendable, Equatable, Identifiable, Codable {
+public struct SubscriptionPricePoint: Sendable, Equatable, Identifiable, Codable {
     public let id: String
-    public let iapId: String          // parent — injected by Infrastructure
+    public let subscriptionId: String
+    public let territory: String?
+    public let customerPrice: String?
+    public let proceeds: String?
+    public let proceedsYear2: String? // distinguishes subscription pricing from IAP
 }
-```
 
-**Affordances:** `listLocalizations`
-
----
-
-### `InAppPurchasePricePoint`
-
-```swift
-public struct InAppPurchasePricePoint: Sendable, Equatable, Identifiable {
+public struct WinBackOffer: Sendable, Equatable, Identifiable, Codable {
     public let id: String
-    public let iapId: String          // parent — injected by Infrastructure
-    public let territory: String?     // omitted from JSON when nil
-    public let customerPrice: String? // omitted from JSON when nil
-    public let proceeds: String?      // omitted from JSON when nil
-}
-```
-
-**Affordances:** `listPricePoints` (always); `setPrice` only when `territory != nil`
-
----
-
-### `InAppPurchasePriceSchedule`
-
-```swift
-public struct InAppPurchasePriceSchedule: Sendable, Equatable, Identifiable, Codable {
-    public let id: String
-    public let iapId: String          // parent — injected by Infrastructure
-}
-```
-
-**Affordances:** `listPricePoints`
-
----
-
-### `InAppPurchaseLocalization`
-
-```swift
-public struct InAppPurchaseLocalization: Sendable, Equatable, Identifiable {
-    public let id: String
-    public let iapId: String          // parent — injected by Infrastructure
-    public let locale: String
-    public let name: String?
-    public let description: String?
-    public let state: InAppPurchaseLocalizationState?
-}
-```
-
-Nil fields are omitted from JSON (custom `Codable` with `encodeIfPresent`).
-
-**Affordances:** `listSiblings`
-
----
-
-### `SubscriptionGroup`
-
-```swift
-public struct SubscriptionGroup: Sendable, Codable, Equatable, Identifiable {
-    public let id: String
-    public let appId: String          // parent — injected by Infrastructure
+    public let subscriptionId: String
     public let referenceName: String
-}
-```
-
-**Affordances:** `listSubscriptions`, `createSubscription`
-
----
-
-### `Subscription`
-
-```swift
-public struct Subscription: Sendable, Equatable, Identifiable {
-    public let id: String
-    public let groupId: String        // parent — injected by Infrastructure
-    public let name: String
-    public let productId: String
-    public let subscriptionPeriod: SubscriptionPeriod
-    public let isFamilySharable: Bool
-    public let state: SubscriptionState
-    public let groupLevel: Int?       // omitted from JSON when nil
-}
-```
-
-**`SubscriptionPeriod`** values: `ONE_WEEK`, `ONE_MONTH`, `TWO_MONTHS`, `THREE_MONTHS`, `SIX_MONTHS`, `ONE_YEAR`
-
-**`SubscriptionState`** semantic booleans: same as `InAppPurchaseState`
-
-**Affordances:** `createIntroductoryOffer`, `createLocalization`, `listIntroductoryOffers`, `listLocalizations`, `listOfferCodes` (always); `submit` only when `state == READY_TO_SUBMIT`
-
----
-
-### `SubscriptionSubmission`
-
-```swift
-public struct SubscriptionSubmission: Sendable, Equatable, Identifiable, Codable {
-    public let id: String
-    public let subscriptionId: String  // parent — injected by Infrastructure
-}
-```
-
-**Affordances:** `listLocalizations`
-
----
-
-### `SubscriptionIntroductoryOffer`
-
-```swift
-public struct SubscriptionIntroductoryOffer: Sendable, Equatable, Identifiable {
-    public let id: String
-    public let subscriptionId: String  // parent — injected by Infrastructure
+    public let offerId: String
     public let duration: SubscriptionOfferDuration
     public let offerMode: SubscriptionOfferMode
-    public let numberOfPeriods: Int
-    public let startDate: String?      // omitted from JSON when nil
-    public let endDate: String?        // omitted from JSON when nil
-    public let territory: String?      // omitted from JSON when nil
+    public let periodCount: Int
+    public let customerEligibilityPaidSubscriptionDurationInMonths: Int
+    public let customerEligibilityTimeSinceLastSubscribedMin: Int
+    public let customerEligibilityTimeSinceLastSubscribedMax: Int
+    public let customerEligibilityWaitBetweenOffersInMonths: Int?
+    public let startDate: String
+    public let endDate: String?
+    public let priority: WinBackOfferPriority   // HIGH | NORMAL
+    public let promotionIntent: WinBackOfferPromotionIntent?
 }
-```
 
-**`SubscriptionOfferDuration`** values: `THREE_DAYS`, `ONE_WEEK`, `TWO_WEEKS`, `ONE_MONTH`, `TWO_MONTHS`, `THREE_MONTHS`, `SIX_MONTHS`, `ONE_YEAR`
-
-**`SubscriptionOfferMode`** values: `PAY_AS_YOU_GO`, `PAY_UP_FRONT`, `FREE_TRIAL`
-- `requiresPricePoint` — `true` for `PAY_AS_YOU_GO` and `PAY_UP_FRONT`; a `--price-point-id` is required when creating those offers
-
-Nil fields are omitted from JSON (custom `Codable` with `encodeIfPresent`).
-
-**Affordances:** `listOffers`
-
----
-
-### `SubscriptionLocalization`
-
-```swift
-public struct SubscriptionLocalization: Sendable, Equatable, Identifiable {
+public struct InAppPurchaseReviewScreenshot: Sendable, Equatable, Identifiable, Codable {
     public let id: String
-    public let subscriptionId: String  // parent — injected by Infrastructure
-    public let locale: String
-    public let name: String?
-    public let description: String?
-    public let state: SubscriptionLocalizationState?
+    public let iapId: String
+    public let fileName: String
+    public let fileSize: Int
+    public let assetState: AssetState?  // .isComplete, .hasFailed
 }
 ```
 
-Nil fields are omitted from JSON.
-
-**Affordances:** `listSiblings`
+For full domain reference see `Sources/Domain/Apps/InAppPurchases/` and `Sources/Domain/Apps/Subscriptions/`.
 
 ---
 
@@ -828,301 +395,115 @@ Nil fields are omitted from JSON.
 ```
 Sources/Domain/Apps/
 ├── InAppPurchases/
-│   ├── InAppPurchase.swift
-│   ├── InAppPurchaseRepository.swift
-│   ├── InAppPurchaseSubmission.swift
-│   ├── InAppPurchaseSubmissionRepository.swift
-│   ├── InAppPurchasePricePoint.swift
-│   ├── InAppPurchasePriceSchedule.swift
-│   ├── InAppPurchasePriceRepository.swift
-│   ├── Localizations/
-│   │   ├── InAppPurchaseLocalization.swift
-│   │   └── InAppPurchaseLocalizationRepository.swift
-│   └── OfferCodes/
-│       ├── InAppPurchaseOfferCode.swift
-│       ├── InAppPurchaseOfferCodeCustomCode.swift
-│       ├── InAppPurchaseOfferCodeOneTimeUseCode.swift
-│       └── InAppPurchaseOfferCodeRepository.swift
+│   ├── InAppPurchase.swift, InAppPurchaseRepository.swift
+│   ├── InAppPurchaseSubmission.swift, InAppPurchaseSubmissionRepository.swift
+│   ├── InAppPurchasePricePoint.swift, InAppPurchasePriceSchedule.swift, InAppPurchasePriceRepository.swift
+│   ├── Localizations/InAppPurchaseLocalization.swift + Repository
+│   ├── Availability/InAppPurchaseAvailability.swift + Repository
+│   ├── OfferCodes/InAppPurchaseOfferCode.swift + Custom + OneTime + Price + Repository
+│   └── Review/InAppPurchaseReviewScreenshot.swift (+ PromotionalImage) + Repository
 └── Subscriptions/
-    ├── SubscriptionGroup.swift
-    ├── SubscriptionGroupRepository.swift
-    ├── Subscription.swift
-    ├── SubscriptionRepository.swift
-    ├── SubscriptionSubmission.swift
-    ├── SubscriptionSubmissionRepository.swift
-    ├── IntroductoryOffers/
-    │   ├── SubscriptionIntroductoryOffer.swift
-    │   └── SubscriptionIntroductoryOfferRepository.swift
-    ├── OfferCodes/
-    │   ├── SubscriptionOfferCode.swift
-    │   ├── SubscriptionOfferCodeCustomCode.swift
-    │   ├── SubscriptionOfferCodeOneTimeUseCode.swift
-    │   └── SubscriptionOfferCodeRepository.swift
-    └── Localizations/
-        ├── SubscriptionLocalization.swift
-        └── SubscriptionLocalizationRepository.swift
+    ├── SubscriptionGroup.swift + Repository
+    ├── Subscription.swift + Repository
+    ├── SubscriptionSubmission.swift + Repository
+    ├── SubscriptionPricePoint.swift, SubscriptionPrice.swift, SubscriptionPriceRepository.swift
+    ├── Localizations/Subscription[Group]Localization.swift + Repository
+    ├── Availability/SubscriptionAvailability.swift + Repository
+    ├── IntroductoryOffers/SubscriptionIntroductoryOffer.swift + Repository
+    ├── PromotionalOffers/SubscriptionPromotionalOffer.swift + Price + Repository
+    ├── WinBackOffers/WinBackOffer.swift (+ Price + Input) + Repository
+    ├── OfferCodes/SubscriptionOfferCode.swift + Custom + OneTime + Price + Repository
+    └── Review/SubscriptionReviewScreenshot.swift + Repository
 
-Sources/Infrastructure/Apps/
-├── InAppPurchases/
-│   ├── SDKInAppPurchaseRepository.swift
-│   ├── SDKInAppPurchaseSubmissionRepository.swift
-│   ├── SDKInAppPurchasePriceRepository.swift
-│   ├── Localizations/
-│   │   └── SDKInAppPurchaseLocalizationRepository.swift
-│   └── OfferCodes/
-│       └── SDKInAppPurchaseOfferCodeRepository.swift
-└── Subscriptions/
-    ├── SDKSubscriptionGroupRepository.swift
-    ├── SDKSubscriptionRepository.swift
-    ├── SDKSubscriptionSubmissionRepository.swift
-    ├── IntroductoryOffers/
-    │   └── SDKSubscriptionIntroductoryOfferRepository.swift
-    ├── OfferCodes/
-    │   └── SDKSubscriptionOfferCodeRepository.swift
-    └── Localizations/
-        └── SDKSubscriptionLocalizationRepository.swift
+Sources/Infrastructure/Apps/   # SDK adapters mirroring the Domain folder structure
 
 Sources/ASCCommand/Commands/
-├── IAP/
-│   ├── IAPCommand.swift
-│   ├── IAPList.swift
-│   ├── IAPCreate.swift
-│   ├── IAPSubmit.swift
-│   ├── IAPPricePointsCommand.swift
-│   ├── IAPPricePointsList.swift
-│   ├── IAPPricesCommand.swift
-│   └── IAPPricesSet.swift
-├── IAPLocalizations/
-│   ├── IAPLocalizationsCommand.swift
-│   ├── IAPLocalizationsList.swift
-│   └── IAPLocalizationsCreate.swift
-├── SubscriptionGroups/
-│   ├── SubscriptionGroupsCommand.swift
-│   ├── SubscriptionGroupsList.swift
-│   └── SubscriptionGroupsCreate.swift
-├── Subscriptions/
-│   ├── SubscriptionsCommand.swift
-│   ├── SubscriptionsList.swift
-│   ├── SubscriptionsCreate.swift
-│   └── SubscriptionsSubmit.swift
-├── SubscriptionLocalizations/
-│   ├── SubscriptionLocalizationsCommand.swift
-│   ├── SubscriptionLocalizationsList.swift
-│   └── SubscriptionLocalizationsCreate.swift
-├── SubscriptionOffers/
-│   ├── SubscriptionOffersCommand.swift
-│   ├── SubscriptionOffersList.swift
-│   └── SubscriptionOffersCreate.swift
-├── SubscriptionOfferCodes/
-│   ├── SubscriptionOfferCodesCommand.swift
-│   ├── SubscriptionOfferCodesList.swift
-│   ├── SubscriptionOfferCodesCreate.swift
-│   └── SubscriptionOfferCodesUpdate.swift
-├── SubscriptionOfferCodeCustomCodes/
-│   ├── SubscriptionOfferCodeCustomCodesCommand.swift
-│   ├── SubscriptionOfferCodeCustomCodesList.swift
-│   ├── SubscriptionOfferCodeCustomCodesCreate.swift
-│   └── SubscriptionOfferCodeCustomCodesUpdate.swift
-├── SubscriptionOfferCodeOneTimeCodes/
-│   ├── SubscriptionOfferCodeOneTimeCodesCommand.swift
-│   ├── SubscriptionOfferCodeOneTimeCodesList.swift
-│   ├── SubscriptionOfferCodeOneTimeCodesCreate.swift
-│   └── SubscriptionOfferCodeOneTimeCodesUpdate.swift
-├── IAPOfferCodes/
-│   ├── IAPOfferCodesCommand.swift
-│   ├── IAPOfferCodesList.swift
-│   ├── IAPOfferCodesCreate.swift
-│   └── IAPOfferCodesUpdate.swift
-├── IAPOfferCodeCustomCodes/
-│   ├── IAPOfferCodeCustomCodesCommand.swift
-│   ├── IAPOfferCodeCustomCodesList.swift
-│   ├── IAPOfferCodeCustomCodesCreate.swift
-│   └── IAPOfferCodeCustomCodesUpdate.swift
-└── IAPOfferCodeOneTimeCodes/
-    ├── IAPOfferCodeOneTimeCodesCommand.swift
-    ├── IAPOfferCodeOneTimeCodesList.swift
-    ├── IAPOfferCodeOneTimeCodesCreate.swift
-    └── IAPOfferCodeOneTimeCodesUpdate.swift
+├── IAP/, IAPLocalizations/, IAPOfferCodes/, IAPOfferCodeCustomCodes/, IAPOfferCodeOneTimeCodes/
+├── IAPReviewScreenshot/, IAPImages/
+├── SubscriptionGroups/, SubscriptionGroupLocalizations/
+├── Subscriptions/, SubscriptionLocalizations/
+├── SubscriptionOffers/ (intro), SubscriptionPromotionalOffers/, WinBackOffers/
+├── SubscriptionOfferCodes/, SubscriptionOfferCodeCustomCodes/, SubscriptionOfferCodeOneTimeCodes/
+├── SubscriptionReviewScreenshot/
+└── Web/Controllers/IAP*Controller.swift, Subscription*Controller.swift, etc.
 ```
 
-**Wiring files:**
-| File | Change |
-|------|--------|
-| `Sources/ASCCommand/ASC.swift` | Register 13 command groups (7 existing + 6 new offer code groups) |
-| `Sources/ASCCommand/ClientProvider.swift` | 10 factory methods (8 existing + 2 new offer code repos) |
-| `Sources/Infrastructure/Client/ClientFactory.swift` | 10 factory methods (8 existing + 2 new offer code repos) |
+**Wiring:**
+- `Sources/ASCCommand/ASC.swift` — registers every command group
+- `Sources/ASCCommand/ClientProvider.swift` — static factory per repository
+- `Sources/Infrastructure/Client/ClientFactory.swift` — auth → SDK repository instantiation
+- `Sources/ASCCommand/Commands/Web/RESTRoutes.swift` — wires controllers per repository
 
 ---
 
-## API Reference
+## Selected API Reference
 
-| Command | SDK Endpoint | SDK Version |
-|---------|-------------|-------------|
-| `iap list` | `APIEndpoint.v1.apps.id(appId).inAppPurchasesV2.get()` | v1 |
-| `iap create` | `APIEndpoint.v2.inAppPurchases.post(InAppPurchaseV2CreateRequest)` | v2 |
-| `iap submit` | `APIEndpoint.v1.inAppPurchaseSubmissions.post(InAppPurchaseSubmissionCreateRequest)` | v1 |
-| `iap price-points list` | `APIEndpoint.v2.inAppPurchases.id(iapId).pricePoints.get()` | v2 |
-| `iap prices set` | `APIEndpoint.v1.inAppPurchasePriceSchedules.post(InAppPurchasePriceScheduleCreateRequest)` | v1 |
-| `iap-localizations list` | `APIEndpoint.v2.inAppPurchases.id(iapId).inAppPurchaseLocalizations.get()` | v2 |
-| `iap-localizations create` | `APIEndpoint.v1.inAppPurchaseLocalizations.post(InAppPurchaseLocalizationCreateRequest)` | v1 |
-| `subscription-groups list` | `APIEndpoint.v1.apps.id(appId).subscriptionGroups.get()` | v1 |
-| `subscription-groups create` | `APIEndpoint.v1.subscriptionGroups.post(SubscriptionGroupCreateRequest)` | v1 |
-| `subscriptions list` | `APIEndpoint.v1.subscriptionGroups.id(groupId).subscriptions.get()` | v1 |
-| `subscriptions create` | `APIEndpoint.v1.subscriptions.post(SubscriptionCreateRequest)` | v1 |
-| `subscription-localizations list` | `APIEndpoint.v1.subscriptions.id(subscriptionId).subscriptionLocalizations.get()` | v1 |
-| `subscription-localizations create` | `APIEndpoint.v1.subscriptionLocalizations.post(SubscriptionLocalizationCreateRequest)` | v1 |
-| `subscriptions submit` | `APIEndpoint.v1.subscriptionSubmissions.post(SubscriptionSubmissionCreateRequest)` | v1 |
-| `subscription-offers list` | `APIEndpoint.v1.subscriptions.id(subscriptionId).introductoryOffers.get()` | v1 |
-| `subscription-offers create` | `APIEndpoint.v1.subscriptionIntroductoryOffers.post(SubscriptionIntroductoryOfferCreateRequest)` | v1 |
-| `subscription-offer-codes list` | `APIEndpoint.v1.subscriptions.id(subscriptionId).offerCodes.get()` | v1 |
-| `subscription-offer-codes create` | `APIEndpoint.v1.subscriptionOfferCodes.post(SubscriptionOfferCodeCreateRequest)` | v1 |
-| `subscription-offer-codes update` | `APIEndpoint.v1.subscriptionOfferCodes.id(offerCodeId).patch(SubscriptionOfferCodeUpdateRequest)` | v1 |
-| `subscription-offer-code-custom-codes list` | `APIEndpoint.v1.subscriptionOfferCodes.id(offerCodeId).customCodes.get()` | v1 |
-| `subscription-offer-code-custom-codes create` | `APIEndpoint.v1.subscriptionOfferCodeCustomCodes.post(SubscriptionOfferCodeCustomCodeCreateRequest)` | v1 |
-| `subscription-offer-code-one-time-codes list` | `APIEndpoint.v1.subscriptionOfferCodes.id(offerCodeId).oneTimeUseCodes.get()` | v1 |
-| `subscription-offer-code-one-time-codes create` | `APIEndpoint.v1.subscriptionOfferCodeOneTimeUseCodes.post(SubscriptionOfferCodeOneTimeUseCodeCreateRequest)` | v1 |
-| `iap-offer-codes list` | `APIEndpoint.v2.inAppPurchases.id(iapId).offerCodes.get()` | v2 |
-| `iap-offer-codes create` | `APIEndpoint.v1.inAppPurchaseOfferCodes.post(InAppPurchaseOfferCodeCreateRequest)` | v1 |
-| `iap-offer-codes update` | `APIEndpoint.v1.inAppPurchaseOfferCodes.id(offerCodeId).patch(InAppPurchaseOfferCodeUpdateRequest)` | v1 |
-| `iap-offer-code-custom-codes list` | `APIEndpoint.v1.inAppPurchaseOfferCodes.id(offerCodeId).customCodes.get()` | v1 |
-| `iap-offer-code-custom-codes create` | `APIEndpoint.v1.inAppPurchaseOfferCodeCustomCodes.post(InAppPurchaseOfferCodeCustomCodeCreateRequest)` | v1 |
-| `iap-offer-code-one-time-codes list` | `APIEndpoint.v1.inAppPurchaseOfferCodes.id(offerCodeId).oneTimeUseCodes.get()` | v1 |
-| `iap-offer-code-one-time-codes create` | `APIEndpoint.v1.inAppPurchaseOfferCodeOneTimeUseCodes.post(InAppPurchaseOfferCodeOneTimeUseCodeCreateRequest)` | v1 |
+| Command | SDK call |
+|---------|----------|
+| `iap update` | `APIEndpoint.v2.inAppPurchases.id(id).patch(InAppPurchaseV2UpdateRequest)` |
+| `iap delete` | `APIEndpoint.v2.inAppPurchases.id(id).delete` |
+| `iap unsubmit` | manual `Request<Void>(path: "/v1/inAppPurchaseSubmissions/{id}", method: "DELETE")` |
+| `iap-localizations update` | `APIEndpoint.v1.inAppPurchaseLocalizations.id(id).patch(...)` |
+| `iap-localizations delete` | `APIEndpoint.v1.inAppPurchaseLocalizations.id(id).delete` |
+| `iap-offer-codes prices list` | `APIEndpoint.v1.inAppPurchaseOfferCodes.id(id).prices.get()` |
+| `iap-offer-code-one-time-codes values` | `APIEndpoint.v1.inAppPurchaseOfferCodeOneTimeUseCodes.id(id).values.get` (`Request<String>`) |
+| `iap-review-screenshot upload` | reserve `POST /v1/inAppPurchaseAppStoreReviewScreenshots` → upload chunks → commit `PATCH …/{id}` with MD5 |
+| `iap-images list` | `APIEndpoint.v2.inAppPurchases.id(id).images.get()` |
+| `subscriptions update` | `APIEndpoint.v1.subscriptions.id(id).patch(SubscriptionUpdateRequest)` |
+| `subscriptions delete` | `APIEndpoint.v1.subscriptions.id(id).delete` |
+| `subscriptions unsubmit` | manual `Request<Void>(path: "/v1/subscriptionSubmissions/{id}", method: "DELETE")` |
+| `subscriptions price-points list` | `APIEndpoint.v1.subscriptions.id(id).pricePoints.get()` |
+| `subscriptions prices set` | `APIEndpoint.v1.subscriptionPrices.post(SubscriptionPriceCreateRequest)` |
+| `subscription-group-localizations *` | `APIEndpoint.v1.subscriptionGroupLocalizations.*` |
+| `subscription-promotional-offers create` | `APIEndpoint.v1.subscriptionPromotionalOffers.post(...)` with `included` price create entries |
+| `win-back-offers create` | manual `POST /v1/winBackOffers` with hand-encoded body (SDK lacks price relationships) |
+| `win-back-offers update / delete` | `APIEndpoint.v1.winBackOffers.id(id).patch(...) / .delete` |
+| `subscription-review-screenshot upload` | reserve → upload chunks → commit on `/v1/subscriptionAppStoreReviewScreenshots` |
 
 ---
 
 ## Testing
 
+Each repository, command, and REST controller has its own test suite. Representative slices:
+
 ```swift
-// Domain test
-@Test func `subscription group affordances include listSubscriptions`() {
-    let group = MockRepositoryFactory.makeSubscriptionGroup(id: "grp-1")
-    #expect(group.affordances["listSubscriptions"] == "asc subscriptions list --group-id grp-1")
+// Domain — state-aware affordance
+@Test func `iap localization affordances include update with localization id`() {
+    let loc = MockRepositoryFactory.makeInAppPurchaseLocalization(id: "loc-1", iapId: "iap-1")
+    #expect(loc.affordances["update"] == "asc iap-localizations update --localization-id loc-1 --name <name>")
 }
 
-// Command test
-@Test func `listed subscriptions include groupId, period, state and affordances`() async throws {
-    let mockRepo = MockSubscriptionRepository()
-    given(mockRepo).listSubscriptions(groupId: .any, limit: .any)
-        .willReturn(PaginatedResponse(data: [
-            Subscription(id: "sub-1", groupId: "grp-1", name: "Monthly Premium",
-                        productId: "com.app.monthly", subscriptionPeriod: .oneMonth,
-                        isFamilySharable: false, state: .missingMetadata)
-        ], nextCursor: nil))
+// Infrastructure — parent-id injection
+@Test func `listPricePoints injects subscriptionId into each price point`() async throws {
+    let stub = StubAPIClient()
+    stub.willReturn(SubscriptionPricePointsResponse(data: [...], links: .init(this: "")))
+    let repo = SDKSubscriptionPriceRepository(client: stub)
+    let result = try await repo.listPricePoints(subscriptionId: "sub-77", territory: nil)
+    #expect(result.allSatisfy { $0.subscriptionId == "sub-77" })
+}
 
-    let cmd = try SubscriptionsList.parse(["--group-id", "grp-1", "--pretty"])
-    let output = try await cmd.execute(repo: mockRepo)
-
-    #expect(output == """
-    {
-      "data" : [
-        {
-          "affordances" : { ... },
-          "groupId" : "grp-1",
-          "id" : "sub-1",
-          ...
-        }
-      ]
-    }
-    """)
+// REST — _links shape
+@Test func `subscription promotional offers REST exposes nested paths`() async throws {
+    // …
+    let output = try await SubscriptionPromotionalOffersList.parse([...])
+        .execute(repo: mockRepo, affordanceMode: .rest)
+    #expect(output.contains("/api/v1/subscriptions/sub-7/subscription-promotional-offers"))
+    #expect(output.contains("/api/v1/subscription-promotional-offers/po-1/prices"))
 }
 ```
+
+Run targeted slices:
 
 ```bash
-swift test --filter 'IAPListTests|IAPCreateTests|IAPSubmitTests|IAPPricePointsListTests|IAPPricesSetTests|SubscriptionGroupsListTests|SubscriptionsListTests'
+swift test --filter 'IAP|Subscription|WinBackOffer'
 ```
-
----
-
-### `SubscriptionOfferCode`
-
-```swift
-public struct SubscriptionOfferCode: Sendable, Equatable, Identifiable {
-    public let id: String
-    public let subscriptionId: String  // parent — injected by Infrastructure
-    public let name: String
-    public let customerEligibilities: [SubscriptionCustomerEligibility]
-    public let offerEligibility: SubscriptionOfferEligibility
-    public let duration: SubscriptionOfferDuration
-    public let offerMode: SubscriptionOfferMode
-    public let numberOfPeriods: Int
-    public let totalNumberOfCodes: Int?  // omitted from JSON when nil
-    public let isActive: Bool
-}
-```
-
-**`SubscriptionCustomerEligibility`**: `NEW`, `LAPSED`, `WIN_BACK`, `PAID_SUBSCRIBER`
-**`SubscriptionOfferEligibility`**: `STACKABLE`, `INTRODUCTORY`, `SUBSCRIPTION_OFFER`
-
-**Affordances:** `listOfferCodes`, `listCustomCodes`, `listOneTimeCodes` (always); `deactivate` only when `isActive == true`
-
----
-
-### `SubscriptionOfferCodeCustomCode`
-
-```swift
-public struct SubscriptionOfferCodeCustomCode: Sendable, Equatable, Identifiable {
-    public let id: String
-    public let offerCodeId: String     // parent — injected by Infrastructure
-    public let customCode: String
-    public let numberOfCodes: Int
-    public let createdDate: String?    // omitted from JSON when nil
-    public let expirationDate: String? // omitted from JSON when nil
-    public let isActive: Bool
-}
-```
-
-**Affordances:** `listCustomCodes` (always); `deactivate` only when `isActive == true`
-
----
-
-### `SubscriptionOfferCodeOneTimeUseCode`
-
-```swift
-public struct SubscriptionOfferCodeOneTimeUseCode: Sendable, Equatable, Identifiable {
-    public let id: String
-    public let offerCodeId: String     // parent — injected by Infrastructure
-    public let numberOfCodes: Int
-    public let createdDate: String?    // omitted from JSON when nil
-    public let expirationDate: String? // omitted from JSON when nil
-    public let isActive: Bool
-}
-```
-
-**Affordances:** `listOneTimeCodes` (always); `deactivate` only when `isActive == true`
-
----
-
-### `InAppPurchaseOfferCode`
-
-```swift
-public struct InAppPurchaseOfferCode: Sendable, Equatable, Identifiable {
-    public let id: String
-    public let iapId: String           // parent — injected by Infrastructure
-    public let name: String
-    public let customerEligibilities: [IAPCustomerEligibility]
-    public let isActive: Bool
-    public let totalNumberOfCodes: Int? // omitted from JSON when nil
-}
-```
-
-**`IAPCustomerEligibility`**: `NON_SPENDER`, `ACTIVE_SPENDER`, `CHURNED_SPENDER`
-
-**Affordances:** `listOfferCodes`, `listCustomCodes`, `listOneTimeCodes` (always); `deactivate` only when `isActive == true`
-
----
-
-### `InAppPurchaseOfferCodeCustomCode` / `InAppPurchaseOfferCodeOneTimeUseCode`
-
-Same structure as subscription counterparts with `offerCodeId` as parent.
 
 ---
 
 ## Extending
 
-Natural next steps:
+Natural next steps not yet implemented:
 
-**Subscription Promotional Offers** — `POST /v1/subscriptionPromotionalOffers`:
-```bash
-asc subscription-promotional-offers create --subscription-id <id> --name "Winback" --duration ONE_MONTH --mode PAY_AS_YOU_GO
-```
+- **IAP price schedule fetch with equalizations** — currently only `prices set` and `price-points list`. The full schedule fetch would parallel the AppStoreSdk-SPM `loadPriceSchedule()` flow.
+- **Promotional offer / win-back offer territory-prices update** — only listing today; ASC API allows price replacement.
+- **Promoted purchases** — see [`promoted-purchases.md`](promoted-purchases.md).
