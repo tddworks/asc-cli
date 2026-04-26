@@ -65,6 +65,16 @@ public final class RESTPathResolver: @unchecked Sendable {
 
         let base = "/api/v1"
 
+        // Singleton resources under a parent — when a `get` action's only id-shaped param
+        // matches the registered parent param, the resource is a singleton living under the
+        // parent (e.g. `iap-review-screenshot` under `iap-id`), not a resource keyed by its
+        // own id. Map to `/parent/{id}/segment` so agents can walk the hierarchy.
+        if action == "get", let route = currentRoutes[command],
+           let parentId = params[route.parentParam],
+           !params.keys.contains(where: { $0.hasSuffix("-id") && $0 != route.parentParam }) {
+            return "\(base)/\(route.parentSegment)/\(parentId)/\(route.segment)"
+        }
+
         // Actions on a resource by its own id (get, update, delete, submit, …).
         if action != "list", action != "create",
            let idValue = resourceId(in: params, command: command) {
