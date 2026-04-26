@@ -11,6 +11,8 @@ struct SubscriptionsCommand: AsyncParsableCommand {
             SubscriptionsDelete.self,
             SubscriptionsSubmit.self,
             SubscriptionsUnsubmit.self,
+            SubscriptionPricePointsCommand.self,
+            SubscriptionPricesCommand.self,
         ]
     )
 }

@@ -152,6 +152,12 @@ struct ClientProvider {
         return try factory.makeInAppPurchasePriceRepository(authProvider: authProvider)
     }
 
+    static func makeSubscriptionPriceRepository() throws -> any SubscriptionPriceRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeSubscriptionPriceRepository(authProvider: authProvider)
+    }
+
     static func makeSubscriptionSubmissionRepository() throws -> any SubscriptionSubmissionRepository {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
