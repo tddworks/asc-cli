@@ -43,6 +43,32 @@ public struct SDKSubscriptionRepository: SubscriptionRepository, @unchecked Send
         return mapSubscription(response.data, groupId: groupId)
     }
 
+    public func updateSubscription(
+        subscriptionId: String,
+        name: String?,
+        isFamilySharable: Bool?,
+        groupLevel: Int?,
+        reviewNote: String?
+    ) async throws -> Domain.Subscription {
+        let body = SubscriptionUpdateRequest(data: .init(
+            type: .subscriptions,
+            id: subscriptionId,
+            attributes: .init(
+                name: name,
+                isFamilySharable: isFamilySharable,
+                reviewNote: reviewNote,
+                groupLevel: groupLevel
+            )
+        ))
+        let response = try await client.request(APIEndpoint.v1.subscriptions.id(subscriptionId).patch(body))
+        // PATCH response does not include parent groupId — preserve as empty.
+        return mapSubscription(response.data, groupId: "")
+    }
+
+    public func deleteSubscription(subscriptionId: String) async throws {
+        _ = try await client.request(APIEndpoint.v1.subscriptions.id(subscriptionId).delete)
+    }
+
     private func mapSubscription(_ sdk: AppStoreConnect_Swift_SDK.Subscription, groupId: String) -> Domain.Subscription {
         let periodRaw = sdk.attributes?.subscriptionPeriod?.rawValue ?? SubscriptionPeriod.oneMonth.rawValue
         let period = Domain.SubscriptionPeriod(rawValue: periodRaw) ?? .oneMonth

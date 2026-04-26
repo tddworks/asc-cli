@@ -114,10 +114,12 @@ extension Subscription: AffordanceProviding {
         var result: [String: String] = [
             "createIntroductoryOffer": "asc subscription-offers create --subscription-id \(id) --duration ONE_MONTH --mode FREE_TRIAL --periods 1",
             "createLocalization": "asc subscription-localizations create --subscription-id \(id) --locale en-US --name <name>",
+            "delete": "asc subscriptions delete --subscription-id \(id)",
             "getAvailability": "asc subscription-availability get --subscription-id \(id)",
             "listIntroductoryOffers": "asc subscription-offers list --subscription-id \(id)",
             "listLocalizations": "asc subscription-localizations list --subscription-id \(id)",
             "listOfferCodes": "asc subscription-offer-codes list --subscription-id \(id)",
+            "update": "asc subscriptions update --subscription-id \(id) --name <name>",
         ]
         if state == .readyToSubmit {
             result["submit"] = "asc subscriptions submit --subscription-id \(id)"

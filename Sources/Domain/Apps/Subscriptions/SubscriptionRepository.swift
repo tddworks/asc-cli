@@ -11,4 +11,12 @@ public protocol SubscriptionRepository: Sendable {
         isFamilySharable: Bool,
         groupLevel: Int?
     ) async throws -> Subscription
+    func updateSubscription(
+        subscriptionId: String,
+        name: String?,
+        isFamilySharable: Bool?,
+        groupLevel: Int?,
+        reviewNote: String?
+    ) async throws -> Subscription
+    func deleteSubscription(subscriptionId: String) async throws
 }

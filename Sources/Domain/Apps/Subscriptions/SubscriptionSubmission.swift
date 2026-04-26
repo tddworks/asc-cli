@@ -13,6 +13,7 @@ extension SubscriptionSubmission: AffordanceProviding {
     public var affordances: [String: String] {
         [
             "listLocalizations": "asc subscription-localizations list --subscription-id \(subscriptionId)",
+            "unsubmit": "asc subscriptions unsubmit --submission-id \(id)",
         ]
     }
 }
