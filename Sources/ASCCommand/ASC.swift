@@ -36,6 +36,7 @@ struct ASC: AsyncParsableCommand {
             SubscriptionLocalizationsCommand.self,
             SubscriptionGroupLocalizationsCommand.self,
             SubscriptionOffersCommand.self,
+            SubscriptionPromotionalOffersCommand.self,
             SubscriptionOfferCodesCommand.self,
             SubscriptionOfferCodeCustomCodesCommand.self,
             SubscriptionOfferCodeOneTimeCodesCommand.self,
