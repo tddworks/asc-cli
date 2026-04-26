@@ -91,6 +91,7 @@ extension SubscriptionIntroductoryOffer: Presentable {
 extension SubscriptionIntroductoryOffer: AffordanceProviding {
     public var affordances: [String: String] {
         [
+            "delete": "asc subscription-offers delete --offer-id \(id)",
             "listOffers": "asc subscription-offers list --subscription-id \(subscriptionId)",
         ]
     }

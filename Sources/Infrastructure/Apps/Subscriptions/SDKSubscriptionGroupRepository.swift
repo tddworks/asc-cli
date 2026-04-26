@@ -29,6 +29,24 @@ public struct SDKSubscriptionGroupRepository: SubscriptionGroupRepository, @unch
         return mapGroup(response.data, appId: appId)
     }
 
+    public func updateSubscriptionGroup(
+        groupId: String,
+        referenceName: String
+    ) async throws -> Domain.SubscriptionGroup {
+        let body = SubscriptionGroupUpdateRequest(data: .init(
+            type: .subscriptionGroups,
+            id: groupId,
+            attributes: .init(referenceName: referenceName)
+        ))
+        let response = try await client.request(APIEndpoint.v1.subscriptionGroups.id(groupId).patch(body))
+        // PATCH response does not include parent appId — preserve as empty.
+        return mapGroup(response.data, appId: "")
+    }
+
+    public func deleteSubscriptionGroup(groupId: String) async throws {
+        _ = try await client.request(APIEndpoint.v1.subscriptionGroups.id(groupId).delete)
+    }
+
     private func mapGroup(_ sdk: AppStoreConnect_Swift_SDK.SubscriptionGroup, appId: String) -> Domain.SubscriptionGroup {
         Domain.SubscriptionGroup(
             id: sdk.id,

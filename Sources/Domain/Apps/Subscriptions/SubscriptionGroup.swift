@@ -24,7 +24,9 @@ extension SubscriptionGroup: AffordanceProviding {
     public var affordances: [String: String] {
         [
             "createSubscription": "asc subscriptions create --group-id \(id) --name <name> --product-id <id> --period ONE_MONTH",
+            "delete": "asc subscription-groups delete --group-id \(id)",
             "listSubscriptions": "asc subscriptions list --group-id \(id)",
+            "update": "asc subscription-groups update --group-id \(id) --reference-name <name>",
         ]
     }
 }

@@ -53,6 +53,10 @@ public struct SDKSubscriptionIntroductoryOfferRepository: SubscriptionIntroducto
         return mapOffer(response.data, subscriptionId: subscriptionId)
     }
 
+    public func deleteIntroductoryOffer(offerId: String) async throws {
+        _ = try await client.request(APIEndpoint.v1.subscriptionIntroductoryOffers.id(offerId).delete)
+    }
+
     private func mapOffer(
         _ sdk: AppStoreConnect_Swift_SDK.SubscriptionIntroductoryOffer,
         subscriptionId: String

@@ -13,4 +13,5 @@ public protocol SubscriptionIntroductoryOfferRepository: Sendable {
         territory: String?,
         pricePointId: String?
     ) async throws -> SubscriptionIntroductoryOffer
+    func deleteIntroductoryOffer(offerId: String) async throws
 }

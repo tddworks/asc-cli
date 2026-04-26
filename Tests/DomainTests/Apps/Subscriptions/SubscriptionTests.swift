@@ -83,4 +83,14 @@ struct SubscriptionTests {
         let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
         #expect(sub.affordances["listOfferCodes"] == "asc subscription-offer-codes list --subscription-id sub-1")
     }
+
+    @Test func `subscription affordances include update with subscription id`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.affordances["update"] == "asc subscriptions update --subscription-id sub-1 --name <name>")
+    }
+
+    @Test func `subscription affordances include delete with subscription id`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.affordances["delete"] == "asc subscriptions delete --subscription-id sub-1")
+    }
 }

@@ -14,6 +14,11 @@ struct SubscriptionSubmissionTests {
         #expect(sub.affordances["listLocalizations"] == "asc subscription-localizations list --subscription-id sub-42")
     }
 
+    @Test func `submission affordances include unsubmit with submission id`() {
+        let sub = MockRepositoryFactory.makeSubscriptionSubmission(id: "s-1", subscriptionId: "sub-42")
+        #expect(sub.affordances["unsubmit"] == "asc subscriptions unsubmit --submission-id s-1")
+    }
+
     @Test func `submit affordance present only when readyToSubmit`() {
         let ready = MockRepositoryFactory.makeSubscription(state: .readyToSubmit)
         let other = MockRepositoryFactory.makeSubscription(state: .missingMetadata)
