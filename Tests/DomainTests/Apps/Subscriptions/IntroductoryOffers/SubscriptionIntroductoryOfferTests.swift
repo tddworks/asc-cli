@@ -21,6 +21,14 @@ struct SubscriptionIntroductoryOfferTests {
         #expect(offer.affordances["listOffers"] == "asc subscription-offers list --subscription-id sub-42")
     }
 
+    @Test func `affordances include delete with offer id`() {
+        let offer = MockRepositoryFactory.makeSubscriptionIntroductoryOffer(
+            id: "offer-1",
+            subscriptionId: "sub-42"
+        )
+        #expect(offer.affordances["delete"] == "asc subscription-offers delete --offer-id offer-1")
+    }
+
     @Test func `nil startDate endDate territory omitted from JSON`() throws {
         let offer = MockRepositoryFactory.makeSubscriptionIntroductoryOffer(
             startDate: nil,

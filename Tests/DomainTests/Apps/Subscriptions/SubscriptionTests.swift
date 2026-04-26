@@ -20,6 +20,16 @@ struct SubscriptionTests {
         #expect(group.affordances["createSubscription"] == "asc subscriptions create --group-id grp-1 --name <name> --product-id <id> --period ONE_MONTH")
     }
 
+    @Test func `subscription group affordances include update with group id`() {
+        let group = MockRepositoryFactory.makeSubscriptionGroup(id: "grp-1")
+        #expect(group.affordances["update"] == "asc subscription-groups update --group-id grp-1 --reference-name <name>")
+    }
+
+    @Test func `subscription group affordances include delete with group id`() {
+        let group = MockRepositoryFactory.makeSubscriptionGroup(id: "grp-1")
+        #expect(group.affordances["delete"] == "asc subscription-groups delete --group-id grp-1")
+    }
+
     @Test func `subscription carries groupId`() {
         let sub = MockRepositoryFactory.makeSubscription(id: "sub-1", groupId: "grp-1")
         #expect(sub.groupId == "grp-1")
