@@ -121,6 +121,7 @@ extension Subscription: AffordanceProviding {
             "listLocalizations": "asc subscription-localizations list --subscription-id \(id)",
             "listOfferCodes": "asc subscription-offer-codes list --subscription-id \(id)",
             "listPromotionalOffers": "asc subscription-promotional-offers list --subscription-id \(id)",
+            "listWinBackOffers": "asc win-back-offers list --subscription-id \(id)",
             "update": "asc subscriptions update --subscription-id \(id) --name <name>",
         ]
         if state == .readyToSubmit {

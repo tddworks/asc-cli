@@ -176,6 +176,12 @@ struct ClientProvider {
         return try factory.makeSubscriptionPromotionalOfferRepository(authProvider: authProvider)
     }
 
+    static func makeWinBackOfferRepository() throws -> any WinBackOfferRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeWinBackOfferRepository(authProvider: authProvider)
+    }
+
     static func makeSubscriptionIntroductoryOfferRepository() throws -> any SubscriptionIntroductoryOfferRepository {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
