@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.17.3] - 2026-04-26
+
 ### Added
 - **State-aware affordances on the new aggregates** — affordances no longer suggest illegal next actions:
   - `PromotedPurchase` exposes `state.isLocked` (true while `WAITING_FOR_REVIEW` / `IN_REVIEW`); `update` and `delete` are suppressed while locked, so an agent following affordances won't issue a 409 against App Review.
@@ -813,7 +817,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.17.2...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.17.3...HEAD
+[0.17.3]: https://github.com/tddworks/asc-cli/compare/v0.17.2...v0.17.3
 [0.17.2]: https://github.com/tddworks/asc-cli/compare/v0.17.1...v0.17.2
 [0.17.1]: https://github.com/tddworks/asc-cli/compare/v0.17.0...v0.17.1
 [0.17.0]: https://github.com/tddworks/asc-cli/compare/v0.16.9...v0.17.0
