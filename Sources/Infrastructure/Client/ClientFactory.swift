@@ -121,6 +121,11 @@ public struct ClientFactory: Sendable {
         return SDKSubscriptionLocalizationRepository(client: provider)
     }
 
+    public func makeSubscriptionGroupLocalizationRepository(authProvider: any AuthProvider) throws -> any SubscriptionGroupLocalizationRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKSubscriptionGroupLocalizationRepository(client: provider)
+    }
+
     public func makeInAppPurchaseSubmissionRepository(authProvider: any AuthProvider) throws -> any InAppPurchaseSubmissionRepository {
         let provider = try makeProvider(authProvider: authProvider)
         return SDKInAppPurchaseSubmissionRepository(client: provider)

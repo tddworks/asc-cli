@@ -140,6 +140,12 @@ struct ClientProvider {
         return try factory.makeSubscriptionLocalizationRepository(authProvider: authProvider)
     }
 
+    static func makeSubscriptionGroupLocalizationRepository() throws -> any SubscriptionGroupLocalizationRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeSubscriptionGroupLocalizationRepository(authProvider: authProvider)
+    }
+
     static func makeInAppPurchaseSubmissionRepository() throws -> any InAppPurchaseSubmissionRepository {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
