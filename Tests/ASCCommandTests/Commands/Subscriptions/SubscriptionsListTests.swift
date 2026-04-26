@@ -34,6 +34,7 @@ struct SubscriptionsListTests {
                 "createPromotionalOffer" : "asc subscription-promotional-offers create --subscription-id sub-1 --name <name> --offer-code <code> --duration ONE_MONTH --mode PAY_AS_YOU_GO --periods 1",
                 "delete" : "asc subscriptions delete --subscription-id sub-1",
                 "getAvailability" : "asc subscription-availability get --subscription-id sub-1",
+                "getReviewScreenshot" : "asc subscription-review-screenshot get --subscription-id sub-1",
                 "listIntroductoryOffers" : "asc subscription-offers list --subscription-id sub-1",
                 "listLocalizations" : "asc subscription-localizations list --subscription-id sub-1",
                 "listOfferCodes" : "asc subscription-offer-codes list --subscription-id sub-1",
