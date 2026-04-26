@@ -128,14 +128,32 @@ extension WinBackOffer: Presentable {
 }
 
 extension WinBackOffer: AffordanceProviding {
-    public var affordances: [String: String] {
-        [
-            "delete": "asc win-back-offers delete --offer-id \(id)",
-            "listOffers": "asc win-back-offers list --subscription-id \(subscriptionId)",
-            "listPrices": "asc win-back-offers prices list --offer-id \(id)",
-            "update": "asc win-back-offers update --offer-id \(id)",
+    public var structuredAffordances: [Affordance] {
+        _ = RESTPathResolver._winBackOfferRoutes
+        return [
+            Affordance(key: "delete", command: "win-back-offers", action: "delete", params: ["offer-id": id]),
+            Affordance(key: "listOffers", command: "win-back-offers", action: "list", params: ["subscription-id": subscriptionId]),
+            Affordance(key: "listPrices", command: "win-back-offers prices", action: "list", params: ["offer-id": id]),
+            Affordance(key: "update", command: "win-back-offers", action: "update", params: ["offer-id": id]),
         ]
     }
+}
+
+extension RESTPathResolver {
+    static let _winBackOfferRoutes: Void = {
+        registerRoute(
+            command: "win-back-offers",
+            parentParam: "subscription-id",
+            parentSegment: "subscriptions",
+            segment: "win-back-offers"
+        )
+        registerRoute(
+            command: "win-back-offers prices",
+            parentParam: "offer-id",
+            parentSegment: "win-back-offers",
+            segment: "prices"
+        )
+    }()
 }
 
 public struct WinBackOfferPrice: Sendable, Equatable, Identifiable {
@@ -180,8 +198,11 @@ extension WinBackOfferPrice: Presentable {
 }
 
 extension WinBackOfferPrice: AffordanceProviding {
-    public var affordances: [String: String] {
-        ["listPrices": "asc win-back-offers prices list --offer-id \(offerId)"]
+    public var structuredAffordances: [Affordance] {
+        _ = RESTPathResolver._winBackOfferRoutes
+        return [
+            Affordance(key: "listPrices", command: "win-back-offers prices", action: "list", params: ["offer-id": offerId]),
+        ]
     }
 }
 

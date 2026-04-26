@@ -56,6 +56,9 @@ enum RESTRoutes {
         if let groupLocRepo = try? factory.makeSubscriptionGroupLocalizationRepository(authProvider: auth) {
             SubscriptionGroupLocalizationsController(repo: groupLocRepo).addRoutes(to: v1)
         }
+        if let promoRepo = try? factory.makeSubscriptionPromotionalOfferRepository(authProvider: auth) {
+            SubscriptionPromotionalOffersController(repo: promoRepo).addRoutes(to: v1)
+        }
         if let appInfoRepo = try? factory.makeAppInfoRepository(authProvider: auth) {
             AppInfosController(repo: appInfoRepo).addRoutes(to: v1)
         }

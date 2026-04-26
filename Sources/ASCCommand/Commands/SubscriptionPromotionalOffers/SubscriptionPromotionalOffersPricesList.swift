@@ -17,9 +17,12 @@ struct SubscriptionPromotionalOffersPricesList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubscriptionPromotionalOfferRepository) async throws -> String {
+    func execute(
+        repo: any SubscriptionPromotionalOfferRepository,
+        affordanceMode: AffordanceMode = .cli
+    ) async throws -> String {
         let items = try await repo.listPrices(offerId: offerId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(items)
+        return try formatter.formatAgentItems(items, affordanceMode: affordanceMode)
     }
 }

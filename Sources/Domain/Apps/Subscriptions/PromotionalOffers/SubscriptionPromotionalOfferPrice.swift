@@ -41,8 +41,11 @@ extension SubscriptionPromotionalOfferPrice: Presentable {
 }
 
 extension SubscriptionPromotionalOfferPrice: AffordanceProviding {
-    public var affordances: [String: String] {
-        ["listPrices": "asc subscription-promotional-offers prices list --offer-id \(offerId)"]
+    public var structuredAffordances: [Affordance] {
+        _ = RESTPathResolver._subscriptionPromotionalOfferRoutes
+        return [
+            Affordance(key: "listPrices", command: "subscription-promotional-offers prices", action: "list", params: ["offer-id": offerId]),
+        ]
     }
 }
 
