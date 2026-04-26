@@ -2,6 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## TDD is non-negotiable (read this first)
+
+**You MUST write a failing test before writing any production code.** This rule overrides every other instinct, including "the change is small", "it's just a one-liner", "I'll add the test after". If you catch yourself opening a file under `Sources/` before a test under `Tests/` exists and fails, stop and reverse course.
+
+**Pre-implementation gate** — before editing anything in `Sources/`, you must have done all of the following in order:
+
+1. Stated the user-facing behaviour in one sentence (e.g. "a version is live when state is `READY_FOR_SALE`").
+2. Written a test in `Tests/` that asserts the exact expected output for that behaviour.
+3. Run `swift test` (or a `--filter`'d subset) and **observed the test fail** — compile error counts as a failing test only if the assertion is the reason it can't compile (e.g. missing symbol the test names).
+4. Reported the red result back to the user (one line is fine: "test X fails with: <message>").
+
+Only after step 4 may you write code under `Sources/`. The full workflow, naming rules, and framework details are in the [Testing](#testing) section.
+
+**If you skip the gate, you are violating the project's primary rule.** Treat this the same as committing secrets or force-pushing main.
+
 ## Commands
 
 ```bash
@@ -156,24 +171,28 @@ asc init --app-id <id>
 
 ## Testing
 
-We follow the Chicago School of TDD — state-based, not interaction-based. Tests should verify what domain objects return and compute, rather than how they call their collaborators.
+We follow the Chicago School of TDD — state-based, not interaction-based. Tests verify what domain objects return and compute, not how they call collaborators. The non-negotiable rule and pre-implementation gate live at the [top of this file](#tdd-is-non-negotiable-read-this-first); everything below is the framework-specific detail.
 
-**ALWAYS write tests first, then implement.** Never write implementation code without a failing test. This is non-negotiable.
+**Red → green → refactor**, in that order, every time:
 
-- If code is difficult to test, treat that as a design problem, not an exception to testing.
-- The proper TDD workflow:
-    1. **Think from user's mental model**: How would the user describe this behavior? What would they expect to see? For example: "a version is live when its state is readyForSale", "submit is only available when the version is editable".
-    2. **Write the test**: Name it after the user's expectation. Assert the exact output values (e.g. `"IOS"`, `"READY_FOR_SALE"`, `"expired": true`).
-    3. **Run the test**: It **must fail** (red). If it passes, the test is not testing new behaviour.
-    4. **Implement**: Write just enough code to make the test pass (green).
-    5. **Refactor**: Clean up while keeping tests green.
-- Test cases should reflect the user's mental model — describe what the user sees and expects, not internal implementation details.
-- Never modify a test to make it pass — if a test fails unexpectedly, the specification (step 1) was wrong. Fix the thinking, not the test.
-- If you find yourself writing implementation before tests, stop and reverse course.
-- Framework: Apple's `@Testing` macro (not XCTest)
-- Mocking: `@Mockable` annotation on protocols + `given().willReturn()` in tests
-- Test naming: backtick style — `` func `version is live when state is readyForSale`() ``
-- `Tests/DomainTests/TestHelpers/MockRepositoryFactory.swift` — shared test data factory
+1. **Think from the user's mental model.** Describe the behaviour as the user would: "a version is live when its state is `readyForSale`", "submit is only available when the version is editable". Don't describe internal calls.
+2. **Write the test.** Name it after the user's expectation. Assert exact output values (e.g. `"IOS"`, `"READY_FOR_SALE"`, `"expired": true`) — not "is non-empty" or "doesn't throw".
+3. **Run the test and confirm it fails (red).** If it passes before you wrote any code, it isn't testing new behaviour — fix the test.
+4. **Implement just enough code to make it pass (green).** No extra fields, no speculative branches.
+5. **Refactor while green.** Tests stay passing throughout.
+
+**Hard rules:**
+
+- Difficult to test = design problem, not a testing exception. Refactor the design, don't skip the test.
+- Never modify a test to make it pass. If a test fails unexpectedly, the spec (step 1) was wrong — fix the thinking, not the assertion.
+- No "I'll add tests after". Production code without a preceding red test is a defect, even if it works.
+
+**Framework:**
+
+- `@Testing` macro (not XCTest).
+- `@Mockable` on protocols; `given().willReturn()` in tests.
+- Test names use backticks: `` func `version is live when state is readyForSale`() ``.
+- Shared test data: `Tests/DomainTests/TestHelpers/MockRepositoryFactory.swift`.
 
 ## Two Localization Types
 
