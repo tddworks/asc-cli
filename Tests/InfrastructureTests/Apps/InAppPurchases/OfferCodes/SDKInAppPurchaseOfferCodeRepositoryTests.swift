@@ -287,4 +287,35 @@ struct SDKInAppPurchaseOfferCodeRepositoryTests {
         #expect(result.isActive == false)
         #expect(result.offerCodeId == "")
     }
+
+    @Test func `listPrices injects offerCodeId and maps territory + pricePoint`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(InAppPurchaseOfferPricesResponse(
+            data: [
+                AppStoreConnect_Swift_SDK.InAppPurchaseOfferPrice(
+                    type: .inAppPurchaseOfferPrices, id: "p-1",
+                    relationships: .init(
+                        territory: .init(data: .init(type: .territories, id: "USA")),
+                        pricePoint: .init(data: .init(type: .inAppPurchasePricePoints, id: "pp-9"))
+                    )
+                ),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKInAppPurchaseOfferCodeRepository(client: stub)
+        let result = try await repo.listPrices(offerCodeId: "oc-77")
+
+        #expect(result[0].offerCodeId == "oc-77")
+        #expect(result[0].territory == "USA")
+        #expect(result[0].pricePointId == "pp-9")
+    }
+
+    @Test func `fetchOneTimeUseCodeValues returns CSV string from SDK`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn("CODE1\nCODE2\nCODE3\n")
+        let repo = SDKInAppPurchaseOfferCodeRepository(client: stub)
+        let result = try await repo.fetchOneTimeUseCodeValues(oneTimeCodeId: "otc-1")
+        #expect(result == "CODE1\nCODE2\nCODE3\n")
+    }
 }

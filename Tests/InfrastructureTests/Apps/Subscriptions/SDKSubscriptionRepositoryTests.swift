@@ -123,4 +123,44 @@ struct SDKSubscriptionRepositoryTests {
 
         #expect(result.subscriptionPeriod == .oneYear)
     }
+
+    // MARK: - updateSubscription
+
+    @Test func `updateSubscription returns updated record with empty groupId`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(SubscriptionResponse(
+            data: AppStoreConnect_Swift_SDK.Subscription(
+                type: .subscriptions, id: "sub-1",
+                attributes: .init(
+                    name: "Renamed",
+                    productID: "com.app.monthly",
+                    isFamilySharable: true,
+                    subscriptionPeriod: .oneMonth,
+                    groupLevel: 3
+                )
+            ),
+            links: .init(this: "")
+        ))
+
+        let repo = SDKSubscriptionRepository(client: stub)
+        let result = try await repo.updateSubscription(
+            subscriptionId: "sub-1", name: "Renamed",
+            isFamilySharable: true, groupLevel: 3, reviewNote: nil
+        )
+
+        #expect(result.id == "sub-1")
+        #expect(result.name == "Renamed")
+        #expect(result.isFamilySharable == true)
+        #expect(result.groupLevel == 3)
+        #expect(result.groupId == "")
+    }
+
+    // MARK: - deleteSubscription
+
+    @Test func `deleteSubscription performs void request`() async throws {
+        let stub = StubAPIClient()
+        let repo = SDKSubscriptionRepository(client: stub)
+        try await repo.deleteSubscription(subscriptionId: "sub-1")
+        #expect(stub.voidRequestCalled == true)
+    }
 }

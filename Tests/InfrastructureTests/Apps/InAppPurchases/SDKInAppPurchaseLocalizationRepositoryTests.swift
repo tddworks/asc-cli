@@ -110,4 +110,37 @@ struct SDKInAppPurchaseLocalizationRepositoryTests {
 
         #expect(result.description == nil)
     }
+
+    // MARK: - updateLocalization
+
+    @Test func `updateLocalization returns updated record with empty iapId`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(InAppPurchaseLocalizationResponse(
+            data: InAppPurchaseLocalization(
+                type: .inAppPurchaseLocalizations,
+                id: "loc-1",
+                attributes: .init(name: "Renamed", locale: "en-US", description: "New desc")
+            ),
+            links: .init(this: "")
+        ))
+
+        let repo = SDKInAppPurchaseLocalizationRepository(client: stub)
+        let result = try await repo.updateLocalization(
+            localizationId: "loc-1", name: "Renamed", description: "New desc"
+        )
+
+        #expect(result.id == "loc-1")
+        #expect(result.name == "Renamed")
+        #expect(result.description == "New desc")
+        #expect(result.iapId == "")
+    }
+
+    // MARK: - deleteLocalization
+
+    @Test func `deleteLocalization performs void request`() async throws {
+        let stub = StubAPIClient()
+        let repo = SDKInAppPurchaseLocalizationRepository(client: stub)
+        try await repo.deleteLocalization(localizationId: "loc-1")
+        #expect(stub.voidRequestCalled == true)
+    }
 }

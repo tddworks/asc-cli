@@ -61,4 +61,29 @@ struct SDKSubscriptionGroupRepositoryTests {
         #expect(result.appId == "app-42")
         #expect(result.referenceName == "Premium Plans")
     }
+
+    @Test func `updateSubscriptionGroup returns updated record with empty appId`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(SubscriptionGroupResponse(
+            data: AppStoreConnect_Swift_SDK.SubscriptionGroup(
+                type: .subscriptionGroups, id: "grp-1",
+                attributes: .init(referenceName: "Renamed Plans")
+            ),
+            links: .init(this: "")
+        ))
+
+        let repo = SDKSubscriptionGroupRepository(client: stub)
+        let result = try await repo.updateSubscriptionGroup(groupId: "grp-1", referenceName: "Renamed Plans")
+
+        #expect(result.id == "grp-1")
+        #expect(result.referenceName == "Renamed Plans")
+        #expect(result.appId == "")
+    }
+
+    @Test func `deleteSubscriptionGroup performs void request`() async throws {
+        let stub = StubAPIClient()
+        let repo = SDKSubscriptionGroupRepository(client: stub)
+        try await repo.deleteSubscriptionGroup(groupId: "grp-1")
+        #expect(stub.voidRequestCalled == true)
+    }
 }

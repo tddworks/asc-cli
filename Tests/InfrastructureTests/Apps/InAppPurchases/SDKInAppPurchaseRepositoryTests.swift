@@ -141,4 +141,35 @@ struct SDKInAppPurchaseRepositoryTests {
             )
         }
     }
+
+    // MARK: - updateInAppPurchase
+
+    @Test func `updateInAppPurchase returns updated record with empty appId`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(InAppPurchaseV2Response(
+            data: InAppPurchaseV2(
+                type: .inAppPurchases, id: "iap-1",
+                attributes: .init(name: "Renamed", productID: "com.app.gold", inAppPurchaseType: .consumable)
+            ),
+            links: .init(this: "")
+        ))
+
+        let repo = SDKInAppPurchaseRepository(client: stub)
+        let result = try await repo.updateInAppPurchase(
+            iapId: "iap-1", referenceName: "Renamed", reviewNote: "Note", isFamilySharable: true
+        )
+
+        #expect(result.id == "iap-1")
+        #expect(result.referenceName == "Renamed")
+        #expect(result.appId == "")
+    }
+
+    // MARK: - deleteInAppPurchase
+
+    @Test func `deleteInAppPurchase performs void request`() async throws {
+        let stub = StubAPIClient()
+        let repo = SDKInAppPurchaseRepository(client: stub)
+        try await repo.deleteInAppPurchase(iapId: "iap-1")
+        #expect(stub.voidRequestCalled == true)
+    }
 }

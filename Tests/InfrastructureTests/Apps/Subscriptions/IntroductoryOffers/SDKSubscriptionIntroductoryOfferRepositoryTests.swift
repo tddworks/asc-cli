@@ -104,4 +104,11 @@ struct SDKSubscriptionIntroductoryOfferRepositoryTests {
         #expect(result.duration == .oneMonth)
         #expect(result.offerMode == .freeTrial)
     }
+
+    @Test func `deleteIntroductoryOffer performs void request`() async throws {
+        let stub = StubAPIClient()
+        let repo = SDKSubscriptionIntroductoryOfferRepository(client: stub)
+        try await repo.deleteIntroductoryOffer(offerId: "offer-1")
+        #expect(stub.voidRequestCalled == true)
+    }
 }

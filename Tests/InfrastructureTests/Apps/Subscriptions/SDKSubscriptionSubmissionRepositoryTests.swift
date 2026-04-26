@@ -22,4 +22,11 @@ struct SDKSubscriptionSubmissionRepositoryTests {
         #expect(result.id == "submit-1")
         #expect(result.subscriptionId == "sub-abc")
     }
+
+    @Test func `deleteSubmission performs void request via manual DELETE`() async throws {
+        let stub = StubAPIClient()
+        let repo = SDKSubscriptionSubmissionRepository(client: stub)
+        try await repo.deleteSubmission(submissionId: "sub-1")
+        #expect(stub.voidRequestCalled == true)
+    }
 }

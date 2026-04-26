@@ -110,4 +110,30 @@ struct SDKSubscriptionLocalizationRepositoryTests {
 
         #expect(result.description == nil)
     }
+
+    @Test func `updateLocalization returns updated record with empty subscriptionId`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(SubscriptionLocalizationResponse(
+            data: AppStoreConnect_Swift_SDK.SubscriptionLocalization(
+                type: .subscriptionLocalizations,
+                id: "loc-1",
+                attributes: .init(name: "Renamed", locale: "en-US", description: "New")
+            ),
+            links: .init(this: "")
+        ))
+
+        let repo = SDKSubscriptionLocalizationRepository(client: stub)
+        let result = try await repo.updateLocalization(localizationId: "loc-1", name: "Renamed", description: "New")
+
+        #expect(result.id == "loc-1")
+        #expect(result.name == "Renamed")
+        #expect(result.subscriptionId == "")
+    }
+
+    @Test func `deleteLocalization performs void request`() async throws {
+        let stub = StubAPIClient()
+        let repo = SDKSubscriptionLocalizationRepository(client: stub)
+        try await repo.deleteLocalization(localizationId: "loc-1")
+        #expect(stub.voidRequestCalled == true)
+    }
 }
