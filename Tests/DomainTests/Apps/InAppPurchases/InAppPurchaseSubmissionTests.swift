@@ -14,4 +14,9 @@ struct InAppPurchaseSubmissionTests {
         let submission = MockRepositoryFactory.makeInAppPurchaseSubmission(id: "sub-1", iapId: "iap-abc")
         #expect(submission.affordances["listLocalizations"] == "asc iap-localizations list --iap-id iap-abc")
     }
+
+    @Test func `submission affordances include unsubmit with submission id`() {
+        let submission = MockRepositoryFactory.makeInAppPurchaseSubmission(id: "sub-1", iapId: "iap-abc")
+        #expect(submission.affordances["unsubmit"] == "asc iap unsubmit --submission-id sub-1")
+    }
 }

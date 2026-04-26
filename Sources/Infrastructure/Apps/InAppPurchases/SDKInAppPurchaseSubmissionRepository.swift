@@ -18,4 +18,14 @@ public struct SDKInAppPurchaseSubmissionRepository: InAppPurchaseSubmissionRepos
         let response = try await client.request(APIEndpoint.v1.inAppPurchaseSubmissions.post(body))
         return Domain.InAppPurchaseSubmission(id: response.data.id, iapId: iapId)
     }
+
+    public func deleteSubmission(submissionId: String) async throws {
+        // Generated SDK lacks DELETE /v1/inAppPurchaseSubmissions/{id}; construct manually.
+        let request = Request<Void>(
+            path: "/v1/inAppPurchaseSubmissions/\(submissionId)",
+            method: "DELETE",
+            id: "inAppPurchaseSubmissions_deleteInstance"
+        )
+        try await client.request(request)
+    }
 }

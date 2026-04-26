@@ -7,6 +7,8 @@ struct SubscriptionLocalizationsCommand: AsyncParsableCommand {
         subcommands: [
             SubscriptionLocalizationsList.self,
             SubscriptionLocalizationsCreate.self,
+            SubscriptionLocalizationsUpdate.self,
+            SubscriptionLocalizationsDelete.self,
         ]
     )
 }

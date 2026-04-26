@@ -57,8 +57,28 @@ struct InAppPurchaseTests {
         #expect(loc.affordances["listSiblings"] == "asc iap-localizations list --iap-id iap-1")
     }
 
+    @Test func `iap localization affordances include update with localization id`() {
+        let loc = MockRepositoryFactory.makeInAppPurchaseLocalization(id: "loc-1", iapId: "iap-1")
+        #expect(loc.affordances["update"] == "asc iap-localizations update --localization-id loc-1 --name <name>")
+    }
+
+    @Test func `iap localization affordances include delete with localization id`() {
+        let loc = MockRepositoryFactory.makeInAppPurchaseLocalization(id: "loc-1", iapId: "iap-1")
+        #expect(loc.affordances["delete"] == "asc iap-localizations delete --localization-id loc-1")
+    }
+
     @Test func `iap affordances include listOfferCodes`() {
         let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
         #expect(iap.affordances["listOfferCodes"] == "asc iap-offer-codes list --iap-id iap-1")
+    }
+
+    @Test func `iap affordances include update with iap id`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.affordances["update"] == "asc iap update --iap-id iap-1 --reference-name <name>")
+    }
+
+    @Test func `iap affordances include delete with iap id`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.affordances["delete"] == "asc iap delete --iap-id iap-1")
     }
 }

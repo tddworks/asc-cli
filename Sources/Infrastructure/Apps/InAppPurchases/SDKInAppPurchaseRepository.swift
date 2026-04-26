@@ -41,6 +41,31 @@ public struct SDKInAppPurchaseRepository: InAppPurchaseRepository, @unchecked Se
         return mapInAppPurchase(response.data, appId: appId)
     }
 
+    public func updateInAppPurchase(
+        iapId: String,
+        referenceName: String?,
+        reviewNote: String?,
+        isFamilySharable: Bool?
+    ) async throws -> Domain.InAppPurchase {
+        let body = InAppPurchaseV2UpdateRequest(data: .init(
+            type: .inAppPurchases,
+            id: iapId,
+            attributes: .init(
+                name: referenceName,
+                reviewNote: reviewNote,
+                isFamilySharable: isFamilySharable
+            )
+        ))
+        let response = try await client.request(APIEndpoint.v2.inAppPurchases.id(iapId).patch(body))
+        // The PATCH response does not include the parent appId — preserve as empty;
+        // callers can refetch via listInAppPurchases if they need it.
+        return mapInAppPurchase(response.data, appId: "")
+    }
+
+    public func deleteInAppPurchase(iapId: String) async throws {
+        _ = try await client.request(APIEndpoint.v2.inAppPurchases.id(iapId).delete)
+    }
+
     private func mapInAppPurchase(_ sdk: AppStoreConnect_Swift_SDK.InAppPurchaseV2, appId: String) -> Domain.InAppPurchase {
         Domain.InAppPurchase(
             id: sdk.id,

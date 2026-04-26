@@ -31,6 +31,28 @@ public struct SDKInAppPurchaseLocalizationRepository: InAppPurchaseLocalizationR
         return mapLocalization(response.data, iapId: iapId)
     }
 
+    public func updateLocalization(
+        localizationId: String,
+        name: String?,
+        description: String?
+    ) async throws -> Domain.InAppPurchaseLocalization {
+        let body = InAppPurchaseLocalizationUpdateRequest(data: .init(
+            type: .inAppPurchaseLocalizations,
+            id: localizationId,
+            attributes: .init(name: name, description: description)
+        ))
+        let response = try await client.request(
+            APIEndpoint.v1.inAppPurchaseLocalizations.id(localizationId).patch(body)
+        )
+        // Parent IAP id is not returned on update — preserve from caller intent by leaving empty
+        // (callers that need the parent should refetch via listLocalizations)
+        return mapLocalization(response.data, iapId: "")
+    }
+
+    public func deleteLocalization(localizationId: String) async throws {
+        _ = try await client.request(APIEndpoint.v1.inAppPurchaseLocalizations.id(localizationId).delete)
+    }
+
     private func mapLocalization(
         _ sdk: AppStoreConnect_Swift_SDK.InAppPurchaseLocalization,
         iapId: String

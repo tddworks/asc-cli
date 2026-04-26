@@ -31,6 +31,26 @@ public struct SDKSubscriptionLocalizationRepository: SubscriptionLocalizationRep
         return mapLocalization(response.data, subscriptionId: subscriptionId)
     }
 
+    public func updateLocalization(
+        localizationId: String,
+        name: String?,
+        description: String?
+    ) async throws -> Domain.SubscriptionLocalization {
+        let body = SubscriptionLocalizationUpdateRequest(data: .init(
+            type: .subscriptionLocalizations,
+            id: localizationId,
+            attributes: .init(name: name, description: description)
+        ))
+        let response = try await client.request(
+            APIEndpoint.v1.subscriptionLocalizations.id(localizationId).patch(body)
+        )
+        return mapLocalization(response.data, subscriptionId: "")
+    }
+
+    public func deleteLocalization(localizationId: String) async throws {
+        _ = try await client.request(APIEndpoint.v1.subscriptionLocalizations.id(localizationId).delete)
+    }
+
     private func mapLocalization(
         _ sdk: AppStoreConnect_Swift_SDK.SubscriptionLocalization,
         subscriptionId: String

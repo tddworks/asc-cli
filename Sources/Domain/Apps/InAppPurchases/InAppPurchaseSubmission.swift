@@ -11,6 +11,9 @@ public struct InAppPurchaseSubmission: Sendable, Equatable, Identifiable, Codabl
 
 extension InAppPurchaseSubmission: AffordanceProviding {
     public var affordances: [String: String] {
-        ["listLocalizations": "asc iap-localizations list --iap-id \(iapId)"]
+        [
+            "listLocalizations": "asc iap-localizations list --iap-id \(iapId)",
+            "unsubmit": "asc iap unsubmit --submission-id \(id)",
+        ]
     }
 }

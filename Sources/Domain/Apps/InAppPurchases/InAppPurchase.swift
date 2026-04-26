@@ -83,10 +83,12 @@ extension InAppPurchase: AffordanceProviding {
     public var affordances: [String: String] {
         var cmds: [String: String] = [
             "createLocalization": "asc iap-localizations create --iap-id \(id) --locale en-US --name <name>",
+            "delete": "asc iap delete --iap-id \(id)",
             "getAvailability": "asc iap-availability get --iap-id \(id)",
             "listLocalizations": "asc iap-localizations list --iap-id \(id)",
             "listOfferCodes": "asc iap-offer-codes list --iap-id \(id)",
             "listPricePoints": "asc iap price-points list --iap-id \(id)",
+            "update": "asc iap update --iap-id \(id) --reference-name <name>",
         ]
         if state == .readyToSubmit {
             cmds["submit"] = "asc iap submit --iap-id \(id)"

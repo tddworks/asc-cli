@@ -9,4 +9,10 @@ public protocol InAppPurchaseLocalizationRepository: Sendable {
         name: String,
         description: String?
     ) async throws -> InAppPurchaseLocalization
+    func updateLocalization(
+        localizationId: String,
+        name: String?,
+        description: String?
+    ) async throws -> InAppPurchaseLocalization
+    func deleteLocalization(localizationId: String) async throws
 }

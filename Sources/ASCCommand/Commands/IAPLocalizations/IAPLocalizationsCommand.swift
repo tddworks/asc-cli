@@ -7,6 +7,8 @@ struct IAPLocalizationsCommand: AsyncParsableCommand {
         subcommands: [
             IAPLocalizationsList.self,
             IAPLocalizationsCreate.self,
+            IAPLocalizationsUpdate.self,
+            IAPLocalizationsDelete.self,
         ]
     )
 }

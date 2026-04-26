@@ -9,4 +9,10 @@ public protocol SubscriptionLocalizationRepository: Sendable {
         name: String,
         description: String?
     ) async throws -> SubscriptionLocalization
+    func updateLocalization(
+        localizationId: String,
+        name: String?,
+        description: String?
+    ) async throws -> SubscriptionLocalization
+    func deleteLocalization(localizationId: String) async throws
 }

@@ -69,7 +69,9 @@ extension InAppPurchaseLocalization: Presentable {
 extension InAppPurchaseLocalization: AffordanceProviding {
     public var affordances: [String: String] {
         [
+            "delete": "asc iap-localizations delete --localization-id \(id)",
             "listSiblings": "asc iap-localizations list --iap-id \(iapId)",
+            "update": "asc iap-localizations update --localization-id \(id) --name <name>",
         ]
     }
 }

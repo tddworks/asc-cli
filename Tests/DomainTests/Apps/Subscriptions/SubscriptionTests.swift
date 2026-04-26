@@ -53,6 +53,16 @@ struct SubscriptionTests {
         #expect(loc.affordances["listSiblings"] == "asc subscription-localizations list --subscription-id sub-1")
     }
 
+    @Test func `subscription localization affordances include update with localization id`() {
+        let loc = MockRepositoryFactory.makeSubscriptionLocalization(id: "loc-1", subscriptionId: "sub-1")
+        #expect(loc.affordances["update"] == "asc subscription-localizations update --localization-id loc-1 --name <name>")
+    }
+
+    @Test func `subscription localization affordances include delete with localization id`() {
+        let loc = MockRepositoryFactory.makeSubscriptionLocalization(id: "loc-1", subscriptionId: "sub-1")
+        #expect(loc.affordances["delete"] == "asc subscription-localizations delete --localization-id loc-1")
+    }
+
     @Test func `subscription period displayName`() {
         #expect(SubscriptionPeriod.oneWeek.displayName == "1 Week")
         #expect(SubscriptionPeriod.oneMonth.displayName == "1 Month")
