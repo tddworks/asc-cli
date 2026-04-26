@@ -41,7 +41,21 @@ extension InAppPurchaseOfferCodePrice: Presentable {
 }
 
 extension InAppPurchaseOfferCodePrice: AffordanceProviding {
-    public var affordances: [String: String] {
-        ["listPrices": "asc iap-offer-codes prices list --offer-code-id \(offerCodeId)"]
+    public var structuredAffordances: [Affordance] {
+        _ = RESTPathResolver._iapOfferCodePriceRoutes
+        return [
+            Affordance(key: "listPrices", command: "iap-offer-codes prices", action: "list", params: ["offer-code-id": offerCodeId]),
+        ]
     }
+}
+
+extension RESTPathResolver {
+    static let _iapOfferCodePriceRoutes: Void = {
+        registerRoute(
+            command: "iap-offer-codes prices",
+            parentParam: "offer-code-id",
+            parentSegment: "iap-offer-codes",
+            segment: "prices"
+        )
+    }()
 }
