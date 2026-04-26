@@ -117,6 +117,7 @@ extension Subscription: AffordanceProviding {
             "createPromotionalOffer": "asc subscription-promotional-offers create --subscription-id \(id) --name <name> --offer-code <code> --duration ONE_MONTH --mode PAY_AS_YOU_GO --periods 1",
             "delete": "asc subscriptions delete --subscription-id \(id)",
             "getAvailability": "asc subscription-availability get --subscription-id \(id)",
+            "getReviewScreenshot": "asc subscription-review-screenshot get --subscription-id \(id)",
             "listIntroductoryOffers": "asc subscription-offers list --subscription-id \(id)",
             "listLocalizations": "asc subscription-localizations list --subscription-id \(id)",
             "listOfferCodes": "asc subscription-offer-codes list --subscription-id \(id)",
