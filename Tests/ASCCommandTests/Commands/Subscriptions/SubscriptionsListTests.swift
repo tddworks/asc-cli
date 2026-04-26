@@ -38,6 +38,7 @@ struct SubscriptionsListTests {
                 "listLocalizations" : "asc subscription-localizations list --subscription-id sub-1",
                 "listOfferCodes" : "asc subscription-offer-codes list --subscription-id sub-1",
                 "listPromotionalOffers" : "asc subscription-promotional-offers list --subscription-id sub-1",
+                "listWinBackOffers" : "asc win-back-offers list --subscription-id sub-1",
                 "update" : "asc subscriptions update --subscription-id sub-1 --name <name>"
               },
               "groupId" : "grp-1",
