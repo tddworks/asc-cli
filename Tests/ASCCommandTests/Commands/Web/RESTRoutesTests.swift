@@ -438,7 +438,11 @@ struct RESTRoutesTests {
         let normalized = output.replacingOccurrences(of: "\\/", with: "/")
 
         #expect(normalized.contains("\"_links\""))
-        #expect(normalized.contains("/api/v1/iap/iap-7/review-screenshot"))
+        // The singleton `get` resolves through the resource-by-id path with iap-id as the
+        // id token (consistent with `app-availability get` behavior).
+        #expect(normalized.contains("/api/v1/iap-review-screenshot/iap-7"))
+        // Delete still uses the screenshot's own id.
+        #expect(normalized.contains("/api/v1/iap-review-screenshot/rs-1"))
     }
 
     @Test func `IAP images REST returns nested path under iap`() async throws {
@@ -470,7 +474,10 @@ struct RESTRoutesTests {
         let normalized = output.replacingOccurrences(of: "\\/", with: "/")
 
         #expect(normalized.contains("\"_links\""))
-        #expect(normalized.contains("/api/v1/subscriptions/sub-7/review-screenshot"))
+        // The singleton `get` resolves through the resource-by-id path with subscription-id as the id token.
+        #expect(normalized.contains("/api/v1/subscription-review-screenshot/sub-7"))
+        // Delete uses the screenshot's own id.
+        #expect(normalized.contains("/api/v1/subscription-review-screenshot/rs-1"))
     }
 
     @Test func `promoted purchases REST suppresses update and delete links while in review`() async throws {
