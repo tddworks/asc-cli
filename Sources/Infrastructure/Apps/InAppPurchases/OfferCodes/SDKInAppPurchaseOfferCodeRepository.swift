@@ -55,6 +55,14 @@ public struct SDKInAppPurchaseOfferCodeRepository: InAppPurchaseOfferCodeReposit
         return mapOfferCode(response.data, iapId: "")
     }
 
+    // MARK: - Prices
+
+    public func listPrices(offerCodeId: String) async throws -> [Domain.InAppPurchaseOfferCodePrice] {
+        let request = APIEndpoint.v1.inAppPurchaseOfferCodes.id(offerCodeId).prices.get()
+        let response = try await client.request(request)
+        return response.data.map { mapPrice($0, offerCodeId: offerCodeId) }
+    }
+
     // MARK: - Custom Codes
 
     public func listCustomCodes(offerCodeId: String) async throws -> [Domain.InAppPurchaseOfferCodeCustomCode] {
@@ -139,6 +147,11 @@ public struct SDKInAppPurchaseOfferCodeRepository: InAppPurchaseOfferCodeReposit
         return mapOneTimeUseCode(response.data, offerCodeId: "")
     }
 
+    public func fetchOneTimeUseCodeValues(oneTimeCodeId: String) async throws -> String {
+        let request = APIEndpoint.v1.inAppPurchaseOfferCodeOneTimeUseCodes.id(oneTimeCodeId).values.get
+        return try await client.request(request)
+    }
+
     // MARK: - Mappers
 
     private func mapOfferCode(
@@ -173,6 +186,18 @@ public struct SDKInAppPurchaseOfferCodeRepository: InAppPurchaseOfferCodeReposit
             createdDate: createdDateString,
             expirationDate: sdk.attributes?.expirationDate,
             isActive: sdk.attributes?.isActive ?? false
+        )
+    }
+
+    private func mapPrice(
+        _ sdk: AppStoreConnect_Swift_SDK.InAppPurchaseOfferPrice,
+        offerCodeId: String
+    ) -> Domain.InAppPurchaseOfferCodePrice {
+        Domain.InAppPurchaseOfferCodePrice(
+            id: sdk.id,
+            offerCodeId: offerCodeId,
+            territory: sdk.relationships?.territory?.data?.id,
+            pricePointId: sdk.relationships?.pricePoint?.data?.id
         )
     }
 

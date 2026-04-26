@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Offer code prices + one-time code values** — completes the offer-code feature so an agent can read back per-territory pricing and download distributable redemption codes:
+  - `asc iap-offer-codes prices list --offer-code-id <id>` and `asc subscription-offer-codes prices list --offer-code-id <id>` — returns each price with `territory` and `pricePointId` (IAP) or `subscriptionPricePointId` (Subscription). Backed by `GET /v1/inAppPurchaseOfferCodes/{id}/prices` and `GET /v1/subscriptionOfferCodes/{id}/prices`.
+  - `asc iap-offer-code-one-time-codes values --one-time-code-id <id>` and `asc subscription-offer-code-one-time-codes values --one-time-code-id <id>` — fetches the raw CSV body of one-time-use redemption codes for distribution. Backed by `GET /v1/.../oneTimeUseCodes/{id}/values` (`Request<String>`).
+  - Two new domain types: `InAppPurchaseOfferCodePrice { id, offerCodeId, territory?, pricePointId? }` and `SubscriptionOfferCodePrice { id, offerCodeId, territory?, subscriptionPricePointId? }`. Each advertises a `listPrices` affordance that points back at its parent offer code.
+  - Repository protocols extended with `listPrices(offerCodeId:)` and `fetchOneTimeUseCodeValues(oneTimeCodeId:) -> String`; SDK adapters implement them on top of the appstoreconnect-swift-sdk.
+- **Subscription pricing parity** — subscriptions now match IAP for browsing tiers and committing per-territory prices. Subscriptions don't have a base territory (Apple auto-equalizes), so the model has `proceedsYear2` and `prices set` is per-territory rather than per-base. New CLI commands (mirrored under `asc subscriptions`):
+  - `asc subscriptions price-points list --subscription-id <id> [--territory <code>]` — list `SubscriptionPricePoint`s with optional territory filter. Each result advertises `setPrice` only when a territory is attached.
+  - `asc subscriptions prices set --subscription-id <id> --territory <code> --price-point-id <id> [--start-date YYYY-MM-DD] [--preserve-current-price]` — POST `/v1/subscriptionPrices` to commit a price.
+  - New domain models: `SubscriptionPricePoint` (id, subscriptionId, territory, customerPrice, proceeds, **proceedsYear2**) and `SubscriptionPrice` (id, subscriptionId).
+  - New `SubscriptionPriceRepository` `@Mockable` protocol with `listPricePoints` + `setPrice`; SDK adapter wires `GET /v1/subscriptions/{id}/pricePoints` and `POST /v1/subscriptionPrices`.
 - **IAP & Subscription lifecycle parity** — symmetric update/delete/unsubmit across the in-app-purchase and subscription aggregates so an agent can drive the full lifecycle, not just create-then-submit. New CLI commands:
   - `asc iap-localizations update --localization-id <id> [--name <name>] [--description <desc>]` and `asc iap-localizations delete --localization-id <id>`.
   - `asc subscription-localizations update --localization-id <id> [--name <name>] [--description <desc>]` and `asc subscription-localizations delete --localization-id <id>`.

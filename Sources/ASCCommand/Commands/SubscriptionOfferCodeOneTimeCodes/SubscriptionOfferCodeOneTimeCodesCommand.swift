@@ -8,6 +8,7 @@ struct SubscriptionOfferCodeOneTimeCodesCommand: AsyncParsableCommand {
             SubscriptionOfferCodeOneTimeCodesList.self,
             SubscriptionOfferCodeOneTimeCodesCreate.self,
             SubscriptionOfferCodeOneTimeCodesUpdate.self,
+            SubscriptionOfferCodeOneTimeCodesValues.self,
         ]
     )
 }

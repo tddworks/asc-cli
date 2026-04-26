@@ -151,6 +151,31 @@ public struct SDKSubscriptionOfferCodeRepository: SubscriptionOfferCodeRepositor
         return mapOneTimeUseCode(response.data, offerCodeId: "")
     }
 
+    public func fetchOneTimeUseCodeValues(oneTimeCodeId: String) async throws -> String {
+        let request = APIEndpoint.v1.subscriptionOfferCodeOneTimeUseCodes.id(oneTimeCodeId).values.get
+        return try await client.request(request)
+    }
+
+    // MARK: - Prices
+
+    public func listPrices(offerCodeId: String) async throws -> [Domain.SubscriptionOfferCodePrice] {
+        let request = APIEndpoint.v1.subscriptionOfferCodes.id(offerCodeId).prices.get()
+        let response = try await client.request(request)
+        return response.data.map { mapPrice($0, offerCodeId: offerCodeId) }
+    }
+
+    private func mapPrice(
+        _ sdk: AppStoreConnect_Swift_SDK.SubscriptionOfferCodePrice,
+        offerCodeId: String
+    ) -> Domain.SubscriptionOfferCodePrice {
+        Domain.SubscriptionOfferCodePrice(
+            id: sdk.id,
+            offerCodeId: offerCodeId,
+            territory: sdk.relationships?.territory?.data?.id,
+            subscriptionPricePointId: sdk.relationships?.subscriptionPricePoint?.data?.id
+        )
+    }
+
     // MARK: - Mappers
 
     private func mapOfferCode(

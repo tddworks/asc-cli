@@ -8,6 +8,7 @@ struct IAPOfferCodesCommand: AsyncParsableCommand {
             IAPOfferCodesList.self,
             IAPOfferCodesCreate.self,
             IAPOfferCodesUpdate.self,
+            IAPOfferCodesPricesCommand.self,
         ]
     )
 }
