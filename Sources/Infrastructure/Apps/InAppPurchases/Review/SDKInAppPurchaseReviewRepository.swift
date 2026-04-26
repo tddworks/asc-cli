@@ -82,7 +82,7 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
             type: .inAppPurchaseImages,
             attributes: .init(fileSize: fileData.count, fileName: fileName),
             relationships: .init(
-                inAppPurchaseV2: .init(data: .init(type: .inAppPurchases, id: iapId))
+                inAppPurchase: .init(data: .init(type: .inAppPurchases, id: iapId))
             )
         ))
         let reserved = try await client.request(APIEndpoint.v1.inAppPurchaseImages.post(reserveBody))
