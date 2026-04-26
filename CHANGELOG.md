@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **IAP & Subscription lifecycle parity** — symmetric update/delete/unsubmit across the in-app-purchase and subscription aggregates so an agent can drive the full lifecycle, not just create-then-submit. New CLI commands:
+  - `asc iap-localizations update --localization-id <id> [--name <name>] [--description <desc>]` and `asc iap-localizations delete --localization-id <id>`.
+  - `asc subscription-localizations update --localization-id <id> [--name <name>] [--description <desc>]` and `asc subscription-localizations delete --localization-id <id>`.
+  - `asc iap update --iap-id <id> [--reference-name <name>] [--review-note <note>] [--family-sharable | --not-family-sharable]`, `asc iap delete --iap-id <id>`, and `asc iap unsubmit --submission-id <id>` (the SDK lacks a generated DELETE, so it goes through a manual `Request<Void>`).
+  - `asc subscriptions update --subscription-id <id> [--name <name>] [--family-sharable | --not-family-sharable] [--group-level <n>] [--review-note <note>]`, `asc subscriptions delete --subscription-id <id>`, and `asc subscriptions unsubmit --submission-id <id>` (manual DELETE same as IAP).
+  - `asc subscription-groups update --group-id <id> --reference-name <name>` and `asc subscription-groups delete --group-id <id>`.
+  - `asc subscription-offers delete --offer-id <id>` to drop an introductory offer.
+- Affordance updates so the new commands surface in the JSON output of every list/create/submit response: `InAppPurchase` now advertises `update`/`delete`, `Subscription` advertises `update`/`delete`, `SubscriptionGroup` advertises `update`/`delete`, both localization models advertise `update`/`delete`, both submission models advertise `unsubmit`, and `SubscriptionIntroductoryOffer` advertises `delete`.
+
 ---
 
 ## [0.17.2] - 2026-04-25
