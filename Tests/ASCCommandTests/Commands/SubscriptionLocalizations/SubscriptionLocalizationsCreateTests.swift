@@ -31,7 +31,9 @@ struct SubscriptionLocalizationsCreateTests {
           "data" : [
             {
               "affordances" : {
-                "listSiblings" : "asc subscription-localizations list --subscription-id sub-1"
+                "delete" : "asc subscription-localizations delete --localization-id loc-new",
+                "listSiblings" : "asc subscription-localizations list --subscription-id sub-1",
+                "update" : "asc subscription-localizations update --localization-id loc-new --name <name>"
               },
               "description" : "Full access to all features",
               "id" : "loc-new",
@@ -67,7 +69,9 @@ struct SubscriptionLocalizationsCreateTests {
           "data" : [
             {
               "affordances" : {
-                "listSiblings" : "asc subscription-localizations list --subscription-id sub-1"
+                "delete" : "asc subscription-localizations delete --localization-id loc-new",
+                "listSiblings" : "asc subscription-localizations list --subscription-id sub-1",
+                "update" : "asc subscription-localizations update --localization-id loc-new --name <name>"
               },
               "id" : "loc-new",
               "locale" : "zh-Hans",

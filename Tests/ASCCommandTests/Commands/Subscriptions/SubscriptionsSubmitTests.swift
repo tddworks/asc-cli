@@ -19,7 +19,8 @@ struct SubscriptionsSubmitTests {
           "data" : [
             {
               "affordances" : {
-                "listLocalizations" : "asc subscription-localizations list --subscription-id sub-1"
+                "listLocalizations" : "asc subscription-localizations list --subscription-id sub-1",
+                "unsubmit" : "asc subscriptions unsubmit --submission-id submit-1"
               },
               "id" : "submit-1",
               "subscriptionId" : "sub-1"

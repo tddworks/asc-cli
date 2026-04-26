@@ -34,6 +34,7 @@ struct SubscriptionOffersCreateTests {
           "data" : [
             {
               "affordances" : {
+                "delete" : "asc subscription-offers delete --offer-id offer-new",
                 "listOffers" : "asc subscription-offers list --subscription-id sub-1"
               },
               "duration" : "ONE_MONTH",

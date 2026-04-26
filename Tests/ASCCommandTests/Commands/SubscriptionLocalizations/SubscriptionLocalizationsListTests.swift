@@ -27,7 +27,9 @@ struct SubscriptionLocalizationsListTests {
           "data" : [
             {
               "affordances" : {
-                "listSiblings" : "asc subscription-localizations list --subscription-id sub-1"
+                "delete" : "asc subscription-localizations delete --localization-id sub-loc-1",
+                "listSiblings" : "asc subscription-localizations list --subscription-id sub-1",
+                "update" : "asc subscription-localizations update --localization-id sub-loc-1 --name <name>"
               },
               "id" : "sub-loc-1",
               "locale" : "en-US",

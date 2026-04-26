@@ -22,7 +22,9 @@ struct SubscriptionGroupsListTests {
             {
               "affordances" : {
                 "createSubscription" : "asc subscriptions create --group-id grp-1 --name <name> --product-id <id> --period ONE_MONTH",
-                "listSubscriptions" : "asc subscriptions list --group-id grp-1"
+                "delete" : "asc subscription-groups delete --group-id grp-1",
+                "listSubscriptions" : "asc subscriptions list --group-id grp-1",
+                "update" : "asc subscription-groups update --group-id grp-1 --reference-name <name>"
               },
               "appId" : "app-1",
               "id" : "grp-1",

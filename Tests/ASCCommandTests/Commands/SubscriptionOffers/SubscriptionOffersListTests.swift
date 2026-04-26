@@ -27,6 +27,7 @@ struct SubscriptionOffersListTests {
           "data" : [
             {
               "affordances" : {
+                "delete" : "asc subscription-offers delete --offer-id offer-1",
                 "listOffers" : "asc subscription-offers list --subscription-id sub-1"
               },
               "duration" : "ONE_MONTH",

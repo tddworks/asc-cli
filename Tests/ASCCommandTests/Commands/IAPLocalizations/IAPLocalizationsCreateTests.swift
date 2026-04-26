@@ -31,7 +31,9 @@ struct IAPLocalizationsCreateTests {
           "data" : [
             {
               "affordances" : {
-                "listSiblings" : "asc iap-localizations list --iap-id iap-1"
+                "delete" : "asc iap-localizations delete --localization-id loc-new",
+                "listSiblings" : "asc iap-localizations list --iap-id iap-1",
+                "update" : "asc iap-localizations update --localization-id loc-new --name <name>"
               },
               "description" : "In-game currency",
               "iapId" : "iap-1",
@@ -67,7 +69,9 @@ struct IAPLocalizationsCreateTests {
           "data" : [
             {
               "affordances" : {
-                "listSiblings" : "asc iap-localizations list --iap-id iap-1"
+                "delete" : "asc iap-localizations delete --localization-id loc-new",
+                "listSiblings" : "asc iap-localizations list --iap-id iap-1",
+                "update" : "asc iap-localizations update --localization-id loc-new --name <name>"
               },
               "iapId" : "iap-1",
               "id" : "loc-new",
