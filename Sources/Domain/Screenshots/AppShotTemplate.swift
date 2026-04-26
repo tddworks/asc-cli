@@ -57,7 +57,7 @@ public struct AppShotTemplate: Sendable, Identifiable {
         var hasher = Hasher()
         hasher.combine(name)
         hasher.combine(palette.background)
-        hasher.combine(screenLayout.headline?.preview ?? "")
+        hasher.combine(screenLayout.headline.preview ?? "")
         hasher.combine(screenLayout.deviceCount)
         return hasher.finalize()
     }
