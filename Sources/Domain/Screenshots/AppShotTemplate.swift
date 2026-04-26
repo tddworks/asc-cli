@@ -40,13 +40,26 @@ public struct AppShotTemplate: Sendable, Identifiable {
     }
 
     /// Self-contained HTML preview — renders with TextSlot.preview placeholders.
-    /// Cached after first computation — templates are immutable.
+    /// Cached after first computation. The cache key is content-aware (id + a
+    /// fingerprint of the rendering inputs) so two templates that share an id
+    /// but differ in palette or headline preview text don't collide.
     public var previewHTML: String {
-        GalleryHTMLRenderer.cachedPreview(id: "tmpl-\(id)") {
+        GalleryHTMLRenderer.cachedPreview(id: "tmpl-\(id)-\(previewCacheFingerprint)") {
             let shot = AppShot(screenshot: "", type: .feature)
             let html = GalleryHTMLRenderer.renderScreen(shot, screenLayout: screenLayout, palette: palette)
             return GalleryHTMLRenderer.wrapPage(html)
         }
+    }
+
+    /// A small fingerprint of the inputs that materially affect `previewHTML`.
+    /// Stable for the lifetime of a process (sufficient for the in-memory cache).
+    private var previewCacheFingerprint: Int {
+        var hasher = Hasher()
+        hasher.combine(name)
+        hasher.combine(palette.background)
+        hasher.combine(screenLayout.headline?.preview ?? "")
+        hasher.combine(screenLayout.deviceCount)
+        return hasher.finalize()
     }
 
     /// Apply with user content — returns a full HTML page.
