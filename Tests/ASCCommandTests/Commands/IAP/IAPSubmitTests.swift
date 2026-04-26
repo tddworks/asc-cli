@@ -19,7 +19,8 @@ struct IAPSubmitTests {
           "data" : [
             {
               "affordances" : {
-                "listLocalizations" : "asc iap-localizations list --iap-id iap-1"
+                "listLocalizations" : "asc iap-localizations list --iap-id iap-1",
+                "unsubmit" : "asc iap unsubmit --submission-id sub-1"
               },
               "iapId" : "iap-1",
               "id" : "sub-1"
