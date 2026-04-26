@@ -11,6 +11,9 @@ public struct InAppPurchaseReviewScreenshot: Sendable, Equatable, Identifiable {
         case uploadComplete = "UPLOAD_COMPLETE"
         case complete = "COMPLETE"
         case failed = "FAILED"
+
+        public var isComplete: Bool { self == .uploadComplete || self == .complete }
+        public var hasFailed: Bool { self == .failed }
     }
 
     public init(id: String, iapId: String, fileName: String, fileSize: Int, assetState: AssetState? = nil) {
@@ -53,10 +56,18 @@ extension InAppPurchaseReviewScreenshot: Presentable {
 
 extension InAppPurchaseReviewScreenshot: AffordanceProviding {
     public var affordances: [String: String] {
-        [
-            "delete": "asc iap-review-screenshot delete --screenshot-id \(id)",
+        var cmds = [
             "get": "asc iap-review-screenshot get --iap-id \(iapId)",
         ]
+        // Delete is offered once the asset is reachable (upload finished or failed).
+        // While `awaitingUpload`, the slot is reserved but the asset isn't there
+        // yet — re-uploading is the natural recovery path.
+        if assetState?.isComplete ?? false || assetState?.hasFailed ?? false {
+            cmds["delete"] = "asc iap-review-screenshot delete --screenshot-id \(id)"
+        }
+        // Re-uploading is always legal — replaces the existing slot.
+        cmds["upload"] = "asc iap-review-screenshot upload --iap-id \(iapId) --file <path>"
+        return cmds
     }
 }
 
@@ -121,9 +132,14 @@ extension InAppPurchasePromotionalImage: Presentable {
 
 extension InAppPurchasePromotionalImage: AffordanceProviding {
     public var affordances: [String: String] {
-        [
-            "delete": "asc iap-images delete --image-id \(id)",
+        var cmds = [
             "listSiblings": "asc iap-images list --iap-id \(iapId)",
         ]
+        // Delete is suppressed while App Review is looking at the image — submitting
+        // a delete during review is a 409 conflict in ASC.
+        if !(state?.isPendingReview ?? false) {
+            cmds["delete"] = "asc iap-images delete --image-id \(id)"
+        }
+        return cmds
     }
 }

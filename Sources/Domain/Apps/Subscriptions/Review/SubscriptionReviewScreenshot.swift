@@ -11,6 +11,9 @@ public struct SubscriptionReviewScreenshot: Sendable, Equatable, Identifiable {
         case uploadComplete = "UPLOAD_COMPLETE"
         case complete = "COMPLETE"
         case failed = "FAILED"
+
+        public var isComplete: Bool { self == .uploadComplete || self == .complete }
+        public var hasFailed: Bool { self == .failed }
     }
 
     public init(id: String, subscriptionId: String, fileName: String, fileSize: Int, assetState: AssetState? = nil) {
@@ -53,9 +56,13 @@ extension SubscriptionReviewScreenshot: Presentable {
 
 extension SubscriptionReviewScreenshot: AffordanceProviding {
     public var affordances: [String: String] {
-        [
-            "delete": "asc subscription-review-screenshot delete --screenshot-id \(id)",
+        var cmds = [
             "get": "asc subscription-review-screenshot get --subscription-id \(subscriptionId)",
         ]
+        if assetState?.isComplete ?? false || assetState?.hasFailed ?? false {
+            cmds["delete"] = "asc subscription-review-screenshot delete --screenshot-id \(id)"
+        }
+        cmds["upload"] = "asc subscription-review-screenshot upload --subscription-id \(subscriptionId) --file <path>"
+        return cmds
     }
 }

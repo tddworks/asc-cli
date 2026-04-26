@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **State-aware affordances on the new aggregates** — affordances no longer suggest illegal next actions:
+  - `PromotedPurchase` exposes `state.isLocked` (true while `WAITING_FOR_REVIEW` / `IN_REVIEW`); `update` and `delete` are suppressed while locked, so an agent following affordances won't issue a 409 against App Review.
+  - `InAppPurchasePromotionalImage` suppresses `delete` while `state.isPendingReview` is true.
+  - `InAppPurchaseReviewScreenshot.AssetState` and `SubscriptionReviewScreenshot.AssetState` gain `isComplete` / `hasFailed` semantic booleans. `delete` is offered once the asset is reachable (`uploadComplete` / `complete` / `failed`); while `awaitingUpload`, only `upload` is offered as the recovery path.
 - **IAP & Subscription review screenshots + IAP promotional images** — closes the upload-heavy feature parity gap. New CLI commands implement the standard ASC reserve → upload chunks → commit-with-MD5 protocol on top of `URLSession`:
   - `asc iap-review-screenshot get|upload|delete` — single review screenshot per IAP. `get` returns an empty `data: []` array when no screenshot is present, mirroring CAEOAS conventions.
   - `asc iap-images list|upload|delete` — 1024×1024 promotional images for an IAP, with state semantic booleans (`isApproved`, `isPendingReview`).
@@ -16,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `InAppPurchase` now advertises `getReviewScreenshot` + `listImages`; `Subscription` advertises `getReviewScreenshot`.
 - **Promoted purchases** — App Store product page promoted slot CRUD. New CLI commands under `asc promoted-purchases`:
   - `list --app-id <id>`, `create --app-id <id> (--iap-id <id> | --subscription-id <id>) [--visible|--hidden] [--enabled|--disabled]`, `update --promoted-id <id> ...`, `delete --promoted-id <id>`.
-  - New `PromotedPurchase` domain type carrying `appId` + either `inAppPurchaseId` or `subscriptionId` (mutually exclusive at create time, validated in the command). State enum `PromotedPurchaseState` with raw values matching ASC.
+  - New `PromotedPurchase` domain type carrying `appId` + either `inAppPurchaseId` or `subscriptionId` (mutually exclusive at create time, validated in the command). State enum `PromotedPurchaseState` with raw values matching ASC plus `isLocked` / `isApproved` semantic booleans.
   - Backed by `GET/POST /v1/apps/{id}/promotedPurchases` and `PATCH/DELETE /v1/promotedPurchases/{id}`.
 - **Win-back offers** — full CRUD with eligibility rules, priority, promotion intent, and per-territory pricing. New CLI command tree under `asc win-back-offers`:
   - `list --subscription-id <id>`, `delete --offer-id <id>`, `update --offer-id <id> [--priority HIGH|NORMAL] [--start-date ...] [--end-date ...] [--paid-months n] [--since-min n] [--since-max n] [--wait-months n] [--promotion-intent ...]`, `prices list --offer-id <id>`.

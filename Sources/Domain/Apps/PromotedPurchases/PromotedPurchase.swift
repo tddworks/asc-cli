@@ -35,6 +35,10 @@ public enum PromotedPurchaseState: String, Sendable, Codable, Equatable {
     case waitingForReview = "WAITING_FOR_REVIEW"
     case inReview = "IN_REVIEW"
     case developerActionNeeded = "DEVELOPER_ACTION_NEEDED"
+
+    /// True when the slot is locked by App Review and can't be updated or deleted by the developer.
+    public var isLocked: Bool { self == .waitingForReview || self == .inReview }
+    public var isApproved: Bool { self == .approved }
 }
 
 extension PromotedPurchase: Codable {
@@ -77,10 +81,15 @@ extension PromotedPurchase: Presentable {
 
 extension PromotedPurchase: AffordanceProviding {
     public var affordances: [String: String] {
-        [
-            "delete": "asc promoted-purchases delete --promoted-id \(id)",
+        var cmds = [
             "listSiblings": "asc promoted-purchases list --app-id \(appId)",
-            "update": "asc promoted-purchases update --promoted-id \(id)",
         ]
+        // Update + delete are gated by review state — the developer cannot mutate
+        // a slot while App Review is examining it.
+        if !(state?.isLocked ?? false) {
+            cmds["delete"] = "asc promoted-purchases delete --promoted-id \(id)"
+            cmds["update"] = "asc promoted-purchases update --promoted-id \(id)"
+        }
+        return cmds
     }
 }
