@@ -14,6 +14,8 @@ public protocol SubscriptionOfferCodeRepository: Sendable {
     ) async throws -> SubscriptionOfferCode
     func updateOfferCode(offerCodeId: String, isActive: Bool) async throws -> SubscriptionOfferCode
 
+    func listPrices(offerCodeId: String) async throws -> [SubscriptionOfferCodePrice]
+
     func listCustomCodes(offerCodeId: String) async throws -> [SubscriptionOfferCodeCustomCode]
     func createCustomCode(
         offerCodeId: String,
@@ -30,4 +32,5 @@ public protocol SubscriptionOfferCodeRepository: Sendable {
         expirationDate: String
     ) async throws -> SubscriptionOfferCodeOneTimeUseCode
     func updateOneTimeUseCode(oneTimeCodeId: String, isActive: Bool) async throws -> SubscriptionOfferCodeOneTimeUseCode
+    func fetchOneTimeUseCodeValues(oneTimeCodeId: String) async throws -> String
 }

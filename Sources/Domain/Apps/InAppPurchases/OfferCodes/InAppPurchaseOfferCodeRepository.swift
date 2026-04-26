@@ -10,6 +10,8 @@ public protocol InAppPurchaseOfferCodeRepository: Sendable {
     ) async throws -> InAppPurchaseOfferCode
     func updateOfferCode(offerCodeId: String, isActive: Bool) async throws -> InAppPurchaseOfferCode
 
+    func listPrices(offerCodeId: String) async throws -> [InAppPurchaseOfferCodePrice]
+
     func listCustomCodes(offerCodeId: String) async throws -> [InAppPurchaseOfferCodeCustomCode]
     func createCustomCode(
         offerCodeId: String,
@@ -26,4 +28,5 @@ public protocol InAppPurchaseOfferCodeRepository: Sendable {
         expirationDate: String
     ) async throws -> InAppPurchaseOfferCodeOneTimeUseCode
     func updateOneTimeUseCode(oneTimeCodeId: String, isActive: Bool) async throws -> InAppPurchaseOfferCodeOneTimeUseCode
+    func fetchOneTimeUseCodeValues(oneTimeCodeId: String) async throws -> String
 }
