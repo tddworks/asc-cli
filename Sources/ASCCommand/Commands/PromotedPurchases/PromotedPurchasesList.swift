@@ -20,9 +20,12 @@ struct PromotedPurchasesList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any PromotedPurchaseRepository) async throws -> String {
+    func execute(
+        repo: any PromotedPurchaseRepository,
+        affordanceMode: AffordanceMode = .cli
+    ) async throws -> String {
         let response = try await repo.listPromotedPurchases(appId: appId, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(response.data)
+        return try formatter.formatAgentItems(response.data, affordanceMode: affordanceMode)
     }
 }

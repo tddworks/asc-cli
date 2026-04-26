@@ -80,16 +80,25 @@ extension PromotedPurchase: Presentable {
 }
 
 extension PromotedPurchase: AffordanceProviding {
-    public var affordances: [String: String] {
-        var cmds = [
-            "listSiblings": "asc promoted-purchases list --app-id \(appId)",
+    public var structuredAffordances: [Affordance] {
+        var items: [Affordance] = [
+            Affordance(key: "listSiblings", command: "promoted-purchases", action: "list", params: ["app-id": appId]),
         ]
         // Update + delete are gated by review state — the developer cannot mutate
         // a slot while App Review is examining it.
         if !(state?.isLocked ?? false) {
-            cmds["delete"] = "asc promoted-purchases delete --promoted-id \(id)"
-            cmds["update"] = "asc promoted-purchases update --promoted-id \(id)"
+            items.append(Affordance(key: "delete", command: "promoted-purchases", action: "delete", params: ["promoted-id": id]))
+            items.append(Affordance(key: "update", command: "promoted-purchases", action: "update", params: ["promoted-id": id]))
         }
-        return cmds
+        // Touch the registration constant so the route is installed before any model is encoded.
+        _ = RESTPathResolver._promotedPurchasesRoutes
+        return items
     }
+}
+
+// Register REST route: GET /api/v1/apps/{appId}/promoted-purchases
+extension RESTPathResolver {
+    static let _promotedPurchasesRoutes: Void = {
+        registerRoute(command: "promoted-purchases", parentParam: "app-id", parentSegment: "apps", segment: "promoted-purchases")
+    }()
 }
