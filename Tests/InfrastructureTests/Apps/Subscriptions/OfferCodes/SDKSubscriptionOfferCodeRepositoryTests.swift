@@ -319,4 +319,35 @@ struct SDKSubscriptionOfferCodeRepositoryTests {
         #expect(result.isActive == false)
         #expect(result.offerCodeId == "")
     }
+
+    @Test func `listPrices injects offerCodeId and maps territory + subscriptionPricePoint`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(SubscriptionOfferCodePricesResponse(
+            data: [
+                AppStoreConnect_Swift_SDK.SubscriptionOfferCodePrice(
+                    type: .subscriptionOfferCodePrices, id: "p-1",
+                    relationships: .init(
+                        territory: .init(data: .init(type: .territories, id: "USA")),
+                        subscriptionPricePoint: .init(data: .init(type: .subscriptionPricePoints, id: "spp-9"))
+                    )
+                ),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKSubscriptionOfferCodeRepository(client: stub)
+        let result = try await repo.listPrices(offerCodeId: "oc-77")
+
+        #expect(result[0].offerCodeId == "oc-77")
+        #expect(result[0].territory == "USA")
+        #expect(result[0].subscriptionPricePointId == "spp-9")
+    }
+
+    @Test func `fetchOneTimeUseCodeValues returns CSV string from SDK`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn("ABC\nDEF\n")
+        let repo = SDKSubscriptionOfferCodeRepository(client: stub)
+        let result = try await repo.fetchOneTimeUseCodeValues(oneTimeCodeId: "otc-1")
+        #expect(result == "ABC\nDEF\n")
+    }
 }
