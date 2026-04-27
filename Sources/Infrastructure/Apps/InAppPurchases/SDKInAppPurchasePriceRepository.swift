@@ -51,7 +51,7 @@ public struct SDKInAppPurchasePriceRepository: InAppPurchasePriceRepository, @un
             }
         }
 
-        let territoryPrices: [Domain.TerritoryPrice] = manualResponse.data.compactMap { price in
+        let manualPrices: [Domain.TerritoryPrice] = manualResponse.data.compactMap { price in
             guard
                 let territoryId = price.relationships?.territory?.data?.id,
                 let territory = territoriesById[territoryId],
@@ -63,12 +63,67 @@ public struct SDKInAppPurchasePriceRepository: InAppPurchasePriceRepository, @un
             return Domain.TerritoryPrice(territory: territory, customerPrice: customerPrice, proceeds: proceeds)
         }
 
+        // Step 3: equalizations — fetch the full ~175-territory list using the manual price's
+        // price point. If there are no manual prices we have nothing to equalize from.
+        let manualPricePointId = manualResponse.data.first?.relationships?.inAppPurchasePricePoint?.data?.id
+        var equalizedPrices: [Domain.TerritoryPrice] = []
+        if let pricePointId = manualPricePointId {
+            equalizedPrices = (try? await fetchEqualizedTerritoryPrices(pricePointId: pricePointId)) ?? []
+        }
+
+        // Merge: manual entries override equalized entries for the same territory.
+        var byTerritory: [String: Domain.TerritoryPrice] = [:]
+        for entry in equalizedPrices { byTerritory[entry.territory.id] = entry }
+        for entry in manualPrices    { byTerritory[entry.territory.id] = entry }
+        let merged = byTerritory.values.sorted { $0.territory.id < $1.territory.id }
+
         return Domain.InAppPurchasePriceSchedule(
             id: scheduleId,
             iapId: iapId,
             baseTerritory: baseTerritory,
-            territoryPrices: territoryPrices
+            territoryPrices: merged
         )
+    }
+
+    private func fetchEqualizedTerritoryPrices(pricePointId: String) async throws -> [Domain.TerritoryPrice] {
+        let response = try await client.request(
+            APIEndpoint.v1.inAppPurchasePricePoints.id(pricePointId).equalizations.get(parameters: .init(
+                fieldsInAppPurchasePricePoints: [.customerPrice, .proceeds, .territory],
+                fieldsTerritories: [.currency],
+                limit: 200,
+                include: [.territory]
+            ))
+        )
+
+        var territoriesById: [String: Domain.Territory] = [:]
+        for t in response.included ?? [] {
+            territoriesById[t.id] = Domain.Territory(id: t.id, currency: t.attributes?.currency)
+        }
+
+        return response.data.compactMap { pp in
+            guard
+                let territoryId = pp.relationships?.territory?.data?.id,
+                let customerPrice = pp.attributes?.customerPrice,
+                let proceeds = pp.attributes?.proceeds
+            else { return nil }
+            let territory = territoriesById[territoryId] ?? Domain.Territory(id: territoryId, currency: nil)
+            return Domain.TerritoryPrice(territory: territory, customerPrice: customerPrice, proceeds: proceeds)
+        }
+    }
+
+    public func listEqualizations(pricePointId: String, limit: Int?) async throws -> [Domain.InAppPurchasePricePoint] {
+        let request = APIEndpoint.v1.inAppPurchasePricePoints.id(pricePointId).equalizations.get(
+            parameters: .init(
+                fieldsInAppPurchasePricePoints: [.customerPrice, .proceeds, .territory],
+                fieldsTerritories: [.currency],
+                limit: limit,
+                include: [.territory]
+            )
+        )
+        let response = try await client.request(request)
+        // The equalizations endpoint is keyed by price point — the IAP id isn't in the
+        // response, so callers receive an empty `iapId`. Domain consumers usually re-inject.
+        return response.data.map { mapPricePoint($0, iapId: "") }
     }
 
     private func extractTerritory(
