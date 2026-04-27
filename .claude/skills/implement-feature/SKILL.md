@@ -27,10 +27,16 @@ Implement features using architecture-first design, TDD, rich domain models, and
    • Write domain tests first → then infrastructure tests → then command tests
    • Each test must FAIL (red) before writing implementation
    • Domain tests → Domain value types + AffordanceProviding + @Mockable protocol
-   • Infrastructure: SDK adapter injecting parent IDs
+   • Infrastructure: SDK adapter injecting parent IDs, composing multi-call flows
    • Command: formatAgentItems → {"data":[{...,"affordances":{...}}]}
 
-3. FEATURE DOC
+3. REST EXPOSURE (no feature is done until reachable via REST)
+   • Add affordanceMode parameter to execute(repo:)
+   • Wire a controller in Sources/ASCCommand/Commands/Web/Controllers/
+   • Register the route in RESTRoutes.swift
+   • Verify _links is populated for the parent resource
+
+4. FEATURE DOC
    • Write docs/features/<feature>.md from the actual implementation
 ```
 
@@ -50,23 +56,44 @@ Steps:
 
 ## Core Design Rules
 
-### Every domain model must
+### 1. Affordances: prefer `structuredAffordances` (single source of truth)
+
+`structuredAffordances: [Affordance]` is the canonical source. Both the CLI string (`affordances`) and the REST `_links` (`apiLinks`) auto-derive from it. **Do not override `apiLinks` directly** — that bypasses SSOT and creates two parallel surfaces to maintain.
+
+```swift
+extension MyModel: AffordanceProviding {
+    public var structuredAffordances: [Affordance] {
+        var items: [Affordance] = [
+            Affordance(key: "listChildren",  command: "children",  action: "list",
+                       params: ["parent-id": id]),
+            Affordance(key: "listSiblings",  command: "my-models", action: "list",
+                       params: ["grandparent-id": parentId]),
+            Affordance(key: "update",        command: "my-models", action: "update",
+                       params: ["model-id": id, "name": "<name>"]),
+        ]
+        if isActionable {
+            items.append(Affordance(key: "doAction", command: "my-models", action: "action",
+                                    params: ["model-id": id]))
+        }
+        return items
+    }
+}
+```
+
+**Param ordering caveat:** `Affordance.cliCommand` sorts params alphabetically by key. Migration from a raw `affordances` override may shift the CLI string order — update existing test JSON snapshots to match. The CLI parser doesn't care about flag order.
+
+**Nested CLI subcommands:** when the CLI is `asc iap price-points list` (subcommand of `iap`), register the route key with the literal space: `command: "iap price-points"`. Both `Affordance.cliCommand` and `RESTPathResolver` use the same key, so they stay in sync.
+
+### 2. REST routes register in two places
+
+Every `registerRoute(...)` call must be reachable from `RESTPathResolver.ensureInitialized()`. Add `_ = _yourRoutes` there. Forgetting this means `_links` silently resolves to `[:]` because the route table is empty when the protocol's `apiLinks` derivation runs in tests / fresh process state.
+
+### 3. Every domain model must
 
 ```swift
 public struct MyModel: Sendable, Equatable, Identifiable, Codable {
     public let id: String
     public let parentId: String  // always carry parent ID (ASC API omits it)
-}
-
-extension MyModel: AffordanceProviding {
-    public var affordances: [String: String] {
-        var cmds = [
-            "listChildren": "asc children list --parent-id \(id)",
-            "listSiblings": "asc my-models list --grandparent-id \(parentId)",
-        ]
-        if isActionable { cmds["doAction"] = "asc my-models action --id \(id)" }
-        return cmds
-    }
 }
 ```
 
@@ -81,7 +108,7 @@ See [command-affordances.md](references/command-affordances.md) for:
 - `formatAgentItems` vs `formatItems`
 - JSON output shape `{"data":[{...,"affordances":{...}}]}`
 
-### Repository protocol
+### 4. Repository protocol — primitives only, but allow composition in adapters
 
 ```swift
 @Mockable
@@ -90,7 +117,9 @@ public protocol MyRepository: Sendable {
 }
 ```
 
-### Command wiring
+Protocol methods stay primitive (one user-visible operation per method). The **SDK adapter** is allowed to compose multiple ASC API calls inside a single method when the user-visible operation requires it — see "Multi-call composition" below.
+
+### 5. Command wiring — accept `affordanceMode` for REST reuse
 
 ```swift
 struct MyList: AsyncParsableCommand {
@@ -99,16 +128,51 @@ struct MyList: AsyncParsableCommand {
 
     func run() async throws {
         let repo = try ClientProvider.makeMyRepository()
+        print(try await execute(repo: repo))
+    }
+
+    func execute(
+        repo: any MyRepository,
+        affordanceMode: AffordanceMode = .cli
+    ) async throws -> String {
         let items = try await repo.listMyModels(parentId: parentId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        print(try formatter.formatAgentItems(
-            items,
-            headers: ["ID", "Name"],
-            rowMapper: { [$0.id, $0.name] }
-        ))
+        return try formatter.formatAgentItems(items, affordanceMode: affordanceMode)
     }
 }
 ```
+
+The REST controller calls the same `execute(repo:affordanceMode: .rest)` — no duplicate logic.
+
+---
+
+## Multi-call composition in SDK adapters
+
+When ASC paginates a relationship or splits a single user-visible resource across endpoints, compose them inside the SDK adapter. **Apple's parent-endpoint `include=foo` truncates the relationship to ~10 entries** — for full lists, hit the dedicated relationship endpoint with explicit `limit`. The iOS SDK does this for `fetchAvailability`, `fetchPriceSchedule`, `fetchEqualizations`, and others.
+
+```swift
+public func getAvailability(iapId: String) async throws -> Domain.InAppPurchaseAvailability {
+    // Two parallel calls — `include=availableTerritories` truncates to ~10.
+    async let availResponse = client.request(
+        APIEndpoint.v2.inAppPurchases.id(iapId).inAppPurchaseAvailability.get(parameters: .init())
+    )
+    async let terrResponse = client.request(
+        APIEndpoint.v1.inAppPurchaseAvailabilities.id(iapId).availableTerritories.get(
+            fieldsTerritories: [.currency], limit: 200
+        )
+    )
+    let (avail, terr) = try await (availResponse, terrResponse)
+
+    let territories = terr.data.map { Domain.Territory(id: $0.id, currency: $0.attributes?.currency) }
+    return Domain.InAppPurchaseAvailability(
+        id: avail.data.id, iapId: iapId,
+        isAvailableInNewTerritories: avail.data.attributes?.isAvailableInNewTerritories ?? false,
+        territories: territories
+    )
+}
+```
+
+**Test these with `StubAPIClient.willReturn(_:)` once per response type.** The stub keys responses by `String(describing: T.self)`, so each `willReturn` for a different response type queues up the next call's return value. Adding a regression test that returns 175 entries proves pagination works.
 
 ---
 
@@ -134,17 +198,38 @@ See [tdd-patterns.md](references/tdd-patterns.md) for complete patterns includin
     let model = MockRepositoryFactory.makeMyModel(id: "m1", parentId: "p1")
     #expect(model.affordances["listChildren"] == "asc children list --parent-id m1")
 }
+
+@Test func `new model apiLinks include list children under nested parent`() {
+    let model = MockRepositoryFactory.makeMyModel(id: "m1", parentId: "p1")
+    #expect(model.apiLinks["listChildren"]?.href == "/api/v1/my-models/m1/children")
+    #expect(model.apiLinks["listChildren"]?.method == "GET")
+}
 ```
+
+Both `affordances` and `apiLinks` derive from the same `structuredAffordances` — testing each catches both the CLI and REST surfaces in one set of assertions.
 
 ### Phase 2: Infrastructure
 
 ```swift
 @Test func `listMyModels injects parentId into each model`() async throws {
-    let mockProvider = MockAPIProvider()
-    given(mockProvider).request(any()).willReturn(makeFixture())
-    let repo = SDKMyRepository(provider: mockProvider)
+    let stub = StubAPIClient()
+    stub.willReturn(makeFixture())
+    let repo = SDKMyRepository(client: stub)
     let models = try await repo.listMyModels(parentId: "p-42")
     #expect(models.allSatisfy { $0.parentId == "p-42" })
+}
+```
+
+For multi-call adapters, stub each response type:
+
+```swift
+@Test func `getThing composes attributes call with relationship call`() async throws {
+    let stub = StubAPIClient()
+    stub.willReturn(ThingResponse(data: ..., links: .init(this: "")))
+    stub.willReturn(RelatedResponse(data: [...], links: .init(this: "")))
+    let repo = SDKMyRepository(client: stub)
+    let result = try await repo.getThing(id: "t-1")
+    // assert the composed result
 }
 ```
 
@@ -171,6 +256,8 @@ Before writing any code, write down the exact JSON the user should see. This is 
 }
 ```
 
+Affordances sort alphabetically by key in the JSON output, and params within each affordance sort alphabetically by flag name. Match that ordering in your expected JSON snapshot.
+
 Also think about affordances from the user's perspective: **"What can I do next?"** — these are the commands the user would naturally want to run after seeing this output.
 
 #### Step 2: Write the test (red)
@@ -178,7 +265,6 @@ Also think about affordances from the user's perspective: **"What can I do next?
 Create a minimal command skeleton (struct + `@Option` fields + `execute()` returning `""`) — just enough to compile, NOT enough to pass. Then write the test:
 
 ```swift
-// Test name = what the user expects to happen
 @Test func `listed my models show id, parent, and next actions`() async throws {
     let mockRepo = MockMyRepository()
     given(mockRepo).listMyModels(parentId: .any).willReturn([
@@ -219,21 +305,67 @@ Run it — **must fail** because `execute()` returns `""`.
 - **Exact JSON assertion** — assert the complete output string, never `output.contains(...)`. This verifies field names, field order, affordance content, and nil-field omission all at once
 - **Think about edge cases from user's perspective** — "What if there are no results?", "What if the version is not editable — should submit still appear?"
 
-### Phase 4: Feature doc
+### Phase 4: REST exposure (mandatory)
+
+Per CLAUDE.md, **a feature is not complete until it is reachable via REST.** Steps:
+
+1. Make sure your model has `Presentable` conformance (so `restFormat` accepts it).
+2. Confirm `structuredAffordances` is in place (so `_links` auto-populates for the parent resource that lists this model).
+3. Confirm the relevant route is registered AND touched in `RESTPathResolver.ensureInitialized()`.
+4. Add a controller in `Sources/ASCCommand/Commands/Web/Controllers/<X>Controller.swift`:
+
+   ```swift
+   struct MyController: Sendable {
+       let repo: any MyRepository
+       func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
+           group.get("/parents/:parentId/children") { _, context -> Response in
+               guard let parentId = context.parameters.get("parentId") else { return jsonError("Missing parentId") }
+               let items = try await self.repo.listMyModels(parentId: parentId)
+               return try restFormat(items)
+           }
+       }
+   }
+   ```
+
+5. Wire the controller in `Sources/ASCCommand/Commands/Web/RESTRoutes.swift`:
+
+   ```swift
+   if let myRepo = try? factory.makeMyRepository(authProvider: auth) {
+       MyController(repo: myRepo).addRoutes(to: v1)
+   }
+   ```
+
+6. Add a REST test in `Tests/ASCCommandTests/Commands/Web/RESTRoutesTests.swift` that calls `execute(repo:affordanceMode: .rest)` and asserts `_links` + the resolved REST path.
+
+7. **Smoke-test the live server.** Build (`swift build`), restart (`asc web-server`), and `curl` the parent resource — confirm `_links` for each item points at the new endpoint.
+
+### Phase 5: Feature doc
 
 Write `docs/features/<feature>.md` from the actual implementation. The doc is derived from code — read the files, then write. Never write from memory.
 
 Structure:
 1. **CLI Usage** — one section per command, with flags table + examples + table-output sample
-2. **Typical Workflow** — end-to-end bash script showing the happy path
-3. **Architecture** — three-layer ASCII diagram + dependency note
-4. **Domain Models** — every public struct/enum/protocol with fields, computed properties, and affordances
-5. **File Map** — `Sources/` and `Tests/` trees + wiring files table
-6. **API Reference** — endpoint → SDK call → repository method table
-7. **Testing** — one representative test snippet + `swift test` command
-8. **Extending** — natural next steps with stub code
+2. **REST Endpoints** — path table + query-param mapping + curl example
+3. **Typical Workflow** — end-to-end bash script showing the happy path
+4. **Architecture** — three-layer ASCII diagram + dependency note
+5. **Domain Models** — every public struct/enum/protocol with fields, computed properties, and affordances
+6. **File Map** — `Sources/` and `Tests/` trees + wiring files table (must list the REST controller)
+7. **API Reference** — endpoint → SDK call → repository method table
+8. **Testing** — one representative test snippet + `swift test` command
+9. **Extending** — natural next steps with stub code
 
 Use `docs/features/screenshots.md` as the canonical reference example.
+
+---
+
+## Anti-patterns (don't)
+
+- ❌ **Override `apiLinks` directly.** Use `structuredAffordances` so CLI and REST stay in sync. The protocol's default `apiLinks` derivation handles the REST mapping for you.
+- ❌ **Override `affordances` with raw strings when migrating.** That blocks the default-derivation path. If you need a CLI string the `Affordance` renderer can't produce (e.g. multi-value flags like `--territory USA --territory CHN`), simplify the affordance — pick one representative value — rather than maintaining two surfaces.
+- ❌ **`include=relationship` for full lists.** Apple paginates the included relationship to ~10 entries. Use the dedicated relationship endpoint with explicit `limit:`.
+- ❌ **`output.contains(...)` in command tests.** Always assert the full JSON string so you catch field renames, ordering changes, and nil-omission regressions.
+- ❌ **Forgetting `_ = _yourRoutes`** in `RESTPathResolver.ensureInitialized()`. Tests pass locally because some other model touched the lazy first; live `/api/v1/...` returns empty `_links`.
+- ❌ **Skipping the smoke test.** Tests can pass while `_links` is empty in production due to test-time route side-effects. Always `curl` the live endpoint after restart.
 
 ---
 
@@ -243,7 +375,6 @@ Use `docs/features/screenshots.md` as the canonical reference example.
 - [Domain model patterns](references/domain-models.md) — model requirements, parent IDs, mappers, MockRepositoryFactory
 - [Command Affordances](references/command-affordances.md) — AffordanceProviding, formatAgentItems, JSON shape
 - [TDD patterns](references/tdd-patterns.md) — MockRepositoryFactory, affordance tests, async patterns
-  -  implement following strict TDD — tests first, then implementation
 - [Swift concurrency](references/swift-observable.md) — Sendable, @unchecked Sendable, method naming
 
 ---
@@ -257,31 +388,41 @@ Use `docs/features/screenshots.md` as the canonical reference example.
 - [ ] **User approval received**
 
 ### Phase 1: Domain
-- [ ] `XModel.swift` — `struct` (passive data) or `final class` (active object with injected repo) — see domain-models.md
-- [ ] Carries `parentId`
-- [ ] `AffordanceProviding` implemented (navigation + state-aware actions)
-- [ ] State enum with semantic booleans (`isX`, `hasFailed`, etc.)
-- [ ] If `final class`: custom `Equatable` + `Codable` exclude the repo field; `MockRepositoryFactory.makeX` gains a `repo:` parameter
-- [ ] `XRepository.swift` — `@Mockable` protocol with primitive methods only (one API call each)
+- [ ] `XModel.swift` — `struct` + `Sendable` + `Equatable` + `Identifiable` + `Codable`
+- [ ] Carries `parentId` (ASC API omits parent IDs from response — Infrastructure injects them)
+- [ ] `Presentable` conformance (`tableHeaders`, `tableRow`)
+- [ ] `AffordanceProviding` via `structuredAffordances` (NOT raw `affordances`)
+- [ ] State enum with semantic booleans (`isLive`, `isEditable`, `isPendingReview`, etc.)
+- [ ] `XRepository.swift` — `@Mockable` protocol with primitive methods only
 - [ ] `make*` factory added to `MockRepositoryFactory.swift`
-- [ ] Domain tests written and passing (including domain operation tests)
+- [ ] Domain tests: model fields, semantic booleans, affordances, **and `apiLinks`** for the new keys
 
 ### Phase 2: Infrastructure
 - [ ] `SDKXRepository.swift` — implements protocol, injects parent IDs in mappers
+- [ ] Multi-call composition where needed (relationships paginate at ~10 — use dedicated endpoints with `limit:`)
 - [ ] Factory registered in `ClientFactory.swift`
-- [ ] Infrastructure tests cover parent ID injection
+- [ ] `_xRoutes` registered AND touched in `RESTPathResolver.ensureInitialized()`
+- [ ] Infrastructure tests cover: parent ID injection, multi-call composition, >10-entry regression
 
 ### Phase 3: Command
-- [ ] `XCommand.swift` + `XList` subcommand using `formatAgentItems`
+- [ ] `XCommand.swift` + subcommands using `formatAgentItems`
+- [ ] `execute(repo:affordanceMode: .cli)` — accepts mode for REST reuse
 - [ ] `ClientProvider.swift` — static factory method
-- [ ] Registered in `ASC.swift`
-- [ ] Affordance tests added to `AffordancesTests.swift`
-- [ ] Command tests: **behavior-focused names**, **always `#expect()`**, **exact JSON string** (not `output.contains`)
-- [ ] `swift test` — all 100+ tests pass
+- [ ] Registered in `ASC.swift` subcommands array
+- [ ] Command tests: behavior-focused names, always `#expect()`, exact JSON snapshot
+- [ ] Affordance keys sort alphabetically; params within each affordance sort alphabetically — match this in JSON snapshots
 
-### Phase 4: Feature Doc
+### Phase 4: REST exposure
+- [ ] Controller added under `Sources/ASCCommand/Commands/Web/Controllers/`
+- [ ] Wired in `Sources/ASCCommand/Commands/Web/RESTRoutes.swift`
+- [ ] REST test in `RESTRoutesTests.swift` — calls `execute(repo:affordanceMode: .rest)`, asserts `"_links"` + resolved path
+- [ ] **Smoke-tested live server** — restarted and curl'd the parent resource; `_links` confirms the new endpoint URL
+
+### Phase 5: Feature Doc
 - [ ] `docs/features/<feature>.md` written from actual code (read files first)
-- [ ] All CLI commands documented with flags table + examples
+- [ ] CLI commands documented with flags table + examples
+- [ ] **REST Endpoints section** with path table + query-param mapping + curl example
 - [ ] Domain models section matches actual struct fields
-- [ ] File map reflects actual directory structure
+- [ ] File map reflects actual directory structure (must list REST controller)
 - [ ] API reference table complete
+- [ ] CHANGELOG.md entry under `[Unreleased]`
