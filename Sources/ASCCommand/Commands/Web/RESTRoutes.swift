@@ -212,3 +212,12 @@ func restFormat<T: Encodable & AffordanceProviding & Presentable>(
 ) throws -> Response {
     try restFormat([item])
 }
+
+/// Paginated REST response: `{ data: [...], nextCursor: "...", totalCount: N }`.
+/// `nextCursor`/`totalCount` are omitted when nil. Frontends loop until `nextCursor` is absent.
+func restFormatPaginated<T: Encodable & AffordanceProviding & Presentable>(
+    _ response: PaginatedResponse<T>
+) throws -> Response {
+    let formatter = OutputFormatter(format: .json, pretty: true)
+    return restResponse(try formatter.formatAgentPaginated(response, affordanceMode: .rest))
+}
