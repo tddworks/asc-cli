@@ -334,10 +334,11 @@ struct RESTRoutesTests {
 
     @Test func `subscription price-points REST exposes nested path under subscription`() async throws {
         let mockRepo = MockSubscriptionPriceRepository()
-        given(mockRepo).listPricePoints(subscriptionId: .any, territory: .any).willReturn([
-            SubscriptionPricePoint(id: "spp-1", subscriptionId: "sub-7", territory: "USA",
-                                   customerPrice: "9.99", proceeds: "6.99")
-        ])
+        given(mockRepo).listPricePoints(subscriptionId: .any, territory: .any, limit: .any, cursor: .any)
+            .willReturn(PaginatedResponse(data: [
+                SubscriptionPricePoint(id: "spp-1", subscriptionId: "sub-7", territory: "USA",
+                                       customerPrice: "9.99", proceeds: "6.99")
+            ], nextCursor: nil))
 
         let output = try await SubscriptionPricePointsList.parse(["--subscription-id", "sub-7", "--pretty"])
             .execute(repo: mockRepo, affordanceMode: .rest)
@@ -591,9 +592,10 @@ struct RESTRoutesTests {
 
     @Test func `IAP price-points list REST exposes nested path under iap`() async throws {
         let mockRepo = MockInAppPurchasePriceRepository()
-        given(mockRepo).listPricePoints(iapId: .any, territory: .any).willReturn([
-            InAppPurchasePricePoint(id: "pp-1", iapId: "iap-7", territory: "USA", customerPrice: "9.99", proceeds: "6.99")
-        ])
+        given(mockRepo).listPricePoints(iapId: .any, territory: .any, limit: .any, cursor: .any)
+            .willReturn(PaginatedResponse(data: [
+                InAppPurchasePricePoint(id: "pp-1", iapId: "iap-7", territory: "USA", customerPrice: "9.99", proceeds: "6.99")
+            ], nextCursor: nil))
 
         let output = try await IAPPricePointsList.parse(["--iap-id", "iap-7", "--pretty"])
             .execute(repo: mockRepo, affordanceMode: .rest)

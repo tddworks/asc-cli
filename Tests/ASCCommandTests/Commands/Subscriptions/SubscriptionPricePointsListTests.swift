@@ -45,16 +45,27 @@ struct SubscriptionPricePointsListTests {
           ]
         }
         """)
-        verify(mockRepo).listPricePoints(subscriptionId: .value("sub-1"), territory: .value("USA")).called(1)
+        verify(mockRepo).listPricePoints(
+            subscriptionId: .value("sub-1"),
+            territory: .value("USA"),
+            limit: .value(nil),
+            cursor: .value(nil)
+        ).called(1)
     }
 
     @Test func `passes nil territory when flag omitted`() async throws {
         let mockRepo = MockSubscriptionPriceRepository()
-        given(mockRepo).listPricePoints(subscriptionId: .any, territory: .any).willReturn([])
+        given(mockRepo).listPricePoints(subscriptionId: .any, territory: .any, limit: .any, cursor: .any)
+            .willReturn(PaginatedResponse(data: [], nextCursor: nil))
 
         let cmd = try SubscriptionPricePointsList.parse(["--subscription-id", "sub-1"])
         _ = try await cmd.execute(repo: mockRepo)
 
-        verify(mockRepo).listPricePoints(subscriptionId: .value("sub-1"), territory: .value(nil)).called(1)
+        verify(mockRepo).listPricePoints(
+            subscriptionId: .value("sub-1"),
+            territory: .value(nil),
+            limit: .value(nil),
+            cursor: .value(nil)
+        ).called(1)
     }
 }

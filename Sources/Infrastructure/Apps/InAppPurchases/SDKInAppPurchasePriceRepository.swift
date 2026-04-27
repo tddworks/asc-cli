@@ -167,8 +167,25 @@ public struct SDKInAppPurchasePriceRepository: InAppPurchasePriceRepository, @un
     }
 
     public func setPriceSchedule(iapId: String, baseTerritory: String, pricePointId: String) async throws -> Domain.InAppPurchasePriceSchedule {
-        let tempId = "p1"
-        let body = InAppPurchasePriceScheduleCreateRequest(
+        let body = Self.makePriceScheduleCreateRequest(
+            iapId: iapId,
+            baseTerritory: baseTerritory,
+            pricePointId: pricePointId
+        )
+        let response = try await client.request(APIEndpoint.v1.inAppPurchasePriceSchedules.post(body))
+        return Domain.InAppPurchasePriceSchedule(id: response.data.id, iapId: iapId)
+    }
+
+    /// Mirrors the iOS app's price-schedule POST shape. ASC requires the inline manual price
+    /// to use the `${...}` placeholder so the relationship correlation works, and to carry an
+    /// `inAppPurchaseV2` back-reference. Without both, ASC rejects the create with a 4xx.
+    static func makePriceScheduleCreateRequest(
+        iapId: String,
+        baseTerritory: String,
+        pricePointId: String
+    ) -> InAppPurchasePriceScheduleCreateRequest {
+        let tempId = "${local-manual-price-1}"
+        return InAppPurchasePriceScheduleCreateRequest(
             data: .init(
                 type: .inAppPurchasePriceSchedules,
                 relationships: .init(
@@ -182,13 +199,12 @@ public struct SDKInAppPurchasePriceRepository: InAppPurchasePriceRepository, @un
                     type: .inAppPurchasePrices,
                     id: tempId,
                     relationships: .init(
+                        inAppPurchaseV2: .init(data: .init(type: .inAppPurchases, id: iapId)),
                         inAppPurchasePricePoint: .init(data: .init(type: .inAppPurchasePricePoints, id: pricePointId))
                     )
                 ))
             ]
         )
-        let response = try await client.request(APIEndpoint.v1.inAppPurchasePriceSchedules.post(body))
-        return Domain.InAppPurchasePriceSchedule(id: response.data.id, iapId: iapId)
     }
 
     private func mapPricePoint(_ sdk: AppStoreConnect_Swift_SDK.InAppPurchasePricePoint, iapId: String) -> Domain.InAppPurchasePricePoint {
