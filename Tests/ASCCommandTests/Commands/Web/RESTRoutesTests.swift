@@ -548,6 +548,31 @@ struct RESTRoutesTests {
         #expect(normalized.contains("/api/v1/iap/iap-7/offer-codes"))
     }
 
+    @Test func `IAP price-schedule get REST exposes nested path under iap`() async throws {
+        let mockRepo = MockInAppPurchasePriceRepository()
+        given(mockRepo).getPriceSchedule(iapId: .any).willReturn(
+            InAppPurchasePriceSchedule(id: "iap-7", iapId: "iap-7")
+        )
+
+        let output = try await IAPPriceScheduleGet.parse(["--iap-id", "iap-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/iap/iap-7/price-points"))
+    }
+
+    @Test func `IAP price-schedule get REST returns empty data when no schedule`() async throws {
+        let mockRepo = MockInAppPurchasePriceRepository()
+        given(mockRepo).getPriceSchedule(iapId: .any).willReturn(nil)
+
+        let output = try await IAPPriceScheduleGet.parse(["--iap-id", "iap-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        // Mirrors `iap-review-screenshot get` shape: empty data array for "not configured yet".
+        #expect(output.contains("\"data\" : ["))
+        #expect(output.contains("]"))
+    }
+
     @Test func `IAP price-points list REST exposes nested path under iap`() async throws {
         let mockRepo = MockInAppPurchasePriceRepository()
         given(mockRepo).listPricePoints(iapId: .any, territory: .any).willReturn([

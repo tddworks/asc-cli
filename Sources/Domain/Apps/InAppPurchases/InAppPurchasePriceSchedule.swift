@@ -9,8 +9,16 @@ public struct InAppPurchasePriceSchedule: Sendable, Equatable, Identifiable, Cod
     }
 }
 
+extension InAppPurchasePriceSchedule: Presentable {
+    public static var tableHeaders: [String] { ["ID", "IAP ID"] }
+    public var tableRow: [String] { [id, iapId] }
+}
+
 extension InAppPurchasePriceSchedule: AffordanceProviding {
-    public var affordances: [String: String] {
-        ["listPricePoints": "asc iap price-points list --iap-id \(iapId)"]
+    public var structuredAffordances: [Affordance] {
+        [
+            Affordance(key: "listPricePoints", command: "iap price-points", action: "list", params: ["iap-id": iapId]),
+            Affordance(key: "getIAP", command: "iap", action: "get", params: ["iap-id": iapId]),
+        ]
     }
 }

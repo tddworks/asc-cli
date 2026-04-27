@@ -88,6 +88,7 @@ enum RESTRoutes {
         }
         if let iapPriceRepo = try? factory.makeInAppPurchasePriceRepository(authProvider: auth) {
             IAPPricePointsController(repo: iapPriceRepo).addRoutes(to: v1)
+            IAPPriceScheduleController(repo: iapPriceRepo).addRoutes(to: v1)
         }
 
         // Subscription detail listings

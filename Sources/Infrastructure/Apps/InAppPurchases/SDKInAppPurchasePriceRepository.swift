@@ -8,6 +8,18 @@ public struct SDKInAppPurchasePriceRepository: InAppPurchasePriceRepository, @un
         self.client = client
     }
 
+    public func getPriceSchedule(iapId: String) async throws -> Domain.InAppPurchasePriceSchedule? {
+        do {
+            let response = try await client.request(
+                APIEndpoint.v2.inAppPurchases.id(iapId).iapPriceSchedule.get()
+            )
+            return Domain.InAppPurchasePriceSchedule(id: response.data.id, iapId: iapId)
+        } catch {
+            // 404 → no schedule configured yet
+            return nil
+        }
+    }
+
     public func listPricePoints(iapId: String, territory: String?) async throws -> [Domain.InAppPurchasePricePoint] {
         let request = APIEndpoint.v2.inAppPurchases.id(iapId).pricePoints.get(
             parameters: .init(

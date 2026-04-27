@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **HATEOAS `_links` for IAPs and Subscriptions** — `GET /api/v1/apps/{id}/iap` and `GET /api/v1/subscription-groups/{id}/subscriptions` now embed `_links` per item so an agent can navigate to localizations, availability, offer codes, price points, review screenshots, promotional offers, win-back offers (subscriptions only), and intro offers without knowing the URL conventions.
+- **REST controllers for IAP details** — `GET /api/v1/iap/:id/localizations`, `/availability`, `/offer-codes`, `/price-points`. Each returns the agent-first `data: [...]` envelope with `_links` already populated.
+- **REST controllers for Subscription details** — `GET /api/v1/subscriptions/:id/localizations`, `/availability`, `/offer-codes`, `/introductory-offers`.
+
+### Changed
+- **`RESTPathResolver` resolves singleton-under-parent `get` to nested path** — when an action is not `list`/`create`, the singularized own-id is missing, and a registered route's parent param matches one in `params`, the resolver now returns the nested `/parent/{id}/segment` path. This corrects `_links.getReviewScreenshot` for IAP and Subscription (was `/api/v1/iap-review-screenshot/{id}` → now `/api/v1/iap/{id}/review-screenshot`) and similar singletons (availability, age-rating).
+- **`AgeRatingController`** now serves the canonical nested path `/api/v1/app-infos/{appInfoId}/age-rating` matching the resolver's `_links`. The flat `/api/v1/age-rating/{id}` remains for back-compat.
+
 ---
 
 ## [0.17.3] - 2026-04-26
