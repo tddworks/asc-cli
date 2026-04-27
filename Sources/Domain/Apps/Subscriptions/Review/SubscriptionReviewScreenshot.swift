@@ -5,6 +5,9 @@ public struct SubscriptionReviewScreenshot: Sendable, Equatable, Identifiable {
     public let fileName: String
     public let fileSize: Int
     public let assetState: AssetState?
+    /// CDN-hosted image with a `{w}x{h}bb.{f}` template URL — populated once ASC finishes
+    /// processing the upload. Nil while `assetState == .awaitingUpload`.
+    public let imageAsset: ImageAsset?
 
     public enum AssetState: String, Sendable, Codable, Equatable {
         case awaitingUpload = "AWAITING_UPLOAD"
@@ -16,18 +19,26 @@ public struct SubscriptionReviewScreenshot: Sendable, Equatable, Identifiable {
         public var hasFailed: Bool { self == .failed }
     }
 
-    public init(id: String, subscriptionId: String, fileName: String, fileSize: Int, assetState: AssetState? = nil) {
+    public init(
+        id: String,
+        subscriptionId: String,
+        fileName: String,
+        fileSize: Int,
+        assetState: AssetState? = nil,
+        imageAsset: ImageAsset? = nil
+    ) {
         self.id = id
         self.subscriptionId = subscriptionId
         self.fileName = fileName
         self.fileSize = fileSize
         self.assetState = assetState
+        self.imageAsset = imageAsset
     }
 }
 
 extension SubscriptionReviewScreenshot: Codable {
     enum CodingKeys: String, CodingKey {
-        case id, subscriptionId, fileName, fileSize, assetState
+        case id, subscriptionId, fileName, fileSize, assetState, imageAsset
     }
 
     public init(from decoder: any Decoder) throws {
@@ -37,6 +48,7 @@ extension SubscriptionReviewScreenshot: Codable {
         fileName = try c.decode(String.self, forKey: .fileName)
         fileSize = try c.decode(Int.self, forKey: .fileSize)
         assetState = try c.decodeIfPresent(AssetState.self, forKey: .assetState)
+        imageAsset = try c.decodeIfPresent(ImageAsset.self, forKey: .imageAsset)
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -46,6 +58,7 @@ extension SubscriptionReviewScreenshot: Codable {
         try c.encode(fileName, forKey: .fileName)
         try c.encode(fileSize, forKey: .fileSize)
         try c.encodeIfPresent(assetState, forKey: .assetState)
+        try c.encodeIfPresent(imageAsset, forKey: .imageAsset)
     }
 }
 

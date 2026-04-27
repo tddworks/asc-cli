@@ -17,6 +17,13 @@ struct SubscriptionPriceCodableTests {
         #expect(p.affordances["listPricePoints"] == "asc subscriptions price-points list --subscription-id sub-1")
     }
 
+    @Test func `subscription price exposes structured affordance with REST link`() {
+        let p = SubscriptionPrice(id: "price-1", subscriptionId: "sub-1")
+        #expect(p.structuredAffordances.contains { $0.key == "listPricePoints" })
+        #expect(p.apiLinks["listPricePoints"]?.href == "/api/v1/subscriptions/sub-1/price-points")
+        #expect(p.apiLinks["listPricePoints"]?.method == "GET")
+    }
+
     @Test func `subscription price exposes table headers and row`() {
         let p = SubscriptionPrice(id: "price-1", subscriptionId: "sub-1")
         #expect(SubscriptionPrice.tableHeaders == ["ID", "Subscription ID"])
