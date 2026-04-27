@@ -140,6 +140,10 @@ extension Subscription: AffordanceProviding {
                        params: ["subscription-id": id]),
             Affordance(key: "listPricePoints", command: "subscriptions price-points", action: "list",
                        params: ["subscription-id": id]),
+            // Batch sets multiple per-territory prices. `--price` is repeatable on the CLI;
+            // the affordance carries one placeholder so an agent knows the shape.
+            Affordance(key: "setPrices", command: "subscriptions prices", action: "set-batch",
+                       params: ["subscription-id": id, "price": "<territory>=<price-point-id>"]),
             Affordance(key: "update", command: "subscriptions", action: "update",
                        params: ["subscription-id": id, "name": "<name>"]),
         ]

@@ -8,5 +8,8 @@ extension RESTPathResolver {
         registerRoute(command: "subscription-availability", parentParam: "subscription-id", parentSegment: "subscriptions", segment: "availability")
         registerRoute(command: "subscription-price-schedule", parentParam: "subscription-id", parentSegment: "subscriptions", segment: "price-schedule")
         registerRoute(command: "subscription-equalizations", parentParam: "price-point-id", parentSegment: "subscription-price-points", segment: "equalizations")
+        // Nested CLI subcommand `asc subscriptions prices` — registered with the literal
+        // space so `Affordance.cliCommand` and the resolver agree on the same key.
+        registerRoute(command: "subscriptions prices", parentParam: "subscription-id", parentSegment: "subscriptions", segment: "prices")
     }()
 }

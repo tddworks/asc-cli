@@ -146,4 +146,15 @@ struct InAppPurchaseTests {
         let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
         #expect(iap.affordances["getPriceSchedule"] == "asc iap-price-schedule get --iap-id iap-1")
     }
+
+    @Test func `iap affordances include setPrice with placeholders`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.affordances["setPrice"] == "asc iap prices set --base-territory <territory> --iap-id iap-1 --price-point-id <price-point-id>")
+    }
+
+    @Test func `iap apiLinks include setPrice posting to nested prices endpoint`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.apiLinks["setPrice"]?.href == "/api/v1/iap/iap-1/prices/set")
+        #expect(iap.apiLinks["setPrice"]?.method == "POST")
+    }
 }

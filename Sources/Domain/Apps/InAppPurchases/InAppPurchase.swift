@@ -100,6 +100,11 @@ extension InAppPurchase: AffordanceProviding {
                        params: ["iap-id": id]),
             Affordance(key: "listPricePoints", command: "iap price-points", action: "list",
                        params: ["iap-id": id]),
+            // Sets (or changes) the base price by picking a new base territory + price point.
+            // Apple equalizes other territories from this manual entry. Calling with a new
+            // `base-territory` is how the iOS app implements "Change Base Territory".
+            Affordance(key: "setPrice", command: "iap prices", action: "set",
+                       params: ["iap-id": id, "base-territory": "<territory>", "price-point-id": "<price-point-id>"]),
             Affordance(key: "update", command: "iap", action: "update",
                        params: ["iap-id": id, "reference-name": "<name>"]),
         ]

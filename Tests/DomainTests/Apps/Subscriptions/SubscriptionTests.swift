@@ -181,6 +181,17 @@ struct SubscriptionTests {
         #expect(sub.apiLinks["delete"]?.method == "DELETE")
     }
 
+    @Test func `subscription affordances include setPrices batch with placeholders`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.affordances["setPrices"] == "asc subscriptions prices set-batch --price <territory>=<price-point-id> --subscription-id sub-1")
+    }
+
+    @Test func `subscription apiLinks include setPrices posting to nested prices endpoint`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.apiLinks["setPrices"]?.href == "/api/v1/subscriptions/sub-1/prices/set-batch")
+        #expect(sub.apiLinks["setPrices"]?.method == "POST")
+    }
+
     @Test func `subscription apiLinks include submit only when readyToSubmit`() {
         let ready = MockRepositoryFactory.makeSubscription(id: "sub-1", state: .readyToSubmit)
         let missing = MockRepositoryFactory.makeSubscription(id: "sub-2", state: .missingMetadata)
