@@ -31,7 +31,7 @@ struct SubscriptionAvailabilityCreateTests {
           "data" : [
             {
               "affordances" : {
-                "createAvailability" : "asc subscription-availability create --subscription-id sub-42 --available-in-new-territories --territory USA --territory CHN",
+                "createAvailability" : "asc subscription-availability create --subscription-id sub-42",
                 "getAvailability" : "asc subscription-availability get --subscription-id sub-42",
                 "listTerritories" : "asc territories list"
               },

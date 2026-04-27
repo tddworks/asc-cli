@@ -31,7 +31,7 @@ struct SubscriptionOfferCodesListTests {
           "data" : [
             {
               "affordances" : {
-                "deactivate" : "asc subscription-offer-codes update --offer-code-id oc-1 --active false",
+                "deactivate" : "asc subscription-offer-codes update --active false --offer-code-id oc-1",
                 "listCustomCodes" : "asc subscription-offer-code-custom-codes list --offer-code-id oc-1",
                 "listOfferCodes" : "asc subscription-offer-codes list --subscription-id sub-1",
                 "listOneTimeCodes" : "asc subscription-offer-code-one-time-codes list --offer-code-id oc-1"
