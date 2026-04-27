@@ -88,6 +88,8 @@ extension InAppPurchase: AffordanceProviding {
                        params: ["iap-id": id]),
             Affordance(key: "getAvailability", command: "iap-availability", action: "get",
                        params: ["iap-id": id]),
+            Affordance(key: "getPriceSchedule", command: "iap-price-schedule", action: "get",
+                       params: ["iap-id": id]),
             Affordance(key: "getReviewScreenshot", command: "iap-review-screenshot", action: "get",
                        params: ["iap-id": id]),
             Affordance(key: "listImages", command: "iap-images", action: "list",

@@ -8,5 +8,6 @@ extension RESTPathResolver {
         // `Affordance.cliCommand` and resolver paths agree on the same key.
         registerRoute(command: "iap price-points", parentParam: "iap-id", parentSegment: "iap", segment: "price-points")
         registerRoute(command: "iap prices", parentParam: "iap-id", parentSegment: "iap", segment: "prices")
+        registerRoute(command: "iap-price-schedule", parentParam: "iap-id", parentSegment: "iap", segment: "price-schedule")
     }()
 }

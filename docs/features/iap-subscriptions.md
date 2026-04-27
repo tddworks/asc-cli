@@ -16,6 +16,28 @@ Every command also serves as a REST endpoint when running `asc web-server`. Affo
 | [win-back-offers.md](iap-subscriptions/win-back-offers.md) | Win-back offers with eligibility rules, priority, promotion intent, and per-territory pricing. |
 | [review-assets.md](iap-subscriptions/review-assets.md) | IAP review screenshots & 1024×1024 promotional images, subscription review screenshots — reserve→upload→commit-with-MD5. |
 
+## REST navigation (`_links`)
+
+When `asc web-server` is running, every IAP and Subscription returned from the list endpoints embeds a populated `_links` map so an agent can fetch its details without knowing URL conventions.
+
+| Resource | List endpoint | Embedded `_links` keys |
+|----------|---------------|------------------------|
+| `InAppPurchase` | `GET /api/v1/apps/:appId/iap` | `listLocalizations`, `listOfferCodes`, `listImages`, `listPricePoints`, `getAvailability`, `getReviewScreenshot`, `update`, `delete`, `submit` (only when `READY_TO_SUBMIT`), `createLocalization` |
+| `Subscription` | `GET /api/v1/subscription-groups/:groupId/subscriptions` | `listLocalizations`, `listIntroductoryOffers`, `listOfferCodes`, `listPromotionalOffers`, `listWinBackOffers`, `listPricePoints`, `getAvailability`, `getReviewScreenshot`, `update`, `delete`, `submit` (only when `READY_TO_SUBMIT`), `createLocalization`, `createIntroductoryOffer`, `createPromotionalOffer` |
+
+Each `_links` entry resolves to a wired controller. For an IAP at id `iap-7`:
+
+| Link key | Method | URL |
+|----------|--------|-----|
+| `listLocalizations` | GET | `/api/v1/iap/iap-7/localizations` |
+| `getAvailability` | GET | `/api/v1/iap/iap-7/availability` |
+| `listOfferCodes` | GET | `/api/v1/iap/iap-7/offer-codes` |
+| `listPricePoints` | GET | `/api/v1/iap/iap-7/price-points` |
+| `getReviewScreenshot` | GET | `/api/v1/iap/iap-7/review-screenshot` |
+| `listImages` | GET | `/api/v1/iap/iap-7/images` |
+
+The same shape applies to subscriptions under `/api/v1/subscriptions/{id}/…` (replace `iap` with `subscriptions` and `getReviewScreenshot`/`listImages` with subscription-specific equivalents; `listIntroductoryOffers` → `/introductory-offers`).
+
 Related top-level features:
 
 - [promoted-purchases.md](promoted-purchases.md) — App Store product page promoted slots.

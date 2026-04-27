@@ -135,4 +135,15 @@ struct InAppPurchaseTests {
         #expect(ready.apiLinks["submit"]?.method == "POST")
         #expect(missing.apiLinks["submit"] == nil)
     }
+
+    @Test func `iap apiLinks include getPriceSchedule under nested parent`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.apiLinks["getPriceSchedule"]?.href == "/api/v1/iap/iap-1/price-schedule")
+        #expect(iap.apiLinks["getPriceSchedule"]?.method == "GET")
+    }
+
+    @Test func `iap affordances include getPriceSchedule with iap id`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.affordances["getPriceSchedule"] == "asc iap-price-schedule get --iap-id iap-1")
+    }
 }
