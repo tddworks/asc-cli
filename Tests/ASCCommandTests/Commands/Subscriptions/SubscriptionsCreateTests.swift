@@ -47,6 +47,7 @@ struct SubscriptionsCreateTests {
                 "listPricePoints" : "asc subscriptions price-points list --subscription-id sub-new",
                 "listPromotionalOffers" : "asc subscription-promotional-offers list --subscription-id sub-new",
                 "listWinBackOffers" : "asc win-back-offers list --subscription-id sub-new",
+                "setPrices" : "asc subscriptions prices set-batch --price <territory>=<price-point-id> --subscription-id sub-new",
                 "update" : "asc subscriptions update --name <name> --subscription-id sub-new"
               },
               "groupId" : "grp-1",

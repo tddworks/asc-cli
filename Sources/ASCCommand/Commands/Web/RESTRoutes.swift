@@ -69,6 +69,7 @@ enum RESTRoutes {
             SubscriptionPricePointsController(repo: subPriceRepo).addRoutes(to: v1)
             SubscriptionPriceScheduleController(repo: subPriceRepo).addRoutes(to: v1)
             SubscriptionEqualizationsController(repo: subPriceRepo).addRoutes(to: v1)
+            SubscriptionPricesController(repo: subPriceRepo).addRoutes(to: v1)
         }
         if let iapOfferCodeRepo = try? factory.makeInAppPurchaseOfferCodeRepository(authProvider: auth),
            let subOfferCodeRepo = try? factory.makeSubscriptionOfferCodeRepository(authProvider: auth) {
@@ -96,6 +97,7 @@ enum RESTRoutes {
             IAPPricePointsController(repo: iapPriceRepo).addRoutes(to: v1)
             IAPPriceScheduleController(repo: iapPriceRepo).addRoutes(to: v1)
             IAPEqualizationsController(repo: iapPriceRepo).addRoutes(to: v1)
+            IAPPricesController(repo: iapPriceRepo).addRoutes(to: v1)
         }
 
         // Subscription detail listings
