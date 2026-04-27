@@ -7,6 +7,7 @@ public struct SubscriptionPromotionalImage: Sendable, Equatable, Identifiable {
     public let fileName: String
     public let fileSize: Int
     public let state: ImageState?
+    public let imageAsset: ImageAsset?
 
     public enum ImageState: String, Sendable, Codable, Equatable {
         case awaitingUpload = "AWAITING_UPLOAD"
@@ -21,18 +22,26 @@ public struct SubscriptionPromotionalImage: Sendable, Equatable, Identifiable {
         public var isPendingReview: Bool { self == .waitingForReview }
     }
 
-    public init(id: String, subscriptionId: String, fileName: String, fileSize: Int, state: ImageState? = nil) {
+    public init(
+        id: String,
+        subscriptionId: String,
+        fileName: String,
+        fileSize: Int,
+        state: ImageState? = nil,
+        imageAsset: ImageAsset? = nil
+    ) {
         self.id = id
         self.subscriptionId = subscriptionId
         self.fileName = fileName
         self.fileSize = fileSize
         self.state = state
+        self.imageAsset = imageAsset
     }
 }
 
 extension SubscriptionPromotionalImage: Codable {
     enum CodingKeys: String, CodingKey {
-        case id, subscriptionId, fileName, fileSize, state
+        case id, subscriptionId, fileName, fileSize, state, imageAsset
     }
 
     public init(from decoder: any Decoder) throws {
@@ -42,6 +51,7 @@ extension SubscriptionPromotionalImage: Codable {
         fileName = try c.decode(String.self, forKey: .fileName)
         fileSize = try c.decode(Int.self, forKey: .fileSize)
         state = try c.decodeIfPresent(ImageState.self, forKey: .state)
+        imageAsset = try c.decodeIfPresent(ImageAsset.self, forKey: .imageAsset)
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -51,6 +61,7 @@ extension SubscriptionPromotionalImage: Codable {
         try c.encode(fileName, forKey: .fileName)
         try c.encode(fileSize, forKey: .fileSize)
         try c.encodeIfPresent(state, forKey: .state)
+        try c.encodeIfPresent(imageAsset, forKey: .imageAsset)
     }
 }
 

@@ -135,7 +135,8 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
             iapId: iapId,
             fileName: sdk.attributes?.fileName ?? "",
             fileSize: sdk.attributes?.fileSize ?? 0,
-            assetState: state
+            assetState: state,
+            imageAsset: mapImageAsset(sdk.attributes?.imageAsset)
         )
     }
 
@@ -150,7 +151,16 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
             iapId: iapId,
             fileName: sdk.attributes?.fileName ?? "",
             fileSize: sdk.attributes?.fileSize ?? 0,
-            state: state
+            state: state,
+            imageAsset: mapImageAsset(sdk.attributes?.imageAsset)
         )
+    }
+
+    private func mapImageAsset(_ sdk: AppStoreConnect_Swift_SDK.ImageAsset?) -> Domain.ImageAsset? {
+        guard let templateUrl = sdk?.templateURL,
+              let width = sdk?.width,
+              let height = sdk?.height
+        else { return nil }
+        return Domain.ImageAsset(templateUrl: templateUrl, width: width, height: height)
     }
 }

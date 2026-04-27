@@ -19,9 +19,15 @@ extension SubscriptionPrice: Presentable {
 }
 
 extension SubscriptionPrice: AffordanceProviding {
-    public var affordances: [String: String] {
-        [
-            "listPricePoints": "asc subscriptions price-points list --subscription-id \(subscriptionId)",
+    public var structuredAffordances: [Affordance] {
+        _ = RESTPathResolver._subscriptionPricePointRoutes
+        return [
+            Affordance(
+                key: "listPricePoints",
+                command: "subscriptions price-points",
+                action: "list",
+                params: ["subscription-id": subscriptionId]
+            ),
         ]
     }
 }
