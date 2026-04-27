@@ -622,9 +622,10 @@ struct RESTRoutesTests {
         let normalized = output.replacingOccurrences(of: "\\/", with: "/")
 
         #expect(normalized.contains("\"_links\""))
-        #expect(normalized.contains("/api/v1/subscription-groups/grp-7/subscriptions"))
-        // Per-item child links are populated too.
+        // Each subscription advertises navigation links to its detail endpoints.
         #expect(normalized.contains("/api/v1/subscriptions/sub-1/localizations"))
+        #expect(normalized.contains("/api/v1/subscriptions/sub-1/availability"))
+        #expect(normalized.contains("/api/v1/subscriptions/sub-1/price-schedule"))
     }
 
     @Test func `subscription localizations list REST exposes nested path under subscription`() async throws {
