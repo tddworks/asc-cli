@@ -1,9 +1,9 @@
 [
   {
     "developer" : "itshan",
-    "developerId" : "1725133580",
     "github" : "hanrw",
-    "x" : "itshanrw"
+    "x" : "itshanrw",
+    "developerId" : "1725133580"
   },
   {
     "apps" : [
@@ -23,6 +23,15 @@
   {
     "apps" : [
       "https:\/\/apps.apple.com\/app\/id6752632723"
+    ]
+  },
+  {
+    "developer" : "westerbamos",
+    "github" : "westerbamos",
+    "x" : "westerbamos",
+    "developerId" : "1880888447",
+    "apps" : [
+      "https:\/\/apps.apple.com\/app\/id6759816401"
     ]
   }
 ]
