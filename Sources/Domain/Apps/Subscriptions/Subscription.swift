@@ -126,6 +126,8 @@ extension Subscription: AffordanceProviding {
                        params: ["subscription-id": id]),
             Affordance(key: "getReviewScreenshot", command: "subscription-review-screenshot", action: "get",
                        params: ["subscription-id": id]),
+            Affordance(key: "listImages", command: "subscription-images", action: "list",
+                       params: ["subscription-id": id]),
             Affordance(key: "listIntroductoryOffers", command: "subscription-offers", action: "list",
                        params: ["subscription-id": id]),
             Affordance(key: "listLocalizations", command: "subscription-localizations", action: "list",

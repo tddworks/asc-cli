@@ -40,6 +40,7 @@ struct SubscriptionsCreateTests {
                 "getAvailability" : "asc subscription-availability get --subscription-id sub-new",
                 "getPriceSchedule" : "asc subscription-price-schedule get --subscription-id sub-new",
                 "getReviewScreenshot" : "asc subscription-review-screenshot get --subscription-id sub-new",
+                "listImages" : "asc subscription-images list --subscription-id sub-new",
                 "listIntroductoryOffers" : "asc subscription-offers list --subscription-id sub-new",
                 "listLocalizations" : "asc subscription-localizations list --subscription-id sub-new",
                 "listOfferCodes" : "asc subscription-offer-codes list --subscription-id sub-new",

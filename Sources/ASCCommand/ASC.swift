@@ -46,6 +46,7 @@ struct ASC: AsyncParsableCommand {
             IAPReviewScreenshotCommand.self,
             IAPImagesCommand.self,
             SubscriptionReviewScreenshotCommand.self,
+            SubscriptionImagesCommand.self,
             SubscriptionOfferCodesCommand.self,
             SubscriptionOfferCodeCustomCodesCommand.self,
             SubscriptionOfferCodeOneTimeCodesCommand.self,

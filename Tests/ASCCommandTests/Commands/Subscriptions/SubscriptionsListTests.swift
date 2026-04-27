@@ -36,6 +36,7 @@ struct SubscriptionsListTests {
                 "getAvailability" : "asc subscription-availability get --subscription-id sub-1",
                 "getPriceSchedule" : "asc subscription-price-schedule get --subscription-id sub-1",
                 "getReviewScreenshot" : "asc subscription-review-screenshot get --subscription-id sub-1",
+                "listImages" : "asc subscription-images list --subscription-id sub-1",
                 "listIntroductoryOffers" : "asc subscription-offers list --subscription-id sub-1",
                 "listLocalizations" : "asc subscription-localizations list --subscription-id sub-1",
                 "listOfferCodes" : "asc subscription-offer-codes list --subscription-id sub-1",

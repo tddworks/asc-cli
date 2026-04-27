@@ -73,6 +73,73 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
         )
     }
 
+    // MARK: - Promotional Images
+
+    public func listImages(subscriptionId: String) async throws -> [Domain.SubscriptionPromotionalImage] {
+        let request = APIEndpoint.v1.subscriptions.id(subscriptionId).images.get()
+        let response = try await client.request(request)
+        return response.data.map { mapImage($0, subscriptionId: subscriptionId) }
+    }
+
+    public func uploadImage(subscriptionId: String, fileURL: URL) async throws -> Domain.SubscriptionPromotionalImage {
+        let fileData = try Data(contentsOf: fileURL)
+        let fileName = fileURL.lastPathComponent
+
+        let reserveBody = SubscriptionImageCreateRequest(data: .init(
+            type: .subscriptionImages,
+            attributes: .init(fileSize: fileData.count, fileName: fileName),
+            relationships: .init(
+                subscription: .init(data: .init(type: .subscriptions, id: subscriptionId))
+            )
+        ))
+        let reserved = try await client.request(APIEndpoint.v1.subscriptionImages.post(reserveBody))
+        let imageId = reserved.data.id
+        let uploadOps = reserved.data.attributes?.uploadOperations ?? []
+
+        for op in uploadOps {
+            guard let urlString = op.url, let url = URL(string: urlString),
+                  let offset = op.offset, let length = op.length else { continue }
+            let chunk = fileData.subdata(in: offset..<(offset + length))
+            var request = URLRequest(url: url)
+            request.httpMethod = op.method ?? "PUT"
+            request.httpBody = chunk
+            for header in op.requestHeaders ?? [] {
+                if let name = header.name, let value = header.value {
+                    request.setValue(value, forHTTPHeaderField: name)
+                }
+            }
+            _ = try await URLSession.shared.data(for: request)
+        }
+
+        let md5 = fileData.md5HexString
+        let confirmBody = SubscriptionImageUpdateRequest(data: .init(
+            type: .subscriptionImages,
+            id: imageId,
+            attributes: .init(sourceFileChecksum: md5, isUploaded: true)
+        ))
+        let confirmed = try await client.request(APIEndpoint.v1.subscriptionImages.id(imageId).patch(confirmBody))
+        return mapImage(confirmed.data, subscriptionId: subscriptionId)
+    }
+
+    public func deleteImage(imageId: String) async throws {
+        _ = try await client.request(APIEndpoint.v1.subscriptionImages.id(imageId).delete)
+    }
+
+    private func mapImage(
+        _ sdk: AppStoreConnect_Swift_SDK.SubscriptionImage,
+        subscriptionId: String
+    ) -> Domain.SubscriptionPromotionalImage {
+        let stateRaw = sdk.attributes?.state?.rawValue
+        let state = stateRaw.flatMap { Domain.SubscriptionPromotionalImage.ImageState(rawValue: $0) }
+        return Domain.SubscriptionPromotionalImage(
+            id: sdk.id,
+            subscriptionId: subscriptionId,
+            fileName: sdk.attributes?.fileName ?? "",
+            fileSize: sdk.attributes?.fileSize ?? 0,
+            state: state
+        )
+    }
+
     private func mapReviewScreenshot(
         _ sdk: AppStoreConnect_Swift_SDK.SubscriptionAppStoreReviewScreenshot,
         subscriptionId: String
