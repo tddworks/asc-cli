@@ -8,8 +8,8 @@ struct SubscriptionPricePointsListTests {
 
     @Test func `listed price points include subscriptionId, territory, prices and affordances`() async throws {
         let mockRepo = MockSubscriptionPriceRepository()
-        given(mockRepo).listPricePoints(subscriptionId: .any, territory: .any)
-            .willReturn([
+        given(mockRepo).listPricePoints(subscriptionId: .any, territory: .any, limit: .any, cursor: .any)
+            .willReturn(PaginatedResponse(data: [
                 SubscriptionPricePoint(
                     id: "pp-tier1",
                     subscriptionId: "sub-1",
@@ -18,7 +18,7 @@ struct SubscriptionPricePointsListTests {
                     proceeds: "6.99",
                     proceedsYear2: "7.49"
                 )
-            ])
+            ], nextCursor: nil))
 
         let cmd = try SubscriptionPricePointsList.parse([
             "--subscription-id", "sub-1",

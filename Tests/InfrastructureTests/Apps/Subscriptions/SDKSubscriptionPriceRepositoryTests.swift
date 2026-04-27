@@ -25,10 +25,10 @@ struct SDKSubscriptionPriceRepositoryTests {
         ))
 
         let repo = SDKSubscriptionPriceRepository(client: stub)
-        let result = try await repo.listPricePoints(subscriptionId: "sub-77", territory: nil)
+        let result = try await repo.listPricePoints(subscriptionId: "sub-77", territory: nil, limit: nil, cursor: nil)
 
-        #expect(result.count == 2)
-        #expect(result.allSatisfy { $0.subscriptionId == "sub-77" })
+        #expect(result.data.count == 2)
+        #expect(result.data.allSatisfy { $0.subscriptionId == "sub-77" })
     }
 
     @Test func `listPricePoints maps customerPrice, proceeds, proceedsYear2 and territory`() async throws {
@@ -45,12 +45,12 @@ struct SDKSubscriptionPriceRepositoryTests {
         ))
 
         let repo = SDKSubscriptionPriceRepository(client: stub)
-        let result = try await repo.listPricePoints(subscriptionId: "sub-1", territory: "USA")
+        let result = try await repo.listPricePoints(subscriptionId: "sub-1", territory: "USA", limit: nil, cursor: nil)
 
-        #expect(result[0].customerPrice == "9.99")
-        #expect(result[0].proceeds == "6.99")
-        #expect(result[0].proceedsYear2 == "7.49")
-        #expect(result[0].territory == "USA")
+        #expect(result.data[0].customerPrice == "9.99")
+        #expect(result.data[0].proceeds == "6.99")
+        #expect(result.data[0].proceedsYear2 == "7.49")
+        #expect(result.data[0].territory == "USA")
     }
 
     @Test func `setPrice injects subscriptionId into response`() async throws {
