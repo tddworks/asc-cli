@@ -145,7 +145,8 @@ struct SDKSubscriptionRepositoryTests {
         let repo = SDKSubscriptionRepository(client: stub)
         let result = try await repo.updateSubscription(
             subscriptionId: "sub-1", name: "Renamed",
-            isFamilySharable: true, groupLevel: 3, reviewNote: nil
+            isFamilySharable: true, groupLevel: 3,
+            subscriptionPeriod: nil, reviewNote: nil
         )
 
         #expect(result.id == "sub-1")

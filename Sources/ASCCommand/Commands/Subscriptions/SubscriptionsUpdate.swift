@@ -1,6 +1,8 @@
 import ArgumentParser
 import Domain
 
+extension SubscriptionPeriod: ExpressibleByArgument {}
+
 struct SubscriptionsUpdate: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "update",
@@ -24,6 +26,9 @@ struct SubscriptionsUpdate: AsyncParsableCommand {
     @Option(name: .long, help: "Group level for upgrade/downgrade ordering")
     var groupLevel: Int?
 
+    @Option(name: .long, help: "Billing period (ONE_WEEK, ONE_MONTH, TWO_MONTHS, THREE_MONTHS, SIX_MONTHS, ONE_YEAR)")
+    var period: SubscriptionPeriod?
+
     @Option(name: .long, help: "App Review note")
     var reviewNote: String?
 
@@ -39,6 +44,7 @@ struct SubscriptionsUpdate: AsyncParsableCommand {
             name: name,
             isFamilySharable: isFamilySharable,
             groupLevel: groupLevel,
+            subscriptionPeriod: period,
             reviewNote: reviewNote
         )
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)

@@ -48,14 +48,19 @@ public struct SDKSubscriptionRepository: SubscriptionRepository, @unchecked Send
         name: String?,
         isFamilySharable: Bool?,
         groupLevel: Int?,
+        subscriptionPeriod: Domain.SubscriptionPeriod?,
         reviewNote: String?
     ) async throws -> Domain.Subscription {
+        let sdkPeriod = subscriptionPeriod.flatMap {
+            SubscriptionUpdateRequest.Data.Attributes.SubscriptionPeriod(rawValue: $0.rawValue)
+        }
         let body = SubscriptionUpdateRequest(data: .init(
             type: .subscriptions,
             id: subscriptionId,
             attributes: .init(
                 name: name,
                 isFamilySharable: isFamilySharable,
+                subscriptionPeriod: sdkPeriod,
                 reviewNote: reviewNote,
                 groupLevel: groupLevel
             )
