@@ -548,6 +548,22 @@ struct RESTRoutesTests {
         #expect(normalized.contains("/api/v1/iap/iap-7/offer-codes"))
     }
 
+    @Test func `IAP equalizations list REST exposes nested path under price point`() async throws {
+        let mockRepo = MockInAppPurchasePriceRepository()
+        given(mockRepo).listEqualizations(pricePointId: .any, limit: .any).willReturn([
+            InAppPurchasePricePoint(id: "pp-USA", iapId: "", territory: "USA", customerPrice: "9.99", proceeds: "6.99"),
+            InAppPurchasePricePoint(id: "pp-JPN", iapId: "", territory: "JPN", customerPrice: "1500", proceeds: "1050"),
+        ])
+
+        let output = try await IAPEqualizationsList.parse(["--price-point-id", "pp-USA", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"data\""))
+        #expect(normalized.contains("\"territory\" : \"USA\""))
+        #expect(normalized.contains("\"territory\" : \"JPN\""))
+    }
+
     @Test func `IAP price-schedule get REST exposes nested path under iap`() async throws {
         let mockRepo = MockInAppPurchasePriceRepository()
         given(mockRepo).getPriceSchedule(iapId: .any).willReturn(

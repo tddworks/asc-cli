@@ -9,5 +9,6 @@ extension RESTPathResolver {
         registerRoute(command: "iap price-points", parentParam: "iap-id", parentSegment: "iap", segment: "price-points")
         registerRoute(command: "iap prices", parentParam: "iap-id", parentSegment: "iap", segment: "prices")
         registerRoute(command: "iap-price-schedule", parentParam: "iap-id", parentSegment: "iap", segment: "price-schedule")
+        registerRoute(command: "iap-equalizations", parentParam: "price-point-id", parentSegment: "iap-price-points", segment: "equalizations")
     }()
 }

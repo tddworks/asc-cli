@@ -30,6 +30,7 @@ struct ASC: AsyncParsableCommand {
             AppPreviewSetsCommand.self,
             AppPreviewsCommand.self,
             IAPCommand.self,
+            IAPEqualizationsCommand.self,
             IAPLocalizationsCommand.self,
             IAPPriceScheduleCommand.self,
             SubscriptionGroupsCommand.self,
