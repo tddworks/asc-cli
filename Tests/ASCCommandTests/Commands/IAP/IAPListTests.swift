@@ -31,6 +31,7 @@ struct IAPListTests {
                 "createLocalization" : "asc iap-localizations create --iap-id iap-1 --locale en-US --name <name>",
                 "delete" : "asc iap delete --iap-id iap-1",
                 "getAvailability" : "asc iap-availability get --iap-id iap-1",
+                "getPriceSchedule" : "asc iap-price-schedule get --iap-id iap-1",
                 "getReviewScreenshot" : "asc iap-review-screenshot get --iap-id iap-1",
                 "listImages" : "asc iap-images list --iap-id iap-1",
                 "listLocalizations" : "asc iap-localizations list --iap-id iap-1",

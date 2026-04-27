@@ -24,6 +24,7 @@ struct IAPPricesSetTests {
           "data" : [
             {
               "affordances" : {
+                "getIAP" : "asc iap get --iap-id iap-1",
                 "listPricePoints" : "asc iap price-points list --iap-id iap-1"
               },
               "iapId" : "iap-1",
