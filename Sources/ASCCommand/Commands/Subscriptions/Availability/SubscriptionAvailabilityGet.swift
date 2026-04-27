@@ -24,7 +24,7 @@ struct SubscriptionAvailabilityGet: AsyncParsableCommand {
         let availability = try await repo.getAvailability(subscriptionId: subscriptionId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
-            [availability],
+            availability.map { [$0] } ?? [],
             headers: ["ID", "Subscription ID", "Available in New Territories", "Territories"],
             rowMapper: { [$0.id, $0.subscriptionId, String($0.isAvailableInNewTerritories), $0.territories.map(\.id).joined(separator: ", ")] },
             affordanceMode: affordanceMode

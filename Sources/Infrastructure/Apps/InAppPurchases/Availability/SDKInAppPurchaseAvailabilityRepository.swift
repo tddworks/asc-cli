@@ -8,30 +8,38 @@ public struct SDKInAppPurchaseAvailabilityRepository: InAppPurchaseAvailabilityR
         self.client = client
     }
 
-    public func getAvailability(iapId: String) async throws -> Domain.InAppPurchaseAvailability {
+    public func getAvailability(iapId: String) async throws -> Domain.InAppPurchaseAvailability? {
         // Two parallel calls — `include=availableTerritories` on the parent endpoint truncates
         // the relationship to ~10 entries. Fetching `/availableTerritories?limit=200` returns
         // the full territory list (Apple's max is 175 today).
-        async let availResponse = client.request(
-            APIEndpoint.v2.inAppPurchases.id(iapId).inAppPurchaseAvailability.get(parameters: .init())
-        )
-        async let terrResponse = client.request(
-            APIEndpoint.v1.inAppPurchaseAvailabilities.id(iapId).availableTerritories.get(
-                fieldsTerritories: [.currency],
-                limit: 200
+        //
+        // 404 → no availability resource configured yet (typical for newly-created IAPs).
+        // Mirrors the iOS SDK's `refreshTerritoryStatuses` 404 tolerance — return nil and let
+        // the frontend seed defaults.
+        do {
+            async let availResponse = client.request(
+                APIEndpoint.v2.inAppPurchases.id(iapId).inAppPurchaseAvailability.get(parameters: .init())
             )
-        )
-        let (avail, terr) = try await (availResponse, terrResponse)
+            async let terrResponse = client.request(
+                APIEndpoint.v1.inAppPurchaseAvailabilities.id(iapId).availableTerritories.get(
+                    fieldsTerritories: [.currency],
+                    limit: 200
+                )
+            )
+            let (avail, terr) = try await (availResponse, terrResponse)
 
-        let territories = terr.data.map { t in
-            Domain.Territory(id: t.id, currency: t.attributes?.currency)
+            let territories = terr.data.map { t in
+                Domain.Territory(id: t.id, currency: t.attributes?.currency)
+            }
+            return Domain.InAppPurchaseAvailability(
+                id: avail.data.id,
+                iapId: iapId,
+                isAvailableInNewTerritories: avail.data.attributes?.isAvailableInNewTerritories ?? false,
+                territories: territories
+            )
+        } catch {
+            return nil
         }
-        return Domain.InAppPurchaseAvailability(
-            id: avail.data.id,
-            iapId: iapId,
-            isAvailableInNewTerritories: avail.data.attributes?.isAvailableInNewTerritories ?? false,
-            territories: territories
-        )
     }
 
     public func createAvailability(

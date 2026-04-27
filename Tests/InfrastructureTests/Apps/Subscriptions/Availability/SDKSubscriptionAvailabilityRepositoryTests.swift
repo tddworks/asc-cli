@@ -27,13 +27,13 @@ struct SDKSubscriptionAvailabilityRepositoryTests {
         let repo = SDKSubscriptionAvailabilityRepository(client: stub)
         let result = try await repo.getAvailability(subscriptionId: "sub-99")
 
-        #expect(result.id == "avail-1")
-        #expect(result.subscriptionId == "sub-99")
-        #expect(result.territories.count == 2)
-        #expect(result.territories[0].id == "USA")
-        #expect(result.territories[0].currency == "USD")
-        #expect(result.territories[1].id == "GBR")
-        #expect(result.territories[1].currency == "GBP")
+        #expect(result?.id == "avail-1")
+        #expect(result?.subscriptionId == "sub-99")
+        #expect(result?.territories.count == 2)
+        #expect(result?.territories[0].id == "USA")
+        #expect(result?.territories[0].currency == "USD")
+        #expect(result?.territories[1].id == "GBR")
+        #expect(result?.territories[1].currency == "GBP")
     }
 
     @Test func `getAvailability returns more than 10 territories without pagination loss`() async throws {
@@ -54,7 +54,7 @@ struct SDKSubscriptionAvailabilityRepositoryTests {
         let repo = SDKSubscriptionAvailabilityRepository(client: stub)
         let result = try await repo.getAvailability(subscriptionId: "sub-big")
 
-        #expect(result.territories.count == 175)
+        #expect(result?.territories.count == 175)
     }
 
     @Test func `getAvailability handles empty territory list`() async throws {
@@ -72,7 +72,14 @@ struct SDKSubscriptionAvailabilityRepositoryTests {
         let repo = SDKSubscriptionAvailabilityRepository(client: stub)
         let result = try await repo.getAvailability(subscriptionId: "sub-1")
 
-        #expect(result.territories.isEmpty)
+        #expect(result?.territories.isEmpty == true)
+    }
+
+    @Test func `getAvailability returns nil when subscription has no availability resource yet`() async throws {
+        let stub = StubAPIClient()
+        let repo = SDKSubscriptionAvailabilityRepository(client: stub)
+        let result = try? await repo.getAvailability(subscriptionId: "sub-fresh")
+        #expect(result == nil)
     }
 
     @Test func `createAvailability injects subscriptionId and maps included territories`() async throws {

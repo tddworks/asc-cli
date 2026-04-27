@@ -11,7 +11,8 @@ struct IAPAvailabilityController: Sendable {
         group.get("/iap/:iapId/availability") { _, context -> Response in
             guard let iapId = context.parameters.get("iapId") else { return jsonError("Missing iapId") }
             let availability = try await self.repo.getAvailability(iapId: iapId)
-            return try restFormat([availability])
+            // nil → empty data array (newly-created IAP, no availability resource yet).
+            return try restFormat(availability.map { [$0] } ?? [])
         }
     }
 }

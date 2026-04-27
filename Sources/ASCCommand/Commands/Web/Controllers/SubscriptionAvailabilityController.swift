@@ -11,7 +11,7 @@ struct SubscriptionAvailabilityController: Sendable {
         group.get("/subscriptions/:subscriptionId/availability") { _, context -> Response in
             guard let subscriptionId = context.parameters.get("subscriptionId") else { return jsonError("Missing subscriptionId") }
             let availability = try await self.repo.getAvailability(subscriptionId: subscriptionId)
-            return try restFormat([availability])
+            return try restFormat(availability.map { [$0] } ?? [])
         }
     }
 }

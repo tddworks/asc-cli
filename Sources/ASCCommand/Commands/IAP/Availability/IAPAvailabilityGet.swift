@@ -23,8 +23,10 @@ struct IAPAvailabilityGet: AsyncParsableCommand {
     ) async throws -> String {
         let availability = try await repo.getAvailability(iapId: iapId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
+        // nil → empty data array. Frontends treat empty as "no availability configured yet"
+        // and seed defaults (mirrors iOS `if iap.availability != nil`).
         return try formatter.formatAgentItems(
-            [availability],
+            availability.map { [$0] } ?? [],
             headers: ["ID", "IAP ID", "Available in New Territories", "Territories"],
             rowMapper: { [$0.id, $0.iapId, String($0.isAvailableInNewTerritories), $0.territories.map(\.id).joined(separator: ", ")] },
             affordanceMode: affordanceMode

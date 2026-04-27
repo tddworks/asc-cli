@@ -8,28 +8,33 @@ public struct SDKSubscriptionAvailabilityRepository: SubscriptionAvailabilityRep
         self.client = client
     }
 
-    public func getAvailability(subscriptionId: String) async throws -> Domain.SubscriptionAvailability {
+    public func getAvailability(subscriptionId: String) async throws -> Domain.SubscriptionAvailability? {
         // Two parallel calls — see SDKInAppPurchaseAvailabilityRepository for rationale.
-        async let availResponse = client.request(
-            APIEndpoint.v1.subscriptions.id(subscriptionId).subscriptionAvailability.get(parameters: .init())
-        )
-        async let terrResponse = client.request(
-            APIEndpoint.v1.subscriptionAvailabilities.id(subscriptionId).availableTerritories.get(
-                fieldsTerritories: [.currency],
-                limit: 200
+        // 404 → nil (no availability configured yet on a fresh subscription).
+        do {
+            async let availResponse = client.request(
+                APIEndpoint.v1.subscriptions.id(subscriptionId).subscriptionAvailability.get(parameters: .init())
             )
-        )
-        let (avail, terr) = try await (availResponse, terrResponse)
+            async let terrResponse = client.request(
+                APIEndpoint.v1.subscriptionAvailabilities.id(subscriptionId).availableTerritories.get(
+                    fieldsTerritories: [.currency],
+                    limit: 200
+                )
+            )
+            let (avail, terr) = try await (availResponse, terrResponse)
 
-        let territories = terr.data.map { t in
-            Domain.Territory(id: t.id, currency: t.attributes?.currency)
+            let territories = terr.data.map { t in
+                Domain.Territory(id: t.id, currency: t.attributes?.currency)
+            }
+            return Domain.SubscriptionAvailability(
+                id: avail.data.id,
+                subscriptionId: subscriptionId,
+                isAvailableInNewTerritories: avail.data.attributes?.isAvailableInNewTerritories ?? false,
+                territories: territories
+            )
+        } catch {
+            return nil
         }
-        return Domain.SubscriptionAvailability(
-            id: avail.data.id,
-            subscriptionId: subscriptionId,
-            isAvailableInNewTerritories: avail.data.attributes?.isAvailableInNewTerritories ?? false,
-            territories: territories
-        )
     }
 
     public func createAvailability(

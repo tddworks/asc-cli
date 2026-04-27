@@ -1,5 +1,13 @@
 @preconcurrency import AppStoreConnect_Swift_SDK
+import Foundation
 @testable import Infrastructure
+
+/// Throwing error used by `StubAPIClient` when no stub matches the requested response type.
+/// Adapters that tolerate ASC 404s (like `getAvailability` for new IAPs) can be tested by
+/// simply not stubbing — the request throws and the adapter's `catch` returns nil.
+struct StubAPIClientError: Error {
+    let message: String
+}
 
 final class StubAPIClient: APIClient, @unchecked Sendable {
     /// Per-type stubs keyed by `String(describing: T.self)`. Lookup falls back to the
@@ -18,7 +26,8 @@ final class StubAPIClient: APIClient, @unchecked Sendable {
         let key = String(describing: T.self)
         if let response = stubsByType[key] as? T { return response }
         if let response = lastStub as? T { return response }
-        fatalError("StubAPIClient: no stub configured for \(T.self)")
+        // Throw rather than fatalError so adapters can simulate ASC 404 by simply not stubbing.
+        throw StubAPIClientError(message: "no stub configured for \(T.self)")
     }
 
     func request(_ endpoint: Request<Void>) async throws {
