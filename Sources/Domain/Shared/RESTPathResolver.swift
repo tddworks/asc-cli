@@ -144,6 +144,7 @@ public final class RESTPathResolver: @unchecked Sendable {
         _ = _iapRoutes
         _ = _iapReviewAssetRoutes
         _ = _subscriptionRoutes
+        _ = _subscriptionGroupLocalizationRoutes
         _ = _subscriptionReviewAssetRoutes
         _ = _subscriptionPromotionalImageRoutes
         _ = _subscriptionPromotionalOfferRoutes
