@@ -85,8 +85,9 @@ enum RESTRoutes {
         if let iapLocRepo = try? factory.makeInAppPurchaseLocalizationRepository(authProvider: auth) {
             IAPLocalizationsController(repo: iapLocRepo).addRoutes(to: v1)
         }
-        if let iapAvailRepo = try? factory.makeInAppPurchaseAvailabilityRepository(authProvider: auth) {
-            IAPAvailabilityController(repo: iapAvailRepo).addRoutes(to: v1)
+        if let iapAvailRepo = try? factory.makeInAppPurchaseAvailabilityRepository(authProvider: auth),
+           let territoryRepo = try? factory.makeTerritoryRepository(authProvider: auth) {
+            IAPAvailabilityController(repo: iapAvailRepo, territoryRepo: territoryRepo).addRoutes(to: v1)
         }
         if let iapOfferCodeRepo = try? factory.makeInAppPurchaseOfferCodeRepository(authProvider: auth) {
             IAPOfferCodesController(repo: iapOfferCodeRepo).addRoutes(to: v1)
@@ -101,8 +102,9 @@ enum RESTRoutes {
         if let subLocRepo = try? factory.makeSubscriptionLocalizationRepository(authProvider: auth) {
             SubscriptionLocalizationsController(repo: subLocRepo).addRoutes(to: v1)
         }
-        if let subAvailRepo = try? factory.makeSubscriptionAvailabilityRepository(authProvider: auth) {
-            SubscriptionAvailabilityController(repo: subAvailRepo).addRoutes(to: v1)
+        if let subAvailRepo = try? factory.makeSubscriptionAvailabilityRepository(authProvider: auth),
+           let territoryRepo = try? factory.makeTerritoryRepository(authProvider: auth) {
+            SubscriptionAvailabilityController(repo: subAvailRepo, territoryRepo: territoryRepo).addRoutes(to: v1)
         }
         if let subOfferCodeRepo = try? factory.makeSubscriptionOfferCodeRepository(authProvider: auth) {
             SubscriptionOfferCodesController(repo: subOfferCodeRepo).addRoutes(to: v1)
