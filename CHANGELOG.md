@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.74] - 2026-04-27
+
 ### Added
 - **HATEOAS `_links` for IAPs and Subscriptions** — `GET /api/v1/apps/{id}/iap` and `GET /api/v1/subscription-groups/{id}/subscriptions` now embed `_links` per item so an agent can navigate to localizations, availability, offer codes, price points, review screenshots, promotional offers, win-back offers (subscriptions only), and intro offers without knowing the URL conventions.
 - **REST controllers for IAP details** — `GET /api/v1/iap/:id/localizations`, `/availability`, `/offer-codes`, `/price-points`. Each returns the agent-first `data: [...]` envelope with `_links` already populated.
@@ -849,7 +853,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.17.3...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.74...HEAD
+[0.1.74]: https://github.com/tddworks/asc-cli/compare/v0.17.3...v0.1.74
 [0.17.3]: https://github.com/tddworks/asc-cli/compare/v0.17.2...v0.17.3
 [0.17.2]: https://github.com/tddworks/asc-cli/compare/v0.17.1...v0.17.2
 [0.17.1]: https://github.com/tddworks/asc-cli/compare/v0.17.0...v0.17.1
