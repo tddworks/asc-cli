@@ -8,15 +8,30 @@ public struct SDKSubscriptionPriceRepository: SubscriptionPriceRepository, @unch
         self.client = client
     }
 
-    public func listPricePoints(subscriptionId: String, territory: String?) async throws -> [Domain.SubscriptionPricePoint] {
-        let request = APIEndpoint.v1.subscriptions.id(subscriptionId).pricePoints.get(
+    public func listPricePoints(
+        subscriptionId: String,
+        territory: String?,
+        limit: Int?,
+        cursor: String?
+    ) async throws -> Domain.PaginatedResponse<Domain.SubscriptionPricePoint> {
+        var request = APIEndpoint.v1.subscriptions.id(subscriptionId).pricePoints.get(
             parameters: .init(
                 filterTerritory: territory.map { [$0] },
-                fieldsSubscriptionPricePoints: [.customerPrice, .proceeds, .proceedsYear2, .territory]
+                fieldsSubscriptionPricePoints: [.customerPrice, .proceeds, .proceedsYear2, .territory],
+                limit: limit
             )
         )
+        if let cursor {
+            var query = request.query ?? []
+            query.append(("cursor", cursor))
+            request.query = query
+        }
         let response = try await client.request(request)
-        return response.data.map { mapPricePoint($0, subscriptionId: subscriptionId) }
+        return Domain.PaginatedResponse(
+            data: response.data.map { mapPricePoint($0, subscriptionId: subscriptionId) },
+            nextCursor: response.meta?.paging.nextCursor,
+            totalCount: response.meta?.paging.total
+        )
     }
 
     public func setPrice(

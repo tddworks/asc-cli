@@ -11,8 +11,12 @@ struct IAPPricePointsController: Sendable {
         group.get("/iap/:iapId/price-points") { request, context -> Response in
             guard let iapId = context.parameters.get("iapId") else { return jsonError("Missing iapId") }
             let territory = request.uri.queryParameters.get("territory").flatMap { String($0) }
-            let items = try await self.repo.listPricePoints(iapId: iapId, territory: territory)
-            return try restFormat(items)
+            let limit = request.uri.queryParameters.get("limit").flatMap { Int($0) }
+            let cursor = request.uri.queryParameters.get("cursor").flatMap { String($0) }
+            let response = try await self.repo.listPricePoints(
+                iapId: iapId, territory: territory, limit: limit, cursor: cursor
+            )
+            return try restFormatPaginated(response)
         }
     }
 }

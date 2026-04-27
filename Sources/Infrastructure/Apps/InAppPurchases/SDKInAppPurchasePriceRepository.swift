@@ -139,15 +139,31 @@ public struct SDKInAppPurchasePriceRepository: InAppPurchasePriceRepository, @un
         return Domain.Territory(id: id, currency: nil)
     }
 
-    public func listPricePoints(iapId: String, territory: String?) async throws -> [Domain.InAppPurchasePricePoint] {
-        let request = APIEndpoint.v2.inAppPurchases.id(iapId).pricePoints.get(
+    public func listPricePoints(
+        iapId: String,
+        territory: String?,
+        limit: Int?,
+        cursor: String?
+    ) async throws -> Domain.PaginatedResponse<Domain.InAppPurchasePricePoint> {
+        var request = APIEndpoint.v2.inAppPurchases.id(iapId).pricePoints.get(
             parameters: .init(
                 filterTerritory: territory.map { [$0] },
-                fieldsInAppPurchasePricePoints: [.customerPrice, .proceeds, .territory]
+                fieldsInAppPurchasePricePoints: [.customerPrice, .proceeds, .territory],
+                limit: limit
             )
         )
+        // The generated SDK doesn't expose `cursor` on `GetParameters` — append it manually.
+        if let cursor {
+            var query = request.query ?? []
+            query.append(("cursor", cursor))
+            request.query = query
+        }
         let response = try await client.request(request)
-        return response.data.map { mapPricePoint($0, iapId: iapId) }
+        return Domain.PaginatedResponse(
+            data: response.data.map { mapPricePoint($0, iapId: iapId) },
+            nextCursor: response.meta?.paging.nextCursor,
+            totalCount: response.meta?.paging.total
+        )
     }
 
     public func setPriceSchedule(iapId: String, baseTerritory: String, pricePointId: String) async throws -> Domain.InAppPurchasePriceSchedule {
