@@ -28,7 +28,10 @@ struct IAPPricesSetTests {
                 "listPricePoints" : "asc iap price-points list --iap-id iap-1"
               },
               "iapId" : "iap-1",
-              "id" : "sched-1"
+              "id" : "sched-1",
+              "territoryPrices" : [
+
+              ]
             }
           ]
         }

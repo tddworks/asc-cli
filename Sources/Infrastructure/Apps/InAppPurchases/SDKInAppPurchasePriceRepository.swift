@@ -9,15 +9,79 @@ public struct SDKInAppPurchasePriceRepository: InAppPurchasePriceRepository, @un
     }
 
     public func getPriceSchedule(iapId: String) async throws -> Domain.InAppPurchasePriceSchedule? {
+        // Step 1: schedule + base territory.
+        let schedule: AppStoreConnect_Swift_SDK.InAppPurchasePriceScheduleResponse
         do {
-            let response = try await client.request(
-                APIEndpoint.v2.inAppPurchases.id(iapId).iapPriceSchedule.get()
+            schedule = try await client.request(
+                APIEndpoint.v2.inAppPurchases.id(iapId).iapPriceSchedule.get(parameters: .init(
+                    fieldsTerritories: [.currency],
+                    include: [.baseTerritory]
+                ))
             )
-            return Domain.InAppPurchasePriceSchedule(id: response.data.id, iapId: iapId)
         } catch {
             // 404 → no schedule configured yet
             return nil
         }
+
+        let scheduleId = schedule.data.id
+        let baseTerritoryId = schedule.data.relationships?.baseTerritory?.data?.id
+        let baseTerritory = baseTerritoryId.flatMap { id in
+            extractTerritory(id: id, included: schedule.included)
+        }
+
+        // Step 2: manual prices with territory + price point includes.
+        let manualResponse = try await client.request(
+            APIEndpoint.v1.inAppPurchasePriceSchedules.id(scheduleId).manualPrices.get(parameters: .init(
+                fieldsInAppPurchasePrices: [.inAppPurchasePricePoint, .territory],
+                fieldsInAppPurchasePricePoints: [.customerPrice, .proceeds, .territory],
+                fieldsTerritories: [.currency],
+                include: [.inAppPurchasePricePoint, .territory]
+            ))
+        )
+
+        // Index included territories + price points for lookup.
+        var territoriesById: [String: Domain.Territory] = [:]
+        var pricePointsById: [String: AppStoreConnect_Swift_SDK.InAppPurchasePricePoint] = [:]
+        for item in manualResponse.included ?? [] {
+            switch item {
+            case .territory(let t):
+                territoriesById[t.id] = Domain.Territory(id: t.id, currency: t.attributes?.currency)
+            case .inAppPurchasePricePoint(let pp):
+                pricePointsById[pp.id] = pp
+            }
+        }
+
+        let territoryPrices: [Domain.TerritoryPrice] = manualResponse.data.compactMap { price in
+            guard
+                let territoryId = price.relationships?.territory?.data?.id,
+                let territory = territoriesById[territoryId],
+                let pricePointId = price.relationships?.inAppPurchasePricePoint?.data?.id,
+                let pricePoint = pricePointsById[pricePointId],
+                let customerPrice = pricePoint.attributes?.customerPrice,
+                let proceeds = pricePoint.attributes?.proceeds
+            else { return nil }
+            return Domain.TerritoryPrice(territory: territory, customerPrice: customerPrice, proceeds: proceeds)
+        }
+
+        return Domain.InAppPurchasePriceSchedule(
+            id: scheduleId,
+            iapId: iapId,
+            baseTerritory: baseTerritory,
+            territoryPrices: territoryPrices
+        )
+    }
+
+    private func extractTerritory(
+        id: String,
+        included: [AppStoreConnect_Swift_SDK.InAppPurchasePriceScheduleResponse.IncludedItem]?
+    ) -> Domain.Territory? {
+        for item in included ?? [] {
+            if case let .territory(t) = item, t.id == id {
+                return Domain.Territory(id: t.id, currency: t.attributes?.currency)
+            }
+        }
+        // Fall back to id-only territory if the include didn't return it.
+        return Domain.Territory(id: id, currency: nil)
     }
 
     public func listPricePoints(iapId: String, territory: String?) async throws -> [Domain.InAppPurchasePricePoint] {
