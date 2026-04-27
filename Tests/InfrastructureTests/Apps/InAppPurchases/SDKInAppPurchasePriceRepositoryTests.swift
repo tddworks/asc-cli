@@ -123,8 +123,10 @@ struct SDKInAppPurchasePriceRepositoryTests {
             return
         }
         #expect(inline.id == tempId)
-        #expect(inline.relationships?.inAppPurchaseV2?.data.id == "iap-abc")
-        #expect(inline.relationships?.inAppPurchasePricePoint?.data.id == "pp-1")
+        let v2DataId = inline.relationships?.inAppPurchaseV2?.data?.id
+        let ppDataId = inline.relationships?.inAppPurchasePricePoint?.data?.id
+        #expect(v2DataId == "iap-abc")
+        #expect(ppDataId == "pp-1")
     }
 
     // MARK: - listEqualizations
