@@ -2,7 +2,14 @@ import Mockable
 
 @Mockable
 public protocol SubscriptionPriceRepository: Sendable {
-    func listPricePoints(subscriptionId: String, territory: String?) async throws -> [SubscriptionPricePoint]
+    /// Cursor-paginated. `cursor` is the opaque value from the previous response's
+    /// `nextCursor`. `limit` defaults to ASC's page size (~50) when nil.
+    func listPricePoints(
+        subscriptionId: String,
+        territory: String?,
+        limit: Int?,
+        cursor: String?
+    ) async throws -> PaginatedResponse<SubscriptionPricePoint>
     func setPrice(
         subscriptionId: String,
         territory: String,

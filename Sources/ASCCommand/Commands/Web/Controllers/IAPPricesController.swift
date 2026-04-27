@@ -21,12 +21,22 @@ struct IAPPricesController: Sendable {
             guard let pricePointId = json["pricePointId"] as? String ?? json["price-point-id"] as? String else {
                 return jsonError("Missing pricePointId", status: .badRequest)
             }
-            let schedule = try await self.repo.setPriceSchedule(
-                iapId: iapId,
-                baseTerritory: baseTerritory,
-                pricePointId: pricePointId
-            )
-            return try restFormat([schedule])
+            do {
+                let schedule = try await self.repo.setPriceSchedule(
+                    iapId: iapId,
+                    baseTerritory: baseTerritory,
+                    pricePointId: pricePointId
+                )
+                return try restFormat([schedule])
+            } catch {
+                FileHandle.standardError.write(Data(
+                    "[web] POST /iap/\(iapId)/prices/set failed: baseTerritory=\(baseTerritory) pricePointId=\(pricePointId) error=\(error)\n".utf8
+                ))
+                return jsonError(
+                    "setPriceSchedule failed: \(error.localizedDescription)",
+                    status: .internalServerError
+                )
+            }
         }
     }
 }

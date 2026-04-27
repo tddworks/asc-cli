@@ -8,6 +8,24 @@ struct DataResponse<T: Encodable>: Encodable {
     let data: [T]
 }
 
+/// Wraps a paginated list with cursor metadata. `nextCursor`/`totalCount` are omitted when nil.
+struct PaginatedDataResponse<T: Encodable>: Encodable {
+    let data: [T]
+    let nextCursor: String?
+    let totalCount: Int?
+
+    func encode(to encoder: any Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(data, forKey: .data)
+        try c.encodeIfPresent(nextCursor, forKey: .nextCursor)
+        try c.encodeIfPresent(totalCount, forKey: .totalCount)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case data, nextCursor, totalCount
+    }
+}
+
 /// Wraps a single item in {"data": {...}} for agent-first JSON responses.
 struct SingleDataResponse<T: Encodable>: Encodable {
     let data: T
@@ -107,6 +125,27 @@ struct OutputFormatter {
             return renderTable(headers: headers, rows: items.map(rowMapper))
         case .markdown:
             return renderMarkdownTable(headers: headers, rows: items.map(rowMapper))
+        }
+    }
+
+    /// Agent-first format with cursor pagination: `{"data": [...], "nextCursor": "...", "totalCount": N}`.
+    /// `nextCursor` and `totalCount` are omitted when nil. Tabular/markdown output drops the
+    /// pagination meta — paginated output only makes sense in JSON.
+    func formatAgentPaginated<T: Encodable & AffordanceProviding & Presentable>(
+        _ response: PaginatedResponse<T>,
+        affordanceMode: AffordanceMode = .cli
+    ) throws -> String {
+        switch format {
+        case .json:
+            return try formatJSON(PaginatedDataResponse(
+                data: response.data.map { WithAffordances($0, mode: affordanceMode) },
+                nextCursor: response.nextCursor,
+                totalCount: response.totalCount
+            ))
+        case .table:
+            return renderTable(headers: T.tableHeaders, rows: response.data.map(\.tableRow))
+        case .markdown:
+            return renderMarkdownTable(headers: T.tableHeaders, rows: response.data.map(\.tableRow))
         }
     }
 
