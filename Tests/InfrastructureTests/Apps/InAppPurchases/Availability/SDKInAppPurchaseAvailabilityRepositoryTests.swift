@@ -6,19 +6,20 @@ import Testing
 @Suite
 struct SDKInAppPurchaseAvailabilityRepositoryTests {
 
-    @Test func `getAvailability injects iapId and maps territories with currency`() async throws {
+    @Test func `getAvailability composes attributes call with availableTerritories relationship call`() async throws {
         let stub = StubAPIClient()
+        // Call 1: GET /v2/inAppPurchases/{id}/inAppPurchaseAvailability — just attributes.
         stub.willReturn(InAppPurchaseAvailabilityResponse(
             data: InAppPurchaseAvailability(
                 type: .inAppPurchaseAvailabilities,
                 id: "avail-1",
-                attributes: .init(isAvailableInNewTerritories: true),
-                relationships: .init(availableTerritories: .init(data: [
-                    .init(type: .territories, id: "USA"),
-                    .init(type: .territories, id: "CHN"),
-                ]))
+                attributes: .init(isAvailableInNewTerritories: true)
             ),
-            included: [
+            links: .init(this: "")
+        ))
+        // Call 2: GET /v1/inAppPurchaseAvailabilities/{id}/availableTerritories?limit=200 — full list.
+        stub.willReturn(TerritoriesResponse(
+            data: [
                 Territory(type: .territories, id: "USA", attributes: .init(currency: "USD")),
                 Territory(type: .territories, id: "CHN", attributes: .init(currency: "CNY")),
             ],
@@ -38,7 +39,31 @@ struct SDKInAppPurchaseAvailabilityRepositoryTests {
         #expect(result.territories[1].currency == "CNY")
     }
 
-    @Test func `getAvailability maps empty territories when relationship data is nil`() async throws {
+    @Test func `getAvailability returns more than 10 territories without pagination loss`() async throws {
+        // Regression test: the parent endpoint's `include=availableTerritories` truncates the
+        // relationship to ~10 entries. Using the dedicated `/availableTerritories` endpoint
+        // with limit=200 returns the full list.
+        let stub = StubAPIClient()
+        stub.willReturn(InAppPurchaseAvailabilityResponse(
+            data: InAppPurchaseAvailability(
+                type: .inAppPurchaseAvailabilities,
+                id: "avail-big",
+                attributes: .init(isAvailableInNewTerritories: false)
+            ),
+            links: .init(this: "")
+        ))
+        let manyTerritories: [AppStoreConnect_Swift_SDK.Territory] = (0..<175).map { i in
+            AppStoreConnect_Swift_SDK.Territory(type: .territories, id: "T\(i)", attributes: .init(currency: "USD"))
+        }
+        stub.willReturn(TerritoriesResponse(data: manyTerritories, links: .init(this: "")))
+
+        let repo = SDKInAppPurchaseAvailabilityRepository(client: stub)
+        let result = try await repo.getAvailability(iapId: "iap-big")
+
+        #expect(result.territories.count == 175)
+    }
+
+    @Test func `getAvailability handles empty territory list`() async throws {
         let stub = StubAPIClient()
         stub.willReturn(InAppPurchaseAvailabilityResponse(
             data: InAppPurchaseAvailability(
@@ -48,6 +73,7 @@ struct SDKInAppPurchaseAvailabilityRepositoryTests {
             ),
             links: .init(this: "")
         ))
+        stub.willReturn(TerritoriesResponse(data: [], links: .init(this: "")))
 
         let repo = SDKInAppPurchaseAvailabilityRepository(client: stub)
         let result = try await repo.getAvailability(iapId: "iap-1")

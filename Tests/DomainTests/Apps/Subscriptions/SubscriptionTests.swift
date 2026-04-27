@@ -17,7 +17,26 @@ struct SubscriptionTests {
 
     @Test func `subscription group affordances include createSubscription`() {
         let group = MockRepositoryFactory.makeSubscriptionGroup(id: "grp-1")
-        #expect(group.affordances["createSubscription"] == "asc subscriptions create --group-id grp-1 --name <name> --product-id <id> --period ONE_MONTH")
+        #expect(group.affordances["createSubscription"] == "asc subscriptions create --group-id grp-1 --name <name> --period ONE_MONTH --product-id <id>")
+    }
+
+    @Test func `subscription group apiLinks include listSubscriptions under nested parent`() {
+        let group = MockRepositoryFactory.makeSubscriptionGroup(id: "grp-1")
+        #expect(group.apiLinks["listSubscriptions"]?.href == "/api/v1/subscription-groups/grp-1/subscriptions")
+        #expect(group.apiLinks["listSubscriptions"]?.method == "GET")
+    }
+
+    @Test func `subscription group apiLinks include listLocalizations under nested parent`() {
+        let group = MockRepositoryFactory.makeSubscriptionGroup(id: "grp-1")
+        #expect(group.apiLinks["listLocalizations"]?.href == "/api/v1/subscription-groups/grp-1/subscription-group-localizations")
+    }
+
+    @Test func `subscription group apiLinks include update and delete on flat resource`() {
+        let group = MockRepositoryFactory.makeSubscriptionGroup(id: "grp-1")
+        #expect(group.apiLinks["update"]?.href == "/api/v1/subscription-groups/grp-1")
+        #expect(group.apiLinks["update"]?.method == "PATCH")
+        #expect(group.apiLinks["delete"]?.href == "/api/v1/subscription-groups/grp-1")
+        #expect(group.apiLinks["delete"]?.method == "DELETE")
     }
 
     @Test func `subscription group affordances include update with group id`() {

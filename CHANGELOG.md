@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Subscription promotional images** — `asc subscription-images list|upload|delete` and `GET /api/v1/subscriptions/:id/images`. New `SubscriptionPromotionalImage` domain type with `delete` suppression while `state.isPendingReview` (mirrors IAP images).
 - **`asc subscriptions update --period <PERIOD>`** — change billing period (ONE_WEEK, ONE_MONTH, …, ONE_YEAR) on an existing subscription. Mirrors the iOS app's `subscription.update(subscriptionPeriod:)`.
 
+### Fixed
+- **IAP/Subscription availability returned only ~10 territories instead of all ~175** — the parent endpoint's `include=availableTerritories` truncates the relationship to a single page. `getAvailability` now issues two parallel calls (attributes + dedicated `/availableTerritories?limit=200`) so the full territory list reaches the frontend's Availability tab. Matches the iOS SDK's `fetchAvailability` composition.
+
 ### Changed
 - **`RESTPathResolver` resolves singleton-under-parent `get` to nested path** — when an action is not `list`/`create`, the singularized own-id is missing, and a registered route's parent param matches one in `params`, the resolver now returns the nested `/parent/{id}/segment` path. This corrects `_links.getReviewScreenshot` for IAP and Subscription (was `/api/v1/iap-review-screenshot/{id}` → now `/api/v1/iap/{id}/review-screenshot`) and similar singletons (availability, age-rating).
 - **`AgeRatingController`** now serves the canonical nested path `/api/v1/app-infos/{appInfoId}/age-rating` matching the resolver's `_links`. The flat `/api/v1/age-rating/{id}` remains for back-compat.

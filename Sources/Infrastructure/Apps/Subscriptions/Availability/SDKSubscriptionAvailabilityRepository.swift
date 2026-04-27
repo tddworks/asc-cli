@@ -9,12 +9,27 @@ public struct SDKSubscriptionAvailabilityRepository: SubscriptionAvailabilityRep
     }
 
     public func getAvailability(subscriptionId: String) async throws -> Domain.SubscriptionAvailability {
-        let request = APIEndpoint.v1.subscriptions.id(subscriptionId).subscriptionAvailability.get(parameters: .init(
-            fieldsTerritories: [.currency],
-            include: [.availableTerritories]
-        ))
-        let response = try await client.request(request)
-        return mapAvailability(response.data, included: response.included, subscriptionId: subscriptionId)
+        // Two parallel calls — see SDKInAppPurchaseAvailabilityRepository for rationale.
+        async let availResponse = client.request(
+            APIEndpoint.v1.subscriptions.id(subscriptionId).subscriptionAvailability.get(parameters: .init())
+        )
+        async let terrResponse = client.request(
+            APIEndpoint.v1.subscriptionAvailabilities.id(subscriptionId).availableTerritories.get(
+                fieldsTerritories: [.currency],
+                limit: 200
+            )
+        )
+        let (avail, terr) = try await (availResponse, terrResponse)
+
+        let territories = terr.data.map { t in
+            Domain.Territory(id: t.id, currency: t.attributes?.currency)
+        }
+        return Domain.SubscriptionAvailability(
+            id: avail.data.id,
+            subscriptionId: subscriptionId,
+            isAvailableInNewTerritories: avail.data.attributes?.isAvailableInNewTerritories ?? false,
+            territories: territories
+        )
     }
 
     public func createAvailability(

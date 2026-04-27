@@ -6,21 +6,20 @@ import Testing
 @Suite
 struct SDKSubscriptionAvailabilityRepositoryTests {
 
-    @Test func `getAvailability injects subscriptionId and maps territories with currency`() async throws {
+    @Test func `getAvailability composes attributes call with availableTerritories relationship call`() async throws {
         let stub = StubAPIClient()
         stub.willReturn(SubscriptionAvailabilityResponse(
             data: SubscriptionAvailability(
                 type: .subscriptionAvailabilities,
                 id: "avail-1",
-                attributes: .init(isAvailableInNewTerritories: true),
-                relationships: .init(availableTerritories: .init(data: [
-                    .init(type: .territories, id: "USA"),
-                    .init(type: .territories, id: "GBR"),
-                ]))
+                attributes: .init(isAvailableInNewTerritories: true)
             ),
-            included: [
-                Territory(type: .territories, id: "USA", attributes: .init(currency: "USD")),
-                Territory(type: .territories, id: "GBR", attributes: .init(currency: "GBP")),
+            links: .init(this: "")
+        ))
+        stub.willReturn(TerritoriesResponse(
+            data: [
+                AppStoreConnect_Swift_SDK.Territory(type: .territories, id: "USA", attributes: .init(currency: "USD")),
+                AppStoreConnect_Swift_SDK.Territory(type: .territories, id: "GBR", attributes: .init(currency: "GBP")),
             ],
             links: .init(this: "")
         ))
@@ -37,7 +36,28 @@ struct SDKSubscriptionAvailabilityRepositoryTests {
         #expect(result.territories[1].currency == "GBP")
     }
 
-    @Test func `getAvailability maps empty territories when relationship data is nil`() async throws {
+    @Test func `getAvailability returns more than 10 territories without pagination loss`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(SubscriptionAvailabilityResponse(
+            data: SubscriptionAvailability(
+                type: .subscriptionAvailabilities,
+                id: "avail-big",
+                attributes: .init(isAvailableInNewTerritories: false)
+            ),
+            links: .init(this: "")
+        ))
+        let many: [AppStoreConnect_Swift_SDK.Territory] = (0..<175).map { i in
+            AppStoreConnect_Swift_SDK.Territory(type: .territories, id: "T\(i)", attributes: .init(currency: "USD"))
+        }
+        stub.willReturn(TerritoriesResponse(data: many, links: .init(this: "")))
+
+        let repo = SDKSubscriptionAvailabilityRepository(client: stub)
+        let result = try await repo.getAvailability(subscriptionId: "sub-big")
+
+        #expect(result.territories.count == 175)
+    }
+
+    @Test func `getAvailability handles empty territory list`() async throws {
         let stub = StubAPIClient()
         stub.willReturn(SubscriptionAvailabilityResponse(
             data: SubscriptionAvailability(
@@ -47,6 +67,7 @@ struct SDKSubscriptionAvailabilityRepositoryTests {
             ),
             links: .init(this: "")
         ))
+        stub.willReturn(TerritoriesResponse(data: [], links: .init(this: "")))
 
         let repo = SDKSubscriptionAvailabilityRepository(client: stub)
         let result = try await repo.getAvailability(subscriptionId: "sub-1")
