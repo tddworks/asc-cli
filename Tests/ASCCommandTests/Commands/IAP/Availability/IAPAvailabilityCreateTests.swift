@@ -31,7 +31,7 @@ struct IAPAvailabilityCreateTests {
           "data" : [
             {
               "affordances" : {
-                "createAvailability" : "asc iap-availability create --iap-id iap-42 --available-in-new-territories --territory USA --territory CHN",
+                "createAvailability" : "asc iap-availability create --iap-id iap-42",
                 "getAvailability" : "asc iap-availability get --iap-id iap-42",
                 "listTerritories" : "asc territories list"
               },

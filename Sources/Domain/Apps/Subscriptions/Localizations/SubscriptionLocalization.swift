@@ -67,11 +67,11 @@ extension SubscriptionLocalization: Presentable {
 }
 
 extension SubscriptionLocalization: AffordanceProviding {
-    public var affordances: [String: String] {
+    public var structuredAffordances: [Affordance] {
         [
-            "delete": "asc subscription-localizations delete --localization-id \(id)",
-            "listSiblings": "asc subscription-localizations list --subscription-id \(subscriptionId)",
-            "update": "asc subscription-localizations update --localization-id \(id) --name <name>",
+            Affordance(key: "delete", command: "subscription-localizations", action: "delete", params: ["localization-id": id]),
+            Affordance(key: "listSiblings", command: "subscription-localizations", action: "list", params: ["subscription-id": subscriptionId]),
+            Affordance(key: "update", command: "subscription-localizations", action: "update", params: ["localization-id": id, "name": "<name>"]),
         ]
     }
 }

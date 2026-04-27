@@ -17,13 +17,17 @@ struct SubscriptionAvailabilityGet: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubscriptionAvailabilityRepository) async throws -> String {
+    func execute(
+        repo: any SubscriptionAvailabilityRepository,
+        affordanceMode: AffordanceMode = .cli
+    ) async throws -> String {
         let availability = try await repo.getAvailability(subscriptionId: subscriptionId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
             [availability],
             headers: ["ID", "Subscription ID", "Available in New Territories", "Territories"],
-            rowMapper: { [$0.id, $0.subscriptionId, String($0.isAvailableInNewTerritories), $0.territories.map(\.id).joined(separator: ", ")] }
+            rowMapper: { [$0.id, $0.subscriptionId, String($0.isAvailableInNewTerritories), $0.territories.map(\.id).joined(separator: ", ")] },
+            affordanceMode: affordanceMode
         )
     }
 }

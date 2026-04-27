@@ -55,11 +55,14 @@ extension InAppPurchasePricePoint: Presentable {
 }
 
 extension InAppPurchasePricePoint: AffordanceProviding {
-    public var affordances: [String: String] {
-        var cmds = ["listPricePoints": "asc iap price-points list --iap-id \(iapId)"]
+    public var structuredAffordances: [Affordance] {
+        var items: [Affordance] = [
+            Affordance(key: "listPricePoints", command: "iap price-points", action: "list", params: ["iap-id": iapId]),
+        ]
         if let territory {
-            cmds["setPrice"] = "asc iap prices set --iap-id \(iapId) --base-territory \(territory) --price-point-id \(id)"
+            items.append(Affordance(key: "setPrice", command: "iap prices", action: "set",
+                                    params: ["iap-id": iapId, "base-territory": territory, "price-point-id": id]))
         }
-        return cmds
+        return items
     }
 }

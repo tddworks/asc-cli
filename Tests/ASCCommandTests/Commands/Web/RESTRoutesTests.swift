@@ -438,10 +438,9 @@ struct RESTRoutesTests {
         let normalized = output.replacingOccurrences(of: "\\/", with: "/")
 
         #expect(normalized.contains("\"_links\""))
-        // The singleton `get` resolves through the resource-by-id path with iap-id as the
-        // id token (consistent with `app-availability get` behavior).
-        #expect(normalized.contains("/api/v1/iap-review-screenshot/iap-7"))
-        // Delete still uses the screenshot's own id.
+        // Singleton `get` resolves through the nested parent path.
+        #expect(normalized.contains("/api/v1/iap/iap-7/review-screenshot"))
+        // Delete uses the screenshot's own id (no parent in params), so the flat path applies.
         #expect(normalized.contains("/api/v1/iap-review-screenshot/rs-1"))
     }
 
@@ -474,9 +473,9 @@ struct RESTRoutesTests {
         let normalized = output.replacingOccurrences(of: "\\/", with: "/")
 
         #expect(normalized.contains("\"_links\""))
-        // The singleton `get` resolves through the resource-by-id path with subscription-id as the id token.
-        #expect(normalized.contains("/api/v1/subscription-review-screenshot/sub-7"))
-        // Delete uses the screenshot's own id.
+        // Singleton `get` resolves through the nested parent path.
+        #expect(normalized.contains("/api/v1/subscriptions/sub-7/review-screenshot"))
+        // Delete uses the screenshot's own id (no parent in params), so the flat path applies.
         #expect(normalized.contains("/api/v1/subscription-review-screenshot/rs-1"))
     }
 
@@ -501,5 +500,127 @@ struct RESTRoutesTests {
         // Update + delete are suppressed by isLocked guard
         #expect(!normalized.contains("\"update\""))
         #expect(!normalized.contains("\"delete\""))
+    }
+
+    // MARK: - IAP detail listings (Localizations, Availability, OfferCodes, PricePoints)
+
+    @Test func `IAP localizations list REST exposes nested path under iap`() async throws {
+        let mockRepo = MockInAppPurchaseLocalizationRepository()
+        given(mockRepo).listLocalizations(iapId: .any).willReturn([
+            InAppPurchaseLocalization(id: "loc-1", iapId: "iap-7", locale: "en-US", name: "Lifetime", description: "Lifetime pass", state: .approved)
+        ])
+
+        let output = try await IAPLocalizationsList.parse(["--iap-id", "iap-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/iap/iap-7/localizations"))
+    }
+
+    @Test func `IAP availability get REST exposes nested path under iap`() async throws {
+        let mockRepo = MockInAppPurchaseAvailabilityRepository()
+        given(mockRepo).getAvailability(iapId: .any).willReturn(
+            InAppPurchaseAvailability(id: "avail-1", iapId: "iap-7",
+                                      isAvailableInNewTerritories: true,
+                                      territories: [Territory(id: "USA", currency: "USD")])
+        )
+
+        let output = try await IAPAvailabilityGet.parse(["--iap-id", "iap-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/iap/iap-7/availability"))
+    }
+
+    @Test func `IAP offer codes list REST exposes nested path under iap`() async throws {
+        let mockRepo = MockInAppPurchaseOfferCodeRepository()
+        given(mockRepo).listOfferCodes(iapId: .any).willReturn([
+            InAppPurchaseOfferCode(id: "oc-1", iapId: "iap-7", name: "Promo", customerEligibilities: [.nonSpender], isActive: true)
+        ])
+
+        let output = try await IAPOfferCodesList.parse(["--iap-id", "iap-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/iap/iap-7/offer-codes"))
+    }
+
+    @Test func `IAP price-points list REST exposes nested path under iap`() async throws {
+        let mockRepo = MockInAppPurchasePriceRepository()
+        given(mockRepo).listPricePoints(iapId: .any, territory: .any).willReturn([
+            InAppPurchasePricePoint(id: "pp-1", iapId: "iap-7", territory: "USA", customerPrice: "9.99", proceeds: "6.99")
+        ])
+
+        let output = try await IAPPricePointsList.parse(["--iap-id", "iap-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/iap/iap-7/price-points"))
+    }
+
+    // MARK: - Subscription detail listings (Localizations, Availability, OfferCodes, IntroOffers)
+
+    @Test func `subscription localizations list REST exposes nested path under subscription`() async throws {
+        let mockRepo = MockSubscriptionLocalizationRepository()
+        given(mockRepo).listLocalizations(subscriptionId: .any).willReturn([
+            SubscriptionLocalization(id: "loc-1", subscriptionId: "sub-7", locale: "en-US", name: "Premium", description: "Premium plan", state: .approved)
+        ])
+
+        let output = try await SubscriptionLocalizationsList.parse(["--subscription-id", "sub-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/subscriptions/sub-7/localizations"))
+    }
+
+    @Test func `subscription availability get REST exposes nested path under subscription`() async throws {
+        let mockRepo = MockSubscriptionAvailabilityRepository()
+        given(mockRepo).getAvailability(subscriptionId: .any).willReturn(
+            SubscriptionAvailability(id: "avail-1", subscriptionId: "sub-7",
+                                     isAvailableInNewTerritories: true,
+                                     territories: [Territory(id: "USA", currency: "USD")])
+        )
+
+        let output = try await SubscriptionAvailabilityGet.parse(["--subscription-id", "sub-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/subscriptions/sub-7/availability"))
+    }
+
+    @Test func `subscription offer codes list REST exposes nested path under subscription`() async throws {
+        let mockRepo = MockSubscriptionOfferCodeRepository()
+        given(mockRepo).listOfferCodes(subscriptionId: .any).willReturn([
+            SubscriptionOfferCode(id: "oc-1", subscriptionId: "sub-7", name: "Promo",
+                                  customerEligibilities: [.new], offerEligibility: .introductory,
+                                  duration: .oneMonth, offerMode: .freeTrial, numberOfPeriods: 1, isActive: true)
+        ])
+
+        let output = try await SubscriptionOfferCodesList.parse(["--subscription-id", "sub-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/subscriptions/sub-7/offer-codes"))
+    }
+
+    @Test func `subscription introductory offers list REST exposes nested path under subscription`() async throws {
+        let mockRepo = MockSubscriptionIntroductoryOfferRepository()
+        given(mockRepo).listIntroductoryOffers(subscriptionId: .any).willReturn([
+            SubscriptionIntroductoryOffer(id: "io-1", subscriptionId: "sub-7", duration: .oneMonth, offerMode: .freeTrial, numberOfPeriods: 1)
+        ])
+
+        let output = try await SubscriptionOffersList.parse(["--subscription-id", "sub-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/subscriptions/sub-7/introductory-offers"))
     }
 }

@@ -66,15 +66,15 @@ extension InAppPurchaseOfferCode: Presentable {
 }
 
 extension InAppPurchaseOfferCode: AffordanceProviding {
-    public var affordances: [String: String] {
-        var cmds: [String: String] = [
-            "listOfferCodes": "asc iap-offer-codes list --iap-id \(iapId)",
-            "listCustomCodes": "asc iap-offer-code-custom-codes list --offer-code-id \(id)",
-            "listOneTimeCodes": "asc iap-offer-code-one-time-codes list --offer-code-id \(id)",
+    public var structuredAffordances: [Affordance] {
+        var items: [Affordance] = [
+            Affordance(key: "listOfferCodes", command: "iap-offer-codes", action: "list", params: ["iap-id": iapId]),
+            Affordance(key: "listCustomCodes", command: "iap-offer-code-custom-codes", action: "list", params: ["offer-code-id": id]),
+            Affordance(key: "listOneTimeCodes", command: "iap-offer-code-one-time-codes", action: "list", params: ["offer-code-id": id]),
         ]
         if isActive {
-            cmds["deactivate"] = "asc iap-offer-codes update --offer-code-id \(id) --active false"
+            items.append(Affordance(key: "deactivate", command: "iap-offer-codes", action: "update", params: ["offer-code-id": id, "active": "false"]))
         }
-        return cmds
+        return items
     }
 }

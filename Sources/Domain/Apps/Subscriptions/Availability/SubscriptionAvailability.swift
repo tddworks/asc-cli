@@ -18,12 +18,21 @@ public struct SubscriptionAvailability: Sendable, Equatable, Identifiable, Codab
     }
 }
 
+extension SubscriptionAvailability: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Subscription ID", "Available in New Territories", "Territories"]
+    }
+    public var tableRow: [String] {
+        [id, subscriptionId, String(isAvailableInNewTerritories), territories.map(\.id).joined(separator: ", ")]
+    }
+}
+
 extension SubscriptionAvailability: AffordanceProviding {
-    public var affordances: [String: String] {
+    public var structuredAffordances: [Affordance] {
         [
-            "createAvailability": "asc subscription-availability create --subscription-id \(subscriptionId) --available-in-new-territories --territory USA --territory CHN",
-            "getAvailability": "asc subscription-availability get --subscription-id \(subscriptionId)",
-            "listTerritories": "asc territories list",
+            Affordance(key: "createAvailability", command: "subscription-availability", action: "create", params: ["subscription-id": subscriptionId]),
+            Affordance(key: "getAvailability", command: "subscription-availability", action: "get", params: ["subscription-id": subscriptionId]),
+            Affordance(key: "listTerritories", command: "territories", action: "list", params: [:]),
         ]
     }
 }

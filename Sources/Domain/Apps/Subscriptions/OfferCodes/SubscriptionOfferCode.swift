@@ -94,15 +94,15 @@ extension SubscriptionOfferCode: Presentable {
 }
 
 extension SubscriptionOfferCode: AffordanceProviding {
-    public var affordances: [String: String] {
-        var cmds: [String: String] = [
-            "listOfferCodes": "asc subscription-offer-codes list --subscription-id \(subscriptionId)",
-            "listCustomCodes": "asc subscription-offer-code-custom-codes list --offer-code-id \(id)",
-            "listOneTimeCodes": "asc subscription-offer-code-one-time-codes list --offer-code-id \(id)",
+    public var structuredAffordances: [Affordance] {
+        var items: [Affordance] = [
+            Affordance(key: "listOfferCodes", command: "subscription-offer-codes", action: "list", params: ["subscription-id": subscriptionId]),
+            Affordance(key: "listCustomCodes", command: "subscription-offer-code-custom-codes", action: "list", params: ["offer-code-id": id]),
+            Affordance(key: "listOneTimeCodes", command: "subscription-offer-code-one-time-codes", action: "list", params: ["offer-code-id": id]),
         ]
         if isActive {
-            cmds["deactivate"] = "asc subscription-offer-codes update --offer-code-id \(id) --active false"
+            items.append(Affordance(key: "deactivate", command: "subscription-offer-codes", action: "update", params: ["offer-code-id": id, "active": "false"]))
         }
-        return cmds
+        return items
     }
 }

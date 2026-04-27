@@ -9,9 +9,14 @@ struct AgeRatingController: Sendable {
     let repo: any AgeRatingDeclarationRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
-        // Shared path param name — Hummingbird rejects the same path template with
-        // different param names. GET interprets it as an appInfoId (parent lookup);
-        // PATCH interprets it as the declaration's own id (per the update _link).
+        // Canonical nested path matches the resolver's `_links.getAgeRating`.
+        group.get("/app-infos/:appInfoId/age-rating") { _, context -> Response in
+            guard let appInfoId = context.parameters.get("appInfoId") else { return jsonError("Missing appInfoId") }
+            let declaration = try await self.repo.getDeclaration(appInfoId: appInfoId)
+            return try restFormat(declaration)
+        }
+
+        // Back-compat: the original flat path. Both interpret the param as appInfoId.
         group.get("/age-rating/:id") { _, context -> Response in
             guard let appInfoId = context.parameters.get("id") else { return jsonError("Missing appInfoId") }
             let declaration = try await self.repo.getDeclaration(appInfoId: appInfoId)

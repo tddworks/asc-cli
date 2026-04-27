@@ -14,7 +14,7 @@ struct InAppPurchasePricePointTests {
     @Test func `price point with territory affordances include setPrice and listPricePoints`() {
         let pp = MockRepositoryFactory.makeInAppPurchasePricePoint(id: "pp-1", iapId: "iap-1", territory: "USA")
         #expect(pp.affordances["listPricePoints"] == "asc iap price-points list --iap-id iap-1")
-        #expect(pp.affordances["setPrice"] == "asc iap prices set --iap-id iap-1 --base-territory USA --price-point-id pp-1")
+        #expect(pp.affordances["setPrice"] == "asc iap prices set --base-territory USA --iap-id iap-1 --price-point-id pp-1")
     }
 
     @Test func `price point without territory affordances omit setPrice`() {

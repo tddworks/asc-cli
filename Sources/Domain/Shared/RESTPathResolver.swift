@@ -65,10 +65,25 @@ public final class RESTPathResolver: @unchecked Sendable {
 
         let base = "/api/v1"
 
-        // Actions on a resource by its own id (get, update, delete, submit, …).
-        if action != "list", action != "create",
-           let idValue = resourceId(in: params, command: command) {
-            return resourcePath(base: base, segment: command, id: idValue, action: action)
+        if action != "list", action != "create" {
+            // Action on this resource by its own id (e.g. `versions get --version-id v-1`).
+            if let ownId = params["\(singularize(command))-id"] {
+                return resourcePath(base: base, segment: command, id: ownId, action: action)
+            }
+            // Singleton-under-parent (e.g. `iap-availability get --iap-id X` →
+            // `/api/v1/iap/X/availability`). Triggered when a route is registered for
+            // this command and its parent param is in `params`.
+            if let route = currentRoutes[command], let parentId = params[route.parentParam] {
+                let nested = "\(base)/\(route.parentSegment)/\(parentId)/\(route.segment)"
+                switch action {
+                case "get", "update", "delete": return nested
+                default: return "\(nested)/\(action)"
+                }
+            }
+            // Fallback: any *-id key (CLI flag names that don't match the singularized command).
+            if let idValue = resourceId(in: params, command: command) {
+                return resourcePath(base: base, segment: command, id: idValue, action: action)
+            }
         }
 
         // List/create under a parent resource.
@@ -127,7 +142,12 @@ public final class RESTPathResolver: @unchecked Sendable {
         _ = _versionRoutes
         _ = _appInfoRoutes
         _ = _iapRoutes
+        _ = _iapReviewAssetRoutes
         _ = _subscriptionRoutes
+        _ = _subscriptionReviewAssetRoutes
+        _ = _subscriptionPromotionalOfferRoutes
+        _ = _winBackOfferRoutes
+        _ = _subscriptionPricePointRoutes
         _ = _testFlightRoutes
         _ = _xcodeCloudRoutes
         _ = _codeSigningRoutes

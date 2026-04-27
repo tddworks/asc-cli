@@ -80,21 +80,31 @@ extension InAppPurchase: Presentable {
 }
 
 extension InAppPurchase: AffordanceProviding {
-    public var affordances: [String: String] {
-        var cmds: [String: String] = [
-            "createLocalization": "asc iap-localizations create --iap-id \(id) --locale en-US --name <name>",
-            "delete": "asc iap delete --iap-id \(id)",
-            "getAvailability": "asc iap-availability get --iap-id \(id)",
-            "getReviewScreenshot": "asc iap-review-screenshot get --iap-id \(id)",
-            "listImages": "asc iap-images list --iap-id \(id)",
-            "listLocalizations": "asc iap-localizations list --iap-id \(id)",
-            "listOfferCodes": "asc iap-offer-codes list --iap-id \(id)",
-            "listPricePoints": "asc iap price-points list --iap-id \(id)",
-            "update": "asc iap update --iap-id \(id) --reference-name <name>",
+    public var structuredAffordances: [Affordance] {
+        var items: [Affordance] = [
+            Affordance(key: "createLocalization", command: "iap-localizations", action: "create",
+                       params: ["iap-id": id, "locale": "en-US", "name": "<name>"]),
+            Affordance(key: "delete", command: "iap", action: "delete",
+                       params: ["iap-id": id]),
+            Affordance(key: "getAvailability", command: "iap-availability", action: "get",
+                       params: ["iap-id": id]),
+            Affordance(key: "getReviewScreenshot", command: "iap-review-screenshot", action: "get",
+                       params: ["iap-id": id]),
+            Affordance(key: "listImages", command: "iap-images", action: "list",
+                       params: ["iap-id": id]),
+            Affordance(key: "listLocalizations", command: "iap-localizations", action: "list",
+                       params: ["iap-id": id]),
+            Affordance(key: "listOfferCodes", command: "iap-offer-codes", action: "list",
+                       params: ["iap-id": id]),
+            Affordance(key: "listPricePoints", command: "iap price-points", action: "list",
+                       params: ["iap-id": id]),
+            Affordance(key: "update", command: "iap", action: "update",
+                       params: ["iap-id": id, "reference-name": "<name>"]),
         ]
         if state == .readyToSubmit {
-            cmds["submit"] = "asc iap submit --iap-id \(id)"
+            items.append(Affordance(key: "submit", command: "iap", action: "submit",
+                                    params: ["iap-id": id]))
         }
-        return cmds
+        return items
     }
 }

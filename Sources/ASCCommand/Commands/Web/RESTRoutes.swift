@@ -75,6 +75,34 @@ enum RESTRoutes {
         if let subReviewRepo = try? factory.makeSubscriptionReviewRepository(authProvider: auth) {
             SubscriptionReviewController(repo: subReviewRepo).addRoutes(to: v1)
         }
+
+        // IAP detail listings
+        if let iapLocRepo = try? factory.makeInAppPurchaseLocalizationRepository(authProvider: auth) {
+            IAPLocalizationsController(repo: iapLocRepo).addRoutes(to: v1)
+        }
+        if let iapAvailRepo = try? factory.makeInAppPurchaseAvailabilityRepository(authProvider: auth) {
+            IAPAvailabilityController(repo: iapAvailRepo).addRoutes(to: v1)
+        }
+        if let iapOfferCodeRepo = try? factory.makeInAppPurchaseOfferCodeRepository(authProvider: auth) {
+            IAPOfferCodesController(repo: iapOfferCodeRepo).addRoutes(to: v1)
+        }
+        if let iapPriceRepo = try? factory.makeInAppPurchasePriceRepository(authProvider: auth) {
+            IAPPricePointsController(repo: iapPriceRepo).addRoutes(to: v1)
+        }
+
+        // Subscription detail listings
+        if let subLocRepo = try? factory.makeSubscriptionLocalizationRepository(authProvider: auth) {
+            SubscriptionLocalizationsController(repo: subLocRepo).addRoutes(to: v1)
+        }
+        if let subAvailRepo = try? factory.makeSubscriptionAvailabilityRepository(authProvider: auth) {
+            SubscriptionAvailabilityController(repo: subAvailRepo).addRoutes(to: v1)
+        }
+        if let subOfferCodeRepo = try? factory.makeSubscriptionOfferCodeRepository(authProvider: auth) {
+            SubscriptionOfferCodesController(repo: subOfferCodeRepo).addRoutes(to: v1)
+        }
+        if let subIntroRepo = try? factory.makeSubscriptionIntroductoryOfferRepository(authProvider: auth) {
+            SubscriptionIntroductoryOffersController(repo: subIntroRepo).addRoutes(to: v1)
+        }
         if let appInfoRepo = try? factory.makeAppInfoRepository(authProvider: auth) {
             AppInfosController(repo: appInfoRepo).addRoutes(to: v1)
         }

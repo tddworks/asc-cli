@@ -17,9 +17,12 @@ struct IAPLocalizationsList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any InAppPurchaseLocalizationRepository) async throws -> String {
+    func execute(
+        repo: any InAppPurchaseLocalizationRepository,
+        affordanceMode: AffordanceMode = .cli
+    ) async throws -> String {
         let items = try await repo.listLocalizations(iapId: iapId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(items)
+        return try formatter.formatAgentItems(items, affordanceMode: affordanceMode)
     }
 }

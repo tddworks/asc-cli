@@ -23,7 +23,7 @@ struct IAPPricePointsListTests {
             {
               "affordances" : {
                 "listPricePoints" : "asc iap price-points list --iap-id iap-1",
-                "setPrice" : "asc iap prices set --iap-id iap-1 --base-territory USA --price-point-id pp-1"
+                "setPrice" : "asc iap prices set --base-territory USA --iap-id iap-1 --price-point-id pp-1"
               },
               "customerPrice" : "0.99",
               "iapId" : "iap-1",

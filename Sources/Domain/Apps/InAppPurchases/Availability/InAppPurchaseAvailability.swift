@@ -18,12 +18,21 @@ public struct InAppPurchaseAvailability: Sendable, Equatable, Identifiable, Coda
     }
 }
 
+extension InAppPurchaseAvailability: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "IAP ID", "Available in New Territories", "Territories"]
+    }
+    public var tableRow: [String] {
+        [id, iapId, String(isAvailableInNewTerritories), territories.map(\.id).joined(separator: ", ")]
+    }
+}
+
 extension InAppPurchaseAvailability: AffordanceProviding {
-    public var affordances: [String: String] {
+    public var structuredAffordances: [Affordance] {
         [
-            "createAvailability": "asc iap-availability create --iap-id \(iapId) --available-in-new-territories --territory USA --territory CHN",
-            "getAvailability": "asc iap-availability get --iap-id \(iapId)",
-            "listTerritories": "asc territories list",
+            Affordance(key: "createAvailability", command: "iap-availability", action: "create", params: ["iap-id": iapId]),
+            Affordance(key: "getAvailability", command: "iap-availability", action: "get", params: ["iap-id": iapId]),
+            Affordance(key: "listTerritories", command: "territories", action: "list", params: [:]),
         ]
     }
 }

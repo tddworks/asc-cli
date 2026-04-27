@@ -88,7 +88,7 @@ struct AppsControllerTests {
         #expect(normalized.contains("\"data\""))
         #expect(normalized.contains("\"id\" : \"rating-1\""))
         #expect(normalized.contains("\"appInfoId\" : \"ai-1\""))
-        #expect(normalized.contains("/api/v1/age-rating/ai-1"))
+        #expect(normalized.contains("/api/v1/app-infos/ai-1/age-rating"))
         #expect(!normalized.contains("\"affordances\""))
     }
 

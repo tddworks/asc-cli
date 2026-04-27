@@ -29,18 +29,19 @@ struct SubscriptionsListTests {
           "data" : [
             {
               "affordances" : {
-                "createIntroductoryOffer" : "asc subscription-offers create --subscription-id sub-1 --duration ONE_MONTH --mode FREE_TRIAL --periods 1",
-                "createLocalization" : "asc subscription-localizations create --subscription-id sub-1 --locale en-US --name <name>",
-                "createPromotionalOffer" : "asc subscription-promotional-offers create --subscription-id sub-1 --name <name> --offer-code <code> --duration ONE_MONTH --mode PAY_AS_YOU_GO --periods 1",
+                "createIntroductoryOffer" : "asc subscription-offers create --duration ONE_MONTH --mode FREE_TRIAL --periods 1 --subscription-id sub-1",
+                "createLocalization" : "asc subscription-localizations create --locale en-US --name <name> --subscription-id sub-1",
+                "createPromotionalOffer" : "asc subscription-promotional-offers create --duration ONE_MONTH --mode PAY_AS_YOU_GO --name <name> --offer-code <code> --periods 1 --subscription-id sub-1",
                 "delete" : "asc subscriptions delete --subscription-id sub-1",
                 "getAvailability" : "asc subscription-availability get --subscription-id sub-1",
                 "getReviewScreenshot" : "asc subscription-review-screenshot get --subscription-id sub-1",
                 "listIntroductoryOffers" : "asc subscription-offers list --subscription-id sub-1",
                 "listLocalizations" : "asc subscription-localizations list --subscription-id sub-1",
                 "listOfferCodes" : "asc subscription-offer-codes list --subscription-id sub-1",
+                "listPricePoints" : "asc subscriptions price-points list --subscription-id sub-1",
                 "listPromotionalOffers" : "asc subscription-promotional-offers list --subscription-id sub-1",
                 "listWinBackOffers" : "asc win-back-offers list --subscription-id sub-1",
-                "update" : "asc subscriptions update --subscription-id sub-1 --name <name>"
+                "update" : "asc subscriptions update --name <name> --subscription-id sub-1"
               },
               "groupId" : "grp-1",
               "id" : "sub-1",

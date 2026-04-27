@@ -47,7 +47,7 @@ struct InAppPurchaseAvailabilityTests {
             id: "avail-1",
             iapId: "iap-42"
         )
-        #expect(availability.affordances["createAvailability"] == "asc iap-availability create --iap-id iap-42 --available-in-new-territories --territory USA --territory CHN")
+        #expect(availability.affordances["createAvailability"] == "asc iap-availability create --iap-id iap-42")
     }
 
     @Test func `affordances include list territories command`() {

@@ -81,4 +81,58 @@ struct InAppPurchaseTests {
         let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
         #expect(iap.affordances["delete"] == "asc iap delete --iap-id iap-1")
     }
+
+    // MARK: - REST navigation links (HATEOAS)
+
+    @Test func `iap apiLinks include listLocalizations under nested parent`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.apiLinks["listLocalizations"]?.href == "/api/v1/iap/iap-1/localizations")
+        #expect(iap.apiLinks["listLocalizations"]?.method == "GET")
+    }
+
+    @Test func `iap apiLinks include listOfferCodes under nested parent`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.apiLinks["listOfferCodes"]?.href == "/api/v1/iap/iap-1/offer-codes")
+        #expect(iap.apiLinks["listOfferCodes"]?.method == "GET")
+    }
+
+    @Test func `iap apiLinks include getAvailability under nested parent`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.apiLinks["getAvailability"]?.href == "/api/v1/iap/iap-1/availability")
+        #expect(iap.apiLinks["getAvailability"]?.method == "GET")
+    }
+
+    @Test func `iap apiLinks include getReviewScreenshot under nested parent`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.apiLinks["getReviewScreenshot"]?.href == "/api/v1/iap/iap-1/review-screenshot")
+        #expect(iap.apiLinks["getReviewScreenshot"]?.method == "GET")
+    }
+
+    @Test func `iap apiLinks include listImages under nested parent`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.apiLinks["listImages"]?.href == "/api/v1/iap/iap-1/images")
+        #expect(iap.apiLinks["listImages"]?.method == "GET")
+    }
+
+    @Test func `iap apiLinks include listPricePoints under nested parent`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.apiLinks["listPricePoints"]?.href == "/api/v1/iap/iap-1/price-points")
+        #expect(iap.apiLinks["listPricePoints"]?.method == "GET")
+    }
+
+    @Test func `iap apiLinks include update and delete on flat resource`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.apiLinks["update"]?.href == "/api/v1/iap/iap-1")
+        #expect(iap.apiLinks["update"]?.method == "PATCH")
+        #expect(iap.apiLinks["delete"]?.href == "/api/v1/iap/iap-1")
+        #expect(iap.apiLinks["delete"]?.method == "DELETE")
+    }
+
+    @Test func `iap apiLinks include submit only when readyToSubmit`() {
+        let ready = MockRepositoryFactory.makeInAppPurchase(id: "iap-1", state: .readyToSubmit)
+        let missing = MockRepositoryFactory.makeInAppPurchase(id: "iap-2", state: .missingMetadata)
+        #expect(ready.apiLinks["submit"]?.href == "/api/v1/iap/iap-1/submit")
+        #expect(ready.apiLinks["submit"]?.method == "POST")
+        #expect(missing.apiLinks["submit"] == nil)
+    }
 }

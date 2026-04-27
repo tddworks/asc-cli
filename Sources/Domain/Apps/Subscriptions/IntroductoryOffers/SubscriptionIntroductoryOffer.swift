@@ -89,10 +89,10 @@ extension SubscriptionIntroductoryOffer: Presentable {
 }
 
 extension SubscriptionIntroductoryOffer: AffordanceProviding {
-    public var affordances: [String: String] {
+    public var structuredAffordances: [Affordance] {
         [
-            "delete": "asc subscription-offers delete --offer-id \(id)",
-            "listOffers": "asc subscription-offers list --subscription-id \(subscriptionId)",
+            Affordance(key: "delete", command: "subscription-offers", action: "delete", params: ["offer-id": id]),
+            Affordance(key: "listOffers", command: "subscription-offers", action: "list", params: ["subscription-id": subscriptionId]),
         ]
     }
 }

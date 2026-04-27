@@ -55,7 +55,7 @@ struct SubscriptionTests {
 
     @Test func `subscription affordances include createLocalization`() {
         let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
-        #expect(sub.affordances["createLocalization"] == "asc subscription-localizations create --subscription-id sub-1 --locale en-US --name <name>")
+        #expect(sub.affordances["createLocalization"] == "asc subscription-localizations create --locale en-US --name <name> --subscription-id sub-1")
     }
 
     @Test func `subscription localization affordances include listSiblings`() {
@@ -96,11 +96,77 @@ struct SubscriptionTests {
 
     @Test func `subscription affordances include update with subscription id`() {
         let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
-        #expect(sub.affordances["update"] == "asc subscriptions update --subscription-id sub-1 --name <name>")
+        #expect(sub.affordances["update"] == "asc subscriptions update --name <name> --subscription-id sub-1")
     }
 
     @Test func `subscription affordances include delete with subscription id`() {
         let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
         #expect(sub.affordances["delete"] == "asc subscriptions delete --subscription-id sub-1")
+    }
+
+    // MARK: - REST navigation links (HATEOAS)
+
+    @Test func `subscription apiLinks include listLocalizations under nested parent`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.apiLinks["listLocalizations"]?.href == "/api/v1/subscriptions/sub-1/localizations")
+        #expect(sub.apiLinks["listLocalizations"]?.method == "GET")
+    }
+
+    @Test func `subscription apiLinks include listIntroductoryOffers under nested parent`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.apiLinks["listIntroductoryOffers"]?.href == "/api/v1/subscriptions/sub-1/introductory-offers")
+        #expect(sub.apiLinks["listIntroductoryOffers"]?.method == "GET")
+    }
+
+    @Test func `subscription apiLinks include listOfferCodes under nested parent`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.apiLinks["listOfferCodes"]?.href == "/api/v1/subscriptions/sub-1/offer-codes")
+        #expect(sub.apiLinks["listOfferCodes"]?.method == "GET")
+    }
+
+    @Test func `subscription apiLinks include listPromotionalOffers under nested parent`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.apiLinks["listPromotionalOffers"]?.href == "/api/v1/subscriptions/sub-1/subscription-promotional-offers")
+        #expect(sub.apiLinks["listPromotionalOffers"]?.method == "GET")
+    }
+
+    @Test func `subscription apiLinks include listWinBackOffers under nested parent`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.apiLinks["listWinBackOffers"]?.href == "/api/v1/subscriptions/sub-1/win-back-offers")
+        #expect(sub.apiLinks["listWinBackOffers"]?.method == "GET")
+    }
+
+    @Test func `subscription apiLinks include getAvailability under nested parent`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.apiLinks["getAvailability"]?.href == "/api/v1/subscriptions/sub-1/availability")
+        #expect(sub.apiLinks["getAvailability"]?.method == "GET")
+    }
+
+    @Test func `subscription apiLinks include getReviewScreenshot under nested parent`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.apiLinks["getReviewScreenshot"]?.href == "/api/v1/subscriptions/sub-1/review-screenshot")
+        #expect(sub.apiLinks["getReviewScreenshot"]?.method == "GET")
+    }
+
+    @Test func `subscription apiLinks include listPricePoints under nested parent`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.apiLinks["listPricePoints"]?.href == "/api/v1/subscriptions/sub-1/price-points")
+        #expect(sub.apiLinks["listPricePoints"]?.method == "GET")
+    }
+
+    @Test func `subscription apiLinks include update and delete on flat resource`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.apiLinks["update"]?.href == "/api/v1/subscriptions/sub-1")
+        #expect(sub.apiLinks["update"]?.method == "PATCH")
+        #expect(sub.apiLinks["delete"]?.href == "/api/v1/subscriptions/sub-1")
+        #expect(sub.apiLinks["delete"]?.method == "DELETE")
+    }
+
+    @Test func `subscription apiLinks include submit only when readyToSubmit`() {
+        let ready = MockRepositoryFactory.makeSubscription(id: "sub-1", state: .readyToSubmit)
+        let missing = MockRepositoryFactory.makeSubscription(id: "sub-2", state: .missingMetadata)
+        #expect(ready.apiLinks["submit"]?.href == "/api/v1/subscriptions/sub-1/submit")
+        #expect(ready.apiLinks["submit"]?.method == "POST")
+        #expect(missing.apiLinks["submit"] == nil)
     }
 }

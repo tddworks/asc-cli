@@ -4,5 +4,9 @@ extension RESTPathResolver {
         registerRoute(command: "iap-localizations", parentParam: "iap-id", parentSegment: "iap", segment: "localizations")
         registerRoute(command: "iap-offer-codes", parentParam: "iap-id", parentSegment: "iap", segment: "offer-codes")
         registerRoute(command: "iap-availability", parentParam: "iap-id", parentSegment: "iap", segment: "availability")
+        // Nested CLI subcommand `asc iap price-points` is registered with a space so the
+        // `Affordance.cliCommand` and resolver paths agree on the same key.
+        registerRoute(command: "iap price-points", parentParam: "iap-id", parentSegment: "iap", segment: "price-points")
+        registerRoute(command: "iap prices", parentParam: "iap-id", parentSegment: "iap", segment: "prices")
     }()
 }

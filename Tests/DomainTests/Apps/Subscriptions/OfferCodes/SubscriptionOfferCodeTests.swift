@@ -62,7 +62,7 @@ struct SubscriptionOfferCodeTests {
 
     @Test func `deactivate affordance only when active`() {
         let active = MockRepositoryFactory.makeSubscriptionOfferCode(id: "oc-1", isActive: true)
-        #expect(active.affordances["deactivate"] == "asc subscription-offer-codes update --offer-code-id oc-1 --active false")
+        #expect(active.affordances["deactivate"] == "asc subscription-offer-codes update --active false --offer-code-id oc-1")
 
         let inactive = MockRepositoryFactory.makeSubscriptionOfferCode(id: "oc-1", isActive: false)
         #expect(inactive.affordances["deactivate"] == nil)

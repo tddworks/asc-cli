@@ -110,24 +110,39 @@ extension Subscription: Presentable {
 }
 
 extension Subscription: AffordanceProviding {
-    public var affordances: [String: String] {
-        var result: [String: String] = [
-            "createIntroductoryOffer": "asc subscription-offers create --subscription-id \(id) --duration ONE_MONTH --mode FREE_TRIAL --periods 1",
-            "createLocalization": "asc subscription-localizations create --subscription-id \(id) --locale en-US --name <name>",
-            "createPromotionalOffer": "asc subscription-promotional-offers create --subscription-id \(id) --name <name> --offer-code <code> --duration ONE_MONTH --mode PAY_AS_YOU_GO --periods 1",
-            "delete": "asc subscriptions delete --subscription-id \(id)",
-            "getAvailability": "asc subscription-availability get --subscription-id \(id)",
-            "getReviewScreenshot": "asc subscription-review-screenshot get --subscription-id \(id)",
-            "listIntroductoryOffers": "asc subscription-offers list --subscription-id \(id)",
-            "listLocalizations": "asc subscription-localizations list --subscription-id \(id)",
-            "listOfferCodes": "asc subscription-offer-codes list --subscription-id \(id)",
-            "listPromotionalOffers": "asc subscription-promotional-offers list --subscription-id \(id)",
-            "listWinBackOffers": "asc win-back-offers list --subscription-id \(id)",
-            "update": "asc subscriptions update --subscription-id \(id) --name <name>",
+    public var structuredAffordances: [Affordance] {
+        var items: [Affordance] = [
+            Affordance(key: "createIntroductoryOffer", command: "subscription-offers", action: "create",
+                       params: ["subscription-id": id, "duration": "ONE_MONTH", "mode": "FREE_TRIAL", "periods": "1"]),
+            Affordance(key: "createLocalization", command: "subscription-localizations", action: "create",
+                       params: ["subscription-id": id, "locale": "en-US", "name": "<name>"]),
+            Affordance(key: "createPromotionalOffer", command: "subscription-promotional-offers", action: "create",
+                       params: ["subscription-id": id, "name": "<name>", "offer-code": "<code>", "duration": "ONE_MONTH", "mode": "PAY_AS_YOU_GO", "periods": "1"]),
+            Affordance(key: "delete", command: "subscriptions", action: "delete",
+                       params: ["subscription-id": id]),
+            Affordance(key: "getAvailability", command: "subscription-availability", action: "get",
+                       params: ["subscription-id": id]),
+            Affordance(key: "getReviewScreenshot", command: "subscription-review-screenshot", action: "get",
+                       params: ["subscription-id": id]),
+            Affordance(key: "listIntroductoryOffers", command: "subscription-offers", action: "list",
+                       params: ["subscription-id": id]),
+            Affordance(key: "listLocalizations", command: "subscription-localizations", action: "list",
+                       params: ["subscription-id": id]),
+            Affordance(key: "listOfferCodes", command: "subscription-offer-codes", action: "list",
+                       params: ["subscription-id": id]),
+            Affordance(key: "listPromotionalOffers", command: "subscription-promotional-offers", action: "list",
+                       params: ["subscription-id": id]),
+            Affordance(key: "listWinBackOffers", command: "win-back-offers", action: "list",
+                       params: ["subscription-id": id]),
+            Affordance(key: "listPricePoints", command: "subscriptions price-points", action: "list",
+                       params: ["subscription-id": id]),
+            Affordance(key: "update", command: "subscriptions", action: "update",
+                       params: ["subscription-id": id, "name": "<name>"]),
         ]
         if state == .readyToSubmit {
-            result["submit"] = "asc subscriptions submit --subscription-id \(id)"
+            items.append(Affordance(key: "submit", command: "subscriptions", action: "submit",
+                                    params: ["subscription-id": id]))
         }
-        return result
+        return items
     }
 }

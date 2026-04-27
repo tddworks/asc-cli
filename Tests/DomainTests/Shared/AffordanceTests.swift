@@ -353,4 +353,32 @@ struct AffordanceTests {
         #expect(a.restLink.href == "/api/v1/app-info-localizations/loc-1")
         #expect(a.restLink.method == "DELETE")
     }
+
+    // MARK: - Singleton-under-parent get resolution
+
+    @Test func `iap-availability get under iap parent`() {
+        // A singleton resource attached to a parent: GET goes to the nested path,
+        // not the flat `/iap-availability/{iap-id}`.
+        let a = Affordance(key: "getAvailability", command: "iap-availability", action: "get", params: ["iap-id": "iap-1"])
+        #expect(a.restLink.href == "/api/v1/iap/iap-1/availability")
+        #expect(a.restLink.method == "GET")
+    }
+
+    @Test func `iap-review-screenshot get under iap parent`() {
+        let a = Affordance(key: "getReviewScreenshot", command: "iap-review-screenshot", action: "get", params: ["iap-id": "iap-1"])
+        #expect(a.restLink.href == "/api/v1/iap/iap-1/review-screenshot")
+        #expect(a.restLink.method == "GET")
+    }
+
+    @Test func `subscription-availability get under subscription parent`() {
+        let a = Affordance(key: "getAvailability", command: "subscription-availability", action: "get", params: ["subscription-id": "sub-1"])
+        #expect(a.restLink.href == "/api/v1/subscriptions/sub-1/availability")
+        #expect(a.restLink.method == "GET")
+    }
+
+    @Test func `subscription-review-screenshot get under subscription parent`() {
+        let a = Affordance(key: "getReviewScreenshot", command: "subscription-review-screenshot", action: "get", params: ["subscription-id": "sub-1"])
+        #expect(a.restLink.href == "/api/v1/subscriptions/sub-1/review-screenshot")
+        #expect(a.restLink.method == "GET")
+    }
 }

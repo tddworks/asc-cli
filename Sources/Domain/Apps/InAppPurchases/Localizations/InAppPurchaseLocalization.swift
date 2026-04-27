@@ -67,11 +67,11 @@ extension InAppPurchaseLocalization: Presentable {
 }
 
 extension InAppPurchaseLocalization: AffordanceProviding {
-    public var affordances: [String: String] {
+    public var structuredAffordances: [Affordance] {
         [
-            "delete": "asc iap-localizations delete --localization-id \(id)",
-            "listSiblings": "asc iap-localizations list --iap-id \(iapId)",
-            "update": "asc iap-localizations update --localization-id \(id) --name <name>",
+            Affordance(key: "delete", command: "iap-localizations", action: "delete", params: ["localization-id": id]),
+            Affordance(key: "listSiblings", command: "iap-localizations", action: "list", params: ["iap-id": iapId]),
+            Affordance(key: "update", command: "iap-localizations", action: "update", params: ["localization-id": id, "name": "<name>"]),
         ]
     }
 }
