@@ -605,6 +605,28 @@ struct RESTRoutesTests {
 
     // MARK: - Subscription detail listings (Localizations, Availability, OfferCodes, IntroOffers)
 
+    @Test func `subscriptions list REST exposes nested path under subscription group`() async throws {
+        let mockRepo = MockSubscriptionRepository()
+        given(mockRepo).listSubscriptions(groupId: .any, limit: .any).willReturn(
+            PaginatedResponse(data: [
+                Subscription(
+                    id: "sub-1", groupId: "grp-7", name: "Monthly Premium",
+                    productId: "com.app.monthly", subscriptionPeriod: .oneMonth,
+                    isFamilySharable: false, state: .missingMetadata
+                )
+            ], nextCursor: nil)
+        )
+
+        let output = try await SubscriptionsList.parse(["--group-id", "grp-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/subscription-groups/grp-7/subscriptions"))
+        // Per-item child links are populated too.
+        #expect(normalized.contains("/api/v1/subscriptions/sub-1/localizations"))
+    }
+
     @Test func `subscription localizations list REST exposes nested path under subscription`() async throws {
         let mockRepo = MockSubscriptionLocalizationRepository()
         given(mockRepo).listLocalizations(subscriptionId: .any).willReturn([

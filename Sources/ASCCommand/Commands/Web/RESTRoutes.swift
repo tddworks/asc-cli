@@ -50,6 +50,9 @@ enum RESTRoutes {
         if let subscriptionGroupRepo = try? factory.makeSubscriptionGroupRepository(authProvider: auth) {
             SubscriptionGroupsController(repo: subscriptionGroupRepo).addRoutes(to: v1)
         }
+        if let subscriptionRepo = try? factory.makeSubscriptionRepository(authProvider: auth) {
+            SubscriptionsController(repo: subscriptionRepo).addRoutes(to: v1)
+        }
         if let promotedRepo = try? factory.makePromotedPurchaseRepository(authProvider: auth) {
             PromotedPurchasesController(repo: promotedRepo).addRoutes(to: v1)
         }
