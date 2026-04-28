@@ -144,7 +144,9 @@ struct SDKSubscriptionOfferCodeRepositoryTests {
             offerEligibility: .stackable,
             duration: .oneMonth,
             offerMode: .freeTrial,
-            numberOfPeriods: 1
+            numberOfPeriods: 1,
+            isAutoRenewEnabled: true,
+            prices: [OfferCodePriceInput(territory: "USA", pricePointId: "spp-1")]
         )
 
         #expect(result.id == "oc-new")

@@ -56,6 +56,17 @@ struct SubscriptionOfferCodesController: Sendable {
                     status: .badRequest
                 )
             }
+            // `isAutoRenewEnabled` defaults to `true` when omitted (ASC's normal renewing offer).
+            let isAutoRenewEnabled = (json["isAutoRenewEnabled"] as? Bool)
+                ?? (json["autoRenew"] as? Bool)
+                ?? (json["auto-renew"] as? Bool)
+                ?? true
+            // Same `prices` body shape as IAP — `pricePointId` nil/absent → free territory.
+            let prices: [OfferCodePriceInput] = (json["prices"] as? [[String: Any]] ?? []).compactMap { entry in
+                guard let territory = entry["territory"] as? String, !territory.isEmpty else { return nil }
+                let pricePointId = entry["pricePointId"] as? String
+                return OfferCodePriceInput(territory: territory, pricePointId: pricePointId)
+            }
             do {
                 let created = try await self.repo.createOfferCode(
                     subscriptionId: subscriptionId,
@@ -64,7 +75,9 @@ struct SubscriptionOfferCodesController: Sendable {
                     offerEligibility: offerEligibility,
                     duration: duration,
                     offerMode: offerMode,
-                    numberOfPeriods: numberOfPeriods
+                    numberOfPeriods: numberOfPeriods,
+                    isAutoRenewEnabled: isAutoRenewEnabled,
+                    prices: prices
                 )
                 return try restFormat(created)
             } catch {

@@ -11,7 +11,7 @@ struct SubscriptionOfferCodesCreateTests {
         given(mockRepo).createOfferCode(
             subscriptionId: .any, name: .any, customerEligibilities: .any,
             offerEligibility: .any, duration: .any, offerMode: .any,
-            numberOfPeriods: .any
+            numberOfPeriods: .any, isAutoRenewEnabled: .any, prices: .any
         ).willReturn(SubscriptionOfferCode(
             id: "oc-new",
             subscriptionId: "sub-1",
@@ -41,6 +41,76 @@ struct SubscriptionOfferCodesCreateTests {
         #expect(output.contains("SUMMER2024"))
         #expect(output.contains("ONE_MONTH"))
         #expect(output.contains("FREE_TRIAL"))
+    }
+
+    @Test func `forwards paid prices and isAutoRenewEnabled true by default`() async throws {
+        let mockRepo = MockSubscriptionOfferCodeRepository()
+        given(mockRepo).createOfferCode(
+            subscriptionId: .any, name: .any, customerEligibilities: .any,
+            offerEligibility: .any, duration: .any, offerMode: .any,
+            numberOfPeriods: .any, isAutoRenewEnabled: .any, prices: .any
+        ).willReturn(SubscriptionOfferCode(
+            id: "oc-new", subscriptionId: "sub-1", name: "PROMO",
+            customerEligibilities: [.new], offerEligibility: .stackable,
+            duration: .oneMonth, offerMode: .freeTrial, numberOfPeriods: 1, isActive: true
+        ))
+
+        let cmd = try SubscriptionOfferCodesCreate.parse([
+            "--subscription-id", "sub-1",
+            "--name", "PROMO",
+            "--duration", "ONE_MONTH",
+            "--mode", "FREE_TRIAL",
+            "--periods", "1",
+            "--eligibility", "NEW",
+            "--offer-eligibility", "STACKABLE",
+            "--price", "USA=spp-usa",
+            "--free-territory", "BRA",
+        ])
+        _ = try await cmd.execute(repo: mockRepo)
+
+        verify(mockRepo).createOfferCode(
+            subscriptionId: .any, name: .any, customerEligibilities: .any,
+            offerEligibility: .any, duration: .any, offerMode: .any,
+            numberOfPeriods: .any,
+            isAutoRenewEnabled: .value(true),
+            prices: .value([
+                OfferCodePriceInput(territory: "USA", pricePointId: "spp-usa"),
+                OfferCodePriceInput(territory: "BRA", pricePointId: nil),
+            ])
+        ).called(1)
+    }
+
+    @Test func `forwards isAutoRenewEnabled false when flag set`() async throws {
+        let mockRepo = MockSubscriptionOfferCodeRepository()
+        given(mockRepo).createOfferCode(
+            subscriptionId: .any, name: .any, customerEligibilities: .any,
+            offerEligibility: .any, duration: .any, offerMode: .any,
+            numberOfPeriods: .any, isAutoRenewEnabled: .any, prices: .any
+        ).willReturn(SubscriptionOfferCode(
+            id: "oc-new", subscriptionId: "sub-1", name: "ONE_TIME",
+            customerEligibilities: [.new], offerEligibility: .stackable,
+            duration: .oneMonth, offerMode: .freeTrial, numberOfPeriods: 1, isActive: true
+        ))
+
+        let cmd = try SubscriptionOfferCodesCreate.parse([
+            "--subscription-id", "sub-1",
+            "--name", "ONE_TIME",
+            "--duration", "ONE_MONTH",
+            "--mode", "FREE_TRIAL",
+            "--periods", "1",
+            "--eligibility", "NEW",
+            "--offer-eligibility", "STACKABLE",
+            "--auto-renew", "false",
+        ])
+        _ = try await cmd.execute(repo: mockRepo)
+
+        verify(mockRepo).createOfferCode(
+            subscriptionId: .any, name: .any, customerEligibilities: .any,
+            offerEligibility: .any, duration: .any, offerMode: .any,
+            numberOfPeriods: .any,
+            isAutoRenewEnabled: .value(false),
+            prices: .any
+        ).called(1)
     }
 
     @Test func `throws for invalid duration`() async throws {

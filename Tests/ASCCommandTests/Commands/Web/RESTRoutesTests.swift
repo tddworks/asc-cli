@@ -485,7 +485,7 @@ struct RESTRoutesTests {
     @Test func `IAP offer codes create REST emits _links pointing back at parent IAP path`() async throws {
         let mockRepo = MockInAppPurchaseOfferCodeRepository()
         given(mockRepo).createOfferCode(
-            iapId: .any, name: .any, customerEligibilities: .any
+            iapId: .any, name: .any, customerEligibilities: .any, prices: .any
         ).willReturn(InAppPurchaseOfferCode(
             id: "oc-new", iapId: "iap-7", name: "Promo",
             customerEligibilities: [.nonSpender], isActive: true
@@ -507,7 +507,8 @@ struct RESTRoutesTests {
         let mockRepo = MockSubscriptionOfferCodeRepository()
         given(mockRepo).createOfferCode(
             subscriptionId: .any, name: .any, customerEligibilities: .any,
-            offerEligibility: .any, duration: .any, offerMode: .any, numberOfPeriods: .any
+            offerEligibility: .any, duration: .any, offerMode: .any, numberOfPeriods: .any,
+            isAutoRenewEnabled: .any, prices: .any
         ).willReturn(SubscriptionOfferCode(
             id: "oc-new", subscriptionId: "sub-7", name: "Loyalty",
             customerEligibilities: [.new], offerEligibility: .stackable,

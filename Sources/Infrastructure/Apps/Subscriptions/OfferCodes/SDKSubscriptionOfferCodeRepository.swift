@@ -24,7 +24,9 @@ public struct SDKSubscriptionOfferCodeRepository: SubscriptionOfferCodeRepositor
         offerEligibility: Domain.SubscriptionOfferEligibility,
         duration: Domain.SubscriptionOfferDuration,
         offerMode: Domain.SubscriptionOfferMode,
-        numberOfPeriods: Int
+        numberOfPeriods: Int,
+        isAutoRenewEnabled: Bool,
+        prices: [Domain.OfferCodePriceInput]
     ) async throws -> Domain.SubscriptionOfferCode {
         let sdkEligibilities = customerEligibilities.compactMap {
             AppStoreConnect_Swift_SDK.SubscriptionCustomerEligibility(rawValue: mapCustomerEligibilityToSDK($0))
@@ -33,6 +35,29 @@ public struct SDKSubscriptionOfferCodeRepository: SubscriptionOfferCodeRepositor
             ?? .stackWithIntroOffers
         let sdkDuration = AppStoreConnect_Swift_SDK.SubscriptionOfferDuration(rawValue: duration.rawValue) ?? .oneMonth
         let sdkMode = AppStoreConnect_Swift_SDK.SubscriptionOfferMode(rawValue: offerMode.rawValue) ?? .freeTrial
+
+        // Same `${local-price-N}` placeholder pattern as IAP — ties `included[]` items
+        // back to the parent's `relationships.prices.data` references.
+        let pricesPayload: [(localId: String, input: Domain.OfferCodePriceInput)] = prices.enumerated().map {
+            (localId: "${local-price-\($0.offset + 1)}", input: $0.element)
+        }
+        let pricesRelationship = pricesPayload.map {
+            SubscriptionOfferCodeCreateRequest.Data.Relationships.Prices.Datum(
+                type: .subscriptionOfferCodePrices, id: $0.localId
+            )
+        }
+        let included: [SubscriptionOfferCodePriceInlineCreate] = pricesPayload.map { entry in
+            SubscriptionOfferCodePriceInlineCreate(
+                type: .subscriptionOfferCodePrices,
+                id: entry.localId,
+                relationships: .init(
+                    territory: .init(data: .init(type: .territories, id: entry.input.territory)),
+                    subscriptionPricePoint: entry.input.pricePointId.map {
+                        .init(data: .init(type: .subscriptionPricePoints, id: $0))
+                    }
+                )
+            )
+        }
 
         let body = SubscriptionOfferCodeCreateRequest(
             data: .init(
@@ -43,13 +68,15 @@ public struct SDKSubscriptionOfferCodeRepository: SubscriptionOfferCodeRepositor
                     offerEligibility: sdkOfferEligibility,
                     duration: sdkDuration,
                     offerMode: sdkMode,
-                    numberOfPeriods: numberOfPeriods
+                    numberOfPeriods: numberOfPeriods,
+                    isAutoRenewEnabled: isAutoRenewEnabled
                 ),
                 relationships: .init(
                     subscription: .init(data: .init(type: .subscriptions, id: subscriptionId)),
-                    prices: .init(data: [])
+                    prices: .init(data: pricesRelationship)
                 )
-            )
+            ),
+            included: included.isEmpty ? nil : included
         )
         let response = try await client.request(APIEndpoint.v1.subscriptionOfferCodes.post(body))
         return mapOfferCode(response.data, subscriptionId: subscriptionId)

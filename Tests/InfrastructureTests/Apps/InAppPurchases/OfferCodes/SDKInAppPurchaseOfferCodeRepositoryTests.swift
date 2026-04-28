@@ -114,7 +114,11 @@ struct SDKInAppPurchaseOfferCodeRepositoryTests {
         let result = try await repo.createOfferCode(
             iapId: "iap-42",
             name: "LAUNCH",
-            customerEligibilities: [.nonSpender]
+            customerEligibilities: [.nonSpender],
+            prices: [
+                OfferCodePriceInput(territory: "USA", pricePointId: "pp-1"),
+                OfferCodePriceInput(territory: "BRA", pricePointId: nil),
+            ]
         )
 
         #expect(result.id == "iap-oc-new")

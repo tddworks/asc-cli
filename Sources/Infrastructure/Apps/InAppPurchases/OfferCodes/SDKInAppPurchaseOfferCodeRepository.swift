@@ -20,10 +20,35 @@ public struct SDKInAppPurchaseOfferCodeRepository: InAppPurchaseOfferCodeReposit
     public func createOfferCode(
         iapId: String,
         name: String,
-        customerEligibilities: [Domain.IAPCustomerEligibility]
+        customerEligibilities: [Domain.IAPCustomerEligibility],
+        prices: [Domain.OfferCodePriceInput]
     ) async throws -> Domain.InAppPurchaseOfferCode {
         let sdkEligibilities = customerEligibilities.compactMap {
             InAppPurchaseOfferCodeCreateRequest.Data.Attributes.CustomerEligibility(rawValue: $0.rawValue)
+        }
+
+        // Each price needs a placeholder id that correlates between `included[]` and
+        // `relationships.prices.data` — ASC reads the placeholders and replaces them with
+        // generated server-side ids. Mirrors the iOS app's offer-code create payload.
+        let pricesPayload: [(localId: String, input: Domain.OfferCodePriceInput)] = prices.enumerated().map {
+            (localId: "${local-price-\($0.offset + 1)}", input: $0.element)
+        }
+        let pricesRelationship = pricesPayload.map {
+            InAppPurchaseOfferCodeCreateRequest.Data.Relationships.Prices.Datum(
+                type: .inAppPurchaseOfferPrices, id: $0.localId
+            )
+        }
+        let included: [InAppPurchaseOfferPriceInlineCreate] = pricesPayload.map { entry in
+            InAppPurchaseOfferPriceInlineCreate(
+                type: .inAppPurchaseOfferPrices,
+                id: entry.localId,
+                relationships: .init(
+                    territory: .init(data: .init(type: .territories, id: entry.input.territory)),
+                    pricePoint: entry.input.pricePointId.map {
+                        .init(data: .init(type: .inAppPurchasePricePoints, id: $0))
+                    }
+                )
+            )
         }
 
         let body = InAppPurchaseOfferCodeCreateRequest(
@@ -35,9 +60,10 @@ public struct SDKInAppPurchaseOfferCodeRepository: InAppPurchaseOfferCodeReposit
                 ),
                 relationships: .init(
                     inAppPurchase: .init(data: .init(type: .inAppPurchases, id: iapId)),
-                    prices: .init(data: [])
+                    prices: .init(data: pricesRelationship)
                 )
-            )
+            ),
+            included: included.isEmpty ? nil : included
         )
         let response = try await client.request(APIEndpoint.v1.inAppPurchaseOfferCodes.post(body))
         return mapOfferCode(response.data, iapId: iapId)

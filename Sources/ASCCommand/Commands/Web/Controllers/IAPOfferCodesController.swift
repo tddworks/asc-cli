@@ -33,11 +33,20 @@ struct IAPOfferCodesController: Sendable {
                     status: .badRequest
                 )
             }
+            // Body accepts `prices: [{territory, pricePointId?}]`. Omit `pricePointId`
+            // (or set to null) for a free offer in that territory. ASC's `prices`
+            // relationship is read-only post-create, so this is the only chance to set it.
+            let prices: [OfferCodePriceInput] = (json["prices"] as? [[String: Any]] ?? []).compactMap { entry in
+                guard let territory = entry["territory"] as? String, !territory.isEmpty else { return nil }
+                let pricePointId = entry["pricePointId"] as? String
+                return OfferCodePriceInput(territory: territory, pricePointId: pricePointId)
+            }
             do {
                 let created = try await self.repo.createOfferCode(
                     iapId: iapId,
                     name: name,
-                    customerEligibilities: eligibilities
+                    customerEligibilities: eligibilities,
+                    prices: prices
                 )
                 return try restFormat(created)
             } catch {

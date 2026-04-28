@@ -4,7 +4,12 @@ import Domain
 struct SubscriptionOfferCodesCreate: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "create",
-        abstract: "Create an offer code for a subscription"
+        abstract: "Create an offer code for a subscription",
+        discussion: """
+            Per-territory pricing is read-only after creation, so include every territory
+            via --price (paid) or --free-territory. Use --auto-renew false for a non-renewing
+            (one-time) offer; ASC only accepts --mode FREE_TRIAL in that case.
+            """
     )
 
     @OptionGroup var globals: GlobalOptions
@@ -29,6 +34,17 @@ struct SubscriptionOfferCodesCreate: AsyncParsableCommand {
 
     @Option(name: .long, help: "Offer eligibility: STACKABLE, INTRODUCTORY, SUBSCRIPTION_OFFER")
     var offerEligibility: String
+
+    @Option(name: .long, help: "Whether the offer auto-renews after the offer period (default: true). Set --auto-renew false for non-renewing (one-time) offers.")
+    var autoRenew: Bool = true
+
+    @Option(name: .long, parsing: .singleValue,
+            help: "Paid price for a territory in `<territory>=<price-point-id>` form (repeatable)")
+    var price: [String] = []
+
+    @Option(name: .long, parsing: .singleValue,
+            help: "Territory that should redeem the offer for free (repeatable)")
+    var freeTerritory: [String] = []
 
     func run() async throws {
         let repo = try ClientProvider.makeSubscriptionOfferCodeRepository()
@@ -55,6 +71,7 @@ struct SubscriptionOfferCodesCreate: AsyncParsableCommand {
         guard let parsedOfferEligibility = SubscriptionOfferEligibility(rawValue: offerEligibility) else {
             throw ValidationError("Invalid offer eligibility '\(offerEligibility)'. Use: STACKABLE, INTRODUCTORY, SUBSCRIPTION_OFFER")
         }
+        let prices = try parseOfferCodePrices(paid: price, free: freeTerritory)
         let item = try await repo.createOfferCode(
             subscriptionId: subscriptionId,
             name: name,
@@ -62,7 +79,9 @@ struct SubscriptionOfferCodesCreate: AsyncParsableCommand {
             offerEligibility: parsedOfferEligibility,
             duration: offerDuration,
             offerMode: offerMode,
-            numberOfPeriods: periods
+            numberOfPeriods: periods,
+            isAutoRenewEnabled: autoRenew,
+            prices: prices
         )
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems([item], affordanceMode: affordanceMode)
