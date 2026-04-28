@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Production / sandbox split for offer codes** — `InAppPurchaseOfferCode` and `SubscriptionOfferCode` now expose `productionCodeCount` and `sandboxCodeCount` (Apple returns these alongside the existing total). Visible in `asc iap-offer-codes list`, `asc subscription-offer-codes list`, and on the existing `GET /api/v1/iap/:iapId/offer-codes` and `GET /api/v1/subscriptions/:subscriptionId/offer-codes` endpoints (flow through Codable).
+- **`environment` on one-time-use code batches** — `InAppPurchaseOfferCodeOneTimeUseCode` and `SubscriptionOfferCodeOneTimeUseCode` now carry `environment: OfferCodeEnvironment?` (PRODUCTION or SANDBOX). Apple separates redemption by environment; sandbox batches redeem against sandbox tester accounts and have a smaller per-quarter ceiling.
+- **`--environment` flag on one-time-codes create** — `asc iap-offer-code-one-time-codes create --environment sandbox` and `asc subscription-offer-code-one-time-codes create --environment sandbox`. Default is `production`, matching prior behaviour. Maps to the SDK's `Attributes(environment:)` field on the create-request body so sandbox batches can be generated from CLI.
+- **REST endpoints for one-time-codes** — `GET/POST /api/v1/iap-offer-codes/:offerCodeId/one-time-codes`, `PATCH /api/v1/iap-offer-code-one-time-codes/:oneTimeCodeId`, and the subscription mirrors. POST body accepts `{numberOfCodes, expirationDate, environment?}` so REST clients can generate sandbox redemption batches without dropping to CLI. Each batch row's `_links` resolves `listOneTimeCodes` to the nested parent path.
+
 ---
 
 ## [0.1.74] - 2026-04-27
