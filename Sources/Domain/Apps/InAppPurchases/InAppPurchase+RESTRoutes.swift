@@ -3,6 +3,8 @@ extension RESTPathResolver {
     static let _iapRoutes: Void = {
         registerRoute(command: "iap-localizations", parentParam: "iap-id", parentSegment: "iap", segment: "localizations")
         registerRoute(command: "iap-offer-codes", parentParam: "iap-id", parentSegment: "iap", segment: "offer-codes")
+        registerRoute(command: "iap-offer-code-one-time-codes", parentParam: "offer-code-id", parentSegment: "iap-offer-codes", segment: "one-time-codes")
+        registerRoute(command: "iap-offer-code-custom-codes", parentParam: "offer-code-id", parentSegment: "iap-offer-codes", segment: "custom-codes")
         registerRoute(command: "iap-availability", parentParam: "iap-id", parentSegment: "iap", segment: "availability")
         // Nested CLI subcommand `asc iap price-points` is registered with a space so the
         // `Affordance.cliCommand` and resolver paths agree on the same key.

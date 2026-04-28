@@ -20,16 +20,15 @@ struct SubscriptionOfferCodeOneTimeCodesUpdate: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubscriptionOfferCodeRepository) async throws -> String {
+    func execute(
+        repo: any SubscriptionOfferCodeRepository,
+        affordanceMode: AffordanceMode = .cli
+    ) async throws -> String {
         guard let isActive = Bool(active) else {
             throw ValidationError("Invalid value '\(active)' for --active. Use: true, false")
         }
         let item = try await repo.updateOneTimeUseCode(oneTimeCodeId: oneTimeCodeId, isActive: isActive)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            [item],
-            headers: ["ID", "Codes", "Expiration", "Active"],
-            rowMapper: { [$0.id, String($0.numberOfCodes), $0.expirationDate ?? "", String($0.isActive)] }
-        )
+        return try formatter.formatAgentItems([item], affordanceMode: affordanceMode)
     }
 }

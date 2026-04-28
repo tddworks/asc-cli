@@ -425,6 +425,91 @@ struct RESTRoutesTests {
         #expect(normalized.contains("/api/v1/subscription-offer-codes/oc-7/prices"))
     }
 
+    // MARK: - One-Time Use Codes (IAP + Subscription)
+
+    @Test func `IAP one-time codes list REST resolves to nested path under offer code`() async throws {
+        let mockRepo = MockInAppPurchaseOfferCodeRepository()
+        given(mockRepo).listOneTimeUseCodes(offerCodeId: .any).willReturn([
+            InAppPurchaseOfferCodeOneTimeUseCode(
+                id: "otc-1", offerCodeId: "oc-7", numberOfCodes: 100,
+                expirationDate: "2026-12-31", isActive: true, environment: .sandbox
+            )
+        ])
+
+        let output = try await IAPOfferCodeOneTimeCodesList.parse(["--offer-code-id", "oc-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/iap-offer-codes/oc-7/one-time-codes"))
+        #expect(normalized.contains("\"environment\" : \"SANDBOX\""))
+    }
+
+    @Test func `IAP one-time codes update REST resolves to PATCH on the code id`() async throws {
+        let mockRepo = MockInAppPurchaseOfferCodeRepository()
+        given(mockRepo).updateOneTimeUseCode(oneTimeCodeId: .any, isActive: .any).willReturn(
+            InAppPurchaseOfferCodeOneTimeUseCode(
+                id: "otc-1", offerCodeId: "oc-7", numberOfCodes: 100,
+                expirationDate: "2026-12-31", isActive: false, environment: .production
+            )
+        )
+
+        let output = try await IAPOfferCodeOneTimeCodesUpdate
+            .parse(["--one-time-code-id", "otc-1", "--active", "false", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        // listOneTimeCodes affordance is preserved on the row → nested path under parent.
+        #expect(normalized.contains("/api/v1/iap-offer-codes/oc-7/one-time-codes"))
+    }
+
+    @Test func `subscription one-time codes list REST resolves to nested path under offer code`() async throws {
+        let mockRepo = MockSubscriptionOfferCodeRepository()
+        given(mockRepo).listOneTimeUseCodes(offerCodeId: .any).willReturn([
+            SubscriptionOfferCodeOneTimeUseCode(
+                id: "otc-1", offerCodeId: "oc-7", numberOfCodes: 100,
+                expirationDate: "2026-12-31", isActive: true, environment: .sandbox
+            )
+        ])
+
+        let output = try await SubscriptionOfferCodeOneTimeCodesList.parse(["--offer-code-id", "oc-7", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/subscription-offer-codes/oc-7/one-time-codes"))
+        #expect(normalized.contains("\"environment\" : \"SANDBOX\""))
+    }
+
+    @Test func `subscription one-time codes create REST forwards environment to repo and emits _links`() async throws {
+        let mockRepo = MockSubscriptionOfferCodeRepository()
+        given(mockRepo).createOneTimeUseCode(
+            offerCodeId: .any, numberOfCodes: .any, expirationDate: .any, environment: .any
+        ).willReturn(
+            SubscriptionOfferCodeOneTimeUseCode(
+                id: "otc-new", offerCodeId: "oc-7", numberOfCodes: 50,
+                expirationDate: "2026-12-31", isActive: true, environment: .sandbox
+            )
+        )
+
+        let output = try await SubscriptionOfferCodeOneTimeCodesCreate.parse([
+            "--offer-code-id", "oc-7",
+            "--number-of-codes", "50",
+            "--expiration-date", "2026-12-31",
+            "--environment", "sandbox",
+            "--pretty",
+        ]).execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        verify(mockRepo).createOneTimeUseCode(
+            offerCodeId: .any, numberOfCodes: .any, expirationDate: .any,
+            environment: .value(.sandbox)
+        ).called(1)
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("\"environment\" : \"SANDBOX\""))
+    }
+
     // MARK: - IAP Review Assets
 
     @Test func `IAP review screenshot REST returns nested path under iap`() async throws {

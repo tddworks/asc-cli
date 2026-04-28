@@ -69,4 +69,16 @@ struct InAppPurchaseOfferCodeOneTimeUseCodeTests {
         let code = MockRepositoryFactory.makeIAPOfferCodeOneTimeUseCode(environment: .sandbox)
         #expect(code.tableRow.contains("SANDBOX"))
     }
+
+    @Test func `apiLinks resolve listOneTimeCodes to nested REST path under offer code`() {
+        let code = MockRepositoryFactory.makeIAPOfferCodeOneTimeUseCode(offerCodeId: "oc-1")
+        #expect(code.apiLinks["listOneTimeCodes"]?.href == "/api/v1/iap-offer-codes/oc-1/one-time-codes")
+        #expect(code.apiLinks["listOneTimeCodes"]?.method == "GET")
+    }
+
+    @Test func `apiLinks resolve deactivate to PATCH on the code id`() {
+        let code = MockRepositoryFactory.makeIAPOfferCodeOneTimeUseCode(id: "otc-1", isActive: true)
+        #expect(code.apiLinks["deactivate"]?.href == "/api/v1/iap-offer-code-one-time-codes/otc-1")
+        #expect(code.apiLinks["deactivate"]?.method == "PATCH")
+    }
 }

@@ -36,7 +36,10 @@ struct IAPOfferCodeOneTimeCodesCreate: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any InAppPurchaseOfferCodeRepository) async throws -> String {
+    func execute(
+        repo: any InAppPurchaseOfferCodeRepository,
+        affordanceMode: AffordanceMode = .cli
+    ) async throws -> String {
         let item = try await repo.createOneTimeUseCode(
             offerCodeId: offerCodeId,
             numberOfCodes: numberOfCodes,
@@ -44,6 +47,6 @@ struct IAPOfferCodeOneTimeCodesCreate: AsyncParsableCommand {
             environment: environment
         )
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems([item])
+        return try formatter.formatAgentItems([item], affordanceMode: affordanceMode)
     }
 }

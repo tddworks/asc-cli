@@ -75,6 +75,12 @@ enum RESTRoutes {
            let subOfferCodeRepo = try? factory.makeSubscriptionOfferCodeRepository(authProvider: auth) {
             OfferCodePricesController(iapRepo: iapOfferCodeRepo, subRepo: subOfferCodeRepo).addRoutes(to: v1)
         }
+        if let iapOfferCodeRepo = try? factory.makeInAppPurchaseOfferCodeRepository(authProvider: auth) {
+            IAPOfferCodeOneTimeCodesController(repo: iapOfferCodeRepo).addRoutes(to: v1)
+        }
+        if let subOfferCodeRepo = try? factory.makeSubscriptionOfferCodeRepository(authProvider: auth) {
+            SubscriptionOfferCodeOneTimeCodesController(repo: subOfferCodeRepo).addRoutes(to: v1)
+        }
         if let iapReviewRepo = try? factory.makeInAppPurchaseReviewRepository(authProvider: auth) {
             IAPReviewController(repo: iapReviewRepo).addRoutes(to: v1)
         }

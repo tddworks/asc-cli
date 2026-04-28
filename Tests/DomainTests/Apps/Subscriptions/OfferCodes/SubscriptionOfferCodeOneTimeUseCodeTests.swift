@@ -58,6 +58,18 @@ struct SubscriptionOfferCodeOneTimeUseCodeTests {
         #expect(SubscriptionOfferCodeOneTimeUseCode.tableHeaders.contains("Env"))
     }
 
+    @Test func `apiLinks resolve listOneTimeCodes to nested REST path under offer code`() {
+        let code = MockRepositoryFactory.makeSubscriptionOfferCodeOneTimeUseCode(offerCodeId: "oc-1")
+        #expect(code.apiLinks["listOneTimeCodes"]?.href == "/api/v1/subscription-offer-codes/oc-1/one-time-codes")
+        #expect(code.apiLinks["listOneTimeCodes"]?.method == "GET")
+    }
+
+    @Test func `apiLinks resolve deactivate to PATCH on the code id`() {
+        let code = MockRepositoryFactory.makeSubscriptionOfferCodeOneTimeUseCode(id: "otc-1", isActive: true)
+        #expect(code.apiLinks["deactivate"]?.href == "/api/v1/subscription-offer-code-one-time-codes/otc-1")
+        #expect(code.apiLinks["deactivate"]?.method == "PATCH")
+    }
+
     @Test func `optional fields omitted from JSON when nil`() throws {
         let code = SubscriptionOfferCodeOneTimeUseCode(
             id: "otc-1",
