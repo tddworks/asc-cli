@@ -72,6 +72,17 @@ struct InAppPurchaseTests {
         #expect(iap.affordances["listOfferCodes"] == "asc iap-offer-codes list --iap-id iap-1")
     }
 
+    @Test func `iap affordances include createOfferCode`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.affordances["createOfferCode"] == "asc iap-offer-codes create --eligibility <NON_SPENDER|ACTIVE_SPENDER|CHURNED_SPENDER> --iap-id iap-1 --name <name>")
+    }
+
+    @Test func `iap apiLinks include createOfferCode as POST under nested parent`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.apiLinks["createOfferCode"]?.href == "/api/v1/iap/iap-1/offer-codes")
+        #expect(iap.apiLinks["createOfferCode"]?.method == "POST")
+    }
+
     @Test func `iap affordances include update with iap id`() {
         let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
         #expect(iap.affordances["update"] == "asc iap update --iap-id iap-1 --reference-name <name>")

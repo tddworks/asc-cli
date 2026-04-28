@@ -113,6 +113,19 @@ struct SubscriptionTests {
         #expect(sub.affordances["listOfferCodes"] == "asc subscription-offer-codes list --subscription-id sub-1")
     }
 
+    @Test func `subscription affordances include createOfferCode`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.affordances["createOfferCode"] != nil)
+        #expect(sub.affordances["createOfferCode"]!.contains("asc subscription-offer-codes create"))
+        #expect(sub.affordances["createOfferCode"]!.contains("--subscription-id sub-1"))
+    }
+
+    @Test func `subscription apiLinks include createOfferCode as POST under nested parent`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.apiLinks["createOfferCode"]?.href == "/api/v1/subscriptions/sub-1/offer-codes")
+        #expect(sub.apiLinks["createOfferCode"]?.method == "POST")
+    }
+
     @Test func `subscription affordances include update with subscription id`() {
         let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
         #expect(sub.affordances["update"] == "asc subscriptions update --name <name> --subscription-id sub-1")

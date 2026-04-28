@@ -35,7 +35,10 @@ struct SubscriptionOfferCodesCreate: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubscriptionOfferCodeRepository) async throws -> String {
+    func execute(
+        repo: any SubscriptionOfferCodeRepository,
+        affordanceMode: AffordanceMode = .cli
+    ) async throws -> String {
         guard let offerDuration = SubscriptionOfferDuration(rawValue: duration) else {
             throw ValidationError("Invalid duration '\(duration)'. Use: THREE_DAYS, ONE_WEEK, TWO_WEEKS, ONE_MONTH, TWO_MONTHS, THREE_MONTHS, SIX_MONTHS, ONE_YEAR")
         }
@@ -62,10 +65,6 @@ struct SubscriptionOfferCodesCreate: AsyncParsableCommand {
             numberOfPeriods: periods
         )
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            [item],
-            headers: ["ID", "Name", "Duration", "Mode", "Periods", "Active"],
-            rowMapper: { [$0.id, $0.name, $0.duration.rawValue, $0.offerMode.rawValue, String($0.numberOfPeriods), String($0.isActive)] }
-        )
+        return try formatter.formatAgentItems([item], affordanceMode: affordanceMode)
     }
 }

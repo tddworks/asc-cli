@@ -23,7 +23,10 @@ struct IAPOfferCodesCreate: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any InAppPurchaseOfferCodeRepository) async throws -> String {
+    func execute(
+        repo: any InAppPurchaseOfferCodeRepository,
+        affordanceMode: AffordanceMode = .cli
+    ) async throws -> String {
         var customerEligibilities: [IAPCustomerEligibility] = []
         for e in eligibility {
             guard let ce = IAPCustomerEligibility(rawValue: e) else {
@@ -37,10 +40,6 @@ struct IAPOfferCodesCreate: AsyncParsableCommand {
             customerEligibilities: customerEligibilities
         )
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            [item],
-            headers: ["ID", "Name", "Eligibilities", "Active"],
-            rowMapper: { [$0.id, $0.name, $0.customerEligibilities.map(\.rawValue).joined(separator: ", "), String($0.isActive)] }
-        )
+        return try formatter.formatAgentItems([item], affordanceMode: affordanceMode)
     }
 }

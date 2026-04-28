@@ -482,6 +482,54 @@ struct RESTRoutesTests {
         #expect(normalized.contains("\"environment\" : \"SANDBOX\""))
     }
 
+    @Test func `IAP offer codes create REST emits _links pointing back at parent IAP path`() async throws {
+        let mockRepo = MockInAppPurchaseOfferCodeRepository()
+        given(mockRepo).createOfferCode(
+            iapId: .any, name: .any, customerEligibilities: .any
+        ).willReturn(InAppPurchaseOfferCode(
+            id: "oc-new", iapId: "iap-7", name: "Promo",
+            customerEligibilities: [.nonSpender], isActive: true
+        ))
+
+        let output = try await IAPOfferCodesCreate.parse([
+            "--iap-id", "iap-7",
+            "--name", "Promo",
+            "--eligibility", "NON_SPENDER",
+            "--pretty",
+        ]).execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/iap-offer-codes/oc-new/one-time-codes"))
+    }
+
+    @Test func `subscription offer codes create REST emits _links`() async throws {
+        let mockRepo = MockSubscriptionOfferCodeRepository()
+        given(mockRepo).createOfferCode(
+            subscriptionId: .any, name: .any, customerEligibilities: .any,
+            offerEligibility: .any, duration: .any, offerMode: .any, numberOfPeriods: .any
+        ).willReturn(SubscriptionOfferCode(
+            id: "oc-new", subscriptionId: "sub-7", name: "Loyalty",
+            customerEligibilities: [.new], offerEligibility: .stackable,
+            duration: .oneMonth, offerMode: .freeTrial, numberOfPeriods: 1, isActive: true
+        ))
+
+        let output = try await SubscriptionOfferCodesCreate.parse([
+            "--subscription-id", "sub-7",
+            "--name", "Loyalty",
+            "--duration", "ONE_MONTH",
+            "--mode", "FREE_TRIAL",
+            "--periods", "1",
+            "--eligibility", "NEW",
+            "--offer-eligibility", "STACKABLE",
+            "--pretty",
+        ]).execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/subscription-offer-codes/oc-new/one-time-codes"))
+    }
+
     @Test func `subscription one-time codes create REST forwards environment to repo and emits _links`() async throws {
         let mockRepo = MockSubscriptionOfferCodeRepository()
         given(mockRepo).createOneTimeUseCode(
