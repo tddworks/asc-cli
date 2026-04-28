@@ -9,6 +9,8 @@ public struct SubscriptionOfferCode: Sendable, Equatable, Identifiable {
     public let offerMode: SubscriptionOfferMode
     public let numberOfPeriods: Int
     public let totalNumberOfCodes: Int?
+    public let productionCodeCount: Int?
+    public let sandboxCodeCount: Int?
     public let isActive: Bool
 
     public init(
@@ -21,6 +23,8 @@ public struct SubscriptionOfferCode: Sendable, Equatable, Identifiable {
         offerMode: SubscriptionOfferMode,
         numberOfPeriods: Int,
         totalNumberOfCodes: Int? = nil,
+        productionCodeCount: Int? = nil,
+        sandboxCodeCount: Int? = nil,
         isActive: Bool
     ) {
         self.id = id
@@ -32,6 +36,8 @@ public struct SubscriptionOfferCode: Sendable, Equatable, Identifiable {
         self.offerMode = offerMode
         self.numberOfPeriods = numberOfPeriods
         self.totalNumberOfCodes = totalNumberOfCodes
+        self.productionCodeCount = productionCodeCount
+        self.sandboxCodeCount = sandboxCodeCount
         self.isActive = isActive
     }
 }
@@ -52,7 +58,9 @@ public enum SubscriptionOfferEligibility: String, Sendable, Codable, Equatable {
 extension SubscriptionOfferCode: Codable {
     enum CodingKeys: String, CodingKey {
         case id, subscriptionId, name, customerEligibilities, offerEligibility
-        case duration, offerMode, numberOfPeriods, totalNumberOfCodes, isActive
+        case duration, offerMode, numberOfPeriods
+        case totalNumberOfCodes, productionCodeCount, sandboxCodeCount
+        case isActive
     }
 
     public init(from decoder: any Decoder) throws {
@@ -66,6 +74,8 @@ extension SubscriptionOfferCode: Codable {
         offerMode = try c.decode(SubscriptionOfferMode.self, forKey: .offerMode)
         numberOfPeriods = try c.decode(Int.self, forKey: .numberOfPeriods)
         totalNumberOfCodes = try c.decodeIfPresent(Int.self, forKey: .totalNumberOfCodes)
+        productionCodeCount = try c.decodeIfPresent(Int.self, forKey: .productionCodeCount)
+        sandboxCodeCount = try c.decodeIfPresent(Int.self, forKey: .sandboxCodeCount)
         isActive = try c.decode(Bool.self, forKey: .isActive)
     }
 
@@ -80,16 +90,27 @@ extension SubscriptionOfferCode: Codable {
         try c.encode(offerMode, forKey: .offerMode)
         try c.encode(numberOfPeriods, forKey: .numberOfPeriods)
         try c.encodeIfPresent(totalNumberOfCodes, forKey: .totalNumberOfCodes)
+        try c.encodeIfPresent(productionCodeCount, forKey: .productionCodeCount)
+        try c.encodeIfPresent(sandboxCodeCount, forKey: .sandboxCodeCount)
         try c.encode(isActive, forKey: .isActive)
     }
 }
 
 extension SubscriptionOfferCode: Presentable {
     public static var tableHeaders: [String] {
-        ["ID", "Name", "Duration", "Mode", "Periods", "Active"]
+        ["ID", "Name", "Duration", "Mode", "Periods", "Active", "Prod", "Sandbox"]
     }
     public var tableRow: [String] {
-        [id, name, duration.rawValue, offerMode.rawValue, String(numberOfPeriods), String(isActive)]
+        [
+            id,
+            name,
+            duration.rawValue,
+            offerMode.rawValue,
+            String(numberOfPeriods),
+            String(isActive),
+            productionCodeCount.map(String.init) ?? "",
+            sandboxCodeCount.map(String.init) ?? "",
+        ]
     }
 }
 

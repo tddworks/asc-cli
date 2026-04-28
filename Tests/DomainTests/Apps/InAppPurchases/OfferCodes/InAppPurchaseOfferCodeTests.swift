@@ -54,10 +54,34 @@ struct InAppPurchaseOfferCodeTests {
             name: "TEST",
             customerEligibilities: [.nonSpender],
             isActive: true,
-            totalNumberOfCodes: nil
+            totalNumberOfCodes: nil,
+            productionCodeCount: nil,
+            sandboxCodeCount: nil
         )
         let data = try JSONEncoder().encode(code)
         let json = String(data: data, encoding: .utf8)!
         #expect(!json.contains("totalNumberOfCodes"))
+        #expect(!json.contains("productionCodeCount"))
+        #expect(!json.contains("sandboxCodeCount"))
+    }
+
+    @Test func `production and sandbox code counts split totals by environment`() {
+        let code = MockRepositoryFactory.makeIAPOfferCode(
+            productionCodeCount: 12_000,
+            sandboxCodeCount: 250
+        )
+        #expect(code.productionCodeCount == 12_000)
+        #expect(code.sandboxCodeCount == 250)
+    }
+
+    @Test func `production and sandbox code counts encode to JSON when present`() throws {
+        let code = MockRepositoryFactory.makeIAPOfferCode(
+            productionCodeCount: 100,
+            sandboxCodeCount: 5
+        )
+        let data = try JSONEncoder().encode(code)
+        let json = String(data: data, encoding: .utf8)!
+        #expect(json.contains("\"productionCodeCount\":100"))
+        #expect(json.contains("\"sandboxCodeCount\":5"))
     }
 }

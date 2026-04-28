@@ -26,9 +26,47 @@ struct InAppPurchaseOfferCodeOneTimeUseCodeTests {
 
     @Test func `deactivate affordance only when active`() {
         let active = MockRepositoryFactory.makeIAPOfferCodeOneTimeUseCode(id: "otc-1", isActive: true)
-        #expect(active.affordances["deactivate"] == "asc iap-offer-code-one-time-codes update --one-time-code-id otc-1 --active false")
+        #expect(active.affordances["deactivate"] == "asc iap-offer-code-one-time-codes update --active false --one-time-code-id otc-1")
 
         let inactive = MockRepositoryFactory.makeIAPOfferCodeOneTimeUseCode(id: "otc-1", isActive: false)
         #expect(inactive.affordances["deactivate"] == nil)
+    }
+
+    @Test func `environment defaults to nil when not provided`() {
+        let code = MockRepositoryFactory.makeIAPOfferCodeOneTimeUseCode()
+        #expect(code.environment == nil)
+    }
+
+    @Test func `sandbox environment is preserved`() {
+        let code = MockRepositoryFactory.makeIAPOfferCodeOneTimeUseCode(environment: .sandbox)
+        #expect(code.environment == .sandbox)
+    }
+
+    @Test func `production environment is preserved`() {
+        let code = MockRepositoryFactory.makeIAPOfferCodeOneTimeUseCode(environment: .production)
+        #expect(code.environment == .production)
+    }
+
+    @Test func `environment encodes to JSON when present`() throws {
+        let code = MockRepositoryFactory.makeIAPOfferCodeOneTimeUseCode(environment: .sandbox)
+        let data = try JSONEncoder().encode(code)
+        let json = String(data: data, encoding: .utf8)!
+        #expect(json.contains("\"environment\":\"SANDBOX\""))
+    }
+
+    @Test func `environment omitted from JSON when nil`() throws {
+        let code = MockRepositoryFactory.makeIAPOfferCodeOneTimeUseCode(environment: nil)
+        let data = try JSONEncoder().encode(code)
+        let json = String(data: data, encoding: .utf8)!
+        #expect(!json.contains("environment"))
+    }
+
+    @Test func `table headers include Environment column`() {
+        #expect(InAppPurchaseOfferCodeOneTimeUseCode.tableHeaders.contains("Env"))
+    }
+
+    @Test func `table row includes environment raw value`() {
+        let code = MockRepositoryFactory.makeIAPOfferCodeOneTimeUseCode(environment: .sandbox)
+        #expect(code.tableRow.contains("SANDBOX"))
     }
 }

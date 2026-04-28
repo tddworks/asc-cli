@@ -103,4 +103,24 @@ struct SubscriptionOfferCodeTests {
         let json = String(data: data, encoding: .utf8)!
         #expect(json.contains("totalNumberOfCodes"))
     }
+
+    @Test func `production and sandbox code counts split totals by environment`() {
+        let code = MockRepositoryFactory.makeSubscriptionOfferCode(
+            productionCodeCount: 9_000,
+            sandboxCodeCount: 80
+        )
+        #expect(code.productionCodeCount == 9_000)
+        #expect(code.sandboxCodeCount == 80)
+    }
+
+    @Test func `production and sandbox code counts encode to JSON when present`() throws {
+        let code = MockRepositoryFactory.makeSubscriptionOfferCode(
+            productionCodeCount: 7,
+            sandboxCodeCount: 1
+        )
+        let data = try JSONEncoder().encode(code)
+        let json = String(data: data, encoding: .utf8)!
+        #expect(json.contains("\"productionCodeCount\":7"))
+        #expect(json.contains("\"sandboxCodeCount\":1"))
+    }
 }

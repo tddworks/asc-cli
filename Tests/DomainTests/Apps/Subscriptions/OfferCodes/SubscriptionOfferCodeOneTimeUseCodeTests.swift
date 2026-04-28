@@ -31,10 +31,31 @@ struct SubscriptionOfferCodeOneTimeUseCodeTests {
 
     @Test func `deactivate affordance only when active`() {
         let active = MockRepositoryFactory.makeSubscriptionOfferCodeOneTimeUseCode(id: "otc-1", isActive: true)
-        #expect(active.affordances["deactivate"] == "asc subscription-offer-code-one-time-codes update --one-time-code-id otc-1 --active false")
+        #expect(active.affordances["deactivate"] == "asc subscription-offer-code-one-time-codes update --active false --one-time-code-id otc-1")
 
         let inactive = MockRepositoryFactory.makeSubscriptionOfferCodeOneTimeUseCode(id: "otc-1", isActive: false)
         #expect(inactive.affordances["deactivate"] == nil)
+    }
+
+    @Test func `environment defaults to nil when not provided`() {
+        let code = MockRepositoryFactory.makeSubscriptionOfferCodeOneTimeUseCode()
+        #expect(code.environment == nil)
+    }
+
+    @Test func `sandbox environment is preserved`() {
+        let code = MockRepositoryFactory.makeSubscriptionOfferCodeOneTimeUseCode(environment: .sandbox)
+        #expect(code.environment == .sandbox)
+    }
+
+    @Test func `environment encodes to JSON when present`() throws {
+        let code = MockRepositoryFactory.makeSubscriptionOfferCodeOneTimeUseCode(environment: .sandbox)
+        let data = try JSONEncoder().encode(code)
+        let json = String(data: data, encoding: .utf8)!
+        #expect(json.contains("\"environment\":\"SANDBOX\""))
+    }
+
+    @Test func `table headers include Environment column`() {
+        #expect(SubscriptionOfferCodeOneTimeUseCode.tableHeaders.contains("Env"))
     }
 
     @Test func `optional fields omitted from JSON when nil`() throws {

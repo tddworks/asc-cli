@@ -961,6 +961,8 @@ struct MockRepositoryFactory {
         offerMode: SubscriptionOfferMode = .freeTrial,
         numberOfPeriods: Int = 1,
         totalNumberOfCodes: Int? = nil,
+        productionCodeCount: Int? = nil,
+        sandboxCodeCount: Int? = nil,
         isActive: Bool = true
     ) -> SubscriptionOfferCode {
         SubscriptionOfferCode(
@@ -973,6 +975,8 @@ struct MockRepositoryFactory {
             offerMode: offerMode,
             numberOfPeriods: numberOfPeriods,
             totalNumberOfCodes: totalNumberOfCodes,
+            productionCodeCount: productionCodeCount,
+            sandboxCodeCount: sandboxCodeCount,
             isActive: isActive
         )
     }
@@ -1003,7 +1007,8 @@ struct MockRepositoryFactory {
         numberOfCodes: Int = 5000,
         createdDate: String? = nil,
         expirationDate: String? = "2026-12-31",
-        isActive: Bool = true
+        isActive: Bool = true,
+        environment: OfferCodeEnvironment? = nil
     ) -> SubscriptionOfferCodeOneTimeUseCode {
         SubscriptionOfferCodeOneTimeUseCode(
             id: id,
@@ -1011,7 +1016,8 @@ struct MockRepositoryFactory {
             numberOfCodes: numberOfCodes,
             createdDate: createdDate,
             expirationDate: expirationDate,
-            isActive: isActive
+            isActive: isActive,
+            environment: environment
         )
     }
 
@@ -1023,7 +1029,9 @@ struct MockRepositoryFactory {
         name: String = "FREEGEMS",
         customerEligibilities: [IAPCustomerEligibility] = [.nonSpender],
         isActive: Bool = true,
-        totalNumberOfCodes: Int? = nil
+        totalNumberOfCodes: Int? = nil,
+        productionCodeCount: Int? = nil,
+        sandboxCodeCount: Int? = nil
     ) -> InAppPurchaseOfferCode {
         InAppPurchaseOfferCode(
             id: id,
@@ -1031,7 +1039,9 @@ struct MockRepositoryFactory {
             name: name,
             customerEligibilities: customerEligibilities,
             isActive: isActive,
-            totalNumberOfCodes: totalNumberOfCodes
+            totalNumberOfCodes: totalNumberOfCodes,
+            productionCodeCount: productionCodeCount,
+            sandboxCodeCount: sandboxCodeCount
         )
     }
 
@@ -1061,7 +1071,8 @@ struct MockRepositoryFactory {
         numberOfCodes: Int = 3000,
         createdDate: String? = nil,
         expirationDate: String? = "2026-06-30",
-        isActive: Bool = true
+        isActive: Bool = true,
+        environment: OfferCodeEnvironment? = nil
     ) -> InAppPurchaseOfferCodeOneTimeUseCode {
         InAppPurchaseOfferCodeOneTimeUseCode(
             id: id,
@@ -1069,7 +1080,8 @@ struct MockRepositoryFactory {
             numberOfCodes: numberOfCodes,
             createdDate: createdDate,
             expirationDate: expirationDate,
-            isActive: isActive
+            isActive: isActive,
+            environment: environment
         )
     }
 

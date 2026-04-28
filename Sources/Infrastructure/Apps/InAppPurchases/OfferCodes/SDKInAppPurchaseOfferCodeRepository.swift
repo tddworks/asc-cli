@@ -117,14 +117,17 @@ public struct SDKInAppPurchaseOfferCodeRepository: InAppPurchaseOfferCodeReposit
     public func createOneTimeUseCode(
         offerCodeId: String,
         numberOfCodes: Int,
-        expirationDate: String
+        expirationDate: String,
+        environment: Domain.OfferCodeEnvironment
     ) async throws -> Domain.InAppPurchaseOfferCodeOneTimeUseCode {
+        let sdkEnv = AppStoreConnect_Swift_SDK.OfferCodeEnvironment(rawValue: environment.rawValue)
         let body = InAppPurchaseOfferCodeOneTimeUseCodeCreateRequest(
             data: .init(
                 type: .inAppPurchaseOfferCodeOneTimeUseCodes,
                 attributes: .init(
                     numberOfCodes: numberOfCodes,
-                    expirationDate: expirationDate
+                    expirationDate: expirationDate,
+                    environment: sdkEnv
                 ),
                 relationships: .init(
                     offerCode: .init(data: .init(type: .inAppPurchaseOfferCodes, id: offerCodeId))
@@ -168,7 +171,9 @@ public struct SDKInAppPurchaseOfferCodeRepository: InAppPurchaseOfferCodeReposit
             name: sdk.attributes?.name ?? "",
             customerEligibilities: customerEligibilities,
             isActive: sdk.attributes?.isActive ?? false,
-            totalNumberOfCodes: nil
+            totalNumberOfCodes: nil,
+            productionCodeCount: sdk.attributes?.productionCodeCount,
+            sandboxCodeCount: sdk.attributes?.sandboxCodeCount
         )
     }
 
@@ -206,6 +211,9 @@ public struct SDKInAppPurchaseOfferCodeRepository: InAppPurchaseOfferCodeReposit
         offerCodeId: String
     ) -> Domain.InAppPurchaseOfferCodeOneTimeUseCode {
         let createdDateString: String? = sdk.attributes?.createdDate.map { ISO8601DateFormatter().string(from: $0) }
+        let environment: Domain.OfferCodeEnvironment? = sdk.attributes?.environment.flatMap {
+            Domain.OfferCodeEnvironment(rawValue: $0.rawValue)
+        }
 
         return Domain.InAppPurchaseOfferCodeOneTimeUseCode(
             id: sdk.id,
@@ -213,7 +221,8 @@ public struct SDKInAppPurchaseOfferCodeRepository: InAppPurchaseOfferCodeReposit
             numberOfCodes: sdk.attributes?.numberOfCodes ?? 0,
             createdDate: createdDateString,
             expirationDate: sdk.attributes?.expirationDate,
-            isActive: sdk.attributes?.isActive ?? false
+            isActive: sdk.attributes?.isActive ?? false,
+            environment: environment
         )
     }
 }

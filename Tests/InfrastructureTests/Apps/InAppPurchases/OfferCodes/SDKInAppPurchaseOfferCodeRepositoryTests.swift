@@ -67,6 +67,32 @@ struct SDKInAppPurchaseOfferCodeRepositoryTests {
         #expect(result[0].isActive == true)
     }
 
+    @Test func `listOfferCodes maps production and sandbox code counts`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(InAppPurchaseOfferCodesResponse(
+            data: [
+                AppStoreConnect_Swift_SDK.InAppPurchaseOfferCode(
+                    type: .inAppPurchaseOfferCodes,
+                    id: "iap-oc-1",
+                    attributes: .init(
+                        name: "PROMO",
+                        customerEligibilities: [.nonSpender],
+                        productionCodeCount: 8_500,
+                        sandboxCodeCount: 120,
+                        isActive: true
+                    )
+                ),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKInAppPurchaseOfferCodeRepository(client: stub)
+        let result = try await repo.listOfferCodes(iapId: "iap-1")
+
+        #expect(result[0].productionCodeCount == 8_500)
+        #expect(result[0].sandboxCodeCount == 120)
+    }
+
     // MARK: - createOfferCode
 
     @Test func `createOfferCode injects iapId into result`() async throws {
@@ -256,12 +282,40 @@ struct SDKInAppPurchaseOfferCodeRepositoryTests {
         let result = try await repo.createOneTimeUseCode(
             offerCodeId: "iap-oc-7",
             numberOfCodes: 750,
-            expirationDate: "2026-01-01"
+            expirationDate: "2026-01-01",
+            environment: .production
         )
 
         #expect(result.id == "iap-otc-new")
         #expect(result.offerCodeId == "iap-oc-7")
         #expect(result.numberOfCodes == 750)
+    }
+
+    @Test func `createOneTimeUseCode maps environment from SDK response`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(InAppPurchaseOfferCodeOneTimeUseCodeResponse(
+            data: AppStoreConnect_Swift_SDK.InAppPurchaseOfferCodeOneTimeUseCode(
+                type: .inAppPurchaseOfferCodeOneTimeUseCodes,
+                id: "iap-otc-sb",
+                attributes: .init(
+                    numberOfCodes: 10,
+                    expirationDate: "2026-01-01",
+                    isActive: true,
+                    environment: .sandbox
+                )
+            ),
+            links: .init(this: "")
+        ))
+
+        let repo = SDKInAppPurchaseOfferCodeRepository(client: stub)
+        let result = try await repo.createOneTimeUseCode(
+            offerCodeId: "iap-oc-7",
+            numberOfCodes: 10,
+            expirationDate: "2026-01-01",
+            environment: .sandbox
+        )
+
+        #expect(result.environment == .sandbox)
     }
 
     // MARK: - updateOneTimeUseCode

@@ -6,6 +6,8 @@ public struct InAppPurchaseOfferCode: Sendable, Equatable, Identifiable {
     public let customerEligibilities: [IAPCustomerEligibility]
     public let isActive: Bool
     public let totalNumberOfCodes: Int?
+    public let productionCodeCount: Int?
+    public let sandboxCodeCount: Int?
 
     public init(
         id: String,
@@ -13,7 +15,9 @@ public struct InAppPurchaseOfferCode: Sendable, Equatable, Identifiable {
         name: String,
         customerEligibilities: [IAPCustomerEligibility],
         isActive: Bool,
-        totalNumberOfCodes: Int? = nil
+        totalNumberOfCodes: Int? = nil,
+        productionCodeCount: Int? = nil,
+        sandboxCodeCount: Int? = nil
     ) {
         self.id = id
         self.iapId = iapId
@@ -21,6 +25,8 @@ public struct InAppPurchaseOfferCode: Sendable, Equatable, Identifiable {
         self.customerEligibilities = customerEligibilities
         self.isActive = isActive
         self.totalNumberOfCodes = totalNumberOfCodes
+        self.productionCodeCount = productionCodeCount
+        self.sandboxCodeCount = sandboxCodeCount
     }
 }
 
@@ -32,7 +38,8 @@ public enum IAPCustomerEligibility: String, Sendable, Codable, Equatable {
 
 extension InAppPurchaseOfferCode: Codable {
     enum CodingKeys: String, CodingKey {
-        case id, iapId, name, customerEligibilities, isActive, totalNumberOfCodes
+        case id, iapId, name, customerEligibilities, isActive
+        case totalNumberOfCodes, productionCodeCount, sandboxCodeCount
     }
 
     public init(from decoder: any Decoder) throws {
@@ -43,6 +50,8 @@ extension InAppPurchaseOfferCode: Codable {
         customerEligibilities = try c.decode([IAPCustomerEligibility].self, forKey: .customerEligibilities)
         isActive = try c.decode(Bool.self, forKey: .isActive)
         totalNumberOfCodes = try c.decodeIfPresent(Int.self, forKey: .totalNumberOfCodes)
+        productionCodeCount = try c.decodeIfPresent(Int.self, forKey: .productionCodeCount)
+        sandboxCodeCount = try c.decodeIfPresent(Int.self, forKey: .sandboxCodeCount)
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -53,15 +62,24 @@ extension InAppPurchaseOfferCode: Codable {
         try c.encode(customerEligibilities, forKey: .customerEligibilities)
         try c.encode(isActive, forKey: .isActive)
         try c.encodeIfPresent(totalNumberOfCodes, forKey: .totalNumberOfCodes)
+        try c.encodeIfPresent(productionCodeCount, forKey: .productionCodeCount)
+        try c.encodeIfPresent(sandboxCodeCount, forKey: .sandboxCodeCount)
     }
 }
 
 extension InAppPurchaseOfferCode: Presentable {
     public static var tableHeaders: [String] {
-        ["ID", "Name", "Eligibilities", "Active"]
+        ["ID", "Name", "Eligibilities", "Active", "Prod", "Sandbox"]
     }
     public var tableRow: [String] {
-        [id, name, customerEligibilities.map(\.rawValue).joined(separator: ", "), String(isActive)]
+        [
+            id,
+            name,
+            customerEligibilities.map(\.rawValue).joined(separator: ", "),
+            String(isActive),
+            productionCodeCount.map(String.init) ?? "",
+            sandboxCodeCount.map(String.init) ?? "",
+        ]
     }
 }
 

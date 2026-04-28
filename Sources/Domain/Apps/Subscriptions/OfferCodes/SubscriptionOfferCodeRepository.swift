@@ -29,7 +29,8 @@ public protocol SubscriptionOfferCodeRepository: Sendable {
     func createOneTimeUseCode(
         offerCodeId: String,
         numberOfCodes: Int,
-        expirationDate: String
+        expirationDate: String,
+        environment: OfferCodeEnvironment
     ) async throws -> SubscriptionOfferCodeOneTimeUseCode
     func updateOneTimeUseCode(oneTimeCodeId: String, isActive: Bool) async throws -> SubscriptionOfferCodeOneTimeUseCode
     func fetchOneTimeUseCodeValues(oneTimeCodeId: String) async throws -> String

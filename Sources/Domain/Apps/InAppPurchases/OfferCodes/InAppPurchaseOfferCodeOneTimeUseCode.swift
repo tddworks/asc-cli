@@ -6,6 +6,10 @@ public struct InAppPurchaseOfferCodeOneTimeUseCode: Sendable, Equatable, Identif
     public let createdDate: String?
     public let expirationDate: String?
     public let isActive: Bool
+    /// PRODUCTION or SANDBOX. Sandbox batches redeem against sandbox tester accounts and
+    /// have a smaller per-quarter ceiling — iOS clients filter by this to render production
+    /// and sandbox batch lists separately.
+    public let environment: OfferCodeEnvironment?
 
     public init(
         id: String,
@@ -13,7 +17,8 @@ public struct InAppPurchaseOfferCodeOneTimeUseCode: Sendable, Equatable, Identif
         numberOfCodes: Int,
         createdDate: String? = nil,
         expirationDate: String? = nil,
-        isActive: Bool
+        isActive: Bool,
+        environment: OfferCodeEnvironment? = nil
     ) {
         self.id = id
         self.offerCodeId = offerCodeId
@@ -21,12 +26,13 @@ public struct InAppPurchaseOfferCodeOneTimeUseCode: Sendable, Equatable, Identif
         self.createdDate = createdDate
         self.expirationDate = expirationDate
         self.isActive = isActive
+        self.environment = environment
     }
 }
 
 extension InAppPurchaseOfferCodeOneTimeUseCode: Codable {
     enum CodingKeys: String, CodingKey {
-        case id, offerCodeId, numberOfCodes, createdDate, expirationDate, isActive
+        case id, offerCodeId, numberOfCodes, createdDate, expirationDate, isActive, environment
     }
 
     public init(from decoder: any Decoder) throws {
@@ -37,6 +43,7 @@ extension InAppPurchaseOfferCodeOneTimeUseCode: Codable {
         createdDate = try c.decodeIfPresent(String.self, forKey: .createdDate)
         expirationDate = try c.decodeIfPresent(String.self, forKey: .expirationDate)
         isActive = try c.decode(Bool.self, forKey: .isActive)
+        environment = try c.decodeIfPresent(OfferCodeEnvironment.self, forKey: .environment)
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -47,26 +54,27 @@ extension InAppPurchaseOfferCodeOneTimeUseCode: Codable {
         try c.encodeIfPresent(createdDate, forKey: .createdDate)
         try c.encodeIfPresent(expirationDate, forKey: .expirationDate)
         try c.encode(isActive, forKey: .isActive)
+        try c.encodeIfPresent(environment, forKey: .environment)
     }
 }
 
 extension InAppPurchaseOfferCodeOneTimeUseCode: Presentable {
     public static var tableHeaders: [String] {
-        ["ID", "Codes", "Expiration", "Active"]
+        ["ID", "Codes", "Expiration", "Active", "Env"]
     }
     public var tableRow: [String] {
-        [id, String(numberOfCodes), expirationDate ?? "", String(isActive)]
+        [id, String(numberOfCodes), expirationDate ?? "", String(isActive), environment?.rawValue ?? ""]
     }
 }
 
 extension InAppPurchaseOfferCodeOneTimeUseCode: AffordanceProviding {
-    public var affordances: [String: String] {
-        var cmds: [String: String] = [
-            "listOneTimeCodes": "asc iap-offer-code-one-time-codes list --offer-code-id \(offerCodeId)",
+    public var structuredAffordances: [Affordance] {
+        var items: [Affordance] = [
+            Affordance(key: "listOneTimeCodes", command: "iap-offer-code-one-time-codes", action: "list", params: ["offer-code-id": offerCodeId]),
         ]
         if isActive {
-            cmds["deactivate"] = "asc iap-offer-code-one-time-codes update --one-time-code-id \(id) --active false"
+            items.append(Affordance(key: "deactivate", command: "iap-offer-code-one-time-codes", action: "update", params: ["one-time-code-id": id, "active": "false"]))
         }
-        return cmds
+        return items
     }
 }

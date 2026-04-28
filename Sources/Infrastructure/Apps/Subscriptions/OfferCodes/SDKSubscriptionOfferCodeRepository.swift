@@ -121,14 +121,17 @@ public struct SDKSubscriptionOfferCodeRepository: SubscriptionOfferCodeRepositor
     public func createOneTimeUseCode(
         offerCodeId: String,
         numberOfCodes: Int,
-        expirationDate: String
+        expirationDate: String,
+        environment: Domain.OfferCodeEnvironment
     ) async throws -> Domain.SubscriptionOfferCodeOneTimeUseCode {
+        let sdkEnv = AppStoreConnect_Swift_SDK.OfferCodeEnvironment(rawValue: environment.rawValue)
         let body = SubscriptionOfferCodeOneTimeUseCodeCreateRequest(
             data: .init(
                 type: .subscriptionOfferCodeOneTimeUseCodes,
                 attributes: .init(
                     numberOfCodes: numberOfCodes,
-                    expirationDate: expirationDate
+                    expirationDate: expirationDate,
+                    environment: sdkEnv
                 ),
                 relationships: .init(
                     offerCode: .init(data: .init(type: .subscriptionOfferCodes, id: offerCodeId))
@@ -201,6 +204,8 @@ public struct SDKSubscriptionOfferCodeRepository: SubscriptionOfferCodeRepositor
             offerMode: offerMode,
             numberOfPeriods: sdk.attributes?.numberOfPeriods ?? 1,
             totalNumberOfCodes: sdk.attributes?.totalNumberOfCodes,
+            productionCodeCount: sdk.attributes?.productionCodeCount,
+            sandboxCodeCount: sdk.attributes?.sandboxCodeCount,
             isActive: sdk.attributes?.isActive ?? false
         )
     }
@@ -227,6 +232,9 @@ public struct SDKSubscriptionOfferCodeRepository: SubscriptionOfferCodeRepositor
         offerCodeId: String
     ) -> Domain.SubscriptionOfferCodeOneTimeUseCode {
         let createdDateString: String? = sdk.attributes?.createdDate.map { ISO8601DateFormatter().string(from: $0) }
+        let environment: Domain.OfferCodeEnvironment? = sdk.attributes?.environment.flatMap {
+            Domain.OfferCodeEnvironment(rawValue: $0.rawValue)
+        }
 
         return Domain.SubscriptionOfferCodeOneTimeUseCode(
             id: sdk.id,
@@ -234,7 +242,8 @@ public struct SDKSubscriptionOfferCodeRepository: SubscriptionOfferCodeRepositor
             numberOfCodes: sdk.attributes?.numberOfCodes ?? 0,
             createdDate: createdDateString,
             expirationDate: sdk.attributes?.expirationDate,
-            isActive: sdk.attributes?.isActive ?? false
+            isActive: sdk.attributes?.isActive ?? false,
+            environment: environment
         )
     }
 

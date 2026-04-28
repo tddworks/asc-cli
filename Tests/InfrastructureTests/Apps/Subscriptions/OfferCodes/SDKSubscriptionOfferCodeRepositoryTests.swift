@@ -84,6 +84,37 @@ struct SDKSubscriptionOfferCodeRepositoryTests {
         #expect(result[0].isActive == true)
     }
 
+    @Test func `listOfferCodes maps production and sandbox code counts`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(SubscriptionOfferCodesResponse(
+            data: [
+                AppStoreConnect_Swift_SDK.SubscriptionOfferCode(
+                    type: .subscriptionOfferCodes,
+                    id: "oc-1",
+                    attributes: .init(
+                        name: "PROMO",
+                        customerEligibilities: [.new],
+                        offerEligibility: .stackWithIntroOffers,
+                        duration: .oneMonth,
+                        offerMode: .freeTrial,
+                        numberOfPeriods: 1,
+                        totalNumberOfCodes: 500,
+                        productionCodeCount: 480,
+                        sandboxCodeCount: 20,
+                        isActive: true
+                    )
+                ),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKSubscriptionOfferCodeRepository(client: stub)
+        let result = try await repo.listOfferCodes(subscriptionId: "sub-1")
+
+        #expect(result[0].productionCodeCount == 480)
+        #expect(result[0].sandboxCodeCount == 20)
+    }
+
     // MARK: - createOfferCode
 
     @Test func `createOfferCode injects subscriptionId into result`() async throws {
@@ -288,12 +319,40 @@ struct SDKSubscriptionOfferCodeRepositoryTests {
         let result = try await repo.createOneTimeUseCode(
             offerCodeId: "oc-7",
             numberOfCodes: 500,
-            expirationDate: "2026-01-01"
+            expirationDate: "2026-01-01",
+            environment: .production
         )
 
         #expect(result.id == "otc-new")
         #expect(result.offerCodeId == "oc-7")
         #expect(result.numberOfCodes == 500)
+    }
+
+    @Test func `createOneTimeUseCode maps environment from SDK response`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(SubscriptionOfferCodeOneTimeUseCodeResponse(
+            data: AppStoreConnect_Swift_SDK.SubscriptionOfferCodeOneTimeUseCode(
+                type: .subscriptionOfferCodeOneTimeUseCodes,
+                id: "otc-sb",
+                attributes: .init(
+                    numberOfCodes: 10,
+                    expirationDate: "2026-01-01",
+                    isActive: true,
+                    environment: .sandbox
+                )
+            ),
+            links: .init(this: "")
+        ))
+
+        let repo = SDKSubscriptionOfferCodeRepository(client: stub)
+        let result = try await repo.createOneTimeUseCode(
+            offerCodeId: "oc-7",
+            numberOfCodes: 10,
+            expirationDate: "2026-01-01",
+            environment: .sandbox
+        )
+
+        #expect(result.environment == .sandbox)
     }
 
     // MARK: - updateOneTimeUseCode
