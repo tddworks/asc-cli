@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.17.6] - 2026-04-28
+
 ### Fixed
 - **`PATCH /api/v1/iap/{iapId}/availability` returned 404** — the route was never registered, so the web frontend's "save territories" call failed. `IAPAvailabilityController` now serves `PATCH` with body `{territoryIds, availableInNewTerritories}` and routes through `repo.createAvailability` (ASC's `POST /v1/inAppPurchaseAvailabilities` upserts — there is no separate update endpoint).
 
@@ -869,7 +873,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.74...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.17.6...HEAD
+[0.17.6]: https://github.com/tddworks/asc-cli/compare/v0.1.74...v0.17.6
 [0.1.74]: https://github.com/tddworks/asc-cli/compare/v0.17.3...v0.1.74
 [0.17.3]: https://github.com/tddworks/asc-cli/compare/v0.17.2...v0.17.3
 [0.17.2]: https://github.com/tddworks/asc-cli/compare/v0.17.1...v0.17.2
