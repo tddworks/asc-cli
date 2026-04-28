@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **`PATCH /api/v1/iap/{iapId}/availability` returned 404** — the route was never registered, so the web frontend's "save territories" call failed. `IAPAvailabilityController` now serves `PATCH` with body `{territoryIds, availableInNewTerritories}` and routes through `repo.createAvailability` (ASC's `POST /v1/inAppPurchaseAvailabilities` upserts — there is no separate update endpoint).
+
 ### Added
 - **Production / sandbox split for offer codes** — `InAppPurchaseOfferCode` and `SubscriptionOfferCode` now expose `productionCodeCount` and `sandboxCodeCount` (Apple returns these alongside the existing total). Visible in `asc iap-offer-codes list`, `asc subscription-offer-codes list`, and on the existing `GET /api/v1/iap/:iapId/offer-codes` and `GET /api/v1/subscriptions/:subscriptionId/offer-codes` endpoints (flow through Codable).
 - **`environment` on one-time-use code batches** — `InAppPurchaseOfferCodeOneTimeUseCode` and `SubscriptionOfferCodeOneTimeUseCode` now carry `environment: OfferCodeEnvironment?` (PRODUCTION or SANDBOX). Apple separates redemption by environment; sandbox batches redeem against sandbox tester accounts and have a smaller per-quarter ceiling.

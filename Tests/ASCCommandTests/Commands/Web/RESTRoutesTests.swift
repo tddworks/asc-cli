@@ -669,6 +669,29 @@ struct RESTRoutesTests {
         #expect(normalized.contains("/api/v1/iap/iap-7/availability"))
     }
 
+    @Test func `IAP availability create REST emits _links pointing back at parent IAP path`() async throws {
+        let mockRepo = MockInAppPurchaseAvailabilityRepository()
+        given(mockRepo).createAvailability(iapId: .any, isAvailableInNewTerritories: .any, territoryIds: .any)
+            .willReturn(InAppPurchaseAvailability(
+                id: "iap-7", iapId: "iap-7",
+                isAvailableInNewTerritories: true,
+                territories: [Territory(id: "USA", currency: "USD")]
+            ))
+
+        let output = try await IAPAvailabilityCreate.parse([
+            "--iap-id", "iap-7",
+            "--available-in-new-territories",
+            "--territory", "USA",
+            "--pretty",
+        ]).execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        // The controller's PATCH /iap/:iapId/availability route reuses createAvailability —
+        // so the returned affordances should point back at the same nested REST path.
+        #expect(normalized.contains("/api/v1/iap/iap-7/availability"))
+    }
+
     @Test func `IAP offer codes list REST exposes nested path under iap`() async throws {
         let mockRepo = MockInAppPurchaseOfferCodeRepository()
         given(mockRepo).listOfferCodes(iapId: .any).willReturn([

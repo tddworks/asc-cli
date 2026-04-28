@@ -1,4 +1,5 @@
 import Domain
+import Foundation
 import Hummingbird
 import HummingbirdWebSocket
 import Infrastructure
@@ -27,6 +28,23 @@ struct IAPAvailabilityController: Sendable {
                 territories: territories
             )
             return try restFormat([synthetic])
+        }
+
+        // PATCH = upsert: ASC's POST /v1/inAppPurchaseAvailabilities is the only mutation
+        // it exposes for this resource and acts as a replace when the IAP already has one.
+        // The frontend uses PATCH semantically (modify existing territories) — same SDK call.
+        group.patch("/iap/:iapId/availability") { request, context -> Response in
+            guard let iapId = context.parameters.get("iapId") else { return jsonError("Missing iapId") }
+            let body = try await request.body.collect(upTo: 64 * 1024)
+            let json = (try? JSONSerialization.jsonObject(with: body) as? [String: Any]) ?? [:]
+            let territoryIds = json["territoryIds"] as? [String] ?? []
+            let availableInNew = json["availableInNewTerritories"] as? Bool ?? false
+            let availability = try await self.repo.createAvailability(
+                iapId: iapId,
+                isAvailableInNewTerritories: availableInNew,
+                territoryIds: territoryIds
+            )
+            return try restFormat([availability])
         }
     }
 }
