@@ -9,7 +9,7 @@ A 3-level hierarchy: **offer code → custom codes / one-time-use codes → valu
 | Command | Required flags |
 |---------|----------------|
 | `asc iap-offer-codes list --iap-id <id>` | `--iap-id` |
-| `asc iap-offer-codes create --iap-id <id> --name <n> --eligibility <e>...` | first two; `--eligibility` repeatable, ∈ `NON_SPENDER`, `ACTIVE_SPENDER`, `CHURNED_SPENDER` |
+| `asc iap-offer-codes create --iap-id <id> --name <n> --eligibility <e>... [--price <T>=<pp-id>...] [--free-territory <T>...]` | first two; `--eligibility` repeatable, ∈ `NON_SPENDER`, `ACTIVE_SPENDER`, `CHURNED_SPENDER`. `--price` is `<territory>=<price-point-id>` (repeatable). `--free-territory` is repeatable. **Per-territory pricing is read-only after creation — supply every territory at create time.** |
 | `asc iap-offer-codes update --offer-code-id <id> --active <bool>` | both |
 | `asc iap-offer-codes prices list --offer-code-id <id>` | `--offer-code-id` |
 | `asc iap-offer-code-custom-codes list --offer-code-id <id>` | `--offer-code-id` |
@@ -25,7 +25,7 @@ A 3-level hierarchy: **offer code → custom codes / one-time-use codes → valu
 | Command | Required flags |
 |---------|----------------|
 | `asc subscription-offer-codes list --subscription-id <id>` | `--subscription-id` |
-| `asc subscription-offer-codes create --subscription-id <id> --name <n> --duration <d> --mode <m> --periods <n> --eligibility <e>... --offer-eligibility <oe>` | all |
+| `asc subscription-offer-codes create --subscription-id <id> --name <n> --duration <d> --mode <m> --periods <n> --eligibility <e>... --offer-eligibility <oe> [--auto-renew <bool>] [--price <T>=<pp-id>...] [--free-territory <T>...]` | all required as before. `--auto-renew` defaults to `true`; pass `false` for non-renewing offers (ASC accepts only `--mode FREE_TRIAL` in that case). `--price`/`--free-territory` same shape as IAP. |
 | `asc subscription-offer-codes update --offer-code-id <id> --active <bool>` | both |
 | `asc subscription-offer-codes prices list --offer-code-id <id>` | `--offer-code-id` |
 | `asc subscription-offer-code-custom-codes list/create/update` | as IAP equivalents |
@@ -134,9 +134,9 @@ Custom codes and one-time-use codes both surface a `deactivate` affordance only 
 | Path | Method | Description |
 |------|--------|-------------|
 | `/api/v1/iap/:iapId/offer-codes` | GET | List IAP offer codes (returns `productionCodeCount`/`sandboxCodeCount` per item) |
-| `/api/v1/iap/:iapId/offer-codes` | POST | Create an IAP offer code — body: `{name, customerEligibilities: ["NON_SPENDER"\|"ACTIVE_SPENDER"\|"CHURNED_SPENDER"]}` |
+| `/api/v1/iap/:iapId/offer-codes` | POST | Create an IAP offer code — body: `{name, customerEligibilities[], prices: [{territory, pricePointId?}]}`. Omit `pricePointId` (or set to `null`) for a free territory. **Required at create time — read-only after.** |
 | `/api/v1/subscriptions/:subscriptionId/offer-codes` | GET | List subscription offer codes (same per-environment counts) |
-| `/api/v1/subscriptions/:subscriptionId/offer-codes` | POST | Create a subscription offer code — body: `{name, duration, mode, periods, customerEligibilities[], offerEligibility}` |
+| `/api/v1/subscriptions/:subscriptionId/offer-codes` | POST | Create a subscription offer code — body: `{name, duration, mode, periods, customerEligibilities[], offerEligibility, isAutoRenewEnabled?, prices: [{territory, pricePointId?}]}`. `isAutoRenewEnabled` defaults to `true` (also accepts `autoRenew`). Same `prices` shape and read-only-after rule as IAP. |
 | `/api/v1/iap-offer-codes/:offerCodeId/prices` | GET | Per-territory prices for an IAP offer code |
 | `/api/v1/subscription-offer-codes/:offerCodeId/prices` | GET | Per-territory prices for a subscription offer code |
 | `/api/v1/iap-offer-codes/:offerCodeId/one-time-codes` | GET | List one-time-use code batches |
@@ -149,9 +149,34 @@ Custom codes and one-time-use codes both surface a `deactivate` affordance only 
 `environment` in the POST body is optional — defaults to `production`. Accepts `"production"`, `"sandbox"`, `"PRODUCTION"`, or `"SANDBOX"`.
 
 ```bash
+# Generate sandbox redemption codes for an existing offer code
 curl -X POST http://localhost:8080/api/v1/iap-offer-codes/oc-1/one-time-codes \
   -H "Content-Type: application/json" \
   -d '{"numberOfCodes": 100, "expirationDate": "2026-12-31", "environment": "sandbox"}'
+
+# Create a paid IAP offer code with mixed paid + free territories
+curl -X POST http://localhost:8080/api/v1/iap/iap-1/offer-codes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "LAUNCH_PROMO",
+    "customerEligibilities": ["NON_SPENDER", "CHURNED_SPENDER"],
+    "prices": [
+      {"territory": "USA", "pricePointId": "pp-usa"},
+      {"territory": "JPN", "pricePointId": "pp-jpn"},
+      {"territory": "BRA"}
+    ]
+  }'
+
+# Create a non-renewing subscription offer code (autoRenew false ⇒ free trial only)
+curl -X POST http://localhost:8080/api/v1/subscriptions/sub-1/offer-codes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "WELCOME_TRIAL",
+    "duration": "ONE_MONTH", "mode": "FREE_TRIAL", "periods": 1,
+    "customerEligibilities": ["NEW"], "offerEligibility": "STACKABLE",
+    "isAutoRenewEnabled": false,
+    "prices": [{"territory": "USA"}]
+  }'
 ```
 
 The CSV `values` endpoint is intentionally CLI-only — REST clients should list the parent `one-time-codes` resource and follow its affordances to deactivate or create new batches.
