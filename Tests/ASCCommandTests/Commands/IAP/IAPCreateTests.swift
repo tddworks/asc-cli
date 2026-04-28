@@ -33,6 +33,7 @@ struct IAPCreateTests {
             {
               "affordances" : {
                 "createLocalization" : "asc iap-localizations create --iap-id iap-new --locale en-US --name <name>",
+                "createOfferCode" : "asc iap-offer-codes create --eligibility <NON_SPENDER|ACTIVE_SPENDER|CHURNED_SPENDER> --iap-id iap-new --name <name>",
                 "delete" : "asc iap delete --iap-id iap-new",
                 "getAvailability" : "asc iap-availability get --iap-id iap-new",
                 "getPriceSchedule" : "asc iap-price-schedule get --iap-id iap-new",

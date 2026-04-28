@@ -35,6 +35,7 @@ struct SubscriptionsCreateTests {
               "affordances" : {
                 "createIntroductoryOffer" : "asc subscription-offers create --duration ONE_MONTH --mode FREE_TRIAL --periods 1 --subscription-id sub-new",
                 "createLocalization" : "asc subscription-localizations create --locale en-US --name <name> --subscription-id sub-new",
+                "createOfferCode" : "asc subscription-offer-codes create --duration <ONE_MONTH|THREE_MONTHS|SIX_MONTHS|ONE_YEAR> --eligibility <NEW|LAPSED|WIN_BACK|PAID_SUBSCRIBER> --mode <FREE_TRIAL|PAY_AS_YOU_GO|PAY_UP_FRONT> --name <name> --offer-eligibility <STACKABLE|INTRODUCTORY|SUBSCRIPTION_OFFER> --periods <n> --subscription-id sub-new",
                 "createPromotionalOffer" : "asc subscription-promotional-offers create --duration ONE_MONTH --mode PAY_AS_YOU_GO --name <name> --offer-code <code> --periods 1 --subscription-id sub-new",
                 "delete" : "asc subscriptions delete --subscription-id sub-new",
                 "getAvailability" : "asc subscription-availability get --subscription-id sub-new",
