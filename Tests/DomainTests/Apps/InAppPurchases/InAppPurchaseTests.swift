@@ -157,6 +157,28 @@ struct InAppPurchaseTests {
         #expect(iap.apiLinks["listImages"]?.method == "GET")
     }
 
+    @Test func `iap affordances include uploadReviewScreenshot with file placeholder`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.affordances["uploadReviewScreenshot"] == "asc iap-review-screenshot upload --file <path> --iap-id iap-1")
+    }
+
+    @Test func `iap affordances include uploadImage with file placeholder`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.affordances["uploadImage"] == "asc iap-images upload --file <path> --iap-id iap-1")
+    }
+
+    @Test func `iap apiLinks include uploadReviewScreenshot as POST on collection path`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.apiLinks["uploadReviewScreenshot"]?.href == "/api/v1/iap/iap-1/review-screenshot")
+        #expect(iap.apiLinks["uploadReviewScreenshot"]?.method == "POST")
+    }
+
+    @Test func `iap apiLinks include uploadImage as POST on collection path`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
+        #expect(iap.apiLinks["uploadImage"]?.href == "/api/v1/iap/iap-1/images")
+        #expect(iap.apiLinks["uploadImage"]?.method == "POST")
+    }
+
     @Test func `iap apiLinks include listPricePoints under nested parent`() {
         let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1")
         #expect(iap.apiLinks["listPricePoints"]?.href == "/api/v1/iap/iap-1/price-points")

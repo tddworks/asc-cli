@@ -23,7 +23,10 @@ struct SubscriptionGroupLocalizationsUpdate: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubscriptionGroupLocalizationRepository) async throws -> String {
+    func execute(
+        repo: any SubscriptionGroupLocalizationRepository,
+        affordanceMode: AffordanceMode = .cli
+    ) async throws -> String {
         let item = try await repo.updateLocalization(
             localizationId: localizationId,
             name: name,
@@ -33,7 +36,8 @@ struct SubscriptionGroupLocalizationsUpdate: AsyncParsableCommand {
         return try formatter.formatAgentItems(
             [item],
             headers: ["ID", "Locale", "Name", "Custom App Name"],
-            rowMapper: { [$0.id, $0.locale, $0.name ?? "", $0.customAppName ?? ""] }
+            rowMapper: { [$0.id, $0.locale, $0.name ?? "", $0.customAppName ?? ""] },
+            affordanceMode: affordanceMode
         )
     }
 }

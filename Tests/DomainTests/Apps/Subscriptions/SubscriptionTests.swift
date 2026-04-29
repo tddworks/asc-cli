@@ -212,6 +212,28 @@ struct SubscriptionTests {
         #expect(sub.apiLinks["getReviewScreenshot"]?.method == "GET")
     }
 
+    @Test func `subscription affordances include uploadReviewScreenshot with file placeholder`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.affordances["uploadReviewScreenshot"] == "asc subscription-review-screenshot upload --file <path> --subscription-id sub-1")
+    }
+
+    @Test func `subscription affordances include uploadImage with file placeholder`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.affordances["uploadImage"] == "asc subscription-images upload --file <path> --subscription-id sub-1")
+    }
+
+    @Test func `subscription apiLinks include uploadReviewScreenshot as POST on collection path`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.apiLinks["uploadReviewScreenshot"]?.href == "/api/v1/subscriptions/sub-1/review-screenshot")
+        #expect(sub.apiLinks["uploadReviewScreenshot"]?.method == "POST")
+    }
+
+    @Test func `subscription apiLinks include uploadImage as POST on collection path`() {
+        let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
+        #expect(sub.apiLinks["uploadImage"]?.href == "/api/v1/subscriptions/sub-1/images")
+        #expect(sub.apiLinks["uploadImage"]?.method == "POST")
+    }
+
     @Test func `subscription apiLinks include listPricePoints under nested parent`() {
         let sub = MockRepositoryFactory.makeSubscription(id: "sub-1")
         #expect(sub.apiLinks["listPricePoints"]?.href == "/api/v1/subscriptions/sub-1/price-points")

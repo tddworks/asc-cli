@@ -1,4 +1,5 @@
 import Domain
+import Foundation
 import Hummingbird
 import HummingbirdWebSocket
 import Infrastructure
@@ -14,10 +15,30 @@ struct IAPReviewController: Sendable {
             return try restFormat(item.map { [$0] } ?? [])
         }
 
+        group.post("/iap/:iapId/review-screenshot") { request, context -> Response in
+            guard let iapId = context.parameters.get("iapId") else { return jsonError("Missing iapId") }
+            let item = try await uploadReviewBody(
+                request: request,
+                fileExtension: extensionFor(contentType: request.headers[.contentType], fallback: "png"),
+                upload: { try await self.repo.uploadReviewScreenshot(iapId: iapId, fileURL: $0) }
+            )
+            return try restFormat(item)
+        }
+
         group.get("/iap/:iapId/images") { _, context -> Response in
             guard let iapId = context.parameters.get("iapId") else { return jsonError("Missing iapId") }
             let items = try await self.repo.listImages(iapId: iapId)
             return try restFormat(items)
+        }
+
+        group.post("/iap/:iapId/images") { request, context -> Response in
+            guard let iapId = context.parameters.get("iapId") else { return jsonError("Missing iapId") }
+            let item = try await uploadReviewBody(
+                request: request,
+                fileExtension: extensionFor(contentType: request.headers[.contentType], fallback: "jpg"),
+                upload: { try await self.repo.uploadImage(iapId: iapId, fileURL: $0) }
+            )
+            return try restFormat(item)
         }
     }
 }

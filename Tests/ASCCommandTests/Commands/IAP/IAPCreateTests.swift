@@ -43,7 +43,9 @@ struct IAPCreateTests {
                 "listOfferCodes" : "asc iap-offer-codes list --iap-id iap-new",
                 "listPricePoints" : "asc iap price-points list --iap-id iap-new",
                 "setPrice" : "asc iap prices set --base-territory <territory> --iap-id iap-new --price-point-id <price-point-id>",
-                "update" : "asc iap update --iap-id iap-new --reference-name <name>"
+                "update" : "asc iap update --iap-id iap-new --reference-name <name>",
+                "uploadImage" : "asc iap-images upload --file <path> --iap-id iap-new",
+                "uploadReviewScreenshot" : "asc iap-review-screenshot upload --file <path> --iap-id iap-new"
               },
               "appId" : "app-1",
               "id" : "iap-new",

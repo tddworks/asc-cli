@@ -21,10 +21,13 @@ struct IAPImagesUpload: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any InAppPurchaseReviewRepository) async throws -> String {
+    func execute(
+        repo: any InAppPurchaseReviewRepository,
+        affordanceMode: AffordanceMode = .cli
+    ) async throws -> String {
         let url = URL(fileURLWithPath: file)
         let item = try await repo.uploadImage(iapId: iapId, fileURL: url)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems([item])
+        return try formatter.formatAgentItems([item], affordanceMode: affordanceMode)
     }
 }

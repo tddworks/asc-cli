@@ -330,6 +330,102 @@ struct RESTRoutesTests {
         #expect(normalized.contains("/api/v1/subscription-group-localizations/loc-1"))
     }
 
+    @Test func `subscription group localization create returns JSON with _links`() async throws {
+        let mockRepo = MockSubscriptionGroupLocalizationRepository()
+        given(mockRepo).createLocalization(groupId: .any, locale: .any, name: .any, customAppName: .any)
+            .willReturn(SubscriptionGroupLocalization(
+                id: "loc-1", groupId: "grp-7", locale: "en-US", name: "Premium"
+            ))
+
+        let output = try await SubscriptionGroupLocalizationsCreate
+            .parse(["--group-id", "grp-7", "--locale", "en-US", "--name", "Premium", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/subscription-group-localizations/loc-1"))
+        #expect(!normalized.contains("\"affordances\""))
+    }
+
+    // MARK: - Review uploads (IAP + Subscription)
+
+    @Test func `iap review screenshot upload returns JSON with _links pointing at iap-review-screenshot`() async throws {
+        let mockRepo = MockInAppPurchaseReviewRepository()
+        given(mockRepo).uploadReviewScreenshot(iapId: .any, fileURL: .any).willReturn(
+            InAppPurchaseReviewScreenshot(id: "rs-1", iapId: "iap-7", fileName: "shot.png", fileSize: 1024, assetState: .complete)
+        )
+        let output = try await IAPReviewScreenshotUpload
+            .parse(["--iap-id", "iap-7", "--file", "/tmp/shot.png", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/iap/iap-7/review-screenshot"))
+        #expect(!normalized.contains("\"affordances\""))
+    }
+
+    @Test func `iap image upload returns JSON with _links pointing at iap-images`() async throws {
+        let mockRepo = MockInAppPurchaseReviewRepository()
+        given(mockRepo).uploadImage(iapId: .any, fileURL: .any).willReturn(
+            InAppPurchasePromotionalImage(id: "img-1", iapId: "iap-7", fileName: "promo.jpg", fileSize: 2048, state: .uploadComplete)
+        )
+        let output = try await IAPImagesUpload
+            .parse(["--iap-id", "iap-7", "--file", "/tmp/promo.jpg", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/iap-images/img-1"))
+        #expect(!normalized.contains("\"affordances\""))
+    }
+
+    @Test func `subscription review screenshot upload returns JSON with _links pointing at subscription-review-screenshot`() async throws {
+        let mockRepo = MockSubscriptionReviewRepository()
+        given(mockRepo).uploadReviewScreenshot(subscriptionId: .any, fileURL: .any).willReturn(
+            SubscriptionReviewScreenshot(id: "srs-1", subscriptionId: "sub-7", fileName: "shot.png", fileSize: 1024, assetState: .complete)
+        )
+        let output = try await SubscriptionReviewScreenshotUpload
+            .parse(["--subscription-id", "sub-7", "--file", "/tmp/shot.png", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/subscriptions/sub-7/review-screenshot"))
+        #expect(!normalized.contains("\"affordances\""))
+    }
+
+    @Test func `subscription image upload returns JSON with _links pointing at subscription-images`() async throws {
+        let mockRepo = MockSubscriptionReviewRepository()
+        given(mockRepo).uploadImage(subscriptionId: .any, fileURL: .any).willReturn(
+            SubscriptionPromotionalImage(id: "simg-1", subscriptionId: "sub-7", fileName: "promo.jpg", fileSize: 2048, state: .uploadComplete)
+        )
+        let output = try await SubscriptionImagesUpload
+            .parse(["--subscription-id", "sub-7", "--file", "/tmp/promo.jpg", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/subscription-images/simg-1"))
+        #expect(!normalized.contains("\"affordances\""))
+    }
+
+    @Test func `subscription group localization update returns JSON with _links`() async throws {
+        let mockRepo = MockSubscriptionGroupLocalizationRepository()
+        given(mockRepo).updateLocalization(localizationId: .any, name: .any, customAppName: .any)
+            .willReturn(SubscriptionGroupLocalization(
+                id: "loc-1", groupId: "grp-7", locale: "en-US", name: "Renamed"
+            ))
+
+        let output = try await SubscriptionGroupLocalizationsUpdate
+            .parse(["--localization-id", "loc-1", "--name", "Renamed", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/subscription-group-localizations/loc-1"))
+        #expect(normalized.contains("\"name\" : \"Renamed\""))
+    }
+
     // MARK: - Subscription Pricing
 
     @Test func `subscription price-points REST exposes nested path under subscription`() async throws {

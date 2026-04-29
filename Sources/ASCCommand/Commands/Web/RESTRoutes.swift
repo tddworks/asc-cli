@@ -187,6 +187,36 @@ func restResponse(_ json: String, status: HTTPResponse.Status = .ok) -> Response
     )
 }
 
+/// Collect a request's raw body bytes (up to ~20MB), spool to a temp file with the
+/// given extension, run `upload(fileURL:)`, and clean up the temp file. The temp
+/// is removed even if `upload` throws — keeps the spool directory bounded.
+///
+/// Used for review screenshots and 1024×1024 promotional images. The 20MB ceiling
+/// covers the largest screenshot Apple accepts (~10MB) with headroom.
+func uploadReviewBody<T>(
+    request: Request,
+    fileExtension: String,
+    upload: (URL) async throws -> T
+) async throws -> T {
+    let body = try await request.body.collect(upTo: 20 * 1024 * 1024)
+    let bytes = Data(buffer: body)
+    let tmpURL = FileManager.default.temporaryDirectory.appendingPathComponent("upload-\(UUID().uuidString).\(fileExtension)")
+    try bytes.write(to: tmpURL)
+    defer { try? FileManager.default.removeItem(at: tmpURL) }
+    return try await upload(tmpURL)
+}
+
+/// Pick a file extension based on `Content-Type`. Falls back to the caller's default
+/// when the header is absent or carries an unfamiliar mime-type.
+func extensionFor(contentType: String?, fallback: String) -> String {
+    guard let ct = contentType?.lowercased() else { return fallback }
+    if ct.contains("image/png") { return "png" }
+    if ct.contains("image/jpeg") || ct.contains("image/jpg") { return "jpg" }
+    if ct.contains("image/heic") { return "heic" }
+    if ct.contains("image/webp") { return "webp" }
+    return fallback
+}
+
 /// Write base64 screenshot to a temp file. Returns the file path.
 func writeTempScreenshot(_ base64: String?) throws -> String {
     guard let b64 = base64, let data = Data(base64Encoded: b64) else {

@@ -1,4 +1,5 @@
 import Domain
+import Foundation
 import Hummingbird
 import HummingbirdWebSocket
 import Infrastructure
@@ -14,10 +15,30 @@ struct SubscriptionReviewController: Sendable {
             return try restFormat(item.map { [$0] } ?? [])
         }
 
+        group.post("/subscriptions/:subscriptionId/review-screenshot") { request, context -> Response in
+            guard let subscriptionId = context.parameters.get("subscriptionId") else { return jsonError("Missing subscriptionId") }
+            let item = try await uploadReviewBody(
+                request: request,
+                fileExtension: extensionFor(contentType: request.headers[.contentType], fallback: "png"),
+                upload: { try await self.repo.uploadReviewScreenshot(subscriptionId: subscriptionId, fileURL: $0) }
+            )
+            return try restFormat(item)
+        }
+
         group.get("/subscriptions/:subscriptionId/images") { _, context -> Response in
             guard let subscriptionId = context.parameters.get("subscriptionId") else { return jsonError("Missing subscriptionId") }
             let items = try await self.repo.listImages(subscriptionId: subscriptionId)
             return try restFormat(items)
+        }
+
+        group.post("/subscriptions/:subscriptionId/images") { request, context -> Response in
+            guard let subscriptionId = context.parameters.get("subscriptionId") else { return jsonError("Missing subscriptionId") }
+            let item = try await uploadReviewBody(
+                request: request,
+                fileExtension: extensionFor(contentType: request.headers[.contentType], fallback: "jpg"),
+                upload: { try await self.repo.uploadImage(subscriptionId: subscriptionId, fileURL: $0) }
+            )
+            return try restFormat(item)
         }
     }
 }

@@ -45,7 +45,9 @@ struct SubscriptionsListTests {
                 "listPromotionalOffers" : "asc subscription-promotional-offers list --subscription-id sub-1",
                 "listWinBackOffers" : "asc win-back-offers list --subscription-id sub-1",
                 "setPrices" : "asc subscriptions prices set-batch --price <territory>=<price-point-id> --subscription-id sub-1",
-                "update" : "asc subscriptions update --name <name> --subscription-id sub-1"
+                "update" : "asc subscriptions update --name <name> --subscription-id sub-1",
+                "uploadImage" : "asc subscription-images upload --file <path> --subscription-id sub-1",
+                "uploadReviewScreenshot" : "asc subscription-review-screenshot upload --file <path> --subscription-id sub-1"
               },
               "groupId" : "grp-1",
               "id" : "sub-1",

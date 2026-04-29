@@ -73,10 +73,14 @@ public final class RESTPathResolver: @unchecked Sendable {
             // Singleton-under-parent (e.g. `iap-availability get --iap-id X` →
             // `/api/v1/iap/X/availability`). Triggered when a route is registered for
             // this command and its parent param is in `params`.
+            //
+            // `upload` resolves to the bare collection path (POST is the verb),
+            // matching standard REST: a binary upload posts the body straight at
+            // `/api/v1/iap/X/review-screenshot` rather than `/...review-screenshot/upload`.
             if let route = currentRoutes[command], let parentId = params[route.parentParam] {
                 let nested = "\(base)/\(route.parentSegment)/\(parentId)/\(route.segment)"
                 switch action {
-                case "get", "update", "delete": return nested
+                case "get", "update", "delete", "upload": return nested
                 default: return "\(nested)/\(action)"
                 }
             }
