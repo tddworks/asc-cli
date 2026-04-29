@@ -1,6 +1,8 @@
 # Iris SRP Login
 
-**Status: design doc — not yet implemented.** This is the blueprint for `asc iris auth login`, a self-contained Apple ID login flow that lets the CLI hit iris private APIs without depending on the user's browser session.
+**Status: implemented (slices 1–7).** All scaffolding ships: domain types, Apple SRP client (PBKDF2-derived `x`, RFC 5054-derived `S` and `M1`), idmsa HTTP layer, 2FA endpoints, olympus session lookup, file-backed session storage, CLI commands, and a composite cookie provider that wires SRP-stored sessions into existing iris commands automatically.
+
+**First-real-login validation pending.** Slices 1–7 are unit-tested with mocked HTTP and synthesized vectors (RFC 7914 PBKDF2 + structural assertions). Whether Apple actually accepts our `M1` shape we'll learn from the first real `asc iris auth login` attempt — set `ASC_IRIS_DEBUG=1` to dump every idmsa request/response (with `a`/`m1`/`m2` redacted so logs are safe to share). Failures here become test fixtures.
 
 ## Why this exists
 
