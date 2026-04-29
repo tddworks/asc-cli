@@ -176,6 +176,49 @@ struct SDKInAppPurchaseRepositoryTests {
         #expect(result.data.isEmpty)
     }
 
+    // MARK: - Iris-state enrichment
+
+    @Test func `listInAppPurchases threads submitWithNextAppStoreVersion from the iris enricher`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(InAppPurchasesV2Response(
+            data: [
+                InAppPurchaseV2(type: .inAppPurchases, id: "iap-1", attributes: .init(state: .readyToSubmit)),
+                InAppPurchaseV2(type: .inAppPurchases, id: "iap-2", attributes: .init(state: .readyToSubmit)),
+            ],
+            links: .init(this: "")
+        ))
+
+        // The enricher closure represents "ask iris for submitWithNextAppStoreVersion
+        // per IAP". We stub it directly here so the SDK repo stays decoupled from
+        // iris cookies / network.
+        let enricher: @Sendable (String) async -> [String: Bool] = { _ in
+            ["iap-1": true, "iap-2": false]
+        }
+
+        let repo = SDKInAppPurchaseRepository(client: stub, irisFlagsProvider: enricher)
+        let result = try await repo.listInAppPurchases(appId: "app-1", limit: nil)
+
+        let iap1 = try #require(result.data.first { $0.id == "iap-1" })
+        let iap2 = try #require(result.data.first { $0.id == "iap-2" })
+        #expect(iap1.submitWithNextAppStoreVersion == true)
+        #expect(iap2.submitWithNextAppStoreVersion == false)
+    }
+
+    @Test func `listInAppPurchases falls back to false when no iris enricher is wired`() async throws {
+        // Default constructor — no enricher. CI scripts using API-key auth get the
+        // existing behavior unchanged: every IAP has submitWithNextAppStoreVersion=false.
+        let stub = StubAPIClient()
+        stub.willReturn(InAppPurchasesV2Response(
+            data: [InAppPurchaseV2(type: .inAppPurchases, id: "iap-1", attributes: .init(state: .readyToSubmit))],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKInAppPurchaseRepository(client: stub)
+        let result = try await repo.listInAppPurchases(appId: "app-1", limit: nil)
+
+        #expect(result.data[0].submitWithNextAppStoreVersion == false)
+    }
+
     // MARK: - createInAppPurchase
 
     @Test func `createInAppPurchase injects appId into response`() async throws {

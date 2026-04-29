@@ -3,9 +3,19 @@ import Domain
 
 public struct SDKInAppPurchaseRepository: InAppPurchaseRepository, @unchecked Sendable {
     private let client: any APIClient
+    /// Optional enricher that asks iris for `submitWithNextAppStoreVersion` per IAP
+    /// (the public SDK has no path that exposes that bit). Wired by the factory when
+    /// iris cookies are available; absent for CI scripts with API-key auth only.
+    /// Treated as best-effort — any thrown error inside the closure should map to
+    /// an empty dictionary by the wiring layer so the listing call still succeeds.
+    private let irisFlagsProvider: (@Sendable (String) async -> [String: Bool])?
 
-    public init(client: any APIClient) {
+    public init(
+        client: any APIClient,
+        irisFlagsProvider: (@Sendable (String) async -> [String: Bool])? = nil
+    ) {
         self.client = client
+        self.irisFlagsProvider = irisFlagsProvider
     }
 
     public func listInAppPurchases(appId: String, limit: Int?) async throws -> PaginatedResponse<Domain.InAppPurchase> {
@@ -23,10 +33,16 @@ public struct SDKInAppPurchaseRepository: InAppPurchaseRepository, @unchecked Se
             let mapped = mapState(iap.attributes?.state)
             return mapped.hasBeenApproved
         }
+        let irisFlags = await irisFlagsProvider?(appId) ?? [:]
         let purchases = response.data.map { sdkIAP -> Domain.InAppPurchase in
             let state = mapState(sdkIAP.attributes?.state)
             let isFirstTime = !hasShippedIAP && !state.hasBeenApproved
-            return mapInAppPurchase(sdkIAP, appId: appId, isFirstTimeSubmission: isFirstTime)
+            let submitWithNextVersion = irisFlags[sdkIAP.id] ?? false
+            return mapInAppPurchase(
+                sdkIAP, appId: appId,
+                isFirstTimeSubmission: isFirstTime,
+                submitWithNextAppStoreVersion: submitWithNextVersion
+            )
         }
         return PaginatedResponse(data: purchases, nextCursor: response.links.next)
     }
@@ -83,7 +99,8 @@ public struct SDKInAppPurchaseRepository: InAppPurchaseRepository, @unchecked Se
     private func mapInAppPurchase(
         _ sdk: AppStoreConnect_Swift_SDK.InAppPurchaseV2,
         appId: String,
-        isFirstTimeSubmission: Bool = false
+        isFirstTimeSubmission: Bool = false,
+        submitWithNextAppStoreVersion: Bool = false
     ) -> Domain.InAppPurchase {
         Domain.InAppPurchase(
             id: sdk.id,
@@ -93,7 +110,8 @@ public struct SDKInAppPurchaseRepository: InAppPurchaseRepository, @unchecked Se
             type: mapFromSDKType(sdk.attributes?.inAppPurchaseType) ?? .consumable,
             state: mapState(sdk.attributes?.state),
             reviewNote: sdk.attributes?.reviewNote,
-            isFirstTimeSubmission: isFirstTimeSubmission
+            isFirstTimeSubmission: isFirstTimeSubmission,
+            submitWithNextAppStoreVersion: submitWithNextAppStoreVersion
         )
     }
 

@@ -15,6 +15,14 @@ public struct InAppPurchase: Sendable, Equatable, Identifiable {
     /// to `false` for paths without batch context (`asc iap get`); see
     /// `docs/features/iap-subscriptions/submission-iris-parity.md` for the caveat.
     public let isFirstTimeSubmission: Bool
+    /// True when the iris listing reports this IAP is currently queued to ride along
+    /// with the next App Store version submission (Apple's iris API exposes the bit
+    /// as `attributes.submitWithNextAppStoreVersion`; the public SDK omits it). The
+    /// IAP is staged but not yet under review — withdrawing means dequeue, not the
+    /// classic "withdraw from active review". Populated only when iris cookies are
+    /// available; defaults to `false` so CI scripts using API-key auth keep their
+    /// existing JSON output unchanged.
+    public let submitWithNextAppStoreVersion: Bool
 
     public init(
         id: String,
@@ -24,7 +32,8 @@ public struct InAppPurchase: Sendable, Equatable, Identifiable {
         type: InAppPurchaseType,
         state: InAppPurchaseState,
         reviewNote: String? = nil,
-        isFirstTimeSubmission: Bool = false
+        isFirstTimeSubmission: Bool = false,
+        submitWithNextAppStoreVersion: Bool = false
     ) {
         self.id = id
         self.appId = appId
@@ -34,12 +43,14 @@ public struct InAppPurchase: Sendable, Equatable, Identifiable {
         self.state = state
         self.reviewNote = reviewNote
         self.isFirstTimeSubmission = isFirstTimeSubmission
+        self.submitWithNextAppStoreVersion = submitWithNextAppStoreVersion
     }
 }
 
 extension InAppPurchase: Codable {
     enum CodingKeys: String, CodingKey {
-        case id, appId, referenceName, productId, type, state, reviewNote, isFirstTimeSubmission
+        case id, appId, referenceName, productId, type, state, reviewNote
+        case isFirstTimeSubmission, submitWithNextAppStoreVersion
     }
 
     public init(from decoder: any Decoder) throws {
@@ -52,6 +63,7 @@ extension InAppPurchase: Codable {
         state = try c.decode(InAppPurchaseState.self, forKey: .state)
         reviewNote = try c.decodeIfPresent(String.self, forKey: .reviewNote)
         isFirstTimeSubmission = try c.decodeIfPresent(Bool.self, forKey: .isFirstTimeSubmission) ?? false
+        submitWithNextAppStoreVersion = try c.decodeIfPresent(Bool.self, forKey: .submitWithNextAppStoreVersion) ?? false
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -63,11 +75,14 @@ extension InAppPurchase: Codable {
         try c.encode(type, forKey: .type)
         try c.encode(state, forKey: .state)
         try c.encodeIfPresent(reviewNote, forKey: .reviewNote)
-        // Omit when false to avoid noise in the common case (most IAPs aren't
-        // first-time). The affordance dispatch is the user-visible signal; this
-        // field is read-side metadata for agents that want it explicitly.
+        // Omit boolean flags when false to avoid noise in the common case. The
+        // affordance dispatch is the user-visible signal; these fields are read-side
+        // metadata for agents that want the raw state explicitly.
         if isFirstTimeSubmission {
             try c.encode(isFirstTimeSubmission, forKey: .isFirstTimeSubmission)
+        }
+        if submitWithNextAppStoreVersion {
+            try c.encode(submitWithNextAppStoreVersion, forKey: .submitWithNextAppStoreVersion)
         }
     }
 }
@@ -172,12 +187,17 @@ extension InAppPurchase: AffordanceProviding {
                        params: ["iap-id": id, "reference-name": "<name>"]),
         ]
         if state == .readyToSubmit {
-            // Apple binds the first IAP for an app to a new App Store version. Only
-            // `POST /iris/v1/inAppPurchaseSubmissions` accepts that flag, so first-time
-            // IAPs route through `asc iris iap-submissions create`. Subsequent IAPs use
-            // the public-key path. The agent reads one `submit` affordance and runs it
-            // — no need to know iris-vs-sdk exists.
-            if isFirstTimeSubmission {
+            if submitWithNextAppStoreVersion {
+                // Already queued via iris — submitting again would be rejected. Only
+                // surface the dequeue affordance. The submission resource is keyed by
+                // the IAP id in iris, so `--submission-id <iapId>` works against the
+                // public-SDK DELETE endpoint.
+                items.append(Affordance(key: "removeFromNextVersion", command: "iap", action: "unsubmit",
+                                        params: ["submission-id": id]))
+            } else if isFirstTimeSubmission {
+                // Apple binds the first IAP for an app to a new App Store version. Only
+                // `POST /iris/v1/inAppPurchaseSubmissions` accepts that flag, so
+                // first-time IAPs route through `asc iris iap-submissions create`.
                 items.append(Affordance(key: "submit", command: "iris iap-submissions", action: "create",
                                         params: ["iap-id": id]))
             } else {

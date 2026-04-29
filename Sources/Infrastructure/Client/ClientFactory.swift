@@ -98,7 +98,17 @@ public struct ClientFactory: Sendable {
 
     public func makeInAppPurchaseRepository(authProvider: any AuthProvider) throws -> any InAppPurchaseRepository {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKInAppPurchaseRepository(client: provider)
+        // Best-effort iris enrichment for `submitWithNextAppStoreVersion`. The closure
+        // resolves iris cookies on every list call (so freshly-logged-in sessions are
+        // picked up); any failure — no cookies, network error, malformed response —
+        // returns an empty map and the SDK list still succeeds with the flag = false.
+        let cookieProvider = makeIrisCookieProvider()
+        let stateRepo = IrisSDKInAppPurchaseStateRepository()
+        let irisFlagsProvider: @Sendable (String) async -> [String: Bool] = { appId in
+            guard let session = try? cookieProvider.resolveSession() else { return [:] }
+            return (try? await stateRepo.fetchSubmitFlags(session: session, appId: appId)) ?? [:]
+        }
+        return SDKInAppPurchaseRepository(client: provider, irisFlagsProvider: irisFlagsProvider)
     }
 
     public func makeInAppPurchaseLocalizationRepository(authProvider: any AuthProvider) throws -> any InAppPurchaseLocalizationRepository {

@@ -117,6 +117,48 @@ struct InAppPurchaseTests {
         #expect(link?.href.contains("iap-1") == true)
     }
 
+    @Test func `removeFromNextVersion affordance fires when IAP is queued for next version`() {
+        // When the iris listing reports `submitWithNextAppStoreVersion: true`, the IAP
+        // is staged to ride along with the next app version submission — but not yet
+        // under active review. The action to undo this is "remove from next version",
+        // not "withdraw from review". Underlying call is the same DELETE on the
+        // submission record, which is keyed by the IAP id in iris.
+        let queued = MockRepositoryFactory.makeInAppPurchase(
+            id: "iap-7", state: .readyToSubmit, submitWithNextAppStoreVersion: true
+        )
+        #expect(queued.affordances["removeFromNextVersion"] == "asc iap unsubmit --submission-id iap-7")
+    }
+
+    @Test func `submit and removeFromNextVersion are mutually exclusive`() {
+        // Already queued — submitting again would be rejected by Apple, so we hide
+        // submit and only offer the dequeue path.
+        let queued = MockRepositoryFactory.makeInAppPurchase(
+            id: "iap-7", state: .readyToSubmit, submitWithNextAppStoreVersion: true
+        )
+        #expect(queued.affordances["submit"] == nil)
+
+        // Not queued — submit is the only option.
+        let notQueued = MockRepositoryFactory.makeInAppPurchase(
+            id: "iap-8", state: .readyToSubmit, submitWithNextAppStoreVersion: false
+        )
+        #expect(notQueued.affordances["removeFromNextVersion"] == nil)
+        #expect(notQueued.affordances["submit"] != nil)
+    }
+
+    @Test func `removeFromNextVersion is hidden when not in readyToSubmit`() {
+        // Out of caution — if the IAP advances to active review, we don't want to
+        // display the "remove from next version" affordance there (different semantic).
+        let inReview = MockRepositoryFactory.makeInAppPurchase(
+            id: "iap-9", state: .inReview, submitWithNextAppStoreVersion: true
+        )
+        #expect(inReview.affordances["removeFromNextVersion"] == nil)
+    }
+
+    @Test func `iap defaults submitWithNextAppStoreVersion to false`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1", state: .readyToSubmit)
+        #expect(iap.submitWithNextAppStoreVersion == false)
+    }
+
     @Test func `iap defaults isFirstTimeSubmission to false`() {
         let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1", state: .readyToSubmit)
         #expect(iap.isFirstTimeSubmission == false)
