@@ -304,7 +304,13 @@ public struct ClientFactory: Sendable {
     }
 
     public func makeIrisCookieProvider() -> any IrisCookieProvider {
-        BrowserIrisCookieProvider()
+        // Resolution order: SRP-stored session (from `asc iris auth login`) first,
+        // browser cookies as a fallback for users who haven't run SRP login. The
+        // browser provider already handles `ASC_IRIS_COOKIES` env override internally.
+        CompositeIrisCookieProvider(providers: [
+            StoredSRPIrisCookieProvider(),
+            BrowserIrisCookieProvider(),
+        ])
     }
 
     private func makeProvider(authProvider: any AuthProvider) throws -> APIProvider {

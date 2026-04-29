@@ -13,6 +13,8 @@ public struct IrisStatus: Sendable, Equatable, Codable {
 public enum IrisCookieSource: String, Sendable, Equatable, Codable {
     case browser
     case environment
+    /// Session persisted by `asc iris auth login` (Apple SRP login).
+    case srpLogin
 }
 
 extension IrisStatus: AffordanceProviding {
