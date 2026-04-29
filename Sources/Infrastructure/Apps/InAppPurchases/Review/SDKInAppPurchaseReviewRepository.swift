@@ -4,9 +4,21 @@ import Foundation
 
 public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @unchecked Sendable {
     private let client: any APIClient
+    /// Per-attempt sleep when polling for `imageAsset` readiness post-upload.
+    /// Mirrors the iOS SDK's 2s default; tests override to 0 to keep the suite fast.
+    private let pollDelayNanos: UInt64
+    /// Max attempts before falling back to the latest state (mapper drops empty
+    /// `imageAsset`, so callers see `imageAsset == nil` rather than zero values).
+    private let pollMaxAttempts: Int
 
-    public init(client: any APIClient) {
+    public init(
+        client: any APIClient,
+        pollDelayNanos: UInt64 = 2_000_000_000,
+        pollMaxAttempts: Int = 15
+    ) {
         self.client = client
+        self.pollDelayNanos = pollDelayNanos
+        self.pollMaxAttempts = pollMaxAttempts
     }
 
     // MARK: - Review Screenshot
@@ -54,10 +66,14 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
             id: screenshotId,
             attributes: .init(sourceFileChecksum: md5, isUploaded: true)
         ))
-        let confirmed = try await client.request(
+        _ = try await client.request(
             APIEndpoint.v1.inAppPurchaseAppStoreReviewScreenshots.id(screenshotId).patch(confirmBody)
         )
-        return mapReviewScreenshot(confirmed.data, iapId: iapId)
+
+        // Step 4: Poll until ASC finishes processing — the PATCH-commit response
+        // returns an empty `imageAsset` (templateURL/width/height all zero/empty)
+        // because processing is async. Mirrors the iOS SDK's verifyReviewScreenshotUpload.
+        return try await pollReviewScreenshotReady(screenshotId: screenshotId, iapId: iapId)
     }
 
     public func deleteReviewScreenshot(screenshotId: String) async throws {
@@ -97,12 +113,68 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
             id: imageId,
             attributes: .init(sourceFileChecksum: md5, isUploaded: true)
         ))
-        let confirmed = try await client.request(APIEndpoint.v1.inAppPurchaseImages.id(imageId).patch(confirmBody))
-        return mapImage(confirmed.data, iapId: iapId)
+        _ = try await client.request(APIEndpoint.v1.inAppPurchaseImages.id(imageId).patch(confirmBody))
+
+        // Step 4: Poll until ASC finishes processing — see `uploadReviewScreenshot`.
+        return try await pollImageReady(imageId: imageId, iapId: iapId)
     }
 
     public func deleteImage(imageId: String) async throws {
         _ = try await client.request(APIEndpoint.v1.inAppPurchaseImages.id(imageId).delete)
+    }
+
+    // MARK: - Poll for upload readiness
+
+    /// Re-fetches the screenshot until ASC reports `assetDeliveryState == COMPLETE`
+    /// (imageAsset URL populated). Stops on `FAILED`. Falls back to whatever the latest
+    /// fetch returned if processing exceeds `pollMaxAttempts × pollDelayNanos`.
+    private func pollReviewScreenshotReady(screenshotId: String, iapId: String) async throws -> Domain.InAppPurchaseReviewScreenshot {
+        var latest: Domain.InAppPurchaseReviewScreenshot?
+        for attempt in 1...pollMaxAttempts {
+            let response = try await client.request(
+                APIEndpoint.v1.inAppPurchaseAppStoreReviewScreenshots.id(screenshotId).get()
+            )
+            latest = mapReviewScreenshot(response.data, iapId: iapId)
+
+            let stateRaw = response.data.attributes?.assetDeliveryState?.state?.rawValue
+            switch stateRaw {
+            case "COMPLETE":
+                return latest!
+            case "FAILED":
+                let errors = response.data.attributes?.assetDeliveryState?.errors?
+                    .compactMap(\.description).joined(separator: ", ") ?? "Unknown error"
+                throw APIError.unknown("Review screenshot processing failed: \(errors)")
+            default:
+                if attempt < pollMaxAttempts {
+                    try await Task.sleep(nanoseconds: pollDelayNanos)
+                }
+            }
+        }
+        return latest ?? mapReviewScreenshot(.init(type: .inAppPurchaseAppStoreReviewScreenshots, id: screenshotId), iapId: iapId)
+    }
+
+    /// Re-fetches the image until state is one of `PREPARE_FOR_SUBMISSION /
+    /// WAITING_FOR_REVIEW / APPROVED` (imageAsset URL populated). Stops on `FAILED`/`REJECTED`.
+    private func pollImageReady(imageId: String, iapId: String) async throws -> Domain.InAppPurchasePromotionalImage {
+        var latest: Domain.InAppPurchasePromotionalImage?
+        for attempt in 1...pollMaxAttempts {
+            let response = try await client.request(
+                APIEndpoint.v1.inAppPurchaseImages.id(imageId).get()
+            )
+            latest = mapImage(response.data, iapId: iapId)
+
+            switch response.data.attributes?.state {
+            case .prepareForSubmission, .waitingForReview, .approved:
+                return latest!
+            case .failed, .rejected:
+                throw APIError.unknown("Image processing failed with state: \(response.data.attributes?.state?.rawValue ?? "unknown")")
+            default:
+                if attempt < pollMaxAttempts {
+                    try await Task.sleep(nanoseconds: pollDelayNanos)
+                }
+            }
+        }
+        return latest ?? mapImage(.init(type: .inAppPurchaseImages, id: imageId), iapId: iapId)
     }
 
     // MARK: - Helpers
@@ -156,12 +228,6 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
         )
     }
 
-    /// ASC returns a non-nil `imageAsset` with empty `templateURL`/zero dimensions
-    /// immediately after the upload commit but before server-side processing finishes.
-    /// We treat that not-yet-processed shape as absent so JSON output omits the field
-    /// (frontends keep showing a local preview and poll the GET endpoint until the
-    /// asset is populated). Mirrors how the iOS app's `previewImageURL` returns nil
-    /// for an empty `templateURL`.
     private func mapImageAsset(_ sdk: AppStoreConnect_Swift_SDK.ImageAsset?) -> Domain.ImageAsset? {
         guard let templateUrl = sdk?.templateURL, !templateUrl.isEmpty,
               let width = sdk?.width, width > 0,

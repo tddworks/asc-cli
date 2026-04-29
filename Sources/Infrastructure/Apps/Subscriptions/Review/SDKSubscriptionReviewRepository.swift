@@ -4,9 +4,19 @@ import Foundation
 
 public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @unchecked Sendable {
     private let client: any APIClient
+    /// Per-attempt sleep when polling for `imageAsset` readiness post-upload.
+    /// Mirrors the iOS SDK's 2s default; tests override to 0 to keep the suite fast.
+    private let pollDelayNanos: UInt64
+    private let pollMaxAttempts: Int
 
-    public init(client: any APIClient) {
+    public init(
+        client: any APIClient,
+        pollDelayNanos: UInt64 = 2_000_000_000,
+        pollMaxAttempts: Int = 15
+    ) {
         self.client = client
+        self.pollDelayNanos = pollDelayNanos
+        self.pollMaxAttempts = pollMaxAttempts
     }
 
     public func getReviewScreenshot(subscriptionId: String) async throws -> Domain.SubscriptionReviewScreenshot? {
@@ -61,10 +71,14 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
             id: screenshotId,
             attributes: .init(sourceFileChecksum: md5, isUploaded: true)
         ))
-        let confirmed = try await client.request(
+        _ = try await client.request(
             APIEndpoint.v1.subscriptionAppStoreReviewScreenshots.id(screenshotId).patch(confirmBody)
         )
-        return mapReviewScreenshot(confirmed.data, subscriptionId: subscriptionId)
+
+        // Step 4: Poll until ASC finishes processing the screenshot — the PATCH-commit
+        // response returns an empty `imageAsset` because processing is async. Mirrors
+        // the iOS SDK's verifyReviewScreenshotUpload.
+        return try await pollReviewScreenshotReady(screenshotId: screenshotId, subscriptionId: subscriptionId)
     }
 
     public func deleteReviewScreenshot(screenshotId: String) async throws {
@@ -117,12 +131,68 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
             id: imageId,
             attributes: .init(sourceFileChecksum: md5, isUploaded: true)
         ))
-        let confirmed = try await client.request(APIEndpoint.v1.subscriptionImages.id(imageId).patch(confirmBody))
-        return mapImage(confirmed.data, subscriptionId: subscriptionId)
+        _ = try await client.request(APIEndpoint.v1.subscriptionImages.id(imageId).patch(confirmBody))
+
+        // Step 4: Poll until ASC finishes processing — see `uploadReviewScreenshot`.
+        return try await pollImageReady(imageId: imageId, subscriptionId: subscriptionId)
     }
 
     public func deleteImage(imageId: String) async throws {
         _ = try await client.request(APIEndpoint.v1.subscriptionImages.id(imageId).delete)
+    }
+
+    // MARK: - Poll for upload readiness
+
+    /// Re-fetches the screenshot until ASC reports `assetDeliveryState == COMPLETE`
+    /// (imageAsset URL populated). Stops on `FAILED`. Falls back to whatever the latest
+    /// fetch returned if processing exceeds `pollMaxAttempts × pollDelayNanos`.
+    private func pollReviewScreenshotReady(screenshotId: String, subscriptionId: String) async throws -> Domain.SubscriptionReviewScreenshot {
+        var latest: Domain.SubscriptionReviewScreenshot?
+        for attempt in 1...pollMaxAttempts {
+            let response = try await client.request(
+                APIEndpoint.v1.subscriptionAppStoreReviewScreenshots.id(screenshotId).get()
+            )
+            latest = mapReviewScreenshot(response.data, subscriptionId: subscriptionId)
+
+            let stateRaw = response.data.attributes?.assetDeliveryState?.state?.rawValue
+            switch stateRaw {
+            case "COMPLETE":
+                return latest!
+            case "FAILED":
+                let errors = response.data.attributes?.assetDeliveryState?.errors?
+                    .compactMap(\.description).joined(separator: ", ") ?? "Unknown error"
+                throw APIError.unknown("Review screenshot processing failed: \(errors)")
+            default:
+                if attempt < pollMaxAttempts {
+                    try await Task.sleep(nanoseconds: pollDelayNanos)
+                }
+            }
+        }
+        return latest ?? mapReviewScreenshot(.init(type: .subscriptionAppStoreReviewScreenshots, id: screenshotId), subscriptionId: subscriptionId)
+    }
+
+    /// Re-fetches the image until state is one of `PREPARE_FOR_SUBMISSION /
+    /// WAITING_FOR_REVIEW / APPROVED` (imageAsset URL populated). Stops on `FAILED`/`REJECTED`.
+    private func pollImageReady(imageId: String, subscriptionId: String) async throws -> Domain.SubscriptionPromotionalImage {
+        var latest: Domain.SubscriptionPromotionalImage?
+        for attempt in 1...pollMaxAttempts {
+            let response = try await client.request(
+                APIEndpoint.v1.subscriptionImages.id(imageId).get()
+            )
+            latest = mapImage(response.data, subscriptionId: subscriptionId)
+
+            switch response.data.attributes?.state {
+            case .prepareForSubmission, .waitingForReview, .approved:
+                return latest!
+            case .failed, .rejected:
+                throw APIError.unknown("Image processing failed with state: \(response.data.attributes?.state?.rawValue ?? "unknown")")
+            default:
+                if attempt < pollMaxAttempts {
+                    try await Task.sleep(nanoseconds: pollDelayNanos)
+                }
+            }
+        }
+        return latest ?? mapImage(.init(type: .subscriptionImages, id: imageId), subscriptionId: subscriptionId)
     }
 
     private func mapImage(
@@ -157,12 +227,6 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
         )
     }
 
-    /// ASC returns a non-nil `imageAsset` with empty `templateURL`/zero dimensions
-    /// immediately after the upload commit but before server-side processing finishes.
-    /// We treat that not-yet-processed shape as absent so JSON output omits the field
-    /// (frontends keep showing a local preview and poll the GET endpoint until the
-    /// asset is populated). Mirrors how the iOS app's `previewImageURL` returns nil
-    /// for an empty `templateURL`.
     private func mapImageAsset(_ sdk: AppStoreConnect_Swift_SDK.ImageAsset?) -> Domain.ImageAsset? {
         guard let templateUrl = sdk?.templateURL, !templateUrl.isEmpty,
               let width = sdk?.width, width > 0,
