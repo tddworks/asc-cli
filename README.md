@@ -455,7 +455,7 @@ asc simulators list --booted --pretty
 asc simulators boot --udid <udid>
 asc simulators shutdown --udid <udid>
 
-# Start web server (opens asccli.app/command-center)
+# Start web server (opens cc.asccli.app)
 asc web-server
 ```
 
