@@ -179,20 +179,35 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
 
     // MARK: - Helpers
 
+    /// Mirrors `AppStoreConnectInAppPurchaseRepository.uploadChunks` in `AppStoreSdk-SPM`:
+    /// slice via subscript, guard `method` (skip op if nil), set headers verbatim
+    /// (forwarding `header.value` even when nil), assign body AFTER headers, and throw
+    /// on non-2xx so a chunk failure surfaces instead of leaking a partial file to ASC.
     private func uploadChunks(uploadOps: [UploadOperation], fileData: Data) async throws {
-        for op in uploadOps {
-            guard let urlString = op.url, let url = URL(string: urlString),
-                  let offset = op.offset, let length = op.length else { continue }
-            let chunk = fileData.subdata(in: offset..<(offset + length))
+        for operation in uploadOps {
+            guard let urlString = operation.url,
+                  let url = URL(string: urlString),
+                  let method = operation.method,
+                  let offset = operation.offset,
+                  let length = operation.length
+            else { continue }
+
+            let chunk = fileData[offset..<(offset + length)]
             var request = URLRequest(url: url)
-            request.httpMethod = op.method ?? "PUT"
-            request.httpBody = chunk
-            for header in op.requestHeaders ?? [] {
-                if let name = header.name, let value = header.value {
-                    request.setValue(value, forHTTPHeaderField: name)
+            request.httpMethod = method
+            for header in (operation.requestHeaders ?? []) {
+                if let name = header.name {
+                    request.setValue(header.value, forHTTPHeaderField: name)
                 }
             }
-            _ = try await URLSession.shared.data(for: request)
+            request.httpBody = chunk
+
+            let (_, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  200..<300 ~= httpResponse.statusCode
+            else {
+                throw APIError.unknown("Image upload chunk failed")
+            }
         }
     }
 

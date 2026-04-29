@@ -50,20 +50,7 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
         let screenshotId = reserved.data.id
         let uploadOps = reserved.data.attributes?.uploadOperations ?? []
 
-        for op in uploadOps {
-            guard let urlString = op.url, let url = URL(string: urlString),
-                  let offset = op.offset, let length = op.length else { continue }
-            let chunk = fileData.subdata(in: offset..<(offset + length))
-            var request = URLRequest(url: url)
-            request.httpMethod = op.method ?? "PUT"
-            request.httpBody = chunk
-            for header in op.requestHeaders ?? [] {
-                if let name = header.name, let value = header.value {
-                    request.setValue(value, forHTTPHeaderField: name)
-                }
-            }
-            _ = try await URLSession.shared.data(for: request)
-        }
+        try await uploadChunks(uploadOps: uploadOps, fileData: fileData)
 
         let md5 = fileData.md5HexString
         let confirmBody = SubscriptionAppStoreReviewScreenshotUpdateRequest(data: .init(
@@ -110,20 +97,7 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
         let imageId = reserved.data.id
         let uploadOps = reserved.data.attributes?.uploadOperations ?? []
 
-        for op in uploadOps {
-            guard let urlString = op.url, let url = URL(string: urlString),
-                  let offset = op.offset, let length = op.length else { continue }
-            let chunk = fileData.subdata(in: offset..<(offset + length))
-            var request = URLRequest(url: url)
-            request.httpMethod = op.method ?? "PUT"
-            request.httpBody = chunk
-            for header in op.requestHeaders ?? [] {
-                if let name = header.name, let value = header.value {
-                    request.setValue(value, forHTTPHeaderField: name)
-                }
-            }
-            _ = try await URLSession.shared.data(for: request)
-        }
+        try await uploadChunks(uploadOps: uploadOps, fileData: fileData)
 
         let md5 = fileData.md5HexString
         let confirmBody = SubscriptionImageUpdateRequest(data: .init(
@@ -139,6 +113,36 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
 
     public func deleteImage(imageId: String) async throws {
         _ = try await client.request(APIEndpoint.v1.subscriptionImages.id(imageId).delete)
+    }
+
+    /// Mirrors `AppStoreConnectInAppPurchaseRepository.uploadChunks` in `AppStoreSdk-SPM`.
+    /// See the IAP repo's twin for rationale.
+    private func uploadChunks(uploadOps: [UploadOperation], fileData: Data) async throws {
+        for operation in uploadOps {
+            guard let urlString = operation.url,
+                  let url = URL(string: urlString),
+                  let method = operation.method,
+                  let offset = operation.offset,
+                  let length = operation.length
+            else { continue }
+
+            let chunk = fileData[offset..<(offset + length)]
+            var request = URLRequest(url: url)
+            request.httpMethod = method
+            for header in (operation.requestHeaders ?? []) {
+                if let name = header.name {
+                    request.setValue(header.value, forHTTPHeaderField: name)
+                }
+            }
+            request.httpBody = chunk
+
+            let (_, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  200..<300 ~= httpResponse.statusCode
+            else {
+                throw APIError.unknown("Image upload chunk failed")
+            }
+        }
     }
 
     // MARK: - Poll for upload readiness
