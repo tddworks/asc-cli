@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`asc iris auth login` / `verify-code` / `logout` — Apple ID SRP login for the iris private API** — until now iris features (`asc iris apps list`, `asc iris status`) only worked when the user had logged into App Store Connect in their browser; we'd borrow cookies from there. Headless CI had no path. The new command performs a full Apple SRP-6a handshake against `idmsa.apple.com`, handles 2FA (trusted-device push or phone code), then persists the resulting session to `~/.asc/iris/session.json` (0600 perms). New `CompositeIrisCookieProvider` chains SRP-stored cookies before browser cookies, so any existing iris command immediately picks up the SRP session without code changes elsewhere. See `docs/features/iris/iris-srp-login.md`.
+  - `asc iris auth login --apple-id user@example.com` — prompts for password on stdin, runs SRP, persists session on success or pending-2FA state on 409.
+  - `asc iris auth verify-code 123456` — submits the 2FA code, calls `2sv/trust`, fetches `olympus/v1/session` for team metadata, persists the full session.
+  - `asc iris auth logout` — deletes the persisted session.
+  - `ASC_IRIS_DEBUG=1` — dumps every idmsa request/response to stderr with `a`/`m1`/`m2` redacted, so failures self-capture safely-shareable test data.
+  - Built on `adam-fowler/swift-srp` (Apache 2.0) for RFC 5054 group-2048 constants, BigNum, and key generation. Apple's PBKDF2-derived `x` is layered on top in `AppleSRPClient`. PBKDF2-HMAC-SHA256 implementation cross-checked against RFC 7914 §11 vectors.
+  - **Caveat**: while every layer is unit-tested with mocked HTTP and synthesized vectors, real-world correctness against Apple's specific `M1` shape gets validated only on the first real login attempt. If Apple's protocol shifts, expect churn here.
+
 ---
 
 ## [0.17.7] - 2026-04-29
