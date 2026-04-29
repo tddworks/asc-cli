@@ -84,6 +84,44 @@ struct InAppPurchaseTests {
         #expect(missing.affordances["submit"] == nil)
     }
 
+    @Test func `submit affordance routes to iris when isFirstTimeSubmission`() {
+        // Apple requires the first IAP for an app to be submitted alongside a new
+        // App Store version — only `POST /iris/v1/inAppPurchaseSubmissions` accepts
+        // `submitWithNextAppStoreVersion`. The IAP affordance auto-dispatches to that
+        // path so the user never has to know iris-vs-sdk exists.
+        let firstTime = MockRepositoryFactory.makeInAppPurchase(
+            id: "iap-1", state: .readyToSubmit, isFirstTimeSubmission: true
+        )
+        #expect(firstTime.affordances["submit"] == "asc iris iap-submissions create --iap-id iap-1")
+    }
+
+    @Test func `submit affordance routes to sdk when not first-time`() {
+        let subsequent = MockRepositoryFactory.makeInAppPurchase(
+            id: "iap-2", state: .readyToSubmit, isFirstTimeSubmission: false
+        )
+        #expect(subsequent.affordances["submit"] == "asc iap submit --iap-id iap-2")
+    }
+
+    @Test func `submit apiLinks resolve to iris path for first-time IAPs`() {
+        let firstTime = MockRepositoryFactory.makeInAppPurchase(
+            id: "iap-1", state: .readyToSubmit, isFirstTimeSubmission: true
+        )
+        // The iris route isn't registered with the path resolver yet (it's a fresh
+        // CLI command), so the resolver falls back to the default `/api/v1/{command}/{action}`
+        // shape. Both CLI and REST renderers stay in sync because both go through
+        // `Affordance` — what matters is that the resolved REST path is iris-flavored
+        // and not the legacy `/api/v1/iap/iap-1/submit`.
+        let link = firstTime.apiLinks["submit"]
+        #expect(link?.method == "POST")
+        #expect(link?.href.contains("iris") == true)
+        #expect(link?.href.contains("iap-1") == true)
+    }
+
+    @Test func `iap defaults isFirstTimeSubmission to false`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1", state: .readyToSubmit)
+        #expect(iap.isFirstTimeSubmission == false)
+    }
+
     @Test func `iap localization affordances include listSiblings`() {
         let loc = MockRepositoryFactory.makeInAppPurchaseLocalization(id: "loc-1", iapId: "iap-1")
         #expect(loc.affordances["listSiblings"] == "asc iap-localizations list --iap-id iap-1")

@@ -13,7 +13,21 @@ public struct SDKInAppPurchaseRepository: InAppPurchaseRepository, @unchecked Se
             limit: limit
         ))
         let response = try await client.request(request)
-        let purchases = response.data.map { mapInAppPurchase($0, appId: appId) }
+        // First-time detection: if no IAP in this batch has ever been approved by Apple
+        // (current state in approved / *removedFromSale*), every unapproved IAP is
+        // flagged so the affordance routes through `asc iris iap-submissions create`.
+        // The check is per-batch, not authoritative across all IAPs the API might
+        // paginate — but `listInAppPurchases` already pulls the full set when `limit`
+        // isn't specified, which is the path agents use.
+        let hasShippedIAP = response.data.contains { iap in
+            let mapped = mapState(iap.attributes?.state)
+            return mapped.hasBeenApproved
+        }
+        let purchases = response.data.map { sdkIAP -> Domain.InAppPurchase in
+            let state = mapState(sdkIAP.attributes?.state)
+            let isFirstTime = !hasShippedIAP && !state.hasBeenApproved
+            return mapInAppPurchase(sdkIAP, appId: appId, isFirstTimeSubmission: isFirstTime)
+        }
         return PaginatedResponse(data: purchases, nextCursor: response.links.next)
     }
 
@@ -66,7 +80,11 @@ public struct SDKInAppPurchaseRepository: InAppPurchaseRepository, @unchecked Se
         _ = try await client.request(APIEndpoint.v2.inAppPurchases.id(iapId).delete)
     }
 
-    private func mapInAppPurchase(_ sdk: AppStoreConnect_Swift_SDK.InAppPurchaseV2, appId: String) -> Domain.InAppPurchase {
+    private func mapInAppPurchase(
+        _ sdk: AppStoreConnect_Swift_SDK.InAppPurchaseV2,
+        appId: String,
+        isFirstTimeSubmission: Bool = false
+    ) -> Domain.InAppPurchase {
         Domain.InAppPurchase(
             id: sdk.id,
             appId: appId,
@@ -74,7 +92,8 @@ public struct SDKInAppPurchaseRepository: InAppPurchaseRepository, @unchecked Se
             productId: sdk.attributes?.productID ?? "",
             type: mapFromSDKType(sdk.attributes?.inAppPurchaseType) ?? .consumable,
             state: mapState(sdk.attributes?.state),
-            reviewNote: sdk.attributes?.reviewNote
+            reviewNote: sdk.attributes?.reviewNote,
+            isFirstTimeSubmission: isFirstTimeSubmission
         )
     }
 

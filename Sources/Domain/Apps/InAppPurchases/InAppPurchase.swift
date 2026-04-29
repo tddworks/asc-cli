@@ -7,6 +7,14 @@ public struct InAppPurchase: Sendable, Equatable, Identifiable {
     public let type: InAppPurchaseType
     public let state: InAppPurchaseState
     public let reviewNote: String?
+    /// True when this IAP looks like the first IAP being submitted for its app — Apple
+    /// requires those to ride along with a new App Store version, which only the iris
+    /// private API accepts (`submitWithNextAppStoreVersion: true`). Computed by
+    /// Infrastructure when listing IAPs for an app: if no sibling IAP is in an
+    /// approved/live state, every unapproved IAP is flagged as first-time. Defaults
+    /// to `false` for paths without batch context (`asc iap get`); see
+    /// `docs/features/iap-subscriptions/submission-iris-parity.md` for the caveat.
+    public let isFirstTimeSubmission: Bool
 
     public init(
         id: String,
@@ -15,7 +23,8 @@ public struct InAppPurchase: Sendable, Equatable, Identifiable {
         productId: String,
         type: InAppPurchaseType,
         state: InAppPurchaseState,
-        reviewNote: String? = nil
+        reviewNote: String? = nil,
+        isFirstTimeSubmission: Bool = false
     ) {
         self.id = id
         self.appId = appId
@@ -24,12 +33,13 @@ public struct InAppPurchase: Sendable, Equatable, Identifiable {
         self.type = type
         self.state = state
         self.reviewNote = reviewNote
+        self.isFirstTimeSubmission = isFirstTimeSubmission
     }
 }
 
 extension InAppPurchase: Codable {
     enum CodingKeys: String, CodingKey {
-        case id, appId, referenceName, productId, type, state, reviewNote
+        case id, appId, referenceName, productId, type, state, reviewNote, isFirstTimeSubmission
     }
 
     public init(from decoder: any Decoder) throws {
@@ -41,6 +51,7 @@ extension InAppPurchase: Codable {
         type = try c.decode(InAppPurchaseType.self, forKey: .type)
         state = try c.decode(InAppPurchaseState.self, forKey: .state)
         reviewNote = try c.decodeIfPresent(String.self, forKey: .reviewNote)
+        isFirstTimeSubmission = try c.decodeIfPresent(Bool.self, forKey: .isFirstTimeSubmission) ?? false
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -52,6 +63,12 @@ extension InAppPurchase: Codable {
         try c.encode(type, forKey: .type)
         try c.encode(state, forKey: .state)
         try c.encodeIfPresent(reviewNote, forKey: .reviewNote)
+        // Omit when false to avoid noise in the common case (most IAPs aren't
+        // first-time). The affordance dispatch is the user-visible signal; this
+        // field is read-side metadata for agents that want it explicitly.
+        if isFirstTimeSubmission {
+            try c.encode(isFirstTimeSubmission, forKey: .isFirstTimeSubmission)
+        }
     }
 }
 
@@ -99,6 +116,14 @@ public enum InAppPurchaseState: String, Sendable, Codable, Equatable {
         self == .missingMetadata || self == .rejected || self == .developerActionNeeded
     }
     public var isPendingReview: Bool { self == .waitingForReview || self == .inReview }
+    /// True if this IAP has cleared Apple's review at least once. Used by Infrastructure
+    /// to decide whether sibling IAPs in the same app are still "first-time" — the
+    /// app's first-IAP gate is cleared as soon as one IAP reaches an approved-or-past
+    /// state, and `removedFromSale` / `developerRemovedFromSale` both imply the IAP
+    /// was approved earlier.
+    public var hasBeenApproved: Bool {
+        self == .approved || self == .developerRemovedFromSale || self == .removedFromSale
+    }
 }
 
 extension InAppPurchase: Presentable {
@@ -147,8 +172,18 @@ extension InAppPurchase: AffordanceProviding {
                        params: ["iap-id": id, "reference-name": "<name>"]),
         ]
         if state == .readyToSubmit {
-            items.append(Affordance(key: "submit", command: "iap", action: "submit",
-                                    params: ["iap-id": id]))
+            // Apple binds the first IAP for an app to a new App Store version. Only
+            // `POST /iris/v1/inAppPurchaseSubmissions` accepts that flag, so first-time
+            // IAPs route through `asc iris iap-submissions create`. Subsequent IAPs use
+            // the public-key path. The agent reads one `submit` affordance and runs it
+            // — no need to know iris-vs-sdk exists.
+            if isFirstTimeSubmission {
+                items.append(Affordance(key: "submit", command: "iris iap-submissions", action: "create",
+                                        params: ["iap-id": id]))
+            } else {
+                items.append(Affordance(key: "submit", command: "iap", action: "submit",
+                                        params: ["iap-id": id]))
+            }
         }
         return items
     }

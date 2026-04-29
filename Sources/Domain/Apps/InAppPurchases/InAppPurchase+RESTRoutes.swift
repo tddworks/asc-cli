@@ -12,5 +12,11 @@ extension RESTPathResolver {
         registerRoute(command: "iap prices", parentParam: "iap-id", parentSegment: "iap", segment: "prices")
         registerRoute(command: "iap-price-schedule", parentParam: "iap-id", parentSegment: "iap", segment: "price-schedule")
         registerRoute(command: "iap-equalizations", parentParam: "price-point-id", parentSegment: "iap-price-points", segment: "equalizations")
+        // Iris-only IAP submission path. Mirrors the controller route exactly:
+        //   POST /api/v1/iris/iap/:iapId/submissions
+        // Multi-segment `parentSegment` is fine — `RESTPathResolver.resolve` does
+        // straight string concat and produces the right URL for the registered
+        // `iris iap-submissions` create affordance.
+        registerRoute(command: "iris iap-submissions", parentParam: "iap-id", parentSegment: "iris/iap", segment: "submissions")
     }()
 }

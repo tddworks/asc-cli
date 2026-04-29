@@ -380,7 +380,8 @@ struct MockRepositoryFactory {
         productId: String = "com.app.gold",
         type: InAppPurchaseType = .consumable,
         state: InAppPurchaseState = .missingMetadata,
-        reviewNote: String? = nil
+        reviewNote: String? = nil,
+        isFirstTimeSubmission: Bool = false
     ) -> InAppPurchase {
         InAppPurchase(
             id: id,
@@ -389,7 +390,8 @@ struct MockRepositoryFactory {
             productId: productId,
             type: type,
             state: state,
-            reviewNote: reviewNote
+            reviewNote: reviewNote,
+            isFirstTimeSubmission: isFirstTimeSubmission
         )
     }
 

@@ -107,6 +107,75 @@ struct SDKInAppPurchaseRepositoryTests {
         #expect(result.data[0].state == .missingMetadata)
     }
 
+    // MARK: - First-time submission detection
+
+    @Test func `listInAppPurchases marks every unapproved IAP first-time when batch has no approved siblings`() async throws {
+        // No IAP in this app has ever been approved → Apple requires first IAP to ride along
+        // with a new App Store version → every unapproved IAP gets the iris-routed submit
+        // affordance via isFirstTimeSubmission == true.
+        let stub = StubAPIClient()
+        stub.willReturn(InAppPurchasesV2Response(
+            data: [
+                InAppPurchaseV2(type: .inAppPurchases, id: "iap-1", attributes: .init(state: .readyToSubmit)),
+                InAppPurchaseV2(type: .inAppPurchases, id: "iap-2", attributes: .init(state: .missingMetadata)),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKInAppPurchaseRepository(client: stub)
+        let result = try await repo.listInAppPurchases(appId: "app-1", limit: nil)
+
+        #expect(result.data.allSatisfy { $0.isFirstTimeSubmission == true })
+    }
+
+    @Test func `listInAppPurchases marks every IAP not first-time when at least one sibling is approved`() async throws {
+        // App already has an approved IAP → first-IAP gate is cleared → every other IAP
+        // can submit via the public-key path.
+        let stub = StubAPIClient()
+        stub.willReturn(InAppPurchasesV2Response(
+            data: [
+                InAppPurchaseV2(type: .inAppPurchases, id: "iap-shipped", attributes: .init(state: .approved)),
+                InAppPurchaseV2(type: .inAppPurchases, id: "iap-new", attributes: .init(state: .readyToSubmit)),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKInAppPurchaseRepository(client: stub)
+        let result = try await repo.listInAppPurchases(appId: "app-1", limit: nil)
+
+        #expect(result.data.allSatisfy { $0.isFirstTimeSubmission == false })
+    }
+
+    @Test func `listInAppPurchases treats removedFromSale as already-shipped`() async throws {
+        // Once Apple has approved an IAP, removing it from sale doesn't reopen the
+        // first-IAP gate — the app has cleared review for IAPs at least once.
+        let stub = StubAPIClient()
+        stub.willReturn(InAppPurchasesV2Response(
+            data: [
+                InAppPurchaseV2(type: .inAppPurchases, id: "iap-removed", attributes: .init(state: .removedFromSale)),
+                InAppPurchaseV2(type: .inAppPurchases, id: "iap-new", attributes: .init(state: .readyToSubmit)),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKInAppPurchaseRepository(client: stub)
+        let result = try await repo.listInAppPurchases(appId: "app-1", limit: nil)
+
+        let newIAP = try #require(result.data.first { $0.id == "iap-new" })
+        #expect(newIAP.isFirstTimeSubmission == false)
+    }
+
+    @Test func `listInAppPurchases marks empty batch entries first-time vacuously not applied`() async throws {
+        // Edge case: empty batch. Nothing to mark; stays empty.
+        let stub = StubAPIClient()
+        stub.willReturn(InAppPurchasesV2Response(data: [], links: .init(this: "")))
+
+        let repo = SDKInAppPurchaseRepository(client: stub)
+        let result = try await repo.listInAppPurchases(appId: "app-1", limit: nil)
+
+        #expect(result.data.isEmpty)
+    }
+
     // MARK: - createInAppPurchase
 
     @Test func `createInAppPurchase injects appId into response`() async throws {
