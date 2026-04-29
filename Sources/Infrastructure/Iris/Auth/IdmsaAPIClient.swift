@@ -13,8 +13,19 @@ public struct IdmsaAPIClient: Sendable {
     private static let baseURL = "https://idmsa.apple.com/appleauth/auth"
     private static let debugEnabled = ProcessInfo.processInfo.environment["ASC_IRIS_DEBUG"] == "1"
 
-    public init(session: URLSession = .shared, serviceKey: String) {
-        self.session = session
+    public init(session: URLSession? = nil, serviceKey: String) {
+        // Default to URLSession.shared so HTTPCookieStorage.shared automatically threads
+        // cookies. Matches xcodes' working pattern. We *can't* use a private
+        // HTTPCookieStorage — Foundation only exposes `HTTPCookieStorage.shared`; the
+        // `HTTPCookieStorage()` constructor returns a non-functional instance that
+        // silently drops Set-Cookie headers, leaving every continuation request without
+        // session cookies and 401-ing on Apple's side.
+        //
+        // For multi-process flows (`asc iris auth login` then `verify-code` in a
+        // separate process), `seedCookiesIfNeeded(_:forURL:in:)` injects persisted
+        // cookies into HTTPCookieStorage.shared so the second process picks up where
+        // the first left off.
+        self.session = session ?? .shared
         self.serviceKey = serviceKey
     }
 
@@ -116,7 +127,7 @@ public struct IdmsaAPIClient: Sendable {
 
         var extraHeaders: [String: String] = [:]
         if let hashcash { extraHeaders["X-Apple-HC"] = hashcash }
-        if !incomingCookies.isEmpty { extraHeaders["Cookie"] = incomingCookies }
+        Self.seedCookiesIfNeeded(incomingCookies, forURL: url, in: session)
 
         let (_, response) = try await postJSON(
             url: url, body: body, scnt: scnt, sessionID: appleIDSessionID,
@@ -164,9 +175,7 @@ public struct IdmsaAPIClient: Sendable {
         request.setValue(serviceKey, forHTTPHeaderField: "X-Apple-Widget-Key")
         request.setValue(scnt, forHTTPHeaderField: "scnt")
         request.setValue(appleIDSessionID, forHTTPHeaderField: "X-Apple-ID-Session-Id")
-        if !incomingCookies.isEmpty {
-            request.setValue(incomingCookies, forHTTPHeaderField: "Cookie")
-        }
+        Self.seedCookiesIfNeeded(incomingCookies, forURL: url, in: session)
         if Self.debugEnabled { dumpRequest(request, body: nil) }
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else {
@@ -174,9 +183,6 @@ public struct IdmsaAPIClient: Sendable {
         }
         if Self.debugEnabled { dumpResponse(http, data: data) }
         guard (200..<300).contains(http.statusCode) else {
-            // Don't fail the verify flow when auth-options 401s — Apple's behavior here
-            // varies by account. The real signal is what verify/securitycode returns.
-            // Return the same cookies we came in with and let the verify call try.
             FileHandle.standardError.write(
                 Data("[idmsa] auth options returned \(http.statusCode); proceeding to verify anyway\n".utf8)
             )
@@ -217,16 +223,17 @@ public struct IdmsaAPIClient: Sendable {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
-        // Minimal continuation-flow headers (matches fastlane spaceship exactly):
+        // Minimal header set — matches XcodesOrg/xcodes byte-for-byte. NO X-Requested-With
+        // on verify (xcodes drops it for continuation calls — observed to flip 200 → 401
+        // when included), NO OAuth-* / Origin / Referer headers. Cookies are auto-threaded
+        // by URLSession's HTTPCookieStorage; the `incomingCookies` parameter is now only
+        // used to seed storage when crossing process boundaries (kept for API stability).
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("XMLHttpRequest", forHTTPHeaderField: "X-Requested-With")
         request.setValue(serviceKey, forHTTPHeaderField: "X-Apple-Widget-Key")
         request.setValue(scnt, forHTTPHeaderField: "scnt")
         request.setValue(appleIDSessionID, forHTTPHeaderField: "X-Apple-ID-Session-Id")
-        if !incomingCookies.isEmpty {
-            request.setValue(incomingCookies, forHTTPHeaderField: "Cookie")
-        }
+        Self.seedCookiesIfNeeded(incomingCookies, forURL: url, in: session)
 
         if Self.debugEnabled { dumpRequest(request, body: request.httpBody) }
         let (data, urlResponse) = try await session.data(for: request)
@@ -275,9 +282,7 @@ public struct IdmsaAPIClient: Sendable {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"  // trust endpoint is a GET in observed flows
         applyHeaders(to: &request, scnt: scnt, sessionID: appleIDSessionID)
-        if !incomingCookies.isEmpty {
-            request.setValue(incomingCookies, forHTTPHeaderField: "Cookie")
-        }
+        Self.seedCookiesIfNeeded(incomingCookies, forURL: url, in: session)
         if Self.debugEnabled { dumpRequest(request, body: nil) }
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else {
@@ -288,6 +293,39 @@ public struct IdmsaAPIClient: Sendable {
             throw IrisAuthError.networkFailure(message: "2sv/trust HTTP \(http.statusCode)")
         }
         return Self.accumulateCookies(from: http, into: incomingCookies)
+    }
+
+    /// Seeds the URLSession's cookie storage from a persisted `Cookie:` string. Used
+    /// when crossing process boundaries — `asc iris auth verify-code` reads cookies
+    /// the `login` step persisted, then injects them here so URLSession can thread
+    /// them automatically on subsequent requests. Within a single process the auto-
+    /// threading already covers everything; this is purely a multi-process aid.
+    private static func seedCookiesIfNeeded(
+        _ cookieString: String,
+        forURL url: URL,
+        in session: URLSession
+    ) {
+        guard !cookieString.isEmpty else { return }
+        let storage = session.configuration.httpCookieStorage ?? HTTPCookieStorage.shared
+        for pair in cookieString.split(separator: ";") {
+            let kv = pair.trimmingCharacters(in: .whitespaces).split(separator: "=", maxSplits: 1)
+            guard kv.count == 2 else { continue }
+            let name = String(kv[0])
+            let value = String(kv[1])
+            // Only seed if not already present — avoid clobbering fresher cookies
+            // URLSession may have set on a prior in-process request.
+            let existing = storage.cookies(for: url) ?? []
+            if existing.contains(where: { $0.name == name }) { continue }
+            // Apple sets cookies on either `apple.com` (parent) or `idmsa.apple.com`
+            // (host). Without a stored Set-Cookie line we can't know — default to the
+            // host so cookies match the next idmsa request.
+            if let cookie = HTTPCookie(properties: [
+                .name: name, .value: value, .domain: url.host ?? "idmsa.apple.com",
+                .path: "/", .secure: true,
+            ]) {
+                storage.setCookie(cookie)
+            }
+        }
     }
 
     /// Parses `Set-Cookie` headers from `response`, merges them into the existing cookie
@@ -371,6 +409,15 @@ public struct IdmsaAPIClient: Sendable {
                 }
                 dump += "  \(name): \(display)\n"
             }
+        }
+        // URLSession adds Cookie header AT SEND TIME from its storage — these don't
+        // appear via `request.value(forHTTPHeaderField:)` above. Query the cookie
+        // storage directly so the dump reflects what Apple actually sees.
+        if let url = request.url,
+           let storage = self.session.configuration.httpCookieStorage ?? HTTPCookieStorage.shared as HTTPCookieStorage?,
+           let stored = storage.cookies(for: url), !stored.isEmpty {
+            let cookieHeader = stored.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
+            dump += "  (URLSession will add) Cookie: \(cookieHeader)\n"
         }
         if let body, var json = try? JSONSerialization.jsonObject(with: body) as? [String: Any] {
             if json["a"] is String { json["a"] = "<redacted>" }
