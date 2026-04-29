@@ -72,4 +72,8 @@ struct IrisAuthSummaryTests {
         #expect(row[1] == "")
         #expect(row[2] == "")
     }
+
+    @Test func `summary table headers list email, provider, team, and expiry`() {
+        #expect(IrisAuthSummary.tableHeaders == ["Email", "Provider", "Team", "Expires"])
+    }
 }

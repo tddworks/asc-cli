@@ -23,4 +23,22 @@ struct IrisInAppPurchaseSubmissionTests {
         #expect(submission.apiLinks["viewIAP"]?.href == "/api/v1/iap/iap-7")
         #expect(submission.apiLinks["viewIAP"]?.method == "GET")
     }
+
+    @Test func `submission table headers describe id, parent iap, and version binding`() {
+        #expect(IrisInAppPurchaseSubmission.tableHeaders == ["ID", "IAP ID", "With Next Version"])
+    }
+
+    @Test func `submission table row renders with-next-version flag as true`() {
+        let submission = MockRepositoryFactory.makeIrisInAppPurchaseSubmission(
+            id: "sub-42", iapId: "iap-7", submitWithNextAppStoreVersion: true
+        )
+        #expect(submission.tableRow == ["sub-42", "iap-7", "true"])
+    }
+
+    @Test func `submission table row renders with-next-version flag as false`() {
+        let submission = MockRepositoryFactory.makeIrisInAppPurchaseSubmission(
+            id: "sub-42", iapId: "iap-7", submitWithNextAppStoreVersion: false
+        )
+        #expect(submission.tableRow == ["sub-42", "iap-7", "false"])
+    }
 }

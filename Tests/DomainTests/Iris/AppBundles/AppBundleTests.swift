@@ -45,4 +45,32 @@ struct AppBundleTests {
         let decoded = try JSONDecoder().decode(AppBundle.self, from: data)
         #expect(decoded == bundle)
     }
+
+    @Test func `app bundle table headers describe identity and platforms`() {
+        #expect(AppBundle.tableHeaders == ["ID", "Name", "Bundle ID", "SKU", "Platforms"])
+    }
+
+    @Test func `app bundle table row joins multiple platforms with comma`() {
+        let bundle = MockRepositoryFactory.makeAppBundle(
+            id: "app-1",
+            name: "Test",
+            bundleId: "com.test",
+            sku: "SKU1",
+            primaryLocale: "en-US",
+            platforms: ["IOS", "MAC_OS"]
+        )
+        #expect(bundle.tableRow == ["app-1", "Test", "com.test", "SKU1", "IOS,MAC_OS"])
+    }
+
+    @Test func `app bundle table row leaves platforms empty when none declared`() {
+        let bundle = MockRepositoryFactory.makeAppBundle(
+            id: "app-1",
+            name: "Test",
+            bundleId: "com.test",
+            sku: "SKU1",
+            primaryLocale: "en-US",
+            platforms: []
+        )
+        #expect(bundle.tableRow[4] == "")
+    }
 }

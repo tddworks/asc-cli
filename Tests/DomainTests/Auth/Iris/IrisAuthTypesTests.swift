@@ -106,4 +106,45 @@ struct IrisAuthTypesTests {
             Issue.record("expected twoFactorRequired")
         }
     }
+
+    @Test func `two factor required error tells user to run verify-code`() {
+        let pending = PendingTwoFactorState(
+            credentials: IrisAuthCredentials(appleId: "u@x.com", password: "p"),
+            scnt: "s", serviceKey: "k", appleIDSessionID: "a", twoFactorCookieBag: "",
+            challenge: TwoFactorChallenge(method: .trustedDevice, maskedDestination: "Trusted devices", codeLength: 6)
+        )
+        let error = IrisAuthError.twoFactorRequired(pending)
+        #expect(error.errorDescription?.contains("asc iris auth verify-code") == true)
+    }
+
+    @Test func `two factor code rejected with remaining attempts pluralizes correctly`() {
+        let many = IrisAuthError.twoFactorCodeRejected(remainingAttempts: 3)
+        #expect(many.errorDescription == "Two-factor code rejected (3 attempts remaining).")
+    }
+
+    @Test func `two factor code rejected with one remaining attempt is singular`() {
+        let one = IrisAuthError.twoFactorCodeRejected(remainingAttempts: 1)
+        #expect(one.errorDescription == "Two-factor code rejected (1 attempt remaining).")
+    }
+
+    @Test func `two factor code rejected omits attempts phrasing when unknown`() {
+        let unknown = IrisAuthError.twoFactorCodeRejected(remainingAttempts: nil)
+        #expect(unknown.errorDescription == "Two-factor code rejected.")
+    }
+
+    @Test func `apple prompt required error points user at the browser`() {
+        let error = IrisAuthError.applePromptRequired
+        #expect(error.errorDescription?.contains("appstoreconnect.apple.com") == true)
+    }
+
+    @Test func `session expired error tells user to re-run iris auth login`() {
+        let error = IrisAuthError.sessionExpired
+        #expect(error.errorDescription?.contains("asc iris auth login") == true)
+    }
+
+    @Test func `network failure error surfaces underlying message`() {
+        let error = IrisAuthError.networkFailure(message: "connection reset")
+        #expect(error.errorDescription?.contains("connection reset") == true)
+        #expect(error.errorDescription?.contains("idmsa.apple.com") == true)
+    }
 }
