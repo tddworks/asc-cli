@@ -90,6 +90,10 @@ enum RESTRoutes {
         if let iapSubmissionRepo = try? factory.makeInAppPurchaseSubmissionRepository(authProvider: auth) {
             IAPSubmissionController(repo: iapSubmissionRepo).addRoutes(to: v1)
         }
+        IrisIAPSubmissionsController(
+            cookieProvider: factory.makeIrisCookieProvider(),
+            repo: factory.makeIrisInAppPurchaseSubmissionRepository()
+        ).addRoutes(to: v1)
         if let subSubmissionRepo = try? factory.makeSubscriptionSubmissionRepository(authProvider: auth) {
             SubscriptionSubmissionController(repo: subSubmissionRepo).addRoutes(to: v1)
         }

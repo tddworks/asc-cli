@@ -929,6 +929,30 @@ struct RESTRoutesTests {
         #expect(normalized.contains("/api/v1/subscriptions/sub-7/offer-codes"))
     }
 
+    @Test func `iris iap-submissions create returns _links pointing at the parent IAP`() async throws {
+        let mockCookieProvider = MockIrisCookieProvider()
+        given(mockCookieProvider).resolveSession().willReturn(IrisSession(cookies: "myacinfo=test"))
+
+        let mockRepo = MockIrisInAppPurchaseSubmissionRepository()
+        given(mockRepo).submitInAppPurchase(
+            session: .any, iapId: .any, submitWithNextAppStoreVersion: .any
+        ).willReturn(
+            IrisInAppPurchaseSubmission(id: "sub-9", iapId: "iap-7", submitWithNextAppStoreVersion: true)
+        )
+
+        let cmd = try IrisIAPSubmissionsCreate.parse(["--iap-id", "iap-7", "--pretty"])
+        let output = try await cmd.execute(
+            cookieProvider: mockCookieProvider, repo: mockRepo, affordanceMode: .rest
+        )
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        // The viewIAP affordance resolves to the public IAP REST resource — this is the
+        // forward link an agent would follow after a successful iris submission.
+        #expect(normalized.contains("/api/v1/iap/iap-7"))
+        #expect(!normalized.contains("\"affordances\""))
+    }
+
     @Test func `subscription introductory offers list REST exposes nested path under subscription`() async throws {
         let mockRepo = MockSubscriptionIntroductoryOfferRepository()
         given(mockRepo).listIntroductoryOffers(subscriptionId: .any).willReturn([

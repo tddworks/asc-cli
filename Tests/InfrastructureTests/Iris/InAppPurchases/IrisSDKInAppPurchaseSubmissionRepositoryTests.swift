@@ -19,21 +19,51 @@ private func collectBody(from request: URLRequest) -> Data? {
     return collected
 }
 
+/// Private URLProtocol subclass with its own `handler` static so this suite's stubs
+/// can't race with `URLProtocolStub`'s handler from `IdmsaAPIClientTests`. Sharing
+/// the same static across suites caused intermittent `signin/init` parse failures
+/// when the two suites ran in parallel.
+final class IrisSubmissionsURLProtocolStub: URLProtocol, @unchecked Sendable {
+    nonisolated(unsafe) static var handler: (@Sendable (URLRequest) -> (HTTPURLResponse, Data))?
+
+    static func makeSession() -> URLSession {
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [IrisSubmissionsURLProtocolStub.self]
+        return URLSession(configuration: config)
+    }
+
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+    override func startLoading() {
+        guard let handler = IrisSubmissionsURLProtocolStub.handler else {
+            client?.urlProtocol(self, didFailWithError: URLError(.badServerResponse))
+            return
+        }
+        let (response, data) = handler(request)
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: data)
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
+}
+
 @Suite(.serialized)
 struct IrisSDKInAppPurchaseSubmissionRepositoryTests {
 
     @Test func `submitInAppPurchase posts JSON-API body with submitWithNextAppStoreVersion attribute`() async throws {
         let captured = CapturedBody()
-        URLProtocolStub.handler = { request in
+        IrisSubmissionsURLProtocolStub.handler = { request in
             captured.set(collectBody(from: request))
             let body = Data(#"{"data":{"id":"sub-9","type":"inAppPurchaseSubmissions"}}"#.utf8)
             let response = HTTPURLResponse(
-                url: request.url!, statusCode: 201, httpVersion: nil, headerFields: nil
+                url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil
             )!
             return (response, body)
         }
 
-        let client = IrisClient(session: URLProtocolStub.makeSession())
+        let client = IrisClient(session: IrisSubmissionsURLProtocolStub.makeSession())
         let repo = IrisSDKInAppPurchaseSubmissionRepository(client: client)
         _ = try await repo.submitInAppPurchase(
             session: IrisSession(cookies: "myacinfo=ABC"),
@@ -54,15 +84,15 @@ struct IrisSDKInAppPurchaseSubmissionRepositoryTests {
     }
 
     @Test func `submitInAppPurchase returns submission with iapId injected from request`() async throws {
-        URLProtocolStub.handler = { request in
+        IrisSubmissionsURLProtocolStub.handler = { request in
             let body = Data(#"{"data":{"id":"sub-9","type":"inAppPurchaseSubmissions"}}"#.utf8)
             let response = HTTPURLResponse(
-                url: request.url!, statusCode: 201, httpVersion: nil, headerFields: nil
+                url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil
             )!
             return (response, body)
         }
 
-        let client = IrisClient(session: URLProtocolStub.makeSession())
+        let client = IrisClient(session: IrisSubmissionsURLProtocolStub.makeSession())
         let repo = IrisSDKInAppPurchaseSubmissionRepository(client: client)
         let submission = try await repo.submitInAppPurchase(
             session: IrisSession(cookies: "myacinfo=ABC"),
@@ -78,16 +108,16 @@ struct IrisSDKInAppPurchaseSubmissionRepositoryTests {
 
     @Test func `submitInAppPurchase posts to iris inAppPurchaseSubmissions endpoint`() async throws {
         let capturedURL = CapturedBody()
-        URLProtocolStub.handler = { request in
+        IrisSubmissionsURLProtocolStub.handler = { request in
             capturedURL.set(Data(request.url!.absoluteString.utf8))
             let body = Data(#"{"data":{"id":"sub-9","type":"inAppPurchaseSubmissions"}}"#.utf8)
             let response = HTTPURLResponse(
-                url: request.url!, statusCode: 201, httpVersion: nil, headerFields: nil
+                url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil
             )!
             return (response, body)
         }
 
-        let client = IrisClient(session: URLProtocolStub.makeSession())
+        let client = IrisClient(session: IrisSubmissionsURLProtocolStub.makeSession())
         let repo = IrisSDKInAppPurchaseSubmissionRepository(client: client)
         _ = try await repo.submitInAppPurchase(
             session: IrisSession(cookies: "myacinfo=ABC"),
