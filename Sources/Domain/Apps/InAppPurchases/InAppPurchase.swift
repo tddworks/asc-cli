@@ -1,4 +1,4 @@
-public struct InAppPurchase: Sendable, Codable, Equatable, Identifiable {
+public struct InAppPurchase: Sendable, Equatable, Identifiable {
     public let id: String
     /// Parent app identifier — injected by Infrastructure since ASC API omits it from response
     public let appId: String
@@ -6,6 +6,7 @@ public struct InAppPurchase: Sendable, Codable, Equatable, Identifiable {
     public let productId: String
     public let type: InAppPurchaseType
     public let state: InAppPurchaseState
+    public let reviewNote: String?
 
     public init(
         id: String,
@@ -13,7 +14,8 @@ public struct InAppPurchase: Sendable, Codable, Equatable, Identifiable {
         referenceName: String,
         productId: String,
         type: InAppPurchaseType,
-        state: InAppPurchaseState
+        state: InAppPurchaseState,
+        reviewNote: String? = nil
     ) {
         self.id = id
         self.appId = appId
@@ -21,6 +23,35 @@ public struct InAppPurchase: Sendable, Codable, Equatable, Identifiable {
         self.productId = productId
         self.type = type
         self.state = state
+        self.reviewNote = reviewNote
+    }
+}
+
+extension InAppPurchase: Codable {
+    enum CodingKeys: String, CodingKey {
+        case id, appId, referenceName, productId, type, state, reviewNote
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        appId = try c.decode(String.self, forKey: .appId)
+        referenceName = try c.decode(String.self, forKey: .referenceName)
+        productId = try c.decode(String.self, forKey: .productId)
+        type = try c.decode(InAppPurchaseType.self, forKey: .type)
+        state = try c.decode(InAppPurchaseState.self, forKey: .state)
+        reviewNote = try c.decodeIfPresent(String.self, forKey: .reviewNote)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(appId, forKey: .appId)
+        try c.encode(referenceName, forKey: .referenceName)
+        try c.encode(productId, forKey: .productId)
+        try c.encode(type, forKey: .type)
+        try c.encode(state, forKey: .state)
+        try c.encodeIfPresent(reviewNote, forKey: .reviewNote)
     }
 }
 

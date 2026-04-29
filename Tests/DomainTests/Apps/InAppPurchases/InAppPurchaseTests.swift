@@ -1,8 +1,40 @@
+import Foundation
 import Testing
 @testable import Domain
 
 @Suite
 struct InAppPurchaseTests {
+
+    // MARK: - Review note (read-side)
+
+    @Test func `iap carries reviewNote when set`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase(reviewNote: "Use code TEST")
+        #expect(iap.reviewNote == "Use code TEST")
+    }
+
+    @Test func `iap reviewNote is nil by default`() {
+        let iap = MockRepositoryFactory.makeInAppPurchase()
+        #expect(iap.reviewNote == nil)
+    }
+
+    @Test func `iap with nil reviewNote omits it from JSON`() throws {
+        let iap = MockRepositoryFactory.makeInAppPurchase(reviewNote: nil)
+        let json = String(decoding: try JSONEncoder().encode(iap), as: UTF8.self)
+        #expect(!json.contains("reviewNote"))
+    }
+
+    @Test func `iap with reviewNote encodes it in JSON`() throws {
+        let iap = MockRepositoryFactory.makeInAppPurchase(reviewNote: "Use code TEST")
+        let json = String(decoding: try JSONEncoder().encode(iap), as: UTF8.self)
+        #expect(json.contains("\"reviewNote\":\"Use code TEST\""))
+    }
+
+    @Test func `iap roundtrips reviewNote through Codable`() throws {
+        let iap = MockRepositoryFactory.makeInAppPurchase(reviewNote: "Use code TEST")
+        let data = try JSONEncoder().encode(iap)
+        let decoded = try JSONDecoder().decode(InAppPurchase.self, from: data)
+        #expect(decoded.reviewNote == "Use code TEST")
+    }
 
     @Test func `iap carries appId and productId`() {
         let iap = MockRepositoryFactory.makeInAppPurchase(id: "iap-1", appId: "app-1", productId: "com.app.gold")

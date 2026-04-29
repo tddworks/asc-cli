@@ -87,7 +87,8 @@ public struct SDKSubscriptionRepository: SubscriptionRepository, @unchecked Send
             subscriptionPeriod: period,
             isFamilySharable: sdk.attributes?.isFamilySharable ?? false,
             state: state,
-            groupLevel: sdk.attributes?.groupLevel
+            groupLevel: sdk.attributes?.groupLevel,
+            reviewNote: sdk.attributes?.reviewNote
         )
     }
 }

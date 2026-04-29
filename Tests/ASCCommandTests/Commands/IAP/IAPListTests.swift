@@ -53,6 +53,27 @@ struct IAPListTests {
         """)
     }
 
+    @Test func `listed iap with reviewNote surfaces it in JSON output`() async throws {
+        let mockRepo = MockInAppPurchaseRepository()
+        given(mockRepo).listInAppPurchases(appId: .any, limit: .any)
+            .willReturn(PaginatedResponse(data: [
+                InAppPurchase(
+                    id: "iap-1",
+                    appId: "app-1",
+                    referenceName: "Gold Coins",
+                    productId: "com.app.gold",
+                    type: .consumable,
+                    state: .missingMetadata,
+                    reviewNote: "Use code TEST"
+                )
+            ], nextCursor: nil))
+
+        let cmd = try IAPList.parse(["--app-id", "app-1"])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output.contains("\"reviewNote\":\"Use code TEST\""))
+    }
+
     @Test func `table output includes all row fields`() async throws {
         let mockRepo = MockInAppPurchaseRepository()
         given(mockRepo).listInAppPurchases(appId: .any, limit: .any)

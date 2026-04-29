@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **`reviewNote` now read-side on `InAppPurchase` and `Subscription`** — the field was previously write-only via `asc iap update --review-note` / `asc subscriptions update --review-note`. List/get responses now expose `reviewNote: String?` so an agent (or web UI like AppNexus's IAP/Subscription review tabs) can read the existing value without a separate fetch. SDK mappers thread `attributes.reviewNote` from `InAppPurchaseV2` and `Subscription` SDK responses; nil values are omitted from JSON output via `encodeIfPresent`. Existing JSON snapshots stay byte-identical when no review note is set.
+
 ### Fixed
 - **`PATCH /api/v1/iap/{iapId}/availability` returned 404** — the route was never registered, so the web frontend's "save territories" call failed. `IAPAvailabilityController` now serves `PATCH` with body `{territoryIds, availableInNewTerritories}` and routes through `repo.createAvailability` (ASC's `POST /v1/inAppPurchaseAvailabilities` upserts — there is no separate update endpoint).
 

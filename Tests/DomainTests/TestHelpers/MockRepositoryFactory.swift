@@ -379,7 +379,8 @@ struct MockRepositoryFactory {
         referenceName: String = "Gold Coins",
         productId: String = "com.app.gold",
         type: InAppPurchaseType = .consumable,
-        state: InAppPurchaseState = .missingMetadata
+        state: InAppPurchaseState = .missingMetadata,
+        reviewNote: String? = nil
     ) -> InAppPurchase {
         InAppPurchase(
             id: id,
@@ -387,7 +388,8 @@ struct MockRepositoryFactory {
             referenceName: referenceName,
             productId: productId,
             type: type,
-            state: state
+            state: state,
+            reviewNote: reviewNote
         )
     }
 
@@ -510,7 +512,8 @@ struct MockRepositoryFactory {
         subscriptionPeriod: SubscriptionPeriod = .oneMonth,
         isFamilySharable: Bool = false,
         state: SubscriptionState = .missingMetadata,
-        groupLevel: Int? = nil
+        groupLevel: Int? = nil,
+        reviewNote: String? = nil
     ) -> Subscription {
         Subscription(
             id: id,
@@ -520,7 +523,8 @@ struct MockRepositoryFactory {
             subscriptionPeriod: subscriptionPeriod,
             isFamilySharable: isFamilySharable,
             state: state,
-            groupLevel: groupLevel
+            groupLevel: groupLevel,
+            reviewNote: reviewNote
         )
     }
 

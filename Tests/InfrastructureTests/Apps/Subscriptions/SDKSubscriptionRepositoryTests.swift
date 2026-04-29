@@ -57,6 +57,36 @@ struct SDKSubscriptionRepositoryTests {
         #expect(result.data[0].subscriptionPeriod == .oneMonth)
     }
 
+    @Test func `listSubscriptions maps reviewNote from SDK attributes`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(SubscriptionsResponse(
+            data: [
+                AppStoreConnect_Swift_SDK.Subscription(type: .subscriptions, id: "sub-1", attributes: .init(reviewNote: "Use code TEST")),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKSubscriptionRepository(client: stub)
+        let result = try await repo.listSubscriptions(groupId: "grp-1", limit: nil)
+
+        #expect(result.data[0].reviewNote == "Use code TEST")
+    }
+
+    @Test func `listSubscriptions maps nil reviewNote when SDK omits it`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(SubscriptionsResponse(
+            data: [
+                AppStoreConnect_Swift_SDK.Subscription(type: .subscriptions, id: "sub-1", attributes: .init(name: "Monthly")),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKSubscriptionRepository(client: stub)
+        let result = try await repo.listSubscriptions(groupId: "grp-1", limit: nil)
+
+        #expect(result.data[0].reviewNote == nil)
+    }
+
     @Test func `listSubscriptions maps isFamilySharable from SDK attributes`() async throws {
         let stub = StubAPIClient()
         stub.willReturn(SubscriptionsResponse(

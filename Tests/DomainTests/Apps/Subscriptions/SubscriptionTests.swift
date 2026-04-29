@@ -1,8 +1,40 @@
+import Foundation
 import Testing
 @testable import Domain
 
 @Suite
 struct SubscriptionTests {
+
+    // MARK: - Review note (read-side)
+
+    @Test func `subscription carries reviewNote when set`() {
+        let sub = MockRepositoryFactory.makeSubscription(reviewNote: "Use code TEST")
+        #expect(sub.reviewNote == "Use code TEST")
+    }
+
+    @Test func `subscription reviewNote is nil by default`() {
+        let sub = MockRepositoryFactory.makeSubscription()
+        #expect(sub.reviewNote == nil)
+    }
+
+    @Test func `subscription with nil reviewNote omits it from JSON`() throws {
+        let sub = MockRepositoryFactory.makeSubscription(reviewNote: nil)
+        let json = String(decoding: try JSONEncoder().encode(sub), as: UTF8.self)
+        #expect(!json.contains("reviewNote"))
+    }
+
+    @Test func `subscription with reviewNote encodes it in JSON`() throws {
+        let sub = MockRepositoryFactory.makeSubscription(reviewNote: "Use code TEST")
+        let json = String(decoding: try JSONEncoder().encode(sub), as: UTF8.self)
+        #expect(json.contains("\"reviewNote\":\"Use code TEST\""))
+    }
+
+    @Test func `subscription roundtrips reviewNote through Codable`() throws {
+        let sub = MockRepositoryFactory.makeSubscription(reviewNote: "Use code TEST")
+        let data = try JSONEncoder().encode(sub)
+        let decoded = try JSONDecoder().decode(Subscription.self, from: data)
+        #expect(decoded.reviewNote == "Use code TEST")
+    }
 
     @Test func `subscription group carries appId`() {
         let group = MockRepositoryFactory.makeSubscriptionGroup(id: "grp-1", appId: "app-1")

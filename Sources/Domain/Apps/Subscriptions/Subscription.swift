@@ -8,6 +8,7 @@ public struct Subscription: Sendable, Equatable, Identifiable {
     public let isFamilySharable: Bool
     public let state: SubscriptionState
     public let groupLevel: Int?
+    public let reviewNote: String?
 
     public init(
         id: String,
@@ -17,7 +18,8 @@ public struct Subscription: Sendable, Equatable, Identifiable {
         subscriptionPeriod: SubscriptionPeriod,
         isFamilySharable: Bool = false,
         state: SubscriptionState,
-        groupLevel: Int? = nil
+        groupLevel: Int? = nil,
+        reviewNote: String? = nil
     ) {
         self.id = id
         self.groupId = groupId
@@ -27,6 +29,7 @@ public struct Subscription: Sendable, Equatable, Identifiable {
         self.isFamilySharable = isFamilySharable
         self.state = state
         self.groupLevel = groupLevel
+        self.reviewNote = reviewNote
     }
 }
 
@@ -72,7 +75,7 @@ public enum SubscriptionState: String, Sendable, Codable, Equatable {
 
 extension Subscription: Codable {
     enum CodingKeys: String, CodingKey {
-        case id, groupId, name, productId, subscriptionPeriod, isFamilySharable, state, groupLevel
+        case id, groupId, name, productId, subscriptionPeriod, isFamilySharable, state, groupLevel, reviewNote
     }
 
     public init(from decoder: any Decoder) throws {
@@ -85,6 +88,7 @@ extension Subscription: Codable {
         isFamilySharable = try c.decode(Bool.self, forKey: .isFamilySharable)
         state = try c.decode(SubscriptionState.self, forKey: .state)
         groupLevel = try c.decodeIfPresent(Int.self, forKey: .groupLevel)
+        reviewNote = try c.decodeIfPresent(String.self, forKey: .reviewNote)
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -97,6 +101,7 @@ extension Subscription: Codable {
         try c.encode(isFamilySharable, forKey: .isFamilySharable)
         try c.encode(state, forKey: .state)
         try c.encodeIfPresent(groupLevel, forKey: .groupLevel)
+        try c.encodeIfPresent(reviewNote, forKey: .reviewNote)
     }
 }
 

@@ -73,7 +73,8 @@ public struct SDKInAppPurchaseRepository: InAppPurchaseRepository, @unchecked Se
             referenceName: sdk.attributes?.name ?? "",
             productId: sdk.attributes?.productID ?? "",
             type: mapFromSDKType(sdk.attributes?.inAppPurchaseType) ?? .consumable,
-            state: mapState(sdk.attributes?.state)
+            state: mapState(sdk.attributes?.state),
+            reviewNote: sdk.attributes?.reviewNote
         )
     }
 

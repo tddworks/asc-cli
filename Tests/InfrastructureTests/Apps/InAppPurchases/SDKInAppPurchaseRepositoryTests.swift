@@ -68,6 +68,32 @@ struct SDKInAppPurchaseRepositoryTests {
         #expect(result.data[0].type == .nonConsumable)
     }
 
+    @Test func `listInAppPurchases maps reviewNote from SDK attributes`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(InAppPurchasesV2Response(
+            data: [InAppPurchaseV2(type: .inAppPurchases, id: "iap-1", attributes: .init(reviewNote: "Use code TEST"))],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKInAppPurchaseRepository(client: stub)
+        let result = try await repo.listInAppPurchases(appId: "app-1", limit: nil)
+
+        #expect(result.data[0].reviewNote == "Use code TEST")
+    }
+
+    @Test func `listInAppPurchases maps nil reviewNote when SDK omits it`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(InAppPurchasesV2Response(
+            data: [InAppPurchaseV2(type: .inAppPurchases, id: "iap-1", attributes: .init(name: "Gold"))],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKInAppPurchaseRepository(client: stub)
+        let result = try await repo.listInAppPurchases(appId: "app-1", limit: nil)
+
+        #expect(result.data[0].reviewNote == nil)
+    }
+
     @Test func `listInAppPurchases maps state from SDK response`() async throws {
         let stub = StubAPIClient()
         stub.willReturn(InAppPurchasesV2Response(

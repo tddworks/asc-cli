@@ -60,6 +60,28 @@ struct SubscriptionsListTests {
         """)
     }
 
+    @Test func `listed subscription with reviewNote surfaces it in JSON output`() async throws {
+        let mockRepo = MockSubscriptionRepository()
+        given(mockRepo).listSubscriptions(groupId: .any, limit: .any)
+            .willReturn(PaginatedResponse(data: [
+                Subscription(
+                    id: "sub-1",
+                    groupId: "grp-1",
+                    name: "Monthly Premium",
+                    productId: "com.app.monthly",
+                    subscriptionPeriod: .oneMonth,
+                    isFamilySharable: false,
+                    state: .missingMetadata,
+                    reviewNote: "Use code TEST"
+                )
+            ], nextCursor: nil))
+
+        let cmd = try SubscriptionsList.parse(["--group-id", "grp-1"])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output.contains("\"reviewNote\":\"Use code TEST\""))
+    }
+
     @Test func `table output includes all row fields`() async throws {
         let mockRepo = MockSubscriptionRepository()
         given(mockRepo).listSubscriptions(groupId: .any, limit: .any)
