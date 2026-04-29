@@ -28,6 +28,12 @@ public struct IdmsaAPIClient: Sendable {
         public let protocolType: AppleSRPClient.AppleProtocol
         public let scnt: String
         public let appleIDSessionID: String
+        /// Apple bundles the hashcash challenge in the `signin/init` response headers
+        /// (`X-Apple-HC-Challenge` + `X-Apple-HC-Bits`). The challenge is bound to the
+        /// same session as the `scnt` / `appleIDSessionID` returned here — using a
+        /// challenge from any *other* request will fail `signin/complete` with 401.
+        public let hashcashChallenge: String?
+        public let hashcashBits: Int?
     }
 
     public func signinInit(accountName: String, A: Data) async throws -> SigninInitResponse {
@@ -54,9 +60,12 @@ public struct IdmsaAPIClient: Sendable {
         }
         let scnt = response.value(forHTTPHeaderField: "scnt") ?? ""
         let sessionID = response.value(forHTTPHeaderField: "X-Apple-ID-Session-Id") ?? ""
+        let hashcashChallenge = response.value(forHTTPHeaderField: "X-Apple-HC-Challenge")
+        let hashcashBits = response.value(forHTTPHeaderField: "X-Apple-HC-Bits").flatMap(Int.init)
         return SigninInitResponse(
             iteration: iteration, salt: salt, b: b, c: c,
-            protocolType: proto, scnt: scnt, appleIDSessionID: sessionID
+            protocolType: proto, scnt: scnt, appleIDSessionID: sessionID,
+            hashcashChallenge: hashcashChallenge, hashcashBits: hashcashBits
         )
     }
 
@@ -71,7 +80,8 @@ public struct IdmsaAPIClient: Sendable {
 
     public func signinComplete(
         accountName: String, c: String, m1: Data, m2: Data,
-        scnt: String, appleIDSessionID: String
+        scnt: String, appleIDSessionID: String,
+        hashcashChallenge: String?, hashcashBits: Int?
     ) async throws -> SigninCompleteResult {
         let body: [String: Any] = [
             "accountName": accountName,
@@ -81,7 +91,22 @@ public struct IdmsaAPIClient: Sendable {
             "rememberMe": true,
         ]
         let url = URL(string: "\(Self.baseURL)/signin/complete?isRememberMeEnabled=true")!
-        let (_, response) = try await postJSON(url: url, body: body, scnt: scnt, sessionID: appleIDSessionID)
+
+        // The hashcash challenge MUST come from the same `signin/init` response that
+        // produced our `scnt` and `appleIDSessionID`. Computing one from any other
+        // request opens a different Apple session, and `signin/complete` will return
+        // 401 with code -20101 ("Incorrect Apple Account email or password").
+        let hashcash: String?
+        if let challenge = hashcashChallenge, let bits = hashcashBits {
+            hashcash = AppleHashcash.compute(challenge: challenge, bits: bits)
+        } else {
+            hashcash = nil
+        }
+
+        let (_, response) = try await postJSON(
+            url: url, body: body, scnt: scnt, sessionID: appleIDSessionID,
+            extraHeaders: hashcash.map { ["X-Apple-HC": $0] } ?? [:]
+        )
 
         let respScnt = response.value(forHTTPHeaderField: "scnt") ?? scnt
         let respSession = response.value(forHTTPHeaderField: "X-Apple-ID-Session-Id") ?? appleIDSessionID
@@ -162,12 +187,14 @@ public struct IdmsaAPIClient: Sendable {
         url: URL,
         body: [String: Any],
         scnt: String?,
-        sessionID: String?
+        sessionID: String?,
+        extraHeaders: [String: String] = [:]
     ) async throws -> (Data, HTTPURLResponse) {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         applyHeaders(to: &request, scnt: scnt, sessionID: sessionID)
+        for (name, value) in extraHeaders { request.setValue(value, forHTTPHeaderField: name) }
 
         if Self.debugEnabled { dumpRequest(request, body: request.httpBody) }
 
@@ -180,9 +207,13 @@ public struct IdmsaAPIClient: Sendable {
         return (data, http)
     }
 
+
     private func applyHeaders(to request: inout URLRequest, scnt: String?, sessionID: String?) {
         request.setValue("application/json, text/javascript", forHTTPHeaderField: "Accept")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        // `XMLHttpRequest` is the Origin signal Apple's idmsa expects for web flows;
+        // missing this header has been observed to flip 200 → 401 on edge cases.
+        request.setValue("XMLHttpRequest", forHTTPHeaderField: "X-Requested-With")
         request.setValue(serviceKey, forHTTPHeaderField: "X-Apple-Widget-Key")
         request.setValue(serviceKey, forHTTPHeaderField: "X-Apple-OAuth-Client-Id")
         request.setValue("https://idmsa.apple.com", forHTTPHeaderField: "X-Apple-OAuth-Redirect-URI")
@@ -210,11 +241,25 @@ public struct IdmsaAPIClient: Sendable {
 
     private func dumpResponse(_ response: HTTPURLResponse, data: Data) {
         var dump = "[idmsa] ← \(response.statusCode) \(response.url?.path ?? "?")\n"
+        // Print the headers we actually care about for the SRP+hashcash flow so the
+        // dump is self-sufficient when sharing for debugging.
+        let interestingHeaders = [
+            "X-Apple-HC-Challenge", "X-Apple-HC-Bits", "scnt", "X-Apple-ID-Session-Id",
+            "Set-Cookie", "Content-Type",
+        ]
+        for name in interestingHeaders {
+            if let value = response.value(forHTTPHeaderField: name) {
+                dump += "  \(name): \(value)\n"
+            }
+        }
         if let pretty = try? JSONSerialization.jsonObject(with: data),
            let formatted = try? JSONSerialization.data(withJSONObject: pretty, options: [.prettyPrinted]) {
             dump += String(decoding: formatted, as: UTF8.self) + "\n"
-        } else if !data.isEmpty {
+        } else if !data.isEmpty, data.count < 4096 {
+            // Avoid dumping multi-KB HTML pages; clip if needed.
             dump += String(decoding: data, as: UTF8.self) + "\n"
+        } else if !data.isEmpty {
+            dump += "<\(data.count)-byte body, suppressed>\n"
         }
         FileHandle.standardError.write(Data(dump.utf8))
     }

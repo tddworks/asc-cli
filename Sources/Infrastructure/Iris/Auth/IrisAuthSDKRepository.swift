@@ -38,7 +38,9 @@ public struct IrisAuthSDKRepository: IrisAuthRepository, @unchecked Sendable {
             m1: completion.m1,
             m2: completion.m2Expected,
             scnt: initResponse.scnt,
-            appleIDSessionID: initResponse.appleIDSessionID
+            appleIDSessionID: initResponse.appleIDSessionID,
+            hashcashChallenge: initResponse.hashcashChallenge,
+            hashcashBits: initResponse.hashcashBits
         )
 
         switch result {
