@@ -2,6 +2,21 @@
 
 Review screenshots (one per IAP/subscription) and 1024×1024 promotional images (multiple per IAP). All uploads go through ASC's standard reserve → upload chunks → commit-with-MD5 protocol on top of `URLSession`.
 
+## REST surface (parent resource)
+
+`InAppPurchase` and `Subscription` advertise `getReviewScreenshot`, `uploadReviewScreenshot`, `listImages`, and `uploadImage` so a fresh agent or UI can discover the full review-asset workflow from the parent resource.
+
+| Verb | Path | Body | Returns |
+|------|------|------|---------|
+| `GET` | `/api/v1/iap/:iapId/review-screenshot` | — | review screenshot or `{data: []}` |
+| `POST` | `/api/v1/iap/:iapId/review-screenshot` | image bytes (Content-Type `image/png`, `image/jpeg`, …) | uploaded screenshot |
+| `GET` | `/api/v1/iap/:iapId/images` | — | promotional images |
+| `POST` | `/api/v1/iap/:iapId/images` | image bytes | uploaded image |
+
+Subscription mirrors: replace `iap/:iapId` with `subscriptions/:subscriptionId`.
+
+The `POST` body is the raw image (no multipart). 20MB ceiling. Body is spooled to a temp file before delegating to the existing `uploadReviewScreenshot` / `uploadImage` repository methods.
+
 ## CLI commands
 
 ### IAP review screenshot (singleton)

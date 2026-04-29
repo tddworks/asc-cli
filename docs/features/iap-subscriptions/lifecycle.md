@@ -41,6 +41,15 @@ Symmetric `update` / `delete` / `unsubmit` across in-app-purchase and subscripti
 | `asc subscription-groups update --group-id <id> --reference-name <n>` | both |
 | `asc subscription-groups delete --group-id <id>` | `--group-id` |
 
+### REST surface (subscription group localizations)
+
+| Verb | Path | Body |
+|------|------|------|
+| `GET` | `/api/v1/subscription-groups/:groupId/subscription-group-localizations` | — |
+| `POST` | `/api/v1/subscription-groups/:groupId/subscription-group-localizations` | `{locale, name, customAppName?}` |
+| `PATCH` | `/api/v1/subscription-group-localizations/:localizationId` | `{name?, customAppName?}` |
+| `DELETE` | `/api/v1/subscription-group-localizations/:localizationId` | — |
+
 ### Introductory offers
 
 | Command | Required flags |

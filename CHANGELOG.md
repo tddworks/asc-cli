@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **REST `POST` / `PATCH` / `DELETE` for subscription group localizations** — `SubscriptionGroupLocalizationsController` previously exposed only `GET`, so `POST /api/v1/subscription-groups/:groupId/subscription-group-localizations` (the call the AppNexus web UI emits when creating a new locale) returned 404. Now wired:
+  - `POST /api/v1/subscription-groups/:groupId/subscription-group-localizations` — body `{locale, name, customAppName?}`.
+  - `PATCH /api/v1/subscription-group-localizations/:localizationId` — body `{name?, customAppName?}`.
+  - `DELETE /api/v1/subscription-group-localizations/:localizationId` — returns `{"deleted": true}`.
+- **`uploadReviewScreenshot` and `uploadImage` affordances on `InAppPurchase` and `Subscription`** — until now an agent looking at an IAP or subscription with no review screenshot had no `_links` path to discover the upload command. The four new affordances close that gap (CLI surface, REST `_links`, REST endpoints).
+- **REST upload endpoints (raw body)** — `POST /api/v1/iap/:iapId/review-screenshot`, `POST /api/v1/iap/:iapId/images`, `POST /api/v1/subscriptions/:subscriptionId/review-screenshot`, `POST /api/v1/subscriptions/:subscriptionId/images`. Send the image bytes as the request body (Content-Type `image/png`, `image/jpeg`, etc.); body is spooled to a temp file and uploaded through the existing `uploadReviewScreenshot` / `uploadImage` repository methods. 20MB body ceiling. Same path as the `GET` collection — verb selects read vs. upload.
+
 ### Changed
+- **`upload` action resolves to bare collection path in REST** — `RESTPathResolver` now treats `upload` like `get/update/delete` (no extra suffix) so an upload `_links` href is `/api/v1/iap/:iapId/review-screenshot` (POST), not `/...review-screenshot/upload`. Standard REST: the verb carries the intent, the path names the resource.
 - **`reviewNote` now read-side on `InAppPurchase` and `Subscription`** — the field was previously write-only via `asc iap update --review-note` / `asc subscriptions update --review-note`. List/get responses now expose `reviewNote: String?` so an agent (or web UI like AppNexus's IAP/Subscription review tabs) can read the existing value without a separate fetch. SDK mappers thread `attributes.reviewNote` from `InAppPurchaseV2` and `Subscription` SDK responses; nil values are omitted from JSON output via `encodeIfPresent`. Existing JSON snapshots stay byte-identical when no review note is set.
 
 ---
