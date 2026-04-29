@@ -187,6 +187,12 @@ public struct IdmsaAPIClient: Sendable {
 
     /// Submits the 6-digit code and returns the updated cookie bag (Apple may set
     /// extra cookies on success). Cookies must be echoed on the subsequent `trust` call.
+    ///
+    /// **Header set is deliberately minimal** — matching fastlane's spaceship to the byte.
+    /// Sending the OAuth-* / Origin / Referer headers our SRP endpoints use here flips
+    /// 200 → 401 on Apple's verify endpoint with no useful service error in the body.
+    /// The verify endpoint is part of Apple's "continuation" flow and only wants the
+    /// scnt + sessionId + widget-key + cookies that bind us to the post-SRP session.
     public func submitTwoFactorCode(
         _ code: String,
         method: TwoFactorMethod,
@@ -208,13 +214,26 @@ public struct IdmsaAPIClient: Sendable {
             body = ["securityCode": ["code": code], "phoneNumber": ["id": 1], "mode": "sms"]
         }
 
-        var extraHeaders: [String: String] = [:]
-        if !incomingCookies.isEmpty { extraHeaders["Cookie"] = incomingCookies }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        // Minimal continuation-flow headers (matches fastlane spaceship exactly):
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("XMLHttpRequest", forHTTPHeaderField: "X-Requested-With")
+        request.setValue(serviceKey, forHTTPHeaderField: "X-Apple-Widget-Key")
+        request.setValue(scnt, forHTTPHeaderField: "scnt")
+        request.setValue(appleIDSessionID, forHTTPHeaderField: "X-Apple-ID-Session-Id")
+        if !incomingCookies.isEmpty {
+            request.setValue(incomingCookies, forHTTPHeaderField: "Cookie")
+        }
 
-        let (data, response) = try await postJSON(
-            url: url, body: body, scnt: scnt, sessionID: appleIDSessionID,
-            extraHeaders: extraHeaders
-        )
+        if Self.debugEnabled { dumpRequest(request, body: request.httpBody) }
+        let (data, urlResponse) = try await session.data(for: request)
+        guard let response = urlResponse as? HTTPURLResponse else {
+            throw IrisAuthError.networkFailure(message: "non-HTTP response")
+        }
+        if Self.debugEnabled { dumpResponse(response, data: data) }
         switch response.statusCode {
         case 200, 204:
             return Self.accumulateCookies(from: response, into: incomingCookies)
