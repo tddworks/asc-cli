@@ -51,6 +51,80 @@ struct SDKInAppPurchaseReviewRepositoryTests {
         #expect(result[0].state == .approved)
     }
 
+    // MARK: - imageAsset processing-state guard
+
+    @Test func `listImages drops imageAsset when SDK returns empty templateURL`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(InAppPurchaseImagesResponse(
+            data: [
+                AppStoreConnect_Swift_SDK.InAppPurchaseImage(
+                    type: .inAppPurchaseImages, id: "img-1",
+                    attributes: .init(
+                        fileSize: 1024, fileName: "promo.jpg",
+                        imageAsset: AppStoreConnect_Swift_SDK.ImageAsset(templateURL: "", width: 0, height: 0),
+                        state: .uploadComplete
+                    )
+                ),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKInAppPurchaseReviewRepository(client: stub)
+        let result = try await repo.listImages(iapId: "iap-1")
+
+        #expect(result[0].imageAsset == nil)
+    }
+
+    @Test func `listImages drops imageAsset when SDK returns zero dimensions`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(InAppPurchaseImagesResponse(
+            data: [
+                AppStoreConnect_Swift_SDK.InAppPurchaseImage(
+                    type: .inAppPurchaseImages, id: "img-1",
+                    attributes: .init(
+                        fileSize: 1024, fileName: "promo.jpg",
+                        imageAsset: AppStoreConnect_Swift_SDK.ImageAsset(
+                            templateURL: "https://cdn/{w}x{h}bb.{f}", width: 0, height: 0
+                        ),
+                        state: .uploadComplete
+                    )
+                ),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKInAppPurchaseReviewRepository(client: stub)
+        let result = try await repo.listImages(iapId: "iap-1")
+
+        #expect(result[0].imageAsset == nil)
+    }
+
+    @Test func `listImages preserves imageAsset when SDK returns fully processed values`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(InAppPurchaseImagesResponse(
+            data: [
+                AppStoreConnect_Swift_SDK.InAppPurchaseImage(
+                    type: .inAppPurchaseImages, id: "img-1",
+                    attributes: .init(
+                        fileSize: 1024, fileName: "promo.jpg",
+                        imageAsset: AppStoreConnect_Swift_SDK.ImageAsset(
+                            templateURL: "https://cdn/{w}x{h}bb.{f}", width: 1024, height: 1024
+                        ),
+                        state: .uploadComplete
+                    )
+                ),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = SDKInAppPurchaseReviewRepository(client: stub)
+        let result = try await repo.listImages(iapId: "iap-1")
+
+        #expect(result[0].imageAsset?.templateUrl == "https://cdn/{w}x{h}bb.{f}")
+        #expect(result[0].imageAsset?.width == 1024)
+        #expect(result[0].imageAsset?.height == 1024)
+    }
+
     // MARK: - delete
 
     @Test func `deleteReviewScreenshot performs void request`() async throws {

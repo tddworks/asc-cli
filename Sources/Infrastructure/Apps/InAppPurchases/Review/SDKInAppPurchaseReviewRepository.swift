@@ -156,10 +156,16 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
         )
     }
 
+    /// ASC returns a non-nil `imageAsset` with empty `templateURL`/zero dimensions
+    /// immediately after the upload commit but before server-side processing finishes.
+    /// We treat that not-yet-processed shape as absent so JSON output omits the field
+    /// (frontends keep showing a local preview and poll the GET endpoint until the
+    /// asset is populated). Mirrors how the iOS app's `previewImageURL` returns nil
+    /// for an empty `templateURL`.
     private func mapImageAsset(_ sdk: AppStoreConnect_Swift_SDK.ImageAsset?) -> Domain.ImageAsset? {
-        guard let templateUrl = sdk?.templateURL,
-              let width = sdk?.width,
-              let height = sdk?.height
+        guard let templateUrl = sdk?.templateURL, !templateUrl.isEmpty,
+              let width = sdk?.width, width > 0,
+              let height = sdk?.height, height > 0
         else { return nil }
         return Domain.ImageAsset(templateUrl: templateUrl, width: width, height: height)
     }
