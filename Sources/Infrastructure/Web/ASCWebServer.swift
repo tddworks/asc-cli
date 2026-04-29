@@ -63,7 +63,7 @@ public struct ASCWebServer: Sendable {
         #if os(macOS)
         let proc = Process()
         proc.executableURL = URL(fileURLWithPath: "/usr/bin/open")
-        proc.arguments = ["https://asccli.app/command-center"]
+        proc.arguments = ["https://cc.asccli.app/"]
         try? proc.run()
         #endif
 
