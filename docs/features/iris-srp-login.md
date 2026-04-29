@@ -93,25 +93,27 @@ The existing `BrowserIrisCookieProvider` is **not removed** — users on a deskt
 
 ```
 Sources/
-├── Domain/Auth/Iris/                                (new — pure value types & protocol)
+├── Domain/Auth/Iris/                                (new — pure value types & @Mockable protocols, zero I/O)
 │   ├── IrisAuthCredentials.swift                    appleId, password
 │   ├── IrisAuthSession.swift                        cookies, scnt, serviceKey, appleIDSessionID, providerID, teamId, userEmail, expiresAt
 │   ├── IrisAuthRepository.swift                     @Mockable: login, requestTwoFactorCode, submitTwoFactorCode, logout
+│   ├── IrisSessionRepository.swift                     @Mockable: save(IrisAuthSession), load() throws -> IrisAuthSession?, clear()
 │   ├── IrisAuthError.swift                          invalidCredentials, twoFactorRequired, twoFactorRejected, applePromptRequired, networkError
 │   ├── TwoFactorChallenge.swift                     method (trustedDevice/phone), maskedDestination, codeLength
 │   └── PendingTwoFactorState.swift                  serialized partial session: scnt, serviceKey, appleIDSessionID, twoFactorCookieBag
 │
-├── Infrastructure/Iris/Auth/                        (new — implementations)
+├── Infrastructure/Iris/Auth/                        (new — implementations of Domain protocols)
 │   ├── SRP/                                         (Apple-specific glue on top of swift-srp)
 │   │   ├── AppleSRPClient.swift                     init() → A using swift-srp keys; completeWith(salt, B, iterations) computes Apple x via PBKDF2 then S using swift-srp's BigNum + config.k/g/N
 │   │   └── AppleM1.swift                            HKDF-SHA256-derived M1 — Apple's variant, distinct from RFC 2945 proof
 │   ├── IdmsaAPIClient.swift                         HTTP for idmsa.apple.com (signin/init, signin/complete, verify/<method>/securitycode, 2sv/trust); cookie jar & header threading
 │   ├── OlympusClient.swift                          olympus/v1/session for team metadata
-│   ├── IrisAuthSDKRepository.swift                  conforms to Domain.IrisAuthRepository, composes AppleSRPClient + IdmsaAPIClient + OlympusClient
-│   ├── KeychainIrisSessionStorage.swift             macOS Keychain
-│   ├── FileIrisSessionStorage.swift                 ~/.asc/iris/session.json with 0600 perms (Linux + macOS fallback)
-│   ├── CompositeIrisCookieProvider.swift            env → SRP-stored → browser
-│   └── KeychainIrisCookieProvider.swift             reads cookies from KeychainIrisSessionStorage
+│   ├── IrisAuthSDKRepository.swift                  implements `Domain.IrisAuthRepository`; composes AppleSRPClient + IdmsaAPIClient + OlympusClient
+│   ├── KeychainIrisSessionRepository.swift             implements `Domain.IrisSessionRepository` via macOS Keychain (Security framework)
+│   ├── FileIrisSessionRepository.swift                 implements `Domain.IrisSessionRepository` via `~/.asc/iris/session.json`, written with `0600`
+│   ├── CompositeIrisSessionRepository.swift            implements `Domain.IrisSessionRepository` by trying Keychain first, falling back to file (so macOS gets keychain protection, Linux silently falls through)
+│   ├── KeychainIrisCookieProvider.swift             implements existing `Domain.IrisCookieProvider`; reads from any `IrisSessionRepository`
+│   └── CompositeIrisCookieProvider.swift            implements `Domain.IrisCookieProvider`; resolution order env → stored → browser
 │
 └── ASCCommand/Commands/Iris/Auth/                   (new — CLI)
     ├── IrisAuthCommand.swift                        `asc iris auth`
