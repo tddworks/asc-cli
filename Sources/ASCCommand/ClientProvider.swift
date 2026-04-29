@@ -1,4 +1,5 @@
 import Domain
+import Foundation
 import Infrastructure
 
 struct ClientProvider {
@@ -376,5 +377,23 @@ struct ClientProvider {
 
     static func makeIrisCookieProvider() -> any IrisCookieProvider {
         ClientFactory().makeIrisCookieProvider()
+    }
+
+    static func makeIrisAuthRepository() -> any IrisAuthRepository {
+        IrisAuthSDKRepository()
+    }
+
+    static func makeIrisSessionRepository() -> any IrisSessionRepository {
+        FileIrisSessionRepository()
+    }
+
+    /// File path for the half-finished login state between `login` and `verify-code`.
+    /// Stored separately from the persisted session so a rejected 2FA code doesn't blow
+    /// away an existing valid session.
+    static func pendingTwoFactorURL() -> URL {
+        FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(".asc")
+            .appendingPathComponent("iris")
+            .appendingPathComponent("pending-2fa.json")
     }
 }
