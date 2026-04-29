@@ -24,6 +24,24 @@ asc apps list          # find your app ID
 asc init --app-id <id> # pin it — skip --app-id on every future command
 ```
 
+### Optional: sign in to iris (unlocks first-time IAP submissions, web UI parity)
+
+The public ASC API (above) covers most workflows but **can't submit the first IAP for an app** — Apple requires that to ride along with a new App Store version, and the only path that accepts the flag is the iris private API. Sign in once with your Apple ID and `asc iap list` will auto-route the right command for each IAP:
+
+```bash
+asc iris auth login --apple-id you@example.com --interactive
+# Apple ID password: ••••••••
+# Two-factor authentication required.
+# 2FA code: 123456
+# → session saved to ~/.asc/iris/session.json (~30 days)
+
+asc iris status        # verify; shows source: "srpLogin"
+```
+
+Now `asc iap list --app-id <id>` enriches each IAP with the right submission affordance — `addToNextVersion` for queue-via-iris, `removeFromNextVersion` to dequeue, `submit` for established-app standalone review. The agent reads one affordance and runs it; no need to learn iris-vs-sdk.
+
+`asc iris auth logout` to clear the session. CI scripts using the API key alone keep working unchanged — iris is purely additive.
+
 ## Features
 
 | Category | What you can do |
