@@ -119,14 +119,23 @@ struct InAppPurchaseTests {
     }
 
     @Test func `removeFromNextVersion affordance fires when IAP is queued for next version`() {
-        // When the iris listing reports `submitWithNextAppStoreVersion: true`, the IAP
-        // is staged to ride along with the next app version submission — but not yet
-        // under active review. Inverse of addToNextVersion. Same DELETE on submission
-        // record (keyed by IAP id in iris).
+        // Inverse of addToNextVersion. Iris-queued submissions can only be deleted via
+        // the iris DELETE — public-SDK DELETE doesn't accept them — so the affordance
+        // routes through `asc iris iap-submissions delete`. Submission resource is
+        // keyed by parent IAP id in iris, so `--submission-id <iapId>` works.
         let queued = MockRepositoryFactory.makeInAppPurchase(
             id: "iap-7", state: .readyToSubmit, submitWithNextAppStoreVersion: true
         )
-        #expect(queued.affordances["removeFromNextVersion"] == "asc iap unsubmit --submission-id iap-7")
+        #expect(queued.affordances["removeFromNextVersion"] == "asc iris iap-submissions delete --submission-id iap-7")
+    }
+
+    @Test func `removeFromNextVersion apiLinks resolve to iris REST DELETE path`() {
+        let queued = MockRepositoryFactory.makeInAppPurchase(
+            id: "iap-7", state: .readyToSubmit, submitWithNextAppStoreVersion: true
+        )
+        let link = queued.apiLinks["removeFromNextVersion"]
+        #expect(link?.method == "DELETE")
+        #expect(link?.href == "/api/v1/iris/iap-submissions/iap-7")
     }
 
     @Test func `queued IAP suppresses submit and addToNextVersion`() {

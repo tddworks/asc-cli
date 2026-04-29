@@ -44,6 +44,20 @@ public struct IrisClient: Sendable {
         return try await perform(request)
     }
 
+    /// Perform a DELETE request against the iris API. Used by the iris-only
+    /// IAP submission dequeue (`DELETE /iris/v1/inAppPurchaseSubmissions/:id`),
+    /// which the public ASC SDK can't call (different auth surface).
+    public func delete(
+        path: String,
+        cookies: String
+    ) async throws -> (Data, HTTPURLResponse) {
+        let url = URL(string: "\(Self.baseURL)/\(path)")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        applyHeaders(to: &request, cookies: cookies)
+        return try await perform(request)
+    }
+
     private func applyHeaders(to request: inout URLRequest, cookies: String) {
         request.setValue("application/vnd.api+json", forHTTPHeaderField: "accept")
         request.setValue("application/vnd.api+json", forHTTPHeaderField: "content-type")

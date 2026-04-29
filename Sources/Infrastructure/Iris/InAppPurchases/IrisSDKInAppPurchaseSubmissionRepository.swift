@@ -14,6 +14,16 @@ public struct IrisSDKInAppPurchaseSubmissionRepository: IrisInAppPurchaseSubmiss
         self.client = client
     }
 
+    public func deleteSubmission(
+        session: IrisSession,
+        submissionId: String
+    ) async throws {
+        _ = try await client.delete(
+            path: "inAppPurchaseSubmissions/\(submissionId)",
+            cookies: session.cookies
+        )
+    }
+
     public func submitInAppPurchase(
         session: IrisSession,
         iapId: String,

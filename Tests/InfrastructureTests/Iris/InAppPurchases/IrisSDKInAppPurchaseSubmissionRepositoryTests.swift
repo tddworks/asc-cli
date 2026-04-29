@@ -128,4 +128,29 @@ struct IrisSDKInAppPurchaseSubmissionRepositoryTests {
         let url = String(decoding: capturedURL.value!, as: UTF8.self)
         #expect(url == "https://appstoreconnect.apple.com/iris/v1/inAppPurchaseSubmissions")
     }
+
+    @Test func `deleteSubmission DELETEs iris inAppPurchaseSubmissions by id`() async throws {
+        let capturedURL = CapturedBody()
+        let capturedMethod = CapturedBody()
+        IrisSubmissionsURLProtocolStub.handler = { request in
+            capturedURL.set(Data(request.url!.absoluteString.utf8))
+            capturedMethod.set(Data((request.httpMethod ?? "").utf8))
+            let response = HTTPURLResponse(
+                url: request.url!, statusCode: 204, httpVersion: nil, headerFields: nil
+            )!
+            return (response, Data())
+        }
+
+        let client = IrisClient(session: IrisSubmissionsURLProtocolStub.makeSession())
+        let repo = IrisSDKInAppPurchaseSubmissionRepository(client: client)
+        try await repo.deleteSubmission(
+            session: IrisSession(cookies: "myacinfo=ABC"),
+            submissionId: "iap-7"
+        )
+
+        let url = String(decoding: capturedURL.value!, as: UTF8.self)
+        let method = String(decoding: capturedMethod.value!, as: UTF8.self)
+        #expect(url == "https://appstoreconnect.apple.com/iris/v1/inAppPurchaseSubmissions/iap-7")
+        #expect(method == "DELETE")
+    }
 }

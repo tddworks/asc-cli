@@ -189,10 +189,11 @@ extension InAppPurchase: AffordanceProviding {
         if state == .readyToSubmit {
             if submitWithNextAppStoreVersion {
                 // Already queued via iris — re-submitting via either path would be
-                // rejected. Only surface the dequeue affordance. The submission
-                // resource is keyed by the IAP id in iris, so `--submission-id <iapId>`
-                // works against the public-SDK DELETE endpoint.
-                items.append(Affordance(key: "removeFromNextVersion", command: "iap", action: "unsubmit",
+                // rejected. Only surface the dequeue affordance. Iris-queued
+                // submissions can only be removed via the iris DELETE endpoint
+                // (public-SDK DELETE returns errors for them); the submission resource
+                // is keyed by parent IAP id in iris so `--submission-id <iapId>` works.
+                items.append(Affordance(key: "removeFromNextVersion", command: "iris iap-submissions", action: "delete",
                                         params: ["submission-id": id]))
             } else {
                 // Inverse of removeFromNextVersion: `addToNextVersion` queues this IAP

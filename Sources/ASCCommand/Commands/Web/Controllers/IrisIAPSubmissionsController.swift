@@ -35,5 +35,17 @@ struct IrisIAPSubmissionsController: Sendable {
             )
             return try restFormat(submission)
         }
+
+        // Matches the `removeFromNextVersion` affordance's `_links` URL. Iris-queued
+        // submissions can only be removed via the iris DELETE; the submission resource
+        // is keyed by parent IAP id, so the path param IS the submission id.
+        group.delete("/iris/iap-submissions/:submissionId") { _, context -> Response in
+            guard let submissionId = context.parameters.get("submissionId") else {
+                return jsonError("Missing submissionId")
+            }
+            let session = try self.cookieProvider.resolveSession()
+            try await self.repo.deleteSubmission(session: session, submissionId: submissionId)
+            return restResponse("{\"deleted\":true}")
+        }
     }
 }

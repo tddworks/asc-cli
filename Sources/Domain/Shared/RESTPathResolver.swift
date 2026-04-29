@@ -113,10 +113,13 @@ public final class RESTPathResolver: @unchecked Sendable {
     }
 
     private static func resourcePath(base: String, segment: String, id: String, action: String) -> String {
+        // Multi-word commands (e.g. `iris iap-submissions`) carry their CLI subcommand
+        // structure as a space; convert to a slash for clean URL segments.
+        let urlSegment = segment.replacingOccurrences(of: " ", with: "/")
         if action == "get" || action == "update" || action == "delete" {
-            return "\(base)/\(segment)/\(id)"
+            return "\(base)/\(urlSegment)/\(id)"
         }
-        return "\(base)/\(segment)/\(id)/\(action)"
+        return "\(base)/\(urlSegment)/\(id)/\(action)"
     }
 
     private static func singularize(_ command: String) -> String {
