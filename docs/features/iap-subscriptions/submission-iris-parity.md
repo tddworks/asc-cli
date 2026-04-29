@@ -1,6 +1,6 @@
 # IAP / Subscription Submission — public SDK vs iris parity gap
 
-## Status: design note (not implemented)
+## Status: IAP shipped via `asc iris iap-submissions` (subscriptions still pending)
 
 ## The gap
 
@@ -44,30 +44,51 @@ The web UI expresses "alongside next version" via `submitWithNextAppStoreVersion
 - `Sources/Infrastructure/Iris/BrowserIrisCookieProvider.swift` — pulls cookies from the user's logged-in browser
 - Working precedent: `IrisSDKAppBundleRepository` already calls iris through `IrisClient`
 
-## Proposed approach (when we ship this)
+## Shipped approach (IAP)
 
-1. Extend the protocol — one method, explicit knob, default = current behaviour:
+Two paths, namespaced by auth surface — the existing `asc iap submit` stays untouched (key-auth, CI-friendly), and a new iris-namespaced path opts into the `submitWithNextAppStoreVersion` flag.
 
-   ```swift
-   public protocol InAppPurchaseSubmissionRepository: Sendable {
-       func submitInAppPurchase(
-           iapId: String,
-           submitWithNextAppStoreVersion: Bool
-       ) async throws -> InAppPurchaseSubmission
-       func deleteSubmission(submissionId: String) async throws
-   }
-   ```
+### CLI
 
-   `false` → existing public SDK path (key-auth, no browser session needed).
-   `true` → new iris path via `IrisClient`, requires browser cookies.
+```bash
+asc iris iap-submissions create --iap-id <id> [--no-with-next-version]
+```
 
-2. CLI: `asc iap submit --iap-id X [--with-next-version]`. Default `false` keeps CI scripts working unchanged.
+`--with-next-version` defaults to **true** (the only reason to use this path). `--no-with-next-version` opts out and posts `false`. Lives under `asc iris …` because it requires iris cookies — either browser cookies or a session persisted by `asc iris auth login`.
 
-3. REST: `POST /api/v1/iap/:iapId/submit` body `{"submitWithNextAppStoreVersion": true}` (omit / `false` keeps legacy shape).
+### REST
 
-4. Mirror on the subscription side.
+```
+POST /api/v1/iris/iap/:iapId/submissions
+Content-Type: application/json
+{
+  "submitWithNextAppStoreVersion": true   // optional; default true
+}
+```
 
-5. Surface a clear error when `--with-next-version` is requested but iris cookies are missing — point the user at `asc iris status`.
+Returns the submission resource with a `_links.viewIAP → /api/v1/iap/:iapId` so the caller can navigate back to the IAP after submission.
+
+### Domain protocol
+
+```swift
+public protocol IrisInAppPurchaseSubmissionRepository: Sendable {
+    func submitInAppPurchase(
+        session: IrisSession,
+        iapId: String,
+        submitWithNextAppStoreVersion: Bool
+    ) async throws -> IrisInAppPurchaseSubmission
+}
+```
+
+Distinct from `InAppPurchaseSubmissionRepository` (public SDK) so the two auth surfaces don't tangle.
+
+### Discoverability
+
+`IrisStatus.affordances` advertises `submitIAP` when iris is authenticated, so `asc iris status` lists the iris-only IAP submission path alongside `listApps` / `createApp`.
+
+### Subscriptions — still pending
+
+Same gap exists at `POST /iris/v1/subscriptionSubmissions`. The implementation will mirror this PR — separate `IrisSubscriptionSubmissionRepository`, `asc iris subscription-submissions create`, `POST /api/v1/iris/subscriptions/:id/submissions`. Out of scope for this iteration to keep the change reviewable.
 
 ## Tradeoffs
 
