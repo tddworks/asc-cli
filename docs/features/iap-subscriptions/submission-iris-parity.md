@@ -103,7 +103,7 @@ Two clean inverse pairs, gated on `state == .readyToSubmit`:
 | Affordance | Command | What it does |
 |---|---|---|
 | `addToNextVersion` | `asc iris iap-submissions create --iap-id <id>` | `POST /iris/v1/inAppPurchaseSubmissions` (iris cookie auth) |
-| `removeFromNextVersion` | `asc iap unsubmit --submission-id <iapId>` | `DELETE /v1/inAppPurchaseSubmissions/{id}` (public SDK; Apple keys the submission resource by parent IAP id in iris) |
+| `removeFromNextVersion` | `asc iris iap-submissions delete --submission-id <iapId>` | `DELETE /iris/v1/inAppPurchaseSubmissions/{id}` (iris cookie auth; public-SDK delete doesn't accept iris-queued submissions). Apple keys the submission resource by parent IAP id, so `--submission-id` carries the IAP id. |
 | `submit` | `asc iap submit --iap-id <id>` | `POST /v1/inAppPurchaseSubmissions` (public SDK; standalone review) |
 
 For an established-app IAP that's ready, the agent sees both `submit` and `addToNextVersion` and picks based on release strategy — standalone review (`submit`) vs ride along with the next app version (`addToNextVersion`).
