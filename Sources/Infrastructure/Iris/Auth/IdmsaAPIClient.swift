@@ -174,7 +174,7 @@ public struct IdmsaAPIClient: Sendable {
         var extraHeaders: [String: String] = [:]
         if !incomingCookies.isEmpty { extraHeaders["Cookie"] = incomingCookies }
 
-        let (_, response) = try await postJSON(
+        let (data, response) = try await postJSON(
             url: url, body: body, scnt: scnt, sessionID: appleIDSessionID,
             extraHeaders: extraHeaders
         )
@@ -182,10 +182,30 @@ public struct IdmsaAPIClient: Sendable {
         case 200, 204:
             return Self.accumulateCookies(from: response, into: incomingCookies)
         case 400, 401, 403:
-            throw IrisAuthError.twoFactorCodeRejected(remainingAttempts: nil)
+            // Apple's response body carries a specific code in `serviceErrors[].code`:
+            // -21669 = code expired / out of attempts
+            // -22421 = wrong code typed
+            // anything else = session-state mismatch or protocol regression
+            // Surfacing the code in the error message turns "code rejected" into
+            // actionable signal for the user.
+            let serviceError = Self.extractServiceError(from: data)
+            throw IrisAuthError.networkFailure(
+                message: "verify/securitycode HTTP \(response.statusCode)\(serviceError)"
+            )
         default:
             throw IrisAuthError.networkFailure(message: "verify/securitycode HTTP \(response.statusCode)")
         }
+    }
+
+    private static func extractServiceError(from data: Data) -> String {
+        guard
+            let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+            let errors = json["serviceErrors"] as? [[String: Any]],
+            let first = errors.first
+        else { return "" }
+        let code = (first["code"] as? String) ?? ""
+        let message = (first["message"] as? String) ?? ""
+        return " (Apple \(code): \(message))"
     }
 
     /// Calls `2sv/trust` to finalize `myacinfo` after a successful 2FA submission.
