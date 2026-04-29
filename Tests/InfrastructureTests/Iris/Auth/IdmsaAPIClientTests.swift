@@ -9,6 +9,17 @@ final class CapturedBody: @unchecked Sendable {
     func set(_ data: Data?) { lock.lock(); _value = data; lock.unlock() }
 }
 
+final class CapturedRequest: @unchecked Sendable {
+    private let lock = NSLock()
+    private var _request: URLRequest?
+    private var _body: Data?
+    var request: URLRequest? { lock.lock(); defer { lock.unlock() }; return _request }
+    var body: Data? { lock.lock(); defer { lock.unlock() }; return _body }
+    func set(_ request: URLRequest, body: Data?) {
+        lock.lock(); _request = request; _body = body; lock.unlock()
+    }
+}
+
 private func extractBody(from request: URLRequest) -> Data? {
     if let body = request.httpBody { return body }
     guard let stream = request.httpBodyStream else { return nil }
@@ -100,6 +111,71 @@ struct IdmsaAPIClientTests {
         } else {
             Issue.record("expected .success, got \(result)")
         }
+    }
+
+    @Test func `signinInit omits OAuth, Origin, and Referer headers (matches xcodes and rorkai go ref)`() async throws {
+        let captured = CapturedRequest()
+        URLProtocolStub.handler = { request in
+            captured.set(request, body: extractBody(from: request))
+            let body = Data("""
+            {"iteration":20000,"salt":"YWJjZA==","b":"QQ==","c":"c","protocol":"s2k"}
+            """.utf8)
+            let response = HTTPURLResponse(
+                url: request.url!, statusCode: 200, httpVersion: nil,
+                headerFields: ["scnt": "s", "X-Apple-ID-Session-Id": "id"]
+            )!
+            return (response, body)
+        }
+
+        let client = IdmsaAPIClient(session: URLProtocolStub.makeSession(), serviceKey: "k")
+        _ = try await client.signinInit(accountName: "u@x.com", A: Data(count: 256))
+
+        let req = try #require(captured.request)
+        // Apple binds the SRP session to the headers we send. xcodes (XcodesOrg) and the
+        // rorkai go reference both omit OAuth-* / Origin / Referer; sending them taints
+        // the session and makes the post-409 GET /appleauth/auth return 401 — which
+        // rotates scnt server-side and then fails verify/securitycode with another 401.
+        #expect(req.value(forHTTPHeaderField: "X-Apple-OAuth-Client-Id") == nil)
+        #expect(req.value(forHTTPHeaderField: "X-Apple-OAuth-Redirect-URI") == nil)
+        #expect(req.value(forHTTPHeaderField: "X-Apple-OAuth-Response-Mode") == nil)
+        #expect(req.value(forHTTPHeaderField: "X-Apple-OAuth-Response-Type") == nil)
+        #expect(req.value(forHTTPHeaderField: "Origin") == nil)
+        #expect(req.value(forHTTPHeaderField: "Referer") == nil)
+        // Headers we still expect — preserved set matches xcodes URLRequest+Apple.swift SRPInit.
+        #expect(req.value(forHTTPHeaderField: "X-Requested-With") == "XMLHttpRequest")
+        #expect(req.value(forHTTPHeaderField: "X-Apple-Widget-Key") == "k")
+        #expect(req.value(forHTTPHeaderField: "Content-Type") == "application/json")
+    }
+
+    @Test func `signinComplete posts to isRememberMeEnabled=false with rememberMe false body`() async throws {
+        let captured = CapturedRequest()
+        URLProtocolStub.handler = { request in
+            captured.set(request, body: extractBody(from: request))
+            let response = HTTPURLResponse(
+                url: request.url!, statusCode: 409, httpVersion: nil,
+                headerFields: ["scnt": "s", "X-Apple-ID-Session-Id": "id"]
+            )!
+            return (response, Data("{}".utf8))
+        }
+
+        let client = IdmsaAPIClient(session: URLProtocolStub.makeSession(), serviceKey: "k")
+        _ = try await client.signinComplete(
+            accountName: "u@x.com", c: "c", m1: Data(count: 32), m2: Data(count: 32),
+            scnt: "s0", appleIDSessionID: "id0",
+            hashcashChallenge: nil, hashcashBits: nil, cookies: ""
+        )
+
+        let req = try #require(captured.request)
+        let bodyJSON = try JSONSerialization.jsonObject(with: try #require(captured.body)) as? [String: Any]
+        // Both xcodes (URL constant) and rorkai go (request URL) use isRememberMeEnabled=false.
+        #expect(req.url?.query == "isRememberMeEnabled=false")
+        // Body matches: rememberMe=false bypasses Apple's "trust this browser" path, which
+        // is the wrong path for a CLI session.
+        #expect(bodyJSON?["rememberMe"] as? Bool == false)
+        // OAuth/Origin/Referer must not be sent (same reason as signin/init).
+        #expect(req.value(forHTTPHeaderField: "X-Apple-OAuth-Client-Id") == nil)
+        #expect(req.value(forHTTPHeaderField: "Origin") == nil)
+        #expect(req.value(forHTTPHeaderField: "Referer") == nil)
     }
 
     @Test func `signinComplete returns twoFactorRequired when status is 409`() async throws {

@@ -110,9 +110,12 @@ public struct IdmsaAPIClient: Sendable {
             "c": c,
             "m1": m1.base64EncodedString(),
             "m2": m2.base64EncodedString(),
-            "rememberMe": true,
+            "rememberMe": false,
         ]
-        let url = URL(string: "\(Self.baseURL)/signin/complete?isRememberMeEnabled=true")!
+        // Match xcodes (URL constant) and the rorkai/Go reference: `?isRememberMeEnabled=false`
+        // with `rememberMe: false` body. `true` puts Apple in the "trust this browser" path,
+        // which mismatches the CLI session and makes the post-409 GET /appleauth/auth 401.
+        let url = URL(string: "\(Self.baseURL)/signin/complete?isRememberMeEnabled=false")!
 
         // The hashcash challenge MUST come from the same `signin/init` response that
         // produced our `scnt` and `appleIDSessionID`. Computing one from any other
@@ -377,18 +380,15 @@ public struct IdmsaAPIClient: Sendable {
 
 
     private func applyHeaders(to request: inout URLRequest, scnt: String?, sessionID: String?) {
+        // Header set is intentionally narrow — matches xcodes (URLRequest+Apple.swift
+        // SRPInit/SRPComplete) and the rorkai/Go reference (signin.go). Adding
+        // OAuth/Origin/Referer here taints the SRP session: signin/complete still works,
+        // but the post-409 GET /appleauth/auth then returns 401 with a rotated scnt,
+        // and the subsequent verify/securitycode call is rejected as out-of-sequence.
         request.setValue("application/json, text/javascript", forHTTPHeaderField: "Accept")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        // `XMLHttpRequest` is the Origin signal Apple's idmsa expects for web flows;
-        // missing this header has been observed to flip 200 → 401 on edge cases.
         request.setValue("XMLHttpRequest", forHTTPHeaderField: "X-Requested-With")
         request.setValue(serviceKey, forHTTPHeaderField: "X-Apple-Widget-Key")
-        request.setValue(serviceKey, forHTTPHeaderField: "X-Apple-OAuth-Client-Id")
-        request.setValue("https://idmsa.apple.com", forHTTPHeaderField: "X-Apple-OAuth-Redirect-URI")
-        request.setValue("WebKit", forHTTPHeaderField: "X-Apple-OAuth-Response-Mode")
-        request.setValue("code", forHTTPHeaderField: "X-Apple-OAuth-Response-Type")
-        request.setValue("https://appstoreconnect.apple.com", forHTTPHeaderField: "Origin")
-        request.setValue("https://appstoreconnect.apple.com/", forHTTPHeaderField: "Referer")
         if let scnt { request.setValue(scnt, forHTTPHeaderField: "scnt") }
         if let sessionID { request.setValue(sessionID, forHTTPHeaderField: "X-Apple-ID-Session-Id") }
     }

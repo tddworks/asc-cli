@@ -18,6 +18,7 @@ let package = Package(
         .package(url: "https://github.com/hummingbird-project/hummingbird.git", exact: "2.21.1"),
         .package(url: "https://github.com/hummingbird-project/hummingbird-websocket.git", from: "2.6.0"),
         .package(url: "https://github.com/hummingbird-project/swift-mustache.git", from: "2.0.2"),
+        .package(url: "https://github.com/adam-fowler/swift-srp.git", from: "2.0.0"),
     ],
     targets: [
         .target(
@@ -47,6 +48,7 @@ let package = Package(
                 .product(name: "Hummingbird", package: "hummingbird"),
                 .product(name: "HummingbirdTLS", package: "hummingbird"),
                 .product(name: "HummingbirdWebSocket", package: "hummingbird-websocket"),
+                .product(name: "SRP", package: "swift-srp"),
             ]
         ),
         .executableTarget(
