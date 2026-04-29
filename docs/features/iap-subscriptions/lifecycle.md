@@ -47,6 +47,20 @@ Symmetric `update` / `delete` / `unsubmit` across in-app-purchase and subscripti
 |---------|----------------|
 | `asc subscription-offers delete --offer-id <id>` | `--offer-id` |
 
+## Read-side `reviewNote`
+
+Both `InAppPurchase` and `Subscription` carry a `reviewNote: String?` field on the read path. ASC returns it on every list/get; the value an agent wrote with `--review-note` is visible on the next `asc iap list` / `asc subscriptions list` (and the matching REST endpoints) without a separate fetch. Nil values are omitted from JSON via `encodeIfPresent`, so output shape is unchanged when no note is set.
+
+```json
+{
+  "id": "iap-1",
+  "appId": "app-1",
+  "productId": "com.app.gold",
+  "reviewNote": "Use code TEST",
+  "state": "MISSING_METADATA"
+}
+```
+
 ## Affordances surfaced
 
 After running any list/create command, JSON output advertises the matching update/delete/unsubmit commands:

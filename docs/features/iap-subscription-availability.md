@@ -287,6 +287,14 @@ Tests/
 | GET /v1/subscriptions/{id}/subscriptionAvailability | `APIEndpoint.v1.subscriptions.id().subscriptionAvailability.get()` | `getAvailability(subscriptionId:)` |
 | POST /v1/subscriptionAvailabilities | `APIEndpoint.v1.subscriptionAvailabilities.post()` | `createAvailability(subscriptionId:...)` |
 
+### REST Endpoints
+
+| Method | Path | Body | Notes |
+|--------|------|------|-------|
+| GET | `/api/v1/iap/{iapId}/availability` | — | Returns synthetic full-territory record when no availability is configured yet |
+| PATCH | `/api/v1/iap/{iapId}/availability` | `{ "territoryIds": [...], "availableInNewTerritories": Bool }` | Upsert via ASC `POST /v1/inAppPurchaseAvailabilities` (replaces if already set) |
+| GET | `/api/v1/subscriptions/{subscriptionId}/availability` | — | Same synthetic-default behavior |
+
 ## Testing
 
 ```bash
@@ -295,6 +303,5 @@ swift test --filter 'TerritoryTests|InAppPurchaseAvailabilityTests|SubscriptionA
 
 ## Extending
 
-- **Update availability** — Add PATCH support if the API supports modifying existing availability records
 - **App-level availability** — Use `/v2/appAvailabilities` for app-level territory control
 - **Territory filtering** — Add `--currency USD` filter to `asc territories list`
