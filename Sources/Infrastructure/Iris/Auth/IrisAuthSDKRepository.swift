@@ -68,12 +68,21 @@ public struct IrisAuthSDKRepository: IrisAuthRepository, @unchecked Sendable {
     }
 
     public func submitTwoFactorCode(_ code: String, pending: PendingTwoFactorState) async throws -> IrisAuthSession {
+        // Mandatory pre-flight: `GET /appleauth/auth`. Apple's session won't accept a
+        // verify-code submission until this call has primed the 2FA state. Skipping it
+        // is the difference between "verify works" and a generic 401 with no useful
+        // service error — same shape as a genuinely-rejected code.
+        let cookiesAfterAuthOptions = try await idmsa.fetchAuthOptions(
+            scnt: pending.scnt, appleIDSessionID: pending.appleIDSessionID,
+            cookies: pending.twoFactorCookieBag
+        )
+
         let cookiesAfterVerify: String
         do {
             cookiesAfterVerify = try await idmsa.submitTwoFactorCode(
                 code, method: mapMethod(pending.challenge.method),
                 scnt: pending.scnt, appleIDSessionID: pending.appleIDSessionID,
-                cookies: pending.twoFactorCookieBag
+                cookies: cookiesAfterAuthOptions
             )
         } catch let e as IrisAuthError where e == .twoFactorCodeRejected(remainingAttempts: nil) {
             throw e

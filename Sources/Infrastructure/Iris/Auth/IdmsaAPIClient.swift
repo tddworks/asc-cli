@@ -148,6 +148,43 @@ public struct IdmsaAPIClient: Sendable {
 
     /// Submits a 6-digit 2FA code. 200 = accepted; non-2xx surfaces as `twoFactorCodeRejected`
     /// or `networkFailure` depending on Apple's status.
+    /// Calls `GET /appleauth/auth` to prime Apple's 2FA session state. We deliberately
+    /// send a MINIMAL header set here
+    /// because the OAuth-* and X-Requested-With headers our other endpoints expect
+    /// have been observed to flip 200 → 401 on this specific endpoint.
+    public func fetchAuthOptions(
+        scnt: String,
+        appleIDSessionID: String,
+        cookies incomingCookies: String
+    ) async throws -> String {
+        let url = URL(string: "\(Self.baseURL)")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue(serviceKey, forHTTPHeaderField: "X-Apple-Widget-Key")
+        request.setValue(scnt, forHTTPHeaderField: "scnt")
+        request.setValue(appleIDSessionID, forHTTPHeaderField: "X-Apple-ID-Session-Id")
+        if !incomingCookies.isEmpty {
+            request.setValue(incomingCookies, forHTTPHeaderField: "Cookie")
+        }
+        if Self.debugEnabled { dumpRequest(request, body: nil) }
+        let (data, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse else {
+            throw IrisAuthError.networkFailure(message: "non-HTTP response")
+        }
+        if Self.debugEnabled { dumpResponse(http, data: data) }
+        guard (200..<300).contains(http.statusCode) else {
+            // Don't fail the verify flow when auth-options 401s — Apple's behavior here
+            // varies by account. The real signal is what verify/securitycode returns.
+            // Return the same cookies we came in with and let the verify call try.
+            FileHandle.standardError.write(
+                Data("[idmsa] auth options returned \(http.statusCode); proceeding to verify anyway\n".utf8)
+            )
+            return incomingCookies
+        }
+        return Self.accumulateCookies(from: http, into: incomingCookies)
+    }
+
     /// Submits the 6-digit code and returns the updated cookie bag (Apple may set
     /// extra cookies on success). Cookies must be echoed on the subsequent `trust` call.
     public func submitTwoFactorCode(
@@ -301,13 +338,18 @@ public struct IdmsaAPIClient: Sendable {
 
     private func dumpRequest(_ request: URLRequest, body: Data?) {
         var dump = "[idmsa] → \(request.httpMethod ?? "?") \(request.url?.path ?? "?")\n"
-        // Print the headers we actually thread through the SRP+2FA flow so the dump
-        // is self-sufficient for debugging session-mismatch issues.
-        let interestingHeaders = ["Cookie", "scnt", "X-Apple-ID-Session-Id", "X-Apple-HC", "X-Apple-Widget-Key"]
+        // Print headers we actually thread through the SRP+2FA flow so the dump
+        // is self-sufficient. Cookie is shown in full because seeing which cookies
+        // are present (aasp, acn01, dslang, site, …) is critical for debugging.
+        let interestingHeaders = ["Accept", "Cookie", "scnt", "X-Apple-ID-Session-Id", "X-Apple-HC", "X-Apple-Widget-Key", "X-Requested-With"]
         for name in interestingHeaders {
             if let value = request.value(forHTTPHeaderField: name) {
-                let display = name == "X-Apple-Widget-Key" || name == "Cookie" || name == "X-Apple-HC"
-                    ? value.prefix(40) + (value.count > 40 ? "…" : "") : Substring(value)
+                let display: Substring
+                if name == "X-Apple-Widget-Key" || name == "X-Apple-HC" {
+                    display = Substring(value.prefix(40) + (value.count > 40 ? "…" : ""))
+                } else {
+                    display = Substring(value)
+                }
                 dump += "  \(name): \(display)\n"
             }
         }
