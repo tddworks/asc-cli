@@ -183,8 +183,8 @@ Step 1  POST /appleauth/auth/signin/init                       body: { a: A_pub_
 Step 2  client computes:
           x = PBKDF2-SHA256(SHA256(password), salt, iterations, 32)
           v, M1 per RFC 5054 (with HKDF-derived M1 input — Apple-specific)
-Step 3  POST /appleauth/auth/signin/complete?isRememberMeEnabled=true
-                                                                body: { accountName, c, m1, m2, rememberMe }
+Step 3  POST /appleauth/auth/signin/complete?isRememberMeEnabled=false
+                                                                body: { accountName, c, m1, m2, rememberMe: false }
                                                                 → 200 OK   → step 6
                                                                 → 409      → step 4 (2FA)
 Step 4  GET  /appleauth/auth                                   → discover trusted-device & phone options
@@ -194,13 +194,15 @@ Step 5c POST /appleauth/auth/2sv/trust                          → finalizes my
 Step 6  GET  /olympus/v1/session                               → providerID, teamId, userEmail
 ```
 
-Headers carried throughout:
+Headers carried throughout (matches XcodesOrg/XcodesApp, XcodesOrg/XcodesLoginKit, and rorkai/App-Store-Connect-CLI byte-for-byte):
 - `X-Apple-Widget-Key: <serviceKey>`
-- `X-Apple-OAuth-Client-Id: <serviceKey>`
-- `X-Apple-OAuth-Redirect-URI: https://idmsa.apple.com`
+- `X-Requested-With: XMLHttpRequest`
 - `Accept: application/json, text/javascript`
-- `Origin: https://appstoreconnect.apple.com`
+- `Content-Type: application/json` (on POST)
+- `X-Apple-HC: <hashcash>` (signin/complete only)
 - `scnt` and `X-Apple-ID-Session-Id` once Apple sets them
+
+We do NOT send `X-Apple-OAuth-Client-Id`, `X-Apple-OAuth-Redirect-URI`, `X-Apple-OAuth-Response-Mode`, `X-Apple-OAuth-Response-Type`, `Origin`, or `Referer`. Adding any of these to the SRP requests taints the session: signin/complete still works, but the post-409 `GET /appleauth/auth` returns 401, rotates `scnt`, and `POST /verify/trusteddevice/securitycode` is rejected as out-of-sequence.
 
 ## Dependencies to add to `Package.swift`
 
