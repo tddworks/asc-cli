@@ -16,13 +16,25 @@ struct IrisAuthLogin: AsyncParsableCommand {
     @Option(name: .long, help: "Apple ID password (omit to be prompted on stdin)")
     var password: String?
 
+    @Flag(name: .long, help: "Single-process: prompt for 2FA code on stdin instead of writing pending state")
+    var interactive: Bool = false
+
     func run() async throws {
         let resolvedPassword = try password ?? promptForPassword()
         let creds = IrisAuthCredentials(appleId: appleId, password: resolvedPassword)
         let authRepo = ClientProvider.makeIrisAuthRepository()
         let sessionRepo = ClientProvider.makeIrisSessionRepository()
         let pendingURL = ClientProvider.pendingTwoFactorURL()
-        print(try await execute(credentials: creds, authRepo: authRepo, sessionRepo: sessionRepo, pendingURL: pendingURL))
+        let codePrompt: (() throws -> String)?
+        if interactive {
+            codePrompt = { try Self.promptForCode() }
+        } else {
+            codePrompt = nil
+        }
+        print(try await execute(
+            credentials: creds, authRepo: authRepo, sessionRepo: sessionRepo,
+            pendingURL: pendingURL, interactivePromptForCode: codePrompt
+        ))
     }
 
     func execute(
@@ -30,6 +42,7 @@ struct IrisAuthLogin: AsyncParsableCommand {
         authRepo: any IrisAuthRepository,
         sessionRepo: any IrisSessionRepository,
         pendingURL: URL,
+        interactivePromptForCode: (() throws -> String)? = nil,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         do {
@@ -39,9 +52,29 @@ struct IrisAuthLogin: AsyncParsableCommand {
             let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
             return try formatter.formatAgentItems([IrisAuthSummary(session)], affordanceMode: affordanceMode)
         } catch IrisAuthError.twoFactorRequired(let pending) {
+            // Interactive path: prompt + submit in the same process — keeps the TLS
+            // connection alive and avoids any session-binding issues that may exist
+            // when verify-code runs as a separate process.
+            if let prompt = interactivePromptForCode {
+                FileHandle.standardError.write(Data((Self.formatTwoFactorMessage(pending) + "\n").utf8))
+                let code = try prompt()
+                let session = try await authRepo.submitTwoFactorCode(code, pending: pending)
+                try sessionRepo.save(session)
+                try? FileManager.default.removeItem(at: pendingURL)
+                let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
+                return try formatter.formatAgentItems([IrisAuthSummary(session)], affordanceMode: affordanceMode)
+            }
             try writePending(pending, to: pendingURL)
             return Self.formatTwoFactorMessage(pending)
         }
+    }
+
+    static func promptForCode() throws -> String {
+        FileHandle.standardError.write(Data("2FA code: ".utf8))
+        guard let line = readLine(strippingNewline: true), !line.isEmpty else {
+            throw IrisAuthError.networkFailure(message: "no 2FA code on stdin")
+        }
+        return line
     }
 
     private func writePending(_ pending: PendingTwoFactorState, to url: URL) throws {
