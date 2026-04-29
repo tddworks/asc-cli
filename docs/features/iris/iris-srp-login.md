@@ -1,8 +1,8 @@
 # Iris SRP Login
 
-**Status: implemented (slices 1–7).** All scaffolding ships: domain types, Apple SRP client (PBKDF2-derived `x`, RFC 5054-derived `S` and `M1`), idmsa HTTP layer, 2FA endpoints, olympus session lookup, file-backed session storage, CLI commands, and a composite cookie provider that wires SRP-stored sessions into existing iris commands automatically.
+**Status: implemented and validated against `idmsa.apple.com`.** Real login + trusted-device 2FA verified end-to-end: `asc iris auth login --apple-id <email> --interactive` returns an `IrisAuthSession` with populated `providerID`, `teamId`, `userEmail`, and `expiresAt`. All scaffolding ships: domain types, Apple SRP client (PBKDF2-derived `x`, RFC 5054-derived `S` and `M1`), idmsa HTTP layer, 2FA endpoints, olympus session lookup, file-backed session storage, CLI commands, and a composite cookie provider that wires SRP-stored sessions into existing iris commands automatically.
 
-**First-real-login validation pending.** Slices 1–7 are unit-tested with mocked HTTP and synthesized vectors (RFC 7914 PBKDF2 + structural assertions). Whether Apple actually accepts our `M1` shape we'll learn from the first real `asc iris auth login` attempt — set `ASC_IRIS_DEBUG=1` to dump every idmsa request/response (with `a`/`m1`/`m2` redacted so logs are safe to share). Failures here become test fixtures.
+**Header set is load-bearing.** The first real-login attempts failed with a 401 on `POST /verify/trusteddevice/securitycode` despite a correct code. Root cause: `signin/init` and `signin/complete` were sending OAuth/Origin/Referer headers that no production reference (`XcodesOrg/XcodesApp`, `XcodesOrg/XcodesLoginKit`, `rorkai/App-Store-Connect-CLI`) sends. Apple's SRP session was being marked as an OAuth flow; the post-409 `GET /appleauth/auth` then returned 401, rotating `scnt` server-side, so the verify call arrived with a stale scnt and was rejected. Fix: narrow the SRP header set (see "Headers carried throughout" below) and use `?isRememberMeEnabled=false` + `rememberMe: false` on `signin/complete`. Set `ASC_IRIS_DEBUG=1` to dump every idmsa request/response (with `a`/`m1`/`m2` redacted) if you need to debug a future regression.
 
 ## Why this exists
 
@@ -265,6 +265,7 @@ Strict TDD. Each slice has a red test before any production code.
 | 5 | Keychain / file persistence | Login → restart process → cookies still resolve from storage |
 | 6 | CLI commands `login` / `verify-code` / `logout` | Snapshot tests green; `asc iris status` reflects source `srp-login` |
 | 7 | Doc + CHANGELOG | This doc updated with implementation status; CHANGELOG `[Unreleased] → Added` |
+| 8 | Real-login validation | `asc iris auth login --interactive` returns a populated `IrisAuthSession` against the live `idmsa.apple.com`, hsa2 trusted-device path; required narrowing the SRP header set and flipping `rememberMe` to `false` |
 
 ## Risks (called out so we don't kid ourselves)
 
