@@ -73,10 +73,21 @@ public struct AppleSRPClient: @unchecked Sendable {
             throw AppleSRPError.nullServerKey
         }
 
-        let xBytes = Self.deriveAppleX(
+        // Apple's `x` derivation is a two-stage process:
+        //   1. derivedPassword = PBKDF2-HMAC-SHA256(SHA256(password), salt, iter, 32)
+        //   2. x = SHA256(salt || SHA256(0x3A || derivedPassword))
+        //
+        // Step 2 is the canonical RFC 5054 / SRP-6a `x = H(salt | H(":" | P))` formula
+        // with `I = ""` and `P = derivedPassword`. Without it, M1 won't match Apple's
+        // server-side computation and `signin/complete` returns 401 with code -20101
+        // ("Incorrect Apple Account email or password" — the misleading message that
+        // has bitten every reverse-engineered Apple-auth client).
+        let derivedPassword = Self.deriveAppleX(
             password: password, salt: salt, iterations: iterations, protocol: srpProtocol
         )
-        let x = BigNum(bytes: [UInt8](xBytes))
+        let inner = SHA256.hash(data: Data([0x3A]) + derivedPassword)
+        let outer = SHA256.hash(data: salt + Data(inner))
+        let x = BigNum(bytes: [UInt8](outer))
 
         let A_padded = keys.public.with(padding: configuration.sizeN).bytes
         let B_padded = padded(serverPublicKeyBytes, to: configuration.sizeN)
