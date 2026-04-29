@@ -86,6 +86,19 @@ Distinct from `InAppPurchaseSubmissionRepository` (public SDK) so the two auth s
 
 `IrisStatus.affordances` advertises `submitIAP` when iris is authenticated, so `asc iris status` lists the iris-only IAP submission path alongside `listApps` / `createApp`.
 
+### Auto-dispatch on the `submit` affordance
+
+The agent doesn't have to know iris-vs-sdk exists. `InAppPurchase.structuredAffordances` auto-dispatches the `submit` key:
+
+| App's IAP history | `submit` affordance resolves to |
+|---|---|
+| Zero IAPs ever approved (first-time gate active) | `asc iris iap-submissions create --iap-id <id>` |
+| Any IAP previously approved (or in `removedFromSale`) | `asc iap submit --iap-id <id>` |
+
+Detection is **per-batch**: `SDKInAppPurchaseRepository.listInAppPurchases` looks at every IAP returned for the parent app and asks "has any of these been approved?" — using `InAppPurchaseState.hasBeenApproved` (`approved | developerRemovedFromSale | removedFromSale`). If no, every unapproved IAP gets `isFirstTimeSubmission = true`. Zero extra API calls — derived from data already in the listing response.
+
+**Caveat — `iap get` ≠ `iap list`.** A single `asc iap get --iap-id <id>` has no batch context, so `isFirstTimeSubmission` defaults to `false` and the `submit` affordance always resolves to `asc iap submit`. Agents that need the right path should `list` first. The fix would be a second API call inside `get` to fetch sibling IAPs; we judged the cost not worth the consistency.
+
 ### Subscriptions — still pending
 
 Same gap exists at `POST /iris/v1/subscriptionSubmissions`. The implementation will mirror this PR — separate `IrisSubscriptionSubmissionRepository`, `asc iris subscription-submissions create`, `POST /api/v1/iris/subscriptions/:id/submissions`. Out of scope for this iteration to keep the change reviewable.
