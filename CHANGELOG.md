@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.17.7] - 2026-04-29
+
 ### Added
 - **REST `POST` / `PATCH` / `DELETE` for subscription group localizations** — `SubscriptionGroupLocalizationsController` previously exposed only `GET`, so `POST /api/v1/subscription-groups/:groupId/subscription-group-localizations` (the call the AppNexus web UI emits when creating a new locale) returned 404. Now wired:
   - `POST /api/v1/subscription-groups/:groupId/subscription-group-localizations` — body `{locale, name, customAppName?}`.
@@ -888,7 +892,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.1.74...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.17.7...HEAD
+[0.17.7]: https://github.com/tddworks/asc-cli/compare/v0.1.74...v0.17.7
 [0.1.74]: https://github.com/tddworks/asc-cli/compare/v0.17.3...v0.1.74
 [0.17.3]: https://github.com/tddworks/asc-cli/compare/v0.17.2...v0.17.3
 [0.17.2]: https://github.com/tddworks/asc-cli/compare/v0.17.1...v0.17.2
