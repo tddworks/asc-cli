@@ -17,12 +17,12 @@ struct SubscriptionReviewController: Sendable {
 
         group.post("/subscriptions/:subscriptionId/review-screenshot") { request, context -> Response in
             guard let subscriptionId = context.parameters.get("subscriptionId") else { return jsonError("Missing subscriptionId") }
-            let item = try await uploadReviewBody(
+            return await uploadReviewBodyResponse(
+                label: "subscription-review-screenshot",
                 request: request,
                 fileExtension: extensionFor(contentType: request.headers[.contentType], fallback: "png"),
                 upload: { try await self.repo.uploadReviewScreenshot(subscriptionId: subscriptionId, fileURL: $0) }
             )
-            return try restFormat(item)
         }
 
         group.get("/subscriptions/:subscriptionId/images") { _, context -> Response in
@@ -33,12 +33,12 @@ struct SubscriptionReviewController: Sendable {
 
         group.post("/subscriptions/:subscriptionId/images") { request, context -> Response in
             guard let subscriptionId = context.parameters.get("subscriptionId") else { return jsonError("Missing subscriptionId") }
-            let item = try await uploadReviewBody(
+            return await uploadReviewBodyResponse(
+                label: "subscription-images",
                 request: request,
                 fileExtension: extensionFor(contentType: request.headers[.contentType], fallback: "jpg"),
                 upload: { try await self.repo.uploadImage(subscriptionId: subscriptionId, fileURL: $0) }
             )
-            return try restFormat(item)
         }
     }
 }

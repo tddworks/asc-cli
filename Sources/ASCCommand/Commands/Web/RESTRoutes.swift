@@ -206,6 +206,28 @@ func uploadReviewBody<T>(
     return try await upload(tmpURL)
 }
 
+/// Wraps `uploadReviewBody` in a do/catch so failures (auth, ASC processing failure,
+/// poll timeout, body too large) surface as a JSON error response with a logged message
+/// instead of an unhandled throw becoming a Hummingbird 500-with-empty-body. The `label`
+/// is prefixed in stderr logs so we can correlate without enabling debug logging.
+func uploadReviewBodyResponse<T: Encodable & AffordanceProviding & Presentable>(
+    label: String,
+    request: Request,
+    fileExtension: String,
+    upload: (URL) async throws -> T
+) async -> Response {
+    do {
+        let item = try await uploadReviewBody(
+            request: request, fileExtension: fileExtension, upload: upload
+        )
+        return try restFormat(item)
+    } catch {
+        let message = "\(label) upload failed: \(error)"
+        FileHandle.standardError.write(Data((message + "\n").utf8))
+        return jsonError(message, status: .internalServerError)
+    }
+}
+
 /// Pick a file extension based on `Content-Type`. Falls back to the caller's default
 /// when the header is absent or carries an unfamiliar mime-type.
 func extensionFor(contentType: String?, fallback: String) -> String {

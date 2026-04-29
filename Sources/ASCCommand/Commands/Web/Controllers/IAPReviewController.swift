@@ -17,12 +17,12 @@ struct IAPReviewController: Sendable {
 
         group.post("/iap/:iapId/review-screenshot") { request, context -> Response in
             guard let iapId = context.parameters.get("iapId") else { return jsonError("Missing iapId") }
-            let item = try await uploadReviewBody(
+            return await uploadReviewBodyResponse(
+                label: "iap-review-screenshot",
                 request: request,
                 fileExtension: extensionFor(contentType: request.headers[.contentType], fallback: "png"),
                 upload: { try await self.repo.uploadReviewScreenshot(iapId: iapId, fileURL: $0) }
             )
-            return try restFormat(item)
         }
 
         group.get("/iap/:iapId/images") { _, context -> Response in
@@ -33,12 +33,12 @@ struct IAPReviewController: Sendable {
 
         group.post("/iap/:iapId/images") { request, context -> Response in
             guard let iapId = context.parameters.get("iapId") else { return jsonError("Missing iapId") }
-            let item = try await uploadReviewBody(
+            return await uploadReviewBodyResponse(
+                label: "iap-images",
                 request: request,
                 fileExtension: extensionFor(contentType: request.headers[.contentType], fallback: "jpg"),
                 upload: { try await self.repo.uploadImage(iapId: iapId, fileURL: $0) }
             )
-            return try restFormat(item)
         }
     }
 }
