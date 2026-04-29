@@ -17,3 +17,8 @@ extension SubscriptionSubmission: AffordanceProviding {
         ]
     }
 }
+
+extension SubscriptionSubmission: Presentable {
+    public static var tableHeaders: [String] { ["ID", "Subscription ID"] }
+    public var tableRow: [String] { [id, subscriptionId] }
+}

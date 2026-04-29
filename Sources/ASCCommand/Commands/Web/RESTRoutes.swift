@@ -87,6 +87,12 @@ enum RESTRoutes {
         if let subReviewRepo = try? factory.makeSubscriptionReviewRepository(authProvider: auth) {
             SubscriptionReviewController(repo: subReviewRepo).addRoutes(to: v1)
         }
+        if let iapSubmissionRepo = try? factory.makeInAppPurchaseSubmissionRepository(authProvider: auth) {
+            IAPSubmissionController(repo: iapSubmissionRepo).addRoutes(to: v1)
+        }
+        if let subSubmissionRepo = try? factory.makeSubscriptionSubmissionRepository(authProvider: auth) {
+            SubscriptionSubmissionController(repo: subSubmissionRepo).addRoutes(to: v1)
+        }
 
         // IAP detail listings
         if let iapLocRepo = try? factory.makeInAppPurchaseLocalizationRepository(authProvider: auth) {

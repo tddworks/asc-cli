@@ -17,3 +17,8 @@ extension InAppPurchaseSubmission: AffordanceProviding {
         ]
     }
 }
+
+extension InAppPurchaseSubmission: Presentable {
+    public static var tableHeaders: [String] { ["ID", "IAP ID"] }
+    public var tableRow: [String] { [id, iapId] }
+}
