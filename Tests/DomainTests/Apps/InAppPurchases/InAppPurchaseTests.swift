@@ -77,41 +77,42 @@ struct InAppPurchaseTests {
         #expect(iap.affordances["listPricePoints"] == "asc iap price-points list --iap-id iap-1")
     }
 
-    @Test func `iap affordances include submit only when readyToSubmit`() {
+    @Test func `iap affordances include submit only when readyToSubmit and not first-time`() {
+        // Default factory leaves isFirstTimeSubmission=false → public-SDK direct submit
+        // is the established-app path.
         let ready = MockRepositoryFactory.makeInAppPurchase(id: "iap-1", state: .readyToSubmit)
         let missing = MockRepositoryFactory.makeInAppPurchase(id: "iap-2", state: .missingMetadata)
         #expect(ready.affordances["submit"] == "asc iap submit --iap-id iap-1")
         #expect(missing.affordances["submit"] == nil)
     }
 
-    @Test func `submit affordance routes to iris when isFirstTimeSubmission`() {
-        // Apple requires the first IAP for an app to be submitted alongside a new
-        // App Store version — only `POST /iris/v1/inAppPurchaseSubmissions` accepts
-        // `submitWithNextAppStoreVersion`. The IAP affordance auto-dispatches to that
-        // path so the user never has to know iris-vs-sdk exists.
+    @Test func `first-time IAP shows addToNextVersion only (no submit)`() {
+        // Apple requires the first IAP for an app to ride along with a new App Store
+        // version — only the iris queue path accepts that. There's no public-SDK
+        // direct path that works, so submit is hidden.
         let firstTime = MockRepositoryFactory.makeInAppPurchase(
             id: "iap-1", state: .readyToSubmit, isFirstTimeSubmission: true
         )
-        #expect(firstTime.affordances["submit"] == "asc iris iap-submissions create --iap-id iap-1")
+        #expect(firstTime.affordances["addToNextVersion"] == "asc iris iap-submissions create --iap-id iap-1")
+        #expect(firstTime.affordances["submit"] == nil)
     }
 
-    @Test func `submit affordance routes to sdk when not first-time`() {
+    @Test func `subsequent IAP shows both submit and addToNextVersion when ready`() {
+        // The app already has shipped IAPs, so first-IAP gate is cleared. Either path
+        // works — agent picks based on whether they want this IAP reviewed standalone
+        // (submit, public SDK) or attached to next app version (addToNextVersion, iris).
         let subsequent = MockRepositoryFactory.makeInAppPurchase(
             id: "iap-2", state: .readyToSubmit, isFirstTimeSubmission: false
         )
         #expect(subsequent.affordances["submit"] == "asc iap submit --iap-id iap-2")
+        #expect(subsequent.affordances["addToNextVersion"] == "asc iris iap-submissions create --iap-id iap-2")
     }
 
-    @Test func `submit apiLinks resolve to iris path for first-time IAPs`() {
+    @Test func `addToNextVersion apiLinks resolve to iris REST path`() {
         let firstTime = MockRepositoryFactory.makeInAppPurchase(
             id: "iap-1", state: .readyToSubmit, isFirstTimeSubmission: true
         )
-        // The iris route isn't registered with the path resolver yet (it's a fresh
-        // CLI command), so the resolver falls back to the default `/api/v1/{command}/{action}`
-        // shape. Both CLI and REST renderers stay in sync because both go through
-        // `Affordance` — what matters is that the resolved REST path is iris-flavored
-        // and not the legacy `/api/v1/iap/iap-1/submit`.
-        let link = firstTime.apiLinks["submit"]
+        let link = firstTime.apiLinks["addToNextVersion"]
         #expect(link?.method == "POST")
         #expect(link?.href.contains("iris") == true)
         #expect(link?.href.contains("iap-1") == true)
@@ -120,29 +121,23 @@ struct InAppPurchaseTests {
     @Test func `removeFromNextVersion affordance fires when IAP is queued for next version`() {
         // When the iris listing reports `submitWithNextAppStoreVersion: true`, the IAP
         // is staged to ride along with the next app version submission — but not yet
-        // under active review. The action to undo this is "remove from next version",
-        // not "withdraw from review". Underlying call is the same DELETE on the
-        // submission record, which is keyed by the IAP id in iris.
+        // under active review. Inverse of addToNextVersion. Same DELETE on submission
+        // record (keyed by IAP id in iris).
         let queued = MockRepositoryFactory.makeInAppPurchase(
             id: "iap-7", state: .readyToSubmit, submitWithNextAppStoreVersion: true
         )
         #expect(queued.affordances["removeFromNextVersion"] == "asc iap unsubmit --submission-id iap-7")
     }
 
-    @Test func `submit and removeFromNextVersion are mutually exclusive`() {
-        // Already queued — submitting again would be rejected by Apple, so we hide
-        // submit and only offer the dequeue path.
+    @Test func `queued IAP suppresses submit and addToNextVersion`() {
+        // Already queued — re-submitting via either path would be rejected. Only
+        // the dequeue affordance fires.
         let queued = MockRepositoryFactory.makeInAppPurchase(
             id: "iap-7", state: .readyToSubmit, submitWithNextAppStoreVersion: true
         )
         #expect(queued.affordances["submit"] == nil)
-
-        // Not queued — submit is the only option.
-        let notQueued = MockRepositoryFactory.makeInAppPurchase(
-            id: "iap-8", state: .readyToSubmit, submitWithNextAppStoreVersion: false
-        )
-        #expect(notQueued.affordances["removeFromNextVersion"] == nil)
-        #expect(notQueued.affordances["submit"] != nil)
+        #expect(queued.affordances["addToNextVersion"] == nil)
+        #expect(queued.affordances["removeFromNextVersion"] != nil)
     }
 
     @Test func `removeFromNextVersion is hidden when not in readyToSubmit`() {

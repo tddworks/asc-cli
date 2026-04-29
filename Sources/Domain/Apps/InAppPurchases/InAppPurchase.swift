@@ -188,21 +188,27 @@ extension InAppPurchase: AffordanceProviding {
         ]
         if state == .readyToSubmit {
             if submitWithNextAppStoreVersion {
-                // Already queued via iris — submitting again would be rejected. Only
-                // surface the dequeue affordance. The submission resource is keyed by
-                // the IAP id in iris, so `--submission-id <iapId>` works against the
-                // public-SDK DELETE endpoint.
+                // Already queued via iris — re-submitting via either path would be
+                // rejected. Only surface the dequeue affordance. The submission
+                // resource is keyed by the IAP id in iris, so `--submission-id <iapId>`
+                // works against the public-SDK DELETE endpoint.
                 items.append(Affordance(key: "removeFromNextVersion", command: "iap", action: "unsubmit",
                                         params: ["submission-id": id]))
-            } else if isFirstTimeSubmission {
-                // Apple binds the first IAP for an app to a new App Store version. Only
-                // `POST /iris/v1/inAppPurchaseSubmissions` accepts that flag, so
-                // first-time IAPs route through `asc iris iap-submissions create`.
-                items.append(Affordance(key: "submit", command: "iris iap-submissions", action: "create",
-                                        params: ["iap-id": id]))
             } else {
-                items.append(Affordance(key: "submit", command: "iap", action: "submit",
+                // Inverse of removeFromNextVersion: `addToNextVersion` queues this IAP
+                // to ride along with the next App Store version submission via iris.
+                // Always available when ready and not yet queued — Apple permits it
+                // for both first-time and subsequent IAPs.
+                items.append(Affordance(key: "addToNextVersion", command: "iris iap-submissions", action: "create",
                                         params: ["iap-id": id]))
+                // `submit` (public-SDK direct) is only available once the app has
+                // shipped at least one IAP — Apple rejects the direct path for the
+                // first IAP. Established apps see both options; the agent picks
+                // standalone-review (submit) vs ride-along-with-version (addToNextVersion).
+                if !isFirstTimeSubmission {
+                    items.append(Affordance(key: "submit", command: "iap", action: "submit",
+                                            params: ["iap-id": id]))
+                }
             }
         }
         return items
