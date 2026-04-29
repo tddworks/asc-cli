@@ -36,6 +36,7 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
     ) async throws -> Domain.SubscriptionReviewScreenshot {
         let fileData = try Data(contentsOf: fileURL)
         let fileName = fileURL.lastPathComponent
+        logUploadStep("subscription-review-screenshot reserve fileName=\(fileName) bytes=\(fileData.count) subscriptionId=\(subscriptionId)")
 
         let reserveBody = SubscriptionAppStoreReviewScreenshotCreateRequest(data: .init(
             type: .subscriptionAppStoreReviewScreenshots,
@@ -49,8 +50,10 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
         )
         let screenshotId = reserved.data.id
         let uploadOps = reserved.data.attributes?.uploadOperations ?? []
+        logUploadStep("subscription-review-screenshot reserved id=\(screenshotId) chunks=\(uploadOps.count)")
 
         try await uploadChunks(uploadOps: uploadOps, fileData: fileData)
+        logUploadStep("subscription-review-screenshot chunks uploaded id=\(screenshotId)")
 
         let md5 = fileData.md5HexString
         let confirmBody = SubscriptionAppStoreReviewScreenshotUpdateRequest(data: .init(
@@ -61,6 +64,7 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
         _ = try await client.request(
             APIEndpoint.v1.subscriptionAppStoreReviewScreenshots.id(screenshotId).patch(confirmBody)
         )
+        logUploadStep("subscription-review-screenshot commit ok id=\(screenshotId) md5=\(md5)")
 
         // Step 4: Poll until ASC finishes processing the screenshot — the PATCH-commit
         // response returns an empty `imageAsset` because processing is async. Mirrors
@@ -85,6 +89,7 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
     public func uploadImage(subscriptionId: String, fileURL: URL) async throws -> Domain.SubscriptionPromotionalImage {
         let fileData = try Data(contentsOf: fileURL)
         let fileName = fileURL.lastPathComponent
+        logUploadStep("subscription-image reserve fileName=\(fileName) bytes=\(fileData.count) subscriptionId=\(subscriptionId)")
 
         let reserveBody = SubscriptionImageCreateRequest(data: .init(
             type: .subscriptionImages,
@@ -96,8 +101,10 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
         let reserved = try await client.request(APIEndpoint.v1.subscriptionImages.post(reserveBody))
         let imageId = reserved.data.id
         let uploadOps = reserved.data.attributes?.uploadOperations ?? []
+        logUploadStep("subscription-image reserved id=\(imageId) chunks=\(uploadOps.count)")
 
         try await uploadChunks(uploadOps: uploadOps, fileData: fileData)
+        logUploadStep("subscription-image chunks uploaded id=\(imageId)")
 
         let md5 = fileData.md5HexString
         let confirmBody = SubscriptionImageUpdateRequest(data: .init(
@@ -106,6 +113,7 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
             attributes: .init(sourceFileChecksum: md5, isUploaded: true)
         ))
         _ = try await client.request(APIEndpoint.v1.subscriptionImages.id(imageId).patch(confirmBody))
+        logUploadStep("subscription-image commit ok id=\(imageId) md5=\(md5)")
 
         // Step 4: Poll until ASC finishes processing — see `uploadReviewScreenshot`.
         return try await pollImageReady(imageId: imageId, subscriptionId: subscriptionId)
@@ -113,6 +121,10 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
 
     public func deleteImage(imageId: String) async throws {
         _ = try await client.request(APIEndpoint.v1.subscriptionImages.id(imageId).delete)
+    }
+
+    private func logUploadStep(_ message: String) {
+        FileHandle.standardError.write(Data("[asc-upload] \(message)\n".utf8))
     }
 
     /// Mirrors `AppStoreConnectInAppPurchaseRepository.uploadChunks` in `AppStoreSdk-SPM`.
@@ -159,6 +171,7 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
             latest = mapReviewScreenshot(response.data, subscriptionId: subscriptionId)
 
             let stateRaw = response.data.attributes?.assetDeliveryState?.state?.rawValue
+            logUploadStep("subscription-review-screenshot poll attempt=\(attempt) state=\(stateRaw ?? "nil") id=\(screenshotId)")
             switch stateRaw {
             case "COMPLETE":
                 return latest!
@@ -185,6 +198,8 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
             )
             latest = mapImage(response.data, subscriptionId: subscriptionId)
 
+            let stateRaw = response.data.attributes?.state?.rawValue
+            logUploadStep("subscription-image poll attempt=\(attempt) state=\(stateRaw ?? "nil") id=\(imageId)")
             switch response.data.attributes?.state {
             case .prepareForSubmission, .waitingForReview, .approved:
                 return latest!

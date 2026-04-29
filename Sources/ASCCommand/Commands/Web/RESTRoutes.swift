@@ -207,7 +207,7 @@ func uploadReviewBody<T>(
     let rawBytes = Data(buffer: buffer)
 
     let contentType = request.headers[.contentType]
-    let (fileBytes, resolvedExtension): (Data, String)
+    let (fileBytes, resolvedExtension, originalFilename): (Data, String, String?)
     if let boundary = multipartBoundary(from: contentType),
        let part = extractMultipartFilePart(body: rawBytes, boundary: boundary) {
         // Multipart: prefer the inner part's Content-Type for extension hinting,
@@ -215,14 +215,37 @@ func uploadReviewBody<T>(
         let extFromInner = extensionFor(contentType: part.contentType, fallback: fileExtension)
         let extFromFilename = part.filename.flatMap { ($0 as NSString).pathExtension.lowercased() }
         let resolvedExt = (extFromFilename.flatMap { $0.isEmpty ? nil : $0 }) ?? extFromInner
-        (fileBytes, resolvedExtension) = (part.bytes, resolvedExt)
+        (fileBytes, resolvedExtension, originalFilename) = (part.bytes, resolvedExt, part.filename)
     } else {
-        (fileBytes, resolvedExtension) = (rawBytes, fileExtension)
+        (fileBytes, resolvedExtension, originalFilename) = (rawBytes, fileExtension, nil)
     }
 
-    let tmpURL = FileManager.default.temporaryDirectory.appendingPathComponent("upload-\(UUID().uuidString).\(resolvedExtension)")
+    // Spool into a per-request UUID subdirectory so `lastPathComponent` is the user-supplied
+    // filename without any temp-dir collision risk. ASC stores `attributes.fileName` from
+    // the upload reservation — sending a generic "upload-{UUID}.png" makes ASC's review-asset
+    // UI fall back to "SOURCE" / "No preview" because it can't infer the file type.
+    let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+    try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: dir) }
+
+    let preferredName = originalFilename
+        .map { $0.replacingOccurrences(of: "/", with: "_") }
+        .flatMap { $0.isEmpty ? nil : $0 } ?? "upload.\(resolvedExtension)"
+    let tmpURL = dir.appendingPathComponent(preferredName)
     try fileBytes.write(to: tmpURL)
-    defer { try? FileManager.default.removeItem(at: tmpURL) }
+
+    // Diagnostic to stderr so the upload pipeline is visible in `swift run asc web-server`
+    // console output. Helps diagnose IMAGE_CORRUPT vs filename-rendering issues without
+    // having to keep temp files around.
+    let magic = fileBytes.prefix(16).map { String(format: "%02X", $0) }.joined(separator: " ")
+    let summary = """
+    [upload] contentType=\(contentType ?? "nil") rawBytes=\(rawBytes.count) extractedBytes=\(fileBytes.count)
+    [upload] filename=\(preferredName) ext=\(resolvedExtension) first16=\(magic)
+    [upload] tmpFile=\(tmpURL.path)
+
+    """
+    FileHandle.standardError.write(Data(summary.utf8))
+
     return try await upload(tmpURL)
 }
 

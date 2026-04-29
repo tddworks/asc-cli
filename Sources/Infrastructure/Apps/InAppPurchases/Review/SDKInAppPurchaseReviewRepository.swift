@@ -41,6 +41,7 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
     ) async throws -> Domain.InAppPurchaseReviewScreenshot {
         let fileData = try Data(contentsOf: fileURL)
         let fileName = fileURL.lastPathComponent
+        logUploadStep("iap-review-screenshot reserve fileName=\(fileName) bytes=\(fileData.count) iapId=\(iapId)")
 
         // Step 1: Reserve
         let reserveBody = InAppPurchaseAppStoreReviewScreenshotCreateRequest(data: .init(
@@ -55,9 +56,11 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
         )
         let screenshotId = reserved.data.id
         let uploadOps = reserved.data.attributes?.uploadOperations ?? []
+        logUploadStep("iap-review-screenshot reserved id=\(screenshotId) chunks=\(uploadOps.count)")
 
         // Step 2: Upload chunks
         try await uploadChunks(uploadOps: uploadOps, fileData: fileData)
+        logUploadStep("iap-review-screenshot chunks uploaded id=\(screenshotId)")
 
         // Step 3: Commit with MD5
         let md5 = fileData.md5HexString
@@ -69,6 +72,7 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
         _ = try await client.request(
             APIEndpoint.v1.inAppPurchaseAppStoreReviewScreenshots.id(screenshotId).patch(confirmBody)
         )
+        logUploadStep("iap-review-screenshot commit ok id=\(screenshotId) md5=\(md5)")
 
         // Step 4: Poll until ASC finishes processing — the PATCH-commit response
         // returns an empty `imageAsset` (templateURL/width/height all zero/empty)
@@ -93,6 +97,7 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
     public func uploadImage(iapId: String, fileURL: URL) async throws -> Domain.InAppPurchasePromotionalImage {
         let fileData = try Data(contentsOf: fileURL)
         let fileName = fileURL.lastPathComponent
+        logUploadStep("iap-image reserve fileName=\(fileName) bytes=\(fileData.count) iapId=\(iapId)")
 
         let reserveBody = InAppPurchaseImageCreateRequest(data: .init(
             type: .inAppPurchaseImages,
@@ -104,8 +109,10 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
         let reserved = try await client.request(APIEndpoint.v1.inAppPurchaseImages.post(reserveBody))
         let imageId = reserved.data.id
         let uploadOps = reserved.data.attributes?.uploadOperations ?? []
+        logUploadStep("iap-image reserved id=\(imageId) chunks=\(uploadOps.count)")
 
         try await uploadChunks(uploadOps: uploadOps, fileData: fileData)
+        logUploadStep("iap-image chunks uploaded id=\(imageId)")
 
         let md5 = fileData.md5HexString
         let confirmBody = InAppPurchaseImageUpdateRequest(data: .init(
@@ -114,6 +121,7 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
             attributes: .init(sourceFileChecksum: md5, isUploaded: true)
         ))
         _ = try await client.request(APIEndpoint.v1.inAppPurchaseImages.id(imageId).patch(confirmBody))
+        logUploadStep("iap-image commit ok id=\(imageId) md5=\(md5)")
 
         // Step 4: Poll until ASC finishes processing — see `uploadReviewScreenshot`.
         return try await pollImageReady(imageId: imageId, iapId: iapId)
@@ -137,6 +145,7 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
             latest = mapReviewScreenshot(response.data, iapId: iapId)
 
             let stateRaw = response.data.attributes?.assetDeliveryState?.state?.rawValue
+            logUploadStep("iap-review-screenshot poll attempt=\(attempt) state=\(stateRaw ?? "nil") id=\(screenshotId)")
             switch stateRaw {
             case "COMPLETE":
                 return latest!
@@ -163,6 +172,8 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
             )
             latest = mapImage(response.data, iapId: iapId)
 
+            let stateRaw = response.data.attributes?.state?.rawValue
+            logUploadStep("iap-image poll attempt=\(attempt) state=\(stateRaw ?? "nil") id=\(imageId)")
             switch response.data.attributes?.state {
             case .prepareForSubmission, .waitingForReview, .approved:
                 return latest!
@@ -178,6 +189,10 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
     }
 
     // MARK: - Helpers
+
+    private func logUploadStep(_ message: String) {
+        FileHandle.standardError.write(Data("[asc-upload] \(message)\n".utf8))
+    }
 
     /// Mirrors `AppStoreConnectInAppPurchaseRepository.uploadChunks` in `AppStoreSdk-SPM`:
     /// slice via subscript, guard `method` (skip op if nil), set headers verbatim
