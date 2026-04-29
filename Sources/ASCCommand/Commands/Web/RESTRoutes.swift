@@ -191,6 +191,11 @@ func restResponse(_ json: String, status: HTTPResponse.Status = .ok) -> Response
 /// given extension, run `upload(fileURL:)`, and clean up the temp file. The temp
 /// is removed even if `upload` throws — keeps the spool directory bounded.
 ///
+/// Auto-detects `multipart/form-data` (the shape browser `<input type=file>` posts)
+/// and extracts the first file part's bytes before spooling. Forwarding the multipart
+/// envelope to ASC otherwise yields `IMAGE_CORRUPT` because the boundary lines aren't
+/// part of a valid PNG/JPEG.
+///
 /// Used for review screenshots and 1024×1024 promotional images. The 20MB ceiling
 /// covers the largest screenshot Apple accepts (~10MB) with headroom.
 func uploadReviewBody<T>(
@@ -198,10 +203,25 @@ func uploadReviewBody<T>(
     fileExtension: String,
     upload: (URL) async throws -> T
 ) async throws -> T {
-    let body = try await request.body.collect(upTo: 20 * 1024 * 1024)
-    let bytes = Data(buffer: body)
-    let tmpURL = FileManager.default.temporaryDirectory.appendingPathComponent("upload-\(UUID().uuidString).\(fileExtension)")
-    try bytes.write(to: tmpURL)
+    let buffer = try await request.body.collect(upTo: 20 * 1024 * 1024)
+    let rawBytes = Data(buffer: buffer)
+
+    let contentType = request.headers[.contentType]
+    let (fileBytes, resolvedExtension): (Data, String)
+    if let boundary = multipartBoundary(from: contentType),
+       let part = extractMultipartFilePart(body: rawBytes, boundary: boundary) {
+        // Multipart: prefer the inner part's Content-Type for extension hinting,
+        // otherwise the filename's extension, otherwise the caller's fallback.
+        let extFromInner = extensionFor(contentType: part.contentType, fallback: fileExtension)
+        let extFromFilename = part.filename.flatMap { ($0 as NSString).pathExtension.lowercased() }
+        let resolvedExt = (extFromFilename.flatMap { $0.isEmpty ? nil : $0 }) ?? extFromInner
+        (fileBytes, resolvedExtension) = (part.bytes, resolvedExt)
+    } else {
+        (fileBytes, resolvedExtension) = (rawBytes, fileExtension)
+    }
+
+    let tmpURL = FileManager.default.temporaryDirectory.appendingPathComponent("upload-\(UUID().uuidString).\(resolvedExtension)")
+    try fileBytes.write(to: tmpURL)
     defer { try? FileManager.default.removeItem(at: tmpURL) }
     return try await upload(tmpURL)
 }
@@ -226,6 +246,87 @@ func uploadReviewBodyResponse<T: Encodable & AffordanceProviding & Presentable>(
         FileHandle.standardError.write(Data((message + "\n").utf8))
         return jsonError(message, status: .internalServerError)
     }
+}
+
+// MARK: - Multipart/form-data parsing
+//
+// Browser `<input type=file>` (and `FormData`) wraps file bytes in a multipart envelope
+// even when there's only one field. Forwarding that envelope to ASC results in
+// `IMAGE_CORRUPT` because the boundary lines and Content-Disposition headers aren't
+// part of a valid PNG/JPEG. We strip them before spooling to the upload temp file.
+
+/// Pulls the boundary token out of a `multipart/form-data; boundary=…` Content-Type.
+/// Returns `nil` for any other content type. Tolerates surrounding quotes and casing.
+func multipartBoundary(from contentType: String?) -> String? {
+    guard let contentType else { return nil }
+    let lower = contentType.lowercased()
+    guard lower.contains("multipart/form-data") else { return nil }
+    for part in contentType.split(separator: ";") {
+        let trimmed = part.trimmingCharacters(in: .whitespaces)
+        if trimmed.lowercased().hasPrefix("boundary=") {
+            var value = String(trimmed.dropFirst("boundary=".count))
+            if value.hasPrefix("\""), value.hasSuffix("\"") {
+                value = String(value.dropFirst().dropLast())
+            }
+            return value.isEmpty ? nil : value
+        }
+    }
+    return nil
+}
+
+/// Extracts the first part's bytes (and its Content-Type / filename when declared)
+/// from a `multipart/form-data` body. Designed for the single-file upload case the
+/// browser sends — we don't need to enumerate all parts.
+///
+/// Byte-safe: searches for boundary markers via byte ranges, never decoding the body
+/// as a string. Embedded CRLF inside the file bytes are preserved.
+func extractMultipartFilePart(body: Data, boundary: String) -> (bytes: Data, contentType: String?, filename: String?)? {
+    let dashBoundary = Data("--\(boundary)".utf8)
+    let crlfCrlf = Data("\r\n\r\n".utf8)
+
+    guard let firstBoundary = body.range(of: dashBoundary) else { return nil }
+    let afterBoundary = firstBoundary.upperBound
+    guard afterBoundary < body.endIndex else { return nil }
+
+    // Headers run from end-of-first-boundary-line to the next CRLFCRLF.
+    let headerSearch = afterBoundary..<body.endIndex
+    guard let headerEnd = body.range(of: crlfCrlf, in: headerSearch) else { return nil }
+
+    let headerBlock = body[afterBoundary..<headerEnd.lowerBound]
+    let headerString = String(data: headerBlock, encoding: .utf8) ?? ""
+    let (contentType, filename) = parseMultipartPartHeaders(headerString)
+
+    // File body runs from after the CRLFCRLF until the next boundary line. The two
+    // bytes immediately before the next boundary are the trailing `\r\n` separator
+    // and don't belong to the file.
+    let bodyStart = headerEnd.upperBound
+    let bodySearch = bodyStart..<body.endIndex
+    guard let nextBoundary = body.range(of: dashBoundary, in: bodySearch) else { return nil }
+    let bodyEnd = nextBoundary.lowerBound - 2
+    guard bodyEnd >= bodyStart else { return nil }
+
+    return (bytes: body.subdata(in: bodyStart..<bodyEnd), contentType: contentType, filename: filename)
+}
+
+/// Reads `Content-Type` and `filename="…"` from a multipart part's header block.
+private func parseMultipartPartHeaders(_ headerString: String) -> (contentType: String?, filename: String?) {
+    var contentType: String?
+    var filename: String?
+    for line in headerString.split(separator: "\r\n", omittingEmptySubsequences: true) {
+        let lower = line.lowercased()
+        if lower.hasPrefix("content-type:") {
+            contentType = line.dropFirst("content-type:".count).trimmingCharacters(in: .whitespaces)
+        } else if lower.hasPrefix("content-disposition:") {
+            // Naive: filename="something.png"
+            if let range = line.range(of: "filename=\"") {
+                let after = line[range.upperBound...]
+                if let end = after.firstIndex(of: "\"") {
+                    filename = String(after[..<end])
+                }
+            }
+        }
+    }
+    return (contentType, filename)
 }
 
 /// Pick a file extension based on `Content-Type`. Falls back to the caller's default
