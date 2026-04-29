@@ -86,18 +86,34 @@ Distinct from `InAppPurchaseSubmissionRepository` (public SDK) so the two auth s
 
 `IrisStatus.affordances` advertises `submitIAP` when iris is authenticated, so `asc iris status` lists the iris-only IAP submission path alongside `listApps` / `createApp`.
 
-### Auto-dispatch on the `submit` affordance
+### Submission affordances on `InAppPurchase`
 
-The agent doesn't have to know iris-vs-sdk exists. `InAppPurchase.structuredAffordances` auto-dispatches the `submit` key:
+Two clean inverse pairs, gated on `state == .readyToSubmit`:
 
-| App's IAP history | `submit` affordance resolves to |
+- **`addToNextVersion` ↔ `removeFromNextVersion`** — iris queue family. Add stages the IAP to ride along with the next App Store version submission; remove dequeues it.
+- **`submit`** — public-SDK direct submit; only emitted once the app has shipped at least one IAP (Apple rejects the direct path for the first IAP).
+
+| Condition | Affordances emitted |
 |---|---|
-| Zero IAPs ever approved (first-time gate active) | `asc iris iap-submissions create --iap-id <id>` |
-| Any IAP previously approved (or in `removedFromSale`) | `asc iap submit --iap-id <id>` |
+| `state == .readyToSubmit && submitWithNextAppStoreVersion == true` | `removeFromNextVersion` (only) |
+| `state == .readyToSubmit && !submitWithNextAppStoreVersion && isFirstTimeSubmission` | `addToNextVersion` (only) |
+| `state == .readyToSubmit && !submitWithNextAppStoreVersion && !isFirstTimeSubmission` | `addToNextVersion` **and** `submit` |
+| any other state | none of the above |
 
-Detection is **per-batch**: `SDKInAppPurchaseRepository.listInAppPurchases` looks at every IAP returned for the parent app and asks "has any of these been approved?" — using `InAppPurchaseState.hasBeenApproved` (`approved | developerRemovedFromSale | removedFromSale`). If no, every unapproved IAP gets `isFirstTimeSubmission = true`. Zero extra API calls — derived from data already in the listing response.
+| Affordance | Command | What it does |
+|---|---|---|
+| `addToNextVersion` | `asc iris iap-submissions create --iap-id <id>` | `POST /iris/v1/inAppPurchaseSubmissions` (iris cookie auth) |
+| `removeFromNextVersion` | `asc iap unsubmit --submission-id <iapId>` | `DELETE /v1/inAppPurchaseSubmissions/{id}` (public SDK; Apple keys the submission resource by parent IAP id in iris) |
+| `submit` | `asc iap submit --iap-id <id>` | `POST /v1/inAppPurchaseSubmissions` (public SDK; standalone review) |
 
-**Caveat — `iap get` ≠ `iap list`.** A single `asc iap get --iap-id <id>` has no batch context, so `isFirstTimeSubmission` defaults to `false` and the `submit` affordance always resolves to `asc iap submit`. Agents that need the right path should `list` first. The fix would be a second API call inside `get` to fetch sibling IAPs; we judged the cost not worth the consistency.
+For an established-app IAP that's ready, the agent sees both `submit` and `addToNextVersion` and picks based on release strategy — standalone review (`submit`) vs ride along with the next app version (`addToNextVersion`).
+
+#### Where the two signals come from
+
+- **`isFirstTimeSubmission`** — derived per-batch in `SDKInAppPurchaseRepository.listInAppPurchases`. Every IAP returned for the app is checked via `InAppPurchaseState.hasBeenApproved` (`approved | developerRemovedFromSale | removedFromSale`); if zero are shipped, every unapproved IAP gets `true`. **Zero extra API calls** — derived from data already in the listing response.
+- **`submitWithNextAppStoreVersion`** — best-effort enrichment via `IrisSDKInAppPurchaseStateRepository.fetchSubmitFlags`. One iris call per `iap list`, server-side filtered to `state=READY_TO_SUBMIT` with only the one field. Failures (no iris cookies, network error, malformed response) silently leave the flag `false` so CI scripts using API-key auth keep their existing JSON output unchanged.
+
+**Caveat — `iap get` ≠ `iap list`.** A single `asc iap get --iap-id <id>` has no batch context, so `isFirstTimeSubmission` defaults to `false`. Iris enrichment also fires only on the list path. Agents that need the right affordance should `list` first.
 
 ### Subscriptions — still pending
 
