@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iris SRP login flow · Sequence</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #faf7f2;
+      --color-ink:     #1c1917;
+      --color-muted:   #57534e;
+      --color-accent:  #b5523a;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    .frame { max-width: 1200px; width: 100%; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      color: var(--color-muted);
+      margin-bottom: 1.5rem;
+      max-width: 56ch;
+    }
+
+    svg { width: 100%; min-width: 960px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Sequence · iris auth</p>
+    <h1>Apple ID SRP login + trusted-device 2FA</h1>
+    <p class="subtitle">From <code style="font-family:var(--font-mono);font-size:0.85rem;">asc iris auth login</code> to a populated <code style="font-family:var(--font-mono);font-size:0.85rem;">IrisAuthSession</code>. The verify/securitycode arrow is the headline; the preflight GET is the call most likely to break if SRP headers drift.</p>
+
+    <svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r="0.9" fill="rgba(28,25,23,0.10)"/>
+        </pattern>
+
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#57534e"/>
+        </marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#b5523a"/>
+        </marker>
+        <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#2563eb"/>
+        </marker>
+      </defs>
+
+      <!-- Background -->
+      <rect width="100%" height="100%" fill="#faf7f2"/>
+      <rect width="100%" height="100%" fill="url(#dots)" opacity="0.55"/>
+
+      <!-- =================================================================
+           LIFELINES — actors at x: 128, 384, 640, 880
+           ================================================================= -->
+      <line x1="128" y1="128" x2="128" y2="600" stroke="rgba(28,25,23,0.22)" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="384" y1="128" x2="384" y2="600" stroke="rgba(28,25,23,0.22)" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="640" y1="128" x2="640" y2="600" stroke="rgba(28,25,23,0.22)" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="880" y1="128" x2="880" y2="600" stroke="rgba(28,25,23,0.22)" stroke-width="1" stroke-dasharray="3,3"/>
+
+      <!-- =================================================================
+           ACTIVATION BARS on idmsa lifeline (where Apple holds control)
+           ================================================================= -->
+      <!-- SRP window: signin/init through 409 hsa2 -->
+      <rect x="380" y="180" width="8" height="160" fill="rgba(28,25,23,0.06)" stroke="#57534e" stroke-width="0.8"/>
+      <!-- Verify window: preflight through 204 -->
+      <rect x="380" y="408" width="8" height="100" fill="rgba(28,25,23,0.06)" stroke="#57534e" stroke-width="0.8"/>
+      <!-- Olympus activation -->
+      <rect x="876" y="540" width="8" height="36" fill="rgba(28,25,23,0.06)" stroke="#57534e" stroke-width="0.8"/>
+
+      <!-- =================================================================
+           MESSAGES — time flows top → down. Draw arrows BEFORE labels.
+           ================================================================= -->
+
+      <!-- M1: CLI → idmsa  POST /signin/init -->
+      <line x1="128" y1="180" x2="384" y2="180" stroke="#2563eb" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+
+      <!-- M2: idmsa → CLI  return salt + B (dashed) -->
+      <line x1="384" y1="212" x2="132" y2="212" stroke="#57534e" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+
+      <!-- M3: CLI self  derive M1 via PBKDF2 + SRP -->
+      <path d="M 132 244 L 168 244 L 168 276 L 132 276" fill="none" stroke="#57534e" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- M4: CLI → idmsa  POST /signin/complete -->
+      <line x1="128" y1="308" x2="384" y2="308" stroke="#2563eb" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+
+      <!-- M5: idmsa → CLI  409 hsa2 (dashed) -->
+      <line x1="384" y1="340" x2="132" y2="340" stroke="#57534e" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+
+      <!-- M6: idmsa → Trusted Device  push 6-digit code (async dashed) -->
+      <line x1="388" y1="372" x2="640" y2="372" stroke="#57534e" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+
+      <!-- M7: CLI → idmsa  GET /appleauth/auth (preflight) -->
+      <line x1="128" y1="416" x2="384" y2="416" stroke="#2563eb" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+
+      <!-- M8: CLI → idmsa  POST verify/trusteddevice/securitycode  (CORAL — headline) -->
+      <line x1="128" y1="464" x2="384" y2="464" stroke="#b5523a" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+
+      <!-- M9: idmsa → CLI  204 + 2sv/trust → myacinfo (dashed) -->
+      <line x1="384" y1="496" x2="132" y2="496" stroke="#57534e" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+
+      <!-- M10: CLI → olympus  GET /olympus/v1/session -->
+      <line x1="128" y1="544" x2="880" y2="544" stroke="#2563eb" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+
+      <!-- M11: olympus → CLI  providerID + teamId (dashed) -->
+      <line x1="880" y1="576" x2="132" y2="576" stroke="#57534e" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+
+      <!-- =================================================================
+           MESSAGE LABELS — opaque mask + Geist Mono
+           ================================================================= -->
+
+      <!-- M1 -->
+      <rect x="184" y="164" width="144" height="12" rx="2" fill="#faf7f2"/>
+      <text x="256" y="174" fill="#2563eb" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">POST /SIGNIN/INIT · A_PUB</text>
+
+      <!-- M2 -->
+      <rect x="188" y="196" width="136" height="12" rx="2" fill="#faf7f2"/>
+      <text x="256" y="206" fill="#57534e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">SALT · B · SCNT|1 · AASP</text>
+
+      <!-- M3 (self) -->
+      <rect x="176" y="252" width="184" height="12" rx="2" fill="#faf7f2"/>
+      <text x="268" y="262" fill="#57534e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">PBKDF2 · X · M1 · M2 (SRP)</text>
+
+      <!-- M4 -->
+      <rect x="172" y="292" width="168" height="12" rx="2" fill="#faf7f2"/>
+      <text x="256" y="302" fill="#2563eb" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">POST /SIGNIN/COMPLETE · M1 · HC</text>
+
+      <!-- M5 -->
+      <rect x="188" y="324" width="136" height="12" rx="2" fill="#faf7f2"/>
+      <text x="256" y="334" fill="#57534e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">409 HSA2 · SCNT|2</text>
+
+      <!-- M6 -->
+      <rect x="448" y="356" width="128" height="12" rx="2" fill="#faf7f2"/>
+      <text x="512" y="366" fill="#57534e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">PUSH 6-DIGIT CODE</text>
+
+      <!-- M7 -->
+      <rect x="184" y="400" width="144" height="12" rx="2" fill="#faf7f2"/>
+      <text x="256" y="410" fill="#2563eb" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">GET /APPLEAUTH/AUTH</text>
+
+      <!-- M8 (coral / headline) -->
+      <rect x="160" y="448" width="192" height="12" rx="2" fill="#faf7f2"/>
+      <text x="256" y="458" fill="#b5523a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">POST /VERIFY/TRUSTEDDEVICE · CODE</text>
+
+      <!-- M9 -->
+      <rect x="184" y="480" width="144" height="12" rx="2" fill="#faf7f2"/>
+      <text x="256" y="490" fill="#57534e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">204 · 2SV/TRUST · MYACINFO</text>
+
+      <!-- M10 -->
+      <rect x="416" y="528" width="176" height="12" rx="2" fill="#faf7f2"/>
+      <text x="504" y="538" fill="#2563eb" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">GET /OLYMPUS/V1/SESSION</text>
+
+      <!-- M11 -->
+      <rect x="416" y="560" width="176" height="12" rx="2" fill="#faf7f2"/>
+      <text x="504" y="570" fill="#57534e" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">PROVIDERID · TEAMID · EMAIL</text>
+
+      <!-- =================================================================
+           ANNOTATION — editorial italic callout on the preflight (M7)
+           ================================================================= -->
+      <line x1="408" y1="416" x2="468" y2="416" stroke="rgba(28,25,23,0.28)" stroke-width="0.8"/>
+      <line x1="468" y1="416" x2="468" y2="436" stroke="rgba(28,25,23,0.28)" stroke-width="0.8"/>
+      <text x="476" y="424" fill="#1c1917" font-size="14" font-family="'Instrument Serif', serif" font-style="italic">Load-bearing.</text>
+      <text x="476" y="442" fill="#57534e" font-size="11" font-family="'Geist', sans-serif">OAuth / Origin / Referer on signin/*</text>
+      <text x="476" y="456" fill="#57534e" font-size="11" font-family="'Geist', sans-serif">turns this 401, rotates scnt, then</text>
+      <text x="476" y="470" fill="#57534e" font-size="11" font-family="'Geist', sans-serif">verify rejects as out-of-sequence.</text>
+
+      <!-- =================================================================
+           ACTOR BOXES — drawn after arrows so they sit on top
+           ================================================================= -->
+
+      <!-- Actor 1: asc iris (focal / coral) -->
+      <rect x="56" y="72" width="144" height="56" rx="6" fill="#faf7f2"/>
+      <rect x="56" y="72" width="144" height="56" rx="6" fill="rgba(181,82,58,0.08)" stroke="#b5523a" stroke-width="1"/>
+      <rect x="64" y="80" width="28" height="12" rx="2" fill="transparent" stroke="rgba(181,82,58,0.50)" stroke-width="0.8"/>
+      <text x="78" y="89" fill="#b5523a" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CLI</text>
+      <text x="128" y="104" fill="#1c1917" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">asc iris</text>
+      <text x="128" y="119" fill="#57534e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">local · IdmsaAPIClient</text>
+
+      <!-- Actor 2: idmsa.apple.com (backend / ink) -->
+      <rect x="312" y="72" width="144" height="56" rx="6" fill="#faf7f2"/>
+      <rect x="312" y="72" width="144" height="56" rx="6" fill="#ffffff" stroke="#1c1917" stroke-width="1"/>
+      <rect x="320" y="80" width="28" height="12" rx="2" fill="transparent" stroke="rgba(28,25,23,0.40)" stroke-width="0.8"/>
+      <text x="334" y="89" fill="#57534e" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">API</text>
+      <text x="384" y="104" fill="#1c1917" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">idmsa.apple.com</text>
+      <text x="384" y="119" fill="#57534e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/appleauth/auth</text>
+
+      <!-- Actor 3: Trusted Device (external / soft) -->
+      <rect x="568" y="72" width="144" height="56" rx="6" fill="#faf7f2"/>
+      <rect x="568" y="72" width="144" height="56" rx="6" fill="rgba(87,83,78,0.10)" stroke="#78716c" stroke-width="1"/>
+      <rect x="576" y="80" width="28" height="12" rx="2" fill="transparent" stroke="rgba(120,113,108,0.40)" stroke-width="0.8"/>
+      <text x="590" y="89" fill="#78716c" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">EXT</text>
+      <text x="640" y="104" fill="#1c1917" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Trusted Device</text>
+      <text x="640" y="119" fill="#57534e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">iCloud push · hsa2</text>
+
+      <!-- Actor 4: olympus (cloud / muted) -->
+      <rect x="808" y="72" width="144" height="56" rx="6" fill="#faf7f2"/>
+      <rect x="808" y="72" width="144" height="56" rx="6" fill="rgba(28,25,23,0.03)" stroke="rgba(28,25,23,0.30)" stroke-width="1"/>
+      <rect x="816" y="80" width="28" height="12" rx="2" fill="transparent" stroke="rgba(28,25,23,0.30)" stroke-width="0.8"/>
+      <text x="830" y="89" fill="#57534e" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">API</text>
+      <text x="880" y="104" fill="#1c1917" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Olympus</text>
+      <text x="880" y="119" fill="#57534e" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">appstoreconnect</text>
+
+      <!-- =================================================================
+           LEGEND — horizontal strip
+           ================================================================= -->
+      <line x1="56" y1="624" x2="944" y2="624" stroke="rgba(28,25,23,0.10)" stroke-width="0.8"/>
+      <text x="56" y="640" fill="#57534e" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND</text>
+
+      <!-- L1: Focal actor -->
+      <rect x="56" y="660" width="14" height="10" rx="2" fill="rgba(181,82,58,0.08)" stroke="#b5523a" stroke-width="1"/>
+      <text x="76" y="668" fill="#57534e" font-size="8.5" font-family="'Geist', sans-serif">Focal actor</text>
+
+      <!-- L2: Activation bar -->
+      <rect x="180" y="656" width="4" height="18" fill="rgba(28,25,23,0.06)" stroke="#57534e" stroke-width="0.8"/>
+      <text x="192" y="668" fill="#57534e" font-size="8.5" font-family="'Geist', sans-serif">Activation</text>
+
+      <!-- L3: HTTP request (link-blue) -->
+      <line x1="288" y1="666" x2="316" y2="666" stroke="#2563eb" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+      <text x="324" y="668" fill="#57534e" font-size="8.5" font-family="'Geist', sans-serif">HTTP request</text>
+
+      <!-- L4: Return / async (muted dashed) -->
+      <line x1="432" y1="666" x2="460" y2="666" stroke="#57534e" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+      <text x="468" y="668" fill="#57534e" font-size="8.5" font-family="'Geist', sans-serif">Return / async</text>
+
+      <!-- L5: Headline arrow (coral) -->
+      <line x1="588" y1="666" x2="616" y2="666" stroke="#b5523a" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+      <text x="624" y="668" fill="#57534e" font-size="8.5" font-family="'Geist', sans-serif">2FA verify (headline)</text>
+    </svg>
+  </div>
+</body>
+</html>

@@ -175,6 +175,8 @@ public enum IrisAuthError: LocalizedError {
 
 ## Apple flow reproduced
 
+> Visual: open [`iris-srp-flow.html`](./iris-srp-flow.html) in a browser for a sequence diagram of every step below, with the load-bearing preflight call called out.
+
 ```
 Step 0  GET  /appleauth/auth/signin                            → grab serviceKey + scnt headers + cookies
 Step 1  POST /appleauth/auth/signin/init                       body: { a: A_pub_b64, accountName: email,
