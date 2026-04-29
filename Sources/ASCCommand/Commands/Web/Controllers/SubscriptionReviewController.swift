@@ -25,6 +25,12 @@ struct SubscriptionReviewController: Sendable {
             )
         }
 
+        group.delete("/subscription-review-screenshot/:screenshotId") { _, context -> Response in
+            guard let screenshotId = context.parameters.get("screenshotId") else { return jsonError("Missing screenshotId") }
+            try await self.repo.deleteReviewScreenshot(screenshotId: screenshotId)
+            return restResponse("{\"deleted\":true}")
+        }
+
         group.get("/subscriptions/:subscriptionId/images") { _, context -> Response in
             guard let subscriptionId = context.parameters.get("subscriptionId") else { return jsonError("Missing subscriptionId") }
             let items = try await self.repo.listImages(subscriptionId: subscriptionId)
@@ -39,6 +45,12 @@ struct SubscriptionReviewController: Sendable {
                 fileExtension: extensionFor(contentType: request.headers[.contentType], fallback: "jpg"),
                 upload: { try await self.repo.uploadImage(subscriptionId: subscriptionId, fileURL: $0) }
             )
+        }
+
+        group.delete("/subscription-images/:imageId") { _, context -> Response in
+            guard let imageId = context.parameters.get("imageId") else { return jsonError("Missing imageId") }
+            try await self.repo.deleteImage(imageId: imageId)
+            return restResponse("{\"deleted\":true}")
         }
     }
 }

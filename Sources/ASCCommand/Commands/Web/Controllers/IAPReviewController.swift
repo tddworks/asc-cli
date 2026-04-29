@@ -25,6 +25,12 @@ struct IAPReviewController: Sendable {
             )
         }
 
+        group.delete("/iap-review-screenshot/:screenshotId") { _, context -> Response in
+            guard let screenshotId = context.parameters.get("screenshotId") else { return jsonError("Missing screenshotId") }
+            try await self.repo.deleteReviewScreenshot(screenshotId: screenshotId)
+            return restResponse("{\"deleted\":true}")
+        }
+
         group.get("/iap/:iapId/images") { _, context -> Response in
             guard let iapId = context.parameters.get("iapId") else { return jsonError("Missing iapId") }
             let items = try await self.repo.listImages(iapId: iapId)
@@ -39,6 +45,12 @@ struct IAPReviewController: Sendable {
                 fileExtension: extensionFor(contentType: request.headers[.contentType], fallback: "jpg"),
                 upload: { try await self.repo.uploadImage(iapId: iapId, fileURL: $0) }
             )
+        }
+
+        group.delete("/iap-images/:imageId") { _, context -> Response in
+            guard let imageId = context.parameters.get("imageId") else { return jsonError("Missing imageId") }
+            try await self.repo.deleteImage(imageId: imageId)
+            return restResponse("{\"deleted\":true}")
         }
     }
 }
