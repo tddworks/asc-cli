@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.17.8] - 2026-04-29
+
 ### Added
 - **`asc iris iap-submissions delete --submission-id <id>`** — iris-side dequeue of an IAP submission (`DELETE /iris/v1/inAppPurchaseSubmissions/{id}`). Iris-queued submissions don't round-trip through the public-SDK delete; they can only be removed via this iris-cookie-authed path. New `IrisClient.delete`, new `IrisInAppPurchaseSubmissionRepository.deleteSubmission(session:submissionId:)`. REST equivalent: `DELETE /api/v1/iris/iap-submissions/:submissionId` on `IrisIAPSubmissionsController`. **`removeFromNextVersion` affordance now resolves end-to-end through iris** (CLI: `asc iris iap-submissions delete --submission-id <id>`; REST: `DELETE /api/v1/iris/iap-submissions/<id>`). `RESTPathResolver.resourcePath` now converts spaces in segment names to slashes so multi-word commands like `iris iap-submissions` produce clean URL segments. Removed the short-lived public-SDK alias `POST /api/v1/iap/:iapId/unsubmit` (incorrect — public DELETE doesn't accept iris-queued submissions).
 - **`removeFromNextVersion` affordance on queued IAPs** — when an IAP is in `READY_TO_SUBMIT` and Apple's iris listing reports `submitWithNextAppStoreVersion: true` (queued to ride along with the next app version), `InAppPurchase.structuredAffordances` surfaces `removeFromNextVersion` → `asc iap unsubmit --submission-id <iapId>` and **suppresses** the `submit` affordance (mutually exclusive — Apple rejects re-submits on already-queued IAPs). The dequeue uses the existing public-SDK `DELETE /v1/inAppPurchaseSubmissions/{id}` (Apple's iris flow keys the submission resource by parent IAP id, so `--submission-id <iapId>` works). Underpinned by a new best-effort iris enrichment: `IrisSDKInAppPurchaseStateRepository` calls `GET /iris/v1/apps/:appId/inAppPurchasesV2?fields[inAppPurchases]=submitWithNextAppStoreVersion&filter[state]=READY_TO_SUBMIT`, mapping each IAP to its queued bit. `SDKInAppPurchaseRepository.listInAppPurchases` accepts an optional `irisFlagsProvider` closure; the factory wires it from `IrisCookieProvider` + `IrisSDKInAppPurchaseStateRepository`. CI scripts using API-key auth keep their existing JSON output (flag stays `false`, no `removeFromNextVersion` affordance). New `InAppPurchase.submitWithNextAppStoreVersion: Bool` field, encoded only when `true` to avoid snapshot churn. New `IrisInAppPurchaseStateRepository` `@Mockable` Domain protocol.
@@ -920,7 +924,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.17.7...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.17.8...HEAD
+[0.17.8]: https://github.com/tddworks/asc-cli/compare/v0.17.7...v0.17.8
 [0.17.7]: https://github.com/tddworks/asc-cli/compare/v0.1.74...v0.17.7
 [0.1.74]: https://github.com/tddworks/asc-cli/compare/v0.17.3...v0.1.74
 [0.17.3]: https://github.com/tddworks/asc-cli/compare/v0.17.2...v0.17.3
