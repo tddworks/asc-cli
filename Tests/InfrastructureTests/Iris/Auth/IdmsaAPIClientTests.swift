@@ -90,7 +90,8 @@ struct IdmsaAPIClientTests {
         let result = try await client.signinComplete(
             accountName: "u@x.com", c: "cookie", m1: Data(count: 32), m2: Data(count: 32),
             scnt: "prev-scnt", appleIDSessionID: "prev-session",
-            hashcashChallenge: nil, hashcashBits: nil
+            hashcashChallenge: nil, hashcashBits: nil,
+            cookies: ""
         )
 
         if case .success(let scnt, let cookies) = result {
@@ -114,12 +115,14 @@ struct IdmsaAPIClientTests {
         let result = try await client.signinComplete(
             accountName: "u@x.com", c: "cookie", m1: Data(count: 32), m2: Data(count: 32),
             scnt: "prev-scnt", appleIDSessionID: "prev-session",
-            hashcashChallenge: nil, hashcashBits: nil
+            hashcashChallenge: nil, hashcashBits: nil,
+            cookies: "aasp=existing"
         )
 
-        if case .twoFactorRequired(let scnt, let sessionId) = result {
+        if case .twoFactorRequired(let scnt, let sessionId, let cookies) = result {
             #expect(scnt == "scnt-3")
             #expect(sessionId == "session-3")
+            #expect(cookies.contains("aasp=existing"))
         } else {
             Issue.record("expected .twoFactorRequired, got \(result)")
         }

@@ -40,20 +40,21 @@ public struct IrisAuthSDKRepository: IrisAuthRepository, @unchecked Sendable {
             scnt: initResponse.scnt,
             appleIDSessionID: initResponse.appleIDSessionID,
             hashcashChallenge: initResponse.hashcashChallenge,
-            hashcashBits: initResponse.hashcashBits
+            hashcashBits: initResponse.hashcashBits,
+            cookies: initResponse.cookies
         )
 
         switch result {
-        case .twoFactorRequired(let scnt, let sessionID):
-            // Apple gives no shape for the challenge here — observed flow surfaces it
-            // via a follow-up GET that we don't model yet. Default to trusted-device push;
-            // the verify-code CLI accepts a `--method phone` override when phone is the
-            // only path. Real-world calibration in slice 6.
+        case .twoFactorRequired(let scnt, let sessionID, let cookies):
+            // The cookie bag is the LIFELINE for the next CLI invocation: `verify-code`
+            // runs in a separate process, so HTTPCookieStorage is wiped. We persist the
+            // accumulated `aasp` (and friends) here and re-send them as Cookie header
+            // on the verify and trust requests.
             let pending = PendingTwoFactorState(
                 credentials: credentials,
                 scnt: scnt, serviceKey: Self.ascServiceKey,
                 appleIDSessionID: sessionID,
-                twoFactorCookieBag: "",
+                twoFactorCookieBag: cookies,
                 challenge: TwoFactorChallenge(method: .trustedDevice, maskedDestination: "Trusted devices", codeLength: 6)
             )
             throw IrisAuthError.twoFactorRequired(pending)
@@ -67,15 +68,20 @@ public struct IrisAuthSDKRepository: IrisAuthRepository, @unchecked Sendable {
     }
 
     public func submitTwoFactorCode(_ code: String, pending: PendingTwoFactorState) async throws -> IrisAuthSession {
+        let cookiesAfterVerify: String
         do {
-            try await idmsa.submitTwoFactorCode(
+            cookiesAfterVerify = try await idmsa.submitTwoFactorCode(
                 code, method: mapMethod(pending.challenge.method),
-                scnt: pending.scnt, appleIDSessionID: pending.appleIDSessionID
+                scnt: pending.scnt, appleIDSessionID: pending.appleIDSessionID,
+                cookies: pending.twoFactorCookieBag
             )
         } catch let e as IrisAuthError where e == .twoFactorCodeRejected(remainingAttempts: nil) {
             throw e
         }
-        let cookies = try await idmsa.trust(scnt: pending.scnt, appleIDSessionID: pending.appleIDSessionID)
+        let cookies = try await idmsa.trust(
+            scnt: pending.scnt, appleIDSessionID: pending.appleIDSessionID,
+            cookies: cookiesAfterVerify
+        )
         return try await buildSession(
             cookies: cookies, scnt: pending.scnt, sessionID: pending.appleIDSessionID,
             userEmail: pending.credentials.appleId

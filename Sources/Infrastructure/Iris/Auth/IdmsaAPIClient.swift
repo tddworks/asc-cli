@@ -34,6 +34,12 @@ public struct IdmsaAPIClient: Sendable {
         /// challenge from any *other* request will fail `signin/complete` with 401.
         public let hashcashChallenge: String?
         public let hashcashBits: Int?
+        /// Accumulated `name=value; name=value` cookie bag from `Set-Cookie`. Must be
+        /// echoed on every subsequent idmsa call in this login flow — including 2FA
+        /// verification and trust — or Apple sees the calls as out-of-session and
+        /// rejects them. Crucial for surviving across CLI process boundaries (between
+        /// `asc iris auth login` and `asc iris auth verify-code`).
+        public let cookies: String
     }
 
     public func signinInit(accountName: String, A: Data) async throws -> SigninInitResponse {
@@ -62,26 +68,31 @@ public struct IdmsaAPIClient: Sendable {
         let sessionID = response.value(forHTTPHeaderField: "X-Apple-ID-Session-Id") ?? ""
         let hashcashChallenge = response.value(forHTTPHeaderField: "X-Apple-HC-Challenge")
         let hashcashBits = response.value(forHTTPHeaderField: "X-Apple-HC-Bits").flatMap(Int.init)
+        let cookies = Self.accumulateCookies(from: response, into: "")
         return SigninInitResponse(
             iteration: iteration, salt: salt, b: b, c: c,
             protocolType: proto, scnt: scnt, appleIDSessionID: sessionID,
-            hashcashChallenge: hashcashChallenge, hashcashBits: hashcashBits
+            hashcashChallenge: hashcashChallenge, hashcashBits: hashcashBits,
+            cookies: cookies
         )
     }
 
     // MARK: - signin/complete
 
     public enum SigninCompleteResult: Sendable, Equatable {
-        /// 200 OK — login succeeded without 2FA. `cookies` is the Set-Cookie payload.
+        /// 200 OK — login succeeded without 2FA. `cookies` is the accumulated bag.
         case success(scnt: String, cookies: String)
-        /// 409 Conflict — 2FA gate. Caller must run the 2FA flow with the new scnt + sessionID.
-        case twoFactorRequired(scnt: String, appleIDSessionID: String)
+        /// 409 Conflict — 2FA gate. Caller must run the 2FA flow with the new scnt + sessionID
+        /// and the accumulated cookie bag (which will include `aasp` from init plus anything
+        /// the complete-409 response adds).
+        case twoFactorRequired(scnt: String, appleIDSessionID: String, cookies: String)
     }
 
     public func signinComplete(
         accountName: String, c: String, m1: Data, m2: Data,
         scnt: String, appleIDSessionID: String,
-        hashcashChallenge: String?, hashcashBits: Int?
+        hashcashChallenge: String?, hashcashBits: Int?,
+        cookies incomingCookies: String
     ) async throws -> SigninCompleteResult {
         let body: [String: Any] = [
             "accountName": accountName,
@@ -103,20 +114,24 @@ public struct IdmsaAPIClient: Sendable {
             hashcash = nil
         }
 
+        var extraHeaders: [String: String] = [:]
+        if let hashcash { extraHeaders["X-Apple-HC"] = hashcash }
+        if !incomingCookies.isEmpty { extraHeaders["Cookie"] = incomingCookies }
+
         let (_, response) = try await postJSON(
             url: url, body: body, scnt: scnt, sessionID: appleIDSessionID,
-            extraHeaders: hashcash.map { ["X-Apple-HC": $0] } ?? [:]
+            extraHeaders: extraHeaders
         )
 
         let respScnt = response.value(forHTTPHeaderField: "scnt") ?? scnt
         let respSession = response.value(forHTTPHeaderField: "X-Apple-ID-Session-Id") ?? appleIDSessionID
+        let updatedCookies = Self.accumulateCookies(from: response, into: incomingCookies)
 
         switch response.statusCode {
         case 200:
-            let cookies = (response.allHeaderFields["Set-Cookie"] as? String) ?? ""
-            return .success(scnt: respScnt, cookies: cookies)
+            return .success(scnt: respScnt, cookies: updatedCookies)
         case 409:
-            return .twoFactorRequired(scnt: respScnt, appleIDSessionID: respSession)
+            return .twoFactorRequired(scnt: respScnt, appleIDSessionID: respSession, cookies: updatedCookies)
         case 401, 403:
             throw IrisAuthError.invalidCredentials
         default:
@@ -133,12 +148,15 @@ public struct IdmsaAPIClient: Sendable {
 
     /// Submits a 6-digit 2FA code. 200 = accepted; non-2xx surfaces as `twoFactorCodeRejected`
     /// or `networkFailure` depending on Apple's status.
+    /// Submits the 6-digit code and returns the updated cookie bag (Apple may set
+    /// extra cookies on success). Cookies must be echoed on the subsequent `trust` call.
     public func submitTwoFactorCode(
         _ code: String,
         method: TwoFactorMethod,
         scnt: String,
-        appleIDSessionID: String
-    ) async throws {
+        appleIDSessionID: String,
+        cookies incomingCookies: String
+    ) async throws -> String {
         let url: URL
         let body: [String: Any]
         switch method {
@@ -152,9 +170,17 @@ public struct IdmsaAPIClient: Sendable {
             // and let real-world testing iterate on it.
             body = ["securityCode": ["code": code], "phoneNumber": ["id": 1], "mode": "sms"]
         }
-        let (_, response) = try await postJSON(url: url, body: body, scnt: scnt, sessionID: appleIDSessionID)
+
+        var extraHeaders: [String: String] = [:]
+        if !incomingCookies.isEmpty { extraHeaders["Cookie"] = incomingCookies }
+
+        let (_, response) = try await postJSON(
+            url: url, body: body, scnt: scnt, sessionID: appleIDSessionID,
+            extraHeaders: extraHeaders
+        )
         switch response.statusCode {
-        case 200, 204: return
+        case 200, 204:
+            return Self.accumulateCookies(from: response, into: incomingCookies)
         case 400, 401, 403:
             throw IrisAuthError.twoFactorCodeRejected(remainingAttempts: nil)
         default:
@@ -162,13 +188,20 @@ public struct IdmsaAPIClient: Sendable {
         }
     }
 
-    /// Calls `2sv/trust` to finalize the `myacinfo` cookie after a successful 2FA submission.
-    /// Returns the cookies the trust step set.
-    public func trust(scnt: String, appleIDSessionID: String) async throws -> String {
+    /// Calls `2sv/trust` to finalize `myacinfo` after a successful 2FA submission.
+    /// Returns the merged cookie bag including the trust-set cookies.
+    public func trust(
+        scnt: String,
+        appleIDSessionID: String,
+        cookies incomingCookies: String
+    ) async throws -> String {
         let url = URL(string: "\(Self.baseURL)/2sv/trust")!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"  // trust endpoint is a GET in observed flows
         applyHeaders(to: &request, scnt: scnt, sessionID: appleIDSessionID)
+        if !incomingCookies.isEmpty {
+            request.setValue(incomingCookies, forHTTPHeaderField: "Cookie")
+        }
         if Self.debugEnabled { dumpRequest(request, body: nil) }
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else {
@@ -178,7 +211,28 @@ public struct IdmsaAPIClient: Sendable {
         guard (200..<300).contains(http.statusCode) else {
             throw IrisAuthError.networkFailure(message: "2sv/trust HTTP \(http.statusCode)")
         }
-        return (http.allHeaderFields["Set-Cookie"] as? String) ?? ""
+        return Self.accumulateCookies(from: http, into: incomingCookies)
+    }
+
+    /// Parses `Set-Cookie` headers from `response`, merges them into the existing cookie
+    /// bag (newer values overwrite older), and returns a `name=value; name=value` string
+    /// suitable for the `Cookie` request header.
+    private static func accumulateCookies(from response: HTTPURLResponse, into existing: String) -> String {
+        var jar: [String: String] = [:]
+        // Parse existing first.
+        for pair in existing.split(separator: ";") {
+            let kv = pair.trimmingCharacters(in: .whitespaces).split(separator: "=", maxSplits: 1)
+            if kv.count == 2 { jar[String(kv[0])] = String(kv[1]) }
+        }
+        // Layer Set-Cookie on top — newest wins.
+        if let url = response.url {
+            let cookies = HTTPCookie.cookies(
+                withResponseHeaderFields: response.allHeaderFields as? [String: String] ?? [:],
+                for: url
+            )
+            for cookie in cookies { jar[cookie.name] = cookie.value }
+        }
+        return jar.map { "\($0.key)=\($0.value)" }.joined(separator: "; ")
     }
 
     // MARK: - Helpers
@@ -227,8 +281,17 @@ public struct IdmsaAPIClient: Sendable {
 
     private func dumpRequest(_ request: URLRequest, body: Data?) {
         var dump = "[idmsa] → \(request.httpMethod ?? "?") \(request.url?.path ?? "?")\n"
+        // Print the headers we actually thread through the SRP+2FA flow so the dump
+        // is self-sufficient for debugging session-mismatch issues.
+        let interestingHeaders = ["Cookie", "scnt", "X-Apple-ID-Session-Id", "X-Apple-HC", "X-Apple-Widget-Key"]
+        for name in interestingHeaders {
+            if let value = request.value(forHTTPHeaderField: name) {
+                let display = name == "X-Apple-Widget-Key" || name == "Cookie" || name == "X-Apple-HC"
+                    ? value.prefix(40) + (value.count > 40 ? "…" : "") : Substring(value)
+                dump += "  \(name): \(display)\n"
+            }
+        }
         if let body, var json = try? JSONSerialization.jsonObject(with: body) as? [String: Any] {
-            // Redact long base64 fields so dumps are safe to share.
             if json["a"] is String { json["a"] = "<redacted>" }
             if json["m1"] is String { json["m1"] = "<redacted>" }
             if json["m2"] is String { json["m2"] = "<redacted>" }
