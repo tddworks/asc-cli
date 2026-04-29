@@ -400,6 +400,18 @@ struct MockRepositoryFactory {
         InAppPurchaseSubmission(id: id, iapId: iapId)
     }
 
+    static func makeIrisInAppPurchaseSubmission(
+        id: String = "sub-1",
+        iapId: String = "iap-1",
+        submitWithNextAppStoreVersion: Bool = true
+    ) -> IrisInAppPurchaseSubmission {
+        IrisInAppPurchaseSubmission(
+            id: id,
+            iapId: iapId,
+            submitWithNextAppStoreVersion: submitWithNextAppStoreVersion
+        )
+    }
+
     static func makeInAppPurchasePricePoint(
         id: String = "pp-1",
         iapId: String = "iap-1",

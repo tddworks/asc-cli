@@ -21,7 +21,8 @@ struct IrisStatusTests {
             {
               "affordances" : {
                 "createApp" : "asc iris apps create --name <name> --bundle-id <id> --sku <sku>",
-                "listApps" : "asc iris apps list"
+                "listApps" : "asc iris apps list",
+                "submitIAP" : "asc iris iap-submissions create --iap-id <iap-id>"
               },
               "cookieCount" : 5,
               "source" : "browser"

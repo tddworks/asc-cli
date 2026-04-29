@@ -375,6 +375,10 @@ struct ClientProvider {
         ClientFactory().makeIrisAppBundleRepository()
     }
 
+    static func makeIrisInAppPurchaseSubmissionRepository() -> any IrisInAppPurchaseSubmissionRepository {
+        ClientFactory().makeIrisInAppPurchaseSubmissionRepository()
+    }
+
     static func makeIrisCookieProvider() -> any IrisCookieProvider {
         ClientFactory().makeIrisCookieProvider()
     }

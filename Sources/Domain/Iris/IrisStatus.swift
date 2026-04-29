@@ -22,6 +22,7 @@ extension IrisStatus: AffordanceProviding {
         [
             "listApps": "asc iris apps list",
             "createApp": "asc iris apps create --name <name> --bundle-id <id> --sku <sku>",
+            "submitIAP": "asc iris iap-submissions create --iap-id <iap-id>",
         ]
     }
 }
