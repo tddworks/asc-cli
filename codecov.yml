@@ -23,11 +23,19 @@ ignore:
   - "Sources/ASCCommand/ClientProvider.swift"
   - "Sources/Infrastructure/Client/ClientFactory.swift"
 
-  # Auth command — reads live environment credentials, not unit-testable
-  - "Sources/ASCCommand/Commands/Auth/AuthCommand.swift"
+  # Entry points (minimal logic, hard to unit test)
+  - "Sources/ASCCommand/ASC.swift"
+  - "Sources/ASCPlugin/PluginLoader.swift"
 
-  # Version command — prints a constant, no logic to test
-  - "Sources/ASCCommand/Commands/Version/VersionCommand.swift"
+  # Auth commands — read live environment credentials, not unit-testable
+  - "Sources/ASCCommand/Commands/Auth/**/*"
+
+  # Version commands — print constants, no logic to test
+  - "Sources/ASCCommand/Commands/Version/**/*"
+
+  # Web server runtime — Hummingbird server, certs, dylib loading
+  - "Sources/ASCCommand/Commands/Web/**/*"
+  - "Sources/Infrastructure/Web/**/*"
 
   # Iris — real browser cookie extraction and HTTP calls, not unit-testable
   - "Sources/Infrastructure/Iris/BrowserIrisCookieProvider.swift"
