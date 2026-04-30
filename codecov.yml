@@ -33,6 +33,21 @@ ignore:
   - "Sources/Infrastructure/Iris/BrowserIrisCookieProvider.swift"
   - "Sources/Infrastructure/Iris/IrisClient.swift"
 
+  # Iris auth — drives Apple SRP login + idmsa.apple.com HTTP, third-party-interactive
+  - "Sources/Infrastructure/Iris/Auth/**"
+
+  # Iris private app-bundle API — Apple iris HTTP adapter, third-party-interactive
+  - "Sources/Infrastructure/Iris/AppBundles/**"
+
+  # WebKit HTML renderer — WKWebView + AppKit GUI snapshot, not unit-testable
+  - "Sources/Infrastructure/ScreenshotPlans/WebKitHTMLRenderer.swift"
+
+  # Shell runner — spawns real subprocesses, not unit-testable
+  - "Sources/Infrastructure/Skills/ShellRunner.swift"
+
+  # Plugin marketplace — wraps PluginLoader (filesystem) + URLSession download + unzip
+  - "Sources/Infrastructure/Plugins/PluginMarketRepository.swift"
+
   # Simulator stream — HTTP server, subprocess management, AXe shell integration
   - "Sources/Infrastructure/Simulators/DeviceStreamServer.swift"
   - "Sources/Infrastructure/Simulators/AXeStreamManager.swift"
