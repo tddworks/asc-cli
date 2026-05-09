@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`asc beta-app-localizations {list,get,create,update,delete}` — TestFlight Beta App Description per locale** — closes the parity gap that blocked TestFlight submissions: Apple's `BetaAppLocalizations` resource holds the per-locale beta description, tester feedback email, marketing URL, and privacy policy URL shown in TestFlight before external testing can be enabled. Distinct from the existing `asc builds update-beta-notes` (which writes per-build "What to Test" notes) and `asc beta-review` (which writes review contact info). New `BetaAppLocalization` domain model + `@Mockable BetaAppLocalizationRepository` (Domain/Apps/TestFlight/), `SDKBetaAppLocalizationRepository` (Infrastructure) backed by `/v1/apps/{id}/betaAppLocalizations` (list), `/v1/betaAppLocalizations/{id}` (get/update/delete), and `/v1/betaAppLocalizations` (create). Affordances: `delete`, `get`, `listSiblings`, `update`. REST equivalents: `GET /api/v1/apps/:appId/beta-app-localizations` and `GET /api/v1/beta-app-localizations/:id` via `BetaAppLocalizationsController`. New REST path resolver entry for `beta-app-localizations` parented under `apps`. See `docs/features/beta-app-localizations.md`.
+
 ---
 
 ## [0.17.8] - 2026-04-29

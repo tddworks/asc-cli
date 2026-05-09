@@ -53,7 +53,7 @@ Now `asc iap list --app-id <id>` enriches each IAP with the right submission aff
 | **Screenshots** | Create screenshot sets and upload images |
 | **App Previews** | Upload video previews (`.mp4`, `.mov`, `.m4v`) per locale and device size |
 | **App Shots** | AI-powered screenshot generation — single templates, gallery sets, plugin-provided themes (colors, decorations, animations), Gemini enhancement; two-step ThemeDesign workflow for batch styling without extra AI calls |
-| **TestFlight** | Manage beta groups; add/remove/import/export testers; submit builds for beta review |
+| **TestFlight** | Manage beta groups; add/remove/import/export testers; submit builds for beta review; per-locale **Beta App Description** + tester feedback metadata |
 | **Monetization** | IAPs (consumable, non-consumable, non-renewing); subscriptions, intro offers, **promotional offers**, **win-back offers**, offer codes (3-level), **promoted purchases**; full lifecycle (update/delete/unsubmit), per-territory pricing (with `proceedsYear2`), review screenshots, and 1024×1024 promotional images |
 | **Code Signing** | Bundle IDs, certificates, devices, provisioning profiles |
 | **Authentication** | Multi-account credential management; named accounts, active-account switching |
@@ -182,6 +182,12 @@ asc beta-review submissions create --build-id <id>
 asc beta-review submissions get --submission-id <id>
 asc beta-review detail get --app-id <id>
 asc beta-review detail update --detail-id <id> [--contact-first-name <name>] [--notes <text>]
+
+asc beta-app-localizations list --app-id <id>
+asc beta-app-localizations get --localization-id <id>
+asc beta-app-localizations create --app-id <id> --locale en-US [--description <text>] [--feedback-email <email>] [--marketing-url <url>] [--privacy-policy-url <url>]
+asc beta-app-localizations update --localization-id <id> [--description <text>] [--feedback-email <email>]
+asc beta-app-localizations delete --localization-id <id>
 
 asc review-submissions list --app-id <id> [--state WAITING_FOR_REVIEW,IN_REVIEW,READY_FOR_REVIEW] [--limit 200]
 ```
