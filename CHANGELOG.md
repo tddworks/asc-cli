@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.17.9] - 2026-05-09
+
 ### Added
 - **`asc builds set-encryption-compliance --build-id <id> --uses-non-exempt-encryption <true|false>` — set Apple's export-compliance answer on a build** — closes the second TestFlight-blocking gap: when an IPA is uploaded without `ITSAppUsesNonExemptEncryption` in Info.plist, ASC marks the build "Missing Compliance" and external testing is blocked. The new command PATCHes `/v1/builds/{id}` with `usesNonExemptEncryption` so the answer can be supplied post-upload from CI scripts that don't control the Info.plist. `Build` domain model now carries `usesNonExemptEncryption: Bool?` and a `isMissingEncryptionCompliance` semantic boolean (`true` when nil); usable builds in the missing state advertise a `setEncryptionCompliance` affordance with the ready-to-run command. Build's `tableRow` gains an "Encryption" column showing `uses` / `exempt` / `missing`. REST equivalent: `PATCH /api/v1/builds/:buildId/encryption-compliance` body `{"usesNonExemptEncryption": true|false}`. New `BuildRepository.updateBuildEncryptionCompliance(buildId:usesNonExemptEncryption:)`. See `docs/features/builds-upload.md`.
 - **`asc beta-app-localizations {list,get,create,update,delete}` — TestFlight Beta App Description per locale** — closes the parity gap that blocked TestFlight submissions: Apple's `BetaAppLocalizations` resource holds the per-locale beta description, tester feedback email, marketing URL, and privacy policy URL shown in TestFlight before external testing can be enabled. Distinct from the existing `asc builds update-beta-notes` (which writes per-build "What to Test" notes) and `asc beta-review` (which writes review contact info). New `BetaAppLocalization` domain model + `@Mockable BetaAppLocalizationRepository` (Domain/Apps/TestFlight/), `SDKBetaAppLocalizationRepository` (Infrastructure) backed by `/v1/apps/{id}/betaAppLocalizations` (list), `/v1/betaAppLocalizations/{id}` (get/update/delete), and `/v1/betaAppLocalizations` (create). Affordances: `delete`, `get`, `listSiblings`, `update`. REST equivalents: `GET /api/v1/apps/:appId/beta-app-localizations` and `GET /api/v1/beta-app-localizations/:id` via `BetaAppLocalizationsController`. New REST path resolver entry for `beta-app-localizations` parented under `apps`. See `docs/features/beta-app-localizations.md`.
@@ -928,7 +932,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.17.8...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.17.9...HEAD
+[0.17.9]: https://github.com/tddworks/asc-cli/compare/v0.17.8...v0.17.9
 [0.17.8]: https://github.com/tddworks/asc-cli/compare/v0.17.7...v0.17.8
 [0.17.7]: https://github.com/tddworks/asc-cli/compare/v0.1.74...v0.17.7
 [0.1.74]: https://github.com/tddworks/asc-cli/compare/v0.17.3...v0.1.74
