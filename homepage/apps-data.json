@@ -1,5 +1,5 @@
 {
-  "generated": "2026-04-27T06:18:23.911Z",
+  "generated": "2026-05-09T10:33:00.219Z",
   "items": [
     {
       "developer": "itshan",
@@ -10,6 +10,16 @@
       "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/cd/b2/3e/cdb23ecb-14e5-ede8-5850-ad71d9ee24bd/AppIcon-0-0-1x_U007epad-0-1-85-220.png/100x100bb.jpg",
       "primaryGenreName": "Developer Tools",
       "url": "https://apps.apple.com/us/app/coupon-distributor/id6757699024?uo=4"
+    },
+    {
+      "developer": "itshan",
+      "github": "hanrw",
+      "x": "itshanrw",
+      "trackId": 6744051078,
+      "trackName": "LinguaClip",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/3f/b3/49/3fb349f7-adfa-3c65-9a5d-a1111b82a0f1/AppIcon-0-0-1x_U007epad-0-1-85-220.png/100x100bb.jpg",
+      "primaryGenreName": "Education",
+      "url": "https://apps.apple.com/us/app/linguaclip/id6744051078?uo=4"
     },
     {
       "developer": "itshan",
@@ -35,6 +45,16 @@
       "developer": "itshan",
       "github": "hanrw",
       "x": "itshanrw",
+      "trackId": 6743046579,
+      "trackName": "BezelBlend",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/4e/ce/57/4ece57a7-c2b5-242e-c8a0-ec79c71e4a22/AppIcon-0-0-1x_U007epad-0-1-85-220.png/100x100bb.jpg",
+      "primaryGenreName": "Productivity",
+      "url": "https://apps.apple.com/us/app/bezelblend/id6743046579?uo=4"
+    },
+    {
+      "developer": "itshan",
+      "github": "hanrw",
+      "x": "itshanrw",
       "trackId": 6748760927,
       "trackName": "AppNexus for App Store Connect",
       "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/35/ed/e9/35ede934-4096-3451-e134-4d10c6f26f77/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/100x100bb.jpg",
@@ -45,31 +65,11 @@
       "developer": "itshan",
       "github": "hanrw",
       "x": "itshanrw",
-      "trackId": 6744051078,
-      "trackName": "LinguaClip",
-      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/3f/b3/49/3fb349f7-adfa-3c65-9a5d-a1111b82a0f1/AppIcon-0-0-1x_U007epad-0-1-85-220.png/100x100bb.jpg",
-      "primaryGenreName": "Education",
-      "url": "https://apps.apple.com/us/app/linguaclip/id6744051078?uo=4"
-    },
-    {
-      "developer": "itshan",
-      "github": "hanrw",
-      "x": "itshanrw",
       "trackId": 6744317255,
       "trackName": "LinguaScene",
       "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/dc/57/19/dc571924-5781-1575-68ba-0b14f24d461f/AppIcon-0-0-1x_U007epad-0-1-85-220.png/100x100bb.jpg",
       "primaryGenreName": "Photo & Video",
       "url": "https://apps.apple.com/us/app/linguascene/id6744317255?uo=4"
-    },
-    {
-      "developer": "itshan",
-      "github": "hanrw",
-      "x": "itshanrw",
-      "trackId": 6743046579,
-      "trackName": "BezelBlend",
-      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/4e/ce/57/4ece57a7-c2b5-242e-c8a0-ec79c71e4a22/AppIcon-0-0-1x_U007epad-0-1-85-220.png/100x100bb.jpg",
-      "primaryGenreName": "Productivity",
-      "url": "https://apps.apple.com/us/app/bezelblend/id6743046579?uo=4"
     },
     {
       "developer": "itshan",
@@ -107,7 +107,7 @@
       "x": null,
       "trackId": 6467128147,
       "trackName": "Airclap - Fast File Transfer",
-      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/64/2c/5e/642c5ec6-37ca-0661-c550-acb29f503b99/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/100x100bb.jpg",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/10/ea/c9/10eac960-dfc1-76cd-7de7-593bbf5dc6e1/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/100x100bb.jpg",
       "primaryGenreName": "Utilities",
       "url": "https://apps.apple.com/app/id6467128147"
     },
@@ -136,10 +136,20 @@
       "github": "westerbamos",
       "x": "westerbamos",
       "trackId": 6759816401,
-      "trackName": "Tottli: Baby Tracker & Log",
-      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/5a/d8/d3/5ad8d395-aba5-bab0-f61d-b8da10f3c2a6/AppIcon-0-0-1x_U007epad-0-1-85-220.png/100x100bb.jpg",
+      "trackName": "Tottli: Newborn & Baby Tracker",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/d1/6a/17/d16a17d6-e246-4372-fe3f-e1557d4c29ff/AppIcon-0-0-1x_U007epad-0-1-85-220.png/100x100bb.jpg",
       "primaryGenreName": "Health & Fitness",
-      "url": "https://apps.apple.com/us/app/tottli-baby-tracker-log/id6759816401?uo=4"
+      "url": "https://apps.apple.com/us/app/tottli-newborn-baby-tracker/id6759816401?uo=4"
+    },
+    {
+      "developer": "Eversight",
+      "github": "Eversight",
+      "x": null,
+      "trackId": 6760348975,
+      "trackName": "RelicLens: Antique Identifier",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/9a/73/50/9a73505d-1ea7-a79b-9245-3d33ceafb2b0/AppIcon-0-0-1x_U007epad-0-1-sRGB-85-220.png/100x100bb.jpg",
+      "primaryGenreName": "Reference",
+      "url": "https://apps.apple.com/us/app/reliclens-antique-identifier/id6760348975"
     }
   ]
 }
