@@ -261,6 +261,11 @@ public struct ClientFactory: Sendable {
         return SDKBetaAppReviewRepository(client: provider)
     }
 
+    public func makeBetaAppLocalizationRepository(authProvider: any AuthProvider) throws -> any BetaAppLocalizationRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKBetaAppLocalizationRepository(client: provider)
+    }
+
     public func makeInAppPurchaseAvailabilityRepository(authProvider: any AuthProvider) throws -> any InAppPurchaseAvailabilityRepository {
         let provider = try makeProvider(authProvider: authProvider)
         return SDKInAppPurchaseAvailabilityRepository(client: provider)

@@ -41,6 +41,9 @@ enum RESTRoutes {
         if let testFlightRepo = try? factory.makeTestFlightRepository(authProvider: auth) {
             TestFlightController(repo: testFlightRepo).addRoutes(to: v1)
         }
+        if let betaAppLocRepo = try? factory.makeBetaAppLocalizationRepository(authProvider: auth) {
+            BetaAppLocalizationsController(repo: betaAppLocRepo).addRoutes(to: v1)
+        }
         if let reviewRepo = try? factory.makeCustomerReviewRepository(authProvider: auth) {
             CustomerReviewsController(repo: reviewRepo).addRoutes(to: v1)
         }

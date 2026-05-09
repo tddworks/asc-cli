@@ -231,6 +231,12 @@ struct ClientProvider {
         return try factory.makeBetaAppReviewRepository(authProvider: authProvider)
     }
 
+    static func makeBetaAppLocalizationRepository() throws -> any BetaAppLocalizationRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeBetaAppLocalizationRepository(authProvider: authProvider)
+    }
+
     static func makeAppAvailabilityRepository() throws -> any AppAvailabilityRepository {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
