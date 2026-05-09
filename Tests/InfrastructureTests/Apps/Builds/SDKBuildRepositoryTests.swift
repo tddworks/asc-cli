@@ -155,4 +155,57 @@ struct SDKBuildRepositoryTests {
         try await repo.removeBetaGroups(buildId: "build-1", betaGroupIds: ["bg-1"])
         #expect(stub.voidRequestCalled)
     }
+
+    // MARK: - Encryption compliance
+
+    @Test func `getBuild maps usesNonExemptEncryption from SDK attributes`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(BuildResponse(
+            data: AppStoreConnect_Swift_SDK.Build(
+                type: .builds, id: "build-1",
+                attributes: .init(version: "42", processingState: .valid, usesNonExemptEncryption: false)
+            ),
+            links: .init(this: "")
+        ))
+
+        let repo = SDKBuildRepository(client: stub)
+        let result = try await repo.getBuild(id: "build-1")
+
+        #expect(result.usesNonExemptEncryption == false)
+    }
+
+    @Test func `getBuild leaves usesNonExemptEncryption nil when ASC has no answer yet`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(BuildResponse(
+            data: AppStoreConnect_Swift_SDK.Build(
+                type: .builds, id: "build-1",
+                attributes: .init(version: "42", processingState: .valid)
+            ),
+            links: .init(this: "")
+        ))
+
+        let repo = SDKBuildRepository(client: stub)
+        let result = try await repo.getBuild(id: "build-1")
+
+        #expect(result.usesNonExemptEncryption == nil)
+        #expect(result.isMissingEncryptionCompliance == true)
+    }
+
+    @Test func `updateBuildEncryptionCompliance returns build with the new flag`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(BuildResponse(
+            data: AppStoreConnect_Swift_SDK.Build(
+                type: .builds, id: "build-1",
+                attributes: .init(version: "42", processingState: .valid, usesNonExemptEncryption: false)
+            ),
+            links: .init(this: "")
+        ))
+
+        let repo = SDKBuildRepository(client: stub)
+        let result = try await repo.updateBuildEncryptionCompliance(buildId: "build-1", usesNonExemptEncryption: false)
+
+        #expect(result.id == "build-1")
+        #expect(result.usesNonExemptEncryption == false)
+        #expect(result.isMissingEncryptionCompliance == false)
+    }
 }

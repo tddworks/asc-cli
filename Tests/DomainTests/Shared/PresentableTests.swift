@@ -24,17 +24,27 @@ struct PresentableTests {
     // MARK: - Build
 
     @Test func `build table headers include all columns`() {
-        #expect(Build.tableHeaders == ["ID", "Version", "Build Number", "Platform", "State", "Expired"])
+        #expect(Build.tableHeaders == ["ID", "Version", "Build Number", "Platform", "State", "Expired", "Encryption"])
     }
 
     @Test func `build table row nil-coalesces optional fields`() {
         let build = MockRepositoryFactory.makeBuild(id: "b1", version: "1.0", expired: false, processingState: .valid, buildNumber: nil, platform: nil)
-        #expect(build.tableRow == ["b1", "1.0", "-", "-", "VALID", "No"])
+        #expect(build.tableRow == ["b1", "1.0", "-", "-", "VALID", "No", "missing"])
     }
 
     @Test func `build table row shows Yes for expired`() {
         let build = MockRepositoryFactory.makeBuild(id: "b2", version: "2.0", expired: true, processingState: .processing, buildNumber: "42", platform: .iOS)
-        #expect(build.tableRow == ["b2", "2.0", "42", "IOS", "PROCESSING", "Yes"])
+        #expect(build.tableRow == ["b2", "2.0", "42", "IOS", "PROCESSING", "Yes", "missing"])
+    }
+
+    @Test func `build table row shows uses for non-exempt encryption answered yes`() {
+        let build = MockRepositoryFactory.makeBuild(id: "b3", version: "1.0", buildNumber: "5", platform: .iOS, usesNonExemptEncryption: true)
+        #expect(build.tableRow == ["b3", "1.0", "5", "IOS", "VALID", "No", "uses"])
+    }
+
+    @Test func `build table row shows exempt for non-exempt encryption answered no`() {
+        let build = MockRepositoryFactory.makeBuild(id: "b4", version: "1.0", buildNumber: "5", platform: .iOS, usesNonExemptEncryption: false)
+        #expect(build.tableRow == ["b4", "1.0", "5", "IOS", "VALID", "No", "exempt"])
     }
 
     // MARK: - Certificate

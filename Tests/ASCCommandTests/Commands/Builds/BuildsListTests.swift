@@ -23,6 +23,7 @@ struct BuildsListTests {
             {
               "affordances" : {
                 "addToTestFlight" : "asc builds add-beta-group --build-id b-1 --beta-group-id <beta-group-id>",
+                "setEncryptionCompliance" : "asc builds set-encryption-compliance --build-id b-1 --uses-non-exempt-encryption <true|false>",
                 "updateBetaNotes" : "asc builds update-beta-notes --build-id b-1 --locale en-US --notes <notes>"
               },
               "expired" : false,
@@ -52,6 +53,7 @@ struct BuildsListTests {
             {
               "affordances" : {
                 "addToTestFlight" : "asc builds add-beta-group --build-id b-1 --beta-group-id <beta-group-id>",
+                "setEncryptionCompliance" : "asc builds set-encryption-compliance --build-id b-1 --uses-non-exempt-encryption <true|false>",
                 "updateBetaNotes" : "asc builds update-beta-notes --build-id b-1 --locale en-US --notes <notes>"
               },
               "buildNumber" : "42",

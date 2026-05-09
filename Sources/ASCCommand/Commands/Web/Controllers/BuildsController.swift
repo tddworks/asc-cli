@@ -1,4 +1,5 @@
 import Domain
+import Foundation
 import Hummingbird
 import HummingbirdWebSocket
 import Infrastructure
@@ -28,6 +29,22 @@ struct BuildsController: Sendable {
                 limit: limit
             ).data
             return try restFormat(builds)
+        }
+
+        // Set Apple's export-compliance answer (ITSAppUsesNonExemptEncryption) on a build.
+        // Required before TestFlight external testing when Info.plist doesn't carry the key.
+        group.patch("/builds/:buildId/encryption-compliance") { request, context -> Response in
+            guard let buildId = context.parameters.get("buildId") else { return jsonError("Missing buildId") }
+            let body = try await request.body.collect(upTo: 64 * 1024)
+            let json = (try? JSONSerialization.jsonObject(with: body) as? [String: Any]) ?? [:]
+            guard let usesNonExemptEncryption = json["usesNonExemptEncryption"] as? Bool else {
+                return jsonError("Missing or non-boolean 'usesNonExemptEncryption' in body", status: .badRequest)
+            }
+            let updated = try await self.repo.updateBuildEncryptionCompliance(
+                buildId: buildId,
+                usesNonExemptEncryption: usesNonExemptEncryption
+            )
+            return try restFormat(updated)
         }
     }
 }

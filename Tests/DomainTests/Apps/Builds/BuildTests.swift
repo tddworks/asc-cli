@@ -71,4 +71,47 @@ struct BuildTests {
         let build = MockRepositoryFactory.makeBuild(id: "b-1", version: "1.0")
         #expect(build.platform == nil)
     }
+
+    // MARK: - Encryption compliance (ITSAppUsesNonExemptEncryption)
+
+    @Test
+    func `build with no encryption compliance answer is missing compliance`() {
+        let build = MockRepositoryFactory.makeBuild(id: "b-1", version: "1.0", usesNonExemptEncryption: nil)
+        #expect(build.usesNonExemptEncryption == nil)
+        #expect(build.isMissingEncryptionCompliance == true)
+    }
+
+    @Test
+    func `build with explicit encryption compliance answer is not missing compliance`() {
+        let yes = MockRepositoryFactory.makeBuild(id: "b-1", version: "1.0", usesNonExemptEncryption: true)
+        let no  = MockRepositoryFactory.makeBuild(id: "b-2", version: "1.0", usesNonExemptEncryption: false)
+        #expect(yes.isMissingEncryptionCompliance == false)
+        #expect(no.isMissingEncryptionCompliance == false)
+    }
+
+    @Test
+    func `usable build missing encryption compliance advertises setEncryptionCompliance affordance`() {
+        let build = MockRepositoryFactory.makeBuild(id: "b-1", version: "1.0", usesNonExemptEncryption: nil)
+        #expect(build.affordances["setEncryptionCompliance"] == "asc builds set-encryption-compliance --build-id b-1 --uses-non-exempt-encryption <true|false>")
+    }
+
+    @Test
+    func `usable build with encryption compliance answered does not advertise setEncryptionCompliance`() {
+        let build = MockRepositoryFactory.makeBuild(id: "b-1", version: "1.0", usesNonExemptEncryption: false)
+        #expect(build.affordances["setEncryptionCompliance"] == nil)
+    }
+
+    @Test
+    func `usesNonExemptEncryption is omitted from JSON when nil`() throws {
+        let build = MockRepositoryFactory.makeBuild(id: "b-1", version: "1.0", usesNonExemptEncryption: nil)
+        let json = try JSONSerialization.jsonObject(with: JSONEncoder().encode(build)) as! [String: Any]
+        #expect(json["usesNonExemptEncryption"] == nil)
+    }
+
+    @Test
+    func `usesNonExemptEncryption is encoded when present`() throws {
+        let build = MockRepositoryFactory.makeBuild(id: "b-1", version: "1.0", usesNonExemptEncryption: false)
+        let json = try JSONSerialization.jsonObject(with: JSONEncoder().encode(build)) as! [String: Any]
+        #expect(json["usesNonExemptEncryption"] as? Bool == false)
+    }
 }

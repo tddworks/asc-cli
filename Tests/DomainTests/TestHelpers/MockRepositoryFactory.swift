@@ -45,7 +45,8 @@ struct MockRepositoryFactory {
         expired: Bool = false,
         processingState: Build.ProcessingState = .valid,
         buildNumber: String? = "1",
-        platform: BuildUploadPlatform? = nil
+        platform: BuildUploadPlatform? = nil,
+        usesNonExemptEncryption: Bool? = nil
     ) -> Build {
         Build(
             id: id,
@@ -53,7 +54,8 @@ struct MockRepositoryFactory {
             expired: expired,
             processingState: processingState,
             buildNumber: buildNumber,
-            platform: platform
+            platform: platform,
+            usesNonExemptEncryption: usesNonExemptEncryption
         )
     }
 

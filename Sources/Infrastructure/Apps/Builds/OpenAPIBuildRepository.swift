@@ -71,6 +71,18 @@ public struct SDKBuildRepository: BuildRepository, @unchecked Sendable {
         try await client.request(APIEndpoint.v1.builds.id(buildId).relationships.betaGroups.delete(body))
     }
 
+    public func updateBuildEncryptionCompliance(buildId: String, usesNonExemptEncryption: Bool) async throws -> Domain.Build {
+        let body = BuildUpdateRequest(
+            data: .init(
+                type: .builds,
+                id: buildId,
+                attributes: .init(usesNonExemptEncryption: usesNonExemptEncryption)
+            )
+        )
+        let response = try await client.request(APIEndpoint.v1.builds.id(buildId).patch(body))
+        return mapBuild(response.data)
+    }
+
     private func mapBuild(_ sdkBuild: AppStoreConnect_Swift_SDK.Build, preReleaseVersion: PrereleaseVersion? = nil) -> Domain.Build {
         let buildString = sdkBuild.attributes?.version
         let marketingVersion = preReleaseVersion?.attributes?.version
@@ -84,7 +96,8 @@ public struct SDKBuildRepository: BuildRepository, @unchecked Sendable {
             expired: sdkBuild.attributes?.isExpired ?? false,
             processingState: mapProcessingState(sdkBuild.attributes?.processingState),
             buildNumber: buildString,
-            platform: platform
+            platform: platform,
+            usesNonExemptEncryption: sdkBuild.attributes?.usesNonExemptEncryption
         )
     }
 

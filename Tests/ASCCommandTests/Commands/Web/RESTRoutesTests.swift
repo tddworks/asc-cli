@@ -223,6 +223,20 @@ struct RESTRoutesTests {
         #expect(normalized.contains("\"data\""))
     }
 
+    @Test func `builds set-encryption-compliance REST output contains updated build`() async throws {
+        let mockRepo = MockBuildRepository()
+        given(mockRepo).updateBuildEncryptionCompliance(buildId: .any, usesNonExemptEncryption: .any)
+            .willReturn(Build(id: "b-1", version: "1.0", expired: false, processingState: .valid, usesNonExemptEncryption: false))
+        let output = try await BuildsSetEncryptionCompliance.parse([
+            "--build-id", "b-1",
+            "--uses-non-exempt-encryption", "false",
+            "--pretty",
+        ]).execute(repo: mockRepo, affordanceMode: .rest)
+        #expect(output.contains("\"_links\""))
+        #expect(output.contains("\"usesNonExemptEncryption\" : false"))
+        #expect(output.contains("\"id\" : \"b-1\""))
+    }
+
     // MARK: - TestFlight
 
     @Test func `testflight groups list returns JSON with _links`() async throws {

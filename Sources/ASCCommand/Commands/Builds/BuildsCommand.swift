@@ -13,6 +13,7 @@ struct BuildsCommand: AsyncParsableCommand {
             BuildsAddBetaGroup.self,
             BuildsRemoveBetaGroup.self,
             BuildsUpdateBetaNotes.self,
+            BuildsSetEncryptionCompliance.self,
         ]
     )
 }
