@@ -169,6 +169,7 @@ asc builds uploads delete --upload-id <id>
 asc builds add-beta-group --build-id <id> --beta-group-id <id>
 asc builds remove-beta-group --build-id <id> --beta-group-id <id>
 asc builds update-beta-notes --build-id <id> --locale en-US --notes "What's new"
+asc builds set-encryption-compliance --build-id <id> --uses-non-exempt-encryption true|false
 
 asc testflight groups list [--app-id <id>]
 asc testflight testers list --beta-group-id <id>
