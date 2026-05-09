@@ -15,7 +15,7 @@ let package = Package(
         .package(url: "https://github.com/Kolos65/Mockable", from: "0.6.0"),
         .package(url: "https://github.com/steipete/TauTUI.git", from: "0.1.5"),
         .package(url: "https://github.com/steipete/SweetCookieKit.git", from: "0.3.0"),
-        .package(url: "https://github.com/hummingbird-project/hummingbird.git", exact: "2.21.1"),
+        .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.22.0"),
         .package(url: "https://github.com/hummingbird-project/hummingbird-websocket.git", from: "2.6.0"),
         .package(url: "https://github.com/hummingbird-project/swift-mustache.git", from: "2.0.2"),
         .package(url: "https://github.com/adam-fowler/swift-srp.git", from: "2.0.0"),

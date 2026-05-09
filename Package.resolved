@@ -1,5 +1,5 @@
 {
-  "originHash" : "29497eaf6778689c5e122910f59f355300d68688496fd1eedafc287f18fac9d6",
+  "originHash" : "36e93d468f77112285462727655fb84e4ba85d37d403f482323d82643cabf7f6",
   "pins" : [
     {
       "identity" : "appstoreconnect-swift-sdk",
@@ -42,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/hummingbird-project/hummingbird.git",
       "state" : {
-        "revision" : "d1ce7bbd2f1b17f22031ca4c0daeb39eff07a92e",
-        "version" : "2.21.1"
+        "revision" : "a2ed0a0294de56e18ba55344eafc801a7a385a90",
+        "version" : "2.22.0"
       }
     },
     {
