@@ -190,6 +190,48 @@ asc builds update-beta-notes --build-id <BUILD_ID> --locale <LOCALE> --notes "<T
 
 ---
 
+### Set Export-Compliance Answer (`ITSAppUsesNonExemptEncryption`)
+
+Apple requires every build to declare whether it uses non-exempt encryption. The standard place to set this is `Info.plist` (`ITSAppUsesNonExemptEncryption`); when the key is missing from the uploaded IPA, ASC marks the build "Missing Compliance" and TestFlight external testing is blocked. This command supplies the answer post-upload from CI scripts that don't control the Info.plist.
+
+```bash
+asc builds set-encryption-compliance --build-id <BUILD_ID> --uses-non-exempt-encryption <true|false>
+```
+
+**Options:**
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--build-id` | *(required)* | Build ID |
+| `--uses-non-exempt-encryption` | *(required)* | `true` if the build uses non-exempt encryption (full export-compliance flow required); `false` if exempt (most apps) |
+| `--output` | `json` | Output format |
+| `--pretty` | `false` | Pretty-print JSON |
+
+**Discovery via affordance.** Builds in the missing-compliance state advertise the next command on the response:
+
+```json
+{
+  "id": "build-1",
+  "affordances": {
+    "setEncryptionCompliance": "asc builds set-encryption-compliance --build-id build-1 --uses-non-exempt-encryption <true|false>"
+  }
+}
+```
+
+The affordance is suppressed once the answer is supplied (`usesNonExemptEncryption` is non-nil).
+
+**REST equivalent:**
+
+```bash
+curl -X PATCH http://localhost:8080/api/v1/builds/build-1/encryption-compliance \
+  -H 'Content-Type: application/json' \
+  -d '{"usesNonExemptEncryption": false}'
+```
+
+> Saying `true` enables Apple's full export-compliance flow — you'll likely also need to create an `AppEncryptionDeclaration` and upload supporting documents. That resource isn't yet exposed by the CLI; for now use App Store Connect web UI for the declaration, then this command for the build-level answer.
+
+---
+
 ### Link Build to App Store Version
 
 Associate a processed build with an App Store version before submitting for review.
@@ -231,6 +273,10 @@ asc builds add-beta-group --build-id "$BUILD_ID" --beta-group-id "$GROUP_ID"
 # 4. Set "What's New" notes for all locales
 asc builds update-beta-notes --build-id "$BUILD_ID" --locale en-US \
   --notes "What's new in 1.2.0: Performance improvements, bug fixes."
+
+# 4b. Answer the export-compliance question if the build was uploaded without
+#     ITSAppUsesNonExemptEncryption in Info.plist (otherwise TestFlight blocks).
+asc builds set-encryption-compliance --build-id "$BUILD_ID" --uses-non-exempt-encryption false
 
 # 5. Find the version and link the build for App Store release
 VERSION_ID=$(asc versions list --app-id 123456789 | jq -r '.data[0].id')
