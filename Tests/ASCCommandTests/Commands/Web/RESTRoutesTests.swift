@@ -236,6 +236,33 @@ struct RESTRoutesTests {
         #expect(normalized.contains("\"data\""))
     }
 
+    // MARK: - Beta App Localizations
+
+    @Test func `beta app localizations list returns JSON with _links to parent app`() async throws {
+        let mockRepo = MockBetaAppLocalizationRepository()
+        given(mockRepo).listBetaAppLocalizations(appId: .any).willReturn([
+            BetaAppLocalization(id: "bal-1", appId: "42", locale: "en-US", description: "Welcome", feedbackEmail: "beta@example.com"),
+        ])
+        let output = try await BetaAppLocalizationsList.parse(["--app-id", "42", "--pretty"]).execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/apps/42/beta-app-localizations"))
+        #expect(normalized.contains("/api/v1/beta-app-localizations/bal-1"))
+        #expect(!normalized.contains("\"affordances\""))
+    }
+
+    @Test func `beta app localizations get returns _links for actions on this localization`() async throws {
+        let mockRepo = MockBetaAppLocalizationRepository()
+        given(mockRepo).getBetaAppLocalization(localizationId: .any).willReturn(
+            BetaAppLocalization(id: "bal-7", appId: "99", locale: "ja", description: "ベータ")
+        )
+        let output = try await BetaAppLocalizationsGet.parse(["--localization-id", "bal-7", "--pretty"]).execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/beta-app-localizations/bal-7"))
+        #expect(normalized.contains("/api/v1/apps/99/beta-app-localizations"))
+    }
+
     // MARK: - App Shots
 
     @Test func `templates list returns data wrapper`() async throws {

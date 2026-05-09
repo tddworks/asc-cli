@@ -1116,6 +1116,28 @@ struct MockRepositoryFactory {
         BetaAppReviewSubmission(id: id, buildId: buildId, state: state, submittedDate: submittedDate)
     }
 
+    static func makeBetaAppLocalization(
+        id: String = "bal-1",
+        appId: String = "app-1",
+        locale: String = "en-US",
+        description: String? = nil,
+        feedbackEmail: String? = nil,
+        marketingUrl: String? = nil,
+        privacyPolicyUrl: String? = nil,
+        tvOsPrivacyPolicy: String? = nil
+    ) -> BetaAppLocalization {
+        BetaAppLocalization(
+            id: id,
+            appId: appId,
+            locale: locale,
+            description: description,
+            feedbackEmail: feedbackEmail,
+            marketingUrl: marketingUrl,
+            privacyPolicyUrl: privacyPolicyUrl,
+            tvOsPrivacyPolicy: tvOsPrivacyPolicy
+        )
+    }
+
     static func makeBetaAppReviewDetail(
         id: String = "brd-1",
         appId: String = "app-1",
