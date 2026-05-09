@@ -352,6 +352,34 @@ Represents a build upload session.
 | `.tvOS` | `TV_OS` | `tvos` |
 | `.visionOS` | `VISION_OS` | `visionos` |
 
+### `Build`
+
+Processed build record returned by `asc builds list` and `asc builds set-encryption-compliance`.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `String` | Build ID |
+| `version` | `String` | Marketing version (preferred) or `CFBundleVersion` fallback |
+| `uploadedDate` | `Date?` | Upload time (omitted if nil) |
+| `expirationDate` | `Date?` | TestFlight expiration time (omitted if nil) |
+| `expired` | `Bool` | Whether the build is no longer usable |
+| `processingState` | `Build.ProcessingState` | `PROCESSING` / `FAILED` / `INVALID` / `VALID` |
+| `buildNumber` | `String?` | `CFBundleVersion` |
+| `platform` | `BuildUploadPlatform?` | Resolved from the build's preReleaseVersion |
+| `usesNonExemptEncryption` | `Bool?` | Apple's export-compliance answer (Info.plist `ITSAppUsesNonExemptEncryption`); `nil` means "not yet answered" — TestFlight external testing is blocked |
+
+**Computed:**
+- `isUsable` — `!expired && processingState == .valid`
+- `isMissingEncryptionCompliance` — `usesNonExemptEncryption == nil`
+
+**Affordances** (only emitted when `isUsable == true`):
+
+| Key | Command | Condition |
+|-----|---------|-----------|
+| `addToTestFlight` | `asc builds add-beta-group --build-id <id> --beta-group-id <id>` | always |
+| `updateBetaNotes` | `asc builds update-beta-notes --build-id <id> --locale en-US --notes <notes>` | always |
+| `setEncryptionCompliance` | `asc builds set-encryption-compliance --build-id <id> --uses-non-exempt-encryption <true\|false>` | `isMissingEncryptionCompliance == true` |
+
 ### `BetaBuildLocalization`
 
 TestFlight "What's New" text per locale per build.
@@ -403,6 +431,7 @@ Sources/ASCCommand/Commands/Builds/
   BuildsAddBetaGroup.swift              — asc builds add-beta-group
   BuildsRemoveBetaGroup.swift           — asc builds remove-beta-group
   BuildsUpdateBetaNotes.swift           — asc builds update-beta-notes
+  BuildsSetEncryptionCompliance.swift   — asc builds set-encryption-compliance
   BuildsCommand.swift                   — (updated) registers all new subcommands
 Sources/ASCCommand/Commands/Versions/
   VersionsSetBuild.swift                — asc versions set-build
