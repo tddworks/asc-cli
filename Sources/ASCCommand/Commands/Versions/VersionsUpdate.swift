@@ -4,7 +4,7 @@ import Domain
 struct VersionsUpdate: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "update",
-        abstract: "Update an existing App Store version's version string"
+        abstract: "Update an App Store version's version string, copyright, or release schedule"
     )
 
     @OptionGroup var globals: GlobalOptions
@@ -13,7 +13,16 @@ struct VersionsUpdate: AsyncParsableCommand {
     var versionId: String
 
     @Option(name: .long, help: "New version string (e.g. 1.2.3)")
-    var version: String
+    var version: String?
+
+    @Option(name: .long, help: "Copyright line shown on the App Store page (e.g. \"© 2026 Acme\")")
+    var copyright: String?
+
+    @Option(name: .long, help: "Release type: MANUAL, AFTER_APPROVAL, or SCHEDULED")
+    var releaseType: String?
+
+    @Option(name: .long, help: "ISO-8601 timestamp for SCHEDULED releases (e.g. 2026-06-01T00:00:00Z)")
+    var earliestReleaseDate: String?
 
     func run() async throws {
         let repo = try ClientProvider.makeVersionRepository()
@@ -24,9 +33,9 @@ struct VersionsUpdate: AsyncParsableCommand {
         let updated = try await repo.updateVersion(
             id: versionId,
             versionString: version,
-            copyright: nil,
-            releaseType: nil,
-            earliestReleaseDate: nil
+            copyright: copyright,
+            releaseType: releaseType,
+            earliestReleaseDate: earliestReleaseDate
         )
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

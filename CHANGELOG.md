@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`asc versions update` now accepts `--copyright`, `--release-type`, and `--earliest-release-date`** — closes the App Store submission gap where the version's copyright line, release type (`MANUAL` / `AFTER_APPROVAL` / `SCHEDULED`), and earliest release date could only be set via the web. The underlying `VersionRepository.updateVersion(...)` already supported these fields; the CLI now wires them through. `--version` is now optional, so any subset of these fields can be patched independently (e.g. `asc versions update --version-id v-1 --copyright "© 2026 Acme"`).
+
 ---
 
 ## [0.17.9] - 2026-05-09
