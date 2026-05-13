@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **`asc app-availability get` no longer crashes with `PARAMETER_ERROR.INVALID` ("maximum allowable limit is '50'")** — Apple caps `include=territoryAvailabilities` on `/v1/apps/{id}/appAvailabilityV2` at 50 entries, and silently truncates relationship includes regardless. `SDKAppAvailabilityRepository.getAppAvailability` now matches the iOS-SDK multi-call pattern documented in CLAUDE.md: one call to the parent for `availableInNewTerritories` (no `include`), then a second call to the dedicated `/v2/appAvailabilities/{id}/territoryAvailabilities` endpoint with `limit: 200` for the full territory list. Added a regression test that round-trips 175 territories.
+
 ---
 
 ## [0.18.0] - 2026-05-13
