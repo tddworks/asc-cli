@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.18.0] - 2026-05-13
+
 ### Added
 - **`asc versions update` now accepts `--copyright`, `--release-type`, and `--earliest-release-date`** — closes the App Store submission gap where the version's copyright line, release type (`MANUAL` / `AFTER_APPROVAL` / `SCHEDULED`), and earliest release date could only be set via the web. The underlying `VersionRepository.updateVersion(...)` already supported these fields; the CLI now wires them through. `--version` is now optional, so any subset of these fields can be patched independently (e.g. `asc versions update --version-id v-1 --copyright "© 2026 Acme"`).
 
@@ -935,7 +939,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.17.9...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.18.0...HEAD
+[0.18.0]: https://github.com/tddworks/asc-cli/compare/v0.17.9...v0.18.0
 [0.17.9]: https://github.com/tddworks/asc-cli/compare/v0.17.8...v0.17.9
 [0.17.8]: https://github.com/tddworks/asc-cli/compare/v0.17.7...v0.17.8
 [0.17.7]: https://github.com/tddworks/asc-cli/compare/v0.1.74...v0.17.7
