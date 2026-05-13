@@ -435,7 +435,8 @@ async function loadPluginScripts() {
     const loadPromises = [];
     for (const plugin of (data.plugins || [])) {
       for (const url of (plugin.ui || [])) {
-        const fullUrl = `${DataProvider._serverUrl || ''}${url}`;
+        if (!url.endsWith('.js')) continue;
+        const fullUrl = `${DataProvider._serverUrl || ''}/api/plugins/${plugin.slug}/${url}`;
         const alreadyLoaded = !!document.querySelector(`script[src="${fullUrl}"]`);
         console.log('[screenshots] script:', fullUrl, 'alreadyLoaded=', alreadyLoaded);
         if (alreadyLoaded) continue;

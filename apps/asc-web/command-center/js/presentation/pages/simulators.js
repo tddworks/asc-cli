@@ -216,7 +216,9 @@ async function loadPluginScripts() {
     const data = await res.json();
     for (const plugin of (data.plugins || [])) {
       for (const url of (plugin.ui || [])) {
-        const fullUrl = `${DataProvider._serverUrl || ''}${url}`;
+        if (!url.endsWith('.js')) continue;
+        const fullUrl = `${DataProvider._serverUrl || ''}/api/plugins/${plugin.slug}/${url}`;
+        if (document.querySelector(`script[src="${fullUrl}"]`)) continue;
         const script = document.createElement('script');
         script.src = fullUrl;
         script.async = true;
