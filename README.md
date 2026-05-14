@@ -191,6 +191,8 @@ asc beta-app-localizations update --localization-id <id> [--description <text>] 
 asc beta-app-localizations delete --localization-id <id>
 
 asc review-submissions list --app-id <id> [--state WAITING_FOR_REVIEW,IN_REVIEW,READY_FOR_REVIEW] [--limit 200]
+asc review-submissions get --submission-id <id>
+asc review-submissions items list --submission-id <id> [--state REJECTED]
 ```
 
 ### Xcode Cloud
@@ -538,7 +540,7 @@ Detailed documentation for each feature:
 - [App Info](docs/features/app-infos.md) — name, subtitle, privacy policy, categories, age rating
 - [TestFlight](docs/features/testflight.md) — beta groups, tester management, CSV import/export
 - [Beta Review](docs/features/beta-review.md) — submit builds for beta app review, manage review contact details
-- [Review Submissions](docs/features/review-submissions.md) — list App Store review submissions filtered by state
+- [Review Submissions](docs/features/review-submissions.md) — inspect App Store review submissions, drill into per-item state to find what Apple rejected
 - [Xcode Cloud](docs/features/xcode-cloud.md) — products, workflows, build runs, start builds
 - [Builds Archive](docs/features/builds-archive.md) — archive Xcode projects, export IPA/PKG, optional upload chaining
 - [Builds Upload](docs/features/builds-upload.md) — upload IPA/PKG, TestFlight distribution, beta notes
