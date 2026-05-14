@@ -29,9 +29,21 @@ public struct ReviewSubmission: Sendable, Equatable, Identifiable, Codable {
 
 extension ReviewSubmission: AffordanceProviding {
     public var structuredAffordances: [Affordance] {
-        [
-            Affordance(key: "listVersions", command: "versions", action: "list", params: ["app-id": appId]),
+        var items: [Affordance] = [
+            Affordance(key: "getSubmission", command: "review-submissions", action: "get",
+                       params: ["submission-id": id]),
+            Affordance(key: "listItems", command: "review-submissions items", action: "list",
+                       params: ["submission-id": id]),
+            Affordance(key: "listVersions", command: "versions", action: "list",
+                       params: ["app-id": appId]),
         ]
+        if hasIssues {
+            // Agent shortcut: when Apple flags issues, the rejected items expose
+            // which resource needs fixing — surface them as the first thing to do.
+            items.append(Affordance(key: "listRejectedItems", command: "review-submissions items", action: "list",
+                                    params: ["submission-id": id, "state": "REJECTED"]))
+        }
+        return items
     }
 }
 

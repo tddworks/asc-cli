@@ -28,5 +28,24 @@ struct ReviewSubmissionsController: Sendable {
             let items = try await self.submissionRepo.listSubmissions(appId: appId, states: states, limit: limit)
             return try restFormat(items)
         }
+
+        // GET /api/v1/review-submissions/:id — single submission detail.
+        group.get("/review-submissions/:id") { _, context -> Response in
+            guard let id = context.parameters.get("id") else { return jsonError("Missing submission id") }
+            let submission = try await self.submissionRepo.getSubmission(id: id)
+            return try restFormat(submission)
+        }
+
+        // GET /api/v1/review-submissions/:id/items — list items; ?state= filters them.
+        // The `?state=` query param mirrors the CLI's `--state` flag.
+        group.get("/review-submissions/:id/items") { request, context -> Response in
+            guard let id = context.parameters.get("id") else { return jsonError("Missing submission id") }
+            var items = try await self.submissionRepo.listSubmissionItems(submissionId: id)
+            if let raw = request.uri.queryParameters["state"],
+               let filter = ReviewSubmissionItemState(rawValue: String(raw).uppercased()) {
+                items = items.filter { $0.state == filter }
+            }
+            return try restFormat(items)
+        }
     }
 }

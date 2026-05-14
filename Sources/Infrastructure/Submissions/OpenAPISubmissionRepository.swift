@@ -67,6 +67,56 @@ public struct OpenAPISubmissionRepository: SubmissionRepository, @unchecked Send
         return try await patchSubmitted(id: submissionId, appId: appId, platform: platform)
     }
 
+    public func getSubmission(id: String) async throws -> Domain.ReviewSubmission {
+        let request = APIEndpoint.v1.reviewSubmissions.id(id).get(parameters: .init(
+            include: [.app]
+        ))
+        let response = try await client.request(request)
+        let appId = response.data.relationships?.app?.data?.id ?? ""
+        return mapListedSubmission(response.data, appId: appId)
+    }
+
+    public func listSubmissionItems(submissionId: String) async throws -> [Domain.ReviewSubmissionItem] {
+        let request = APIEndpoint.v1.reviewSubmissions.id(submissionId).items.get(parameters: .init())
+        let response = try await client.request(request)
+        return response.data.map { mapSubmissionItem($0, submissionId: submissionId) }
+    }
+
+    private func mapSubmissionItem(
+        _ sdkItem: AppStoreConnect_Swift_SDK.ReviewSubmissionItem,
+        submissionId: String
+    ) -> Domain.ReviewSubmissionItem {
+        let state = sdkItem.attributes?.state.flatMap {
+            Domain.ReviewSubmissionItemState(rawValue: $0.rawValue)
+        } ?? .readyForReview
+
+        // Apple attaches exactly one related resource per item, expressed as
+        // separate optional relationships. Probe the well-known kinds in priority
+        // order — appStoreVersion first since it's by far the common case.
+        let (linkedId, linkedType): (String?, Domain.ReviewSubmissionItemLinkedResource?) = {
+            if let id = sdkItem.relationships?.appStoreVersion?.data?.id { return (id, .appStoreVersion) }
+            if let id = sdkItem.relationships?.appCustomProductPageVersion?.data?.id { return (id, .appCustomProductPageVersion) }
+            if let id = sdkItem.relationships?.appStoreVersionExperiment?.data?.id { return (id, .appStoreVersionExperiment) }
+            if let id = sdkItem.relationships?.appStoreVersionExperimentV2?.data?.id { return (id, .appStoreVersionExperiment) }
+            if let id = sdkItem.relationships?.appEvent?.data?.id { return (id, .appEvent) }
+            if let id = sdkItem.relationships?.backgroundAssetVersion?.data?.id { return (id, .backgroundAssetVersion) }
+            if let id = sdkItem.relationships?.gameCenterAchievementVersion?.data?.id { return (id, .gameCenterAchievementVersion) }
+            if let id = sdkItem.relationships?.gameCenterActivityVersion?.data?.id { return (id, .gameCenterActivityVersion) }
+            if let id = sdkItem.relationships?.gameCenterChallengeVersion?.data?.id { return (id, .gameCenterChallengeVersion) }
+            if let id = sdkItem.relationships?.gameCenterLeaderboardSetVersion?.data?.id { return (id, .gameCenterLeaderboardSetVersion) }
+            if let id = sdkItem.relationships?.gameCenterLeaderboardVersion?.data?.id { return (id, .gameCenterLeaderboardVersion) }
+            return (nil, nil)
+        }()
+
+        return Domain.ReviewSubmissionItem(
+            id: sdkItem.id,
+            submissionId: submissionId,
+            state: state,
+            linkedResourceId: linkedId,
+            linkedResourceType: linkedType
+        )
+    }
+
     public func listSubmissions(
         appId: String,
         states: [Domain.ReviewSubmissionState]?,

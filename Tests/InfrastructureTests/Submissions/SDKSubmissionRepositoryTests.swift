@@ -182,6 +182,89 @@ struct SDKSubmissionRepositoryTests {
         #expect(results.last?.state == .unresolvedIssues)
     }
 
+    // MARK: - getSubmission
+
+    @Test func `getSubmission injects appId from app relationship and maps state`() async throws {
+        let stub = SequencedStubAPIClient()
+        stub.enqueue(ReviewSubmissionResponse(
+            data: ReviewSubmission(
+                type: .reviewSubmissions,
+                id: "sub-77",
+                attributes: .init(platform: .ios, state: .unresolvedIssues),
+                relationships: .init(app: .init(data: .init(type: .apps, id: "app-42")))
+            ),
+            links: .init(this: "")
+        ))
+
+        let repo = OpenAPISubmissionRepository(client: stub)
+        let result = try await repo.getSubmission(id: "sub-77")
+
+        #expect(result.id == "sub-77")
+        #expect(result.appId == "app-42")
+        #expect(result.state == .unresolvedIssues)
+        #expect(result.hasIssues == true)
+    }
+
+    // MARK: - listSubmissionItems
+
+    @Test func `listSubmissionItems injects submissionId and maps state`() async throws {
+        let stub = SequencedStubAPIClient()
+        stub.enqueue(ReviewSubmissionItemsResponse(
+            data: [
+                ReviewSubmissionItem(
+                    type: .reviewSubmissionItems,
+                    id: "item-1",
+                    attributes: .init(state: .rejected),
+                    relationships: .init(
+                        appStoreVersion: .init(data: .init(type: .appStoreVersions, id: "v-9"))
+                    )
+                ),
+                ReviewSubmissionItem(
+                    type: .reviewSubmissionItems,
+                    id: "item-2",
+                    attributes: .init(state: .approved),
+                    relationships: .init(
+                        appStoreVersion: .init(data: .init(type: .appStoreVersions, id: "v-10"))
+                    )
+                ),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = OpenAPISubmissionRepository(client: stub)
+        let results = try await repo.listSubmissionItems(submissionId: "sub-1")
+
+        #expect(results.count == 2)
+        #expect(results.allSatisfy { $0.submissionId == "sub-1" })
+        #expect(results.first?.state == .rejected)
+        #expect(results.first?.isRejected == true)
+        #expect(results.first?.linkedResourceId == "v-9")
+        #expect(results.first?.linkedResourceType == .appStoreVersion)
+        #expect(results.last?.state == .approved)
+        #expect(results.last?.isApproved == true)
+    }
+
+    @Test func `listSubmissionItems handles item with no linked relationship`() async throws {
+        let stub = SequencedStubAPIClient()
+        stub.enqueue(ReviewSubmissionItemsResponse(
+            data: [
+                ReviewSubmissionItem(
+                    type: .reviewSubmissionItems,
+                    id: "item-1",
+                    attributes: .init(state: .readyForReview)
+                ),
+            ],
+            links: .init(this: "")
+        ))
+
+        let repo = OpenAPISubmissionRepository(client: stub)
+        let results = try await repo.listSubmissionItems(submissionId: "sub-1")
+
+        #expect(results.first?.linkedResourceId == nil)
+        #expect(results.first?.linkedResourceType == nil)
+        #expect(results.first?.isPending == true)
+    }
+
     @Test func `listSubmissions maps all states and preserves submittedDate`() async throws {
         let stub = SequencedStubAPIClient()
         let date = Date(timeIntervalSince1970: 1_700_000_000)

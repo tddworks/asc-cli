@@ -161,6 +161,7 @@ public final class RESTPathResolver: @unchecked Sendable {
         _ = _xcodeCloudRoutes
         _ = _codeSigningRoutes
         _ = _appShotsRoutes
+        _ = _submissionRoutes
 
         initialized = true
     }

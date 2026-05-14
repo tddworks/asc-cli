@@ -21,6 +21,8 @@ struct ReviewSubmissionsListTests {
           "data" : [
             {
               "affordances" : {
+                "getSubmission" : "asc review-submissions get --submission-id sub-1",
+                "listItems" : "asc review-submissions items list --submission-id sub-1",
                 "listVersions" : "asc versions list --app-id app-42"
               },
               "appId" : "app-42",
@@ -31,6 +33,23 @@ struct ReviewSubmissionsListTests {
           ]
         }
         """)
+    }
+
+    @Test func `unresolved issues submission exposes listRejectedItems affordance`() async throws {
+        let mockRepo = MockSubmissionRepository()
+        given(mockRepo).listSubmissions(
+            appId: .any,
+            states: .any,
+            limit: .any
+        ).willReturn([
+            ReviewSubmission(id: "sub-x", appId: "app-1", platform: .iOS, state: .unresolvedIssues),
+        ])
+
+        let cmd = try ReviewSubmissionsList.parse(["--app-id", "app-1"])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output.contains("\"listRejectedItems\""))
+        #expect(output.contains("--state REJECTED --submission-id sub-x"))
     }
 
     @Test func `state filter parses comma-separated values and passes them to repo`() async throws {

@@ -191,6 +191,22 @@ struct MockRepositoryFactory {
         ReviewSubmission(id: id, appId: appId, platform: platform, state: state, submittedDate: submittedDate)
     }
 
+    static func makeReviewSubmissionItem(
+        id: String = "item-1",
+        submissionId: String = "sub-1",
+        state: ReviewSubmissionItemState = .readyForReview,
+        linkedResourceId: String? = "v-1",
+        linkedResourceType: ReviewSubmissionItemLinkedResource? = .appStoreVersion
+    ) -> ReviewSubmissionItem {
+        ReviewSubmissionItem(
+            id: id,
+            submissionId: submissionId,
+            state: state,
+            linkedResourceId: linkedResourceId,
+            linkedResourceType: linkedResourceType
+        )
+    }
+
     static func makeAppInfo(
         id: String = "info-1",
         appId: String = "app-1",
