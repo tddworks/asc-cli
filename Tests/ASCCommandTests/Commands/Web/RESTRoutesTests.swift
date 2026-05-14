@@ -306,6 +306,38 @@ struct RESTRoutesTests {
         let normalized = output.replacingOccurrences(of: "\\/", with: "/")
         #expect(normalized.contains("\"_links\""))
         #expect(normalized.contains("/api/v1/apps/42/versions"))
+        #expect(normalized.contains("/api/v1/review-submissions/sub-1"))
+        #expect(normalized.contains("/api/v1/review-submissions/sub-1/items"))
+        #expect(!normalized.contains("\"affordances\""))
+    }
+
+    @Test func `review submissions get returns JSON with _links`() async throws {
+        let mockRepo = MockSubmissionRepository()
+        given(mockRepo).getSubmission(id: .value("sub-1")).willReturn(
+            ReviewSubmission(id: "sub-1", appId: "42", platform: .iOS, state: .unresolvedIssues)
+        )
+        let output = try await ReviewSubmissionsGet
+            .parse(["--submission-id", "sub-1", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/review-submissions/sub-1/items"))
+        #expect(!normalized.contains("\"affordances\""))
+    }
+
+    @Test func `review submission items list returns JSON with _links for parent and version`() async throws {
+        let mockRepo = MockSubmissionRepository()
+        given(mockRepo).listSubmissionItems(submissionId: .value("sub-1")).willReturn([
+            ReviewSubmissionItem(id: "item-1", submissionId: "sub-1", state: .rejected,
+                                 linkedResourceId: "v-9", linkedResourceType: .appStoreVersion),
+        ])
+        let output = try await ReviewSubmissionItemsList
+            .parse(["--submission-id", "sub-1", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/review-submissions/sub-1"))
+        #expect(normalized.contains("/api/v1/versions/v-9"))
         #expect(!normalized.contains("\"affordances\""))
     }
 

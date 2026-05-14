@@ -25,6 +25,8 @@ struct VersionsSubmitTests {
           "data" : [
             {
               "affordances" : {
+                "getSubmission" : "asc review-submissions get --submission-id sub-1",
+                "listItems" : "asc review-submissions items list --submission-id sub-1",
                 "listVersions" : "asc versions list --app-id app-42"
               },
               "appId" : "app-42",
