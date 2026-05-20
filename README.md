@@ -427,6 +427,9 @@ asc sales-reports download --report-type SALES --sub-type SUMMARY --frequency DA
 # Weekly/monthly/yearly require --report-date
 asc sales-reports download --report-type SUBSCRIPTION --sub-type SUMMARY --frequency MONTHLY --report-date 2024-01
 
+# Rollup across a date range
+asc sales-reports summary --from 2026-05-13 --to 2026-05-18
+
 # Financial report (--report-date always required)
 asc finance-reports download --report-type FINANCIAL --region-code US --report-date 2024-01
 

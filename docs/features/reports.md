@@ -81,6 +81,51 @@ Currency of Proceeds  Developer Proceeds  Provider  Provider Country  SKU       
 USD                   6.99                APPLE     US                com.example.app  My App  10
 ```
 
+### Sales Summary
+
+```bash
+asc sales-reports summary --from <YYYY-MM-DD> --to <YYYY-MM-DD>
+```
+
+Aggregates daily Sales reports across a date range into a single rollup.
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--vendor-number` | No | Auto-resolved from active account. |
+| `--from` | Yes | Start date inclusive (`YYYY-MM-DD`). |
+| `--to` | Yes | End date inclusive (`YYYY-MM-DD`). |
+| `--pretty` | No | Pretty-print JSON. |
+
+**Bucketing rules:**
+
+| Metric | Formula |
+|--------|---------|
+| `downloads` | Sum of `Units` where `Product Type Identifier` starts with `1` (iOS) or `F` (macOS). Excludes `3F` (Apple Watch redownloads), `7*` (updates), `IA*` (in-app purchases). |
+| `updates` | Sum of `Units` where PTI starts with `7`. |
+| `inAppPurchases` | Sum of `Units` where PTI starts with `IA`. |
+| `payers` | Distinct count of SKUs where `Customer Price > 0`. |
+| `customerSpend` | Map of `Customer Currency` → sum of `Customer Price × Units`. Kept per-currency because the column is in customer-local currency — summing across currencies would be mathematically meaningless. |
+| `proceeds` | Map of `Currency of Proceeds` → sum of `Developer Proceeds × Units`. The developer's actual payout, per proceeds currency. |
+
+**Example:**
+
+```bash
+asc sales-reports summary --from 2026-05-13 --to 2026-05-18 --pretty
+# {
+#   "customerSpend" : { "CNY" : 48 },
+#   "days" : 6,
+#   "downloads" : 58,
+#   "from" : "2026-05-13",
+#   "inAppPurchases" : 9,
+#   "payers" : 1,
+#   "proceeds" : { "USD" : 41.94 },
+#   "to" : "2026-05-18",
+#   "updates" : 12
+# }
+```
+
+**Note on data freshness:** This command reads from the same `/v1/salesReports` TSV pipeline as `download`. Apple amends daily reports for up to 5 days. For most-recent-day numbers matching the App Store Connect mobile app's "Trends" view in real-time, the public API is not the right source (mobile uses an internal iris endpoint).
+
 ### Finance Reports
 
 ```bash
