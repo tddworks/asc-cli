@@ -91,13 +91,56 @@ struct SDKReportRepositoryDownloadSalesReportTests {
             reportType: .sales,
             subType: .summary,
             frequency: .daily,
-            reportDate: nil
+            reportDate: nil,
+            version: nil
         )
 
         #expect(rows.count == 1)
         #expect(rows[0]["Provider"] == "APPLE")
         #expect(rows[0]["SKU"] == "com.example")
         #expect(rows[0]["Units"] == "10")
+    }
+
+    @Test func `downloadSalesReport sends filter[version] when version provided`() async throws {
+        let tsv = "Provider\tSKU\tUnits\nAPPLE\tcom.example\t16\n"
+        let gzipped = try gzipCompress(tsv.data(using: .utf8)!)
+
+        let stub = StubAPIClient()
+        stub.willReturn(gzipped)
+
+        let repo = SDKReportRepository(client: stub)
+        _ = try await repo.downloadSalesReport(
+            vendorNumber: "123",
+            reportType: .sales,
+            subType: .summary,
+            frequency: .daily,
+            reportDate: "2026-05-18",
+            version: "1_4"
+        )
+
+        let query = stub.lastQuery ?? []
+        #expect(query.contains(where: { $0.0 == "filter[version]" && $0.1 == "1_4" }))
+    }
+
+    @Test func `downloadSalesReport omits filter[version] when version is nil`() async throws {
+        let tsv = "Provider\tSKU\tUnits\nAPPLE\tcom.example\t1\n"
+        let gzipped = try gzipCompress(tsv.data(using: .utf8)!)
+
+        let stub = StubAPIClient()
+        stub.willReturn(gzipped)
+
+        let repo = SDKReportRepository(client: stub)
+        _ = try await repo.downloadSalesReport(
+            vendorNumber: "123",
+            reportType: .sales,
+            subType: .summary,
+            frequency: .daily,
+            reportDate: nil,
+            version: nil
+        )
+
+        let query = stub.lastQuery ?? []
+        #expect(!query.contains(where: { $0.0 == "filter[version]" }))
     }
 }
 

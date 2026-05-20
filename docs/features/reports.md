@@ -22,6 +22,7 @@ asc sales-reports download \
 | `--sub-type` | Yes | `SUMMARY`, `DETAILED`, `SUMMARY_INSTALL_TYPE`, `SUMMARY_TERRITORY`, `SUMMARY_CHANNEL` |
 | `--frequency` | Yes | `DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY` |
 | `--report-date` | **DAILY: No; WEEKLY/MONTHLY/YEARLY: Yes** | Report date (e.g. `2024-01-15` for daily, `2024-03-02` for weekly — must be a Sunday, `2024-01` for monthly). Optional only for DAILY (omit to get latest). Required for all other frequencies. |
+| `--version` | No | Report schema version (e.g. `1_1` for `SALES/SUMMARY/DAILY`). Omit to use Apple's default. Invalid values surface as `PARAMETER_ERROR.INVALID` with the latest supported version. |
 | `--output` | No | `json` (default), `table` |
 | `--pretty` | No | Pretty-print JSON output |
 
@@ -209,7 +210,8 @@ public protocol ReportRepository: Sendable {
         reportType: SalesReportType,
         subType: SalesReportSubType,
         frequency: ReportFrequency,
-        reportDate: String?
+        reportDate: String?,
+        version: String?
     ) async throws -> [[String: String]]
 
     func downloadFinanceReport(

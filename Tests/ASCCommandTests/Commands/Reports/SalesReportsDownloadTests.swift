@@ -13,7 +13,8 @@ struct SalesReportsDownloadTests {
             reportType: .any,
             subType: .any,
             frequency: .any,
-            reportDate: .any
+            reportDate: .any,
+            version: .any
         ).willReturn([
             ["Provider": "APPLE", "SKU": "com.example", "Units": "10"]
         ])
@@ -47,7 +48,8 @@ struct SalesReportsDownloadTests {
             reportType: .any,
             subType: .any,
             frequency: .any,
-            reportDate: .any
+            reportDate: .any,
+            version: .any
         ).willReturn([
             ["Provider": "APPLE", "SKU": "com.a", "Units": "5"]
         ])
@@ -82,7 +84,8 @@ struct SalesReportsDownloadTests {
             reportType: .any,
             subType: .any,
             frequency: .any,
-            reportDate: .any
+            reportDate: .any,
+            version: .any
         ).willReturn([
             ["Provider": "APPLE", "SKU": "com.example", "Units": "10"]
         ])
@@ -111,7 +114,8 @@ struct SalesReportsDownloadTests {
             reportType: .any,
             subType: .any,
             frequency: .any,
-            reportDate: .any
+            reportDate: .any,
+            version: .any
         ).willReturn([
             ["Provider": "APPLE", "Units": "1"]
         ])
@@ -137,7 +141,8 @@ struct SalesReportsDownloadTests {
             reportType: .any,
             subType: .any,
             frequency: .any,
-            reportDate: .any
+            reportDate: .any,
+            version: .any
         ).willReturn([
             ["Provider": "APPLE", "Units": "1"]
         ])
@@ -170,6 +175,32 @@ struct SalesReportsDownloadTests {
         }
     }
 
+    @Test func `forwards --version flag to repository as filterVersion`() async throws {
+        let mockRepo = MockReportRepository()
+        given(mockRepo).downloadSalesReport(
+            vendorNumber: .any,
+            reportType: .any,
+            subType: .any,
+            frequency: .any,
+            reportDate: .any,
+            version: .value("1.4")
+        ).willReturn([
+            ["Provider": "APPLE", "Units": "16"]
+        ])
+
+        let cmd = try SalesReportsDownload.parse([
+            "--vendor-number", "123",
+            "--report-type", "SALES",
+            "--sub-type", "SUMMARY",
+            "--frequency", "DAILY",
+            "--version", "1.4",
+            "--pretty",
+        ])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output.contains("\"Units\" : \"16\""))
+    }
+
     @Test func `handles empty report`() async throws {
         let mockRepo = MockReportRepository()
         given(mockRepo).downloadSalesReport(
@@ -177,7 +208,8 @@ struct SalesReportsDownloadTests {
             reportType: .any,
             subType: .any,
             frequency: .any,
-            reportDate: .any
+            reportDate: .any,
+            version: .any
         ).willReturn([])
 
         let cmd = try SalesReportsDownload.parse([

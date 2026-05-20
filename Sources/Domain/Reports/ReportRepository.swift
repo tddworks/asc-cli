@@ -7,7 +7,8 @@ public protocol ReportRepository: Sendable {
         reportType: SalesReportType,
         subType: SalesReportSubType,
         frequency: ReportFrequency,
-        reportDate: String?
+        reportDate: String?,
+        version: String?
     ) async throws -> [[String: String]]
 
     func downloadFinanceReport(

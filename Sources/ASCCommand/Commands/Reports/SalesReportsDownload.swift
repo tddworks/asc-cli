@@ -25,6 +25,9 @@ struct SalesReportsDownload: AsyncParsableCommand {
     @Option(name: .long, help: "Report date (e.g. 2024-01-15)")
     var reportDate: String?
 
+    @Option(name: .long, help: "Report schema version (e.g. 1_4 for SALES/SUMMARY/DAILY). Omit to use Apple's default.")
+    var version: String?
+
     func run() async throws {
         let repo = try ClientProvider.makeReportRepository()
         let storage = FileAuthStorage()
@@ -49,7 +52,8 @@ struct SalesReportsDownload: AsyncParsableCommand {
             reportType: parsedReportType,
             subType: parsedSubType,
             frequency: parsedFrequency,
-            reportDate: reportDate
+            reportDate: reportDate,
+            version: version
         )
 
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)

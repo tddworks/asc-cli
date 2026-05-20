@@ -16,6 +16,8 @@ final class StubAPIClient: APIClient, @unchecked Sendable {
     private var stubsByType: [String: Any] = [:]
     private var lastStub: Any?
     private(set) var voidRequestCalled = false
+    private(set) var lastQuery: [(String, String?)]?
+    private(set) var lastPath: String?
 
     func willReturn<T>(_ response: T) {
         stubsByType[String(describing: T.self)] = response
@@ -23,6 +25,8 @@ final class StubAPIClient: APIClient, @unchecked Sendable {
     }
 
     func request<T: Decodable>(_ endpoint: Request<T>) async throws -> T {
+        lastQuery = endpoint.query
+        lastPath = endpoint.path
         let key = String(describing: T.self)
         if let response = stubsByType[key] as? T { return response }
         if let response = lastStub as? T { return response }

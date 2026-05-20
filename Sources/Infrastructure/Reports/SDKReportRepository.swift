@@ -14,7 +14,8 @@ public struct SDKReportRepository: ReportRepository, @unchecked Sendable {
         reportType: SalesReportType,
         subType: SalesReportSubType,
         frequency: ReportFrequency,
-        reportDate: String?
+        reportDate: String?,
+        version: String?
     ) async throws -> [[String: String]] {
         let sdkReportType = mapSalesReportType(reportType)
         let sdkSubType = mapSalesReportSubType(subType)
@@ -25,7 +26,8 @@ public struct SDKReportRepository: ReportRepository, @unchecked Sendable {
             filterReportType: [sdkReportType],
             filterReportSubType: [sdkSubType],
             filterFrequency: [sdkFrequency],
-            filterReportDate: reportDate.map { [$0] }
+            filterReportDate: reportDate.map { [$0] },
+            filterVersion: version.map { [$0] }
         ))
 
         let data: Data = try await client.request(endpoint)
