@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.18.1] - 2026-05-31
+
 ### Added
 - **`asc sales-reports summary --from <date> --to <date>`** — aggregates daily Sales reports across a date range into a single rollup with derived metrics: `downloads` (first installs of phone/Mac apps, excluding Apple Watch `3F` redownloads), `updates`, `inAppPurchases`, `payers` (distinct SKUs with non-zero customer price), `customerSpend` (per `Customer Currency`, since `Customer Price` is in customer-local currency and cross-currency summing is meaningless), `proceeds` (per `Currency of Proceeds`, the developer's actual payout). CLI-only like the other report commands.
 - **`asc sales-reports download --version <schema>`** — exposes Apple's `filter[version]` query parameter on `/v1/salesReports`. Previously omitted by `SDKReportRepository`, so Apple always returned its default schema. Invalid values now surface Apple's helpful `PARAMETER_ERROR.INVALID` message naming the latest supported version (e.g. `1_1` for `SALES/SUMMARY/DAILY`). `ReportRepository.downloadSalesReport` gains a trailing `version: String?` parameter; pass `nil` to keep the previous default behavior.
@@ -947,7 +951,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.18.0...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.18.1...HEAD
+[0.18.1]: https://github.com/tddworks/asc-cli/compare/v0.18.0...v0.18.1
 [0.18.0]: https://github.com/tddworks/asc-cli/compare/v0.17.9...v0.18.0
 [0.17.9]: https://github.com/tddworks/asc-cli/compare/v0.17.8...v0.17.9
 [0.17.8]: https://github.com/tddworks/asc-cli/compare/v0.17.7...v0.17.8
