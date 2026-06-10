@@ -12,7 +12,7 @@ A CLI for App Store Connect — automate builds, releases, TestFlight, subscript
 ## Quick Start
 
 ```bash
-brew install tddworks/tap/asccli
+brew install asccli
 
 asc auth login \
   --key-id YOUR_KEY_ID \
@@ -78,7 +78,7 @@ Now `asc iap list --app-id <id>` enriches each IAP with the right submission aff
 ### Homebrew (recommended)
 
 ```bash
-brew install tddworks/tap/asccli
+brew install asccli
 ```
 
 ### Build from source

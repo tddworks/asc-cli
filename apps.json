@@ -25,7 +25,7 @@
       "github": "https://github.com/tddworks/asc-cli",
       "homepage": "https://asccli.app",
       "language": "Swift",
-      "brew": "brew install tddworks/tap/asccli",
+      "brew": "brew install asccli",
       "requirements": "macOS 15 Sequoia or later",
       "features": [
         "List apps, create versions, link builds, submit for App Store review",

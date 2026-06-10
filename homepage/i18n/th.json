@@ -26,7 +26,7 @@
     "titleAccent": "จาก terminal ของคุณ",
     "subtitle": "Swift CLI สำหรับจัดการแอป iOS และ macOS บน App Store Connect ส่งเวอร์ชัน จัดการภาพหน้าจอ ติดตาม build — พร้อมรองรับ AI agent อย่างสมบูรณ์ผ่าน CAEOAS",
     "installLabel": "ติดตั้งผ่าน Homebrew",
-    "installCmd": "brew install tddworks/tap/asccli",
+    "installCmd": "brew install asccli",
     "githubLabel": "ดูบน GitHub",
     "stats": {
       "stat1Value": "130+",

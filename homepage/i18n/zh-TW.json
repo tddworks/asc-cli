@@ -26,7 +26,7 @@
     "titleAccent": "App Store Connect。",
     "subtitle": "用於管理 iOS 和 macOS 應用程式的 Swift 命令列工具。提交版本、管理截圖、追蹤建構——同時內建完整的 CAEOAS 可供 AI 智能體調用。",
     "installLabel": "透過 Homebrew 安裝",
-    "installCmd": "brew install tddworks/tap/asccli",
+    "installCmd": "brew install asccli",
     "githubLabel": "在 GitHub 上查看",
     "stats": {
       "stat1Value": "130+",

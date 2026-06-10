@@ -26,7 +26,7 @@
     "titleAccent": "từ terminal của bạn.",
     "subtitle": "CLI Swift để quản lý ứng dụng iOS và macOS trên App Store Connect. Gửi phiên bản, quản lý ảnh chụp màn hình, theo dõi bản build — với hỗ trợ tác nhân AI đầy đủ qua CAEOAS.",
     "installLabel": "Cài đặt qua Homebrew",
-    "installCmd": "brew install tddworks/tap/asccli",
+    "installCmd": "brew install asccli",
     "githubLabel": "Xem trên GitHub",
     "stats": {
       "stat1Value": "130+",

@@ -26,7 +26,7 @@
     "titleAccent": "App Store Connect を管理。",
     "subtitle": "iOS・macOS アプリを App Store Connect で管理するための Swift CLI。バージョン提出、スクリーンショット管理、ビルド追跡 — CAEOAS による完全な AI エージェントサポート付き。",
     "installLabel": "Homebrew でインストール",
-    "installCmd": "brew install tddworks/tap/asccli",
+    "installCmd": "brew install asccli",
     "githubLabel": "GitHub で見る",
     "stats": {
       "stat1Value": "130+",
