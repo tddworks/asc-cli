@@ -1,9 +1,9 @@
 [
   {
     "developer" : "itshan",
+    "developerId" : "1725133580",
     "x" : "itshanrw",
-    "github" : "hanrw",
-    "developerId" : "1725133580"
+    "github" : "hanrw"
   },
   {
     "apps" : [
@@ -27,9 +27,9 @@
   },
   {
     "developer" : "westerbamos",
+    "developerId" : "1880888447",
     "x" : "westerbamos",
     "github" : "westerbamos",
-    "developerId" : "1880888447",
     "apps" : [
       "https:\/\/apps.apple.com\/app\/id6759816401"
     ]
@@ -39,6 +39,11 @@
     "github" : "Eversight",
     "apps" : [
       "https:\/\/apps.apple.com\/us\/app\/reliclens-antique-identifier\/id6760348975"
+    ]
+  },
+  {
+    "apps" : [
+      "https:\/\/apps.apple.com\/app\/id6777212637"
     ]
   }
 ]
