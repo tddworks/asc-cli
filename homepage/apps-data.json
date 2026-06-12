@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-09T10:33:00.219Z",
+  "generated": "2026-06-12T07:34:45.406Z",
   "items": [
     {
       "developer": "itshan",
@@ -10,6 +10,16 @@
       "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/cd/b2/3e/cdb23ecb-14e5-ede8-5850-ad71d9ee24bd/AppIcon-0-0-1x_U007epad-0-1-85-220.png/100x100bb.jpg",
       "primaryGenreName": "Developer Tools",
       "url": "https://apps.apple.com/us/app/coupon-distributor/id6757699024?uo=4"
+    },
+    {
+      "developer": "itshan",
+      "github": "hanrw",
+      "x": "itshanrw",
+      "trackId": 6743046579,
+      "trackName": "BezelBlend",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/82/d1/29/82d12908-8826-9a20-e61a-0288ffaa6ff9/AppIcon-0-0-1x_U007epad-0-1-85-220.png/100x100bb.jpg",
+      "primaryGenreName": "Productivity",
+      "url": "https://apps.apple.com/us/app/bezelblend/id6743046579?uo=4"
     },
     {
       "developer": "itshan",
@@ -27,7 +37,7 @@
       "x": "itshanrw",
       "trackId": 6738306175,
       "trackName": "BlurBlend – Masking Assistant",
-      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/29/cf/72/29cf72f4-a681-b79a-84cf-6a4096643b47/AppIcon-0-0-1x_U007epad-0-1-85-220.png/100x100bb.jpg",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/7e/a2/fa/7ea2fa74-560f-50cb-0770-cad032e72027/AppIcon-0-0-1x_U007epad-0-1-85-220.png/100x100bb.jpg",
       "primaryGenreName": "Utilities",
       "url": "https://apps.apple.com/us/app/blurblend-masking-assistant/id6738306175?uo=4"
     },
@@ -45,19 +55,9 @@
       "developer": "itshan",
       "github": "hanrw",
       "x": "itshanrw",
-      "trackId": 6743046579,
-      "trackName": "BezelBlend",
-      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/4e/ce/57/4ece57a7-c2b5-242e-c8a0-ec79c71e4a22/AppIcon-0-0-1x_U007epad-0-1-85-220.png/100x100bb.jpg",
-      "primaryGenreName": "Productivity",
-      "url": "https://apps.apple.com/us/app/bezelblend/id6743046579?uo=4"
-    },
-    {
-      "developer": "itshan",
-      "github": "hanrw",
-      "x": "itshanrw",
       "trackId": 6748760927,
       "trackName": "AppNexus for App Store Connect",
-      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/35/ed/e9/35ede934-4096-3451-e134-4d10c6f26f77/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/100x100bb.jpg",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/bf/99/ba/bf99ba47-d5c5-9b7b-be52-ae95c1a2a7d8/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/100x100bb.jpg",
       "primaryGenreName": "Developer Tools",
       "url": "https://apps.apple.com/us/app/appnexus-for-app-store-connect/id6748760927?uo=4"
     },
@@ -80,6 +80,16 @@
       "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/44/50/2a/44502ac5-7412-8f9d-dfc6-02c0f53932fe/AppIcon-0-0-1x_U007ephone-0-1-85-220.png/100x100bb.jpg",
       "primaryGenreName": "Education",
       "url": "https://apps.apple.com/us/app/linguasnap-language-classroom/id6741713404?uo=4"
+    },
+    {
+      "developer": "itshan",
+      "github": "hanrw",
+      "x": "itshanrw",
+      "trackId": 6767814134,
+      "trackName": "SwissBoard",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/21/98/9f/21989f58-1db8-2df5-785d-86c494f44d23/AppIcon-0-0-1x_U007emarketing-0-8-0-P3-85-220.png/100x100bb.jpg",
+      "primaryGenreName": "Productivity",
+      "url": "https://apps.apple.com/us/app/swissboard/id6767814134?uo=4"
     },
     {
       "developer": "itshan",
@@ -137,7 +147,7 @@
       "x": "westerbamos",
       "trackId": 6759816401,
       "trackName": "Tottli: Newborn & Baby Tracker",
-      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/d1/6a/17/d16a17d6-e246-4372-fe3f-e1557d4c29ff/AppIcon-0-0-1x_U007epad-0-1-85-220.png/100x100bb.jpg",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/c5/3a/e4/c53ae41e-571d-93fd-6541-f9872d3b26cd/AppIcon-0-0-1x_U007epad-0-1-85-220.png/100x100bb.jpg",
       "primaryGenreName": "Health & Fitness",
       "url": "https://apps.apple.com/us/app/tottli-newborn-baby-tracker/id6759816401?uo=4"
     },
