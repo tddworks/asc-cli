@@ -1,3 +1,4 @@
+import Foundation
 import Mockable
 
 /// Repository for reading Resolution Center data via the iris private API.
@@ -15,4 +16,11 @@ public protocol IrisResolutionCenterRepository: Sendable {
         session: IrisSession,
         submissionId: String
     ) async throws -> ResolutionCenterDetail
+
+    /// Fetch one attachment's bytes from its Apple-signed URL. Adapters must
+    /// refuse URLs that fail `ResolutionCenterAttachment.isValidDownloadURL`.
+    func downloadAttachment(
+        session: IrisSession,
+        url: String
+    ) async throws -> Data
 }

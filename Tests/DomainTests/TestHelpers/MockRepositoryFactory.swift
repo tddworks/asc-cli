@@ -237,14 +237,32 @@ struct MockRepositoryFactory {
         submissionId: String = "sub-1",
         threadState: String? = "OPEN",
         messages: [ResolutionCenterMessage] = [],
-        rejectionReasons: [ReviewRejectionReason] = []
+        rejectionReasons: [ReviewRejectionReason] = [],
+        attachments: [ResolutionCenterAttachment] = []
     ) -> ResolutionCenterDetail {
         ResolutionCenterDetail(
             id: id,
             submissionId: submissionId,
             threadState: threadState,
             messages: messages,
-            rejectionReasons: rejectionReasons
+            rejectionReasons: rejectionReasons,
+            attachments: attachments
+        )
+    }
+
+    static func makeResolutionCenterAttachment(
+        id: String = "att-1",
+        messageId: String = "msg-1",
+        fileName: String = "screenshot.png",
+        fileSize: Int? = 1024,
+        downloadUrl: String? = "https://iosapps-ssl.itunes.apple.com/file.png"
+    ) -> ResolutionCenterAttachment {
+        ResolutionCenterAttachment(
+            id: id,
+            messageId: messageId,
+            fileName: fileName,
+            fileSize: fileSize,
+            downloadUrl: downloadUrl
         )
     }
 

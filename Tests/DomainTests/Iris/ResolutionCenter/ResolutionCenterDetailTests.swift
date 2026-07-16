@@ -45,6 +45,49 @@ struct ResolutionCenterDetailTests {
         #expect(plain.messages[0].body == "Guideline 2.1 & 2.3\nWe were unable to review.")
     }
 
+    // MARK: - Attachments
+
+    @Test func `attachment carries parent messageId`() {
+        let attachment = MockRepositoryFactory.makeResolutionCenterAttachment(id: "att-1", messageId: "msg-1")
+        #expect(attachment.messageId == "msg-1")
+    }
+
+    @Test func `attachment with a downloadUrl is downloadable`() {
+        let attachment = MockRepositoryFactory.makeResolutionCenterAttachment(
+            downloadUrl: "https://iosapps-ssl.itunes.apple.com/file.png"
+        )
+        #expect(attachment.isDownloadable == true)
+    }
+
+    @Test func `attachment without a downloadUrl is not downloadable`() {
+        let attachment = MockRepositoryFactory.makeResolutionCenterAttachment(downloadUrl: nil)
+        #expect(attachment.isDownloadable == false)
+    }
+
+    @Test func `download urls are only valid for https on Apple or CDN hosts`() {
+        #expect(ResolutionCenterAttachment.isValidDownloadURL("https://iosapps-ssl.itunes.apple.com/file.png") == true)
+        #expect(ResolutionCenterAttachment.isValidDownloadURL("https://cdn.mzstatic.com/file.png") == true)
+        #expect(ResolutionCenterAttachment.isValidDownloadURL("https://bucket.s3.amazonaws.com/file.png") == true)
+        #expect(ResolutionCenterAttachment.isValidDownloadURL("https://d1.cloudfront.net/file.png") == true)
+        #expect(ResolutionCenterAttachment.isValidDownloadURL("http://iosapps-ssl.itunes.apple.com/file.png") == false)
+        #expect(ResolutionCenterAttachment.isValidDownloadURL("https://evil.example.com/file.png") == false)
+        #expect(ResolutionCenterAttachment.isValidDownloadURL("https://notapple.com/file.png") == false)
+    }
+
+    @Test func `detail with a downloadable attachment exposes downloadAttachments affordance`() {
+        let detail = MockRepositoryFactory.makeResolutionCenterDetail(
+            id: "thread-1",
+            submissionId: "sub-1",
+            attachments: [MockRepositoryFactory.makeResolutionCenterAttachment()]
+        )
+        #expect(detail.affordances["downloadAttachments"] == "asc iris resolution-center get --out <dir> --submission-id sub-1")
+    }
+
+    @Test func `detail without attachments omits downloadAttachments affordance`() {
+        let detail = MockRepositoryFactory.makeResolutionCenterDetail(attachments: [])
+        #expect(detail.affordances["downloadAttachments"] == nil)
+    }
+
     // MARK: - Affordances (CLI surface)
 
     @Test func `detail affordances back-link to submission and rejected items`() {

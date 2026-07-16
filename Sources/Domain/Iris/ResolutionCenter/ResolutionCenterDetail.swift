@@ -12,19 +12,22 @@ public struct ResolutionCenterDetail: Sendable, Equatable, Identifiable, Codable
     public let threadState: String?
     public let messages: [ResolutionCenterMessage]
     public let rejectionReasons: [ReviewRejectionReason]
+    public let attachments: [ResolutionCenterAttachment]
 
     public init(
         id: String,
         submissionId: String,
         threadState: String? = nil,
         messages: [ResolutionCenterMessage] = [],
-        rejectionReasons: [ReviewRejectionReason] = []
+        rejectionReasons: [ReviewRejectionReason] = [],
+        attachments: [ResolutionCenterAttachment] = []
     ) {
         self.id = id
         self.submissionId = submissionId
         self.threadState = threadState
         self.messages = messages
         self.rejectionReasons = rejectionReasons
+        self.attachments = attachments
     }
 
     /// Apple attached at least one structured guideline citation.
@@ -45,7 +48,8 @@ public struct ResolutionCenterDetail: Sendable, Equatable, Identifiable, Codable
                     body: $0.plainTextBody
                 )
             },
-            rejectionReasons: rejectionReasons
+            rejectionReasons: rejectionReasons,
+            attachments: attachments
         )
     }
 }
@@ -54,7 +58,7 @@ public struct ResolutionCenterDetail: Sendable, Equatable, Identifiable, Codable
 
 extension ResolutionCenterDetail {
     enum CodingKeys: String, CodingKey {
-        case id, submissionId, threadState, messages, rejectionReasons
+        case id, submissionId, threadState, messages, rejectionReasons, attachments
     }
 
     public init(from decoder: any Decoder) throws {
@@ -64,6 +68,7 @@ extension ResolutionCenterDetail {
         threadState = try c.decodeIfPresent(String.self, forKey: .threadState)
         messages = try c.decode([ResolutionCenterMessage].self, forKey: .messages)
         rejectionReasons = try c.decode([ReviewRejectionReason].self, forKey: .rejectionReasons)
+        attachments = try c.decodeIfPresent([ResolutionCenterAttachment].self, forKey: .attachments) ?? []
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -73,17 +78,25 @@ extension ResolutionCenterDetail {
         try c.encodeIfPresent(threadState, forKey: .threadState)
         try c.encode(messages, forKey: .messages)
         try c.encode(rejectionReasons, forKey: .rejectionReasons)
+        if !attachments.isEmpty {
+            try c.encode(attachments, forKey: .attachments)
+        }
     }
 }
 
 extension ResolutionCenterDetail: AffordanceProviding {
     public var structuredAffordances: [Affordance] {
-        [
+        var items: [Affordance] = [
             Affordance(key: "getSubmission", command: "review-submissions", action: "get",
                        params: ["submission-id": submissionId]),
             Affordance(key: "listRejectedItems", command: "review-submissions items", action: "list",
                        params: ["submission-id": submissionId, "state": "REJECTED"]),
         ]
+        if !attachments.isEmpty {
+            items.append(Affordance(key: "downloadAttachments", command: "iris resolution-center", action: "get",
+                                    params: ["submission-id": submissionId, "out": "<dir>"]))
+        }
+        return items
     }
 }
 

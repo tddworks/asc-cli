@@ -1,5 +1,6 @@
 import ArgumentParser
 import Domain
+import Foundation
 
 /// `asc iris resolution-center get --submission-id <id>` — reads App Review's
 /// Resolution Center messages and rejection reasons for a review submission.
@@ -19,6 +20,9 @@ struct IrisResolutionCenterGet: AsyncParsableCommand {
     @Flag(name: .long, help: "Convert HTML message bodies to plain text")
     var plainText: Bool = false
 
+    @Option(name: .long, help: "Directory to download attachments into (created if missing)")
+    var out: String?
+
     func run() async throws {
         let cookieProvider = ClientProvider.makeIrisCookieProvider()
         let repo = ClientProvider.makeIrisResolutionCenterRepository()
@@ -34,6 +38,14 @@ struct IrisResolutionCenterGet: AsyncParsableCommand {
         var detail = try await repo.getResolution(session: session, submissionId: submissionId)
         if plainText {
             detail = detail.plainText()
+        }
+        if let out {
+            let outDir = URL(fileURLWithPath: out)
+            try FileManager.default.createDirectory(at: outDir, withIntermediateDirectories: true)
+            for attachment in detail.attachments where attachment.isDownloadable {
+                let data = try await repo.downloadAttachment(session: session, url: attachment.downloadUrl!)
+                try data.write(to: outDir.appendingPathComponent(attachment.fileName))
+            }
         }
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems([detail], affordanceMode: affordanceMode)

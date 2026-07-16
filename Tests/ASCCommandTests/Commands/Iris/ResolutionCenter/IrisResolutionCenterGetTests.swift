@@ -1,3 +1,4 @@
+import Foundation
 import Mockable
 import Testing
 @testable import ASCCommand
@@ -73,6 +74,43 @@ struct IrisResolutionCenterGetTests {
           ]
         }
         """)
+    }
+
+    @Test func `--out downloads each downloadable attachment named by fileName and skips processing ones`() async throws {
+        let outDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("rc-attachments-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: outDir) }
+
+        let mockCookieProvider = MockIrisCookieProvider()
+        given(mockCookieProvider).resolveSession().willReturn(IrisSession(cookies: "myacinfo=test"))
+
+        let mockRepo = MockIrisResolutionCenterRepository()
+        given(mockRepo).getResolution(session: .any, submissionId: .value("sub-1")).willReturn(
+            ResolutionCenterDetail(
+                id: "thread-1",
+                submissionId: "sub-1",
+                threadState: "OPEN",
+                attachments: [
+                    ResolutionCenterAttachment(
+                        id: "att-1", messageId: "msg-1", fileName: "crash-screenshot.png",
+                        fileSize: 2048, downloadUrl: "https://iosapps-ssl.itunes.apple.com/att-1.png"
+                    ),
+                    ResolutionCenterAttachment(
+                        id: "att-2", messageId: "msg-1", fileName: "processing.png",
+                        fileSize: nil, downloadUrl: nil
+                    ),
+                ]
+            )
+        )
+        given(mockRepo).downloadAttachment(session: .any, url: .value("https://iosapps-ssl.itunes.apple.com/att-1.png"))
+            .willReturn(Data("PNGBYTES".utf8))
+
+        let cmd = try IrisResolutionCenterGet.parse(["--submission-id", "sub-1", "--out", outDir.path])
+        _ = try await cmd.execute(cookieProvider: mockCookieProvider, repo: mockRepo)
+
+        let saved = outDir.appendingPathComponent("crash-screenshot.png")
+        #expect(try Data(contentsOf: saved) == Data("PNGBYTES".utf8))
+        #expect(FileManager.default.fileExists(atPath: outDir.appendingPathComponent("processing.png").path) == false)
     }
 
     @Test func `--plain-text converts html message bodies before output`() async throws {

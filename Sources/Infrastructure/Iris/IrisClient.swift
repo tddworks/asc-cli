@@ -44,6 +44,19 @@ public struct IrisClient: Sendable {
         return try await perform(request)
     }
 
+    /// Fetch an absolute URL (e.g. an Apple-signed attachment URL) with the
+    /// session cookies attached. Callers validate the host before calling —
+    /// this method fetches whatever it is given.
+    public func download(
+        absoluteURL: URL,
+        cookies: String
+    ) async throws -> (Data, HTTPURLResponse) {
+        var request = URLRequest(url: absoluteURL)
+        request.httpMethod = "GET"
+        request.setValue(cookies, forHTTPHeaderField: "cookie")
+        return try await perform(request)
+    }
+
     /// Perform a DELETE request against the iris API. Used by the iris-only
     /// IAP submission dequeue (`DELETE /iris/v1/inAppPurchaseSubmissions/:id`),
     /// which the public ASC SDK can't call (different auth surface).

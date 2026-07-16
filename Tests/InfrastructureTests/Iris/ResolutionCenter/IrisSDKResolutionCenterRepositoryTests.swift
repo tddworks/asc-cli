@@ -59,7 +59,10 @@ private let messagesJSON = Data("""
         "createdDate": "2026-07-02T09:30:00Z"
       },
       "relationships": {
-        "fromActor": { "data": { "type": "actors", "id": "actor-1" } }
+        "fromActor": { "data": { "type": "actors", "id": "actor-1" } },
+        "resolutionCenterMessageAttachments": {
+          "data": [ { "type": "resolutionCenterMessageAttachments", "id": "att-1" } ]
+        }
       }
     }
   ],
@@ -68,6 +71,15 @@ private let messagesJSON = Data("""
       "type": "actors",
       "id": "actor-1",
       "attributes": { "actorType": "APPLE" }
+    },
+    {
+      "type": "resolutionCenterMessageAttachments",
+      "id": "att-1",
+      "attributes": {
+        "fileName": "crash-screenshot.png",
+        "fileSize": 2048,
+        "downloadUrl": "https://iosapps-ssl.itunes.apple.com/att-1.png"
+      }
     }
   ]
 }
@@ -176,6 +188,70 @@ struct IrisSDKResolutionCenterRepositoryTests {
         #expect(urls[1].contains("fromActor"))
         #expect(urls[2].contains("reviewRejections"))
         #expect(urls[2].contains("thread-1"))
+    }
+
+    @Test func `getResolution maps included attachments with parent messageId`() async throws {
+        IrisResolutionCenterURLProtocolStub.handler = { request in
+            let url = request.url!.absoluteString
+            let body: Data
+            if url.contains("resolutionCenterMessages") {
+                body = messagesJSON
+            } else if url.contains("reviewRejections") {
+                body = rejectionsJSON
+            } else {
+                body = threadsJSON
+            }
+            let response = HTTPURLResponse(
+                url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil
+            )!
+            return (response, body)
+        }
+
+        let detail = try await makeRepo().getResolution(
+            session: IrisSession(cookies: "myacinfo=ABC"),
+            submissionId: "sub-42"
+        )
+
+        #expect(detail.attachments == [
+            ResolutionCenterAttachment(
+                id: "att-1",
+                messageId: "msg-1",
+                fileName: "crash-screenshot.png",
+                fileSize: 2048,
+                downloadUrl: "https://iosapps-ssl.itunes.apple.com/att-1.png"
+            ),
+        ])
+    }
+
+    @Test func `downloadAttachment fetches bytes from an allowed https url`() async throws {
+        IrisResolutionCenterURLProtocolStub.handler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil
+            )!
+            return (response, Data("PNGBYTES".utf8))
+        }
+
+        let data = try await makeRepo().downloadAttachment(
+            session: IrisSession(cookies: "myacinfo=ABC"),
+            url: "https://iosapps-ssl.itunes.apple.com/att-1.png"
+        )
+        #expect(data == Data("PNGBYTES".utf8))
+    }
+
+    @Test func `downloadAttachment refuses urls outside the allowed hosts`() async throws {
+        IrisResolutionCenterURLProtocolStub.handler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil
+            )!
+            return (response, Data("SHOULD-NEVER-BE-FETCHED".utf8))
+        }
+
+        await #expect(throws: IrisResolutionCenterError.invalidAttachmentURL("https://evil.example.com/att.png")) {
+            _ = try await makeRepo().downloadAttachment(
+                session: IrisSession(cookies: "myacinfo=ABC"),
+                url: "https://evil.example.com/att.png"
+            )
+        }
     }
 
     @Test func `getResolution without a thread throws a clear no-thread error`() async throws {
