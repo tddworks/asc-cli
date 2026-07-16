@@ -162,6 +162,7 @@ public final class RESTPathResolver: @unchecked Sendable {
         _ = _codeSigningRoutes
         _ = _appShotsRoutes
         _ = _submissionRoutes
+        _ = _resolutionCenterRoutes
 
         initialized = true
     }

@@ -1039,4 +1039,38 @@ struct RESTRoutesTests {
         #expect(normalized.contains("\"_links\""))
         #expect(normalized.contains("/api/v1/subscriptions/sub-7/introductory-offers"))
     }
+
+    // MARK: - Iris Resolution Center
+
+    @Test func `resolution center get REST links back to the public submission resource`() async throws {
+        let mockCookieProvider = MockIrisCookieProvider()
+        given(mockCookieProvider).resolveSession().willReturn(IrisSession(cookies: "myacinfo=test"))
+
+        let mockRepo = MockIrisResolutionCenterRepository()
+        given(mockRepo).getResolution(session: .any, submissionId: .value("sub-1")).willReturn(
+            ResolutionCenterDetail(id: "thread-1", submissionId: "sub-1", threadState: "OPEN")
+        )
+
+        let output = try await IrisResolutionCenterGet.parse(["--submission-id", "sub-1", "--pretty"])
+            .execute(cookieProvider: mockCookieProvider, repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/review-submissions/sub-1"))
+        #expect(!normalized.contains("\"affordances\""))
+    }
+
+    @Test func `unresolved submission REST links to the iris resolution-center endpoint`() async throws {
+        let mockRepo = MockSubmissionRepository()
+        given(mockRepo).getSubmission(id: .value("sub-1")).willReturn(
+            ReviewSubmission(id: "sub-1", appId: "app-1", platform: .macOS, state: .unresolvedIssues)
+        )
+
+        let output = try await ReviewSubmissionsGet.parse(["--submission-id", "sub-1", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+        let normalized = output.replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(normalized.contains("\"_links\""))
+        #expect(normalized.contains("/api/v1/iris/review-submissions/sub-1/resolution-center"))
+    }
 }

@@ -207,6 +207,47 @@ struct MockRepositoryFactory {
         )
     }
 
+    static func makeResolutionCenterMessage(
+        id: String = "msg-1",
+        threadId: String = "thread-1",
+        createdDate: Date? = nil,
+        fromActor: String? = "Apple",
+        body: String = "Guideline 2.1 - Performance"
+    ) -> ResolutionCenterMessage {
+        ResolutionCenterMessage(
+            id: id,
+            threadId: threadId,
+            createdDate: createdDate,
+            fromActor: fromActor,
+            body: body
+        )
+    }
+
+    static func makeReviewRejectionReason(
+        id: String = "rej-1",
+        section: String? = "Performance",
+        descriptionText: String? = "App crashed on launch",
+        code: String? = "2.1"
+    ) -> ReviewRejectionReason {
+        ReviewRejectionReason(id: id, section: section, descriptionText: descriptionText, code: code)
+    }
+
+    static func makeResolutionCenterDetail(
+        id: String = "thread-1",
+        submissionId: String = "sub-1",
+        threadState: String? = "OPEN",
+        messages: [ResolutionCenterMessage] = [],
+        rejectionReasons: [ReviewRejectionReason] = []
+    ) -> ResolutionCenterDetail {
+        ResolutionCenterDetail(
+            id: id,
+            submissionId: submissionId,
+            threadState: threadState,
+            messages: messages,
+            rejectionReasons: rejectionReasons
+        )
+    }
+
     static func makeAppInfo(
         id: String = "info-1",
         appId: String = "app-1",

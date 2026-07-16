@@ -322,6 +322,10 @@ public struct ClientFactory: Sendable {
         IrisSDKInAppPurchaseSubmissionRepository()
     }
 
+    public func makeIrisResolutionCenterRepository() -> any IrisResolutionCenterRepository {
+        IrisSDKResolutionCenterRepository()
+    }
+
     public func makeIrisCookieProvider() -> any IrisCookieProvider {
         // Resolution order: SRP-stored session (from `asc iris auth login`) first,
         // browser cookies as a fallback for users who haven't run SRP login. The
