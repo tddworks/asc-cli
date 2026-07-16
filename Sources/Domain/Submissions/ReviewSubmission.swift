@@ -42,6 +42,10 @@ extension ReviewSubmission: AffordanceProviding {
             // which resource needs fixing — surface them as the first thing to do.
             items.append(Affordance(key: "listRejectedItems", command: "review-submissions items", action: "list",
                                     params: ["submission-id": id, "state": "REJECTED"]))
+            // The reviewer's message text lives only behind the iris (cookie-auth)
+            // surface — the official API has no resolutionCenter endpoints.
+            items.append(Affordance(key: "getResolutionDetails", command: "iris resolution-center", action: "get",
+                                    params: ["submission-id": id]))
         }
         return items
     }

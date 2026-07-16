@@ -26,6 +26,7 @@ struct ReviewSubmissionItemsListTests {
           "data" : [
             {
               "affordances" : {
+                "getResolutionDetails" : "asc iris resolution-center get --submission-id sub-1",
                 "getSubmission" : "asc review-submissions get --submission-id sub-1",
                 "getVersion" : "asc versions get --version-id v-9",
                 "listSiblings" : "asc review-submissions items list --submission-id sub-1"

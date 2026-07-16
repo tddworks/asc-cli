@@ -79,6 +79,12 @@ extension ReviewSubmissionItem: AffordanceProviding {
             Affordance(key: "listSiblings", command: "review-submissions items", action: "list",
                        params: ["submission-id": submissionId]),
         ]
+        if isRejected {
+            // The reviewer's message text lives only behind the iris (cookie-auth)
+            // surface — the official API has no resolutionCenter endpoints.
+            items.append(Affordance(key: "getResolutionDetails", command: "iris resolution-center", action: "get",
+                                    params: ["submission-id": submissionId]))
+        }
         if let linkedId = linkedResourceId, let linkedType = linkedResourceType {
             switch linkedType {
             case .appStoreVersion:

@@ -66,6 +66,24 @@ struct ReviewSubmissionItemTests {
         #expect(item.affordances["getVersion"] == "asc versions get --version-id v-9")
     }
 
+    @Test func `rejected item affordances include getResolutionDetails iris command`() {
+        let item = MockRepositoryFactory.makeReviewSubmissionItem(
+            id: "i-1",
+            submissionId: "sub-1",
+            state: .rejected
+        )
+        #expect(item.affordances["getResolutionDetails"] == "asc iris resolution-center get --submission-id sub-1")
+    }
+
+    @Test func `pending item omits getResolutionDetails affordance`() {
+        let item = MockRepositoryFactory.makeReviewSubmissionItem(
+            id: "i-1",
+            submissionId: "sub-1",
+            state: .readyForReview
+        )
+        #expect(item.affordances["getResolutionDetails"] == nil)
+    }
+
     @Test func `item without linked resource omits getVersion affordance`() {
         let item = MockRepositoryFactory.makeReviewSubmissionItem(
             id: "i-1",

@@ -53,6 +53,18 @@ struct ReviewSubmissionTests {
         #expect(submission.hasIssues == false)
     }
 
+    // MARK: - Resolution Center affordance
+
+    @Test func `unresolvedIssues submission affordances include getResolutionDetails iris command`() {
+        let submission = MockRepositoryFactory.makeReviewSubmission(id: "sub-1", state: .unresolvedIssues)
+        #expect(submission.affordances["getResolutionDetails"] == "asc iris resolution-center get --submission-id sub-1")
+    }
+
+    @Test func `waitingForReview submission omits getResolutionDetails affordance`() {
+        let submission = MockRepositoryFactory.makeReviewSubmission(id: "sub-1", state: .waitingForReview)
+        #expect(submission.affordances["getResolutionDetails"] == nil)
+    }
+
     @Test(arguments: zip(
         ReviewSubmissionState.allCases,
         [
