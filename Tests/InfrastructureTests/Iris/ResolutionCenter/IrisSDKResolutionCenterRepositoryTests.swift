@@ -182,12 +182,17 @@ struct IrisSDKResolutionCenterRepositoryTests {
 
         let urls = captured.values
         #expect(urls.count == 3)
+        // The thread lookup always goes first; the messages and rejections
+        // calls run concurrently, so their order is nondeterministic.
         #expect(urls[0].contains("resolutionCenterThreads"))
         #expect(urls[0].contains("sub-42"))
-        #expect(urls[1].contains("resolutionCenterThreads/thread-1/resolutionCenterMessages"))
-        #expect(urls[1].contains("fromActor"))
-        #expect(urls[2].contains("reviewRejections"))
-        #expect(urls[2].contains("thread-1"))
+        let messagesURL = try #require(urls.first {
+            $0.contains("resolutionCenterThreads/thread-1/resolutionCenterMessages")
+        })
+        #expect(messagesURL.contains("fromActor"))
+        #expect(messagesURL.contains("resolutionCenterMessageAttachments"))
+        let rejectionsURL = try #require(urls.first { $0.contains("reviewRejections") })
+        #expect(rejectionsURL.contains("thread-1"))
     }
 
     @Test func `getResolution maps included attachments with parent messageId`() async throws {
