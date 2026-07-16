@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`asc iris resolution-center get --submission-id <id> [--plain-text]`** — reads App Review's Resolution Center for a review submission: the reviewer's actual rejection message text plus structured rejection reasons (guideline section/description/code). This data has no official App Store Connect API surface (Apple's OpenAPI spec contains no `resolutionCenter*`/`reviewRejection*` paths); the command composes three iris private-API calls (`resolutionCenterThreads` → `resolutionCenterMessages?include=fromActor,rejections` → `reviewRejections`) behind cookie auth, mirroring the existing iris/official split (`asc iap submit` vs `asc iris iap-submissions`). `--plain-text` converts HTML message bodies to terminal-friendly text. New `ResolutionCenterDetail`/`ResolutionCenterMessage`/`ReviewRejectionReason` domain types and `IrisResolutionCenterRepository` in `Domain/Iris/ResolutionCenter/`. Discovery is wired via CAEOAS: `ReviewSubmission` (when `hasIssues`) and `ReviewSubmissionItem` (when `isRejected`) now expose a `getResolutionDetails` affordance pointing at the iris command — the official-API commands stay zero-iris. REST equivalent: `GET /api/v1/iris/review-submissions/:id/resolution-center?plain-text=true` via `IrisResolutionCenterController`. See `docs/features/resolution-center.md`.
+
 ---
 
 ## [0.18.1] - 2026-05-31

@@ -63,7 +63,7 @@ Now `asc iap list --app-id <id>` enriches each IAP with the right submission aff
 | **Game Center** | Manage achievements and leaderboards for your game |
 | **Plugins** | Install executable plugins in `~/.asc/plugins/` for custom event handlers |
 | **Reports** | Sales, subscription, installs, and financial reports; multi-step analytics workflow |
-| **Iris (Private API)** | Cookie-based auth; create apps, list apps via the iris private API that powers the ASC web UI |
+| **Iris (Private API)** | Cookie-based auth; create apps, list apps, read App Review's Resolution Center rejection messages via the iris private API that powers the ASC web UI |
 | **Simulators** | List, boot, shutdown local iOS simulators; streaming via plugin |
 | **AI Agents** | JSON output with CAEOAS affordances — agents navigate without knowing the command tree |
 
@@ -193,6 +193,9 @@ asc beta-app-localizations delete --localization-id <id>
 asc review-submissions list --app-id <id> [--state WAITING_FOR_REVIEW,IN_REVIEW,READY_FOR_REVIEW] [--limit 200]
 asc review-submissions get --submission-id <id>
 asc review-submissions items list --submission-id <id> [--state REJECTED]
+
+# Rejected? Read App Review's actual message (iris cookie auth — see docs/features/resolution-center.md)
+asc iris resolution-center get --submission-id <id> --plain-text
 ```
 
 ### Xcode Cloud
