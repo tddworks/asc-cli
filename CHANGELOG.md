@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.18.2] - 2026-07-16
+
 ### Added
 - **`asc iris resolution-center get --submission-id <id> [--plain-text]`** — reads App Review's Resolution Center for a review submission: the reviewer's actual rejection message text plus structured rejection reasons (guideline section/description/code). This data has no official App Store Connect API surface (Apple's OpenAPI spec contains no `resolutionCenter*`/`reviewRejection*` paths); the command composes three iris private-API calls (`resolutionCenterThreads` → `resolutionCenterMessages?include=fromActor,rejections` → `reviewRejections`) behind cookie auth, mirroring the existing iris/official split (`asc iap submit` vs `asc iris iap-submissions`). `--plain-text` converts HTML message bodies to terminal-friendly text. New `ResolutionCenterDetail`/`ResolutionCenterMessage`/`ReviewRejectionReason` domain types and `IrisResolutionCenterRepository` in `Domain/Iris/ResolutionCenter/`. Discovery is wired via CAEOAS: `ReviewSubmission` (when `hasIssues`) and `ReviewSubmissionItem` (when `isRejected`) now expose a `getResolutionDetails` affordance pointing at the iris command — the official-API commands stay zero-iris. REST equivalent: `GET /api/v1/iris/review-submissions/:id/resolution-center?plain-text=true` via `IrisResolutionCenterController`. Attachments App Review adds to messages are listed in the detail (`attachments[]` with `fileName`/`fileSize`/`downloadUrl`) and downloadable with `--out <dir>`; downloads are gated to https on Apple/CDN hosts (`ResolutionCenterAttachment.isValidDownloadURL`). See `docs/features/resolution-center.md`.
 
@@ -954,7 +958,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.18.1...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.18.2...HEAD
+[0.18.2]: https://github.com/tddworks/asc-cli/compare/v0.18.1...v0.18.2
 [0.18.1]: https://github.com/tddworks/asc-cli/compare/v0.18.0...v0.18.1
 [0.18.0]: https://github.com/tddworks/asc-cli/compare/v0.17.9...v0.18.0
 [0.17.9]: https://github.com/tddworks/asc-cli/compare/v0.17.8...v0.17.9
