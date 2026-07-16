@@ -1,7 +1,7 @@
 [
   {
-    "developer" : "itshan",
     "x" : "itshanrw",
+    "developer" : "itshan",
     "github" : "hanrw",
     "developerId" : "1725133580"
   },
@@ -26,8 +26,8 @@
     ]
   },
   {
-    "developer" : "westerbamos",
     "x" : "westerbamos",
+    "developer" : "westerbamos",
     "github" : "westerbamos",
     "developerId" : "1880888447",
     "apps" : [
@@ -39,6 +39,13 @@
     "github" : "Eversight",
     "apps" : [
       "https:\/\/apps.apple.com\/us\/app\/reliclens-antique-identifier\/id6760348975"
+    ]
+  },
+  {
+    "developer" : "BetaReels",
+    "github" : "AKAICH00",
+    "apps" : [
+      "https:\/\/apps.apple.com\/app\/id6777212637"
     ]
   }
 ]
