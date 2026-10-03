@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (e.g. 0.1.3)'
+        description: 'Version to release, higher than the latest tag (e.g. 0.18.5)'
         required: true
         type: string
 
@@ -32,6 +32,9 @@ jobs:
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check version is higher than the latest release
+        run: ./scripts/check-version-bump.sh "${{ steps.version.outputs.version }}"
 
       - name: Setup Swift
         uses: SwiftyLab/setup-swift@latest
