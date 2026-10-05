@@ -21,7 +21,7 @@
     "skills": "ทักษะ"
   },
   "hero": {
-    "badge": "โอเพนซอร์ส · สัญญาอนุญาต MIT",
+    "badge": "โอเพนซอร์ส · สัญญาอนุญาต Apache 2.0",
     "titleLine1": "App Store Connect,",
     "titleAccent": "จาก terminal ของคุณ",
     "subtitle": "Swift CLI สำหรับจัดการแอป iOS และ macOS บน App Store Connect ส่งเวอร์ชัน จัดการภาพหน้าจอ ติดตาม build — พร้อมรองรับ AI agent อย่างสมบูรณ์ผ่าน CAEOAS",
@@ -33,7 +33,7 @@
       "stat1Label": "คำสั่ง",
       "stat2Value": "CAEOAS",
       "stat2Label": "พร้อมใช้กับ AI",
-      "stat3Value": "MIT",
+      "stat3Value": "Apache",
       "stat3Label": "โอเพนซอร์ส",
       "stat4Value": "100+",
       "stat4Label": "API Endpoints"
@@ -194,7 +194,7 @@
   },
   "footer": {
     "description": "เครื่องมือ CLI โอเพนซอร์สสำหรับ App Store Connect สร้างด้วย Swift",
-    "copyright": "© 2025 ผู้มีส่วนร่วม asc สัญญาอนุญาต MIT",
+    "copyright": "© 2025 ผู้มีส่วนร่วม asc สัญญาอนุญาต Apache 2.0",
     "columns": {
       "project": "โปรเจกต์",
       "resources": "ทรัพยากร",
@@ -208,7 +208,7 @@
       "docs": "เอกสาร",
       "commands": "คำสั่ง",
       "changelog": "บันทึกการเปลี่ยนแปลง",
-      "license": "สัญญาอนุญาต MIT",
+      "license": "สัญญาอนุญาต Apache 2.0",
       "privacy": "ความเป็นส่วนตัว",
       "editor": "ตัวแก้ไข"
     }

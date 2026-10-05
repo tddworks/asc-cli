@@ -5,7 +5,7 @@ class Asccli < Formula
   desc "App Store Connect CLI — manage apps, versions, and screenshots from your terminal"
   homepage "https://github.com/tddworks/asc-cli"
   version "__VERSION__"
-  license "MIT"
+  license "Apache-2.0"
 
   on_arm do
     url "https://github.com/tddworks/asc-cli/releases/download/__VERSION__/asc___VERSION___macOS_arm64"

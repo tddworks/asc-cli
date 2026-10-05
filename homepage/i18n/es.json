@@ -21,7 +21,7 @@
     "skills": "Habilidades"
   },
   "hero": {
-    "badge": "Código abierto · Licencia MIT",
+    "badge": "Código abierto · Licencia Apache 2.0",
     "titleLine1": "App Store Connect,",
     "titleAccent": "desde tu terminal.",
     "subtitle": "Una CLI en Swift para gestionar tus apps iOS y macOS en App Store Connect. Envía versiones, gestiona capturas de pantalla, rastrea builds — con soporte completo para agentes de IA mediante CAEOAS.",
@@ -33,7 +33,7 @@
       "stat1Label": "Comandos",
       "stat2Value": "CAEOAS",
       "stat2Label": "Listo para IA",
-      "stat3Value": "MIT",
+      "stat3Value": "Apache",
       "stat3Label": "Código abierto",
       "stat4Value": "100+",
       "stat4Label": "Endpoints API"
@@ -194,7 +194,7 @@
   },
   "footer": {
     "description": "Herramienta CLI de código abierto para App Store Connect. Construida con Swift.",
-    "copyright": "© 2025 colaboradores de asc. Licencia MIT.",
+    "copyright": "© 2025 colaboradores de asc. Licencia Apache 2.0.",
     "columns": {
       "project": "Proyecto",
       "resources": "Recursos",
@@ -208,7 +208,7 @@
       "docs": "Documentación",
       "commands": "Comandos",
       "changelog": "Registro de cambios",
-      "license": "Licencia MIT",
+      "license": "Licencia Apache 2.0",
       "privacy": "Privacidad",
       "editor": "Editor"
     }

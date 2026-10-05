@@ -21,7 +21,7 @@
     "skills": "Навыки"
   },
   "hero": {
-    "badge": "Открытый исходный код · Лицензия MIT",
+    "badge": "Открытый исходный код · Лицензия Apache 2.0",
     "titleLine1": "App Store Connect",
     "titleAccent": "из вашего терминала.",
     "subtitle": "Swift CLI для управления iOS и macOS приложениями в App Store Connect. Отправляйте версии, управляйте скриншотами, отслеживайте сборки — с полной поддержкой ИИ-агентов через CAEOAS.",
@@ -33,7 +33,7 @@
       "stat1Label": "Команд",
       "stat2Value": "CAEOAS",
       "stat2Label": "Поддержка ИИ",
-      "stat3Value": "MIT",
+      "stat3Value": "Apache",
       "stat3Label": "Открытый код",
       "stat4Value": "100+",
       "stat4Label": "API эндпоинтов"
@@ -194,7 +194,7 @@
   },
   "footer": {
     "description": "CLI-инструмент с открытым исходным кодом для App Store Connect. Создан на Swift.",
-    "copyright": "© 2025 участники проекта asc. Лицензия MIT.",
+    "copyright": "© 2025 участники проекта asc. Лицензия Apache 2.0.",
     "columns": {
       "project": "Проект",
       "resources": "Ресурсы",
@@ -208,7 +208,7 @@
       "docs": "Документация",
       "commands": "Команды",
       "changelog": "Список изменений",
-      "license": "Лицензия MIT",
+      "license": "Лицензия Apache 2.0",
       "privacy": "Конфиденциальность",
       "editor": "Редактор"
     }

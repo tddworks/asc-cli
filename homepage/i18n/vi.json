@@ -21,7 +21,7 @@
     "skills": "Kỹ năng"
   },
   "hero": {
-    "badge": "Mã nguồn mở · Giấy phép MIT",
+    "badge": "Mã nguồn mở · Giấy phép Apache 2.0",
     "titleLine1": "App Store Connect,",
     "titleAccent": "từ terminal của bạn.",
     "subtitle": "CLI Swift để quản lý ứng dụng iOS và macOS trên App Store Connect. Gửi phiên bản, quản lý ảnh chụp màn hình, theo dõi bản build — với hỗ trợ tác nhân AI đầy đủ qua CAEOAS.",
@@ -33,7 +33,7 @@
       "stat1Label": "Lệnh",
       "stat2Value": "CAEOAS",
       "stat2Label": "Sẵn sàng cho AI",
-      "stat3Value": "MIT",
+      "stat3Value": "Apache",
       "stat3Label": "Mã nguồn mở",
       "stat4Value": "100+",
       "stat4Label": "API Endpoints"
@@ -194,7 +194,7 @@
   },
   "footer": {
     "description": "Công cụ CLI mã nguồn mở cho App Store Connect. Được xây dựng bằng Swift.",
-    "copyright": "© 2025 cộng tác viên asc. Giấy phép MIT.",
+    "copyright": "© 2025 cộng tác viên asc. Giấy phép Apache 2.0.",
     "columns": {
       "project": "Dự án",
       "resources": "Tài nguyên",
@@ -208,7 +208,7 @@
       "docs": "Tài liệu",
       "commands": "Lệnh",
       "changelog": "Nhật ký thay đổi",
-      "license": "Giấy phép MIT",
+      "license": "Giấy phép Apache 2.0",
       "privacy": "Quyền riêng tư",
       "editor": "Trình soạn thảo"
     }

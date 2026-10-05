@@ -94,4 +94,4 @@ Apps built and published using asc-cli. To add yours, edit [`homepage/apps.json`
 
 ## License
 
-MIT
+Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

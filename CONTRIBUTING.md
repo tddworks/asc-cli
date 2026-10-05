@@ -30,6 +30,7 @@ Why it's built this way (CAEOAS, rich domain models, parent IDs): [docs/design.m
 
 ## Rules
 
+- **Apache 2.0.** By opening a pull request you agree that your contribution is licensed under the [Apache License 2.0](LICENSE), like the rest of asc-cli.
 - **Tests first.** Write a failing test before any production code (Chicago-school, state-based, `@Testing`). See the gate at the top of [CLAUDE.md](CLAUDE.md).
 - **CLI and REST ship together.** A command that returns data is also exposed by `asc web-server`. The step-by-step checklist is in the [implement-feature skill](.claude/skills/implement-feature/SKILL.md).
 

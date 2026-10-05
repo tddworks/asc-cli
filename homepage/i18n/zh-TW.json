@@ -21,7 +21,7 @@
     "skills": "技能"
   },
   "hero": {
-    "badge": "開源 · MIT 授權",
+    "badge": "開源 · Apache 2.0 授權",
     "titleLine1": "在終端機管理",
     "titleAccent": "App Store Connect。",
     "subtitle": "用於管理 iOS 和 macOS 應用程式的 Swift 命令列工具。提交版本、管理截圖、追蹤建構——同時內建完整的 CAEOAS 可供 AI 智能體調用。",
@@ -33,7 +33,7 @@
       "stat1Label": "命令",
       "stat2Value": "CAEOAS",
       "stat2Label": "AI 智能體就緒",
-      "stat3Value": "MIT",
+      "stat3Value": "Apache",
       "stat3Label": "開源授權",
       "stat4Value": "100+",
       "stat4Label": "API 端點"
@@ -194,7 +194,7 @@
   },
   "footer": {
     "description": "開源的 App Store Connect 命令列工具，使用 Swift 建構。",
-    "copyright": "© 2025 asc 貢獻者。MIT 授權。",
+    "copyright": "© 2025 asc 貢獻者。Apache 2.0 授權。",
     "columns": {
       "project": "專案",
       "resources": "資源",
@@ -208,7 +208,7 @@
       "docs": "文件",
       "commands": "命令參考",
       "changelog": "更新日誌",
-      "license": "MIT 授權",
+      "license": "Apache 2.0 授權",
       "privacy": "隱私政策",
       "editor": "編輯器"
     }

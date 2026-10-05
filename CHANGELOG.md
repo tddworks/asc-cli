@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- asc is now licensed under Apache 2.0 instead of MIT. It stays free and open source, and the license now also grants patent rights. → [LICENSE](LICENSE)
+
 ---
 
 ## [0.18.5] - 2026-10-03

@@ -21,7 +21,7 @@
     "skills": "スキル"
   },
   "hero": {
-    "badge": "オープンソース · MIT ライセンス",
+    "badge": "オープンソース · Apache 2.0 ライセンス",
     "titleLine1": "ターミナルから",
     "titleAccent": "App Store Connect を管理。",
     "subtitle": "iOS・macOS アプリを App Store Connect で管理するための Swift CLI。バージョン提出、スクリーンショット管理、ビルド追跡 — CAEOAS による完全な AI エージェントサポート付き。",
@@ -33,7 +33,7 @@
       "stat1Label": "コマンド",
       "stat2Value": "CAEOAS",
       "stat2Label": "AI エージェント対応",
-      "stat3Value": "MIT",
+      "stat3Value": "Apache",
       "stat3Label": "オープンソース",
       "stat4Value": "100+",
       "stat4Label": "APIエンドポイント"
@@ -194,7 +194,7 @@
   },
   "footer": {
     "description": "App Store Connect 向けオープンソース CLI ツール。Swift で構築。",
-    "copyright": "© 2025 asc コントリビューター。MIT ライセンス。",
+    "copyright": "© 2025 asc コントリビューター。Apache 2.0 ライセンス。",
     "columns": {
       "project": "プロジェクト",
       "resources": "リソース",
@@ -208,7 +208,7 @@
       "docs": "ドキュメント",
       "commands": "コマンド一覧",
       "changelog": "変更履歴",
-      "license": "MIT ライセンス",
+      "license": "Apache 2.0 ライセンス",
       "privacy": "プライバシーポリシー",
       "editor": "エディター"
     }
