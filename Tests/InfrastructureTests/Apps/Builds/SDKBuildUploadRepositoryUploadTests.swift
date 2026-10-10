@@ -48,7 +48,7 @@ struct SDKBuildUploadRepositoryUploadTests {
         #expect(stub.requests.map { "\($0.method) \($0.path)" } == ["POST /v1/buildUploads", "POST /v1/buildUploadFiles"])
     }
 
-    @Test func `should send only the parts App Store Connect named a method for`() async throws {
+    @Test func `should fail without sending or committing the build when App Store Connect leaves out a part's method`() async throws {
         let file = try UploadFixtures.file(named: "MyApp.ipa", contents: "IPADATA")
         let stub = StubAPIClient()
         stub.willReturn(try Self.upload(#"{"data":{"type":"buildUploads","id":"up-1","attributes":{"state":{"state":"AWAITING_UPLOAD"}}},"links":{"self":""}}"#))
@@ -56,13 +56,13 @@ struct SDKBuildUploadRepositoryUploadTests {
         let http = SequencedStubHTTPClient()
         http.enqueue(json: "", statusCode: 200)
 
-        _ = try await SDKBuildUploadRepository(client: stub, uploader: UploadOperationsExecutor(http: http)).uploadBuild(
-            appId: "app-1", version: "1.2.0", buildNumber: "42", platform: .iOS, fileURL: file
-        )
-
-        #expect(http.capturedRequests.map { "\($0.httpMethod ?? "") \($0.url?.absoluteString ?? "") \(String(data: $0.httpBody ?? Data(), encoding: .utf8) ?? "")" } == [
-            "PUT https://upload.example.com/1 DATA",
-        ])
+        await #expect(throws: (any Error).self) {
+            _ = try await SDKBuildUploadRepository(client: stub, uploader: UploadOperationsExecutor(http: http)).uploadBuild(
+                appId: "app-1", version: "1.2.0", buildNumber: "42", platform: .iOS, fileURL: file
+            )
+        }
+        #expect(http.capturedRequests.isEmpty)
+        #expect(stub.requests.map { "\($0.method) \($0.path)" } == ["POST /v1/buildUploads", "POST /v1/buildUploadFiles"])
     }
 
     static func upload(_ json: String) throws -> BuildUploadResponse {

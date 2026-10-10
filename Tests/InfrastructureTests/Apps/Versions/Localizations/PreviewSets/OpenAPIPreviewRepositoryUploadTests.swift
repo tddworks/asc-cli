@@ -38,18 +38,18 @@ struct OpenAPIPreviewRepositoryUploadTests {
         #expect(stub.requests.map { "\($0.method) \($0.path)" } == ["POST /v1/appPreviews"])
     }
 
-    @Test func `should send only the parts App Store Connect named a method for`() async throws {
+    @Test func `should fail without sending or committing the preview when App Store Connect leaves out a part's method`() async throws {
         let file = try UploadFixtures.file(named: "demo.mov", contents: "MOVDATA")
         let stub = StubAPIClient()
         stub.willReturn(try Self.preview(#"{"data":{"type":"appPreviews","id":"prev-1","attributes":{"fileName":"demo.mov","fileSize":7,"uploadOperations":[{"url":"https://upload.example.com/0","length":3,"offset":0},{"method":"PUT","url":"https://upload.example.com/1","length":4,"offset":3}]}},"links":{"self":""}}"#))
         let http = SequencedStubHTTPClient()
         http.enqueue(json: "", statusCode: 200)
 
-        _ = try await OpenAPIPreviewRepository(client: stub, uploader: UploadOperationsExecutor(http: http)).uploadPreview(setId: "pset-1", fileURL: file, previewFrameTimeCode: nil)
-
-        #expect(http.capturedRequests.map { "\($0.httpMethod ?? "") \($0.url?.absoluteString ?? "") \(String(data: $0.httpBody ?? Data(), encoding: .utf8) ?? "")" } == [
-            "PUT https://upload.example.com/1 DATA",
-        ])
+        await #expect(throws: (any Error).self) {
+            _ = try await OpenAPIPreviewRepository(client: stub, uploader: UploadOperationsExecutor(http: http)).uploadPreview(setId: "pset-1", fileURL: file, previewFrameTimeCode: nil)
+        }
+        #expect(http.capturedRequests.isEmpty)
+        #expect(stub.requests.map { "\($0.method) \($0.path)" } == ["POST /v1/appPreviews"])
     }
 
     static func preview(_ json: String) throws -> AppPreviewResponse {

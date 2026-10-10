@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - `asc age-rating` now shows and sets the Korea overrides `ALL` and `TWELVE_PLUS`. Before, an app rated with either one showed no Korea override at all. → [docs](docs/features/age-rating/README.md)
-- `asc screenshots upload`, `asc app-previews upload` and `asc builds upload` now stop with an error when App Store Connect's storage rejects part of the file. Before, they committed the upload anyway and left a broken asset behind.
+- `asc screenshots upload`, `asc app-previews upload` and `asc builds upload` now stop with an error when App Store Connect's storage rejects part of the file, or when App Store Connect sends an incomplete upload instruction. Before, they committed the upload anyway and left a broken asset behind.
 
 ---
 
