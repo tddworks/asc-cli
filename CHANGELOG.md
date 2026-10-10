@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `asc asset-library`, `asset-placement-groups`, `asset-images`, `asset-videos` and `asset-placements` use the App Asset Library: upload screenshots and previews once, then place and order them on version and treatment localizations (CLI + REST). → [docs](docs/features/asset-library/README.md)
 - `asc subscriptions list` shows whether a subscription supports multiple seats and its markets (App Store, Apple School, Apple Business). Change them with `asc subscriptions update --multi-seat-status` and `--market-setting`, or over REST. → [docs](docs/features/iap-subscriptions/README.md)
 - `asc game-center score-moderations list|block|unblock`, `blocked-players list` and `players block|unblock` let you hide cheating leaderboard scores and block players. Game Center is now also reachable over REST. → [docs](docs/features/game-center/README.md)
+- `asc game-center achievements create` and `leaderboards create` are now also reachable over REST (POST to the Game Center detail's achievements or leaderboards). → [docs](docs/features/game-center/README.md)
 - `asc age-rating` shows Korea's GRAC classification number, and `asc age-rating update --grac-rating-classification-number` sets it, also over REST. → [docs](docs/features/age-rating/README.md)
 
 ### Fixed
