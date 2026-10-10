@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - appstoreconnect-swift-sdk updated to 4.5.1 (App Store Connect API 4.5 and 4.5.1).
+- `asc screenshot-sets`, `screenshots`, `app-preview-sets` and `app-previews` say in `--help` that Apple deprecated them; they work as before. → [docs](docs/features/asset-library/README.md)
 - asc is now licensed under Apache 2.0 instead of MIT. It stays free and open source, and the license now also grants patent rights. → [LICENSE](LICENSE)
 
 ### Added
+- `asc asset-library`, `asset-placement-groups`, `asset-images`, `asset-videos` and `asset-placements` use the App Asset Library: upload screenshots and previews once, then place and order them on version and treatment localizations (CLI + REST). → [docs](docs/features/asset-library/README.md)
 - `asc subscriptions list` shows whether a subscription supports multiple seats and its markets (App Store, Apple School, Apple Business). Change them with `asc subscriptions update --multi-seat-status` and `--market-setting`, or over REST. → [docs](docs/features/iap-subscriptions/README.md)
 
 ### Fixed

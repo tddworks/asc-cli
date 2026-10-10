@@ -5,7 +5,7 @@ import Foundation
 struct AppPreviewsCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "app-previews",
-        abstract: "Manage App Store app preview videos",
+        abstract: "Manage App Store app preview videos (deprecated by Apple — use asset-library)",
         subcommands: [AppPreviewsList.self, AppPreviewsUpload.self]
     )
 }
