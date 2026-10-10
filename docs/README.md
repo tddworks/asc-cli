@@ -52,4 +52,4 @@ New here? Start with the [README](../README.md). For every flag, see the [comman
 | [web-server-architecture](features/web-server-architecture/README.md) | How asc web-server bridges the browser UI and the CLI, loads plugins and serves HTTPS. Use when running the local server for asccli.app or building a server plugin. |
 | [xcode-cloud](features/xcode-cloud/README.md) | List Xcode Cloud products, workflows and build runs, and start CI builds. Use when triggering or checking an Xcode Cloud build from the terminal or an agent. |
 
-**Guides:** [Release workflow](release.md) · [Use as a Swift package](library.md) · [Homebrew distribution](homebrew.md) · [Design: CAEOAS and architecture](design.md) · [How these docs are organised](documentation-design/README.md)
+**Guides:** [Release workflow](release.md) · [Use as a Swift package](library.md) · [Design: CAEOAS and architecture](design.md) · [How these docs are organised](documentation-design/README.md)
