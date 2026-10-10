@@ -4,9 +4,11 @@ import Foundation
 
 public struct OpenAPIPreviewRepository: PreviewRepository, @unchecked Sendable {
     private let client: any APIClient
+    private let uploader: UploadOperationsExecutor
 
-    public init(client: any APIClient) {
+    public init(client: any APIClient, uploader: UploadOperationsExecutor = UploadOperationsExecutor()) {
         self.client = client
+        self.uploader = uploader
     }
 
     public func listPreviewSets(localizationId: String) async throws -> [Domain.AppPreviewSet] {
@@ -68,20 +70,7 @@ public struct OpenAPIPreviewRepository: PreviewRepository, @unchecked Sendable {
         let uploadOps = reserved.data.attributes?.uploadOperations ?? []
 
         // Step 2: Upload video data via each upload operation
-        for op in uploadOps {
-            guard let urlString = op.url, let url = URL(string: urlString),
-                  let offset = op.offset, let length = op.length else { continue }
-            let chunk = fileData.subdata(in: offset..<(offset + length))
-            var request = URLRequest(url: url)
-            request.httpMethod = op.method ?? "PUT"
-            request.httpBody = chunk
-            for header in op.requestHeaders ?? [] {
-                if let name = header.name, let value = header.value {
-                    request.setValue(value, forHTTPHeaderField: name)
-                }
-            }
-            _ = try await URLSession.shared.data(for: request)
-        }
+        try await uploader.upload(fileURL: fileURL, operations: uploadOps)
 
         // Step 3: Confirm upload with MD5 checksum
         let md5 = fileData.md5HexString
