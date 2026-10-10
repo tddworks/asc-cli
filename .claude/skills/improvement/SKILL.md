@@ -18,6 +18,7 @@ Make improvements to existing functionality using TDD and rich domain design.
 | Scenario | Skill to Use |
 |----------|--------------|
 | Enhance existing behavior | **improvement** (this skill) |
+| Fix broken behavior | fix-bug |
 | Add new feature | implement-feature |
 
 ## Workflow
@@ -77,7 +78,7 @@ Examples:
 **Test approach**: State-based domain tests
 
 ```swift
-@Test func `build provides human-readable processing state`() {
+@Test func `should show a valid build's processing state as Valid`() {
     let build = Build(id: "1", version: "2.0", processingState: .valid, uploadedDate: .now)
     #expect(build.processingState.displayName == "Valid")
 }
@@ -133,13 +134,13 @@ Examples:
 
 **ALWAYS write tests first, then implement. Never write implementation code without a failing test. This is non-negotiable.**
 
-Think from the user's mental model — test cases describe what the user expects, not internal implementation details.
+Think from the user's mental model — test cases describe what the user expects, not internal implementation details. Name each test `should <outcome> [when <situation>]`, never a method, type or mechanism verb (`returns`, `calls`, `passes`, `maps`) → [Naming tests](../implement-feature/references/tdd-patterns.md#naming-tests). Rename an older test to this shape when you touch it; don't sweep untouched files.
 
 ```swift
 @Suite
 struct {Component}Tests {
     // Name reflects user's expectation, not code internals
-    @Test func `{what the user expects to see or happen}`() {
+    @Test func `should {improved outcome} [when {situation}]`() {
         // Given - standard setup
         let component = Component(...)
 
@@ -170,6 +171,7 @@ swift test  # Must remain all green
 
 ### Do
 - Keep changes focused and minimal
+- Put the rule on the type that owns it — a state enum's semantic boolean, a model's `structuredAffordances`, the Infrastructure mapper — not in a command or controller
 - Maintain existing behavior
 - Add tests for new behavior
 - Follow existing code patterns

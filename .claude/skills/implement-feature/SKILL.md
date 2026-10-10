@@ -186,20 +186,22 @@ See [tdd-patterns.md](references/tdd-patterns.md) for complete patterns includin
 - Infrastructure parent-ID injection tests
 - `@Mockable` / `given().willReturn()` usage
 
+Name each test `should <outcome> [when <situation>]`, in the words of the person, agent or REST client who sees the result — never a method, type or mechanism verb → [Naming tests](references/tdd-patterns.md#naming-tests).
+
 ### Phase 1: Domain
 
 ```swift
-@Test func `new model carries parent id`() {
+@Test func `should belong to the parent it was listed under`() {
     let model = MockRepositoryFactory.makeMyModel(id: "m1", parentId: "p1")
     #expect(model.parentId == "p1")
 }
 
-@Test func `new model affordances include list children command`() {
+@Test func `should point to its children on the CLI`() {
     let model = MockRepositoryFactory.makeMyModel(id: "m1", parentId: "p1")
     #expect(model.affordances["listChildren"] == "asc children list --parent-id m1")
 }
 
-@Test func `new model apiLinks include list children under nested parent`() {
+@Test func `should point to its children over REST`() {
     let model = MockRepositoryFactory.makeMyModel(id: "m1", parentId: "p1")
     #expect(model.apiLinks["listChildren"]?.href == "/api/v1/my-models/m1/children")
     #expect(model.apiLinks["listChildren"]?.method == "GET")
@@ -211,7 +213,7 @@ Both `affordances` and `apiLinks` derive from the same `structuredAffordances` �
 ### Phase 2: Infrastructure
 
 ```swift
-@Test func `listMyModels injects parentId into each model`() async throws {
+@Test func `should tie each model to the parent it was listed under`() async throws {
     let stub = StubAPIClient()
     stub.willReturn(makeFixture())
     let repo = SDKMyRepository(client: stub)
@@ -223,7 +225,7 @@ Both `affordances` and `apiLinks` derive from the same `structuredAffordances` �
 For multi-call adapters, stub each response type:
 
 ```swift
-@Test func `getThing composes attributes call with relationship call`() async throws {
+@Test func `should show the thing together with its related items`() async throws {
     let stub = StubAPIClient()
     stub.willReturn(ThingResponse(data: ..., links: .init(this: "")))
     stub.willReturn(RelatedResponse(data: [...], links: .init(this: "")))
@@ -265,7 +267,7 @@ Also think about affordances from the user's perspective: **"What can I do next?
 Create a minimal command skeleton (struct + `@Option` fields + `execute()` returning `""`) — just enough to compile, NOT enough to pass. Then write the test:
 
 ```swift
-@Test func `listed my models show id, parent, and next actions`() async throws {
+@Test func `should list my models with their parent and next commands`() async throws {
     let mockRepo = MockMyRepository()
     given(mockRepo).listMyModels(parentId: .any).willReturn([
         MockRepositoryFactory.makeMyModel(id: "m-1", parentId: "p-1")
@@ -300,7 +302,7 @@ Run it — **must fail** because `execute()` returns `""`.
 
 #### Test rules
 
-- **Name = user expectation** — `` `listed versions show submit affordance when editable` ``, not `` `execute returns correct JSON` ``
+- **Name = user expectation** — `` `should offer submit for review when the version is editable` ``, not `` `execute returns correct JSON` ``; pair it with the counterpart (`` `should not offer submit for review when the version is live` ``)
 - **Always `#expect()`** — `_ = try await cmd.execute(...)` with no assertion is not a test
 - **Exact JSON assertion** — assert the complete output string, never `output.contains(...)`. This verifies field names, field order, affordance content, and nil-field omission all at once
 - **Think about edge cases from user's perspective** — "What if there are no results?", "What if the version is not editable — should submit still appear?"
@@ -416,7 +418,7 @@ Docs follow `docs/documentation-design/README.md`: each fact has one home, and n
 - [ ] `execute(repo:affordanceMode: .cli)` — accepts mode for REST reuse
 - [ ] `ClientProvider.swift` — static factory method
 - [ ] Registered in `ASC.swift` subcommands array
-- [ ] Command tests: behavior-focused names, always `#expect()`, exact JSON snapshot
+- [ ] Command tests: `should …` names, always `#expect()`, exact JSON snapshot
 - [ ] Affordance keys sort alphabetically; params within each affordance sort alphabetically — match this in JSON snapshots
 
 ### Phase 4: REST exposure

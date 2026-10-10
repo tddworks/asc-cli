@@ -21,7 +21,7 @@ Only after step 4 may you write code under `Sources/`.
 
 Chicago School — state-based, not interaction-based: tests verify what domain objects return and compute, not how they call collaborators. Red → green → refactor, every time.
 
-- Name tests after the user's expectation, with backticks: `` func `version is live when state is readyForSale`() ``.
+- Name tests `should <outcome> [when <situation>]`, with backticks, in the words of whoever sees the result (person, agent, REST client): `` func `should be live when the version is ready for sale`() ``. Never a method, type or mechanism verb (`returns`, `calls`, `passes`, `maps`). Rename older tests when you touch them; don't sweep. → [Naming tests](.claude/skills/implement-feature/references/tdd-patterns.md#naming-tests)
 - Assert exact output values (`"READY_FOR_SALE"`, `"expired": true`), never "is non-empty" or "doesn't throw". Command tests assert the full JSON string.
 - Implement just enough to pass — no extra fields, no speculative branches.
 - Difficult to test = design problem. Never modify a test to make it pass; if it fails unexpectedly, the spec was wrong.
@@ -66,6 +66,7 @@ Why it's built this way: [docs/design.md](docs/design.md).
 
 - **adding a feature** → `implement-feature` skill (architecture approval, TDD phases, REST exposure checklist, docs)
 - **improving an existing one** → `improvement` skill
+- **fixing a bug** → `fix-bug` skill
 - **touching docs** → [docs/documentation-design](docs/documentation-design/README.md). In short: new feature = `docs/features/<x>/README.md` + one CHANGELOG line + `make docs`; fix = one CHANGELOG line. Never hand-edit `docs/commands.md` or `docs/README.md`.
 - **working with auth or credentials** → [docs/features/asc-auth](docs/features/asc-auth/README.md) (`~/.asc/credentials.json` first, then `ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_PRIVATE_KEY_PATH` env vars, via `CompositeAuthProvider`)
 - **working with iris (private API)** → [docs/features/iris](docs/features/iris/README.md)
