@@ -201,6 +201,7 @@ public final class RESTPathResolver: @unchecked Sendable {
         _ = _perfOverviewRoutes
         _ = _gameCenterRoutes
         _ = _assetLibraryRoutes
+        _ = _screenshotImportRoutes
 
         initialized = true
     }
