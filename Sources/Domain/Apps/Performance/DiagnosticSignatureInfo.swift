@@ -56,10 +56,20 @@ public struct DiagnosticSignatureInfo: Sendable, Equatable, Identifiable, Codabl
 }
 
 extension DiagnosticSignatureInfo: AffordanceProviding {
-    public var affordances: [String: String] {
+    public var structuredAffordances: [Affordance] {
         [
-            "listLogs": "asc diagnostic-logs list --signature-id \(id)",
-            "listSignatures": "asc diagnostics list --build-id \(buildId)",
+            Affordance(key: "listLogs", command: "diagnostic-logs", action: "list", params: ["signature-id": id]),
+            Affordance(key: "listSignatures", command: "diagnostics", action: "list", params: ["build-id": buildId]),
         ]
+    }
+}
+
+extension DiagnosticSignatureInfo: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Type", "Signature", "Weight", "Trend"]
+    }
+
+    public var tableRow: [String] {
+        [id, diagnosticType.rawValue, signature, String(weight), insightDirection ?? "-"]
     }
 }

@@ -29,22 +29,10 @@ struct DiagnosticsList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any DiagnosticsRepository) async throws -> String {
+    func execute(repo: any DiagnosticsRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let filter = diagnosticType.flatMap { DiagnosticType(rawValue: $0) }
         let signatures = try await repo.listSignatures(buildId: buildId, diagnosticType: filter)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            signatures,
-            headers: ["ID", "Type", "Signature", "Weight", "Trend"],
-            rowMapper: {
-                [
-                    $0.id,
-                    $0.diagnosticType.rawValue,
-                    $0.signature,
-                    String($0.weight),
-                    $0.insightDirection ?? "-",
-                ]
-            }
-        )
+        return try formatter.formatAgentItems(signatures, affordanceMode: affordanceMode)
     }
 }
