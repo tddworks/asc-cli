@@ -28,6 +28,8 @@ public enum PlacementState: String, Sendable, Equatable, Codable, CaseIterable {
     case parentWaitingForReview = "PARENT_WAITING_FOR_REVIEW"
     case parentInReview = "PARENT_IN_REVIEW"
     case parentApproved = "PARENT_APPROVED"
+    /// Sent by App Store Connect but missing from its spec and docs; treated as neither editable, in review nor live.
+    case active = "ACTIVE"
 
     /// The asset behind the placement is still being processed.
     public var isProcessing: Bool { self == .assetProcessing }

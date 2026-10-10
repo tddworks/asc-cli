@@ -149,6 +149,28 @@ struct SDKAssetPlacementRepositoryTests {
         ])
     }
 
+    @Test func `should show an image's placement when App Store Connect reports it as active`() async throws {
+        // Given - the shape App Store Connect sends live: state ACTIVE, which its spec doesn't list
+        let stub = StubAPIClient()
+        stub.willReturn(try Self.placements("""
+        {"data":[
+          {"type":"appAssetLibraryPlacements","id":"pl-1",
+           "attributes":{"createdDate":"2026-10-01T00:00:00.000Z","lastModifiedDate":"2026-10-01T00:00:00.000Z",
+                         "placementType":"APP_SCREENSHOT","mediaType":"IMAGE","placementGroup":"IPHONE_67","state":"ACTIVE","stateDetails":null},
+           "relationships":{"appStoreVersionLocalization":{"data":{"type":"appStoreVersionLocalizations","id":"loc-1"}}}}
+        ],"links":{"self":""}}
+        """))
+
+        // When
+        let placements = try await SDKAssetPlacementRepository(client: stub).listAssetPlacements(mediaType: .image, assetId: "img-7")
+
+        // Then
+        #expect(placements == [
+            AssetPlacement(id: "pl-1", surface: .appStoreVersionLocalization, localizationId: "loc-1", mediaType: .image,
+                           assetId: "img-7", placementType: .appScreenshot, placementGroup: "IPHONE_67", state: .active),
+        ])
+    }
+
     // MARK: - createPlacement
 
     @Test func `should send App Store Connect a placement naming the image and the version localization`() async throws {
