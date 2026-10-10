@@ -123,15 +123,17 @@ asc game-center players unblock --player-id player-abc123
 |---|---|---|
 | GET | `/apps/{appId}/game-center` | `detail get --app-id` |
 | GET | `/game-center/details/{detailId}/achievements` | `achievements list --detail-id` |
+| POST | `/game-center/details/{detailId}/achievements` | `achievements create` |
 | DELETE | `/game-center/achievements/{achievementId}` | `achievements delete` |
 | GET | `/game-center/details/{detailId}/leaderboards` | `leaderboards list --detail-id` |
+| POST | `/game-center/details/{detailId}/leaderboards` | `leaderboards create` |
 | DELETE | `/game-center/leaderboards/{leaderboardId}` | `leaderboards delete` |
 | GET | `/game-center/leaderboards/{leaderboardId}/score-moderations?blocked-only=true` | `score-moderations list [--blocked-only]` |
 | POST | `/game-center/score-moderations/{id}/block`, `/unblock` | `score-moderations block`, `unblock` |
 | GET | `/game-center/details/{detailId}/blocked-players` | `blocked-players list` |
 | POST | `/game-center/players/{id}/block`, `/unblock` | `players block`, `unblock` |
 
-Creating achievements or leaderboards is CLI-only.
+POST bodies use the create flags in camelCase: `{"referenceName", "vendorIdentifier", "points", "showBeforeEarned"?, "repeatable"?}` for an achievement, `{"referenceName", "vendorIdentifier", "scoreSortType", "submissionType"?}` for a leaderboard (`submissionType` defaults to `BEST_SCORE`). A missing required field returns 400.
 
 ## Gotchas
 
