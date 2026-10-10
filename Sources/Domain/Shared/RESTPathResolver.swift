@@ -25,26 +25,43 @@ public final class RESTPathResolver: @unchecked Sendable {
         public let parentParam: String
         public let parentSegment: String
         public let segment: String
+        /// The flag naming the child itself (e.g. `image-id`). When present on a resource
+        /// action it wins over the parent, so `update --image-id X --library-id L` addresses
+        /// `/asset-images/X` rather than the library's collection.
+        public let resourceParam: String?
 
-        public init(parentParam: String, parentSegment: String, segment: String) {
+        public init(parentParam: String, parentSegment: String, segment: String, resourceParam: String? = nil) {
             self.parentParam = parentParam
             self.parentSegment = parentSegment
             self.segment = segment
+            self.resourceParam = resourceParam
         }
     }
 
     private static let lock = NSLock()
     private static let initLock = NSLock()
-    nonisolated(unsafe) private static var routes: [String: Route] = [:]
+    /// A command may hang off several parents (e.g. placements under a localization or an
+    /// asset); the first registered route whose parent param is present wins.
+    nonisolated(unsafe) private static var routes: [String: [Route]] = [:]
     nonisolated(unsafe) private static var initialized = false
 
     // MARK: - Registration API (called by domain modules)
 
-    /// Register a nested resource route.
-    public static func registerRoute(command: String, parentParam: String, parentSegment: String, segment: String) {
+    /// Register a nested resource route. Registering again for the same parent param
+    /// replaces that route; a different parent param adds another parent.
+    public static func registerRoute(
+        command: String, parentParam: String, parentSegment: String, segment: String, resourceParam: String? = nil
+    ) {
         lock.lock()
         defer { lock.unlock() }
-        routes[command] = Route(parentParam: parentParam, parentSegment: parentSegment, segment: segment)
+        let route = Route(parentParam: parentParam, parentSegment: parentSegment, segment: segment, resourceParam: resourceParam)
+        var existing = routes[command] ?? []
+        if let index = existing.firstIndex(where: { $0.parentParam == parentParam }) {
+            existing[index] = route
+        } else {
+            existing.append(route)
+        }
+        routes[command] = existing
     }
 
     /// Remove a route (for testing cleanup).
@@ -72,6 +89,9 @@ public final class RESTPathResolver: @unchecked Sendable {
             if let ownId = params["\(singularize(command))-id"] {
                 return resourcePath(base: base, segment: command, id: ownId, action: action)
             }
+            if let ownId = (currentRoutes[command] ?? []).lazy.compactMap({ $0.resourceParam.flatMap { params[$0] } }).first {
+                return resourcePath(base: base, segment: command, id: ownId, action: action)
+            }
             // Singleton-under-parent (e.g. `iap-availability get --iap-id X` →
             // `/api/v1/iap/X/availability`). Triggered when a route is registered for
             // this command and its parent param is in `params`.
@@ -79,7 +99,7 @@ public final class RESTPathResolver: @unchecked Sendable {
             // `upload` resolves to the bare collection path (POST is the verb),
             // matching standard REST: a binary upload posts the body straight at
             // `/api/v1/iap/X/review-screenshot` rather than `/...review-screenshot/upload`.
-            if let route = currentRoutes[command], let parentId = params[route.parentParam] {
+            if let (route, parentId) = matchingRoute(currentRoutes[command], params: params) {
                 let nested = "\(base)/\(route.parentSegment)/\(parentId)/\(route.segment)"
                 switch action {
                 case "get", "update", "delete", "upload": return nested
@@ -93,8 +113,7 @@ public final class RESTPathResolver: @unchecked Sendable {
         }
 
         // List/create/add under a parent resource.
-        if let route = currentRoutes[command],
-           let parentId = params[route.parentParam] {
+        if let (route, parentId) = matchingRoute(currentRoutes[command], params: params) {
             return "\(base)/\(route.parentSegment)/\(parentId)/\(route.segment)"
         }
 
@@ -103,6 +122,14 @@ public final class RESTPathResolver: @unchecked Sendable {
     }
 
     // MARK: - Helpers
+
+    /// The first registered route whose parent param the caller supplied, with that parent's id.
+    private static func matchingRoute(_ candidates: [Route]?, params: [String: String]) -> (Route, String)? {
+        for route in candidates ?? [] {
+            if let parentId = params[route.parentParam] { return (route, parentId) }
+        }
+        return nil
+    }
 
     /// Pick the id value for a resource action. Prefers the singularized-from-command
     /// name (`version-id` for `versions`, `certificate-id` for `certificates`), otherwise
@@ -171,6 +198,9 @@ public final class RESTPathResolver: @unchecked Sendable {
         _ = _appAvailabilityRoutes
         _ = _resolutionCenterRoutes
         _ = _experimentRoutes
+        _ = _perfOverviewRoutes
+        _ = _gameCenterRoutes
+        _ = _assetLibraryRoutes
 
         initialized = true
     }

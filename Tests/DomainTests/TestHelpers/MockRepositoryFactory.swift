@@ -616,7 +616,9 @@ struct MockRepositoryFactory {
         isFamilySharable: Bool = false,
         state: SubscriptionState = .missingMetadata,
         groupLevel: Int? = nil,
-        reviewNote: String? = nil
+        reviewNote: String? = nil,
+        multiSeatStatus: SubscriptionMultiSeatStatus? = nil,
+        marketSettings: [SubscriptionMarketSetting]? = nil
     ) -> Subscription {
         Subscription(
             id: id,
@@ -627,7 +629,9 @@ struct MockRepositoryFactory {
             isFamilySharable: isFamilySharable,
             state: state,
             groupLevel: groupLevel,
-            reviewNote: reviewNote
+            reviewNote: reviewNote,
+            multiSeatStatus: multiSeatStatus,
+            marketSettings: marketSettings
         )
     }
 
@@ -887,6 +891,52 @@ struct MockRepositoryFactory {
             scoreSortType: scoreSortType,
             submissionType: submissionType,
             isArchived: isArchived
+        )
+    }
+
+    static func makeGameCenterScoreModeration(
+        id: String = "mod-1",
+        leaderboardId: String? = "lb-1",
+        rank: String? = "1",
+        score: String? = "9999",
+        submittedDate: String? = "2026-01-01T00:00:00Z",
+        isBlocked: Bool = false,
+        isPreReleased: Bool = false,
+        context: String? = nil,
+        challengeIds: [String] = [],
+        playerId: String? = "player-1",
+        playerNickname: String? = "Player One",
+        isPlayerBlocked: Bool? = false
+    ) -> GameCenterScoreModeration {
+        GameCenterScoreModeration(
+            id: id,
+            leaderboardId: leaderboardId,
+            rank: rank,
+            score: score,
+            submittedDate: submittedDate,
+            isBlocked: isBlocked,
+            isPreReleased: isPreReleased,
+            context: context,
+            challengeIds: challengeIds,
+            playerId: playerId,
+            playerNickname: playerNickname,
+            isPlayerBlocked: isPlayerBlocked
+        )
+    }
+
+    static func makeGameCenterPlayer(
+        id: String = "player-1",
+        gameCenterDetailId: String? = "gc-1",
+        nickname: String? = "Player One",
+        bundleId: String? = "com.example.game",
+        isBlocked: Bool = true
+    ) -> GameCenterPlayer {
+        GameCenterPlayer(
+            id: id,
+            gameCenterDetailId: gameCenterDetailId,
+            nickname: nickname,
+            bundleId: bundleId,
+            isBlocked: isBlocked
         )
     }
 
@@ -1440,5 +1490,162 @@ extension MockRepositoryFactory {
         locale: String = "en-US"
     ) -> ExperimentTreatmentLocalization {
         ExperimentTreatmentLocalization(id: id, treatmentId: treatmentId, locale: locale)
+    }
+
+    // MARK: - Performance Overview
+
+    static func makePerformanceInsight(
+        category: PerformanceMetricCategory = .launch,
+        metric: String = "launchTime",
+        latestVersion: String? = "2.0",
+        summary: String? = "Launch time increased 20%",
+        isHighImpact: Bool = false
+    ) -> PerformanceInsight {
+        PerformanceInsight(
+            category: category, metric: metric, latestVersion: latestVersion,
+            summary: summary, isHighImpact: isHighImpact
+        )
+    }
+
+    static func makeOverviewMetric(
+        category: String = "launch",
+        identifier: String = "launchTime",
+        displayName: String? = "Launch Time",
+        unit: String? = "s",
+        latestValue: Double? = 1.5,
+        latestVersion: String? = "2.0",
+        goalValue: Double? = 1.0
+    ) -> OverviewMetric {
+        OverviewMetric(
+            category: category, identifier: identifier, displayName: displayName, unit: unit,
+            latestValue: latestValue, latestVersion: latestVersion, goalValue: goalValue
+        )
+    }
+
+    static func makePerformanceHotspot(
+        kind: DiagnosticType = .hangs,
+        signatureId: String? = "sig-1",
+        signature: String = "main thread hang in -[UIView layoutSubviews]",
+        weight: Double? = 45.2,
+        count: Int? = 12,
+        sourceFile: String? = "MainView.swift",
+        lineNumber: Int? = 42,
+        trend: PerformanceTrend? = .up
+    ) -> PerformanceHotspot {
+        PerformanceHotspot(
+            kind: kind, signatureId: signatureId, signature: signature, weight: weight, count: count,
+            sourceFile: sourceFile, lineNumber: lineNumber, trend: trend
+        )
+    }
+
+    static func makePerformanceOverview(
+        appId: String = "1234567890",
+        deviceType: String? = nil,
+        platform: String? = "iOS",
+        bundleId: String? = "com.example.app",
+        latestVersion: String? = "2.0",
+        regressions: [PerformanceInsight] = [],
+        trendingUp: [PerformanceInsight] = [],
+        metrics: [OverviewMetric] = [],
+        hotspots: [PerformanceHotspot] = []
+    ) -> PerformanceOverview {
+        PerformanceOverview(
+            appId: appId, deviceType: deviceType, platform: platform, bundleId: bundleId,
+            latestVersion: latestVersion, regressions: regressions, trendingUp: trendingUp,
+            metrics: metrics, hotspots: hotspots
+        )
+    }
+
+    // MARK: - App Asset Library
+
+    static func makeAssetLibrary(
+        id: String = "lib-1",
+        appId: String = "app-1"
+    ) -> AppAssetLibrary {
+        AppAssetLibrary(id: id, appId: appId)
+    }
+
+    static func makeLibraryImage(
+        id: String = "img-1",
+        libraryId: String = "lib-1",
+        fileName: String = "home.png",
+        fileSize: Int = 14619,
+        category: AssetCategory = .appScreenshotsAndPreviews,
+        state: LibraryAssetState = .prepareForSubmission,
+        referenceName: String? = nil,
+        specId: String? = nil,
+        width: Int? = nil,
+        height: Int? = nil,
+        templateUrl: String? = nil,
+        stateDetails: [AssetStateDetail]? = nil,
+        createdDate: String? = nil
+    ) -> LibraryImage {
+        LibraryImage(
+            id: id, libraryId: libraryId, fileName: fileName, fileSize: fileSize,
+            category: category, state: state, referenceName: referenceName, specId: specId,
+            width: width, height: height, templateUrl: templateUrl,
+            stateDetails: stateDetails, createdDate: createdDate
+        )
+    }
+
+    static func makeAssetPlacement(
+        id: String = "pl-1",
+        surface: PlacementSurface = .appStoreVersionLocalization,
+        localizationId: String = "loc-1",
+        mediaType: AssetMediaType = .image,
+        assetId: String = "img-1",
+        placementType: AssetPlacementType = .appScreenshot,
+        placementGroup: String = "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE",
+        position: Int? = nil,
+        state: PlacementState = .parentPrepareForSubmission,
+        stateDetails: [AssetStateDetail]? = nil
+    ) -> AssetPlacement {
+        AssetPlacement(
+            id: id, surface: surface, localizationId: localizationId, mediaType: mediaType,
+            assetId: assetId, placementType: placementType, placementGroup: placementGroup,
+            position: position, state: state, stateDetails: stateDetails
+        )
+    }
+
+    static func makeAssetPlacementGroup(
+        id: String = "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE",
+        placementType: AssetPlacementType = .appScreenshot,
+        platform: String? = "IPHONE_APP_STORE",
+        displayClass: String? = "IPHONE_DYNAMIC_ISLAND_LARGE_DISPLAY",
+        feature: String? = "APP_STORE_VERSIONS",
+        sizes: [String] = ["1290x2796"],
+        maxCount: Int? = 10
+    ) -> AssetPlacementGroup {
+        AssetPlacementGroup(
+            id: id, placementType: placementType, platform: platform, displayClass: displayClass,
+            feature: feature, sizes: sizes, maxCount: maxCount
+        )
+    }
+
+    static func makeLibraryVideo(
+        id: String = "vid-1",
+        libraryId: String = "lib-1",
+        fileName: String = "preview.mp4",
+        fileSize: Int = 31457280,
+        category: AssetCategory = .appScreenshotsAndPreviews,
+        state: LibraryAssetState = .prepareForSubmission,
+        referenceName: String? = nil,
+        specId: String? = nil,
+        width: Int? = nil,
+        height: Int? = nil,
+        stateDetails: [AssetStateDetail]? = nil,
+        createdDate: String? = nil,
+        previewFrameTimeCode: String? = nil,
+        previewFrameState: String? = nil,
+        previewFrameUrl: String? = nil,
+        videoUrl: String? = nil
+    ) -> LibraryVideo {
+        LibraryVideo(
+            id: id, libraryId: libraryId, fileName: fileName, fileSize: fileSize,
+            category: category, state: state, referenceName: referenceName, specId: specId,
+            width: width, height: height, stateDetails: stateDetails, createdDate: createdDate,
+            previewFrameTimeCode: previewFrameTimeCode, previewFrameState: previewFrameState,
+            previewFrameUrl: previewFrameUrl, videoUrl: videoUrl
+        )
     }
 }

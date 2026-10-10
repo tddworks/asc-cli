@@ -90,9 +90,11 @@ extension App: AffordanceProviding {
             Affordance(key: "listAppInfos", command: "app-infos", action: "list", params: ["app-id": id]),
             Affordance(key: "listReviews", command: "reviews", action: "list", params: ["app-id": id]),
             Affordance(key: "listExperiments", command: "experiments", action: "list", params: ["app-id": id]),
+            Affordance(key: "getPerfOverview", command: "perf-overview", action: "get", params: ["app-id": id]),
             Affordance(key: "listPricePoints", command: "apps price-points", action: "list",
                        params: ["app-id": id, "territory": "USA"]),
             Affordance(key: "updateContentRights", command: "apps", action: "update", params: ["app-id": id]),
+            Affordance(key: "getAssetLibrary", command: "asset-library", action: "get", params: ["app-id": id]),
         ]
     }
 

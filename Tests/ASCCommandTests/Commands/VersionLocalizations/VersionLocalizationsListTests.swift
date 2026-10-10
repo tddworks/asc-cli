@@ -22,6 +22,7 @@ struct VersionLocalizationsListTests {
             {
               "affordances" : {
                 "listLocalizations" : "asc version-localizations list --version-id v-1",
+                "listPlacements" : "asc asset-placements list --localization-id loc-1",
                 "listScreenshotSets" : "asc screenshot-sets list --localization-id loc-1",
                 "updateLocalization" : "asc version-localizations update --localization-id loc-1"
               },
@@ -32,6 +33,7 @@ struct VersionLocalizationsListTests {
             {
               "affordances" : {
                 "listLocalizations" : "asc version-localizations list --version-id v-1",
+                "listPlacements" : "asc asset-placements list --localization-id loc-2",
                 "listScreenshotSets" : "asc screenshot-sets list --localization-id loc-2",
                 "updateLocalization" : "asc version-localizations update --localization-id loc-2"
               },

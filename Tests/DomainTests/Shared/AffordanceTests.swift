@@ -181,6 +181,18 @@ struct AffordanceTests {
         #expect(links["territories"]?.href == "/api/v1/territories")
     }
 
+    @Test func `should list the asset placement groups from the API root`() {
+        let root = APIRoot()
+        #expect(root.apiLinks["assetPlacementGroups"] == APILink(href: "/api/v1/asset-placement-groups", method: "GET"))
+        #expect(root.affordances["assetPlacementGroups"] == "asc asset-placement-groups list")
+    }
+
+    @Test func `should point an app to its asset library`() {
+        let app = App(id: "42", name: "MyApp", bundleId: "com.test")
+        #expect(app.affordances["getAssetLibrary"] == "asc asset-library get --app-id 42")
+        #expect(app.apiLinks["getAssetLibrary"] == APILink(href: "/api/v1/apps/42/asset-library", method: "GET"))
+    }
+
     @Test func `APIRoot CLI affordances list all top-level commands`() {
         let root = APIRoot()
         let cmds = root.affordances
@@ -322,6 +334,52 @@ struct AffordanceTests {
 
         // Clean up
         RESTPathResolver.removeRoute(command: "custom-widgets")
+    }
+
+    @Test func `should list a child under whichever of its parents the caller names`() {
+        RESTPathResolver.registerRoute(command: "test-gadgets", parentParam: "shelf-id", parentSegment: "shelves", segment: "gadgets")
+        RESTPathResolver.registerRoute(command: "test-gadgets", parentParam: "drawer-id", parentSegment: "drawers", segment: "gadgets")
+        defer { RESTPathResolver.removeRoute(command: "test-gadgets") }
+
+        let underShelf = Affordance(key: "list", command: "test-gadgets", action: "list", params: ["shelf-id": "s-1"])
+        let underDrawer = Affordance(key: "list", command: "test-gadgets", action: "list", params: ["drawer-id": "d-1"])
+
+        #expect(underShelf.restLink.href == "/api/v1/shelves/s-1/gadgets")
+        #expect(underDrawer.restLink.href == "/api/v1/drawers/d-1/gadgets")
+    }
+
+    @Test func `should create a child under the first registered parent when the caller names several`() {
+        RESTPathResolver.registerRoute(command: "test-gadgets", parentParam: "shelf-id", parentSegment: "shelves", segment: "gadgets")
+        RESTPathResolver.registerRoute(command: "test-gadgets", parentParam: "drawer-id", parentSegment: "drawers", segment: "gadgets")
+        defer { RESTPathResolver.removeRoute(command: "test-gadgets") }
+
+        let create = Affordance(key: "create", command: "test-gadgets", action: "create", params: ["drawer-id": "d-1", "shelf-id": "s-1"])
+        let reorder = Affordance(key: "reorder", command: "test-gadgets", action: "reorder", params: ["drawer-id": "d-1"])
+
+        #expect(create.restLink == APILink(href: "/api/v1/shelves/s-1/gadgets", method: "POST"))
+        #expect(reorder.restLink == APILink(href: "/api/v1/drawers/d-1/gadgets/reorder", method: "POST"))
+    }
+
+    @Test func `should address a child by its own id when acting on it even when its parent is named too`() {
+        RESTPathResolver.registerRoute(command: "test-gadgets", parentParam: "shelf-id", parentSegment: "shelves", segment: "gadgets",
+                                       resourceParam: "gadget-id")
+        defer { RESTPathResolver.removeRoute(command: "test-gadgets") }
+
+        let update = Affordance(key: "update", command: "test-gadgets", action: "update", params: ["gadget-id": "g-1", "shelf-id": "s-1"])
+        let list = Affordance(key: "list", command: "test-gadgets", action: "list", params: ["gadget-id": "g-1", "shelf-id": "s-1"])
+
+        #expect(update.restLink == APILink(href: "/api/v1/test-gadgets/g-1", method: "PATCH"))
+        #expect(list.restLink == APILink(href: "/api/v1/shelves/s-1/gadgets", method: "GET"))
+    }
+
+    @Test func `should replace a route registered again for the same parent`() {
+        RESTPathResolver.registerRoute(command: "test-gadgets", parentParam: "shelf-id", parentSegment: "shelves", segment: "gadgets")
+        RESTPathResolver.registerRoute(command: "test-gadgets", parentParam: "shelf-id", parentSegment: "racks", segment: "items")
+        defer { RESTPathResolver.removeRoute(command: "test-gadgets") }
+
+        let a = Affordance(key: "list", command: "test-gadgets", action: "list", params: ["shelf-id": "s-1"])
+
+        #expect(a.restLink.href == "/api/v1/racks/s-1/items")
     }
 
     @Test func `get action on custom command resolves to segment matching the command name`() {

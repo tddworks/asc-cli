@@ -23,6 +23,8 @@ public enum AgeRatingOverride: String, Sendable, Equatable, Codable, CaseIterabl
 
 public enum KoreaAgeRatingOverride: String, Sendable, Equatable, Codable, CaseIterable {
     case none = "NONE"
+    case all = "ALL"
+    case twelvePlus = "TWELVE_PLUS"
     case fifteenPlus = "FIFTEEN_PLUS"
     case nineteenPlus = "NINETEEN_PLUS"
 }
@@ -62,6 +64,8 @@ public struct AgeRatingDeclaration: Sendable, Equatable, Identifiable {
     public let kidsAgeBand: KidsAgeBand?
     public let ageRatingOverride: AgeRatingOverride?
     public let koreaAgeRatingOverride: KoreaAgeRatingOverride?
+    /// Korea's GRAC (Game Rating and Administration Committee) classification number.
+    public let gracRatingClassificationNumber: String?
 
     public init(
         id: String,
@@ -90,7 +94,8 @@ public struct AgeRatingDeclaration: Sendable, Equatable, Identifiable {
         violenceRealistic: ContentIntensity? = nil,
         kidsAgeBand: KidsAgeBand? = nil,
         ageRatingOverride: AgeRatingOverride? = nil,
-        koreaAgeRatingOverride: KoreaAgeRatingOverride? = nil
+        koreaAgeRatingOverride: KoreaAgeRatingOverride? = nil,
+        gracRatingClassificationNumber: String? = nil
     ) {
         self.id = id
         self.appInfoId = appInfoId
@@ -119,6 +124,7 @@ public struct AgeRatingDeclaration: Sendable, Equatable, Identifiable {
         self.kidsAgeBand = kidsAgeBand
         self.ageRatingOverride = ageRatingOverride
         self.koreaAgeRatingOverride = koreaAgeRatingOverride
+        self.gracRatingClassificationNumber = gracRatingClassificationNumber
     }
 }
 
@@ -133,7 +139,7 @@ extension AgeRatingDeclaration: Codable {
         case sexualContentGraphicAndNudity, sexualContentOrNudity, horrorOrFearThemes
         case matureOrSuggestiveThemes, violenceCartoonOrFantasy
         case violenceRealisticProlongedGraphicOrSadistic, violenceRealistic
-        case kidsAgeBand, ageRatingOverride, koreaAgeRatingOverride
+        case kidsAgeBand, ageRatingOverride, koreaAgeRatingOverride, gracRatingClassificationNumber
     }
 
     public init(from decoder: Decoder) throws {
@@ -165,6 +171,7 @@ extension AgeRatingDeclaration: Codable {
         kidsAgeBand = try c.decodeIfPresent(KidsAgeBand.self, forKey: .kidsAgeBand)
         ageRatingOverride = try c.decodeIfPresent(AgeRatingOverride.self, forKey: .ageRatingOverride)
         koreaAgeRatingOverride = try c.decodeIfPresent(KoreaAgeRatingOverride.self, forKey: .koreaAgeRatingOverride)
+        gracRatingClassificationNumber = try c.decodeIfPresent(String.self, forKey: .gracRatingClassificationNumber)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -196,6 +203,7 @@ extension AgeRatingDeclaration: Codable {
         try c.encodeIfPresent(kidsAgeBand, forKey: .kidsAgeBand)
         try c.encodeIfPresent(ageRatingOverride, forKey: .ageRatingOverride)
         try c.encodeIfPresent(koreaAgeRatingOverride, forKey: .koreaAgeRatingOverride)
+        try c.encodeIfPresent(gracRatingClassificationNumber, forKey: .gracRatingClassificationNumber)
     }
 }
 
@@ -244,6 +252,7 @@ public struct AgeRatingDeclarationUpdate: Sendable {
     public var kidsAgeBand: KidsAgeBand?
     public var ageRatingOverride: AgeRatingOverride?
     public var koreaAgeRatingOverride: KoreaAgeRatingOverride?
+    public var gracRatingClassificationNumber: String?
 
     public init() {}
 }

@@ -2,11 +2,13 @@ import ArgumentParser
 import Domain
 
 extension SubscriptionPeriod: ExpressibleByArgument {}
+extension SubscriptionMultiSeatStatus: ExpressibleByArgument {}
+extension SubscriptionMarketSetting: ExpressibleByArgument {}
 
 struct SubscriptionsUpdate: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "update",
-        abstract: "Update a subscription (name, family sharable, group level, review note)"
+        abstract: "Update a subscription (name, family sharable, group level, review note, multi-seat status, markets)"
     )
 
     @OptionGroup var globals: GlobalOptions
@@ -32,6 +34,12 @@ struct SubscriptionsUpdate: AsyncParsableCommand {
     @Option(name: .long, help: "App Review note")
     var reviewNote: String?
 
+    @Option(name: .long, help: "Whether the subscription supports multiple seats")
+    var multiSeatStatus: SubscriptionMultiSeatStatus?
+
+    @Option(name: .long, help: "Market to sell the subscription in (repeatable; replaces the current markets)")
+    var marketSetting: [SubscriptionMarketSetting] = []
+
     func run() async throws {
         let repo = try ClientProvider.makeSubscriptionRepository()
         print(try await execute(repo: repo))
@@ -45,7 +53,9 @@ struct SubscriptionsUpdate: AsyncParsableCommand {
             isFamilySharable: isFamilySharable,
             groupLevel: groupLevel,
             subscriptionPeriod: period,
-            reviewNote: reviewNote
+            reviewNote: reviewNote,
+            multiSeatStatus: multiSeatStatus,
+            marketSettings: marketSetting.isEmpty ? nil : marketSetting
         )
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

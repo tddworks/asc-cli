@@ -10,7 +10,7 @@ let package = Package(
         .library(name: "ASCPlugin", targets: ["ASCPlugin"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/AvdLee/appstoreconnect-swift-sdk.git", from: "4.4.3"),
+        .package(url: "https://github.com/AvdLee/appstoreconnect-swift-sdk.git", from: "4.5.1"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.8.2"),
         .package(url: "https://github.com/Kolos65/Mockable", from: "0.6.4"),
         .package(url: "https://github.com/steipete/TauTUI.git", from: "0.2.2"),

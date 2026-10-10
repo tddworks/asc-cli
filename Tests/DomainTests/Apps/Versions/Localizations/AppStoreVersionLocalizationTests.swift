@@ -88,4 +88,10 @@ struct AppStoreVersionLocalizationTests {
         )
         #expect(decoded == original)
     }
+
+    @Test func `should point to the asset placements on the localization`() {
+        let localization = MockRepositoryFactory.makeLocalization(id: "loc-1", versionId: "v-1")
+        #expect(localization.affordances["listPlacements"] == "asc asset-placements list --localization-id loc-1")
+        #expect(localization.apiLinks["listPlacements"] == APILink(href: "/api/v1/version-localizations/loc-1/placements", method: "GET"))
+    }
 }

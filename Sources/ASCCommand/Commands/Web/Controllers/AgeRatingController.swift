@@ -53,6 +53,7 @@ struct AgeRatingController: Sendable {
             update.kidsAgeBand = (json["kidsAgeBand"] as? String).flatMap(KidsAgeBand.init(rawValue:))
             update.ageRatingOverride = (json["ageRatingOverride"] as? String).flatMap(AgeRatingOverride.init(rawValue:))
             update.koreaAgeRatingOverride = (json["koreaAgeRatingOverride"] as? String).flatMap(KoreaAgeRatingOverride.init(rawValue:))
+            update.gracRatingClassificationNumber = json["gracRatingClassificationNumber"] as? String
             let updated = try await self.repo.updateDeclaration(id: declarationId, update: update)
             return try restFormat(updated)
         }

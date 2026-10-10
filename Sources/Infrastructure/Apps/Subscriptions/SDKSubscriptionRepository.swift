@@ -49,11 +49,16 @@ public struct SDKSubscriptionRepository: SubscriptionRepository, @unchecked Send
         isFamilySharable: Bool?,
         groupLevel: Int?,
         subscriptionPeriod: Domain.SubscriptionPeriod?,
-        reviewNote: String?
+        reviewNote: String?,
+        multiSeatStatus: SubscriptionMultiSeatStatus?,
+        marketSettings: [SubscriptionMarketSetting]?
     ) async throws -> Domain.Subscription {
         let sdkPeriod = subscriptionPeriod.flatMap {
             SubscriptionUpdateRequest.Data.Attributes.SubscriptionPeriod(rawValue: $0.rawValue)
         }
+        typealias Attributes = SubscriptionUpdateRequest.Data.Attributes
+        let sdkMultiSeatStatus = multiSeatStatus.flatMap { Attributes.MultiSeatStatus(rawValue: $0.rawValue) }
+        let sdkMarketSettings = marketSettings.map { $0.compactMap { Attributes.MarketSetting(rawValue: $0.rawValue) } }
         let body = SubscriptionUpdateRequest(data: .init(
             type: .subscriptions,
             id: subscriptionId,
@@ -62,7 +67,9 @@ public struct SDKSubscriptionRepository: SubscriptionRepository, @unchecked Send
                 isFamilySharable: isFamilySharable,
                 subscriptionPeriod: sdkPeriod,
                 reviewNote: reviewNote,
-                groupLevel: groupLevel
+                groupLevel: groupLevel,
+                multiSeatStatus: sdkMultiSeatStatus,
+                marketSettings: sdkMarketSettings
             )
         ))
         let response = try await client.request(APIEndpoint.v1.subscriptions.id(subscriptionId).patch(body))
@@ -88,7 +95,13 @@ public struct SDKSubscriptionRepository: SubscriptionRepository, @unchecked Send
             isFamilySharable: sdk.attributes?.isFamilySharable ?? false,
             state: state,
             groupLevel: sdk.attributes?.groupLevel,
-            reviewNote: sdk.attributes?.reviewNote
+            reviewNote: sdk.attributes?.reviewNote,
+            multiSeatStatus: sdk.attributes?.multiSeatStatus.flatMap {
+                SubscriptionMultiSeatStatus(rawValue: $0.rawValue)
+            },
+            marketSettings: sdk.attributes?.marketSettings.map {
+                $0.compactMap { SubscriptionMarketSetting(rawValue: $0.rawValue) }
+            }
         )
     }
 }

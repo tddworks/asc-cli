@@ -34,6 +34,7 @@ struct GameCenterDetailGetTests {
               "affordances" : {
                 "getDetail" : "asc game-center detail get --app-id app-1",
                 "listAchievements" : "asc game-center achievements list --detail-id gc-1",
+                "listBlockedPlayers" : "asc game-center blocked-players list --detail-id gc-1",
                 "listLeaderboards" : "asc game-center leaderboards list --detail-id gc-1"
               },
               "appId" : "app-1",
@@ -236,7 +237,8 @@ struct GameCenterLeaderboardsListTests {
             {
               "affordances" : {
                 "delete" : "asc game-center leaderboards delete --leaderboard-id lb-1",
-                "listLeaderboards" : "asc game-center leaderboards list --detail-id gc-1"
+                "listLeaderboards" : "asc game-center leaderboards list --detail-id gc-1",
+                "listScoreModerations" : "asc game-center score-moderations list --leaderboard-id lb-1"
               },
               "gameCenterDetailId" : "gc-1",
               "id" : "lb-1",
@@ -289,7 +291,8 @@ struct GameCenterLeaderboardsCreateTests {
             {
               "affordances" : {
                 "delete" : "asc game-center leaderboards delete --leaderboard-id lb-new",
-                "listLeaderboards" : "asc game-center leaderboards list --detail-id gc-1"
+                "listLeaderboards" : "asc game-center leaderboards list --detail-id gc-1",
+                "listScoreModerations" : "asc game-center score-moderations list --leaderboard-id lb-new"
               },
               "gameCenterDetailId" : "gc-1",
               "id" : "lb-new",

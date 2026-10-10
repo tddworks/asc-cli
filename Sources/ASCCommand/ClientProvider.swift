@@ -189,6 +189,22 @@ struct ClientProvider {
         return try factory.makeWinBackOfferRepository(authProvider: authProvider)
     }
 
+    static func makeAssetLibraryRepository() throws -> any AssetLibraryRepository {
+        try ClientFactory().makeAssetLibraryRepository(authProvider: CompositeAuthProvider())
+    }
+
+    static func makeLibraryImageRepository() throws -> any LibraryImageRepository {
+        try ClientFactory().makeLibraryImageRepository(authProvider: CompositeAuthProvider())
+    }
+
+    static func makeLibraryVideoRepository() throws -> any LibraryVideoRepository {
+        try ClientFactory().makeLibraryVideoRepository(authProvider: CompositeAuthProvider())
+    }
+
+    static func makeAssetPlacementRepository() throws -> any AssetPlacementRepository {
+        try ClientFactory().makeAssetPlacementRepository(authProvider: CompositeAuthProvider())
+    }
+
     static func makeExperimentRepository() throws -> any ExperimentRepository {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
@@ -351,6 +367,12 @@ struct ClientProvider {
         return try factory.makeGameCenterRepository(authProvider: authProvider)
     }
 
+    static func makeGameCenterModerationRepository() throws -> any GameCenterModerationRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeGameCenterModerationRepository(authProvider: authProvider)
+    }
+
     static func makeAppClipRepository() throws -> any AppClipRepository {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
@@ -379,6 +401,12 @@ struct ClientProvider {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
         return try factory.makePerfMetricsRepository(authProvider: authProvider)
+    }
+
+    static func makePerfOverviewRepository() throws -> any PerfOverviewRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makePerfOverviewRepository(authProvider: authProvider)
     }
 
     static func makeDiagnosticsRepository() throws -> any DiagnosticsRepository {

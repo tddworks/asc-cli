@@ -6,7 +6,7 @@ Every `asc` command and flag, generated from the binary. For how to use a featur
 **Global flags** (accepted by every command, not repeated below):
 `--output json|table|markdown` (default `json`) · `--pretty` · `--timeout <30s|2m>`
 
-**Commands:** [apps](#asc-apps) · [init](#asc-init) · [versions](#asc-versions) · [version-localizations](#asc-version-localizations) · [screenshot-sets](#asc-screenshot-sets) · [screenshots](#asc-screenshots) · [app-infos](#asc-app-infos) · [app-info-localizations](#asc-app-info-localizations) · [builds](#asc-builds) · [testflight](#asc-testflight) · [auth](#asc-auth) · [version](#asc-version) · [tui](#asc-tui) · [bundle-ids](#asc-bundle-ids) · [certificates](#asc-certificates) · [devices](#asc-devices) · [profiles](#asc-profiles) · [app-preview-sets](#asc-app-preview-sets) · [app-previews](#asc-app-previews) · [iap](#asc-iap) · [iap-equalizations](#asc-iap-equalizations) · [iap-localizations](#asc-iap-localizations) · [iap-price-schedule](#asc-iap-price-schedule) · [subscription-groups](#asc-subscription-groups) · [subscriptions](#asc-subscriptions) · [subscription-localizations](#asc-subscription-localizations) · [subscription-group-localizations](#asc-subscription-group-localizations) · [subscription-price-schedule](#asc-subscription-price-schedule) · [subscription-equalizations](#asc-subscription-equalizations) · [subscription-offers](#asc-subscription-offers) · [subscription-promotional-offers](#asc-subscription-promotional-offers) · [win-back-offers](#asc-win-back-offers) · [promoted-purchases](#asc-promoted-purchases) · [experiments](#asc-experiments) · [experiment-treatments](#asc-experiment-treatments) · [experiment-treatment-localizations](#asc-experiment-treatment-localizations) · [iap-review-screenshot](#asc-iap-review-screenshot) · [iap-images](#asc-iap-images) · [subscription-review-screenshot](#asc-subscription-review-screenshot) · [subscription-images](#asc-subscription-images) · [subscription-offer-codes](#asc-subscription-offer-codes) · [subscription-offer-code-custom-codes](#asc-subscription-offer-code-custom-codes) · [subscription-offer-code-one-time-codes](#asc-subscription-offer-code-one-time-codes) · [iap-offer-codes](#asc-iap-offer-codes) · [iap-offer-code-custom-codes](#asc-iap-offer-code-custom-codes) · [iap-offer-code-one-time-codes](#asc-iap-offer-code-one-time-codes) · [app-shots](#asc-app-shots) · [age-rating](#asc-age-rating) · [app-categories](#asc-app-categories) · [version-review-detail](#asc-version-review-detail) · [plugins](#asc-plugins) · [skills](#asc-skills) · [app-wall](#asc-app-wall) · [users](#asc-users) · [user-invitations](#asc-user-invitations) · [xcode-cloud](#asc-xcode-cloud) · [game-center](#asc-game-center) · [app-clips](#asc-app-clips) · [app-clip-experiences](#asc-app-clip-experiences) · [app-clip-experience-localizations](#asc-app-clip-experience-localizations) · [sales-reports](#asc-sales-reports) · [finance-reports](#asc-finance-reports) · [analytics-reports](#asc-analytics-reports) · [reviews](#asc-reviews) · [review-responses](#asc-review-responses) · [perf-metrics](#asc-perf-metrics) · [diagnostics](#asc-diagnostics) · [diagnostic-logs](#asc-diagnostic-logs) · [beta-review](#asc-beta-review) · [beta-app-localizations](#asc-beta-app-localizations) · [review-submissions](#asc-review-submissions) · [app-availability](#asc-app-availability) · [iap-availability](#asc-iap-availability) · [subscription-availability](#asc-subscription-availability) · [territories](#asc-territories) · [web-server](#asc-web-server) · [iris](#asc-iris) · [simulators](#asc-simulators)
+**Commands:** [apps](#asc-apps) · [init](#asc-init) · [versions](#asc-versions) · [version-localizations](#asc-version-localizations) · [screenshot-sets](#asc-screenshot-sets) · [screenshots](#asc-screenshots) · [asset-library](#asc-asset-library) · [asset-placement-groups](#asc-asset-placement-groups) · [asset-images](#asc-asset-images) · [asset-videos](#asc-asset-videos) · [asset-placements](#asc-asset-placements) · [app-infos](#asc-app-infos) · [app-info-localizations](#asc-app-info-localizations) · [builds](#asc-builds) · [testflight](#asc-testflight) · [auth](#asc-auth) · [version](#asc-version) · [tui](#asc-tui) · [bundle-ids](#asc-bundle-ids) · [certificates](#asc-certificates) · [devices](#asc-devices) · [profiles](#asc-profiles) · [app-preview-sets](#asc-app-preview-sets) · [app-previews](#asc-app-previews) · [iap](#asc-iap) · [iap-equalizations](#asc-iap-equalizations) · [iap-localizations](#asc-iap-localizations) · [iap-price-schedule](#asc-iap-price-schedule) · [subscription-groups](#asc-subscription-groups) · [subscriptions](#asc-subscriptions) · [subscription-localizations](#asc-subscription-localizations) · [subscription-group-localizations](#asc-subscription-group-localizations) · [subscription-price-schedule](#asc-subscription-price-schedule) · [subscription-equalizations](#asc-subscription-equalizations) · [subscription-offers](#asc-subscription-offers) · [subscription-promotional-offers](#asc-subscription-promotional-offers) · [win-back-offers](#asc-win-back-offers) · [promoted-purchases](#asc-promoted-purchases) · [experiments](#asc-experiments) · [experiment-treatments](#asc-experiment-treatments) · [experiment-treatment-localizations](#asc-experiment-treatment-localizations) · [iap-review-screenshot](#asc-iap-review-screenshot) · [iap-images](#asc-iap-images) · [subscription-review-screenshot](#asc-subscription-review-screenshot) · [subscription-images](#asc-subscription-images) · [subscription-offer-codes](#asc-subscription-offer-codes) · [subscription-offer-code-custom-codes](#asc-subscription-offer-code-custom-codes) · [subscription-offer-code-one-time-codes](#asc-subscription-offer-code-one-time-codes) · [iap-offer-codes](#asc-iap-offer-codes) · [iap-offer-code-custom-codes](#asc-iap-offer-code-custom-codes) · [iap-offer-code-one-time-codes](#asc-iap-offer-code-one-time-codes) · [app-shots](#asc-app-shots) · [age-rating](#asc-age-rating) · [app-categories](#asc-app-categories) · [version-review-detail](#asc-version-review-detail) · [plugins](#asc-plugins) · [skills](#asc-skills) · [app-wall](#asc-app-wall) · [users](#asc-users) · [user-invitations](#asc-user-invitations) · [xcode-cloud](#asc-xcode-cloud) · [game-center](#asc-game-center) · [app-clips](#asc-app-clips) · [app-clip-experiences](#asc-app-clip-experiences) · [app-clip-experience-localizations](#asc-app-clip-experience-localizations) · [sales-reports](#asc-sales-reports) · [finance-reports](#asc-finance-reports) · [analytics-reports](#asc-analytics-reports) · [reviews](#asc-reviews) · [review-responses](#asc-review-responses) · [perf-metrics](#asc-perf-metrics) · [perf-overview](#asc-perf-overview) · [diagnostics](#asc-diagnostics) · [diagnostic-logs](#asc-diagnostic-logs) · [beta-review](#asc-beta-review) · [beta-app-localizations](#asc-beta-app-localizations) · [review-submissions](#asc-review-submissions) · [app-availability](#asc-app-availability) · [iap-availability](#asc-iap-availability) · [subscription-availability](#asc-subscription-availability) · [territories](#asc-territories) · [web-server](#asc-web-server) · [iris](#asc-iris) · [simulators](#asc-simulators)
 
 ## asc apps
 
@@ -215,7 +215,7 @@ asc version-localizations update --localization-id <localization-id> [--whats-ne
 
 ## asc screenshot-sets
 
-Manage App Store screenshot sets
+Manage App Store screenshot sets (deprecated by Apple — use asset-library)
 
 ### asc screenshot-sets list
 
@@ -244,7 +244,7 @@ asc screenshot-sets create --localization-id <localization-id> --display-type <d
 
 ## asc screenshots
 
-Manage App Store screenshots
+Manage App Store screenshots (deprecated by Apple — use asset-library)
 
 ### asc screenshots list
 
@@ -283,6 +283,229 @@ asc screenshots import --version-id <version-id> --from <from>
 |---|---|---|---|
 | `--version-id` | yes |  | App Store version ID |
 | `--from` | yes |  | Path to export.zip from the screenshot editor |
+
+## asc asset-library
+
+Read an app's asset library — upload images and videos once, then place them
+
+### asc asset-library get
+
+Get the app's asset library
+
+```
+asc asset-library get --app-id <app-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--app-id` | yes |  | App ID |
+
+## asc asset-placement-groups
+
+List placement groups (device families) and their sizes and limits from App Store Connect's reference data
+
+### asc asset-placement-groups list
+
+List placement groups, one row per placement type and group
+
+```
+asc asset-placement-groups list [--placement-type <placement-type>] [--feature <feature>]
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--placement-type` |  |  | Placement type, e.g. APP_SCREENSHOT, APP_PREVIEW One of: APP_SCREENSHOT, IMESSAGE_APP_SCREENSHOT, APP_PREVIEW, PRODUCT_PAGE_HEADER_ASSET, APP_STORE_SEARCH_RESULTS_ASSET, SEARCH_RESULTS_ADS_ASSET, TODAY_TAB_ADS_ASSET, EVENT_CARD_ASSET, EVENT_DETAILS_PAGE_ASSET, RETENTION_MESSAGE_ASSET. |
+| `--feature` |  |  | App Store feature whose limits to show, e.g. APP_STORE_VERSIONS, CUSTOM_PRODUCT_PAGES |
+
+## asc asset-images
+
+Manage images in an app's asset library
+
+### asc asset-images list
+
+List images in an asset library
+
+```
+asc asset-images list --library-id <library-id> [--image-id <image-id>] [--state <state>] [--category <category>]
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--library-id` | yes |  | Asset library ID |
+| `--image-id` |  |  | Show only this image |
+| `--state` |  |  | Filter by state, e.g. AWAITING_UPLOAD, PREPARE_FOR_SUBMISSION, APPROVED One of: AWAITING_UPLOAD, UPLOAD_COMPLETE, FAILED, COMPLETE, PREPARE_FOR_SUBMISSION, READY_FOR_REVIEW, WAITING_FOR_REVIEW, IN_REVIEW, ACCEPTED, APPROVED, REJECTED, ARCHIVED. |
+| `--category` |  |  | Filter by category: APP_SCREENSHOTS_AND_PREVIEWS or CREATIVE_ASSETS One of: APP_SCREENSHOTS_AND_PREVIEWS, CREATIVE_ASSETS. |
+
+### asc asset-images upload
+
+Upload an image into an asset library (reserve, upload, commit)
+
+```
+asc asset-images upload --library-id <library-id> --file <file> [--category <category>] [--reference-name <reference-name>] [--wait]
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--library-id` | yes |  | Asset library ID |
+| `--file` | yes |  | Path to the image file |
+| `--category` |  | `APP_SCREENSHOTS_AND_PREVIEWS` | APP_SCREENSHOTS_AND_PREVIEWS (default) or CREATIVE_ASSETS — can't be changed later One of: APP_SCREENSHOTS_AND_PREVIEWS, CREATIVE_ASSETS. |
+| `--reference-name` |  |  | A name to recognise the image by |
+| `--wait` |  |  | Wait until App Store Connect has processed the image |
+
+### asc asset-images update
+
+Rename an image, or archive it once approved
+
+```
+asc asset-images update --library-id <library-id> --image-id <image-id> [--reference-name <reference-name>] [--archived <archived>]
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--library-id` | yes |  | Asset library ID |
+| `--image-id` | yes |  | Image ID |
+| `--reference-name` |  |  | New reference name |
+| `--archived` |  |  | true to archive (approved images only) |
+
+### asc asset-images delete
+
+Delete an image from its asset library (delete its placements first)
+
+```
+asc asset-images delete --image-id <image-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--image-id` | yes |  | Image ID |
+
+## asc asset-videos
+
+Manage videos (app previews) in an app's asset library
+
+### asc asset-videos list
+
+List videos in an asset library
+
+```
+asc asset-videos list --library-id <library-id> [--video-id <video-id>] [--state <state>] [--category <category>]
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--library-id` | yes |  | Asset library ID |
+| `--video-id` |  |  | Show only this video |
+| `--state` |  |  | Filter by state, e.g. AWAITING_UPLOAD, PREPARE_FOR_SUBMISSION, APPROVED One of: AWAITING_UPLOAD, UPLOAD_COMPLETE, FAILED, COMPLETE, PREPARE_FOR_SUBMISSION, READY_FOR_REVIEW, WAITING_FOR_REVIEW, IN_REVIEW, ACCEPTED, APPROVED, REJECTED, ARCHIVED. |
+| `--category` |  |  | Filter by category: APP_SCREENSHOTS_AND_PREVIEWS or CREATIVE_ASSETS One of: APP_SCREENSHOTS_AND_PREVIEWS, CREATIVE_ASSETS. |
+
+### asc asset-videos upload
+
+Upload a video into an asset library (reserve, upload, commit)
+
+```
+asc asset-videos upload --library-id <library-id> --file <file> [--category <category>] [--reference-name <reference-name>] [--preview-frame-time-code <preview-frame-time-code>] [--wait]
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--library-id` | yes |  | Asset library ID |
+| `--file` | yes |  | Path to the video file |
+| `--category` |  | `APP_SCREENSHOTS_AND_PREVIEWS` | APP_SCREENSHOTS_AND_PREVIEWS (default) or CREATIVE_ASSETS — can't be changed later One of: APP_SCREENSHOTS_AND_PREVIEWS, CREATIVE_ASSETS. |
+| `--reference-name` |  |  | A name to recognise the video by |
+| `--preview-frame-time-code` |  |  | Frame that represents the video, HH:MM:SS:FF (e.g. 00:00:03:00) |
+| `--wait` |  |  | Wait until App Store Connect has processed the video |
+
+### asc asset-videos update
+
+Rename a video, or archive it once approved
+
+```
+asc asset-videos update --library-id <library-id> --video-id <video-id> [--reference-name <reference-name>] [--archived <archived>]
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--library-id` | yes |  | Asset library ID |
+| `--video-id` | yes |  | Video ID |
+| `--reference-name` |  |  | New reference name |
+| `--archived` |  |  | true to archive (approved videos only) |
+
+### asc asset-videos delete
+
+Delete a video from its asset library (delete its placements first)
+
+```
+asc asset-videos delete --video-id <video-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--video-id` | yes |  | Video ID |
+
+## asc asset-placements
+
+Place asset library images and videos on localizations, and order them
+
+### asc asset-placements list
+
+List the placements on a localization, or everywhere an image or video is placed
+
+```
+asc asset-placements list [--localization-id <localization-id>] [--treatment-localization-id <treatment-localization-id>] [--image-id <image-id>] [--video-id <video-id>] [--placement-type <placement-type>] [--placement-group <placement-group>]
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--localization-id` |  |  | App Store version localization ID |
+| `--treatment-localization-id` |  |  | Product page optimization treatment localization ID |
+| `--image-id` |  |  | Asset library image ID |
+| `--video-id` |  |  | Asset library video ID |
+| `--placement-type` |  |  | Only this placement type (with a localization) One of: APP_SCREENSHOT, IMESSAGE_APP_SCREENSHOT, APP_PREVIEW, PRODUCT_PAGE_HEADER_ASSET, APP_STORE_SEARCH_RESULTS_ASSET, SEARCH_RESULTS_ADS_ASSET, TODAY_TAB_ADS_ASSET, EVENT_CARD_ASSET, EVENT_DETAILS_PAGE_ASSET, RETENTION_MESSAGE_ASSET. |
+| `--placement-group` |  |  | Only this placement group (with a localization) |
+
+### asc asset-placements create
+
+Place a library image or video in one slot of a localization (its version must be editable)
+
+```
+asc asset-placements create --placement-type <placement-type> --placement-group <placement-group> [--localization-id <localization-id>] [--treatment-localization-id <treatment-localization-id>] [--image-id <image-id>] [--video-id <video-id>]
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--localization-id` |  |  | App Store version localization ID |
+| `--treatment-localization-id` |  |  | Product page optimization treatment localization ID |
+| `--image-id` |  |  | Asset library image ID |
+| `--video-id` |  |  | Asset library video ID |
+| `--placement-type` | yes |  | Placement type, e.g. APP_SCREENSHOT One of: APP_SCREENSHOT, IMESSAGE_APP_SCREENSHOT, APP_PREVIEW, PRODUCT_PAGE_HEADER_ASSET, APP_STORE_SEARCH_RESULTS_ASSET, SEARCH_RESULTS_ADS_ASSET, TODAY_TAB_ADS_ASSET, EVENT_CARD_ASSET, EVENT_DETAILS_PAGE_ASSET, RETENTION_MESSAGE_ASSET. |
+| `--placement-group` | yes |  | Placement group from `asc asset-placement-groups list`, e.g. IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE |
+
+### asc asset-placements delete
+
+Remove a placement (the asset stays in the library)
+
+```
+asc asset-placements delete --placement-id <placement-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--placement-id` | yes |  | Placement ID |
+
+### asc asset-placements reorder
+
+Set the display order of one placement group on a localization
+
+```
+asc asset-placements reorder --placement-group <placement-group> --placement-ids <placement-ids> [--localization-id <localization-id>] [--treatment-localization-id <treatment-localization-id>]
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--localization-id` |  |  | App Store version localization ID |
+| `--treatment-localization-id` |  |  | Product page optimization treatment localization ID |
+| `--placement-group` | yes |  | Placement group to order |
+| `--placement-ids` | yes |  | Placement IDs in display order, comma-separated |
 
 ## asc app-infos
 
@@ -897,7 +1120,7 @@ asc profiles delete --profile-id <profile-id>
 
 ## asc app-preview-sets
 
-Manage App Store app preview sets
+Manage App Store app preview sets (deprecated by Apple — use asset-library)
 
 ### asc app-preview-sets list
 
@@ -926,7 +1149,7 @@ asc app-preview-sets create --localization-id <localization-id> --preview-type <
 
 ## asc app-previews
 
-Manage App Store app preview videos
+Manage App Store app preview videos (deprecated by Apple — use asset-library)
 
 ### asc app-previews list
 
@@ -1272,10 +1495,10 @@ asc subscriptions create --group-id <group-id> --name <name> --product-id <produ
 
 ### asc subscriptions update
 
-Update a subscription (name, family sharable, group level, review note)
+Update a subscription (name, family sharable, group level, review note, multi-seat status, markets)
 
 ```
-asc subscriptions update --subscription-id <subscription-id> [--name <name>] [--family-sharable] [--not-family-sharable] [--group-level <group-level>] [--period <period>] [--review-note <review-note>]
+asc subscriptions update --subscription-id <subscription-id> [--name <name>] [--family-sharable] [--not-family-sharable] [--group-level <group-level>] [--period <period>] [--review-note <review-note>] [--multi-seat-status <multi-seat-status>] [--market-setting <market-setting> …]
 ```
 
 | Flag | Required | Default | Description |
@@ -1287,6 +1510,8 @@ asc subscriptions update --subscription-id <subscription-id> [--name <name>] [--
 | `--group-level` |  |  | Group level for upgrade/downgrade ordering |
 | `--period` |  |  | Billing period (ONE_WEEK, ONE_MONTH, TWO_MONTHS, THREE_MONTHS, SIX_MONTHS, ONE_YEAR) |
 | `--review-note` |  |  | App Review note |
+| `--multi-seat-status` |  |  | Whether the subscription supports multiple seats One of: ENABLED, DISABLED. |
+| `--market-setting` |  |  | Market to sell the subscription in (repeatable; replaces the current markets) One of: APP_STORE, APPLE_SCHOOL, APPLE_BUSINESS. |
 
 ### asc subscriptions delete
 
@@ -2671,7 +2896,7 @@ asc age-rating get --app-info-id <app-info-id>
 Update the age rating declaration
 
 ```
-asc age-rating update --declaration-id <declaration-id> [--advertising <advertising>] [--gambling <gambling>] [--health-or-wellness-topics <health-or-wellness-topics>] [--loot-box <loot-box>] [--messaging-and-chat <messaging-and-chat>] [--parental-controls <parental-controls>] [--age-assurance <age-assurance>] [--unrestricted-web-access <unrestricted-web-access>] [--user-generated-content <user-generated-content>] [--alcohol-tobacco-drugs <alcohol-tobacco-drugs>] [--contests <contests>] [--gambling-simulated <gambling-simulated>] [--guns-weapons <guns-weapons>] [--medical-treatment <medical-treatment>] [--profanity <profanity>] [--sexual-content-graphic <sexual-content-graphic>] [--sexual-content <sexual-content>] [--horror-fear <horror-fear>] [--mature-suggestive <mature-suggestive>] [--violence-cartoon <violence-cartoon>] [--violence-realistic-prolonged <violence-realistic-prolonged>] [--violence-realistic <violence-realistic>] [--kids-age-band <kids-age-band>] [--age-rating-override <age-rating-override>] [--korea-age-rating-override <korea-age-rating-override>]
+asc age-rating update --declaration-id <declaration-id> [--advertising <advertising>] [--gambling <gambling>] [--health-or-wellness-topics <health-or-wellness-topics>] [--loot-box <loot-box>] [--messaging-and-chat <messaging-and-chat>] [--parental-controls <parental-controls>] [--age-assurance <age-assurance>] [--unrestricted-web-access <unrestricted-web-access>] [--user-generated-content <user-generated-content>] [--alcohol-tobacco-drugs <alcohol-tobacco-drugs>] [--contests <contests>] [--gambling-simulated <gambling-simulated>] [--guns-weapons <guns-weapons>] [--medical-treatment <medical-treatment>] [--profanity <profanity>] [--sexual-content-graphic <sexual-content-graphic>] [--sexual-content <sexual-content>] [--horror-fear <horror-fear>] [--mature-suggestive <mature-suggestive>] [--violence-cartoon <violence-cartoon>] [--violence-realistic-prolonged <violence-realistic-prolonged>] [--violence-realistic <violence-realistic>] [--kids-age-band <kids-age-band>] [--age-rating-override <age-rating-override>] [--korea-age-rating-override <korea-age-rating-override>] [--grac-rating-classification-number <grac-rating-classification-number>]
 ```
 
 | Flag | Required | Default | Description |
@@ -2701,7 +2926,8 @@ asc age-rating update --declaration-id <declaration-id> [--advertising <advertis
 | `--violence-realistic` |  |  | Realistic violence intensity One of: NONE, INFREQUENT_OR_MILD, FREQUENT_OR_INTENSE, INFREQUENT, FREQUENT. |
 | `--kids-age-band` |  |  | Kids age band (FIVE_AND_UNDER/SIX_TO_EIGHT/NINE_TO_ELEVEN) One of: FIVE_AND_UNDER, SIX_TO_EIGHT, NINE_TO_ELEVEN. |
 | `--age-rating-override` |  |  | Age rating override (NONE/NINE_PLUS/THIRTEEN_PLUS/SIXTEEN_PLUS/EIGHTEEN_PLUS/UNRATED) One of: NONE, NINE_PLUS, THIRTEEN_PLUS, SIXTEEN_PLUS, EIGHTEEN_PLUS, UNRATED. |
-| `--korea-age-rating-override` |  |  | Korea age rating override (NONE/FIFTEEN_PLUS/NINETEEN_PLUS) One of: NONE, FIFTEEN_PLUS, NINETEEN_PLUS. |
+| `--korea-age-rating-override` |  |  | Korea age rating override (NONE/ALL/TWELVE_PLUS/FIFTEEN_PLUS/NINETEEN_PLUS) One of: NONE, ALL, TWELVE_PLUS, FIFTEEN_PLUS, NINETEEN_PLUS. |
+| `--grac-rating-classification-number` |  |  | Korea GRAC rating classification number |
 
 ## asc app-categories
 
@@ -3078,7 +3304,7 @@ asc xcode-cloud builds start --workflow-id <workflow-id> [--clean]
 
 ## asc game-center
 
-Manage Game Center achievements and leaderboards
+Manage Game Center achievements, leaderboards and score moderation
 
 ### asc game-center detail get
 
@@ -3172,6 +3398,79 @@ asc game-center leaderboards delete --leaderboard-id <leaderboard-id>
 | Flag | Required | Default | Description |
 |---|---|---|---|
 | `--leaderboard-id` | yes |  | Leaderboard ID |
+
+### asc game-center score-moderations list
+
+List scores submitted to a leaderboard
+
+```
+asc game-center score-moderations list --leaderboard-id <leaderboard-id> [--blocked-only]
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--leaderboard-id` | yes |  | Leaderboard ID |
+| `--blocked-only` |  |  | Only show blocked scores |
+
+### asc game-center score-moderations block
+
+Hide a score from the leaderboard
+
+```
+asc game-center score-moderations block --moderation-id <moderation-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--moderation-id` | yes |  | Score moderation ID |
+
+### asc game-center score-moderations unblock
+
+Show a previously blocked score on the leaderboard again
+
+```
+asc game-center score-moderations unblock --moderation-id <moderation-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--moderation-id` | yes |  | Score moderation ID |
+
+### asc game-center blocked-players list
+
+List blocked players for a Game Center detail
+
+```
+asc game-center blocked-players list --detail-id <detail-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--detail-id` | yes |  | Game Center detail ID |
+
+### asc game-center players block
+
+Hide all of a player's scores from the game's leaderboards
+
+```
+asc game-center players block --player-id <player-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--player-id` | yes |  | Game Center player ID |
+
+### asc game-center players unblock
+
+Let a blocked player's scores appear on the game's leaderboards again
+
+```
+asc game-center players unblock --player-id <player-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--player-id` | yes |  | Game Center player ID |
 
 ## asc app-clips
 
@@ -3492,6 +3791,23 @@ asc perf-metrics list [--app-id <app-id>] [--build-id <build-id>] [--metric-type
 | `--app-id` |  |  | App ID (mutually exclusive with --build-id) |
 | `--build-id` |  |  | Build ID (mutually exclusive with --app-id) |
 | `--metric-type` |  |  | Filter by metric type: HANG, LAUNCH, MEMORY, DISK, BATTERY, TERMINATION, ANIMATION, STORAGE |
+
+## asc perf-overview
+
+See an app's Xcode Organizer overview: regressions, metrics vs goals, top hotspots
+
+### asc perf-overview get
+
+Get what regressed in the latest version, each metric against Apple's goal, and the top hang/launch/disk-write hotspots
+
+```
+asc perf-overview get --app-id <app-id> [--device-type <device-type>]
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--app-id` | yes |  | App ID |
+| `--device-type` |  |  | Narrow the overview to one device type (as App Store Connect names it) |
 
 ## asc diagnostics
 

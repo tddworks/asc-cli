@@ -1260,4 +1260,319 @@ struct RESTRoutesTests {
         #expect(output.contains("\"_links\""))
         #expect(output.contains("/api/v1/apps/app-42/availability"))
     }
+
+    // MARK: - Performance overview
+
+    @Test func `should link the performance overview to itself, app metrics and builds over REST`() async throws {
+        let repo = MockPerfOverviewRepository()
+        given(repo).getOverview(appId: .any, deviceType: .any).willReturn(
+            PerformanceOverview(appId: "1234567890")
+        )
+
+        let output = try await PerfOverviewGet.parse(["--app-id", "1234567890"])
+            .execute(repo: repo, affordanceMode: .rest).replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(output.contains("\"_links\""))
+        #expect(output.contains("/api/v1/apps/1234567890/perf-overview"))
+        #expect(output.contains("/api/v1/apps/1234567890/perf-metrics"))
+        #expect(output.contains("/api/v1/apps/1234567890/builds"))
+    }
+
+    // MARK: - Game Center
+
+    @Test func `should link a game's detail, achievements, leaderboards and blocked players over REST`() async throws {
+        let mockRepo = MockGameCenterRepository()
+        given(mockRepo).getDetail(appId: .any)
+            .willReturn(GameCenterDetail(id: "gc-1", appId: "app-1", isArcadeEnabled: false))
+
+        let output = try await GameCenterDetailGet.parse(["--app-id", "app-1", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+
+        #expect(output.replacingOccurrences(of: "\\/", with: "/") == """
+        {
+          "data" : [
+            {
+              "_links" : {
+                "getDetail" : {
+                  "href" : "/api/v1/apps/app-1/game-center",
+                  "method" : "GET"
+                },
+                "listAchievements" : {
+                  "href" : "/api/v1/game-center/details/gc-1/achievements",
+                  "method" : "GET"
+                },
+                "listBlockedPlayers" : {
+                  "href" : "/api/v1/game-center/details/gc-1/blocked-players",
+                  "method" : "GET"
+                },
+                "listLeaderboards" : {
+                  "href" : "/api/v1/game-center/details/gc-1/leaderboards",
+                  "method" : "GET"
+                }
+              },
+              "appId" : "app-1",
+              "id" : "gc-1",
+              "isArcadeEnabled" : false
+            }
+          ]
+        }
+        """)
+    }
+
+    @Test func `should link a leaderboard's siblings, delete and score moderation over REST`() async throws {
+        let mockRepo = MockGameCenterRepository()
+        given(mockRepo).listLeaderboards(gameCenterDetailId: .any).willReturn([
+            GameCenterLeaderboard(id: "lb-1", gameCenterDetailId: "gc-1", referenceName: "All Time High",
+                                  vendorIdentifier: "all_time_high", scoreSortType: .desc,
+                                  submissionType: .bestScore, isArchived: false),
+        ])
+
+        let output = try await GameCenterLeaderboardsList.parse(["--detail-id", "gc-1", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+
+        #expect(output.replacingOccurrences(of: "\\/", with: "/") == """
+        {
+          "data" : [
+            {
+              "_links" : {
+                "delete" : {
+                  "href" : "/api/v1/game-center/leaderboards/lb-1",
+                  "method" : "DELETE"
+                },
+                "listLeaderboards" : {
+                  "href" : "/api/v1/game-center/details/gc-1/leaderboards",
+                  "method" : "GET"
+                },
+                "listScoreModerations" : {
+                  "href" : "/api/v1/game-center/leaderboards/lb-1/score-moderations",
+                  "method" : "GET"
+                }
+              },
+              "gameCenterDetailId" : "gc-1",
+              "id" : "lb-1",
+              "isArchived" : false,
+              "referenceName" : "All Time High",
+              "scoreSortType" : "DESC",
+              "submissionType" : "BEST_SCORE",
+              "vendorIdentifier" : "all_time_high"
+            }
+          ]
+        }
+        """)
+    }
+
+    @Test func `should link block, block player and the score list for a visible score over REST`() async throws {
+        let mockRepo = MockGameCenterModerationRepository()
+        given(mockRepo).listScoreModerations(leaderboardId: .any, blockedOnly: .any).willReturn([
+            GameCenterScoreModeration(id: "mod-1", leaderboardId: "lb-1", rank: "1", score: "9999",
+                                      submittedDate: nil, isBlocked: false, isPreReleased: false, context: nil,
+                                      challengeIds: ["ch-1"], playerId: "player-1", playerNickname: nil,
+                                      isPlayerBlocked: false),
+        ])
+
+        let output = try await GameCenterScoreModerationsList.parse(["--leaderboard-id", "lb-1", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+
+        #expect(output.replacingOccurrences(of: "\\/", with: "/") == """
+        {
+          "data" : [
+            {
+              "_links" : {
+                "block" : {
+                  "href" : "/api/v1/game-center/score-moderations/mod-1/block",
+                  "method" : "POST"
+                },
+                "blockPlayer" : {
+                  "href" : "/api/v1/game-center/players/player-1/block",
+                  "method" : "POST"
+                },
+                "listScoreModerations" : {
+                  "href" : "/api/v1/game-center/leaderboards/lb-1/score-moderations",
+                  "method" : "GET"
+                }
+              },
+              "challengeIds" : [
+                "ch-1"
+              ],
+              "id" : "mod-1",
+              "isBlocked" : false,
+              "isPlayerBlocked" : false,
+              "isPreReleased" : false,
+              "leaderboardId" : "lb-1",
+              "playerId" : "player-1",
+              "rank" : "1",
+              "score" : "9999"
+            }
+          ]
+        }
+        """)
+    }
+
+    @Test func `should link unblock for a blocked score over REST`() async throws {
+        let mockRepo = MockGameCenterModerationRepository()
+        given(mockRepo).updateScoreModeration(id: .any, isBlocked: .any).willReturn(
+            GameCenterScoreModeration(id: "mod-1", leaderboardId: nil, rank: nil, score: nil,
+                                      submittedDate: nil, isBlocked: true, isPreReleased: false, context: nil,
+                                      challengeIds: ["ch-1"], playerId: nil, playerNickname: nil,
+                                      isPlayerBlocked: nil)
+        )
+
+        let output = try await GameCenterScoreModerationsBlock.parse(["--moderation-id", "mod-1", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+
+        #expect(output.replacingOccurrences(of: "\\/", with: "/") == """
+        {
+          "data" : [
+            {
+              "_links" : {
+                "unblock" : {
+                  "href" : "/api/v1/game-center/score-moderations/mod-1/unblock",
+                  "method" : "POST"
+                }
+              },
+              "challengeIds" : [
+                "ch-1"
+              ],
+              "id" : "mod-1",
+              "isBlocked" : true,
+              "isPreReleased" : false
+            }
+          ]
+        }
+        """)
+    }
+
+    @Test func `should link unblock and the blocked list for a blocked player over REST`() async throws {
+        let mockRepo = MockGameCenterModerationRepository()
+        given(mockRepo).listBlockedPlayers(gameCenterDetailId: .any).willReturn([
+            GameCenterPlayer(id: "player-1", gameCenterDetailId: "gc-1", nickname: nil, bundleId: nil, isBlocked: true),
+        ])
+
+        let output = try await GameCenterBlockedPlayersList.parse(["--detail-id", "gc-1", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+
+        #expect(output.replacingOccurrences(of: "\\/", with: "/") == """
+        {
+          "data" : [
+            {
+              "_links" : {
+                "listBlockedPlayers" : {
+                  "href" : "/api/v1/game-center/details/gc-1/blocked-players",
+                  "method" : "GET"
+                },
+                "unblock" : {
+                  "href" : "/api/v1/game-center/players/player-1/unblock",
+                  "method" : "POST"
+                }
+              },
+              "gameCenterDetailId" : "gc-1",
+              "id" : "player-1",
+              "isBlocked" : true
+            }
+          ]
+        }
+        """)
+    }
+
+    @Test func `should link block for an unblocked player over REST`() async throws {
+        let mockRepo = MockGameCenterModerationRepository()
+        given(mockRepo).updatePlayer(id: .any, isBlocked: .any).willReturn(
+            GameCenterPlayer(id: "player-1", gameCenterDetailId: nil, nickname: nil, bundleId: nil, isBlocked: false)
+        )
+
+        let output = try await GameCenterPlayersUnblock.parse(["--player-id", "player-1", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+
+        #expect(output.replacingOccurrences(of: "\\/", with: "/") == """
+        {
+          "data" : [
+            {
+              "_links" : {
+                "block" : {
+                  "href" : "/api/v1/game-center/players/player-1/block",
+                  "method" : "POST"
+                }
+              },
+              "id" : "player-1",
+              "isBlocked" : false
+            }
+          ]
+        }
+        """)
+    }
+
+    // MARK: - App Asset Library
+
+    @Test func `should link the asset library to its images, videos, upload and placement groups over REST`() async throws {
+        let repo = MockAssetLibraryRepository()
+        given(repo).getAssetLibrary(appId: .any).willReturn(AppAssetLibrary(id: "lib-1", appId: "app-1"))
+
+        let output = try await AssetLibraryGet.parse(["--app-id", "app-1"])
+            .execute(repo: repo, affordanceMode: .rest).replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(output == #"{"data":[{"_links":{"listImages":{"href":"/api/v1/asset-library/lib-1/images","method":"GET"},"listPlacementGroups":{"href":"/api/v1/asset-placement-groups","method":"GET"},"listVideos":{"href":"/api/v1/asset-library/lib-1/videos","method":"GET"},"uploadImage":{"href":"/api/v1/asset-library/lib-1/images","method":"POST"}},"appId":"app-1","id":"lib-1"}]}"#)
+    }
+
+    @Test func `should link a library image to its placements and deletion over REST`() async throws {
+        let repo = MockLibraryImageRepository()
+        given(repo).listImages(libraryId: .any, imageId: .any, state: .any, category: .any).willReturn([
+            LibraryImage(id: "img-1", libraryId: "lib-1", fileName: "home.png", fileSize: 1, category: .appScreenshotsAndPreviews, state: .inReview),
+        ])
+
+        let output = try await AssetImagesList.parse(["--library-id", "lib-1"])
+            .execute(repo: repo, affordanceMode: .rest).replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(output == #"{"data":[{"_links":{"listImages":{"href":"/api/v1/asset-library/lib-1/images","method":"GET"},"listPlacements":{"href":"/api/v1/asset-images/img-1/placements","method":"GET"},"place":{"href":"/api/v1/version-localizations/<localization-id>/placements","method":"POST"}},"category":"APP_SCREENSHOTS_AND_PREVIEWS","fileName":"home.png","fileSize":1,"id":"img-1","libraryId":"lib-1","state":"IN_REVIEW"}]}"#)
+    }
+
+    @Test func `should link a placement to deletion and reordering its group over REST`() async throws {
+        let repo = MockAssetPlacementRepository()
+        given(repo).listPlacements(surface: .any, localizationId: .any, placementType: .any, placementGroup: .any).willReturn([
+            AssetPlacement(id: "pl-1", surface: .appStoreVersionLocalization, localizationId: "loc-1", mediaType: .image,
+                           assetId: "img-1", placementType: .appScreenshot, placementGroup: "IPHONE_67", position: 1, state: .parentPrepareForSubmission),
+        ])
+
+        let output = try await AssetPlacementsList.parse(["--localization-id", "loc-1"])
+            .execute(repo: repo, affordanceMode: .rest).replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(output == #"{"data":[{"_links":{"delete":{"href":"/api/v1/asset-placements/pl-1","method":"DELETE"},"listAssetPlacements":{"href":"/api/v1/asset-images/img-1/placements","method":"GET"},"listPlacements":{"href":"/api/v1/version-localizations/loc-1/placements","method":"GET"},"reorderGroup":{"href":"/api/v1/version-localizations/loc-1/placements/reorder","method":"POST"}},"assetId":"img-1","id":"pl-1","localizationId":"loc-1","mediaType":"IMAGE","placementGroup":"IPHONE_67","placementType":"APP_SCREENSHOT","position":1,"state":"PARENT_PREPARE_FOR_SUBMISSION","surface":"APP_STORE_VERSION_LOCALIZATION"}]}"#)
+    }
+
+    @Test func `should link a version localization to its asset placements over REST`() async throws {
+        let repo = MockVersionLocalizationRepository()
+        given(repo).listLocalizations(versionId: .any).willReturn([
+            AppStoreVersionLocalization(id: "loc-1", versionId: "v-1", locale: "en-US"),
+        ])
+
+        let output = try await VersionLocalizationsList.parse(["--version-id", "v-1"])
+            .execute(repo: repo, affordanceMode: .rest).replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(output.contains(#""listPlacements":{"href":"/api/v1/version-localizations/loc-1/placements","method":"GET"}"#))
+    }
+
+    @Test func `should link a library video to its placements, archiving and deletion over REST`() async throws {
+        let repo = MockLibraryVideoRepository()
+        given(repo).listVideos(libraryId: .any, videoId: .any, state: .any, category: .any).willReturn([
+            LibraryVideo(id: "vid-1", libraryId: "lib-1", fileName: "p.mp4", fileSize: 1, category: .appScreenshotsAndPreviews, state: .approved),
+        ])
+
+        let output = try await AssetVideosList.parse(["--library-id", "lib-1"])
+            .execute(repo: repo, affordanceMode: .rest).replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(output == #"{"data":[{"_links":{"archive":{"href":"/api/v1/asset-videos/vid-1","method":"PATCH"},"delete":{"href":"/api/v1/asset-videos/vid-1","method":"DELETE"},"listPlacements":{"href":"/api/v1/asset-videos/vid-1/placements","method":"GET"},"listVideos":{"href":"/api/v1/asset-library/lib-1/videos","method":"GET"},"place":{"href":"/api/v1/version-localizations/<localization-id>/placements","method":"POST"}},"category":"APP_SCREENSHOTS_AND_PREVIEWS","fileName":"p.mp4","fileSize":1,"id":"vid-1","libraryId":"lib-1","state":"APPROVED"}]}"#)
+    }
+
+    @Test func `should link a treatment localization's placements to reordering under the treatment localization over REST`() async throws {
+        let repo = MockAssetPlacementRepository()
+        given(repo).listPlacements(surface: .any, localizationId: .any, placementType: .any, placementGroup: .any).willReturn([
+            AssetPlacement(id: "pl-1", surface: .experimentTreatmentLocalization, localizationId: "tl-1", mediaType: .image,
+                           assetId: "img-1", placementType: .appScreenshot, placementGroup: "IPHONE_67", position: 1, state: .parentPrepareForSubmission),
+        ])
+
+        let output = try await AssetPlacementsList.parse(["--treatment-localization-id", "tl-1"])
+            .execute(repo: repo, affordanceMode: .rest).replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(output.contains(#""listPlacements":{"href":"/api/v1/experiment-treatment-localizations/tl-1/placements","method":"GET"}"#))
+        #expect(output.contains(#""reorderGroup":{"href":"/api/v1/experiment-treatment-localizations/tl-1/placements/reorder","method":"POST"}"#))
+    }
 }

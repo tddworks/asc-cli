@@ -59,7 +59,7 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
         logUploadStep("iap-review-screenshot reserved id=\(screenshotId) chunks=\(uploadOps.count)")
 
         // Step 2: Upload chunks
-        try await uploadChunks(uploadOps: uploadOps, fileData: fileData)
+        try await UploadOperationsExecutor().upload(fileURL: fileURL, operations: uploadOps)
         logUploadStep("iap-review-screenshot chunks uploaded id=\(screenshotId)")
 
         // Step 3: Commit with MD5
@@ -111,7 +111,7 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
         let uploadOps = reserved.data.attributes?.uploadOperations ?? []
         logUploadStep("iap-image reserved id=\(imageId) chunks=\(uploadOps.count)")
 
-        try await uploadChunks(uploadOps: uploadOps, fileData: fileData)
+        try await UploadOperationsExecutor().upload(fileURL: fileURL, operations: uploadOps)
         logUploadStep("iap-image chunks uploaded id=\(imageId)")
 
         let md5 = fileData.md5HexString
@@ -192,38 +192,6 @@ public struct SDKInAppPurchaseReviewRepository: InAppPurchaseReviewRepository, @
 
     private func logUploadStep(_ message: String) {
         FileHandle.standardError.write(Data("[asc-upload] \(message)\n".utf8))
-    }
-
-    /// Mirrors `AppStoreConnectInAppPurchaseRepository.uploadChunks` in `AppStoreSdk-SPM`:
-    /// slice via subscript, guard `method` (skip op if nil), set headers verbatim
-    /// (forwarding `header.value` even when nil), assign body AFTER headers, and throw
-    /// on non-2xx so a chunk failure surfaces instead of leaking a partial file to ASC.
-    private func uploadChunks(uploadOps: [UploadOperation], fileData: Data) async throws {
-        for operation in uploadOps {
-            guard let urlString = operation.url,
-                  let url = URL(string: urlString),
-                  let method = operation.method,
-                  let offset = operation.offset,
-                  let length = operation.length
-            else { continue }
-
-            let chunk = fileData[offset..<(offset + length)]
-            var request = URLRequest(url: url)
-            request.httpMethod = method
-            for header in (operation.requestHeaders ?? []) {
-                if let name = header.name {
-                    request.setValue(header.value, forHTTPHeaderField: name)
-                }
-            }
-            request.httpBody = chunk
-
-            let (_, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse,
-                  200..<300 ~= httpResponse.statusCode
-            else {
-                throw APIError.unknown("Image upload chunk failed")
-            }
-        }
     }
 
     private func mapReviewScreenshot(

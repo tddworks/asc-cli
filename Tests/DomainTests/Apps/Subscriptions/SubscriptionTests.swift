@@ -278,4 +278,45 @@ struct SubscriptionTests {
         #expect(group.affordances["listVersions"] == "asc subscription-groups versions list --group-id grp-1")
         #expect(group.apiLinks["listVersions"]?.href == "/api/v1/subscription-groups/grp-1/versions")
     }
+
+    // MARK: - Multi-seat status and market settings (read-side)
+
+    @Test func `should spell multi-seat status exactly as App Store Connect does`() {
+        #expect(SubscriptionMultiSeatStatus.enabled.rawValue == "ENABLED")
+        #expect(SubscriptionMultiSeatStatus.disabled.rawValue == "DISABLED")
+    }
+
+    @Test func `should spell market settings exactly as App Store Connect does`() {
+        #expect(SubscriptionMarketSetting.appStore.rawValue == "APP_STORE")
+        #expect(SubscriptionMarketSetting.appleSchool.rawValue == "APPLE_SCHOOL")
+        #expect(SubscriptionMarketSetting.appleBusiness.rawValue == "APPLE_BUSINESS")
+    }
+
+    @Test func `should show multi-seat status and markets in JSON when App Store Connect sends them`() throws {
+        let sub = MockRepositoryFactory.makeSubscription(
+            multiSeatStatus: .enabled,
+            marketSettings: [.appStore, .appleBusiness]
+        )
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        let json = String(decoding: try encoder.encode(sub), as: UTF8.self)
+        #expect(json == #"{"groupId":"grp-1","id":"sub-1","isFamilySharable":false,"marketSettings":["APP_STORE","APPLE_BUSINESS"],"multiSeatStatus":"ENABLED","name":"Monthly Premium","productId":"com.app.monthly","state":"MISSING_METADATA","subscriptionPeriod":"ONE_MONTH"}"#)
+    }
+
+    @Test func `should omit multi-seat status and markets from JSON when App Store Connect does not send them`() throws {
+        let sub = MockRepositoryFactory.makeSubscription()
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        let json = String(decoding: try encoder.encode(sub), as: UTF8.self)
+        #expect(json == #"{"groupId":"grp-1","id":"sub-1","isFamilySharable":false,"name":"Monthly Premium","productId":"com.app.monthly","state":"MISSING_METADATA","subscriptionPeriod":"ONE_MONTH"}"#)
+    }
+
+    @Test func `should keep multi-seat status and markets when read back from JSON`() throws {
+        let sub = MockRepositoryFactory.makeSubscription(
+            multiSeatStatus: .disabled,
+            marketSettings: [.appleSchool]
+        )
+        let decoded = try JSONDecoder().decode(Subscription.self, from: try JSONEncoder().encode(sub))
+        #expect(decoded == sub)
+    }
 }

@@ -4,7 +4,7 @@ import Domain
 struct ScreenshotSetsCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "screenshot-sets",
-        abstract: "Manage App Store screenshot sets",
+        abstract: "Manage App Store screenshot sets (deprecated by Apple — use asset-library)",
         subcommands: [ScreenshotSetsList.self, ScreenshotSetsCreate.self]
     )
 }

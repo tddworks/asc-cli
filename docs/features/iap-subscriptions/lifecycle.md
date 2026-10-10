@@ -23,7 +23,7 @@ Symmetric `update` / `delete` / `unsubmit` across in-app-purchase and subscripti
 
 | Command | Required flags | Optional flags |
 |---------|----------------|----------------|
-| `asc subscriptions update --subscription-id <id>` | `--subscription-id` | `--name <n>`, `--family-sharable`, `--not-family-sharable`, `--group-level <n>`, `--review-note <note>` |
+| `asc subscriptions update --subscription-id <id>` | `--subscription-id` | `--name <n>`, `--family-sharable`, `--not-family-sharable`, `--group-level <n>`, `--review-note <note>`, `--multi-seat-status <status>`, `--market-setting <market>` (repeatable) |
 | `asc subscriptions delete --subscription-id <id>` | `--subscription-id` | |
 | `asc subscriptions unsubmit --submission-id <id>` | `--submission-id` | |
 

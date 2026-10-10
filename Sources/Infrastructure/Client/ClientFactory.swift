@@ -176,6 +176,26 @@ public struct ClientFactory: Sendable {
         return SDKWinBackOfferRepository(client: provider)
     }
 
+    public func makeAssetLibraryRepository(authProvider: any AuthProvider) throws -> any AssetLibraryRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKAssetLibraryRepository(client: provider)
+    }
+
+    public func makeLibraryImageRepository(authProvider: any AuthProvider) throws -> any LibraryImageRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKLibraryImageRepository(client: provider)
+    }
+
+    public func makeLibraryVideoRepository(authProvider: any AuthProvider) throws -> any LibraryVideoRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKLibraryVideoRepository(client: provider)
+    }
+
+    public func makeAssetPlacementRepository(authProvider: any AuthProvider) throws -> any AssetPlacementRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKAssetPlacementRepository(client: provider)
+    }
+
     public func makeExperimentRepository(authProvider: any AuthProvider) throws -> any ExperimentRepository {
         let provider = try makeProvider(authProvider: authProvider)
         return SDKExperimentRepository(client: provider)
@@ -236,6 +256,11 @@ public struct ClientFactory: Sendable {
         return SDKGameCenterRepository(client: provider)
     }
 
+    public func makeGameCenterModerationRepository(authProvider: any AuthProvider) throws -> any GameCenterModerationRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKGameCenterModerationRepository(client: provider)
+    }
+
     public func makeAppClipRepository(authProvider: any AuthProvider) throws -> any AppClipRepository {
         let provider = try makeProvider(authProvider: authProvider)
         return SDKAppClipRepository(client: provider)
@@ -259,6 +284,11 @@ public struct ClientFactory: Sendable {
     public func makePerfMetricsRepository(authProvider: any AuthProvider) throws -> any PerfMetricsRepository {
         let provider = try makeProvider(authProvider: authProvider)
         return SDKPerfMetricsRepository(client: provider)
+    }
+
+    public func makePerfOverviewRepository(authProvider: any AuthProvider) throws -> any PerfOverviewRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKPerfOverviewRepository(client: provider)
     }
 
     public func makeDiagnosticsRepository(authProvider: any AuthProvider) throws -> any DiagnosticsRepository {
