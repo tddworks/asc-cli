@@ -37,11 +37,24 @@ public struct GameCenterLeaderboard: Sendable, Equatable, Identifiable, Codable 
     }
 }
 
+extension GameCenterLeaderboard: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Reference Name", "Vendor ID", "Sort", "Submission"]
+    }
+    public var tableRow: [String] {
+        [id, referenceName, vendorIdentifier, scoreSortType.rawValue, submissionType.rawValue]
+    }
+}
+
 extension GameCenterLeaderboard: AffordanceProviding {
-    public var affordances: [String: String] {
+    public var structuredAffordances: [Affordance] {
         [
-            "listLeaderboards": "asc game-center leaderboards list --detail-id \(gameCenterDetailId)",
-            "delete": "asc game-center leaderboards delete --leaderboard-id \(id)",
+            Affordance(key: "listLeaderboards", command: "game-center leaderboards", action: "list",
+                       params: ["detail-id": gameCenterDetailId]),
+            Affordance(key: "delete", command: "game-center leaderboards", action: "delete",
+                       params: ["leaderboard-id": id]),
+            Affordance(key: "listScoreModerations", command: "game-center score-moderations", action: "list",
+                       params: ["leaderboard-id": id]),
         ]
     }
 }

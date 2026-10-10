@@ -236,6 +236,11 @@ public struct ClientFactory: Sendable {
         return SDKGameCenterRepository(client: provider)
     }
 
+    public func makeGameCenterModerationRepository(authProvider: any AuthProvider) throws -> any GameCenterModerationRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKGameCenterModerationRepository(client: provider)
+    }
+
     public func makeAppClipRepository(authProvider: any AuthProvider) throws -> any AppClipRepository {
         let provider = try makeProvider(authProvider: authProvider)
         return SDKAppClipRepository(client: provider)

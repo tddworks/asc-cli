@@ -25,7 +25,7 @@ New here? Start with the [README](../README.md). For every flag, see the [comman
 | [code-signing](features/code-signing/README.md) | Manage bundle IDs, signing certificates, test devices and provisioning profiles. Use when setting up code signing for CI/CD or cleaning up expired certificates. |
 | [command-center-react](features/command-center-react/README.md) | Design notes for the React + Vite + TypeScript rewrite of the Command Center web UI. Use when working on apps/asc-web/command-center or writing a plugin page for it. |
 | [customer-reviews](features/customer-reviews/README.md) | List and read App Store customer reviews, and create or delete developer responses. Use when triaging ratings or replying to reviewers. |
-| [game-center](features/game-center/README.md) | Get an app's Game Center configuration and list, create or delete its achievements and leaderboards. Use when setting up Game Center for a game. |
+| [game-center](features/game-center/README.md) | Get an app's Game Center setup, manage achievements and leaderboards, and block cheating scores or players. Use when setting up or moderating Game Center for a game. |
 | [iap-subscription-availability](features/iap-subscription-availability/README.md) | Set and inspect which territories an app, in-app purchase or subscription is sold in. Use when setting up availability for a new app or product, or finding out why a territory is blocked. |
 | [iap-subscriptions](features/iap-subscriptions/README.md) | Manage in-app purchases and auto-renewable subscriptions end to end, from creation and pricing to offer codes, offers, review assets and submission. Use when setting up or changing anything a user can buy inside an app. |
 | [init](features/init/README.md) | Save the current project's app ID, name, bundle ID and review contact to .asc/project.json. Use when setting up a repo so agents and scripts know which app to work on without listing apps every session. |
@@ -52,4 +52,4 @@ New here? Start with the [README](../README.md). For every flag, see the [comman
 | [web-server-architecture](features/web-server-architecture/README.md) | How asc web-server bridges the browser UI and the CLI, loads plugins and serves HTTPS. Use when running the local server for asccli.app or building a server plugin. |
 | [xcode-cloud](features/xcode-cloud/README.md) | List Xcode Cloud products, workflows and build runs, and start CI builds. Use when triggering or checking an Xcode Cloud build from the terminal or an agent. |
 
-**Guides:** [Release workflow](release.md) · [Use as a Swift package](library.md) · [Design: CAEOAS and architecture](design.md) · [How these docs are organised](documentation-design/README.md)
+**Guides:** [Release workflow](release.md) · [Use as a Swift package](library.md) · [Homebrew distribution](homebrew.md) · [Design: CAEOAS and architecture](design.md) · [How these docs are organised](documentation-design/README.md)

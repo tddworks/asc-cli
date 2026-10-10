@@ -31,6 +31,25 @@ struct GameCenterDetailTests {
         #expect(detail.affordances["listLeaderboards"] == "asc game-center leaderboards list --detail-id gc-1")
     }
 
+    @Test func `should point to the players blocked from its leaderboards`() {
+        let detail = MockRepositoryFactory.makeGameCenterDetail(id: "gc-1", appId: "app-1")
+        #expect(detail.affordances["listBlockedPlayers"] == "asc game-center blocked-players list --detail-id gc-1")
+    }
+
+    @Test func `should link its detail, achievements, leaderboards and blocked players over REST`() {
+        let detail = MockRepositoryFactory.makeGameCenterDetail(id: "gc-1", appId: "app-1")
+        #expect(detail.apiLinks["getDetail"] == APILink(href: "/api/v1/apps/app-1/game-center", method: "GET"))
+        #expect(detail.apiLinks["listAchievements"] == APILink(href: "/api/v1/game-center/details/gc-1/achievements", method: "GET"))
+        #expect(detail.apiLinks["listLeaderboards"] == APILink(href: "/api/v1/game-center/details/gc-1/leaderboards", method: "GET"))
+        #expect(detail.apiLinks["listBlockedPlayers"] == APILink(href: "/api/v1/game-center/details/gc-1/blocked-players", method: "GET"))
+    }
+
+    @Test func `should show id, app id and arcade status in a table`() {
+        let detail = MockRepositoryFactory.makeGameCenterDetail(id: "gc-1", appId: "app-1", isArcadeEnabled: false)
+        #expect(GameCenterDetail.tableHeaders == ["ID", "App ID", "Arcade Enabled"])
+        #expect(detail.tableRow == ["gc-1", "app-1", "no"])
+    }
+
     @Test func `detail equatable two equal instances`() {
         let a = GameCenterDetail(id: "gc-1", appId: "app-1", isArcadeEnabled: false)
         let b = GameCenterDetail(id: "gc-1", appId: "app-1", isArcadeEnabled: false)
@@ -152,9 +171,30 @@ struct GameCenterLeaderboardTests {
         #expect(lb.affordances["delete"] == "asc game-center leaderboards delete --leaderboard-id lb-1")
     }
 
-    @Test func `leaderboard affordances have exactly two keys`() {
+    @Test func `should offer list, delete and score moderation for a leaderboard`() {
         let lb = MockRepositoryFactory.makeGameCenterLeaderboard(id: "lb-1", gameCenterDetailId: "gc-1")
-        #expect(lb.affordances.count == 2)
+        #expect(lb.affordances.count == 3)
+    }
+
+    @Test func `should point to the scores submitted to the leaderboard`() {
+        let lb = MockRepositoryFactory.makeGameCenterLeaderboard(id: "lb-1", gameCenterDetailId: "gc-1")
+        #expect(lb.affordances["listScoreModerations"] == "asc game-center score-moderations list --leaderboard-id lb-1")
+    }
+
+    @Test func `should link its siblings, delete and scores over REST`() {
+        let lb = MockRepositoryFactory.makeGameCenterLeaderboard(id: "lb-1", gameCenterDetailId: "gc-1")
+        #expect(lb.apiLinks["listLeaderboards"] == APILink(href: "/api/v1/game-center/details/gc-1/leaderboards", method: "GET"))
+        #expect(lb.apiLinks["delete"] == APILink(href: "/api/v1/game-center/leaderboards/lb-1", method: "DELETE"))
+        #expect(lb.apiLinks["listScoreModerations"] == APILink(href: "/api/v1/game-center/leaderboards/lb-1/score-moderations", method: "GET"))
+    }
+
+    @Test func `should show reference name, vendor id, sort and submission type in a table`() {
+        let lb = MockRepositoryFactory.makeGameCenterLeaderboard(
+            id: "lb-1", referenceName: "All Time High", vendorIdentifier: "all_time_high",
+            scoreSortType: .desc, submissionType: .bestScore
+        )
+        #expect(GameCenterLeaderboard.tableHeaders == ["ID", "Reference Name", "Vendor ID", "Sort", "Submission"])
+        #expect(lb.tableRow == ["lb-1", "All Time High", "all_time_high", "DESC", "BEST_SCORE"])
     }
 
     @Test func `leaderboard equatable two equal instances`() {

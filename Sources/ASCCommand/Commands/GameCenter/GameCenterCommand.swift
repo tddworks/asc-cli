@@ -6,11 +6,14 @@ import Domain
 struct GameCenterCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "game-center",
-        abstract: "Manage Game Center achievements and leaderboards",
+        abstract: "Manage Game Center achievements, leaderboards and score moderation",
         subcommands: [
             GameCenterDetailCommand.self,
             GameCenterAchievementsCommand.self,
             GameCenterLeaderboardsCommand.self,
+            GameCenterScoreModerationsCommand.self,
+            GameCenterBlockedPlayersCommand.self,
+            GameCenterPlayersCommand.self,
         ]
     )
 }
@@ -41,14 +44,10 @@ struct GameCenterDetailGet: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any GameCenterRepository) async throws -> String {
+    func execute(repo: any GameCenterRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let detail = try await repo.getDetail(appId: appId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            [detail],
-            headers: ["ID", "App ID", "Arcade Enabled"],
-            rowMapper: { [$0.id, $0.appId, $0.isArcadeEnabled ? "yes" : "no"] }
-        )
+        return try formatter.formatAgentItems([detail], affordanceMode: affordanceMode)
     }
 }
 
@@ -193,14 +192,10 @@ struct GameCenterLeaderboardsList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any GameCenterRepository) async throws -> String {
+    func execute(repo: any GameCenterRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let items = try await repo.listLeaderboards(gameCenterDetailId: detailId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            items,
-            headers: ["ID", "Reference Name", "Vendor ID", "Sort", "Submission"],
-            rowMapper: { [$0.id, $0.referenceName, $0.vendorIdentifier, $0.scoreSortType.rawValue, $0.submissionType.rawValue] }
-        )
+        return try formatter.formatAgentItems(items, affordanceMode: affordanceMode)
     }
 }
 

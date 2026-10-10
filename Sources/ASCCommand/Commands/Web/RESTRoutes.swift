@@ -87,6 +87,10 @@ enum RESTRoutes {
         if let experimentRepo = try? factory.makeExperimentRepository(authProvider: auth) {
             ExperimentsController(repo: experimentRepo).addRoutes(to: v1)
         }
+        if let gameCenterRepo = try? factory.makeGameCenterRepository(authProvider: auth),
+           let moderationRepo = try? factory.makeGameCenterModerationRepository(authProvider: auth) {
+            GameCenterController(repo: gameCenterRepo, moderationRepo: moderationRepo).addRoutes(to: v1)
+        }
         if let groupLocRepo = try? factory.makeSubscriptionGroupLocalizationRepository(authProvider: auth) {
             SubscriptionGroupLocalizationsController(repo: groupLocRepo).addRoutes(to: v1)
         }

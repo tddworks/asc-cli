@@ -351,6 +351,12 @@ struct ClientProvider {
         return try factory.makeGameCenterRepository(authProvider: authProvider)
     }
 
+    static func makeGameCenterModerationRepository() throws -> any GameCenterModerationRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makeGameCenterModerationRepository(authProvider: authProvider)
+    }
+
     static func makeAppClipRepository() throws -> any AppClipRepository {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()

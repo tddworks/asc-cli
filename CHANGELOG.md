@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `asc perf-overview get --app-id <id>` shows in one call what regressed in the latest version, each Xcode Organizer metric next to Apple's goal, and the top hang, launch and disk-write hotspots. Also over REST. → [docs](docs/features/performance/README.md)
 - `asc subscriptions list` shows whether a subscription supports multiple seats and its markets (App Store, Apple School, Apple Business). Change them with `asc subscriptions update --multi-seat-status` and `--market-setting`, or over REST. → [docs](docs/features/iap-subscriptions/README.md)
+- `asc game-center score-moderations list|block|unblock`, `blocked-players list` and `players block|unblock` let you hide cheating leaderboard scores and block players. Game Center is now also reachable over REST. → [docs](docs/features/game-center/README.md)
 
 ### Fixed
 - `asc age-rating` now shows and sets the Korea overrides `ALL` and `TWELVE_PLUS`. Before, an app rated with either one showed no Korea override at all. → [docs](docs/features/age-rating/README.md)
