@@ -103,6 +103,7 @@ asc asset-images delete --image-id img-1                                       #
 | `asc screenshots upload --set-id …` per localization | `asc asset-images upload` once, then `asset-placements create` per localization |
 | `asc app-previews upload --set-id …` | `asc asset-videos upload` + `asset-placements create --video-id … --placement-type APP_PREVIEW` |
 | set order on upload | `asc asset-placements reorder` per group |
+| `asc screenshots import --from export.zip` | `asc screenshots import --from export.zip --to-library` — upload, place and order in one go → [screenshot-editor](../screenshot-editor/README.md) |
 
 Migrate against a version in `PREPARE_FOR_SUBMISSION`, then verify with `asset-placements list --localization-id`. An interrupted migration leaves unplaced assets in the library; resume by creating the missing placements instead of re-uploading.
 

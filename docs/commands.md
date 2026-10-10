@@ -276,13 +276,17 @@ asc screenshots upload --set-id <set-id> --file <file>
 Import screenshots from an exported ZIP file
 
 ```
-asc screenshots import --version-id <version-id> --from <from>
+asc screenshots import --version-id <version-id> --from <from> [--to-library] [--existing <existing>] [--placement-group <placement-group> …] [--dry-run]
 ```
 
 | Flag | Required | Default | Description |
 |---|---|---|---|
 | `--version-id` | yes |  | App Store version ID |
 | `--from` | yes |  | Path to export.zip from the screenshot editor |
+| `--to-library` |  |  | Upload into the app's asset library and place on each localization (instead of deprecated screenshot sets) |
+| `--existing` |  |  | With --to-library: what to do with screenshots already in a group — fail (default), replace or append. One of: fail, replace, append. |
+| `--placement-group` |  |  | With --to-library: the placement group for sizes that fit several (repeatable) |
+| `--dry-run` |  |  | With --to-library: show the plan without uploading or changing anything |
 
 ## asc asset-library
 
