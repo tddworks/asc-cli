@@ -106,4 +106,68 @@ struct SubscriptionsListTests {
         #expect(output.contains("Monthly"))
         #expect(output.contains("1 Month"))
     }
+
+    @Test func `should show multi-seat status and markets when App Store Connect sends them`() async throws {
+        let mockRepo = MockSubscriptionRepository()
+        given(mockRepo).listSubscriptions(groupId: .any, limit: .any)
+            .willReturn(PaginatedResponse(data: [
+                Subscription(
+                    id: "sub-1",
+                    groupId: "grp-1",
+                    name: "Team Plan",
+                    productId: "com.example.team",
+                    subscriptionPeriod: .oneYear,
+                    isFamilySharable: false,
+                    state: .approved,
+                    multiSeatStatus: .enabled,
+                    marketSettings: [.appStore, .appleBusiness]
+                )
+            ], nextCursor: nil))
+
+        let cmd = try SubscriptionsList.parse(["--group-id", "grp-1", "--pretty"])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "createIntroductoryOffer" : "asc subscription-offers create --duration ONE_MONTH --mode FREE_TRIAL --periods 1 --subscription-id sub-1",
+                "createLocalization" : "asc subscription-localizations create --locale en-US --name <name> --subscription-id sub-1",
+                "createOfferCode" : "asc subscription-offer-codes create --duration <ONE_MONTH|THREE_MONTHS|SIX_MONTHS|ONE_YEAR> --eligibility <NEW|LAPSED|WIN_BACK|PAID_SUBSCRIBER> --mode <FREE_TRIAL|PAY_AS_YOU_GO|PAY_UP_FRONT> --name <name> --offer-eligibility <STACKABLE|INTRODUCTORY|SUBSCRIPTION_OFFER> --periods <n> --subscription-id sub-1",
+                "createPromotionalOffer" : "asc subscription-promotional-offers create --duration ONE_MONTH --mode PAY_AS_YOU_GO --name <name> --offer-code <code> --periods 1 --subscription-id sub-1",
+                "delete" : "asc subscriptions delete --subscription-id sub-1",
+                "getAvailability" : "asc subscription-availability get --subscription-id sub-1",
+                "getPriceSchedule" : "asc subscription-price-schedule get --subscription-id sub-1",
+                "getReviewScreenshot" : "asc subscription-review-screenshot get --subscription-id sub-1",
+                "listImages" : "asc subscription-images list --subscription-id sub-1",
+                "listIntroductoryOffers" : "asc subscription-offers list --subscription-id sub-1",
+                "listLocalizations" : "asc subscription-localizations list --subscription-id sub-1",
+                "listOfferCodes" : "asc subscription-offer-codes list --subscription-id sub-1",
+                "listPricePoints" : "asc subscriptions price-points list --subscription-id sub-1",
+                "listPromotionalOffers" : "asc subscription-promotional-offers list --subscription-id sub-1",
+                "listVersions" : "asc subscriptions versions list --subscription-id sub-1",
+                "listWinBackOffers" : "asc win-back-offers list --subscription-id sub-1",
+                "setPrices" : "asc subscriptions prices set-batch --price <territory>=<price-point-id> --subscription-id sub-1",
+                "update" : "asc subscriptions update --name <name> --subscription-id sub-1",
+                "uploadImage" : "asc subscription-images upload --file <path> --subscription-id sub-1",
+                "uploadReviewScreenshot" : "asc subscription-review-screenshot upload --file <path> --subscription-id sub-1"
+              },
+              "groupId" : "grp-1",
+              "id" : "sub-1",
+              "isFamilySharable" : false,
+              "marketSettings" : [
+                "APP_STORE",
+                "APPLE_BUSINESS"
+              ],
+              "multiSeatStatus" : "ENABLED",
+              "name" : "Team Plan",
+              "productId" : "com.example.team",
+              "state" : "APPROVED",
+              "subscriptionPeriod" : "ONE_YEAR"
+            }
+          ]
+        }
+        """)
+    }
 }

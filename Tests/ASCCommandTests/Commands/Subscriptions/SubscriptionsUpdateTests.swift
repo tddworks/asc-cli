@@ -9,7 +9,8 @@ struct SubscriptionsUpdateTests {
     @Test func `updates subscription name and review note and returns updated record`() async throws {
         let mockRepo = MockSubscriptionRepository()
         given(mockRepo).updateSubscription(
-            subscriptionId: .any, name: .any, isFamilySharable: .any, groupLevel: .any, subscriptionPeriod: .any, reviewNote: .any
+            subscriptionId: .any, name: .any, isFamilySharable: .any, groupLevel: .any, subscriptionPeriod: .any, reviewNote: .any,
+            multiSeatStatus: .any, marketSettings: .any
         ).willReturn(Subscription(
             id: "sub-1", groupId: "", name: "Renamed",
             productId: "com.app.monthly", subscriptionPeriod: .oneMonth,
@@ -29,14 +30,17 @@ struct SubscriptionsUpdateTests {
             isFamilySharable: .value(nil),
             groupLevel: .value(nil),
             subscriptionPeriod: .value(nil),
-            reviewNote: .value("For app review")
+            reviewNote: .value("For app review"),
+            multiSeatStatus: .value(nil),
+            marketSettings: .value(nil)
         ).called(1)
     }
 
     @Test func `family-sharable flag passes true to repo`() async throws {
         let mockRepo = MockSubscriptionRepository()
         given(mockRepo).updateSubscription(
-            subscriptionId: .any, name: .any, isFamilySharable: .any, groupLevel: .any, subscriptionPeriod: .any, reviewNote: .any
+            subscriptionId: .any, name: .any, isFamilySharable: .any, groupLevel: .any, subscriptionPeriod: .any, reviewNote: .any,
+            multiSeatStatus: .any, marketSettings: .any
         ).willReturn(Subscription(
             id: "sub-1", groupId: "", name: "X", productId: "com.x", subscriptionPeriod: .oneMonth,
             isFamilySharable: true, state: .missingMetadata
@@ -48,14 +52,16 @@ struct SubscriptionsUpdateTests {
         verify(mockRepo).updateSubscription(
             subscriptionId: .value("sub-1"), name: .value(nil),
             isFamilySharable: .value(true), groupLevel: .value(nil),
-            subscriptionPeriod: .value(nil), reviewNote: .value(nil)
+            subscriptionPeriod: .value(nil), reviewNote: .value(nil),
+            multiSeatStatus: .value(nil), marketSettings: .value(nil)
         ).called(1)
     }
 
     @Test func `group-level passes through to repo`() async throws {
         let mockRepo = MockSubscriptionRepository()
         given(mockRepo).updateSubscription(
-            subscriptionId: .any, name: .any, isFamilySharable: .any, groupLevel: .any, subscriptionPeriod: .any, reviewNote: .any
+            subscriptionId: .any, name: .any, isFamilySharable: .any, groupLevel: .any, subscriptionPeriod: .any, reviewNote: .any,
+            multiSeatStatus: .any, marketSettings: .any
         ).willReturn(Subscription(
             id: "sub-1", groupId: "", name: "X", productId: "com.x", subscriptionPeriod: .oneMonth,
             isFamilySharable: false, state: .missingMetadata, groupLevel: 3
@@ -67,14 +73,16 @@ struct SubscriptionsUpdateTests {
         verify(mockRepo).updateSubscription(
             subscriptionId: .value("sub-1"), name: .value(nil),
             isFamilySharable: .value(nil), groupLevel: .value(3),
-            subscriptionPeriod: .value(nil), reviewNote: .value(nil)
+            subscriptionPeriod: .value(nil), reviewNote: .value(nil),
+            multiSeatStatus: .value(nil), marketSettings: .value(nil)
         ).called(1)
     }
 
     @Test func `period passes through to repo`() async throws {
         let mockRepo = MockSubscriptionRepository()
         given(mockRepo).updateSubscription(
-            subscriptionId: .any, name: .any, isFamilySharable: .any, groupLevel: .any, subscriptionPeriod: .any, reviewNote: .any
+            subscriptionId: .any, name: .any, isFamilySharable: .any, groupLevel: .any, subscriptionPeriod: .any, reviewNote: .any,
+            multiSeatStatus: .any, marketSettings: .any
         ).willReturn(Subscription(
             id: "sub-1", groupId: "", name: "X", productId: "com.x", subscriptionPeriod: .oneYear,
             isFamilySharable: false, state: .missingMetadata
@@ -86,7 +94,75 @@ struct SubscriptionsUpdateTests {
         verify(mockRepo).updateSubscription(
             subscriptionId: .value("sub-1"), name: .value(nil),
             isFamilySharable: .value(nil), groupLevel: .value(nil),
-            subscriptionPeriod: .value(.oneYear), reviewNote: .value(nil)
+            subscriptionPeriod: .value(.oneYear), reviewNote: .value(nil),
+            multiSeatStatus: .value(nil), marketSettings: .value(nil)
         ).called(1)
+    }
+
+    @Test func `should show the multi-seat status and markets App Store Connect saved when updating`() async throws {
+        let mockRepo = MockSubscriptionRepository()
+        given(mockRepo).updateSubscription(
+            subscriptionId: .any, name: .any, isFamilySharable: .any, groupLevel: .any, subscriptionPeriod: .any, reviewNote: .any,
+            multiSeatStatus: .any, marketSettings: .any
+        ).willProduce { id, _, _, _, _, _, multiSeatStatus, marketSettings in
+            Subscription(
+                id: id, groupId: "", name: "Team Plan",
+                productId: "com.example.team", subscriptionPeriod: .oneYear,
+                isFamilySharable: false, state: .missingMetadata,
+                multiSeatStatus: multiSeatStatus, marketSettings: marketSettings
+            )
+        }
+
+        let cmd = try SubscriptionsUpdate.parse([
+            "--subscription-id", "sub-1",
+            "--multi-seat-status", "ENABLED",
+            "--market-setting", "APPLE_SCHOOL",
+            "--market-setting", "APP_STORE",
+            "--pretty",
+        ])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "createIntroductoryOffer" : "asc subscription-offers create --duration ONE_MONTH --mode FREE_TRIAL --periods 1 --subscription-id sub-1",
+                "createLocalization" : "asc subscription-localizations create --locale en-US --name <name> --subscription-id sub-1",
+                "createOfferCode" : "asc subscription-offer-codes create --duration <ONE_MONTH|THREE_MONTHS|SIX_MONTHS|ONE_YEAR> --eligibility <NEW|LAPSED|WIN_BACK|PAID_SUBSCRIBER> --mode <FREE_TRIAL|PAY_AS_YOU_GO|PAY_UP_FRONT> --name <name> --offer-eligibility <STACKABLE|INTRODUCTORY|SUBSCRIPTION_OFFER> --periods <n> --subscription-id sub-1",
+                "createPromotionalOffer" : "asc subscription-promotional-offers create --duration ONE_MONTH --mode PAY_AS_YOU_GO --name <name> --offer-code <code> --periods 1 --subscription-id sub-1",
+                "delete" : "asc subscriptions delete --subscription-id sub-1",
+                "getAvailability" : "asc subscription-availability get --subscription-id sub-1",
+                "getPriceSchedule" : "asc subscription-price-schedule get --subscription-id sub-1",
+                "getReviewScreenshot" : "asc subscription-review-screenshot get --subscription-id sub-1",
+                "listImages" : "asc subscription-images list --subscription-id sub-1",
+                "listIntroductoryOffers" : "asc subscription-offers list --subscription-id sub-1",
+                "listLocalizations" : "asc subscription-localizations list --subscription-id sub-1",
+                "listOfferCodes" : "asc subscription-offer-codes list --subscription-id sub-1",
+                "listPricePoints" : "asc subscriptions price-points list --subscription-id sub-1",
+                "listPromotionalOffers" : "asc subscription-promotional-offers list --subscription-id sub-1",
+                "listVersions" : "asc subscriptions versions list --subscription-id sub-1",
+                "listWinBackOffers" : "asc win-back-offers list --subscription-id sub-1",
+                "setPrices" : "asc subscriptions prices set-batch --price <territory>=<price-point-id> --subscription-id sub-1",
+                "update" : "asc subscriptions update --name <name> --subscription-id sub-1",
+                "uploadImage" : "asc subscription-images upload --file <path> --subscription-id sub-1",
+                "uploadReviewScreenshot" : "asc subscription-review-screenshot upload --file <path> --subscription-id sub-1"
+              },
+              "groupId" : "",
+              "id" : "sub-1",
+              "isFamilySharable" : false,
+              "marketSettings" : [
+                "APPLE_SCHOOL",
+                "APP_STORE"
+              ],
+              "multiSeatStatus" : "ENABLED",
+              "name" : "Team Plan",
+              "productId" : "com.example.team",
+              "state" : "MISSING_METADATA",
+              "subscriptionPeriod" : "ONE_YEAR"
+            }
+          ]
+        }
+        """)
     }
 }

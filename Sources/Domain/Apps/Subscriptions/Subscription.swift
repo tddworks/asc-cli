@@ -9,6 +9,10 @@ public struct Subscription: Sendable, Equatable, Identifiable {
     public let state: SubscriptionState
     public let groupLevel: Int?
     public let reviewNote: String?
+    /// Whether the subscription can be shared across multiple seats — nil when App Store Connect omits it.
+    public let multiSeatStatus: SubscriptionMultiSeatStatus?
+    /// Markets the subscription is offered in — nil when App Store Connect omits it.
+    public let marketSettings: [SubscriptionMarketSetting]?
 
     public init(
         id: String,
@@ -19,7 +23,9 @@ public struct Subscription: Sendable, Equatable, Identifiable {
         isFamilySharable: Bool = false,
         state: SubscriptionState,
         groupLevel: Int? = nil,
-        reviewNote: String? = nil
+        reviewNote: String? = nil,
+        multiSeatStatus: SubscriptionMultiSeatStatus? = nil,
+        marketSettings: [SubscriptionMarketSetting]? = nil
     ) {
         self.id = id
         self.groupId = groupId
@@ -30,7 +36,20 @@ public struct Subscription: Sendable, Equatable, Identifiable {
         self.state = state
         self.groupLevel = groupLevel
         self.reviewNote = reviewNote
+        self.multiSeatStatus = multiSeatStatus
+        self.marketSettings = marketSettings
     }
+}
+
+public enum SubscriptionMultiSeatStatus: String, Sendable, Codable, Equatable, CaseIterable {
+    case enabled = "ENABLED"
+    case disabled = "DISABLED"
+}
+
+public enum SubscriptionMarketSetting: String, Sendable, Codable, Equatable, CaseIterable {
+    case appStore = "APP_STORE"
+    case appleSchool = "APPLE_SCHOOL"
+    case appleBusiness = "APPLE_BUSINESS"
 }
 
 public enum SubscriptionPeriod: String, Sendable, Codable, Equatable {
@@ -75,7 +94,7 @@ public enum SubscriptionState: String, Sendable, Codable, Equatable {
 
 extension Subscription: Codable {
     enum CodingKeys: String, CodingKey {
-        case id, groupId, name, productId, subscriptionPeriod, isFamilySharable, state, groupLevel, reviewNote
+        case id, groupId, name, productId, subscriptionPeriod, isFamilySharable, state, groupLevel, reviewNote, multiSeatStatus, marketSettings
     }
 
     public init(from decoder: any Decoder) throws {
@@ -89,6 +108,8 @@ extension Subscription: Codable {
         state = try c.decode(SubscriptionState.self, forKey: .state)
         groupLevel = try c.decodeIfPresent(Int.self, forKey: .groupLevel)
         reviewNote = try c.decodeIfPresent(String.self, forKey: .reviewNote)
+        multiSeatStatus = try c.decodeIfPresent(SubscriptionMultiSeatStatus.self, forKey: .multiSeatStatus)
+        marketSettings = try c.decodeIfPresent([SubscriptionMarketSetting].self, forKey: .marketSettings)
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -102,6 +123,8 @@ extension Subscription: Codable {
         try c.encode(state, forKey: .state)
         try c.encodeIfPresent(groupLevel, forKey: .groupLevel)
         try c.encodeIfPresent(reviewNote, forKey: .reviewNote)
+        try c.encodeIfPresent(multiSeatStatus, forKey: .multiSeatStatus)
+        try c.encodeIfPresent(marketSettings, forKey: .marketSettings)
     }
 }
 

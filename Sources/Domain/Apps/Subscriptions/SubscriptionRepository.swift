@@ -17,7 +17,9 @@ public protocol SubscriptionRepository: Sendable {
         isFamilySharable: Bool?,
         groupLevel: Int?,
         subscriptionPeriod: SubscriptionPeriod?,
-        reviewNote: String?
+        reviewNote: String?,
+        multiSeatStatus: SubscriptionMultiSeatStatus?,
+        marketSettings: [SubscriptionMarketSetting]?
     ) async throws -> Subscription
     func deleteSubscription(subscriptionId: String) async throws
 }

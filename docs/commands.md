@@ -1272,10 +1272,10 @@ asc subscriptions create --group-id <group-id> --name <name> --product-id <produ
 
 ### asc subscriptions update
 
-Update a subscription (name, family sharable, group level, review note)
+Update a subscription (name, family sharable, group level, review note, multi-seat status, markets)
 
 ```
-asc subscriptions update --subscription-id <subscription-id> [--name <name>] [--family-sharable] [--not-family-sharable] [--group-level <group-level>] [--period <period>] [--review-note <review-note>]
+asc subscriptions update --subscription-id <subscription-id> [--name <name>] [--family-sharable] [--not-family-sharable] [--group-level <group-level>] [--period <period>] [--review-note <review-note>] [--multi-seat-status <multi-seat-status>] [--market-setting <market-setting> …]
 ```
 
 | Flag | Required | Default | Description |
@@ -1287,6 +1287,8 @@ asc subscriptions update --subscription-id <subscription-id> [--name <name>] [--
 | `--group-level` |  |  | Group level for upgrade/downgrade ordering |
 | `--period` |  |  | Billing period (ONE_WEEK, ONE_MONTH, TWO_MONTHS, THREE_MONTHS, SIX_MONTHS, ONE_YEAR) |
 | `--review-note` |  |  | App Review note |
+| `--multi-seat-status` |  |  | Whether the subscription supports multiple seats One of: ENABLED, DISABLED. |
+| `--market-setting` |  |  | Market to sell the subscription in (repeatable; replaces the current markets) One of: APP_STORE, APPLE_SCHOOL, APPLE_BUSINESS. |
 
 ### asc subscriptions delete
 

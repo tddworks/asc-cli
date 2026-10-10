@@ -6,7 +6,7 @@ description: Manage in-app purchases and auto-renewable subscriptions end to end
 
 In-app purchases (consumable, non-consumable, non-renewing subscriptions) and auto-renewable subscriptions: lifecycle, pricing, offer codes, promotional and win-back offers, and review assets. Every flag: [iap](../../commands.md#asc-iap), [subscription-groups](../../commands.md#asc-subscription-groups), [subscriptions](../../commands.md#asc-subscriptions).
 
-Most list/read commands and many writes are also served by `asc web-server` (subscription create/update/delete and intro-offer create are CLI-only). Affordances in the JSON output are state-aware: they only suggest the next legal action.
+Most list/read commands and many writes are also served by `asc web-server` (subscription create/delete and intro-offer create are CLI-only). Affordances in the JSON output are state-aware: they only suggest the next legal action.
 
 ## Quick start
 ```bash
@@ -57,6 +57,8 @@ Affordances hide themselves when the action wouldn't succeed:
 - A review screenshot still awaiting upload offers only `upload`, not `delete`.
 - A subscription price point without a territory has no `setPrice`.
 - Inactive custom codes and one-time-use codes have no `deactivate`.
+
+Subscriptions show `multiSeatStatus` (`ENABLED`/`DISABLED`) and `marketSettings` (`APP_STORE`, `APPLE_SCHOOL`, `APPLE_BUSINESS`) only when App Store Connect sends them. Set them with `asc subscriptions update --multi-seat-status ENABLED --market-setting APP_STORE --market-setting APPLE_SCHOOL` or `PATCH /api/v1/subscriptions/:id` with `{"multiSeatStatus":"ENABLED","marketSetting":["APP_STORE"]}`. The markets you pass replace the current list. `create` can't set them: App Store Connect only accepts them on update.
 
 ## See also
 [promoted-purchases](../promoted-purchases/README.md) · [iap-subscription-availability](../iap-subscription-availability/README.md) · [submit-with-products](../submit-with-products/README.md)

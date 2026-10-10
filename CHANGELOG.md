@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - appstoreconnect-swift-sdk updated to 4.5.1 (App Store Connect API 4.5 and 4.5.1).
 - asc is now licensed under Apache 2.0 instead of MIT. It stays free and open source, and the license now also grants patent rights. → [LICENSE](LICENSE)
 
+### Added
+- `asc subscriptions list` shows whether a subscription supports multiple seats and its markets (App Store, Apple School, Apple Business). Change them with `asc subscriptions update --multi-seat-status` and `--market-setting`, or over REST. → [docs](docs/features/iap-subscriptions/README.md)
+
 ### Fixed
 - `asc age-rating` now shows and sets the Korea overrides `ALL` and `TWELVE_PLUS`. Before, an app rated with either one showed no Korea override at all. → [docs](docs/features/age-rating/README.md)
 

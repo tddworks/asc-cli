@@ -616,7 +616,9 @@ struct MockRepositoryFactory {
         isFamilySharable: Bool = false,
         state: SubscriptionState = .missingMetadata,
         groupLevel: Int? = nil,
-        reviewNote: String? = nil
+        reviewNote: String? = nil,
+        multiSeatStatus: SubscriptionMultiSeatStatus? = nil,
+        marketSettings: [SubscriptionMarketSetting]? = nil
     ) -> Subscription {
         Subscription(
             id: id,
@@ -627,7 +629,9 @@ struct MockRepositoryFactory {
             isFamilySharable: isFamilySharable,
             state: state,
             groupLevel: groupLevel,
-            reviewNote: reviewNote
+            reviewNote: reviewNote,
+            multiSeatStatus: multiSeatStatus,
+            marketSettings: marketSettings
         )
     }
 
