@@ -87,6 +87,7 @@ extension AppStoreVersionLocalization: AffordanceProviding {
             Affordance(key: "listScreenshotSets", command: "screenshot-sets", action: "list", params: ["localization-id": id]),
             Affordance(key: "listLocalizations", command: "version-localizations", action: "list", params: ["version-id": versionId]),
             Affordance(key: "updateLocalization", command: "version-localizations", action: "update", params: ["localization-id": id]),
+            Affordance(key: "listPlacements", command: "asset-placements", action: "list", params: ["localization-id": id]),
         ]
     }
 }

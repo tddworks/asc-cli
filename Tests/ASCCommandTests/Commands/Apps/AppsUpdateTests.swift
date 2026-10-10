@@ -25,6 +25,7 @@ struct AppsUpdateTests {
             {
               "affordances" : {
                 "createVersion" : "asc versions create --app-id app-9",
+                "getAssetLibrary" : "asc asset-library get --app-id app-9",
                 "listAppInfos" : "asc app-infos list --app-id app-9",
                 "listExperiments" : "asc experiments list --app-id app-9",
                 "listPricePoints" : "asc apps price-points list --app-id app-9 --territory USA",

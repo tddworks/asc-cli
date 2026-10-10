@@ -1260,4 +1260,53 @@ struct RESTRoutesTests {
         #expect(output.contains("\"_links\""))
         #expect(output.contains("/api/v1/apps/app-42/availability"))
     }
+
+    // MARK: - App Asset Library
+
+    @Test func `should link the asset library to its images, upload and placement groups over REST`() async throws {
+        let repo = MockAssetLibraryRepository()
+        given(repo).getAssetLibrary(appId: .any).willReturn(AppAssetLibrary(id: "lib-1", appId: "app-1"))
+
+        let output = try await AssetLibraryGet.parse(["--app-id", "app-1"])
+            .execute(repo: repo, affordanceMode: .rest).replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(output == #"{"data":[{"_links":{"listImages":{"href":"/api/v1/asset-library/lib-1/images","method":"GET"},"listPlacementGroups":{"href":"/api/v1/asset-placement-groups","method":"GET"},"uploadImage":{"href":"/api/v1/asset-library/lib-1/images","method":"POST"}},"appId":"app-1","id":"lib-1"}]}"#)
+    }
+
+    @Test func `should link a library image to its placements and deletion over REST`() async throws {
+        let repo = MockLibraryImageRepository()
+        given(repo).listImages(libraryId: .any, imageId: .any, state: .any, category: .any).willReturn([
+            LibraryImage(id: "img-1", libraryId: "lib-1", fileName: "home.png", fileSize: 1, category: .appScreenshotsAndPreviews, state: .inReview),
+        ])
+
+        let output = try await AssetImagesList.parse(["--library-id", "lib-1"])
+            .execute(repo: repo, affordanceMode: .rest).replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(output == #"{"data":[{"_links":{"listImages":{"href":"/api/v1/asset-library/lib-1/images","method":"GET"},"listPlacements":{"href":"/api/v1/asset-images/img-1/placements","method":"GET"},"place":{"href":"/api/v1/version-localizations/<localization-id>/placements","method":"POST"}},"category":"APP_SCREENSHOTS_AND_PREVIEWS","fileName":"home.png","fileSize":1,"id":"img-1","libraryId":"lib-1","state":"IN_REVIEW"}]}"#)
+    }
+
+    @Test func `should link a placement to deletion and reordering its group over REST`() async throws {
+        let repo = MockAssetPlacementRepository()
+        given(repo).listPlacements(surface: .any, localizationId: .any, placementType: .any, placementGroup: .any).willReturn([
+            AssetPlacement(id: "pl-1", surface: .appStoreVersionLocalization, localizationId: "loc-1", mediaType: .image,
+                           assetId: "img-1", placementType: .appScreenshot, placementGroup: "IPHONE_67", position: 1, state: .parentPrepareForSubmission),
+        ])
+
+        let output = try await AssetPlacementsList.parse(["--localization-id", "loc-1"])
+            .execute(repo: repo, affordanceMode: .rest).replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(output == #"{"data":[{"_links":{"delete":{"href":"/api/v1/asset-placements/pl-1","method":"DELETE"},"listAssetPlacements":{"href":"/api/v1/asset-images/img-1/placements","method":"GET"},"listPlacements":{"href":"/api/v1/version-localizations/loc-1/placements","method":"GET"},"reorderGroup":{"href":"/api/v1/version-localizations/loc-1/placements/reorder","method":"POST"}},"assetId":"img-1","id":"pl-1","localizationId":"loc-1","mediaType":"IMAGE","placementGroup":"IPHONE_67","placementType":"APP_SCREENSHOT","position":1,"state":"PARENT_PREPARE_FOR_SUBMISSION","surface":"APP_STORE_VERSION_LOCALIZATION"}]}"#)
+    }
+
+    @Test func `should link a version localization to its asset placements over REST`() async throws {
+        let repo = MockVersionLocalizationRepository()
+        given(repo).listLocalizations(versionId: .any).willReturn([
+            AppStoreVersionLocalization(id: "loc-1", versionId: "v-1", locale: "en-US"),
+        ])
+
+        let output = try await VersionLocalizationsList.parse(["--version-id", "v-1"])
+            .execute(repo: repo, affordanceMode: .rest).replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(output.contains(#""listPlacements":{"href":"/api/v1/version-localizations/loc-1/placements","method":"GET"}"#))
+    }
 }

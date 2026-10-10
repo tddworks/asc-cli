@@ -35,6 +35,11 @@ enum RESTRoutes {
             ScreenshotSetsController(repo: screenshotRepo).addRoutes(to: v1)
             ScreenshotsController(repo: screenshotRepo).addRoutes(to: v1)
         }
+        if let libraryRepo = try? factory.makeAssetLibraryRepository(authProvider: auth),
+           let imageRepo = try? factory.makeLibraryImageRepository(authProvider: auth),
+           let placementRepo = try? factory.makeAssetPlacementRepository(authProvider: auth) {
+            AssetLibraryController(libraryRepo: libraryRepo, imageRepo: imageRepo, placementRepo: placementRepo).addRoutes(to: v1)
+        }
         if let buildRepo = try? factory.makeBuildRepository(authProvider: auth) {
             BuildsController(repo: buildRepo).addRoutes(to: v1)
         }
