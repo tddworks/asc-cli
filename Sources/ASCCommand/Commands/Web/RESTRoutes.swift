@@ -37,8 +37,11 @@ enum RESTRoutes {
         }
         if let libraryRepo = try? factory.makeAssetLibraryRepository(authProvider: auth),
            let imageRepo = try? factory.makeLibraryImageRepository(authProvider: auth),
+           let videoRepo = try? factory.makeLibraryVideoRepository(authProvider: auth),
            let placementRepo = try? factory.makeAssetPlacementRepository(authProvider: auth) {
-            AssetLibraryController(libraryRepo: libraryRepo, imageRepo: imageRepo, placementRepo: placementRepo).addRoutes(to: v1)
+            AssetLibraryController(
+                libraryRepo: libraryRepo, imageRepo: imageRepo, videoRepo: videoRepo, placementRepo: placementRepo
+            ).addRoutes(to: v1)
         }
         if let buildRepo = try? factory.makeBuildRepository(authProvider: auth) {
             BuildsController(repo: buildRepo).addRoutes(to: v1)
@@ -248,9 +251,10 @@ func restResponse(_ json: String, status: HTTPResponse.Status = .ok) -> Response
 func uploadReviewBody<T>(
     request: Request,
     fileExtension: String,
+    maxBytes: Int = 20 * 1024 * 1024,
     upload: (URL) async throws -> T
 ) async throws -> T {
-    let buffer = try await request.body.collect(upTo: 20 * 1024 * 1024)
+    let buffer = try await request.body.collect(upTo: maxBytes)
     let rawBytes = Data(buffer: buffer)
 
     let contentType = request.headers[.contentType]
@@ -304,11 +308,12 @@ func uploadReviewBodyResponse<T: Encodable & AffordanceProviding & Presentable>(
     label: String,
     request: Request,
     fileExtension: String,
+    maxBytes: Int = 20 * 1024 * 1024,
     upload: (URL) async throws -> T
 ) async -> Response {
     do {
         let item = try await uploadReviewBody(
-            request: request, fileExtension: fileExtension, upload: upload
+            request: request, fileExtension: fileExtension, maxBytes: maxBytes, upload: upload
         )
         return try restFormat(item)
     } catch {

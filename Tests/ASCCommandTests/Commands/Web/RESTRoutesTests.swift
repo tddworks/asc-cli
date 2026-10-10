@@ -1263,14 +1263,14 @@ struct RESTRoutesTests {
 
     // MARK: - App Asset Library
 
-    @Test func `should link the asset library to its images, upload and placement groups over REST`() async throws {
+    @Test func `should link the asset library to its images, videos, upload and placement groups over REST`() async throws {
         let repo = MockAssetLibraryRepository()
         given(repo).getAssetLibrary(appId: .any).willReturn(AppAssetLibrary(id: "lib-1", appId: "app-1"))
 
         let output = try await AssetLibraryGet.parse(["--app-id", "app-1"])
             .execute(repo: repo, affordanceMode: .rest).replacingOccurrences(of: "\\/", with: "/")
 
-        #expect(output == #"{"data":[{"_links":{"listImages":{"href":"/api/v1/asset-library/lib-1/images","method":"GET"},"listPlacementGroups":{"href":"/api/v1/asset-placement-groups","method":"GET"},"uploadImage":{"href":"/api/v1/asset-library/lib-1/images","method":"POST"}},"appId":"app-1","id":"lib-1"}]}"#)
+        #expect(output == #"{"data":[{"_links":{"listImages":{"href":"/api/v1/asset-library/lib-1/images","method":"GET"},"listPlacementGroups":{"href":"/api/v1/asset-placement-groups","method":"GET"},"listVideos":{"href":"/api/v1/asset-library/lib-1/videos","method":"GET"},"uploadImage":{"href":"/api/v1/asset-library/lib-1/images","method":"POST"}},"appId":"app-1","id":"lib-1"}]}"#)
     }
 
     @Test func `should link a library image to its placements and deletion over REST`() async throws {
@@ -1308,5 +1308,31 @@ struct RESTRoutesTests {
             .execute(repo: repo, affordanceMode: .rest).replacingOccurrences(of: "\\/", with: "/")
 
         #expect(output.contains(#""listPlacements":{"href":"/api/v1/version-localizations/loc-1/placements","method":"GET"}"#))
+    }
+
+    @Test func `should link a library video to its placements, archiving and deletion over REST`() async throws {
+        let repo = MockLibraryVideoRepository()
+        given(repo).listVideos(libraryId: .any, videoId: .any, state: .any, category: .any).willReturn([
+            LibraryVideo(id: "vid-1", libraryId: "lib-1", fileName: "p.mp4", fileSize: 1, category: .appScreenshotsAndPreviews, state: .approved),
+        ])
+
+        let output = try await AssetVideosList.parse(["--library-id", "lib-1"])
+            .execute(repo: repo, affordanceMode: .rest).replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(output == #"{"data":[{"_links":{"archive":{"href":"/api/v1/asset-videos/vid-1","method":"PATCH"},"delete":{"href":"/api/v1/asset-videos/vid-1","method":"DELETE"},"listPlacements":{"href":"/api/v1/asset-videos/vid-1/placements","method":"GET"},"listVideos":{"href":"/api/v1/asset-library/lib-1/videos","method":"GET"},"place":{"href":"/api/v1/version-localizations/<localization-id>/placements","method":"POST"}},"category":"APP_SCREENSHOTS_AND_PREVIEWS","fileName":"p.mp4","fileSize":1,"id":"vid-1","libraryId":"lib-1","state":"APPROVED"}]}"#)
+    }
+
+    @Test func `should link a treatment localization's placements to reordering under the treatment localization over REST`() async throws {
+        let repo = MockAssetPlacementRepository()
+        given(repo).listPlacements(surface: .any, localizationId: .any, placementType: .any, placementGroup: .any).willReturn([
+            AssetPlacement(id: "pl-1", surface: .experimentTreatmentLocalization, localizationId: "tl-1", mediaType: .image,
+                           assetId: "img-1", placementType: .appScreenshot, placementGroup: "IPHONE_67", position: 1, state: .parentPrepareForSubmission),
+        ])
+
+        let output = try await AssetPlacementsList.parse(["--treatment-localization-id", "tl-1"])
+            .execute(repo: repo, affordanceMode: .rest).replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(output.contains(#""listPlacements":{"href":"/api/v1/experiment-treatment-localizations/tl-1/placements","method":"GET"}"#))
+        #expect(output.contains(#""reorderGroup":{"href":"/api/v1/experiment-treatment-localizations/tl-1/placements/reorder","method":"POST"}"#))
     }
 }

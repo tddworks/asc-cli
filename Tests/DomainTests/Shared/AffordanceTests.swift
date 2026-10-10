@@ -360,6 +360,18 @@ struct AffordanceTests {
         #expect(reorder.restLink == APILink(href: "/api/v1/drawers/d-1/gadgets/reorder", method: "POST"))
     }
 
+    @Test func `should address a child by its own id when acting on it even when its parent is named too`() {
+        RESTPathResolver.registerRoute(command: "test-gadgets", parentParam: "shelf-id", parentSegment: "shelves", segment: "gadgets",
+                                       resourceParam: "gadget-id")
+        defer { RESTPathResolver.removeRoute(command: "test-gadgets") }
+
+        let update = Affordance(key: "update", command: "test-gadgets", action: "update", params: ["gadget-id": "g-1", "shelf-id": "s-1"])
+        let list = Affordance(key: "list", command: "test-gadgets", action: "list", params: ["gadget-id": "g-1", "shelf-id": "s-1"])
+
+        #expect(update.restLink == APILink(href: "/api/v1/test-gadgets/g-1", method: "PATCH"))
+        #expect(list.restLink == APILink(href: "/api/v1/shelves/s-1/gadgets", method: "GET"))
+    }
+
     @Test func `should replace a route registered again for the same parent`() {
         RESTPathResolver.registerRoute(command: "test-gadgets", parentParam: "shelf-id", parentSegment: "shelves", segment: "gadgets")
         RESTPathResolver.registerRoute(command: "test-gadgets", parentParam: "shelf-id", parentSegment: "racks", segment: "items")

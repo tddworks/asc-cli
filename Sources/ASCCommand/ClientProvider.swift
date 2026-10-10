@@ -197,6 +197,10 @@ struct ClientProvider {
         try ClientFactory().makeLibraryImageRepository(authProvider: CompositeAuthProvider())
     }
 
+    static func makeLibraryVideoRepository() throws -> any LibraryVideoRepository {
+        try ClientFactory().makeLibraryVideoRepository(authProvider: CompositeAuthProvider())
+    }
+
     static func makeAssetPlacementRepository() throws -> any AssetPlacementRepository {
         try ClientFactory().makeAssetPlacementRepository(authProvider: CompositeAuthProvider())
     }

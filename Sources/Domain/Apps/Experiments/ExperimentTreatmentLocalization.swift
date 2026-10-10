@@ -23,6 +23,7 @@ extension ExperimentTreatmentLocalization: AffordanceProviding {
         [
             Affordance(key: "listSiblings", command: "experiment-treatment-localizations", action: "list", params: ["treatment-id": treatmentId]),
             Affordance(key: "delete", command: "experiment-treatment-localizations", action: "delete", params: ["localization-id": id]),
+            Affordance(key: "listPlacements", command: "asset-placements", action: "list", params: ["treatment-localization-id": id]),
         ]
     }
 }

@@ -113,6 +113,24 @@ struct SDKLibraryImageRepositoryTests {
         #expect(String(data: http.capturedRequests.first?.httpBody ?? Data(), encoding: .utf8) == "PNGDATA")
     }
 
+    // MARK: - updateImage
+
+    @Test func `should rename and archive the image by sending only what changed`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(try Self.image("""
+        {"data":{"type":"appAssetLibraryImages","id":"img-1","attributes":{"category":"APP_SCREENSHOTS_AND_PREVIEWS",
+          "fileName":"home.png","fileSize":7,"referenceName":"Home (Fall)","state":"ARCHIVED"}},"links":{"self":""}}
+        """))
+
+        let image = try await Self.repo(stub).updateImage(libraryId: "lib-9", imageId: "img-1", referenceName: "Home (Fall)", isArchived: true)
+
+        #expect(image == LibraryImage(id: "img-1", libraryId: "lib-9", fileName: "home.png", fileSize: 7,
+                                      category: .appScreenshotsAndPreviews, state: .archived, referenceName: "Home (Fall)"))
+        #expect(stub.requests.map { "\($0.method) \($0.path) \($0.body ?? "")" } == [
+            #"PATCH /v1/appAssetLibraryImages/img-1 {"data":{"attributes":{"archived":true,"referenceName":"Home (Fall)"},"id":"img-1","type":"appAssetLibraryImages"}}"#,
+        ])
+    }
+
     // MARK: - deleteImage
 
     @Test func `should delete the image from the library`() async throws {

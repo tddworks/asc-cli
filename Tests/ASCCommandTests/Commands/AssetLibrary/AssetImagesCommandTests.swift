@@ -163,6 +163,26 @@ struct AssetImagesCommandTests {
         #expect(output == #"{"data":[{"affordances":{"delete":"asc asset-images delete --image-id img-1","listImages":"asc asset-images list --library-id lib-1","listPlacements":"asc asset-placements list --image-id img-1"},"category":"APP_SCREENSHOTS_AND_PREVIEWS","fileName":"bad.png","fileSize":7,"id":"img-1","libraryId":"lib-1","state":"FAILED","stateDetails":[{"code":"IMAGE_INCORRECT_DIMENSIONS"}]}]}"#)
     }
 
+    // MARK: - update
+
+    @Test func `should rename the image and show it under its new name`() async throws {
+        let mockRepo = MockLibraryImageRepository()
+        given(mockRepo).updateImage(libraryId: .value("lib-1"), imageId: .value("img-1"), referenceName: .value("Home (Fall)"), isArchived: .value(nil))
+            .willReturn(LibraryImage(id: "img-1", libraryId: "lib-1", fileName: "home.png", fileSize: 7,
+                                     category: .appScreenshotsAndPreviews, state: .approved, referenceName: "Home (Fall)"))
+
+        let cmd = try AssetImagesUpdate.parse(["--library-id", "lib-1", "--image-id", "img-1", "--reference-name", "Home (Fall)"])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output == #"{"data":[{"affordances":{"archive":"asc asset-images update --archived true --image-id img-1 --library-id lib-1","delete":"asc asset-images delete --image-id img-1","listImages":"asc asset-images list --library-id lib-1","listPlacements":"asc asset-placements list --image-id img-1","place":"asc asset-placements create --image-id img-1 --localization-id <localization-id> --placement-group <placement-group> --placement-type APP_SCREENSHOT"},"category":"APP_SCREENSHOTS_AND_PREVIEWS","fileName":"home.png","fileSize":7,"id":"img-1","libraryId":"lib-1","referenceName":"Home (Fall)","state":"APPROVED"}]}"#)
+    }
+
+    @Test func `should ask for a new name or archiving when updating an image`() {
+        #expect(throws: (any Error).self) {
+            try AssetImagesUpdate.parse(["--library-id", "lib-1", "--image-id", "img-1"])
+        }
+    }
+
     // MARK: - delete
 
     @Test func `should report App Store Connect's refusal to delete an image that is still placed`() async throws {

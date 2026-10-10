@@ -8,4 +8,6 @@ public protocol LibraryImageRepository: Sendable {
     /// Reserves, uploads and commits the file; returns the image as App Store Connect sees it after the commit.
     func uploadImage(libraryId: String, fileURL: URL, category: AssetCategory, referenceName: String?) async throws -> LibraryImage
     func deleteImage(imageId: String) async throws
+    /// Renames and/or archives the image; `nil` leaves a field as it is.
+    func updateImage(libraryId: String, imageId: String, referenceName: String?, isArchived: Bool?) async throws -> LibraryImage
 }

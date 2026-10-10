@@ -186,6 +186,11 @@ public struct ClientFactory: Sendable {
         return SDKLibraryImageRepository(client: provider)
     }
 
+    public func makeLibraryVideoRepository(authProvider: any AuthProvider) throws -> any LibraryVideoRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKLibraryVideoRepository(client: provider)
+    }
+
     public func makeAssetPlacementRepository(authProvider: any AuthProvider) throws -> any AssetPlacementRepository {
         let provider = try makeProvider(authProvider: authProvider)
         return SDKAssetPlacementRepository(client: provider)

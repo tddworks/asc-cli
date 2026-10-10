@@ -20,6 +20,7 @@ struct AssetLibraryCommandTests {
               "affordances" : {
                 "listImages" : "asc asset-images list --library-id lib-1",
                 "listPlacementGroups" : "asc asset-placement-groups list --placement-type APP_SCREENSHOT",
+                "listVideos" : "asc asset-videos list --library-id lib-1",
                 "uploadImage" : "asc asset-images upload --file <file> --library-id lib-1"
               },
               "appId" : "app-1",

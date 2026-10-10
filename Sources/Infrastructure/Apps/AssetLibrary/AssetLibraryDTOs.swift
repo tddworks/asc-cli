@@ -52,6 +52,14 @@ struct LibraryAssetResource: Decodable {
         let stateDetails: [StateDetailDTO]?
         let imageAsset: ImageAssetDTO?
         let uploadOperations: [UploadOperation]?
+        // Videos
+        struct PreviewFrameDTO: Decodable {
+            let state: String?
+            let image: ImageAssetDTO?
+        }
+        let previewFrameTimeCode: String?
+        let previewFrameImage: PreviewFrameDTO?
+        let videoAsset: String?
     }
 
     let id: String

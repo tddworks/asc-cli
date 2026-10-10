@@ -72,6 +72,20 @@ public struct SDKLibraryImageRepository: LibraryImageRepository, @unchecked Send
         return image
     }
 
+    public func updateImage(libraryId: String, imageId: String, referenceName: String?, isArchived: Bool?) async throws -> LibraryImage {
+        let body = AppAssetLibraryImageUpdateRequest(data: .init(
+            type: .appAssetLibraryImages, id: imageId, attributes: .init(isArchived: isArchived, referenceName: referenceName)
+        ))
+        let sdk = APIEndpoint.v1.appAssetLibraryImages.id(imageId).patch(body)
+        let document = try await client.request(
+            Request<LibraryAssetDocument>(path: sdk.path, method: "PATCH", body: body, id: "appAssetLibraryImages_updateInstance")
+        )
+        guard let image = mapImage(document.data, libraryId: libraryId) else {
+            throw APIError.unknown("App Store Connect returned image \(imageId) in a state asc doesn't recognise: \(document.data.attributes?.state ?? "none")")
+        }
+        return image
+    }
+
     public func deleteImage(imageId: String) async throws {
         try await client.request(APIEndpoint.v1.appAssetLibraryImages.id(imageId).delete)
     }

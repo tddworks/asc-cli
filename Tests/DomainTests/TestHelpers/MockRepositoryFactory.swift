@@ -1511,4 +1511,31 @@ extension MockRepositoryFactory {
             feature: feature, sizes: sizes, maxCount: maxCount
         )
     }
+
+    static func makeLibraryVideo(
+        id: String = "vid-1",
+        libraryId: String = "lib-1",
+        fileName: String = "preview.mp4",
+        fileSize: Int = 31457280,
+        category: AssetCategory = .appScreenshotsAndPreviews,
+        state: LibraryAssetState = .prepareForSubmission,
+        referenceName: String? = nil,
+        specId: String? = nil,
+        width: Int? = nil,
+        height: Int? = nil,
+        stateDetails: [AssetStateDetail]? = nil,
+        createdDate: String? = nil,
+        previewFrameTimeCode: String? = nil,
+        previewFrameState: String? = nil,
+        previewFrameUrl: String? = nil,
+        videoUrl: String? = nil
+    ) -> LibraryVideo {
+        LibraryVideo(
+            id: id, libraryId: libraryId, fileName: fileName, fileSize: fileSize,
+            category: category, state: state, referenceName: referenceName, specId: specId,
+            width: width, height: height, stateDetails: stateDetails, createdDate: createdDate,
+            previewFrameTimeCode: previewFrameTimeCode, previewFrameState: previewFrameState,
+            previewFrameUrl: previewFrameUrl, videoUrl: videoUrl
+        )
+    }
 }

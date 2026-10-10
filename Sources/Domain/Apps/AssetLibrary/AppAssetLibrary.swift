@@ -21,6 +21,7 @@ extension AppAssetLibrary: AffordanceProviding {
     public var structuredAffordances: [Affordance] {
         [
             Affordance(key: "listImages", command: "asset-images", action: "list", params: ["library-id": id]),
+            Affordance(key: "listVideos", command: "asset-videos", action: "list", params: ["library-id": id]),
             Affordance(key: "listPlacementGroups", command: "asset-placement-groups", action: "list",
                        params: ["placement-type": AssetPlacementType.appScreenshot.rawValue]),
             Affordance(key: "uploadImage", command: "asset-images", action: "upload",

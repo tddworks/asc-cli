@@ -25,11 +25,16 @@ public final class RESTPathResolver: @unchecked Sendable {
         public let parentParam: String
         public let parentSegment: String
         public let segment: String
+        /// The flag naming the child itself (e.g. `image-id`). When present on a resource
+        /// action it wins over the parent, so `update --image-id X --library-id L` addresses
+        /// `/asset-images/X` rather than the library's collection.
+        public let resourceParam: String?
 
-        public init(parentParam: String, parentSegment: String, segment: String) {
+        public init(parentParam: String, parentSegment: String, segment: String, resourceParam: String? = nil) {
             self.parentParam = parentParam
             self.parentSegment = parentSegment
             self.segment = segment
+            self.resourceParam = resourceParam
         }
     }
 
@@ -44,10 +49,12 @@ public final class RESTPathResolver: @unchecked Sendable {
 
     /// Register a nested resource route. Registering again for the same parent param
     /// replaces that route; a different parent param adds another parent.
-    public static func registerRoute(command: String, parentParam: String, parentSegment: String, segment: String) {
+    public static func registerRoute(
+        command: String, parentParam: String, parentSegment: String, segment: String, resourceParam: String? = nil
+    ) {
         lock.lock()
         defer { lock.unlock() }
-        let route = Route(parentParam: parentParam, parentSegment: parentSegment, segment: segment)
+        let route = Route(parentParam: parentParam, parentSegment: parentSegment, segment: segment, resourceParam: resourceParam)
         var existing = routes[command] ?? []
         if let index = existing.firstIndex(where: { $0.parentParam == parentParam }) {
             existing[index] = route
@@ -80,6 +87,9 @@ public final class RESTPathResolver: @unchecked Sendable {
         if action != "list", action != "create", action != "add" {
             // Action on this resource by its own id (e.g. `versions get --version-id v-1`).
             if let ownId = params["\(singularize(command))-id"] {
+                return resourcePath(base: base, segment: command, id: ownId, action: action)
+            }
+            if let ownId = (currentRoutes[command] ?? []).lazy.compactMap({ $0.resourceParam.flatMap { params[$0] } }).first {
                 return resourcePath(base: base, segment: command, id: ownId, action: action)
             }
             // Singleton-under-parent (e.g. `iap-availability get --iap-id X` →

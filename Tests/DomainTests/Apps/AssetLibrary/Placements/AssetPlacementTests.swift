@@ -118,6 +118,25 @@ struct AssetPlacementTests {
         #expect(placement.apiLinks["reorderGroup"] == APILink(href: "/api/v1/version-localizations/loc-1/placements/reorder", method: "POST"))
     }
 
+    @Test func `should point to a treatment localization's placements and reorder them there`() {
+        let placement = MockRepositoryFactory.makeAssetPlacement(
+            id: "pl-1", surface: .experimentTreatmentLocalization, localizationId: "tl-1",
+            placementGroup: "IPHONE_67", state: .parentPrepareForSubmission
+        )
+
+        #expect(placement.affordances["listPlacements"] == "asc asset-placements list --treatment-localization-id tl-1")
+        #expect(placement.affordances["reorderGroup"] == "asc asset-placements reorder --placement-group IPHONE_67 --placement-ids <placement-ids> --treatment-localization-id tl-1")
+        #expect(placement.apiLinks["listPlacements"] == APILink(href: "/api/v1/experiment-treatment-localizations/tl-1/placements", method: "GET"))
+        #expect(placement.apiLinks["reorderGroup"] == APILink(href: "/api/v1/experiment-treatment-localizations/tl-1/placements/reorder", method: "POST"))
+    }
+
+    @Test func `should point a video placement to everywhere the video is placed`() {
+        let placement = MockRepositoryFactory.makeAssetPlacement(id: "pl-1", mediaType: .video, assetId: "vid-1", placementType: .appPreview)
+
+        #expect(placement.affordances["listAssetPlacements"] == "asc asset-placements list --video-id vid-1")
+        #expect(placement.apiLinks["listAssetPlacements"] == APILink(href: "/api/v1/asset-videos/vid-1/placements", method: "GET"))
+    }
+
     // MARK: - Table
 
     @Test func `should show type, group, position and state in a table`() {

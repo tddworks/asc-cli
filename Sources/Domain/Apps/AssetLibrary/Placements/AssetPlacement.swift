@@ -13,7 +13,8 @@ public enum PlacementSurface: String, Sendable, Equatable, Codable, CaseIterable
     public var cliParam: String? {
         switch self {
         case .appStoreVersionLocalization: "localization-id"
-        case .experimentTreatmentLocalization, .customProductPageLocalization, .eventLocalization: nil
+        case .experimentTreatmentLocalization: "treatment-localization-id"
+        case .customProductPageLocalization, .eventLocalization: nil
         }
     }
 }

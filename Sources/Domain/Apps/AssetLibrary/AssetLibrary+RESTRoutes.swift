@@ -5,8 +5,11 @@
 extension RESTPathResolver {
     static let _assetLibraryRoutes: Void = {
         registerRoute(command: "asset-library", parentParam: "app-id", parentSegment: "apps", segment: "asset-library")
-        registerRoute(command: "asset-images", parentParam: "library-id", parentSegment: "asset-library", segment: "images")
+        registerRoute(command: "asset-images", parentParam: "library-id", parentSegment: "asset-library", segment: "images", resourceParam: "image-id")
+        registerRoute(command: "asset-videos", parentParam: "library-id", parentSegment: "asset-library", segment: "videos", resourceParam: "video-id")
         registerRoute(command: "asset-placements", parentParam: "localization-id", parentSegment: "version-localizations", segment: "placements")
+        registerRoute(command: "asset-placements", parentParam: "treatment-localization-id", parentSegment: "experiment-treatment-localizations", segment: "placements")
         registerRoute(command: "asset-placements", parentParam: "image-id", parentSegment: "asset-images", segment: "placements")
+        registerRoute(command: "asset-placements", parentParam: "video-id", parentSegment: "asset-videos", segment: "placements")
     }()
 }

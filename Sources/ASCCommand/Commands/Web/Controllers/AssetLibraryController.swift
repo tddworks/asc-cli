@@ -7,10 +7,12 @@ import Infrastructure
 /// Routes for the App Asset Library: the library, its images, placement groups and placements.
 ///
 /// Query-param names match the CLI flags (`?state=&category=&image-id=`, `?placement-type=&placement-group=`).
-/// JSON bodies use the flags in camelCase (`imageId`, `placementType`, `placementGroup`, `placementIds`).
+/// JSON bodies use the flags in camelCase (`imageId`/`videoId`, `placementType`, `placementGroup`,
+/// `placementIds`, `libraryId`, `referenceName`, `archived`).
 struct AssetLibraryController: Sendable {
     let libraryRepo: any AssetLibraryRepository
     let imageRepo: any LibraryImageRepository
+    let videoRepo: any LibraryVideoRepository
     let placementRepo: any AssetPlacementRepository
 
     struct BadRequest: Error, Equatable {
@@ -73,6 +75,16 @@ struct AssetLibraryController: Sendable {
             )
         }
 
+        group.patch("/asset-images/:imageId") { request, context -> Response in
+            guard let imageId = context.parameters.get("imageId") else { return jsonError("Missing imageId") }
+            let json = try await Self.jsonBody(request)
+            do {
+                return try restFormat(try await Self.updateImage(imageId: imageId, json: json, repo: self.imageRepo))
+            } catch let error as BadRequest {
+                return jsonError(error.message)
+            }
+        }
+
         group.delete("/asset-images/:imageId") { _, context -> Response in
             guard let imageId = context.parameters.get("imageId") else { return jsonError("Missing imageId") }
             try await self.imageRepo.deleteImage(imageId: imageId)
@@ -84,9 +96,72 @@ struct AssetLibraryController: Sendable {
             return try restFormat(try await self.placementRepo.listAssetPlacements(mediaType: .image, assetId: imageId))
         }
 
+        // MARK: Videos
+
+        group.get("/asset-library/:libraryId/videos") { request, context -> Response in
+            guard let libraryId = context.parameters.get("libraryId") else { return jsonError("Missing libraryId") }
+            let params = request.uri.queryParameters
+            var state: LibraryAssetState?
+            if let raw = params.get("state") {
+                guard let parsed = LibraryAssetState(rawValue: raw) else { return jsonError("Unknown state '\(raw)'") }
+                state = parsed
+            }
+            var category: AssetCategory?
+            if let raw = params.get("category") {
+                guard let parsed = AssetCategory(rawValue: raw) else { return jsonError("Unknown category '\(raw)'") }
+                category = parsed
+            }
+            let videos = try await self.videoRepo.listVideos(
+                libraryId: libraryId, videoId: params.get("video-id"), state: state, category: category
+            )
+            return try restFormat(videos)
+        }
+
+        group.post("/asset-library/:libraryId/videos") { request, context -> Response in
+            guard let libraryId = context.parameters.get("libraryId") else { return jsonError("Missing libraryId") }
+            let params = request.uri.queryParameters
+            let category = params.get("category").flatMap(AssetCategory.init(rawValue:)) ?? .appScreenshotsAndPreviews
+            let referenceName = params.get("reference-name")
+            let previewFrameTimeCode = params.get("preview-frame-time-code")
+            return await uploadReviewBodyResponse(
+                label: "asset-videos",
+                request: request,
+                fileExtension: extensionFor(contentType: request.headers[.contentType], fallback: "mp4"),
+                maxBytes: Self.maxVideoBytes,
+                upload: {
+                    try await self.videoRepo.uploadVideo(
+                        libraryId: libraryId, fileURL: $0, category: category,
+                        referenceName: referenceName, previewFrameTimeCode: previewFrameTimeCode
+                    )
+                }
+            )
+        }
+
+        group.patch("/asset-videos/:videoId") { request, context -> Response in
+            guard let videoId = context.parameters.get("videoId") else { return jsonError("Missing videoId") }
+            let json = try await Self.jsonBody(request)
+            do {
+                return try restFormat(try await Self.updateVideo(videoId: videoId, json: json, repo: self.videoRepo))
+            } catch let error as BadRequest {
+                return jsonError(error.message)
+            }
+        }
+
+        group.delete("/asset-videos/:videoId") { _, context -> Response in
+            guard let videoId = context.parameters.get("videoId") else { return jsonError("Missing videoId") }
+            try await self.videoRepo.deleteVideo(videoId: videoId)
+            return restResponse("{\"deleted\":true}")
+        }
+
+        group.get("/asset-videos/:videoId/placements") { _, context -> Response in
+            guard let videoId = context.parameters.get("videoId") else { return jsonError("Missing videoId") }
+            return try restFormat(try await self.placementRepo.listAssetPlacements(mediaType: .video, assetId: videoId))
+        }
+
         // MARK: Placements
 
         addPlacementRoutes(to: group, parentSegment: "version-localizations", surface: .appStoreVersionLocalization)
+        addPlacementRoutes(to: group, parentSegment: "experiment-treatment-localizations", surface: .experimentTreatmentLocalization)
 
         group.delete("/asset-placements/:placementId") { _, context -> Response in
             guard let placementId = context.parameters.get("placementId") else { return jsonError("Missing placementId") }
@@ -139,21 +214,49 @@ struct AssetLibraryController: Sendable {
         }
     }
 
-    /// Body: `{"imageId", "placementType", "placementGroup"}`.
+    /// Apple accepts preview files up to 500 MB.
+    static let maxVideoBytes = 500 * 1024 * 1024
+
+    /// Body: `{"imageId" | "videoId", "placementType", "placementGroup"}`.
     static func createPlacement(
         surface: PlacementSurface,
         localizationId: String,
         json: [String: Any],
         repo: any AssetPlacementRepository
     ) async throws -> AssetPlacement {
-        guard let assetId = json["imageId"] as? String,
+        let asset: (AssetMediaType, String)? = (json["videoId"] as? String).map { (.video, $0) }
+            ?? (json["imageId"] as? String).map { (.image, $0) }
+        guard let (mediaType, assetId) = asset,
               let placementType = (json["placementType"] as? String).flatMap(AssetPlacementType.init(rawValue:)),
               let placementGroup = json["placementGroup"] as? String
-        else { throw BadRequest("Provide imageId, placementType and placementGroup") }
+        else { throw BadRequest("Provide imageId or videoId, placementType and placementGroup") }
         return try await repo.createPlacement(
-            surface: surface, localizationId: localizationId, mediaType: .image, assetId: assetId,
+            surface: surface, localizationId: localizationId, mediaType: mediaType, assetId: assetId,
             placementType: placementType, placementGroup: placementGroup
         )
+    }
+
+    /// Body: `{"libraryId", "referenceName"?, "archived"?}` — the `asset-images update` flags.
+    static func updateImage(imageId: String, json: [String: Any], repo: any LibraryImageRepository) async throws -> LibraryImage {
+        let (referenceName, archived) = try updateFields(json)
+        return try await repo.updateImage(
+            libraryId: json["libraryId"] as? String ?? "", imageId: imageId, referenceName: referenceName, isArchived: archived
+        )
+    }
+
+    /// Body: `{"libraryId", "referenceName"?, "archived"?}` — the `asset-videos update` flags.
+    static func updateVideo(videoId: String, json: [String: Any], repo: any LibraryVideoRepository) async throws -> LibraryVideo {
+        let (referenceName, archived) = try updateFields(json)
+        return try await repo.updateVideo(
+            libraryId: json["libraryId"] as? String ?? "", videoId: videoId, referenceName: referenceName, isArchived: archived
+        )
+    }
+
+    private static func updateFields(_ json: [String: Any]) throws -> (referenceName: String?, archived: Bool?) {
+        let referenceName = json["referenceName"] as? String
+        let archived = json["archived"] as? Bool
+        guard referenceName != nil || archived != nil else { throw BadRequest("Provide referenceName or archived") }
+        return (referenceName, archived)
     }
 
     /// Body: `{"placementGroup", "placementIds": [...]}` in display order.

@@ -22,10 +22,45 @@ struct AssetLibraryControllerTests {
         #expect(placement == Self.placement(id: "pl-1"))
     }
 
+    @Test func `should place a video sent over REST on a treatment localization`() async throws {
+        let mockRepo = MockAssetPlacementRepository()
+        given(mockRepo).createPlacement(
+            surface: .value(.experimentTreatmentLocalization), localizationId: .value("tl-1"), mediaType: .value(.video),
+            assetId: .value("vid-1"), placementType: .value(.appPreview), placementGroup: .value("IPHONE_67")
+        ).willReturn(Self.placement(id: "pl-2"))
+
+        let placement = try await AssetLibraryController.createPlacement(
+            surface: .experimentTreatmentLocalization, localizationId: "tl-1",
+            json: ["videoId": "vid-1", "placementType": "APP_PREVIEW", "placementGroup": "IPHONE_67"],
+            repo: mockRepo
+        )
+
+        #expect(placement.id == "pl-2")
+    }
+
+    @Test func `should rename and archive an image over REST with the same fields as the CLI`() async throws {
+        let mockRepo = MockLibraryImageRepository()
+        given(mockRepo).updateImage(libraryId: .value("lib-1"), imageId: .value("img-1"), referenceName: .value("Home"), isArchived: .value(true))
+            .willReturn(LibraryImage(id: "img-1", libraryId: "lib-1", fileName: "home.png", fileSize: 1,
+                                     category: .appScreenshotsAndPreviews, state: .archived, referenceName: "Home"))
+
+        let image = try await AssetLibraryController.updateImage(
+            imageId: "img-1", json: ["libraryId": "lib-1", "referenceName": "Home", "archived": true], repo: mockRepo
+        )
+
+        #expect(image.state == .archived)
+    }
+
+    @Test func `should refuse a REST image update that changes nothing`() async throws {
+        await #expect(throws: AssetLibraryController.BadRequest("Provide referenceName or archived")) {
+            _ = try await AssetLibraryController.updateImage(imageId: "img-1", json: ["libraryId": "lib-1"], repo: MockLibraryImageRepository())
+        }
+    }
+
     @Test func `should refuse a REST placement that names no asset or an unknown placement type`() async throws {
         let mockRepo = MockAssetPlacementRepository()
 
-        await #expect(throws: AssetLibraryController.BadRequest("Provide imageId, placementType and placementGroup")) {
+        await #expect(throws: AssetLibraryController.BadRequest("Provide imageId or videoId, placementType and placementGroup")) {
             _ = try await AssetLibraryController.createPlacement(
                 surface: .appStoreVersionLocalization, localizationId: "loc-1",
                 json: ["placementType": "HOLOGRAM", "placementGroup": "IPHONE_67"], repo: mockRepo

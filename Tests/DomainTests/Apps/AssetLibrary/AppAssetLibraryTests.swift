@@ -13,12 +13,13 @@ struct AppAssetLibraryTests {
         #expect(json == #"{"appId":"app-42","id":"lib-1"}"#)
     }
 
-    @Test func `should point to its images, placement groups and image upload on the CLI`() {
+    @Test func `should point to its images, videos, placement groups and image upload on the CLI`() {
         let library = MockRepositoryFactory.makeAssetLibrary(id: "lib-1", appId: "app-42")
 
         #expect(library.affordances == [
             "listImages": "asc asset-images list --library-id lib-1",
             "listPlacementGroups": "asc asset-placement-groups list --placement-type APP_SCREENSHOT",
+            "listVideos": "asc asset-videos list --library-id lib-1",
             "uploadImage": "asc asset-images upload --file <file> --library-id lib-1",
         ])
     }
@@ -27,6 +28,7 @@ struct AppAssetLibraryTests {
         let library = MockRepositoryFactory.makeAssetLibrary(id: "lib-1", appId: "app-42")
 
         #expect(library.apiLinks["listImages"] == APILink(href: "/api/v1/asset-library/lib-1/images", method: "GET"))
+        #expect(library.apiLinks["listVideos"] == APILink(href: "/api/v1/asset-library/lib-1/videos", method: "GET"))
         #expect(library.apiLinks["listPlacementGroups"] == APILink(href: "/api/v1/asset-placement-groups", method: "GET"))
         #expect(library.apiLinks["uploadImage"] == APILink(href: "/api/v1/asset-library/lib-1/images", method: "POST"))
     }

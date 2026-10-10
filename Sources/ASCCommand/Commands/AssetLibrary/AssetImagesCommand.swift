@@ -6,7 +6,7 @@ struct AssetImagesCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "asset-images",
         abstract: "Manage images in an app's asset library",
-        subcommands: [AssetImagesList.self, AssetImagesUpload.self, AssetImagesDelete.self]
+        subcommands: [AssetImagesList.self, AssetImagesUpload.self, AssetImagesUpdate.self, AssetImagesDelete.self]
     )
 }
 
@@ -83,6 +83,44 @@ struct AssetImagesUpload: AsyncParsableCommand {
                 try await repo.listImages(libraryId: image.libraryId, imageId: image.id, state: nil, category: nil).first
             }
         }
+        let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
+        return try formatter.formatAgentItems([image], affordanceMode: affordanceMode)
+    }
+}
+
+struct AssetImagesUpdate: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "update",
+        abstract: "Rename an image, or archive it once approved"
+    )
+
+    @OptionGroup var globals: GlobalOptions
+
+    @Option(name: .long, help: "Asset library ID")
+    var libraryId: String
+
+    @Option(name: .long, help: "Image ID")
+    var imageId: String
+
+    @Option(name: .long, help: "New reference name")
+    var referenceName: String?
+
+    @Option(name: .long, help: "true to archive (approved images only)")
+    var archived: Bool?
+
+    func validate() throws {
+        if referenceName == nil, archived == nil {
+            throw ValidationError("Pass --reference-name and/or --archived")
+        }
+    }
+
+    func run() async throws {
+        let repo = try ClientProvider.makeLibraryImageRepository()
+        print(try await execute(repo: repo))
+    }
+
+    func execute(repo: any LibraryImageRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+        let image = try await repo.updateImage(libraryId: libraryId, imageId: imageId, referenceName: referenceName, isArchived: archived)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems([image], affordanceMode: affordanceMode)
     }

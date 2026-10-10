@@ -87,6 +87,15 @@ struct LibraryImageTests {
         #expect(image.apiLinks["refresh"] == APILink(href: "/api/v1/asset-library/lib-1/images", method: "GET"))
     }
 
+    @Test func `should offer archiving only once App Review approved the image`() {
+        let approved = MockRepositoryFactory.makeLibraryImage(id: "img-1", libraryId: "lib-1", state: .approved)
+        let processed = MockRepositoryFactory.makeLibraryImage(id: "img-2", state: .prepareForSubmission)
+
+        #expect(approved.affordances["archive"] == "asc asset-images update --archived true --image-id img-1 --library-id lib-1")
+        #expect(approved.apiLinks["archive"] == APILink(href: "/api/v1/asset-images/img-1", method: "PATCH"))
+        #expect(processed.affordances["archive"] == nil)
+    }
+
     // MARK: - Table
 
     @Test func `should show file, category, state and reference name in a table`() {

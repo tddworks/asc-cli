@@ -19,6 +19,7 @@ struct ASC: AsyncParsableCommand {
             AssetLibraryCommand.self,
             AssetPlacementGroupsCommand.self,
             AssetImagesCommand.self,
+            AssetVideosCommand.self,
             AssetPlacementsCommand.self,
             AppInfosCommand.self,
             AppInfoLocalizationsCommand.self,

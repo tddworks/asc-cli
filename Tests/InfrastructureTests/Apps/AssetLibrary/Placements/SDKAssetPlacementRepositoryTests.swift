@@ -88,7 +88,38 @@ struct SDKAssetPlacementRepositoryTests {
         #expect(placements == [])
     }
 
+    @Test func `should read a treatment localization's placements from its own endpoint`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(try Self.placements(#"{"data":[\#(Self.screenshot(id: "pl-1", group: "IPHONE_67", image: "img-1"))],"links":{"self":""}}"#))
+
+        let placements = try await SDKAssetPlacementRepository(client: stub).listPlacements(
+            surface: .experimentTreatmentLocalization, localizationId: "tl-1", placementType: nil, placementGroup: nil
+        )
+
+        #expect(stub.lastPath == "/v1/appStoreVersionExperimentTreatmentLocalizations/tl-1/placements")
+        #expect(placements.map { "\($0.surface.rawValue) \($0.localizationId)" } == ["EXPERIMENT_TREATMENT_LOCALIZATION tl-1"])
+    }
+
     // MARK: - listAssetPlacements
+
+    @Test func `should read everywhere a video is placed from the video's endpoint`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(try Self.placements("""
+        {"data":[{"type":"appAssetLibraryPlacements","id":"pl-1",
+          "attributes":{"mediaType":"VIDEO","placementType":"APP_PREVIEW","placementGroup":"IPHONE_67","state":"PARENT_APPROVED"},
+          "relationships":{"appStoreVersionExperimentTreatmentLocalization":{"data":{"type":"appStoreVersionExperimentTreatmentLocalizations","id":"tl-1"}}}}
+        ],"links":{"self":""}}
+        """))
+
+        let placements = try await SDKAssetPlacementRepository(client: stub).listAssetPlacements(mediaType: .video, assetId: "vid-1")
+
+        #expect(stub.lastPath == "/v1/appAssetLibraryVideos/vid-1/placements")
+        #expect(placements == [
+            AssetPlacement(id: "pl-1", surface: .experimentTreatmentLocalization, localizationId: "tl-1", mediaType: .video,
+                           assetId: "vid-1", placementType: .appPreview, placementGroup: "IPHONE_67", state: .parentApproved),
+        ])
+    }
+
 
     @Test func `should show which localization each placement of an image sits on`() async throws {
         let stub = StubAPIClient()
@@ -140,6 +171,22 @@ struct SDKAssetPlacementRepositoryTests {
         #expect(stub.requests.map { "\($0.method) \($0.path) \($0.body ?? "")" } == [
             #"POST /v1/appAssetLibraryPlacements {"data":{"attributes":{"placementGroup":"IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE","placementType":"APP_SCREENSHOT"},"relationships":{"appStoreVersionLocalization":{"data":{"id":"loc-9","type":"appStoreVersionLocalizations"}},"image":{"data":{"id":"img-1","type":"appAssetLibraryImages"}}},"type":"appAssetLibraryPlacements"}}"#,
         ])
+    }
+
+    @Test func `should send App Store Connect a placement naming the video and the treatment localization`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(try Self.placement("""
+        {"data":{"type":"appAssetLibraryPlacements","id":"pl-1",
+          "attributes":{"mediaType":"VIDEO","placementType":"APP_PREVIEW","placementGroup":"IPHONE_67","state":"ASSET_PROCESSING"}},
+         "links":{"self":""}}
+        """))
+
+        _ = try await SDKAssetPlacementRepository(client: stub).createPlacement(
+            surface: .experimentTreatmentLocalization, localizationId: "tl-1", mediaType: .video, assetId: "vid-1",
+            placementType: .appPreview, placementGroup: "IPHONE_67"
+        )
+
+        #expect(stub.requests.first?.body == #"{"data":{"attributes":{"placementGroup":"IPHONE_67","placementType":"APP_PREVIEW"},"relationships":{"appStoreVersionExperimentTreatmentLocalization":{"data":{"id":"tl-1","type":"appStoreVersionExperimentTreatmentLocalizations"}},"video":{"data":{"id":"vid-1","type":"appAssetLibraryVideos"}}},"type":"appAssetLibraryPlacements"}}"#)
     }
 
     // MARK: - reorderPlacements
