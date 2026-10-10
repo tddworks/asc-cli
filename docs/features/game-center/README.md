@@ -122,6 +122,8 @@ asc game-center players unblock --player-id player-abc123
 | Method | Path | CLI |
 |---|---|---|
 | GET | `/apps/{appId}/game-center` | `detail get --app-id` |
+| GET | `/game-center/details/{detailId}/achievements` | `achievements list --detail-id` |
+| DELETE | `/game-center/achievements/{achievementId}` | `achievements delete` |
 | GET | `/game-center/details/{detailId}/leaderboards` | `leaderboards list --detail-id` |
 | DELETE | `/game-center/leaderboards/{leaderboardId}` | `leaderboards delete` |
 | GET | `/game-center/leaderboards/{leaderboardId}/score-moderations?blocked-only=true` | `score-moderations list [--blocked-only]` |
@@ -129,7 +131,7 @@ asc game-center players unblock --player-id player-abc123
 | GET | `/game-center/details/{detailId}/blocked-players` | `blocked-players list` |
 | POST | `/game-center/players/{id}/block`, `/unblock` | `players block`, `unblock` |
 
-Achievements, and creating achievements or leaderboards, are CLI-only.
+Creating achievements or leaderboards is CLI-only.
 
 ## Gotchas
 

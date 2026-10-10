@@ -4,7 +4,7 @@ import Hummingbird
 import HummingbirdWebSocket
 import Infrastructure
 
-/// Routes for Game Center: the app's Game Center detail, its leaderboards,
+/// Routes for Game Center: the app's Game Center detail, its achievements and leaderboards,
 /// and moderation of leaderboard scores and players.
 ///
 /// Query-param names match the CLI flags: `?blocked-only=true`.
@@ -23,6 +23,17 @@ struct GameCenterController: Sendable {
         group.get("/game-center/details/:detailId/leaderboards") { _, context -> Response in
             guard let detailId = context.parameters.get("detailId") else { return jsonError("Missing detailId") }
             return try restFormat(try await self.repo.listLeaderboards(gameCenterDetailId: detailId))
+        }
+
+        group.get("/game-center/details/:detailId/achievements") { _, context -> Response in
+            guard let detailId = context.parameters.get("detailId") else { return jsonError("Missing detailId") }
+            return try restFormat(try await self.repo.listAchievements(gameCenterDetailId: detailId))
+        }
+
+        group.delete("/game-center/achievements/:achievementId") { _, context -> Response in
+            guard let achievementId = context.parameters.get("achievementId") else { return jsonError("Missing achievementId") }
+            try await self.repo.deleteAchievement(id: achievementId)
+            return restResponse("{\"deleted\":true}")
         }
 
         group.delete("/game-center/leaderboards/:leaderboardId") { _, context -> Response in

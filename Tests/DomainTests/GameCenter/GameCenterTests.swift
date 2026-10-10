@@ -107,6 +107,18 @@ struct GameCenterAchievementTests {
         #expect(a.affordances["delete"] == "asc game-center achievements delete --achievement-id ach-1")
     }
 
+    @Test func `should link an achievement to its list and its deletion over REST`() {
+        let a = MockRepositoryFactory.makeGameCenterAchievement(id: "ach-1", gameCenterDetailId: "gc-1")
+        #expect(a.apiLinks["listAchievements"] == APILink(href: "/api/v1/game-center/details/gc-1/achievements", method: "GET"))
+        #expect(a.apiLinks["delete"] == APILink(href: "/api/v1/game-center/achievements/ach-1", method: "DELETE"))
+    }
+
+    @Test func `should show an achievement's name, vendor id and points in a table`() {
+        let a = MockRepositoryFactory.makeGameCenterAchievement(id: "ach-1", referenceName: "First Win", vendorIdentifier: "first_win", points: 10)
+        #expect(GameCenterAchievement.tableHeaders == ["ID", "Reference Name", "Vendor ID", "Points"])
+        #expect(a.tableRow == ["ach-1", "First Win", "first_win", "10"])
+    }
+
     @Test func `achievement affordances have exactly two keys`() {
         let a = MockRepositoryFactory.makeGameCenterAchievement(id: "ach-1", gameCenterDetailId: "gc-1")
         #expect(a.affordances.count == 2)

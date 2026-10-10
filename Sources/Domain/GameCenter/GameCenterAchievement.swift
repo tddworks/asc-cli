@@ -30,11 +30,22 @@ public struct GameCenterAchievement: Sendable, Equatable, Identifiable, Codable 
     }
 }
 
+extension GameCenterAchievement: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Reference Name", "Vendor ID", "Points"]
+    }
+    public var tableRow: [String] {
+        [id, referenceName, vendorIdentifier, String(points)]
+    }
+}
+
 extension GameCenterAchievement: AffordanceProviding {
-    public var affordances: [String: String] {
+    public var structuredAffordances: [Affordance] {
         [
-            "listAchievements": "asc game-center achievements list --detail-id \(gameCenterDetailId)",
-            "delete": "asc game-center achievements delete --achievement-id \(id)",
+            Affordance(key: "listAchievements", command: "game-center achievements", action: "list",
+                       params: ["detail-id": gameCenterDetailId]),
+            Affordance(key: "delete", command: "game-center achievements", action: "delete",
+                       params: ["achievement-id": id]),
         ]
     }
 }
