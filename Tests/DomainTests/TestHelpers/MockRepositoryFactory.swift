@@ -1445,4 +1445,68 @@ extension MockRepositoryFactory {
     ) -> ExperimentTreatmentLocalization {
         ExperimentTreatmentLocalization(id: id, treatmentId: treatmentId, locale: locale)
     }
+
+    // MARK: - Performance Overview
+
+    static func makePerformanceInsight(
+        category: PerformanceMetricCategory = .launch,
+        metric: String = "launchTime",
+        latestVersion: String? = "2.0",
+        summary: String? = "Launch time increased 20%",
+        isHighImpact: Bool = false
+    ) -> PerformanceInsight {
+        PerformanceInsight(
+            category: category, metric: metric, latestVersion: latestVersion,
+            summary: summary, isHighImpact: isHighImpact
+        )
+    }
+
+    static func makeOverviewMetric(
+        category: String = "launch",
+        identifier: String = "launchTime",
+        displayName: String? = "Launch Time",
+        unit: String? = "s",
+        latestValue: Double? = 1.5,
+        latestVersion: String? = "2.0",
+        goalValue: Double? = 1.0
+    ) -> OverviewMetric {
+        OverviewMetric(
+            category: category, identifier: identifier, displayName: displayName, unit: unit,
+            latestValue: latestValue, latestVersion: latestVersion, goalValue: goalValue
+        )
+    }
+
+    static func makePerformanceHotspot(
+        kind: DiagnosticType = .hangs,
+        signatureId: String? = "sig-1",
+        signature: String = "main thread hang in -[UIView layoutSubviews]",
+        weight: Double? = 45.2,
+        count: Int? = 12,
+        sourceFile: String? = "MainView.swift",
+        lineNumber: Int? = 42,
+        trend: PerformanceTrend? = .up
+    ) -> PerformanceHotspot {
+        PerformanceHotspot(
+            kind: kind, signatureId: signatureId, signature: signature, weight: weight, count: count,
+            sourceFile: sourceFile, lineNumber: lineNumber, trend: trend
+        )
+    }
+
+    static func makePerformanceOverview(
+        appId: String = "1234567890",
+        deviceType: String? = nil,
+        platform: String? = "iOS",
+        bundleId: String? = "com.example.app",
+        latestVersion: String? = "2.0",
+        regressions: [PerformanceInsight] = [],
+        trendingUp: [PerformanceInsight] = [],
+        metrics: [OverviewMetric] = [],
+        hotspots: [PerformanceHotspot] = []
+    ) -> PerformanceOverview {
+        PerformanceOverview(
+            appId: appId, deviceType: deviceType, platform: platform, bundleId: bundleId,
+            latestVersion: latestVersion, regressions: regressions, trendingUp: trendingUp,
+            metrics: metrics, hotspots: hotspots
+        )
+    }
 }

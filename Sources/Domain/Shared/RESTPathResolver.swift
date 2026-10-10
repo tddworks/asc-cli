@@ -171,6 +171,7 @@ public final class RESTPathResolver: @unchecked Sendable {
         _ = _appAvailabilityRoutes
         _ = _resolutionCenterRoutes
         _ = _experimentRoutes
+        _ = _perfOverviewRoutes
 
         initialized = true
     }

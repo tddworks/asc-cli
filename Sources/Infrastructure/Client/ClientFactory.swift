@@ -261,6 +261,11 @@ public struct ClientFactory: Sendable {
         return SDKPerfMetricsRepository(client: provider)
     }
 
+    public func makePerfOverviewRepository(authProvider: any AuthProvider) throws -> any PerfOverviewRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKPerfOverviewRepository(client: provider)
+    }
+
     public func makeDiagnosticsRepository(authProvider: any AuthProvider) throws -> any DiagnosticsRepository {
         let provider = try makeProvider(authProvider: authProvider)
         return SDKDiagnosticsRepository(client: provider)

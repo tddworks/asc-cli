@@ -81,6 +81,9 @@ enum RESTRoutes {
                 ).addRoutes(to: v1)
             }
         }
+        if let perfOverviewRepo = try? factory.makePerfOverviewRepository(authProvider: auth) {
+            PerfOverviewController(repo: perfOverviewRepo).addRoutes(to: v1)
+        }
         if let experimentRepo = try? factory.makeExperimentRepository(authProvider: auth) {
             ExperimentsController(repo: experimentRepo).addRoutes(to: v1)
         }

@@ -23,6 +23,7 @@ struct AppsListTests {
             {
               "affordances" : {
                 "createVersion" : "asc versions create --app-id app-1",
+                "getPerfOverview" : "asc perf-overview get --app-id app-1",
                 "listAppInfos" : "asc app-infos list --app-id app-1",
                 "listExperiments" : "asc experiments list --app-id app-1",
                 "listPricePoints" : "asc apps price-points list --app-id app-1 --territory USA",
@@ -57,6 +58,7 @@ struct AppsListTests {
             {
               "affordances" : {
                 "createVersion" : "asc versions create --app-id app-1",
+                "getPerfOverview" : "asc perf-overview get --app-id app-1",
                 "listAppInfos" : "asc app-infos list --app-id app-1",
                 "listExperiments" : "asc experiments list --app-id app-1",
                 "listPricePoints" : "asc apps price-points list --app-id app-1 --territory USA",

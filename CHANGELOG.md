@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - asc is now licensed under Apache 2.0 instead of MIT. It stays free and open source, and the license now also grants patent rights. → [LICENSE](LICENSE)
 
 ### Added
+- `asc perf-overview get --app-id <id>` shows in one call what regressed in the latest version, each Xcode Organizer metric next to Apple's goal, and the top hang, launch and disk-write hotspots. Also over REST. → [docs](docs/features/performance/README.md)
 - `asc subscriptions list` shows whether a subscription supports multiple seats and its markets (App Store, Apple School, Apple Business). Change them with `asc subscriptions update --multi-seat-status` and `--market-setting`, or over REST. → [docs](docs/features/iap-subscriptions/README.md)
 
 ### Fixed

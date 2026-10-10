@@ -1260,4 +1260,21 @@ struct RESTRoutesTests {
         #expect(output.contains("\"_links\""))
         #expect(output.contains("/api/v1/apps/app-42/availability"))
     }
+
+    // MARK: - Performance overview
+
+    @Test func `should link the performance overview to itself, app metrics and builds over REST`() async throws {
+        let repo = MockPerfOverviewRepository()
+        given(repo).getOverview(appId: .any, deviceType: .any).willReturn(
+            PerformanceOverview(appId: "1234567890")
+        )
+
+        let output = try await PerfOverviewGet.parse(["--app-id", "1234567890"])
+            .execute(repo: repo, affordanceMode: .rest).replacingOccurrences(of: "\\/", with: "/")
+
+        #expect(output.contains("\"_links\""))
+        #expect(output.contains("/api/v1/apps/1234567890/perf-overview"))
+        #expect(output.contains("/api/v1/apps/1234567890/perf-metrics"))
+        #expect(output.contains("/api/v1/apps/1234567890/builds"))
+    }
 }

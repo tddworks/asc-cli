@@ -381,6 +381,12 @@ struct ClientProvider {
         return try factory.makePerfMetricsRepository(authProvider: authProvider)
     }
 
+    static func makePerfOverviewRepository() throws -> any PerfOverviewRepository {
+        let authProvider = CompositeAuthProvider()
+        let factory = ClientFactory()
+        return try factory.makePerfOverviewRepository(authProvider: authProvider)
+    }
+
     static func makeDiagnosticsRepository() throws -> any DiagnosticsRepository {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
