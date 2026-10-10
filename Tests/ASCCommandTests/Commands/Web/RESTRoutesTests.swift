@@ -1260,4 +1260,227 @@ struct RESTRoutesTests {
         #expect(output.contains("\"_links\""))
         #expect(output.contains("/api/v1/apps/app-42/availability"))
     }
+
+    // MARK: - Game Center
+
+    @Test func `should link a game's detail, achievements, leaderboards and blocked players over REST`() async throws {
+        let mockRepo = MockGameCenterRepository()
+        given(mockRepo).getDetail(appId: .any)
+            .willReturn(GameCenterDetail(id: "gc-1", appId: "app-1", isArcadeEnabled: false))
+
+        let output = try await GameCenterDetailGet.parse(["--app-id", "app-1", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+
+        #expect(output.replacingOccurrences(of: "\\/", with: "/") == """
+        {
+          "data" : [
+            {
+              "_links" : {
+                "getDetail" : {
+                  "href" : "/api/v1/apps/app-1/game-center",
+                  "method" : "GET"
+                },
+                "listAchievements" : {
+                  "href" : "/api/v1/game-center/details/gc-1/achievements",
+                  "method" : "GET"
+                },
+                "listBlockedPlayers" : {
+                  "href" : "/api/v1/game-center/details/gc-1/blocked-players",
+                  "method" : "GET"
+                },
+                "listLeaderboards" : {
+                  "href" : "/api/v1/game-center/details/gc-1/leaderboards",
+                  "method" : "GET"
+                }
+              },
+              "appId" : "app-1",
+              "id" : "gc-1",
+              "isArcadeEnabled" : false
+            }
+          ]
+        }
+        """)
+    }
+
+    @Test func `should link a leaderboard's siblings, delete and score moderation over REST`() async throws {
+        let mockRepo = MockGameCenterRepository()
+        given(mockRepo).listLeaderboards(gameCenterDetailId: .any).willReturn([
+            GameCenterLeaderboard(id: "lb-1", gameCenterDetailId: "gc-1", referenceName: "All Time High",
+                                  vendorIdentifier: "all_time_high", scoreSortType: .desc,
+                                  submissionType: .bestScore, isArchived: false),
+        ])
+
+        let output = try await GameCenterLeaderboardsList.parse(["--detail-id", "gc-1", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+
+        #expect(output.replacingOccurrences(of: "\\/", with: "/") == """
+        {
+          "data" : [
+            {
+              "_links" : {
+                "delete" : {
+                  "href" : "/api/v1/game-center/leaderboards/lb-1",
+                  "method" : "DELETE"
+                },
+                "listLeaderboards" : {
+                  "href" : "/api/v1/game-center/details/gc-1/leaderboards",
+                  "method" : "GET"
+                },
+                "listScoreModerations" : {
+                  "href" : "/api/v1/game-center/leaderboards/lb-1/score-moderations",
+                  "method" : "GET"
+                }
+              },
+              "gameCenterDetailId" : "gc-1",
+              "id" : "lb-1",
+              "isArchived" : false,
+              "referenceName" : "All Time High",
+              "scoreSortType" : "DESC",
+              "submissionType" : "BEST_SCORE",
+              "vendorIdentifier" : "all_time_high"
+            }
+          ]
+        }
+        """)
+    }
+
+    @Test func `should link block, block player and the score list for a visible score over REST`() async throws {
+        let mockRepo = MockGameCenterModerationRepository()
+        given(mockRepo).listScoreModerations(leaderboardId: .any, blockedOnly: .any).willReturn([
+            GameCenterScoreModeration(id: "mod-1", leaderboardId: "lb-1", rank: "1", score: "9999",
+                                      submittedDate: nil, isBlocked: false, isPreReleased: false, context: nil,
+                                      challengeIds: ["ch-1"], playerId: "player-1", playerNickname: nil,
+                                      isPlayerBlocked: false),
+        ])
+
+        let output = try await GameCenterScoreModerationsList.parse(["--leaderboard-id", "lb-1", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+
+        #expect(output.replacingOccurrences(of: "\\/", with: "/") == """
+        {
+          "data" : [
+            {
+              "_links" : {
+                "block" : {
+                  "href" : "/api/v1/game-center/score-moderations/mod-1/block",
+                  "method" : "POST"
+                },
+                "blockPlayer" : {
+                  "href" : "/api/v1/game-center/players/player-1/block",
+                  "method" : "POST"
+                },
+                "listScoreModerations" : {
+                  "href" : "/api/v1/game-center/leaderboards/lb-1/score-moderations",
+                  "method" : "GET"
+                }
+              },
+              "challengeIds" : [
+                "ch-1"
+              ],
+              "id" : "mod-1",
+              "isBlocked" : false,
+              "isPlayerBlocked" : false,
+              "isPreReleased" : false,
+              "leaderboardId" : "lb-1",
+              "playerId" : "player-1",
+              "rank" : "1",
+              "score" : "9999"
+            }
+          ]
+        }
+        """)
+    }
+
+    @Test func `should link unblock for a blocked score over REST`() async throws {
+        let mockRepo = MockGameCenterModerationRepository()
+        given(mockRepo).updateScoreModeration(id: .any, isBlocked: .any).willReturn(
+            GameCenterScoreModeration(id: "mod-1", leaderboardId: nil, rank: nil, score: nil,
+                                      submittedDate: nil, isBlocked: true, isPreReleased: false, context: nil,
+                                      challengeIds: ["ch-1"], playerId: nil, playerNickname: nil,
+                                      isPlayerBlocked: nil)
+        )
+
+        let output = try await GameCenterScoreModerationsBlock.parse(["--moderation-id", "mod-1", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+
+        #expect(output.replacingOccurrences(of: "\\/", with: "/") == """
+        {
+          "data" : [
+            {
+              "_links" : {
+                "unblock" : {
+                  "href" : "/api/v1/game-center/score-moderations/mod-1/unblock",
+                  "method" : "POST"
+                }
+              },
+              "challengeIds" : [
+                "ch-1"
+              ],
+              "id" : "mod-1",
+              "isBlocked" : true,
+              "isPreReleased" : false
+            }
+          ]
+        }
+        """)
+    }
+
+    @Test func `should link unblock and the blocked list for a blocked player over REST`() async throws {
+        let mockRepo = MockGameCenterModerationRepository()
+        given(mockRepo).listBlockedPlayers(gameCenterDetailId: .any).willReturn([
+            GameCenterPlayer(id: "player-1", gameCenterDetailId: "gc-1", nickname: nil, bundleId: nil, isBlocked: true),
+        ])
+
+        let output = try await GameCenterBlockedPlayersList.parse(["--detail-id", "gc-1", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+
+        #expect(output.replacingOccurrences(of: "\\/", with: "/") == """
+        {
+          "data" : [
+            {
+              "_links" : {
+                "listBlockedPlayers" : {
+                  "href" : "/api/v1/game-center/details/gc-1/blocked-players",
+                  "method" : "GET"
+                },
+                "unblock" : {
+                  "href" : "/api/v1/game-center/players/player-1/unblock",
+                  "method" : "POST"
+                }
+              },
+              "gameCenterDetailId" : "gc-1",
+              "id" : "player-1",
+              "isBlocked" : true
+            }
+          ]
+        }
+        """)
+    }
+
+    @Test func `should link block for an unblocked player over REST`() async throws {
+        let mockRepo = MockGameCenterModerationRepository()
+        given(mockRepo).updatePlayer(id: .any, isBlocked: .any).willReturn(
+            GameCenterPlayer(id: "player-1", gameCenterDetailId: nil, nickname: nil, bundleId: nil, isBlocked: false)
+        )
+
+        let output = try await GameCenterPlayersUnblock.parse(["--player-id", "player-1", "--pretty"])
+            .execute(repo: mockRepo, affordanceMode: .rest)
+
+        #expect(output.replacingOccurrences(of: "\\/", with: "/") == """
+        {
+          "data" : [
+            {
+              "_links" : {
+                "block" : {
+                  "href" : "/api/v1/game-center/players/player-1/block",
+                  "method" : "POST"
+                }
+              },
+              "id" : "player-1",
+              "isBlocked" : false
+            }
+          ]
+        }
+        """)
+    }
 }

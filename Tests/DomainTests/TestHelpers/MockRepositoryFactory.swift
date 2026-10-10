@@ -894,6 +894,52 @@ struct MockRepositoryFactory {
         )
     }
 
+    static func makeGameCenterScoreModeration(
+        id: String = "mod-1",
+        leaderboardId: String? = "lb-1",
+        rank: String? = "1",
+        score: String? = "9999",
+        submittedDate: String? = "2026-01-01T00:00:00Z",
+        isBlocked: Bool = false,
+        isPreReleased: Bool = false,
+        context: String? = nil,
+        challengeIds: [String] = [],
+        playerId: String? = "player-1",
+        playerNickname: String? = "Player One",
+        isPlayerBlocked: Bool? = false
+    ) -> GameCenterScoreModeration {
+        GameCenterScoreModeration(
+            id: id,
+            leaderboardId: leaderboardId,
+            rank: rank,
+            score: score,
+            submittedDate: submittedDate,
+            isBlocked: isBlocked,
+            isPreReleased: isPreReleased,
+            context: context,
+            challengeIds: challengeIds,
+            playerId: playerId,
+            playerNickname: playerNickname,
+            isPlayerBlocked: isPlayerBlocked
+        )
+    }
+
+    static func makeGameCenterPlayer(
+        id: String = "player-1",
+        gameCenterDetailId: String? = "gc-1",
+        nickname: String? = "Player One",
+        bundleId: String? = "com.example.game",
+        isBlocked: Bool = true
+    ) -> GameCenterPlayer {
+        GameCenterPlayer(
+            id: id,
+            gameCenterDetailId: gameCenterDetailId,
+            nickname: nickname,
+            bundleId: bundleId,
+            isBlocked: isBlocked
+        )
+    }
+
     // MARK: - App Clips
 
     static func makeAppClip(

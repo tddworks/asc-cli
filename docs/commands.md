@@ -3080,7 +3080,7 @@ asc xcode-cloud builds start --workflow-id <workflow-id> [--clean]
 
 ## asc game-center
 
-Manage Game Center achievements and leaderboards
+Manage Game Center achievements, leaderboards and score moderation
 
 ### asc game-center detail get
 
@@ -3174,6 +3174,79 @@ asc game-center leaderboards delete --leaderboard-id <leaderboard-id>
 | Flag | Required | Default | Description |
 |---|---|---|---|
 | `--leaderboard-id` | yes |  | Leaderboard ID |
+
+### asc game-center score-moderations list
+
+List scores submitted to a leaderboard
+
+```
+asc game-center score-moderations list --leaderboard-id <leaderboard-id> [--blocked-only]
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--leaderboard-id` | yes |  | Leaderboard ID |
+| `--blocked-only` |  |  | Only show blocked scores |
+
+### asc game-center score-moderations block
+
+Hide a score from the leaderboard
+
+```
+asc game-center score-moderations block --moderation-id <moderation-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--moderation-id` | yes |  | Score moderation ID |
+
+### asc game-center score-moderations unblock
+
+Show a previously blocked score on the leaderboard again
+
+```
+asc game-center score-moderations unblock --moderation-id <moderation-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--moderation-id` | yes |  | Score moderation ID |
+
+### asc game-center blocked-players list
+
+List blocked players for a Game Center detail
+
+```
+asc game-center blocked-players list --detail-id <detail-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--detail-id` | yes |  | Game Center detail ID |
+
+### asc game-center players block
+
+Hide all of a player's scores from the game's leaderboards
+
+```
+asc game-center players block --player-id <player-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--player-id` | yes |  | Game Center player ID |
+
+### asc game-center players unblock
+
+Let a blocked player's scores appear on the game's leaderboards again
+
+```
+asc game-center players unblock --player-id <player-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--player-id` | yes |  | Game Center player ID |
 
 ## asc app-clips
 
