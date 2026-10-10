@@ -23,6 +23,8 @@ public enum AgeRatingOverride: String, Sendable, Equatable, Codable, CaseIterabl
 
 public enum KoreaAgeRatingOverride: String, Sendable, Equatable, Codable, CaseIterable {
     case none = "NONE"
+    case all = "ALL"
+    case twelvePlus = "TWELVE_PLUS"
     case fifteenPlus = "FIFTEEN_PLUS"
     case nineteenPlus = "NINETEEN_PLUS"
 }

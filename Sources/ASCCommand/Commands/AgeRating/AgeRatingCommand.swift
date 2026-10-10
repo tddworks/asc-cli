@@ -126,7 +126,7 @@ struct AgeRatingUpdate: AsyncParsableCommand {
     @Option(name: .long, help: "Age rating override (NONE/NINE_PLUS/THIRTEEN_PLUS/SIXTEEN_PLUS/EIGHTEEN_PLUS/UNRATED)")
     var ageRatingOverride: AgeRatingOverride?
 
-    @Option(name: .long, help: "Korea age rating override (NONE/FIFTEEN_PLUS/NINETEEN_PLUS)")
+    @Option(name: .long, help: "Korea age rating override (NONE/ALL/TWELVE_PLUS/FIFTEEN_PLUS/NINETEEN_PLUS)")
     var koreaAgeRatingOverride: KoreaAgeRatingOverride?
 
     func run() async throws {

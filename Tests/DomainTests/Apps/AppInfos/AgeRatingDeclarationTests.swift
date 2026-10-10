@@ -56,6 +56,12 @@ struct AgeRatingDeclarationTests {
         #expect(decl.koreaAgeRatingOverride == .fifteenPlus)
     }
 
+    @Test func `should offer every Korea age-rating override App Store Connect accepts`() {
+        #expect(KoreaAgeRatingOverride.allCases.map(\.rawValue) == [
+            "NONE", "ALL", "TWELVE_PLUS", "FIFTEEN_PLUS", "NINETEEN_PLUS",
+        ])
+    }
+
     @Test func `contentIntensity has correct raw values`() {
         #expect(ContentIntensity.none.rawValue == "NONE")
         #expect(ContentIntensity.infrequentOrMild.rawValue == "INFREQUENT_OR_MILD")

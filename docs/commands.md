@@ -2701,7 +2701,7 @@ asc age-rating update --declaration-id <declaration-id> [--advertising <advertis
 | `--violence-realistic` |  |  | Realistic violence intensity One of: NONE, INFREQUENT_OR_MILD, FREQUENT_OR_INTENSE, INFREQUENT, FREQUENT. |
 | `--kids-age-band` |  |  | Kids age band (FIVE_AND_UNDER/SIX_TO_EIGHT/NINE_TO_ELEVEN) One of: FIVE_AND_UNDER, SIX_TO_EIGHT, NINE_TO_ELEVEN. |
 | `--age-rating-override` |  |  | Age rating override (NONE/NINE_PLUS/THIRTEEN_PLUS/SIXTEEN_PLUS/EIGHTEEN_PLUS/UNRATED) One of: NONE, NINE_PLUS, THIRTEEN_PLUS, SIXTEEN_PLUS, EIGHTEEN_PLUS, UNRATED. |
-| `--korea-age-rating-override` |  |  | Korea age rating override (NONE/FIFTEEN_PLUS/NINETEEN_PLUS) One of: NONE, FIFTEEN_PLUS, NINETEEN_PLUS. |
+| `--korea-age-rating-override` |  |  | Korea age rating override (NONE/ALL/TWELVE_PLUS/FIFTEEN_PLUS/NINETEEN_PLUS) One of: NONE, ALL, TWELVE_PLUS, FIFTEEN_PLUS, NINETEEN_PLUS. |
 
 ## asc app-categories
 

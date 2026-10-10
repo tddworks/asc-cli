@@ -8,7 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- appstoreconnect-swift-sdk updated to 4.5.1 (App Store Connect API 4.5 and 4.5.1).
 - asc is now licensed under Apache 2.0 instead of MIT. It stays free and open source, and the license now also grants patent rights. → [LICENSE](LICENSE)
+
+### Fixed
+- `asc age-rating` now shows and sets the Korea overrides `ALL` and `TWELVE_PLUS`. Before, an app rated with either one showed no Korea override at all. → [docs](docs/features/age-rating/README.md)
 
 ---
 
