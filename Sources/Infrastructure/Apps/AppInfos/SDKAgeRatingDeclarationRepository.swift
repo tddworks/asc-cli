@@ -61,7 +61,8 @@ public struct SDKAgeRatingDeclarationRepository: AgeRatingDeclarationRepository,
             violenceRealistic: mapIntensity(a?.violenceRealistic),
             kidsAgeBand: a?.kidsAgeBand.flatMap { Domain.KidsAgeBand(rawValue: $0.rawValue) },
             ageRatingOverride: a?.ageRatingOverrideV2.flatMap { Domain.AgeRatingOverride(rawValue: $0.rawValue) },
-            koreaAgeRatingOverride: a?.koreaAgeRatingOverride.flatMap { Domain.KoreaAgeRatingOverride(rawValue: $0.rawValue) }
+            koreaAgeRatingOverride: a?.koreaAgeRatingOverride.flatMap { Domain.KoreaAgeRatingOverride(rawValue: $0.rawValue) },
+            gracRatingClassificationNumber: a?.gracRatingClassificationNumber
         )
     }
 
@@ -102,7 +103,8 @@ public struct SDKAgeRatingDeclarationRepository: AgeRatingDeclarationRepository,
                 .flatMap { .init(rawValue: $0.rawValue) },
             violenceRealistic: update.violenceRealistic.flatMap { .init(rawValue: $0.rawValue) },
             ageRatingOverrideV2: update.ageRatingOverride.flatMap { .init(rawValue: $0.rawValue) },
-            koreaAgeRatingOverride: update.koreaAgeRatingOverride.flatMap { .init(rawValue: $0.rawValue) }
+            koreaAgeRatingOverride: update.koreaAgeRatingOverride.flatMap { .init(rawValue: $0.rawValue) },
+            gracRatingClassificationNumber: update.gracRatingClassificationNumber
         )
     }
 }

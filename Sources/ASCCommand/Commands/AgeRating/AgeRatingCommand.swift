@@ -129,6 +129,9 @@ struct AgeRatingUpdate: AsyncParsableCommand {
     @Option(name: .long, help: "Korea age rating override (NONE/ALL/TWELVE_PLUS/FIFTEEN_PLUS/NINETEEN_PLUS)")
     var koreaAgeRatingOverride: KoreaAgeRatingOverride?
 
+    @Option(name: .long, help: "Korea GRAC rating classification number")
+    var gracRatingClassificationNumber: String?
+
     func run() async throws {
         let repo = try ClientProvider.makeAgeRatingDeclarationRepository()
         print(try await execute(repo: repo))
@@ -161,6 +164,7 @@ struct AgeRatingUpdate: AsyncParsableCommand {
         update.kidsAgeBand = kidsAgeBand
         update.ageRatingOverride = ageRatingOverride
         update.koreaAgeRatingOverride = koreaAgeRatingOverride
+        update.gracRatingClassificationNumber = gracRatingClassificationNumber
 
         let declaration = try await repo.updateDeclaration(id: declarationId, update: update)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)

@@ -101,4 +101,38 @@ struct AgeRatingUpdateTests {
         }
         """)
     }
+
+    @Test func `should set Korea's GRAC classification number`() async throws {
+        // Given - App Store Connect applies the number it is sent
+        let mockRepo = MockAgeRatingDeclarationRepository()
+        given(mockRepo).updateDeclaration(id: .any, update: .any)
+            .willProduce { id, update in
+                AgeRatingDeclaration(id: id, appInfoId: "info-42", gracRatingClassificationNumber: update.gracRatingClassificationNumber)
+            }
+
+        // When
+        let cmd = try AgeRatingUpdate.parse([
+            "--declaration-id", "decl-1",
+            "--grac-rating-classification-number", "CC-OL-000000-000",
+            "--pretty",
+        ])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        // Then
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "getAgeRating" : "asc age-rating get --app-info-id info-42",
+                "update" : "asc age-rating update --declaration-id decl-1"
+              },
+              "appInfoId" : "info-42",
+              "gracRatingClassificationNumber" : "CC-OL-000000-000",
+              "id" : "decl-1"
+            }
+          ]
+        }
+        """)
+    }
 }

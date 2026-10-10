@@ -75,7 +75,7 @@ The PATCH body uses the JSON field names from the response (e.g. `{"isGambling":
 - The declaration belongs to an `AppInfo`, not to the app or a version, so `get` takes `--app-info-id` while `update` takes the declaration's own `id`.
 - `update` is a partial PATCH: only the flags you pass change.
 - Intensity flags accept `NONE`, `INFREQUENT_OR_MILD`, `FREQUENT_OR_INTENSE`, `INFREQUENT`, `FREQUENT`; boolean flags take `true`/`false`.
-- `--age-rating-override` values are `NONE`, `NINE_PLUS`, `THIRTEEN_PLUS`, `SIXTEEN_PLUS`, `EIGHTEEN_PLUS`, `UNRATED`; Korea has its own `--korea-age-rating-override` (`NONE`, `ALL`, `TWELVE_PLUS`, `FIFTEEN_PLUS`, `NINETEEN_PLUS`).
+- `--age-rating-override` values are `NONE`, `NINE_PLUS`, `THIRTEEN_PLUS`, `SIXTEEN_PLUS`, `EIGHTEEN_PLUS`, `UNRATED`; Korea has its own `--korea-age-rating-override` (`NONE`, `ALL`, `TWELVE_PLUS`, `FIFTEEN_PLUS`, `NINETEEN_PLUS`). Korea's GRAC classification number goes in `--grac-rating-classification-number` (REST body key `gracRatingClassificationNumber`).
 - `--kids-age-band` values are `FIVE_AND_UNDER`, `SIX_TO_EIGHT`, `NINE_TO_ELEVEN`.
 - `ageRatingOverride` maps to Apple's non-deprecated `ageRatingOverrideV2` field.
 
