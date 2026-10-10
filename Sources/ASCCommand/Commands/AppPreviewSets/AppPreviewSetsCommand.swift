@@ -5,7 +5,7 @@ import Foundation
 struct AppPreviewSetsCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "app-preview-sets",
-        abstract: "Manage App Store app preview sets",
+        abstract: "Manage App Store app preview sets (deprecated by Apple — use asset-library)",
         subcommands: [AppPreviewSetsList.self, AppPreviewSetsCreate.self]
     )
 }

@@ -176,6 +176,26 @@ public struct ClientFactory: Sendable {
         return SDKWinBackOfferRepository(client: provider)
     }
 
+    public func makeAssetLibraryRepository(authProvider: any AuthProvider) throws -> any AssetLibraryRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKAssetLibraryRepository(client: provider)
+    }
+
+    public func makeLibraryImageRepository(authProvider: any AuthProvider) throws -> any LibraryImageRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKLibraryImageRepository(client: provider)
+    }
+
+    public func makeLibraryVideoRepository(authProvider: any AuthProvider) throws -> any LibraryVideoRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKLibraryVideoRepository(client: provider)
+    }
+
+    public func makeAssetPlacementRepository(authProvider: any AuthProvider) throws -> any AssetPlacementRepository {
+        let provider = try makeProvider(authProvider: authProvider)
+        return SDKAssetPlacementRepository(client: provider)
+    }
+
     public func makeExperimentRepository(authProvider: any AuthProvider) throws -> any ExperimentRepository {
         let provider = try makeProvider(authProvider: authProvider)
         return SDKExperimentRepository(client: provider)

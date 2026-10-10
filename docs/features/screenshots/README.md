@@ -75,6 +75,7 @@ Creating sets and uploading are CLI-only.
 
 ## Gotchas
 
+- Apple deprecated screenshot sets and screenshots in API 4.5.1. They keep working, but new work belongs in the [asset library](../asset-library/README.md): upload once, place on many localizations.
 - `--display-type` takes the App Store Connect raw value (e.g. `APP_IPHONE_67`, `APP_IPAD_PRO_3GEN_129`, `APP_DESKTOP`, `APP_APPLE_VISION_PRO`), not the human-readable name shown in tables.
 - `screenshots upload` runs Apple's three-step flow for you: reserve, upload the binary, then commit. A screenshot is only ready for submission when its state is `COMPLETE`; other states are `AWAITING_UPLOAD`, `UPLOAD_COMPLETE` and `FAILED`.
 - A set's `screenshotsCount` is 0 when it is empty; the set still exists.

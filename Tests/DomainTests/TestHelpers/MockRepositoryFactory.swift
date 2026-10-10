@@ -1555,4 +1555,97 @@ extension MockRepositoryFactory {
             metrics: metrics, hotspots: hotspots
         )
     }
+
+    // MARK: - App Asset Library
+
+    static func makeAssetLibrary(
+        id: String = "lib-1",
+        appId: String = "app-1"
+    ) -> AppAssetLibrary {
+        AppAssetLibrary(id: id, appId: appId)
+    }
+
+    static func makeLibraryImage(
+        id: String = "img-1",
+        libraryId: String = "lib-1",
+        fileName: String = "home.png",
+        fileSize: Int = 14619,
+        category: AssetCategory = .appScreenshotsAndPreviews,
+        state: LibraryAssetState = .prepareForSubmission,
+        referenceName: String? = nil,
+        specId: String? = nil,
+        width: Int? = nil,
+        height: Int? = nil,
+        templateUrl: String? = nil,
+        stateDetails: [AssetStateDetail]? = nil,
+        createdDate: String? = nil
+    ) -> LibraryImage {
+        LibraryImage(
+            id: id, libraryId: libraryId, fileName: fileName, fileSize: fileSize,
+            category: category, state: state, referenceName: referenceName, specId: specId,
+            width: width, height: height, templateUrl: templateUrl,
+            stateDetails: stateDetails, createdDate: createdDate
+        )
+    }
+
+    static func makeAssetPlacement(
+        id: String = "pl-1",
+        surface: PlacementSurface = .appStoreVersionLocalization,
+        localizationId: String = "loc-1",
+        mediaType: AssetMediaType = .image,
+        assetId: String = "img-1",
+        placementType: AssetPlacementType = .appScreenshot,
+        placementGroup: String = "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE",
+        position: Int? = nil,
+        state: PlacementState = .parentPrepareForSubmission,
+        stateDetails: [AssetStateDetail]? = nil
+    ) -> AssetPlacement {
+        AssetPlacement(
+            id: id, surface: surface, localizationId: localizationId, mediaType: mediaType,
+            assetId: assetId, placementType: placementType, placementGroup: placementGroup,
+            position: position, state: state, stateDetails: stateDetails
+        )
+    }
+
+    static func makeAssetPlacementGroup(
+        id: String = "IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE",
+        placementType: AssetPlacementType = .appScreenshot,
+        platform: String? = "IPHONE_APP_STORE",
+        displayClass: String? = "IPHONE_DYNAMIC_ISLAND_LARGE_DISPLAY",
+        feature: String? = "APP_STORE_VERSIONS",
+        sizes: [String] = ["1290x2796"],
+        maxCount: Int? = 10
+    ) -> AssetPlacementGroup {
+        AssetPlacementGroup(
+            id: id, placementType: placementType, platform: platform, displayClass: displayClass,
+            feature: feature, sizes: sizes, maxCount: maxCount
+        )
+    }
+
+    static func makeLibraryVideo(
+        id: String = "vid-1",
+        libraryId: String = "lib-1",
+        fileName: String = "preview.mp4",
+        fileSize: Int = 31457280,
+        category: AssetCategory = .appScreenshotsAndPreviews,
+        state: LibraryAssetState = .prepareForSubmission,
+        referenceName: String? = nil,
+        specId: String? = nil,
+        width: Int? = nil,
+        height: Int? = nil,
+        stateDetails: [AssetStateDetail]? = nil,
+        createdDate: String? = nil,
+        previewFrameTimeCode: String? = nil,
+        previewFrameState: String? = nil,
+        previewFrameUrl: String? = nil,
+        videoUrl: String? = nil
+    ) -> LibraryVideo {
+        LibraryVideo(
+            id: id, libraryId: libraryId, fileName: fileName, fileSize: fileSize,
+            category: category, state: state, referenceName: referenceName, specId: specId,
+            width: width, height: height, stateDetails: stateDetails, createdDate: createdDate,
+            previewFrameTimeCode: previewFrameTimeCode, previewFrameState: previewFrameState,
+            previewFrameUrl: previewFrameUrl, videoUrl: videoUrl
+        )
+    }
 }

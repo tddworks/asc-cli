@@ -23,6 +23,7 @@ struct AppsListTests {
             {
               "affordances" : {
                 "createVersion" : "asc versions create --app-id app-1",
+                "getAssetLibrary" : "asc asset-library get --app-id app-1",
                 "getPerfOverview" : "asc perf-overview get --app-id app-1",
                 "listAppInfos" : "asc app-infos list --app-id app-1",
                 "listExperiments" : "asc experiments list --app-id app-1",
@@ -58,6 +59,7 @@ struct AppsListTests {
             {
               "affordances" : {
                 "createVersion" : "asc versions create --app-id app-1",
+                "getAssetLibrary" : "asc asset-library get --app-id app-1",
                 "getPerfOverview" : "asc perf-overview get --app-id app-1",
                 "listAppInfos" : "asc app-infos list --app-id app-1",
                 "listExperiments" : "asc experiments list --app-id app-1",

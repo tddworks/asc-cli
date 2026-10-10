@@ -94,6 +94,7 @@ extension App: AffordanceProviding {
             Affordance(key: "listPricePoints", command: "apps price-points", action: "list",
                        params: ["app-id": id, "territory": "USA"]),
             Affordance(key: "updateContentRights", command: "apps", action: "update", params: ["app-id": id]),
+            Affordance(key: "getAssetLibrary", command: "asset-library", action: "get", params: ["app-id": id]),
         ]
     }
 

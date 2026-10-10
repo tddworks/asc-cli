@@ -59,6 +59,7 @@ A finished preview looks like this (null fields are omitted):
 ```
 
 ## Gotchas
+- Apple deprecated preview sets and previews in API 4.5.1. They keep working, but new work belongs in the [asset library](../asset-library/README.md) (`asc asset-videos`).
 - A preview has two states. `assetDeliveryState` tracks the upload (`AWAITING_UPLOAD`, `UPLOAD_COMPLETE`, `COMPLETE`, `FAILED`). `videoDeliveryState` tracks Apple's encoding and adds `PROCESSING`. The preview is ready only when `videoDeliveryState` is `COMPLETE`, and `videoURL` appears only after encoding.
 - `upload` accepts `.mp4`, `.mov` and `.m4v`. It reserves a slot, uploads the chunks, then confirms with an MD5 checksum.
 - `--preview-type` values have no `APP_` prefix, unlike screenshot display types: `IPHONE_67`, `IPHONE_61`, `IPHONE_65`, `IPHONE_58`, `IPHONE_55`, `IPHONE_47`, `IPHONE_40`, `IPHONE_35`, `IPAD_PRO_3GEN_129`, `IPAD_PRO_3GEN_11`, `IPAD_PRO_129`, `IPAD_105`, `IPAD_97`, `DESKTOP`, `APPLE_TV`, `APPLE_VISION_PRO`.

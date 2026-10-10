@@ -21,6 +21,7 @@ struct ExperimentTreatmentLocalizationsTests {
             {
               "affordances" : {
                 "delete" : "asc experiment-treatment-localizations delete --localization-id loc-1",
+                "listPlacements" : "asc asset-placements list --treatment-localization-id loc-1",
                 "listSiblings" : "asc experiment-treatment-localizations list --treatment-id trt-1"
               },
               "id" : "loc-1",
