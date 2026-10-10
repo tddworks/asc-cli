@@ -26,22 +26,9 @@ struct DiagnosticLogsList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any DiagnosticsRepository) async throws -> String {
+    func execute(repo: any DiagnosticsRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let logs = try await repo.listLogs(signatureId: signatureId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            logs,
-            headers: ["ID", "Bundle ID", "Version", "OS", "Device", "Event"],
-            rowMapper: {
-                [
-                    $0.id,
-                    $0.bundleId ?? "-",
-                    $0.appVersion ?? "-",
-                    $0.osVersion ?? "-",
-                    $0.deviceType ?? "-",
-                    $0.event ?? "-",
-                ]
-            }
-        )
+        return try formatter.formatAgentItems(logs, affordanceMode: affordanceMode)
     }
 }

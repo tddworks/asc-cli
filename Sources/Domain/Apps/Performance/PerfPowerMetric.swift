@@ -87,14 +87,29 @@ public struct PerformanceMetric: Sendable, Equatable, Identifiable, Codable {
 }
 
 extension PerformanceMetric: AffordanceProviding {
-    public var affordances: [String: String] {
-        var cmds: [String: String] = [:]
+    public var structuredAffordances: [Affordance] {
         switch parentType {
         case .app:
-            cmds["listAppMetrics"] = "asc perf-metrics list --app-id \(parentId)"
+            return [Affordance(key: "listAppMetrics", command: "perf-metrics", action: "list", params: ["app-id": parentId])]
         case .build:
-            cmds["listBuildMetrics"] = "asc perf-metrics list --build-id \(parentId)"
+            return [Affordance(key: "listBuildMetrics", command: "perf-metrics", action: "list", params: ["build-id": parentId])]
         }
-        return cmds
+    }
+}
+
+extension PerformanceMetric: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Category", "Metric", "Value", "Unit", "Goal"]
+    }
+
+    public var tableRow: [String] {
+        [
+            id,
+            category.rawValue,
+            metricIdentifier,
+            latestValue.map { String($0) } ?? "-",
+            unit ?? "-",
+            goalValue.map { String($0) } ?? "-",
+        ]
     }
 }

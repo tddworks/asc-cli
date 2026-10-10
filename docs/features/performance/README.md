@@ -124,8 +124,12 @@ Each log entry has device, OS and app version, and a `callStackSummary` of the t
 | CLI | REST |
 |---|---|
 | `asc perf-overview get --app-id <id> [--device-type <t>]` | `GET /api/v1/apps/<id>/perf-overview[?device-type=<t>]` |
+| `asc perf-metrics list --app-id <id> [--metric-type <t>]` | `GET /api/v1/apps/<id>/perf-metrics[?metric-type=<t>]` |
+| `asc perf-metrics list --build-id <id> [--metric-type <t>]` | `GET /api/v1/builds/<id>/perf-metrics[?metric-type=<t>]` |
+| `asc diagnostics list --build-id <id> [--diagnostic-type <t>]` | `GET /api/v1/builds/<id>/diagnostics[?diagnostic-type=<t>]` |
+| `asc diagnostic-logs list --signature-id <id>` | `GET /api/v1/diagnostics/<id>/logs` |
 
-Every app's `_links` include `getPerfOverview`.
+Every app's `_links` include `getPerfOverview`. Metrics link `listAppMetrics` or `listBuildMetrics`; a signature links `listLogs` and `listSignatures`; a log links `listLogs`.
 
 ## Gotchas
 
@@ -133,7 +137,6 @@ Every app's `_links` include `getPerfOverview`.
 - Diagnostics are per build only; there is no app-level `diagnostics list`.
 - Metric and log IDs are synthetic (`{parentId}-{category}-{metric}`, `{signatureId}-{product}-{log}`); they are stable for display but are not Apple IDs.
 - `--device-type` is passed to App Store Connect as-is; it echoes back as `deviceType`.
-- `perf-overview` is the only one of these commands on REST so far; `perf-metrics`, `diagnostics` and `diagnostic-logs` are CLI-only.
 
 ## See also
 

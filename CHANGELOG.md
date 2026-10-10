@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - appstoreconnect-swift-sdk updated to 4.5.1 (App Store Connect API 4.5 and 4.5.1).
 - `asc screenshot-sets`, `screenshots`, `app-preview-sets` and `app-previews` say in `--help` that Apple deprecated them; they work as before. → [docs](docs/features/asset-library/README.md)
+- `asc perf-metrics`, `asc diagnostics` and `asc diagnostic-logs` are now also available over REST (`asc web-server`), with `_links` to the next call. → [docs](docs/features/performance/README.md)
 - asc is now licensed under Apache 2.0 instead of MIT. It stays free and open source, and the license now also grants patent rights. → [LICENSE](LICENSE)
 
 ### Added

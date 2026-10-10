@@ -52,4 +52,31 @@ struct DiagnosticSignatureInfoTests {
         let json = String(data: data, encoding: .utf8)!
         #expect(json.contains("\"insightDirection\":\"UP\""))
     }
+
+    // MARK: - REST
+
+    @Test func `should link a signature to its logs and its build's diagnostics over REST`() {
+        let sig = MockRepositoryFactory.makeDiagnosticSignatureInfo(id: "sig-1", buildId: "build-1")
+        #expect(sig.apiLinks == [
+            "listLogs": APILink(href: "/api/v1/diagnostics/sig-1/logs", method: "GET"),
+            "listSignatures": APILink(href: "/api/v1/builds/build-1/diagnostics", method: "GET"),
+        ])
+    }
+
+    // MARK: - Table
+
+    @Test func `should show id, type, signature, weight and trend in a table`() {
+        let sig = MockRepositoryFactory.makeDiagnosticSignatureInfo(
+            id: "sig-1", diagnosticType: .hangs, signature: "main thread hang", weight: 45.2, insightDirection: "UP"
+        )
+        #expect(DiagnosticSignatureInfo.tableHeaders == ["ID", "Type", "Signature", "Weight", "Trend"])
+        #expect(sig.tableRow == ["sig-1", "HANGS", "main thread hang", "45.2", "UP"])
+    }
+
+    @Test func `should show a dash for trend in a table when App Store Connect gives no direction`() {
+        let sig = MockRepositoryFactory.makeDiagnosticSignatureInfo(
+            id: "sig-1", diagnosticType: .launches, signature: "slow launch", weight: 10, insightDirection: nil
+        )
+        #expect(sig.tableRow == ["sig-1", "LAUNCHES", "slow launch", "10.0", "-"])
+    }
 }

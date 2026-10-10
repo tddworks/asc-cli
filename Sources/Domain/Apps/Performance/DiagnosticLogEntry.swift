@@ -65,9 +65,19 @@ public struct DiagnosticLogEntry: Sendable, Equatable, Identifiable, Codable {
 }
 
 extension DiagnosticLogEntry: AffordanceProviding {
-    public var affordances: [String: String] {
+    public var structuredAffordances: [Affordance] {
         [
-            "listLogs": "asc diagnostic-logs list --signature-id \(signatureId)",
+            Affordance(key: "listLogs", command: "diagnostic-logs", action: "list", params: ["signature-id": signatureId]),
         ]
+    }
+}
+
+extension DiagnosticLogEntry: Presentable {
+    public static var tableHeaders: [String] {
+        ["ID", "Bundle ID", "Version", "OS", "Device", "Event"]
+    }
+
+    public var tableRow: [String] {
+        [id, bundleId ?? "-", appVersion ?? "-", osVersion ?? "-", deviceType ?? "-", event ?? "-"]
     }
 }
