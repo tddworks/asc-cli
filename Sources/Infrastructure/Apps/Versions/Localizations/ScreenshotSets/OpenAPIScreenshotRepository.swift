@@ -4,9 +4,11 @@ import Foundation
 
 public struct SDKScreenshotRepository: ScreenshotRepository, @unchecked Sendable {
     private let client: any APIClient
+    private let uploader: UploadOperationsExecutor
 
-    public init(client: any APIClient) {
+    public init(client: any APIClient, uploader: UploadOperationsExecutor = UploadOperationsExecutor()) {
         self.client = client
+        self.uploader = uploader
     }
 
     public func listScreenshotSets(localizationId: String) async throws -> [Domain.AppScreenshotSet] {
@@ -58,20 +60,7 @@ public struct SDKScreenshotRepository: ScreenshotRepository, @unchecked Sendable
         let uploadOps = reserved.data.attributes?.uploadOperations ?? []
 
         // Step 2: Upload image data via each upload operation
-        for op in uploadOps {
-            guard let urlString = op.url, let url = URL(string: urlString),
-                  let offset = op.offset, let length = op.length else { continue }
-            let chunk = fileData.subdata(in: offset..<(offset + length))
-            var request = URLRequest(url: url)
-            request.httpMethod = op.method ?? "PUT"
-            request.httpBody = chunk
-            for header in op.requestHeaders ?? [] {
-                if let name = header.name, let value = header.value {
-                    request.setValue(value, forHTTPHeaderField: name)
-                }
-            }
-            _ = try await URLSession.shared.data(for: request)
-        }
+        try await uploader.upload(fileURL: fileURL, operations: uploadOps)
 
         // Step 3: Confirm upload
         let md5 = fileData.md5HexString

@@ -4,6 +4,7 @@ import Foundation
 
 public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @unchecked Sendable {
     private let client: any APIClient
+    private let uploader: UploadOperationsExecutor
     /// Per-attempt sleep when polling for `imageAsset` readiness post-upload.
     /// Mirrors the iOS SDK's 2s default; tests override to 0 to keep the suite fast.
     private let pollDelayNanos: UInt64
@@ -11,10 +12,12 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
 
     public init(
         client: any APIClient,
+        uploader: UploadOperationsExecutor = UploadOperationsExecutor(),
         pollDelayNanos: UInt64 = 2_000_000_000,
         pollMaxAttempts: Int = 15
     ) {
         self.client = client
+        self.uploader = uploader
         self.pollDelayNanos = pollDelayNanos
         self.pollMaxAttempts = pollMaxAttempts
     }
@@ -52,7 +55,7 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
         let uploadOps = reserved.data.attributes?.uploadOperations ?? []
         logUploadStep("subscription-review-screenshot reserved id=\(screenshotId) chunks=\(uploadOps.count)")
 
-        try await uploadChunks(uploadOps: uploadOps, fileData: fileData)
+        try await uploader.upload(fileURL: fileURL, operations: uploadOps)
         logUploadStep("subscription-review-screenshot chunks uploaded id=\(screenshotId)")
 
         let md5 = fileData.md5HexString
@@ -103,7 +106,7 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
         let uploadOps = reserved.data.attributes?.uploadOperations ?? []
         logUploadStep("subscription-image reserved id=\(imageId) chunks=\(uploadOps.count)")
 
-        try await uploadChunks(uploadOps: uploadOps, fileData: fileData)
+        try await uploader.upload(fileURL: fileURL, operations: uploadOps)
         logUploadStep("subscription-image chunks uploaded id=\(imageId)")
 
         let md5 = fileData.md5HexString
@@ -125,36 +128,6 @@ public struct SDKSubscriptionReviewRepository: SubscriptionReviewRepository, @un
 
     private func logUploadStep(_ message: String) {
         FileHandle.standardError.write(Data("[asc-upload] \(message)\n".utf8))
-    }
-
-    /// Mirrors `AppStoreConnectInAppPurchaseRepository.uploadChunks` in `AppStoreSdk-SPM`.
-    /// See the IAP repo's twin for rationale.
-    private func uploadChunks(uploadOps: [UploadOperation], fileData: Data) async throws {
-        for operation in uploadOps {
-            guard let urlString = operation.url,
-                  let url = URL(string: urlString),
-                  let method = operation.method,
-                  let offset = operation.offset,
-                  let length = operation.length
-            else { continue }
-
-            let chunk = fileData[offset..<(offset + length)]
-            var request = URLRequest(url: url)
-            request.httpMethod = method
-            for header in (operation.requestHeaders ?? []) {
-                if let name = header.name {
-                    request.setValue(header.value, forHTTPHeaderField: name)
-                }
-            }
-            request.httpBody = chunk
-
-            let (_, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse,
-                  200..<300 ~= httpResponse.statusCode
-            else {
-                throw APIError.unknown("Image upload chunk failed")
-            }
-        }
     }
 
     // MARK: - Poll for upload readiness
