@@ -117,25 +117,25 @@ public struct SDKAssetPlacementRepository: AssetPlacementRepository, @unchecked 
         switch surface {
         case .appStoreVersionLocalization:
             let r = APIEndpoint.v1.appStoreVersionLocalizations.id(localizationId).placements.get(parameters: .init(
-                filterPlacementType: placementType.flatMap { .init(rawValue: $0.rawValue) }.map { [$0] },
+                filterPlacementType: sdkFilter(placementType),
                 filterPlacementGroup: groups, sort: [.placementGroupPosition], limit: 200, include: [.image, .video]
             ))
             sdk = (r.path, r.query)
         case .experimentTreatmentLocalization:
             let r = APIEndpoint.v1.appStoreVersionExperimentTreatmentLocalizations.id(localizationId).placements.get(parameters: .init(
-                filterPlacementType: placementType.flatMap { .init(rawValue: $0.rawValue) }.map { [$0] },
+                filterPlacementType: sdkFilter(placementType),
                 filterPlacementGroup: groups, sort: [.placementGroupPosition], limit: 200, include: [.image, .video]
             ))
             sdk = (r.path, r.query)
         case .customProductPageLocalization:
             let r = APIEndpoint.v1.appCustomProductPageLocalizations.id(localizationId).placements.get(parameters: .init(
-                filterPlacementType: placementType.flatMap { .init(rawValue: $0.rawValue) }.map { [$0] },
+                filterPlacementType: sdkFilter(placementType),
                 filterPlacementGroup: groups, sort: [.placementGroupPosition], limit: 200, include: [.image, .video]
             ))
             sdk = (r.path, r.query)
         case .eventLocalization:
             let r = APIEndpoint.v1.appEventLocalizations.id(localizationId).placements.get(parameters: .init(
-                filterPlacementType: placementType.flatMap { .init(rawValue: $0.rawValue) }.map { [$0] },
+                filterPlacementType: sdkFilter(placementType),
                 filterPlacementGroup: groups, sort: [.placementGroupPosition], limit: 200, include: [.image, .video]
             ))
             sdk = (r.path, r.query)
