@@ -18,8 +18,8 @@ public struct SDKLibraryImageRepository: LibraryImageRepository, @unchecked Send
         category: AssetCategory?
     ) async throws -> [LibraryImage] {
         let sdk = APIEndpoint.v1.appAssetLibraries.id(libraryId).images.get(parameters: .init(
-            filterCategory: category.flatMap { .init(rawValue: $0.rawValue) }.map { [$0] },
-            filterState: state.flatMap { .init(rawValue: $0.rawValue) }.map { [$0] },
+            filterCategory: sdkFilter(category),
+            filterState: sdkFilter(state),
             filterID: imageId.map { [$0] },
             limit: 200
         ))
