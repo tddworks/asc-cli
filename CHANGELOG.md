@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.18.6] - 2026-10-11
+
 ### Changed
 - appstoreconnect-swift-sdk updated to 4.5.1 (App Store Connect API 4.5 and 4.5.1).
 - `asc screenshot-sets`, `screenshots`, `app-preview-sets` and `app-previews` say in `--help` that Apple deprecated them; they work as before. → [docs](docs/features/asset-library/README.md)
@@ -96,7 +100,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [0.17](docs/changelog/0.17.md) · [0.16](docs/changelog/0.16.md) · [0.1](docs/changelog/0.1.md)
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.18.5...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.18.6...HEAD
+[0.18.6]: https://github.com/tddworks/asc-cli/compare/v0.18.5...v0.18.6
 [0.18.5]: https://github.com/tddworks/asc-cli/compare/v0.18.4...v0.18.5
 [0.18.4]: https://github.com/tddworks/asc-cli/compare/v0.18.3...v0.18.4
 [0.18.3]: https://github.com/tddworks/asc-cli/compare/v0.18.2...v0.18.3
