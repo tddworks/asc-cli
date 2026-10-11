@@ -11,11 +11,23 @@ struct AssetPlacementTests {
         #expect(PlacementState.allCases.map(\.rawValue) == [
             "ASSET_PROCESSING", "FAILED", "PARENT_PREPARE_FOR_SUBMISSION", "PARENT_READY_FOR_REVIEW",
             "PARENT_WAITING_FOR_REVIEW", "PARENT_IN_REVIEW", "PARENT_APPROVED",
+            // Sent live by App Store Connect, though its spec omits it.
+            "ACTIVE",
         ])
     }
 
     @Test func `should be editable while the asset processes, the parent is being prepared or the placement failed`() {
         #expect(PlacementState.allCases.filter(\.isEditable) == [.assetProcessing, .failed, .parentPrepareForSubmission])
+    }
+
+    @Test func `should not offer delete or reorder for an active placement whose meaning Apple doesn't document`() {
+        let placement = MockRepositoryFactory.makeAssetPlacement(id: "pl-1", state: .active)
+        #expect(placement.state.rawValue == "ACTIVE")
+        #expect(placement.state.isEditable == false)
+        #expect(placement.state.isInReview == false)
+        #expect(placement.state.isLive == false)
+        #expect(placement.affordances["delete"] == nil)
+        #expect(placement.affordances["reorderGroup"] == nil)
     }
 
     @Test func `should be processing only while its asset is processed`() {

@@ -4,9 +4,11 @@ import Foundation
 
 public struct SDKBuildUploadRepository: BuildUploadRepository, @unchecked Sendable {
     private let client: any APIClient
+    private let uploader: UploadOperationsExecutor
 
-    public init(client: any APIClient) {
+    public init(client: any APIClient, uploader: UploadOperationsExecutor = UploadOperationsExecutor()) {
         self.client = client
+        self.uploader = uploader
     }
 
     public func uploadBuild(
@@ -38,9 +40,8 @@ public struct SDKBuildUploadRepository: BuildUploadRepository, @unchecked Sendab
         let uploadId = uploadSession.data.id
 
         // Step 2: Reserve file slot — get upload operations
-        let fileData = try Data(contentsOf: fileURL)
         let fileName = fileURL.lastPathComponent
-        let fileSize = Int64(fileData.count)
+        let fileSize = try (FileManager.default.attributesOfItem(atPath: fileURL.path)[.size] as? NSNumber)?.int64Value ?? 0
         let uti: BuildUploadFileCreateRequest.Data.Attributes.Uti =
             fileURL.pathExtension.lowercased() == "pkg" ? .comApplePkg : .comAppleIpa
 
@@ -55,21 +56,15 @@ public struct SDKBuildUploadRepository: BuildUploadRepository, @unchecked Sendab
         let fileId = fileResponse.data.id
         let uploadOps = fileResponse.data.attributes?.uploadOperations ?? []
 
-        // Step 3: Upload chunks to presigned URLs
-        for op in uploadOps {
-            guard let urlString = op.url, let url = URL(string: urlString),
-                  let offset = op.offset, let length = op.length else { continue }
-            let chunk = fileData.subdata(in: Int(offset)..<Int(offset + length))
-            var request = URLRequest(url: url)
-            request.httpMethod = op.method ?? "PUT"
-            request.httpBody = chunk
-            for header in op.requestHeaders ?? [] {
-                if let name = header.name, let value = header.value {
-                    request.setValue(value, forHTTPHeaderField: name)
-                }
-            }
-            _ = try await URLSession.shared.data(for: request)
-        }
+        // Step 3: Upload chunks to presigned URLs — build files describe parts with 64-bit
+        // offsets; the executor only needs method/url/range/headers.
+        try await uploader.upload(fileURL: fileURL, operations: uploadOps.map {
+            UploadOperation(
+                method: $0.method, url: $0.url,
+                length: $0.length.map(Int.init), offset: $0.offset.map(Int.init),
+                requestHeaders: $0.requestHeaders
+            )
+        })
 
         // Step 4: Commit upload — checksums are optional; don't send any to avoid API rejection
         let confirmBody = BuildUploadFileUpdateRequest(

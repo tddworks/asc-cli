@@ -32,7 +32,7 @@ struct PerfMetricsList: AsyncParsableCommand {
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any PerfMetricsRepository) async throws -> String {
+    func execute(repo: any PerfMetricsRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let filter = metricType.flatMap { PerformanceMetricCategory(rawValue: $0) }
         let metrics: [PerformanceMetric]
 
@@ -45,19 +45,6 @@ struct PerfMetricsList: AsyncParsableCommand {
         }
 
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
-        return try formatter.formatAgentItems(
-            metrics,
-            headers: ["ID", "Category", "Metric", "Value", "Unit", "Goal"],
-            rowMapper: { m in
-                [
-                    m.id,
-                    m.category.rawValue,
-                    m.metricIdentifier,
-                    m.latestValue.map { String($0) } ?? "-",
-                    m.unit ?? "-",
-                    m.goalValue.map { String($0) } ?? "-",
-                ]
-            }
-        )
+        return try formatter.formatAgentItems(metrics, affordanceMode: affordanceMode)
     }
 }

@@ -42,6 +42,21 @@ struct UploadOperationsExecutorTests {
         }
     }
 
+    @Test func `should fail without sending anything when App Store Connect leaves out a part's method, URL or byte range`() async throws {
+        let file = try Self.temporaryFile(contents: "0123456789")
+        defer { try? FileManager.default.removeItem(at: file) }
+        let http = SequencedStubHTTPClient()
+        http.enqueue(json: "", statusCode: 200)
+
+        await #expect(throws: (any Error).self) {
+            try await UploadOperationsExecutor(http: http).upload(fileURL: file, operations: [
+                UploadOperation(method: "PUT", url: "https://upload.example.com/part-1", length: 4, offset: 0),
+                UploadOperation(url: "https://upload.example.com/part-2", length: 6, offset: 4),
+            ])
+        }
+        #expect(http.capturedRequests.isEmpty)
+    }
+
     static func temporaryFile(contents: String) throws -> URL {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("upload-\(UUID().uuidString).png")
         try Data(contents.utf8).write(to: url)

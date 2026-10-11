@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - appstoreconnect-swift-sdk updated to 4.5.1 (App Store Connect API 4.5 and 4.5.1).
 - `asc screenshot-sets`, `screenshots`, `app-preview-sets` and `app-previews` say in `--help` that Apple deprecated them; they work as before. → [docs](docs/features/asset-library/README.md)
+- `asc perf-metrics`, `asc diagnostics` and `asc diagnostic-logs` are now also available over REST (`asc web-server`), with `_links` to the next call. → [docs](docs/features/performance/README.md)
 - asc is now licensed under Apache 2.0 instead of MIT. It stays free and open source, and the license now also grants patent rights. → [LICENSE](LICENSE)
 
 ### Added
@@ -18,10 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `asc subscriptions list` shows whether a subscription supports multiple seats and its markets (App Store, Apple School, Apple Business). Change them with `asc subscriptions update --multi-seat-status` and `--market-setting`, or over REST. → [docs](docs/features/iap-subscriptions/README.md)
 - `asc game-center score-moderations list|block|unblock`, `blocked-players list` and `players block|unblock` let you hide cheating leaderboard scores and block players. Game Center is now also reachable over REST. → [docs](docs/features/game-center/README.md)
 - `asc screenshots import --to-library` uploads an export ZIP into the asset library once and places each screenshot in the group its size matches, per locale and in order; `--dry-run` previews it. Also over REST. → [docs](docs/features/screenshot-editor/README.md)
+- `asc game-center achievements create` and `leaderboards create` are now also reachable over REST (POST to the Game Center detail's achievements or leaderboards). → [docs](docs/features/game-center/README.md)
 - `asc age-rating` shows Korea's GRAC classification number, and `asc age-rating update --grac-rating-classification-number` sets it, also over REST. → [docs](docs/features/age-rating/README.md)
 
 ### Fixed
 - `asc age-rating` now shows and sets the Korea overrides `ALL` and `TWELVE_PLUS`. Before, an app rated with either one showed no Korea override at all. → [docs](docs/features/age-rating/README.md)
+- `asc screenshots upload`, `asc app-previews upload` and `asc builds upload` now stop with an error when App Store Connect's storage rejects part of the file, or when App Store Connect sends an incomplete upload instruction. Before, they committed the upload anyway and left a broken asset behind.
 
 ---
 

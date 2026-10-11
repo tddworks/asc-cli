@@ -1278,6 +1278,139 @@ struct RESTRoutesTests {
         #expect(output.contains("/api/v1/apps/1234567890/builds"))
     }
 
+    // MARK: - Performance metrics & diagnostics
+
+    @Test func `should link an app's metrics to the app's perf-metrics over REST`() async throws {
+        let repo = MockPerfMetricsRepository()
+        given(repo).listAppMetrics(appId: .any, metricType: .any).willReturn([
+            PerformanceMetric(
+                id: "app-1-LAUNCH-launchTime", parentId: "app-1", parentType: .app,
+                category: .launch, metricIdentifier: "launchTime"
+            ),
+        ])
+
+        let output = try await PerfMetricsList.parse(["--app-id", "app-1", "--pretty"])
+            .execute(repo: repo, affordanceMode: .rest)
+
+        #expect(output.replacingOccurrences(of: "\\/", with: "/") == """
+        {
+          "data" : [
+            {
+              "_links" : {
+                "listAppMetrics" : {
+                  "href" : "/api/v1/apps/app-1/perf-metrics",
+                  "method" : "GET"
+                }
+              },
+              "category" : "LAUNCH",
+              "id" : "app-1-LAUNCH-launchTime",
+              "metricIdentifier" : "launchTime",
+              "parentId" : "app-1",
+              "parentType" : "app"
+            }
+          ]
+        }
+        """)
+    }
+
+    @Test func `should link a build's metrics to the build's perf-metrics over REST`() async throws {
+        let repo = MockPerfMetricsRepository()
+        given(repo).listBuildMetrics(buildId: .any, metricType: .any).willReturn([
+            PerformanceMetric(
+                id: "build-1-HANG-hangRate", parentId: "build-1", parentType: .build,
+                category: .hang, metricIdentifier: "hangRate"
+            ),
+        ])
+
+        let output = try await PerfMetricsList.parse(["--build-id", "build-1", "--pretty"])
+            .execute(repo: repo, affordanceMode: .rest)
+
+        #expect(output.replacingOccurrences(of: "\\/", with: "/") == """
+        {
+          "data" : [
+            {
+              "_links" : {
+                "listBuildMetrics" : {
+                  "href" : "/api/v1/builds/build-1/perf-metrics",
+                  "method" : "GET"
+                }
+              },
+              "category" : "HANG",
+              "id" : "build-1-HANG-hangRate",
+              "metricIdentifier" : "hangRate",
+              "parentId" : "build-1",
+              "parentType" : "build"
+            }
+          ]
+        }
+        """)
+    }
+
+    @Test func `should link a diagnostic signature to its logs and its build's diagnostics over REST`() async throws {
+        let repo = MockDiagnosticsRepository()
+        given(repo).listSignatures(buildId: .any, diagnosticType: .any).willReturn([
+            DiagnosticSignatureInfo(
+                id: "sig-1", buildId: "build-1", diagnosticType: .hangs,
+                signature: "main thread hang", weight: 45.2
+            ),
+        ])
+
+        let output = try await DiagnosticsList.parse(["--build-id", "build-1", "--pretty"])
+            .execute(repo: repo, affordanceMode: .rest)
+
+        #expect(output.replacingOccurrences(of: "\\/", with: "/") == """
+        {
+          "data" : [
+            {
+              "_links" : {
+                "listLogs" : {
+                  "href" : "/api/v1/diagnostics/sig-1/logs",
+                  "method" : "GET"
+                },
+                "listSignatures" : {
+                  "href" : "/api/v1/builds/build-1/diagnostics",
+                  "method" : "GET"
+                }
+              },
+              "buildId" : "build-1",
+              "diagnosticType" : "HANGS",
+              "id" : "sig-1",
+              "signature" : "main thread hang",
+              "weight" : 45.2
+            }
+          ]
+        }
+        """)
+    }
+
+    @Test func `should link a diagnostic log back to its signature's logs over REST`() async throws {
+        let repo = MockDiagnosticsRepository()
+        given(repo).listLogs(signatureId: .any).willReturn([
+            DiagnosticLogEntry(id: "sig-1-0-0", signatureId: "sig-1", event: "hang"),
+        ])
+
+        let output = try await DiagnosticLogsList.parse(["--signature-id", "sig-1", "--pretty"])
+            .execute(repo: repo, affordanceMode: .rest)
+
+        #expect(output.replacingOccurrences(of: "\\/", with: "/") == """
+        {
+          "data" : [
+            {
+              "_links" : {
+                "listLogs" : {
+                  "href" : "/api/v1/diagnostics/sig-1/logs",
+                  "method" : "GET"
+                }
+              },
+              "event" : "hang",
+              "id" : "sig-1-0-0",
+              "signatureId" : "sig-1"
+            }
+          ]
+        }
+        """)
+    }
+
     // MARK: - Game Center
 
     @Test func `should link a game's detail, achievements, leaderboards and blocked players over REST`() async throws {
