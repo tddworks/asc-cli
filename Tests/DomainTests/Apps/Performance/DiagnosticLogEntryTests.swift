@@ -47,4 +47,31 @@ struct DiagnosticLogEntryTests {
         #expect(!json.contains("appVersion"))
         #expect(!json.contains("callStackSummary"))
     }
+
+    // MARK: - REST
+
+    @Test func `should link a log back to its signature's logs over REST`() {
+        let entry = MockRepositoryFactory.makeDiagnosticLogEntry(signatureId: "sig-1")
+        #expect(entry.apiLinks == [
+            "listLogs": APILink(href: "/api/v1/diagnostics/sig-1/logs", method: "GET"),
+        ])
+    }
+
+    // MARK: - Table
+
+    @Test func `should show id, bundle id, version, OS, device and event in a table`() {
+        let entry = MockRepositoryFactory.makeDiagnosticLogEntry(
+            id: "log-1", bundleId: "com.example.app", appVersion: "2.0",
+            osVersion: "iOS 17.0", deviceType: "iPhone15,2", event: "hang"
+        )
+        #expect(DiagnosticLogEntry.tableHeaders == ["ID", "Bundle ID", "Version", "OS", "Device", "Event"])
+        #expect(entry.tableRow == ["log-1", "com.example.app", "2.0", "iOS 17.0", "iPhone15,2", "hang"])
+    }
+
+    @Test func `should show dashes in a table when a log has no metadata`() {
+        let entry = MockRepositoryFactory.makeDiagnosticLogEntry(
+            id: "log-1", bundleId: nil, appVersion: nil, osVersion: nil, deviceType: nil, event: nil
+        )
+        #expect(entry.tableRow == ["log-1", "-", "-", "-", "-", "-"])
+    }
 }

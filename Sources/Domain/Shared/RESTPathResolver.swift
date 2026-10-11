@@ -199,6 +199,7 @@ public final class RESTPathResolver: @unchecked Sendable {
         _ = _resolutionCenterRoutes
         _ = _experimentRoutes
         _ = _perfOverviewRoutes
+        _ = _performanceRoutes
         _ = _gameCenterRoutes
         _ = _assetLibraryRoutes
 

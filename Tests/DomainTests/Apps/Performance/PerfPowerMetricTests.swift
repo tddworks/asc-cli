@@ -99,4 +99,37 @@ struct PerformanceMetricTests {
         #expect(PerfMetricParentType.app.rawValue == "app")
         #expect(PerfMetricParentType.build.rawValue == "build")
     }
+
+    // MARK: - REST
+
+    @Test func `should link app metrics to the app's perf-metrics over REST`() {
+        let metric = MockRepositoryFactory.makePerfPowerMetric(parentId: "app-1", parentType: .app)
+        #expect(metric.apiLinks == [
+            "listAppMetrics": APILink(href: "/api/v1/apps/app-1/perf-metrics", method: "GET"),
+        ])
+    }
+
+    @Test func `should link build metrics to the build's perf-metrics over REST`() {
+        let metric = MockRepositoryFactory.makePerfPowerMetric(parentId: "build-1", parentType: .build)
+        #expect(metric.apiLinks == [
+            "listBuildMetrics": APILink(href: "/api/v1/builds/build-1/perf-metrics", method: "GET"),
+        ])
+    }
+
+    // MARK: - Table
+
+    @Test func `should show id, category, metric, value, unit and goal in a table`() {
+        let metric = MockRepositoryFactory.makePerfPowerMetric(
+            id: "m-1", category: .launch, metricIdentifier: "launchTime", unit: "s", latestValue: 1.5, goalValue: 1.0
+        )
+        #expect(PerformanceMetric.tableHeaders == ["ID", "Category", "Metric", "Value", "Unit", "Goal"])
+        #expect(metric.tableRow == ["m-1", "LAUNCH", "launchTime", "1.5", "s", "1.0"])
+    }
+
+    @Test func `should show dashes in a table when a metric has no value, unit or goal`() {
+        let metric = MockRepositoryFactory.makePerfPowerMetric(
+            id: "m-1", category: .hang, metricIdentifier: "hangRate", unit: nil, latestValue: nil, goalValue: nil
+        )
+        #expect(metric.tableRow == ["m-1", "HANG", "hangRate", "-", "-", "-"])
+    }
 }
