@@ -1622,6 +1622,36 @@ extension MockRepositoryFactory {
         )
     }
 
+    // MARK: - Screenshot import
+
+    /// A screenshot from an export ZIP; the content hash defaults to the file name, so
+    /// two files share a hash only when a test says they do.
+    static func makeScreenshotImportFile(
+        file: String = "en-US/1.png",
+        contentHash: String? = nil,
+        width: Int = 1290,
+        height: Int = 2796
+    ) -> ScreenshotImportFile {
+        ScreenshotImportFile(
+            file: file, url: URL(fileURLWithPath: "/export/\(file)"),
+            contentHash: contentHash ?? "sha-\(file)", width: width, height: height
+        )
+    }
+
+    /// An export manifest: each locale's files in display order.
+    static func makeScreenshotManifest(_ localizations: [String: [String]]) -> ScreenshotManifest {
+        ScreenshotManifest(
+            version: "1.0",
+            exportedAt: nil,
+            localizations: localizations.mapValues { files in
+                ScreenshotManifest.LocalizationManifest(
+                    displayType: .iphone67,
+                    screenshots: files.enumerated().map { ScreenshotManifest.ScreenshotEntry(order: $0.offset + 1, file: $0.element) }
+                )
+            }
+        )
+    }
+
     static func makeLibraryVideo(
         id: String = "vid-1",
         libraryId: String = "lib-1",

@@ -11,20 +11,29 @@ public struct Affordance: Sendable, Equatable {
     public let command: String
     public let action: String
     public let params: [String: String]
+    /// Boolean CLI flags (`--to-library`); REST links don't carry them.
+    public let flags: [String]
 
+    /// Kept as its own initializer: installed plugins link against this exact signature.
     public init(key: String, command: String, action: String, params: [String: String] = [:]) {
+        self.init(key: key, command: command, action: action, params: params, flags: [])
+    }
+
+    public init(key: String, command: String, action: String, params: [String: String] = [:], flags: [String]) {
         self.key = key
         self.command = command
         self.action = action
         self.params = params
+        self.flags = flags
     }
 
-    /// Renders as a CLI command: `asc {command} {action} --{k} {v} ...`
+    /// Renders as a CLI command: `asc {command} {action} --{k} {v} ...`, flags and params in name order.
     public var cliCommand: String {
         var parts = ["asc", command, action]
-        for (k, v) in params.sorted(by: { $0.key < $1.key }) {
+        let options: [(String, String?)] = params.map { ($0.key, $0.value) } + flags.map { ($0, nil) }
+        for (k, v) in options.sorted(by: { $0.0 < $1.0 }) {
             parts.append("--\(k)")
-            parts.append(v)
+            if let v { parts.append(v) }
         }
         return parts.joined(separator: " ")
     }

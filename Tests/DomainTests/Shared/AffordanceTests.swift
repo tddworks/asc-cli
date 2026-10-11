@@ -22,6 +22,14 @@ struct AffordanceTests {
         #expect(affordance.cliCommand == "asc apps list")
     }
 
+    @Test func `should show a flag without a value among the params in name order`() {
+        let affordance = Affordance(
+            key: "replace", command: "screenshots", action: "import",
+            params: ["version-id": "v-1", "from": "<zip>"], flags: ["to-library"]
+        )
+        #expect(affordance.cliCommand == "asc screenshots import --from <zip> --to-library --version-id v-1")
+    }
+
     // MARK: - REST rendering
 
     @Test func `affordance renders REST link for list action`() {
