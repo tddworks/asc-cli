@@ -135,6 +135,7 @@ Creating achievements or leaderboards is CLI-only.
 
 ## Gotchas
 
+- `blocked-players list` gets `404 PATH_ERROR` from App Store Connect (checked 2026-10-10): the endpoint is in Apple's API 4.5 spec and in the detail's own `blockedPlayers` link, but Apple doesn't serve it yet. `players block|unblock` and score moderation are separate endpoints.
 - `--score-sort-type`: `ASC` means lowest score wins, `DESC` means highest score wins.
 - `--submission-type`: `BEST_SCORE` (default) tracks the player's personal best; `MOST_RECENT_SCORE` tracks their latest submission.
 - `--reference-name` is internal only and not shown to players; `--vendor-identifier` must be unique (e.g. `first_steps`).

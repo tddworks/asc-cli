@@ -125,6 +125,7 @@ Migrate against a version in `PREPARE_FOR_SUBMISSION`, then verify with `asset-p
 
 ## Gotchas
 
+- Placements can come back in state `ACTIVE`, which App Store Connect sends but doesn't document. asc shows them but offers no `delete` or `reorderGroup` for them; the commands still work if you run them yourself.
 - Delete placements before the asset: deleting an asset that is still placed fails with `STATE_ERROR.ASSET_HAS_PLACEMENTS`.
 - `--category` is fixed at upload. `APP_SCREENSHOT`/`APP_PREVIEW` accept `APP_SCREENSHOTS_AND_PREVIEWS`; creative slots (event cards, product page headers) accept `CREATIVE_ASSETS`.
 - Group limits (`maxCount`) differ per feature — read them from `asset-placement-groups list --feature …` rather than assuming 10.
