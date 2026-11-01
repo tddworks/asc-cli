@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.18.7] - 2026-11-01
 
 ### Added
-- `asc screenshots delete --screenshot-id <id>` and `asc screenshot-sets delete --set-id <id>` remove a screenshot, or a whole set with its screenshots. Listed screenshots and sets offer it as a `delete` next step; also over REST (`DELETE`). → [docs](docs/features/screenshots/README.md)
+- `asc screenshots delete --screenshot-id <id>` and `asc screenshot-sets delete --set-id <id>` remove a screenshot, or a whole set with its screenshots. Listed screenshots and sets offer it as a `delete` next step; also over REST (`DELETE`). → [docs](docs/features/screenshots/README.md) ([#39](https://github.com/tddworks/asc-cli/pull/39))
 
 ---
 

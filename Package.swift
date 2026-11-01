@@ -85,6 +85,8 @@ let package = Package(
                 "ASCCommand",
                 "Domain",
                 .product(name: "Mockable", package: "Mockable"),
+                .product(name: "HummingbirdTesting", package: "hummingbird"),
+                .product(name: "HummingbirdWebSocket", package: "hummingbird-websocket"),
             ],
             swiftSettings: [.define("MOCKING")]
         ),
