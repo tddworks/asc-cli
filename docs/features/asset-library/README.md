@@ -1,5 +1,5 @@
 ---
-description: Upload screenshots, previews and marketing images once into an app's asset library, then place and order them on version and treatment localizations. Use when adding store media with App Store Connect API 4.5.1+.
+description: Upload screenshots, previews and marketing images once into an app's asset library, then place them on version, treatment and custom product page localizations, including header and search results assets. Use when adding store media.
 ---
 
 # App Asset Library
@@ -69,6 +69,25 @@ asc asset-placements reorder --localization-id loc-1 \
 
 App previews work the same way with `asc asset-videos upload` (add `--preview-frame-time-code 00:00:03:00` to choose the poster frame), `--video-id` and `--placement-type APP_PREVIEW`.
 
+### Header and search results assets
+
+The product page **Header** and **Search Results** assets are creative assets with one slot each (`DEFAULT_PROFILE`, max 1). Read the accepted sizes first, upload with `--category CREATIVE_ASSETS`, then place:
+
+```bash
+asc asset-placement-groups list --placement-type PRODUCT_PAGE_HEADER_ASSET --output table        # sizes
+asc asset-placement-groups list --placement-type APP_STORE_SEARCH_RESULTS_ASSET --output table
+
+asc asset-images upload --library-id lib-1 --file header.png --category CREATIVE_ASSETS --wait
+asc asset-placements create --localization-id loc-1 --image-id img-1 \
+  --placement-type PRODUCT_PAGE_HEADER_ASSET --placement-group DEFAULT_PROFILE
+
+asc asset-images upload --library-id lib-1 --file search.png --category CREATIVE_ASSETS --wait
+asc asset-placements create --localization-id loc-1 --image-id img-2 \
+  --placement-type APP_STORE_SEARCH_RESULTS_ASSET --placement-group DEFAULT_PROFILE
+```
+
+To swap one, `asset-placements delete` the old placement, then create the new one. Without a search results asset, the App Store shows your screenshots and previews instead.
+
 ### Product page optimization treatments
 
 Use `--treatment-localization-id` instead of `--localization-id` to list, place and reorder on a treatment localization from `asc experiment-treatment-localizations list`:
@@ -76,6 +95,15 @@ Use `--treatment-localization-id` instead of `--localization-id` to list, place 
 ```bash
 asc asset-placements create --treatment-localization-id tl-1 --image-id img-1 \
   --placement-type APP_SCREENSHOT --placement-group IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE
+```
+
+### Custom product pages
+
+Use `--custom-product-page-localization-id` the same way — for screenshots, previews, or a page-specific header and search results asset:
+
+```bash
+asc asset-placements create --custom-product-page-localization-id cpl-1 --image-id img-1 \
+  --placement-type PRODUCT_PAGE_HEADER_ASSET --placement-group DEFAULT_PROFILE
 ```
 
 ### Where is an asset used?
@@ -120,6 +148,7 @@ Migrate against a version in `PREPARE_FOR_SUBMISSION`, then verify with `asset-p
 | GET / POST | `/api/v1/version-localizations/:id/placements?placement-type=&placement-group=` | `asset-placements list` / `create` (body `{"imageId"\|"videoId","placementType","placementGroup"}`) |
 | POST | `/api/v1/version-localizations/:id/placements/reorder` | `asset-placements reorder` (body `{"placementGroup","placementIds":[…]}`) |
 | GET / POST | `/api/v1/experiment-treatment-localizations/:id/placements` (+ `/reorder`) | same, with `--treatment-localization-id` |
+| GET / POST | `/api/v1/custom-product-page-localizations/:id/placements` (+ `/reorder`) | same, with `--custom-product-page-localization-id` |
 | DELETE | `/api/v1/asset-placements/:placementId` | `asset-placements delete` |
 
 `upload --wait` has no REST equivalent; poll the list route with `?image-id=`.
@@ -135,7 +164,8 @@ Migrate against a version in `PREPARE_FOR_SUBMISSION`, then verify with `asset-p
 - `IPHONE_DUO` placement groups exist only in the asset library — there is no screenshot set display type for them.
 - Images, videos, placements or groups in a state or type asc doesn't know yet are left out of lists rather than failing them; update asc to see them.
 - `update` needs `--library-id` because App Store Connect's response doesn't say which library an asset belongs to.
-- Custom product page and in-app event placements show up in `list --image-id`, but asc has no flags to place on those surfaces yet.
+- asc has no command that lists custom product pages, so take the localization ID from App Store Connect or the API.
+- In-app event placements show up in `list --image-id`, but asc has no flags to place on events yet.
 
 ## See also
 

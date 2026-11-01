@@ -135,6 +135,57 @@ struct AssetPlacementsCommandTests {
         #expect(output == #"{"data":[{"affordances":{"delete":"asc asset-placements delete --placement-id pl-9","listAssetPlacements":"asc asset-placements list --video-id vid-1","listPlacements":"asc asset-placements list --treatment-localization-id tl-1","reorderGroup":"asc asset-placements reorder --placement-group IPHONE_67 --placement-ids <placement-ids> --treatment-localization-id tl-1"},"assetId":"vid-1","id":"pl-9","localizationId":"tl-1","mediaType":"VIDEO","placementGroup":"IPHONE_67","placementType":"APP_PREVIEW","state":"ASSET_PROCESSING","surface":"EXPERIMENT_TREATMENT_LOCALIZATION"}]}"#)
     }
 
+    @Test func `should place a header image on a custom product page localization`() async throws {
+        let mockRepo = MockAssetPlacementRepository()
+        given(mockRepo).createPlacement(
+            surface: .value(.customProductPageLocalization), localizationId: .value("cpl-1"), mediaType: .value(.image),
+            assetId: .value("img-1"), placementType: .value(.productPageHeaderAsset), placementGroup: .value("DEFAULT_PROFILE")
+        ).willReturn(
+            AssetPlacement(id: "pl-9", surface: .customProductPageLocalization, localizationId: "cpl-1", mediaType: .image,
+                           assetId: "img-1", placementType: .productPageHeaderAsset, placementGroup: "DEFAULT_PROFILE", state: .assetProcessing)
+        )
+
+        let cmd = try AssetPlacementsCreate.parse([
+            "--custom-product-page-localization-id", "cpl-1", "--image-id", "img-1",
+            "--placement-type", "PRODUCT_PAGE_HEADER_ASSET", "--placement-group", "DEFAULT_PROFILE",
+        ])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output == #"{"data":[{"affordances":{"delete":"asc asset-placements delete --placement-id pl-9","listAssetPlacements":"asc asset-placements list --image-id img-1","listPlacements":"asc asset-placements list --custom-product-page-localization-id cpl-1","reorderGroup":"asc asset-placements reorder --custom-product-page-localization-id cpl-1 --placement-group DEFAULT_PROFILE --placement-ids <placement-ids>"},"assetId":"img-1","id":"pl-9","localizationId":"cpl-1","mediaType":"IMAGE","placementGroup":"DEFAULT_PROFILE","placementType":"PRODUCT_PAGE_HEADER_ASSET","state":"ASSET_PROCESSING","surface":"CUSTOM_PRODUCT_PAGE_LOCALIZATION"}]}"#)
+    }
+
+    @Test func `should list a custom product page localization's placements`() async throws {
+        let mockRepo = MockAssetPlacementRepository()
+        given(mockRepo).listPlacements(
+            surface: .value(.customProductPageLocalization), localizationId: .value("cpl-1"),
+            placementType: .value(.appStoreSearchResultsAsset), placementGroup: .value(nil)
+        ).willReturn([
+            AssetPlacement(id: "pl-1", surface: .customProductPageLocalization, localizationId: "cpl-1", mediaType: .image,
+                           assetId: "img-1", placementType: .appStoreSearchResultsAsset, placementGroup: "DEFAULT_PROFILE", position: 1, state: .parentApproved),
+        ])
+
+        let cmd = try AssetPlacementsList.parse([
+            "--custom-product-page-localization-id", "cpl-1", "--placement-type", "APP_STORE_SEARCH_RESULTS_ASSET",
+        ])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output == #"{"data":[{"affordances":{"listAssetPlacements":"asc asset-placements list --image-id img-1","listPlacements":"asc asset-placements list --custom-product-page-localization-id cpl-1"},"assetId":"img-1","id":"pl-1","localizationId":"cpl-1","mediaType":"IMAGE","placementGroup":"DEFAULT_PROFILE","placementType":"APP_STORE_SEARCH_RESULTS_ASSET","position":1,"state":"PARENT_APPROVED","surface":"CUSTOM_PRODUCT_PAGE_LOCALIZATION"}]}"#)
+    }
+
+    @Test func `should refuse a custom product page localization together with another localization`() {
+        #expect(throws: (any Error).self) {
+            try AssetPlacementsCreate.parse(["--custom-product-page-localization-id", "cpl-1", "--localization-id", "loc-1",
+                                             "--image-id", "img-1", "--placement-type", "PRODUCT_PAGE_HEADER_ASSET", "--placement-group", "DEFAULT_PROFILE"])
+        }
+        #expect(throws: (any Error).self) {
+            try AssetPlacementsList.parse(["--custom-product-page-localization-id", "cpl-1", "--image-id", "img-1"])
+        }
+        #expect(throws: (any Error).self) {
+            try AssetPlacementsReorder.parse(["--custom-product-page-localization-id", "cpl-1", "--treatment-localization-id", "tl-1",
+                                              "--placement-group", "DEFAULT_PROFILE", "--placement-ids", "pl-1"])
+        }
+    }
+
     @Test func `should ask for exactly one localization and one asset to place`() {
         #expect(throws: (any Error).self) {
             try AssetPlacementsCreate.parse(["--localization-id", "loc-1", "--placement-type", "APP_SCREENSHOT", "--placement-group", "G"])

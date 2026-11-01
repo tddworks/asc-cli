@@ -479,13 +479,14 @@ Place asset library images and videos on localizations, and order them
 List the placements on a localization, or everywhere an image or video is placed
 
 ```
-asc asset-placements list [--localization-id <localization-id>] [--treatment-localization-id <treatment-localization-id>] [--image-id <image-id>] [--video-id <video-id>] [--placement-type <placement-type>] [--placement-group <placement-group>]
+asc asset-placements list [--localization-id <localization-id>] [--treatment-localization-id <treatment-localization-id>] [--custom-product-page-localization-id <custom-product-page-localization-id>] [--image-id <image-id>] [--video-id <video-id>] [--placement-type <placement-type>] [--placement-group <placement-group>]
 ```
 
 | Flag | Required | Default | Description |
 |---|---|---|---|
 | `--localization-id` |  |  | App Store version localization ID |
 | `--treatment-localization-id` |  |  | Product page optimization treatment localization ID |
+| `--custom-product-page-localization-id` |  |  | Custom product page localization ID |
 | `--image-id` |  |  | Asset library image ID |
 | `--video-id` |  |  | Asset library video ID |
 | `--placement-type` |  |  | Only this placement type (with a localization) One of: APP_SCREENSHOT, IMESSAGE_APP_SCREENSHOT, APP_PREVIEW, PRODUCT_PAGE_HEADER_ASSET, APP_STORE_SEARCH_RESULTS_ASSET, SEARCH_RESULTS_ADS_ASSET, TODAY_TAB_ADS_ASSET, EVENT_CARD_ASSET, EVENT_DETAILS_PAGE_ASSET, RETENTION_MESSAGE_ASSET. |
@@ -496,13 +497,14 @@ asc asset-placements list [--localization-id <localization-id>] [--treatment-loc
 Place a library image or video in one slot of a localization (its version must be editable)
 
 ```
-asc asset-placements create --placement-type <placement-type> --placement-group <placement-group> [--localization-id <localization-id>] [--treatment-localization-id <treatment-localization-id>] [--image-id <image-id>] [--video-id <video-id>]
+asc asset-placements create --placement-type <placement-type> --placement-group <placement-group> [--localization-id <localization-id>] [--treatment-localization-id <treatment-localization-id>] [--custom-product-page-localization-id <custom-product-page-localization-id>] [--image-id <image-id>] [--video-id <video-id>]
 ```
 
 | Flag | Required | Default | Description |
 |---|---|---|---|
 | `--localization-id` |  |  | App Store version localization ID |
 | `--treatment-localization-id` |  |  | Product page optimization treatment localization ID |
+| `--custom-product-page-localization-id` |  |  | Custom product page localization ID |
 | `--image-id` |  |  | Asset library image ID |
 | `--video-id` |  |  | Asset library video ID |
 | `--placement-type` | yes |  | Placement type, e.g. APP_SCREENSHOT One of: APP_SCREENSHOT, IMESSAGE_APP_SCREENSHOT, APP_PREVIEW, PRODUCT_PAGE_HEADER_ASSET, APP_STORE_SEARCH_RESULTS_ASSET, SEARCH_RESULTS_ADS_ASSET, TODAY_TAB_ADS_ASSET, EVENT_CARD_ASSET, EVENT_DETAILS_PAGE_ASSET, RETENTION_MESSAGE_ASSET. |
@@ -525,13 +527,14 @@ asc asset-placements delete --placement-id <placement-id>
 Set the display order of one placement group on a localization
 
 ```
-asc asset-placements reorder --placement-group <placement-group> --placement-ids <placement-ids> [--localization-id <localization-id>] [--treatment-localization-id <treatment-localization-id>]
+asc asset-placements reorder --placement-group <placement-group> --placement-ids <placement-ids> [--localization-id <localization-id>] [--treatment-localization-id <treatment-localization-id>] [--custom-product-page-localization-id <custom-product-page-localization-id>]
 ```
 
 | Flag | Required | Default | Description |
 |---|---|---|---|
 | `--localization-id` |  |  | App Store version localization ID |
 | `--treatment-localization-id` |  |  | Product page optimization treatment localization ID |
+| `--custom-product-page-localization-id` |  |  | Custom product page localization ID |
 | `--placement-group` | yes |  | Placement group to order |
 | `--placement-ids` | yes |  | Placement IDs in display order, comma-separated |
 

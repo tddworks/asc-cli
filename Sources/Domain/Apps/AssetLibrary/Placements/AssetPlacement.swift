@@ -14,7 +14,8 @@ public enum PlacementSurface: String, Sendable, Equatable, Codable, CaseIterable
         switch self {
         case .appStoreVersionLocalization: "localization-id"
         case .experimentTreatmentLocalization: "treatment-localization-id"
-        case .customProductPageLocalization, .eventLocalization: nil
+        case .customProductPageLocalization: "custom-product-page-localization-id"
+        case .eventLocalization: nil
         }
     }
 }

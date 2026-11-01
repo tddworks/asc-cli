@@ -31,12 +31,12 @@ struct AssetPlacementsList: AsyncParsableCommand {
     var placementGroup: String?
 
     func validate() throws {
-        let parents = [surface.localizationId, surface.treatmentLocalizationId, imageId, videoId].compactMap { $0 }
+        let parents = surface.given + [imageId, videoId].compactMap { $0 }
         guard parents.count == 1 else {
-            throw ValidationError("Pass exactly one of --localization-id, --treatment-localization-id, --image-id or --video-id")
+            throw ValidationError("Pass exactly one of \(PlacementSurfaceOptions.flags), --image-id or --video-id")
         }
         if surface.selected == nil, placementType != nil || placementGroup != nil {
-            throw ValidationError("--placement-type and --placement-group filter a localization's placements; use them with --localization-id or --treatment-localization-id")
+            throw ValidationError("--placement-type and --placement-group filter a localization's placements; use them with \(PlacementSurfaceOptions.flags)")
         }
     }
 
@@ -163,8 +163,8 @@ struct AssetPlacementsReorder: AsyncParsableCommand {
     }
 }
 
-/// The localization a placement sits on: an App Store version localization or a product
-/// page optimization treatment localization.
+/// The localization a placement sits on: an App Store version localization, a product
+/// page optimization treatment localization, or a custom product page localization.
 struct PlacementSurfaceOptions: ParsableArguments {
     @Option(name: .long, help: "App Store version localization ID")
     var localizationId: String?
@@ -172,15 +172,27 @@ struct PlacementSurfaceOptions: ParsableArguments {
     @Option(name: .long, help: "Product page optimization treatment localization ID")
     var treatmentLocalizationId: String?
 
-    var selected: (PlacementSurface, String)? {
-        if let localizationId { return (.appStoreVersionLocalization, localizationId) }
-        if let treatmentLocalizationId { return (.experimentTreatmentLocalization, treatmentLocalizationId) }
-        return nil
+    @Option(name: .long, help: "Custom product page localization ID")
+    var customProductPageLocalizationId: String?
+
+    static let flags = "--localization-id, --treatment-localization-id or --custom-product-page-localization-id"
+
+    private var surfaces: [(PlacementSurface, String)] {
+        [
+            localizationId.map { (.appStoreVersionLocalization, $0) },
+            treatmentLocalizationId.map { (.experimentTreatmentLocalization, $0) },
+            customProductPageLocalizationId.map { (.customProductPageLocalization, $0) },
+        ].compactMap { $0 }
     }
 
+    /// The localization IDs passed, whatever their surface.
+    var given: [String] { surfaces.map(\.1) }
+
+    var selected: (PlacementSurface, String)? { surfaces.first }
+
     func validateExactlyOne() throws {
-        guard (localizationId == nil) != (treatmentLocalizationId == nil) else {
-            throw ValidationError("Pass exactly one of --localization-id or --treatment-localization-id")
+        guard surfaces.count == 1 else {
+            throw ValidationError("Pass exactly one of \(Self.flags)")
         }
     }
 }

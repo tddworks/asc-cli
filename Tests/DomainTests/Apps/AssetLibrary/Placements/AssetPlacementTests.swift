@@ -115,7 +115,7 @@ struct AssetPlacementTests {
     }
 
     @Test func `should not point to sibling placements on a surface asc cannot list`() {
-        let placement = MockRepositoryFactory.makeAssetPlacement(id: "pl-1", surface: .customProductPageLocalization)
+        let placement = MockRepositoryFactory.makeAssetPlacement(id: "pl-1", surface: .eventLocalization)
 
         #expect(placement.affordances["listPlacements"] == nil)
         #expect(placement.affordances["reorderGroup"] == nil)
@@ -140,6 +140,18 @@ struct AssetPlacementTests {
         #expect(placement.affordances["reorderGroup"] == "asc asset-placements reorder --placement-group IPHONE_67 --placement-ids <placement-ids> --treatment-localization-id tl-1")
         #expect(placement.apiLinks["listPlacements"] == APILink(href: "/api/v1/experiment-treatment-localizations/tl-1/placements", method: "GET"))
         #expect(placement.apiLinks["reorderGroup"] == APILink(href: "/api/v1/experiment-treatment-localizations/tl-1/placements/reorder", method: "POST"))
+    }
+
+    @Test func `should point to a custom product page localization's placements and reorder them there`() {
+        let placement = MockRepositoryFactory.makeAssetPlacement(
+            id: "pl-1", surface: .customProductPageLocalization, localizationId: "cpl-1",
+            placementGroup: "DEFAULT_PROFILE", state: .parentPrepareForSubmission
+        )
+
+        #expect(placement.affordances["listPlacements"] == "asc asset-placements list --custom-product-page-localization-id cpl-1")
+        #expect(placement.affordances["reorderGroup"] == "asc asset-placements reorder --custom-product-page-localization-id cpl-1 --placement-group DEFAULT_PROFILE --placement-ids <placement-ids>")
+        #expect(placement.apiLinks["listPlacements"] == APILink(href: "/api/v1/custom-product-page-localizations/cpl-1/placements", method: "GET"))
+        #expect(placement.apiLinks["reorderGroup"] == APILink(href: "/api/v1/custom-product-page-localizations/cpl-1/placements/reorder", method: "POST"))
     }
 
     @Test func `should point a video placement to everywhere the video is placed`() {
