@@ -99,6 +99,7 @@ extension AppScreenshotSet: Presentable {
 extension AppScreenshotSet: AffordanceProviding {
     public var structuredAffordances: [Affordance] {
         [
+            Affordance(key: "delete", command: "screenshot-sets", action: "delete", params: ["set-id": id]),
             Affordance(key: "listScreenshots", command: "screenshots", action: "list", params: ["set-id": id]),
             Affordance(key: "listScreenshotSets", command: "screenshot-sets", action: "list", params: ["localization-id": localizationId]),
         ]

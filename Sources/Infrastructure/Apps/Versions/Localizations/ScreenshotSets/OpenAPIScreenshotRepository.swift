@@ -75,6 +75,14 @@ public struct SDKScreenshotRepository: ScreenshotRepository, @unchecked Sendable
         return mapScreenshot(confirmed.data, setId: setId)
     }
 
+    public func deleteScreenshotSet(setId: String) async throws {
+        try await client.request(APIEndpoint.v1.appScreenshotSets.id(setId).delete)
+    }
+
+    public func deleteScreenshot(screenshotId: String) async throws {
+        try await client.request(APIEndpoint.v1.appScreenshots.id(screenshotId).delete)
+    }
+
     private func mapScreenshotSet(
         _ sdkSet: AppStoreConnect_Swift_SDK.AppScreenshotSet,
         localizationId: String
