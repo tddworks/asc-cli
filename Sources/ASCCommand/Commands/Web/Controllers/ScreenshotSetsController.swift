@@ -13,5 +13,11 @@ struct ScreenshotSetsController: Sendable {
             let sets = try await self.repo.listScreenshotSets(localizationId: localizationId)
             return try restFormat(sets)
         }
+
+        group.delete("/screenshot-sets/:setId") { _, context -> Response in
+            guard let setId = context.parameters.get("setId") else { return jsonError("Missing setId") }
+            try await self.repo.deleteScreenshotSet(setId: setId)
+            return restResponse("{\"deleted\":true}")
+        }
     }
 }
