@@ -1,5 +1,5 @@
 ---
-description: List and create screenshot sets and upload screenshots for an App Store version localization. Use when adding or checking App Store screenshots for a version.
+description: List, create and delete screenshot sets, and upload or delete screenshots, for an App Store version localization. Use when adding, replacing or checking App Store screenshots for a version.
 ---
 
 # Screenshots
@@ -13,6 +13,8 @@ Every flag: [screenshot-sets](../../commands.md#asc-screenshot-sets) · [screens
 asc screenshot-sets list --localization-id <LOCALIZATION_ID> --output table
 asc screenshot-sets create --localization-id <LOCALIZATION_ID> --display-type APP_IPHONE_67
 asc screenshots upload --set-id <SET_ID> --file ./screens/iphone_hero.png
+asc screenshots delete --screenshot-id <SCREENSHOT_ID>
+asc screenshot-sets delete --set-id <SET_ID>
 ```
 
 ## Workflows
@@ -40,6 +42,23 @@ asc screenshots upload --set-id <SET_ID> --file ./screens/screen01.png
 
 # 7. Verify upload
 asc screenshots list --set-id <SET_ID> --output table
+```
+
+### Replace a screenshot
+
+```bash
+asc screenshots list --set-id <SET_ID> --output table   # find the old one
+asc screenshots delete --screenshot-id <SCREENSHOT_ID>
+asc screenshots upload --set-id <SET_ID> --file ./screens/screen01-v2.png
+```
+
+Every listed screenshot and set carries a `delete` affordance with its own ID filled in.
+
+### Drop a device size you no longer ship
+
+```bash
+asc screenshot-sets list --localization-id <LOCALIZATION_ID> --output table
+asc screenshot-sets delete --set-id <SET_ID>   # removes the set and all its screenshots
 ```
 
 Each response includes `affordances` with the follow-up commands (e.g. a set carries `listScreenshots` and `listScreenshotSets`), so an agent can walk the hierarchy without knowing the command tree.
@@ -70,6 +89,8 @@ img-003   pending.png       0 B      -             Awaiting Upload
 |---|---|---|
 | GET | `/api/v1/version-localizations/:localizationId/screenshot-sets` | `asc screenshot-sets list --localization-id` |
 | GET | `/api/v1/screenshot-sets/:setId/screenshots` | `asc screenshots list --set-id` |
+| DELETE | `/api/v1/screenshot-sets/:setId` | `asc screenshot-sets delete --set-id` |
+| DELETE | `/api/v1/screenshots/:screenshotId` | `asc screenshots delete --screenshot-id` |
 
 Creating sets and uploading are CLI-only.
 
@@ -79,7 +100,8 @@ Creating sets and uploading are CLI-only.
 - `--display-type` takes the App Store Connect raw value (e.g. `APP_IPHONE_67`, `APP_IPAD_PRO_3GEN_129`, `APP_DESKTOP`, `APP_APPLE_VISION_PRO`), not the human-readable name shown in tables.
 - `screenshots upload` runs Apple's three-step flow for you: reserve, upload the binary, then commit. A screenshot is only ready for submission when its state is `COMPLETE`; other states are `AWAITING_UPLOAD`, `UPLOAD_COMPLETE` and `FAILED`.
 - A set's `screenshotsCount` is 0 when it is empty; the set still exists.
-- There are no delete or reorder commands for screenshots or sets.
+- `screenshots delete` and `screenshot-sets delete` print nothing on success and are permanent; deleting a set also deletes every screenshot in it. Over REST both return `{"deleted":true}`.
+- There are no reorder commands.
 
 ## See also
 

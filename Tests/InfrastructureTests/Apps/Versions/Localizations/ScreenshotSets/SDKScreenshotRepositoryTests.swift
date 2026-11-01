@@ -6,6 +6,24 @@ import Testing
 @Suite
 struct SDKScreenshotRepositoryTests {
 
+    // MARK: - deleteScreenshot
+
+    @Test func `should delete the screenshot from App Store Connect`() async throws {
+        let stub = StubAPIClient()
+
+        try await SDKScreenshotRepository(client: stub).deleteScreenshot(screenshotId: "shot-1")
+
+        #expect(stub.requests.map { "\($0.method) \($0.path)" } == ["DELETE /v1/appScreenshots/shot-1"])
+    }
+
+    @Test func `should delete the screenshot set from App Store Connect`() async throws {
+        let stub = StubAPIClient()
+
+        try await SDKScreenshotRepository(client: stub).deleteScreenshotSet(setId: "set-1")
+
+        #expect(stub.requests.map { "\($0.method) \($0.path)" } == ["DELETE /v1/appScreenshotSets/set-1"])
+    }
+
     // MARK: - listScreenshotSets
 
     @Test func `listScreenshotSets injects localizationId into each set`() async throws {

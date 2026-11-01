@@ -117,4 +117,18 @@ struct AppScreenshotTests {
         #expect(link?.href == "/api/v1/screenshot-sets/set-42/screenshots")
         #expect(link?.method == "GET")
     }
+
+    @Test
+    func `should offer deleting the screenshot on the CLI`() {
+        let s = MockRepositoryFactory.makeScreenshot(id: "shot-1", setId: "set-42")
+        #expect(s.affordances["delete"] == "asc screenshots delete --screenshot-id shot-1")
+    }
+
+    @Test
+    func `should offer deleting the screenshot over REST`() {
+        let s = MockRepositoryFactory.makeScreenshot(id: "shot-1", setId: "set-42")
+        let link = s.apiLinks["delete"]
+        #expect(link?.href == "/api/v1/screenshots/shot-1")
+        #expect(link?.method == "DELETE")
+    }
 }

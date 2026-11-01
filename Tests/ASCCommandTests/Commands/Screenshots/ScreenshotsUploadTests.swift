@@ -20,6 +20,7 @@ struct ScreenshotsUploadTests {
           "data" : [
             {
               "affordances" : {
+                "delete" : "asc screenshots delete --screenshot-id img-new",
                 "listScreenshots" : "asc screenshots list --set-id set-1"
               },
               "assetState" : "COMPLETE",

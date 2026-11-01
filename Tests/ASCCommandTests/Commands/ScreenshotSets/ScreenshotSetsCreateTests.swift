@@ -20,6 +20,7 @@ struct ScreenshotSetsCreateTests {
           "data" : [
             {
               "affordances" : {
+                "delete" : "asc screenshot-sets delete --set-id set-new",
                 "listScreenshotSets" : "asc screenshot-sets list --localization-id loc-1",
                 "listScreenshots" : "asc screenshots list --set-id set-new"
               },
@@ -55,6 +56,7 @@ struct ScreenshotSetsCreateTests {
           "data" : [
             {
               "affordances" : {
+                "delete" : "asc screenshot-sets delete --set-id set-1",
                 "listScreenshotSets" : "asc screenshot-sets list --localization-id loc-42",
                 "listScreenshots" : "asc screenshots list --set-id set-1"
               },

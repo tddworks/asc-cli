@@ -123,6 +123,20 @@ struct AppScreenshotSetTests {
         #expect(link?.method == "GET")
     }
 
+    @Test
+    func `should offer deleting the set on the CLI`() {
+        let set = MockRepositoryFactory.makeScreenshotSet(id: "set-1", localizationId: "loc-1")
+        #expect(set.affordances["delete"] == "asc screenshot-sets delete --set-id set-1")
+    }
+
+    @Test
+    func `should offer deleting the set over REST`() {
+        let set = MockRepositoryFactory.makeScreenshotSet(id: "set-1", localizationId: "loc-1")
+        let link = set.apiLinks["delete"]
+        #expect(link?.href == "/api/v1/screenshot-sets/set-1")
+        #expect(link?.method == "DELETE")
+    }
+
     // MARK: - Codable round-trip
 
     @Test

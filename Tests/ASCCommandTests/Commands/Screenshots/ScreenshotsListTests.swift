@@ -20,6 +20,7 @@ struct ScreenshotsListTests {
           "data" : [
             {
               "affordances" : {
+                "delete" : "asc screenshots delete --screenshot-id img-1",
                 "listScreenshots" : "asc screenshots list --set-id set-1"
               },
               "assetState" : "COMPLETE",
@@ -49,6 +50,7 @@ struct ScreenshotsListTests {
           "data" : [
             {
               "affordances" : {
+                "delete" : "asc screenshots delete --screenshot-id img-1",
                 "listScreenshots" : "asc screenshots list --set-id set-1"
               },
               "fileName" : "screen.png",

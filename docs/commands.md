@@ -242,6 +242,18 @@ asc screenshot-sets create --localization-id <localization-id> --display-type <d
 | `--localization-id` | yes |  | Localization ID |
 | `--display-type` | yes |  | Screenshot display type (e.g. APP_IPHONE_67) |
 
+### asc screenshot-sets delete
+
+Delete a screenshot set and every screenshot in it
+
+```
+asc screenshot-sets delete --set-id <set-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--set-id` | yes |  | Screenshot set ID |
+
 ## asc screenshots
 
 Manage App Store screenshots (deprecated by Apple — use asset-library)
@@ -287,6 +299,18 @@ asc screenshots import --version-id <version-id> --from <from> [--to-library] [-
 | `--existing` |  |  | With --to-library: what to do with screenshots already in a group — fail (default), replace or append. One of: fail, replace, append. |
 | `--placement-group` |  |  | With --to-library: the placement group for sizes that fit several (repeatable) |
 | `--dry-run` |  |  | With --to-library: show the plan without uploading or changing anything |
+
+### asc screenshots delete
+
+Delete a screenshot from its screenshot set
+
+```
+asc screenshots delete --screenshot-id <screenshot-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--screenshot-id` | yes |  | Screenshot ID |
 
 ## asc asset-library
 
