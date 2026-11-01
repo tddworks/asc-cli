@@ -162,6 +162,7 @@ struct AssetLibraryController: Sendable {
 
         addPlacementRoutes(to: group, parentSegment: "version-localizations", surface: .appStoreVersionLocalization)
         addPlacementRoutes(to: group, parentSegment: "experiment-treatment-localizations", surface: .experimentTreatmentLocalization)
+        addPlacementRoutes(to: group, parentSegment: "custom-product-page-localizations", surface: .customProductPageLocalization)
 
         group.delete("/asset-placements/:placementId") { _, context -> Response in
             guard let placementId = context.parameters.get("placementId") else { return jsonError("Missing placementId") }

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `asc asset-placements list|create|reorder --custom-product-page-localization-id <id>` places screenshots, previews, header and search results assets on a custom product page, also over REST. → [docs](docs/features/asset-library/README.md)
+
 ---
 
 ## [0.18.6] - 2026-10-11
