@@ -37,6 +37,8 @@ struct AgeRatingController: Sendable {
             update.isAgeAssurance = json["isAgeAssurance"] as? Bool
             update.isUnrestrictedWebAccess = json["isUnrestrictedWebAccess"] as? Bool
             update.isUserGeneratedContent = json["isUserGeneratedContent"] as? Bool
+            update.isSocialMedia = json["isSocialMedia"] as? Bool
+            update.isSocialMediaAgeRestricted = json["isSocialMediaAgeRestricted"] as? Bool
             update.alcoholTobaccoOrDrugUseOrReferences = (json["alcoholTobaccoOrDrugUseOrReferences"] as? String).flatMap(ContentIntensity.init(rawValue:))
             update.contests = (json["contests"] as? String).flatMap(ContentIntensity.init(rawValue:))
             update.gamblingSimulated = (json["gamblingSimulated"] as? String).flatMap(ContentIntensity.init(rawValue:))
@@ -54,6 +56,7 @@ struct AgeRatingController: Sendable {
             update.ageRatingOverride = (json["ageRatingOverride"] as? String).flatMap(AgeRatingOverride.init(rawValue:))
             update.koreaAgeRatingOverride = (json["koreaAgeRatingOverride"] as? String).flatMap(KoreaAgeRatingOverride.init(rawValue:))
             update.gracRatingClassificationNumber = json["gracRatingClassificationNumber"] as? String
+            update.developerAgeRatingInfoUrl = json["developerAgeRatingInfoUrl"] as? String
             let updated = try await self.repo.updateDeclaration(id: declarationId, update: update)
             return try restFormat(updated)
         }

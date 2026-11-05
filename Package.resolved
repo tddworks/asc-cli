@@ -1,13 +1,13 @@
 {
-  "originHash" : "5ac7bf0d8095501d828f8fff0b4601bc00b0384916a851aa635928ded092747f",
+  "originHash" : "e8eb414071ea66822b4e14b769e639fcdc3bdeb83f38676d74254eed61a44156",
   "pins" : [
     {
       "identity" : "appstoreconnect-swift-sdk",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/AvdLee/appstoreconnect-swift-sdk.git",
       "state" : {
-        "revision" : "f84d9a552a5ec63d0f86f71f370a66ea588fd1c2",
-        "version" : "4.5.1"
+        "revision" : "be950c1952febdfccda9b16111177b1d17f3e371",
+        "version" : "4.6.0"
       }
     },
     {

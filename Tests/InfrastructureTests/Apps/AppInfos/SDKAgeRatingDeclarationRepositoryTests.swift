@@ -1,4 +1,5 @@
 @preconcurrency import AppStoreConnect_Swift_SDK
+import Foundation
 import Testing
 @testable import Infrastructure
 @testable import Domain
@@ -170,5 +171,64 @@ struct SDKAgeRatingDeclarationRepositoryTests {
         #expect(result.id == "decl-1")
         #expect(result.isAdvertising == false)
         #expect(result.violenceRealistic == .frequentOrIntense)
+    }
+
+    // MARK: - Social media and developer info answers
+
+    @Test func `should show the social media answers App Store Connect has`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(AgeRatingDeclarationResponse(
+            data: AgeRatingDeclaration(
+                type: .ageRatingDeclarations,
+                id: "decl-1",
+                attributes: .init(
+                    isSocialMedia: false,
+                    isSocialMediaAgeRestricted: true,
+                    developerAgeRatingInfoURL: URL(string: "https://example.com/age")
+                )
+            ),
+            links: .init(this: "")
+        ))
+
+        let result = try await SDKAgeRatingDeclarationRepository(client: stub).getDeclaration(appInfoId: "info-1")
+
+        #expect(result.isSocialMedia == false)
+        #expect(result.isSocialMediaAgeRestricted == true)
+        #expect(result.developerAgeRatingInfoUrl == "https://example.com/age")
+    }
+
+    @Test func `should leave the social media answers empty when App Store Connect has none`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(AgeRatingDeclarationResponse(
+            data: AgeRatingDeclaration(type: .ageRatingDeclarations, id: "decl-1", attributes: .init()),
+            links: .init(this: "")
+        ))
+
+        let result = try await SDKAgeRatingDeclarationRepository(client: stub).getDeclaration(appInfoId: "info-1")
+
+        #expect(result.isSocialMedia == nil)
+        #expect(result.isSocialMediaAgeRestricted == nil)
+        #expect(result.developerAgeRatingInfoUrl == nil)
+    }
+
+    @Test func `should send the social media answers to App Store Connect`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(AgeRatingDeclarationResponse(
+            data: AgeRatingDeclaration(type: .ageRatingDeclarations, id: "decl-1"),
+            links: .init(this: "")
+        ))
+        var update = Domain.AgeRatingDeclarationUpdate()
+        update.isSocialMedia = false
+        update.isSocialMediaAgeRestricted = true
+        update.developerAgeRatingInfoUrl = "https://example.com/age"
+
+        _ = try await SDKAgeRatingDeclarationRepository(client: stub).updateDeclaration(id: "decl-1", update: update)
+
+        let body = try #require(stub.requests.first?.body)
+        let json = try #require(try JSONSerialization.jsonObject(with: Data(body.utf8)) as? [String: Any])
+        let attributes = try #require((json["data"] as? [String: Any])?["attributes"] as? [String: Any])
+        #expect(attributes["socialMedia"] as? Bool == false)
+        #expect(attributes["socialMediaAgeRestricted"] as? Bool == true)
+        #expect(attributes["developerAgeRatingInfoUrl"] as? String == "https://example.com/age")
     }
 }

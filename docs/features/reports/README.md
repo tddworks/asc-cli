@@ -23,8 +23,8 @@ asc sales-reports summary --from 2026-05-13 --to 2026-05-18 --pretty
 asc sales-reports download --report-type SUBSCRIPTION --sub-type SUMMARY \
   --frequency MONTHLY --report-date 2024-01
 
-# Weekly installs report as a table
-asc sales-reports download --report-type INSTALLS --sub-type SUMMARY \
+# Weekly sales report as a table
+asc sales-reports download --report-type SALES --sub-type SUMMARY \
   --frequency WEEKLY --report-date 2024-01-07 --output table
 ```
 
@@ -118,6 +118,7 @@ Reports are CLI-only; `asc web-server` has no report routes yet.
 - Sales and finance reports are gzip-compressed TSV from Apple; asc decompresses and parses them, so columns differ per report type.
 - `customerSpend` and `proceeds` are kept per currency, because summing across currencies would be meaningless.
 - Apple amends daily reports for up to 5 days. `summary` reads the same `/v1/salesReports` data as `download`, so the most recent day may not match the App Store Connect mobile app's Trends view (which uses an internal endpoint).
+- `INSTALLS` is deprecated: since November 4, 2026 Apple no longer generates new reports of this type, but historical ones still download.
 
 ## See also
 

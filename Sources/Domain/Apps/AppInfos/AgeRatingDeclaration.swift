@@ -44,6 +44,8 @@ public struct AgeRatingDeclaration: Sendable, Equatable, Identifiable {
     public let isAgeAssurance: Bool?
     public let isUnrestrictedWebAccess: Bool?
     public let isUserGeneratedContent: Bool?
+    public let isSocialMedia: Bool?
+    public let isSocialMediaAgeRestricted: Bool?
 
     // Content intensity ratings
     public let alcoholTobaccoOrDrugUseOrReferences: ContentIntensity?
@@ -66,6 +68,7 @@ public struct AgeRatingDeclaration: Sendable, Equatable, Identifiable {
     public let koreaAgeRatingOverride: KoreaAgeRatingOverride?
     /// Korea's GRAC (Game Rating and Administration Committee) classification number.
     public let gracRatingClassificationNumber: String?
+    public let developerAgeRatingInfoUrl: String?
 
     public init(
         id: String,
@@ -79,6 +82,8 @@ public struct AgeRatingDeclaration: Sendable, Equatable, Identifiable {
         isAgeAssurance: Bool? = nil,
         isUnrestrictedWebAccess: Bool? = nil,
         isUserGeneratedContent: Bool? = nil,
+        isSocialMedia: Bool? = nil,
+        isSocialMediaAgeRestricted: Bool? = nil,
         alcoholTobaccoOrDrugUseOrReferences: ContentIntensity? = nil,
         contests: ContentIntensity? = nil,
         gamblingSimulated: ContentIntensity? = nil,
@@ -95,7 +100,8 @@ public struct AgeRatingDeclaration: Sendable, Equatable, Identifiable {
         kidsAgeBand: KidsAgeBand? = nil,
         ageRatingOverride: AgeRatingOverride? = nil,
         koreaAgeRatingOverride: KoreaAgeRatingOverride? = nil,
-        gracRatingClassificationNumber: String? = nil
+        gracRatingClassificationNumber: String? = nil,
+        developerAgeRatingInfoUrl: String? = nil
     ) {
         self.id = id
         self.appInfoId = appInfoId
@@ -108,6 +114,8 @@ public struct AgeRatingDeclaration: Sendable, Equatable, Identifiable {
         self.isAgeAssurance = isAgeAssurance
         self.isUnrestrictedWebAccess = isUnrestrictedWebAccess
         self.isUserGeneratedContent = isUserGeneratedContent
+        self.isSocialMedia = isSocialMedia
+        self.isSocialMediaAgeRestricted = isSocialMediaAgeRestricted
         self.alcoholTobaccoOrDrugUseOrReferences = alcoholTobaccoOrDrugUseOrReferences
         self.contests = contests
         self.gamblingSimulated = gamblingSimulated
@@ -125,6 +133,52 @@ public struct AgeRatingDeclaration: Sendable, Equatable, Identifiable {
         self.ageRatingOverride = ageRatingOverride
         self.koreaAgeRatingOverride = koreaAgeRatingOverride
         self.gracRatingClassificationNumber = gracRatingClassificationNumber
+        self.developerAgeRatingInfoUrl = developerAgeRatingInfoUrl
+    }
+}
+
+extension AgeRatingDeclaration {
+    /// Questionnaire questions without an answer, by App Store Connect attribute name — the
+    /// name Apple uses when it refuses a submission. Absent means unanswered; `false` is an
+    /// answer. Kids age band, overrides, the GRAC number and the info URL are optional.
+    public var unansweredQuestions: [String] {
+        let questions: [(String, Bool)] = [
+            ("advertising", isAdvertising != nil),
+            ("gambling", isGambling != nil),
+            ("healthOrWellnessTopics", isHealthOrWellnessTopics != nil),
+            ("lootBox", isLootBox != nil),
+            ("messagingAndChat", isMessagingAndChat != nil),
+            ("parentalControls", isParentalControls != nil),
+            ("ageAssurance", isAgeAssurance != nil),
+            ("unrestrictedWebAccess", isUnrestrictedWebAccess != nil),
+            ("userGeneratedContent", isUserGeneratedContent != nil),
+            ("socialMedia", isSocialMedia != nil),
+            ("socialMediaAgeRestricted", isSocialMedia != true || isSocialMediaAgeRestricted != nil),
+            ("alcoholTobaccoOrDrugUseOrReferences", alcoholTobaccoOrDrugUseOrReferences != nil),
+            ("contests", contests != nil),
+            ("gamblingSimulated", gamblingSimulated != nil),
+            ("gunsOrOtherWeapons", gunsOrOtherWeapons != nil),
+            ("medicalOrTreatmentInformation", medicalOrTreatmentInformation != nil),
+            ("profanityOrCrudeHumor", profanityOrCrudeHumor != nil),
+            ("sexualContentGraphicAndNudity", sexualContentGraphicAndNudity != nil),
+            ("sexualContentOrNudity", sexualContentOrNudity != nil),
+            ("horrorOrFearThemes", horrorOrFearThemes != nil),
+            ("matureOrSuggestiveThemes", matureOrSuggestiveThemes != nil),
+            ("violenceCartoonOrFantasy", violenceCartoonOrFantasy != nil),
+            ("violenceRealisticProlongedGraphicOrSadistic", violenceRealisticProlongedGraphicOrSadistic != nil),
+            ("violenceRealistic", violenceRealistic != nil),
+        ]
+        return questions.filter { !$0.1 }.map(\.0)
+    }
+
+    /// Whether Apple will accept this declaration in a review submission.
+    public var readinessCheck: ReadinessCheck {
+        let unanswered = unansweredQuestions
+        guard !unanswered.isEmpty else { return .pass() }
+        return .fail(
+            "Age rating questions not answered: \(unanswered.joined(separator: ", ")). "
+                + "Answer them with asc age-rating update --declaration-id \(id)"
+        )
     }
 }
 
@@ -134,12 +188,14 @@ extension AgeRatingDeclaration: Codable {
         case isAdvertising, isGambling, isHealthOrWellnessTopics, isLootBox
         case isMessagingAndChat, isParentalControls, isAgeAssurance
         case isUnrestrictedWebAccess, isUserGeneratedContent
+        case isSocialMedia, isSocialMediaAgeRestricted
         case alcoholTobaccoOrDrugUseOrReferences, contests, gamblingSimulated
         case gunsOrOtherWeapons, medicalOrTreatmentInformation, profanityOrCrudeHumor
         case sexualContentGraphicAndNudity, sexualContentOrNudity, horrorOrFearThemes
         case matureOrSuggestiveThemes, violenceCartoonOrFantasy
         case violenceRealisticProlongedGraphicOrSadistic, violenceRealistic
         case kidsAgeBand, ageRatingOverride, koreaAgeRatingOverride, gracRatingClassificationNumber
+        case developerAgeRatingInfoUrl
     }
 
     public init(from decoder: Decoder) throws {
@@ -155,6 +211,8 @@ extension AgeRatingDeclaration: Codable {
         isAgeAssurance = try c.decodeIfPresent(Bool.self, forKey: .isAgeAssurance)
         isUnrestrictedWebAccess = try c.decodeIfPresent(Bool.self, forKey: .isUnrestrictedWebAccess)
         isUserGeneratedContent = try c.decodeIfPresent(Bool.self, forKey: .isUserGeneratedContent)
+        isSocialMedia = try c.decodeIfPresent(Bool.self, forKey: .isSocialMedia)
+        isSocialMediaAgeRestricted = try c.decodeIfPresent(Bool.self, forKey: .isSocialMediaAgeRestricted)
         alcoholTobaccoOrDrugUseOrReferences = try c.decodeIfPresent(ContentIntensity.self, forKey: .alcoholTobaccoOrDrugUseOrReferences)
         contests = try c.decodeIfPresent(ContentIntensity.self, forKey: .contests)
         gamblingSimulated = try c.decodeIfPresent(ContentIntensity.self, forKey: .gamblingSimulated)
@@ -172,6 +230,7 @@ extension AgeRatingDeclaration: Codable {
         ageRatingOverride = try c.decodeIfPresent(AgeRatingOverride.self, forKey: .ageRatingOverride)
         koreaAgeRatingOverride = try c.decodeIfPresent(KoreaAgeRatingOverride.self, forKey: .koreaAgeRatingOverride)
         gracRatingClassificationNumber = try c.decodeIfPresent(String.self, forKey: .gracRatingClassificationNumber)
+        developerAgeRatingInfoUrl = try c.decodeIfPresent(String.self, forKey: .developerAgeRatingInfoUrl)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -187,6 +246,8 @@ extension AgeRatingDeclaration: Codable {
         try c.encodeIfPresent(isAgeAssurance, forKey: .isAgeAssurance)
         try c.encodeIfPresent(isUnrestrictedWebAccess, forKey: .isUnrestrictedWebAccess)
         try c.encodeIfPresent(isUserGeneratedContent, forKey: .isUserGeneratedContent)
+        try c.encodeIfPresent(isSocialMedia, forKey: .isSocialMedia)
+        try c.encodeIfPresent(isSocialMediaAgeRestricted, forKey: .isSocialMediaAgeRestricted)
         try c.encodeIfPresent(alcoholTobaccoOrDrugUseOrReferences, forKey: .alcoholTobaccoOrDrugUseOrReferences)
         try c.encodeIfPresent(contests, forKey: .contests)
         try c.encodeIfPresent(gamblingSimulated, forKey: .gamblingSimulated)
@@ -204,6 +265,7 @@ extension AgeRatingDeclaration: Codable {
         try c.encodeIfPresent(ageRatingOverride, forKey: .ageRatingOverride)
         try c.encodeIfPresent(koreaAgeRatingOverride, forKey: .koreaAgeRatingOverride)
         try c.encodeIfPresent(gracRatingClassificationNumber, forKey: .gracRatingClassificationNumber)
+        try c.encodeIfPresent(developerAgeRatingInfoUrl, forKey: .developerAgeRatingInfoUrl)
     }
 }
 
@@ -236,6 +298,8 @@ public struct AgeRatingDeclarationUpdate: Sendable {
     public var isAgeAssurance: Bool?
     public var isUnrestrictedWebAccess: Bool?
     public var isUserGeneratedContent: Bool?
+    public var isSocialMedia: Bool?
+    public var isSocialMediaAgeRestricted: Bool?
     public var alcoholTobaccoOrDrugUseOrReferences: ContentIntensity?
     public var contests: ContentIntensity?
     public var gamblingSimulated: ContentIntensity?
@@ -253,6 +317,7 @@ public struct AgeRatingDeclarationUpdate: Sendable {
     public var ageRatingOverride: AgeRatingOverride?
     public var koreaAgeRatingOverride: KoreaAgeRatingOverride?
     public var gracRatingClassificationNumber: String?
+    public var developerAgeRatingInfoUrl: String?
 
     public init() {}
 }

@@ -20,6 +20,8 @@ struct VersionsCheckReadiness: AsyncParsableCommand {
         let localizationRepo = try ClientProvider.makeVersionLocalizationRepository()
         let screenshotRepo = try ClientProvider.makeScreenshotRepository()
         let pricingRepo = try ClientProvider.makePricingRepository()
+        let appInfoRepo = try ClientProvider.makeAppInfoRepository()
+        let ageRatingRepo = try ClientProvider.makeAgeRatingDeclarationRepository()
         print(try await execute(
             versionRepo: versionRepo,
             appRepo: appRepo,
@@ -27,7 +29,9 @@ struct VersionsCheckReadiness: AsyncParsableCommand {
             reviewDetailRepo: reviewDetailRepo,
             localizationRepo: localizationRepo,
             screenshotRepo: screenshotRepo,
-            pricingRepo: pricingRepo
+            pricingRepo: pricingRepo,
+            appInfoRepo: appInfoRepo,
+            ageRatingRepo: ageRatingRepo
         ))
     }
 
@@ -38,7 +42,9 @@ struct VersionsCheckReadiness: AsyncParsableCommand {
         reviewDetailRepo: any ReviewDetailRepository,
         localizationRepo: any VersionLocalizationRepository,
         screenshotRepo: any ScreenshotRepository,
-        pricingRepo: any PricingRepository
+        pricingRepo: any PricingRepository,
+        appInfoRepo: any AppInfoRepository,
+        ageRatingRepo: any AgeRatingDeclarationRepository
     ) async throws -> String {
         // 1. Fetch version (includes appId + buildId)
         let version = try await versionRepo.getVersion(id: versionId)
@@ -102,9 +108,19 @@ struct VersionsCheckReadiness: AsyncParsableCommand {
             ))
         }
 
-        // 7. Aggregate MUST FIX result — primary locale must pass
+        // 7. Age rating check (MUST FIX) — the app info going to review, not the live one
+        let appInfos = try await appInfoRepo.listAppInfos(appId: version.appId)
+        let ageRatingCheck: ReadinessCheck
+        if let appInfo = appInfos.first(where: \.isEditable) ?? appInfos.first(where: { !$0.isLive }) ?? appInfos.first {
+            ageRatingCheck = try await ageRatingRepo.getDeclaration(appInfoId: appInfo.id).readinessCheck
+        } else {
+            ageRatingCheck = .fail("No app info found to read the age rating from")
+        }
+
+        // 8. Aggregate MUST FIX result — primary locale must pass
         let localizationCheck = LocalizationReadinessCheck(localizations: localizationReadiness)
-        let isReadyToSubmit = stateCheck.pass && buildCheck.pass && pricingCheck.pass && localizationCheck.pass
+        let isReadyToSubmit = stateCheck.pass && buildCheck.pass && pricingCheck.pass
+            && localizationCheck.pass && ageRatingCheck.pass
 
         let readiness = VersionReadiness(
             id: version.id,
@@ -116,6 +132,7 @@ struct VersionsCheckReadiness: AsyncParsableCommand {
             buildCheck: buildCheck,
             pricingCheck: pricingCheck,
             localizationCheck: localizationCheck,
+            ageRatingCheck: ageRatingCheck,
             reviewContactCheck: reviewContactCheck
         )
 

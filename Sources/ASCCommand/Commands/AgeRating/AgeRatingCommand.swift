@@ -79,6 +79,12 @@ struct AgeRatingUpdate: AsyncParsableCommand {
     @Option(name: .long, help: "Contains user-generated content (true/false)")
     var userGeneratedContent: Bool?
 
+    @Option(name: .long, help: "Contains social media features (true/false)")
+    var socialMedia: Bool?
+
+    @Option(name: .long, help: "Social media features are age restricted (true/false)")
+    var socialMediaAgeRestricted: Bool?
+
     // Intensity flags (NONE/INFREQUENT_OR_MILD/FREQUENT_OR_INTENSE/INFREQUENT/FREQUENT)
     @Option(name: .long, help: "Alcohol, tobacco or drug use intensity")
     var alcoholTobaccoDrugs: ContentIntensity?
@@ -132,6 +138,9 @@ struct AgeRatingUpdate: AsyncParsableCommand {
     @Option(name: .long, help: "Korea GRAC rating classification number")
     var gracRatingClassificationNumber: String?
 
+    @Option(name: .long, help: "URL of your own age rating information")
+    var developerAgeRatingInfoUrl: String?
+
     func run() async throws {
         let repo = try ClientProvider.makeAgeRatingDeclarationRepository()
         print(try await execute(repo: repo))
@@ -148,6 +157,8 @@ struct AgeRatingUpdate: AsyncParsableCommand {
         update.isAgeAssurance = ageAssurance
         update.isUnrestrictedWebAccess = unrestrictedWebAccess
         update.isUserGeneratedContent = userGeneratedContent
+        update.isSocialMedia = socialMedia
+        update.isSocialMediaAgeRestricted = socialMediaAgeRestricted
         update.alcoholTobaccoOrDrugUseOrReferences = alcoholTobaccoDrugs
         update.contests = contests
         update.gamblingSimulated = gamblingSimulated
@@ -165,6 +176,7 @@ struct AgeRatingUpdate: AsyncParsableCommand {
         update.ageRatingOverride = ageRatingOverride
         update.koreaAgeRatingOverride = koreaAgeRatingOverride
         update.gracRatingClassificationNumber = gracRatingClassificationNumber
+        update.developerAgeRatingInfoUrl = developerAgeRatingInfoUrl
 
         let declaration = try await repo.updateDeclaration(id: declarationId, update: update)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)

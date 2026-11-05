@@ -1,5 +1,6 @@
 @preconcurrency import AppStoreConnect_Swift_SDK
 import Domain
+import Foundation
 
 public struct SDKAgeRatingDeclarationRepository: AgeRatingDeclarationRepository, @unchecked Sendable {
     private let client: any APIClient
@@ -46,6 +47,8 @@ public struct SDKAgeRatingDeclarationRepository: AgeRatingDeclarationRepository,
             isAgeAssurance: a?.isAgeAssurance,
             isUnrestrictedWebAccess: a?.isUnrestrictedWebAccess,
             isUserGeneratedContent: a?.isUserGeneratedContent,
+            isSocialMedia: a?.isSocialMedia,
+            isSocialMediaAgeRestricted: a?.isSocialMediaAgeRestricted,
             alcoholTobaccoOrDrugUseOrReferences: mapIntensity(a?.alcoholTobaccoOrDrugUseOrReferences),
             contests: mapIntensity(a?.contests),
             gamblingSimulated: mapIntensity(a?.gamblingSimulated),
@@ -62,7 +65,8 @@ public struct SDKAgeRatingDeclarationRepository: AgeRatingDeclarationRepository,
             kidsAgeBand: a?.kidsAgeBand.flatMap { Domain.KidsAgeBand(rawValue: $0.rawValue) },
             ageRatingOverride: a?.ageRatingOverrideV2.flatMap { Domain.AgeRatingOverride(rawValue: $0.rawValue) },
             koreaAgeRatingOverride: a?.koreaAgeRatingOverride.flatMap { Domain.KoreaAgeRatingOverride(rawValue: $0.rawValue) },
-            gracRatingClassificationNumber: a?.gracRatingClassificationNumber
+            gracRatingClassificationNumber: a?.gracRatingClassificationNumber,
+            developerAgeRatingInfoUrl: a?.developerAgeRatingInfoURL?.absoluteString
         )
     }
 
@@ -94,6 +98,8 @@ public struct SDKAgeRatingDeclarationRepository: AgeRatingDeclarationRepository,
             sexualContentGraphicAndNudity: update.sexualContentGraphicAndNudity
                 .flatMap { .init(rawValue: $0.rawValue) },
             sexualContentOrNudity: update.sexualContentOrNudity.flatMap { .init(rawValue: $0.rawValue) },
+            isSocialMedia: update.isSocialMedia,
+            isSocialMediaAgeRestricted: update.isSocialMediaAgeRestricted,
             horrorOrFearThemes: update.horrorOrFearThemes.flatMap { .init(rawValue: $0.rawValue) },
             matureOrSuggestiveThemes: update.matureOrSuggestiveThemes.flatMap { .init(rawValue: $0.rawValue) },
             isUnrestrictedWebAccess: update.isUnrestrictedWebAccess,
@@ -104,7 +110,8 @@ public struct SDKAgeRatingDeclarationRepository: AgeRatingDeclarationRepository,
             violenceRealistic: update.violenceRealistic.flatMap { .init(rawValue: $0.rawValue) },
             ageRatingOverrideV2: update.ageRatingOverride.flatMap { .init(rawValue: $0.rawValue) },
             koreaAgeRatingOverride: update.koreaAgeRatingOverride.flatMap { .init(rawValue: $0.rawValue) },
-            gracRatingClassificationNumber: update.gracRatingClassificationNumber
+            gracRatingClassificationNumber: update.gracRatingClassificationNumber,
+            developerAgeRatingInfoURL: update.developerAgeRatingInfoUrl.flatMap(URL.init(string:))
         )
     }
 }

@@ -33,6 +33,8 @@ final class StubAPIClient: APIClient, @unchecked Sendable {
 
     /// When set, every request throws this error (simulates an ASC failure response).
     var errorToThrow: (any Error)?
+    /// Throws only for the request with this method and path, e.g. "POST /v1/reviewSubmissionItems".
+    var errorsByRequest: [String: any Error] = [:]
 
     func willReturn<T>(_ response: T) {
         stubsByType[String(describing: T.self)] = response
@@ -51,6 +53,7 @@ final class StubAPIClient: APIClient, @unchecked Sendable {
             method: endpoint.method, path: endpoint.path, query: endpoint.query, body: Self.encodedBody(of: endpoint)
         ))
         if let errorToThrow { throw errorToThrow }
+        if let error = errorsByRequest["\(endpoint.method) \(endpoint.path)"] { throw error }
         let key = String(describing: T.self)
         if var pages = pagesByType[key], !pages.isEmpty, let page = pages.removeFirst() as? T {
             pagesByType[key] = pages

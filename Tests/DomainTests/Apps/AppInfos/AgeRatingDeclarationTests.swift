@@ -89,4 +89,56 @@ struct AgeRatingDeclarationTests {
         let info = AppInfo(id: "info-1", appId: "app-42")
         #expect(info.affordances["getAgeRating"] == "asc age-rating get --app-info-id info-1")
     }
+
+    // MARK: - Unanswered questions
+
+    /// A declaration with every questionnaire answer, and none of the optional overrides.
+    private func answered(socialMedia: Bool? = false, socialMediaAgeRestricted: Bool? = nil, gambling: Bool? = false) -> AgeRatingDeclaration {
+        AgeRatingDeclaration(
+            id: "decl-1", appInfoId: "info-1",
+            isAdvertising: false, isGambling: gambling, isHealthOrWellnessTopics: false, isLootBox: false,
+            isMessagingAndChat: false, isParentalControls: false, isAgeAssurance: false,
+            isUnrestrictedWebAccess: false, isUserGeneratedContent: false,
+            isSocialMedia: socialMedia, isSocialMediaAgeRestricted: socialMediaAgeRestricted,
+            alcoholTobaccoOrDrugUseOrReferences: ContentIntensity.none, contests: ContentIntensity.none,
+            gamblingSimulated: ContentIntensity.none, gunsOrOtherWeapons: ContentIntensity.none,
+            medicalOrTreatmentInformation: ContentIntensity.none, profanityOrCrudeHumor: ContentIntensity.none,
+            sexualContentGraphicAndNudity: ContentIntensity.none, sexualContentOrNudity: ContentIntensity.none,
+            horrorOrFearThemes: ContentIntensity.none, matureOrSuggestiveThemes: ContentIntensity.none,
+            violenceCartoonOrFantasy: ContentIntensity.none, violenceRealisticProlongedGraphicOrSadistic: ContentIntensity.none,
+            violenceRealistic: ContentIntensity.none
+        )
+    }
+
+    @Test func `should have nothing unanswered when every question is answered and the overrides are empty`() {
+        #expect(answered().unansweredQuestions == [])
+    }
+
+    @Test func `should name social media when it is unanswered`() {
+        #expect(answered(socialMedia: nil).unansweredQuestions == ["socialMedia"])
+    }
+
+    @Test func `should count an answer of false as answered`() {
+        #expect(answered(socialMedia: false, gambling: false).unansweredQuestions == [])
+    }
+
+    @Test func `should name every unanswered question`() {
+        #expect(answered(socialMedia: nil, gambling: nil).unansweredQuestions == ["gambling", "socialMedia"])
+    }
+
+    @Test func `should ask whether social media is age restricted when the app has social media`() {
+        #expect(answered(socialMedia: true).unansweredQuestions == ["socialMediaAgeRestricted"])
+        #expect(answered(socialMedia: true, socialMediaAgeRestricted: false).unansweredQuestions == [])
+    }
+
+    @Test func `should name each question of a blank declaration by its App Store Connect attribute`() {
+        #expect(AgeRatingDeclaration(id: "decl-1", appInfoId: "info-1").unansweredQuestions == [
+            "advertising", "gambling", "healthOrWellnessTopics", "lootBox", "messagingAndChat",
+            "parentalControls", "ageAssurance", "unrestrictedWebAccess", "userGeneratedContent", "socialMedia",
+            "alcoholTobaccoOrDrugUseOrReferences", "contests", "gamblingSimulated", "gunsOrOtherWeapons",
+            "medicalOrTreatmentInformation", "profanityOrCrudeHumor", "sexualContentGraphicAndNudity",
+            "sexualContentOrNudity", "horrorOrFearThemes", "matureOrSuggestiveThemes", "violenceCartoonOrFantasy",
+            "violenceRealisticProlongedGraphicOrSadistic", "violenceRealistic",
+        ])
+    }
 }

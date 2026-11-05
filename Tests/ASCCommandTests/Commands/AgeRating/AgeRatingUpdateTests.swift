@@ -135,4 +135,45 @@ struct AgeRatingUpdateTests {
         }
         """)
     }
+
+    @Test func `should save and show the social media answers`() async throws {
+        let mockRepo = MockAgeRatingDeclarationRepository()
+        given(mockRepo).updateDeclaration(id: .any, update: .any)
+            .willProduce { id, update in
+                AgeRatingDeclaration(
+                    id: id,
+                    appInfoId: "info-42",
+                    isSocialMedia: update.isSocialMedia,
+                    isSocialMediaAgeRestricted: update.isSocialMediaAgeRestricted,
+                    developerAgeRatingInfoUrl: update.developerAgeRatingInfoUrl
+                )
+            }
+
+        let cmd = try AgeRatingUpdate.parse([
+            "--declaration-id", "decl-1",
+            "--social-media", "false",
+            "--social-media-age-restricted", "true",
+            "--developer-age-rating-info-url", "https://example.com/age",
+            "--pretty",
+        ])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "getAgeRating" : "asc age-rating get --app-info-id info-42",
+                "update" : "asc age-rating update --declaration-id decl-1"
+              },
+              "appInfoId" : "info-42",
+              "developerAgeRatingInfoUrl" : "https:\\/\\/example.com\\/age",
+              "id" : "decl-1",
+              "isSocialMedia" : false,
+              "isSocialMediaAgeRestricted" : true
+            }
+          ]
+        }
+        """)
+    }
 }

@@ -31,37 +31,32 @@ public struct OpenAPISubmissionRepository: SubmissionRepository, @unchecked Send
         ))
         let listResp = try await client.request(listReq)
         if let existing = listResp.data.first {
+            // A refused submit leaves its draft open and empty, so it may not contain this version yet.
+            let items = try await listSubmissionItems(submissionId: existing.id)
+            if !items.contains(where: { $0.linkedResourceId == versionId }) {
+                _ = try await addItem(submissionId: existing.id, target: .appStoreVersion(versionId))
+            }
             return try await patchSubmitted(id: existing.id, appId: appId, platform: platform)
         }
 
         // Step 3: Create new review submission
-        let createReq = APIEndpoint.v1.reviewSubmissions.post(
-            ReviewSubmissionCreateRequest(
-                data: .init(
-                    type: .reviewSubmissions,
-                    attributes: .init(platform: sdkPlatform),
-                    relationships: .init(
-                        app: .init(data: .init(type: .apps, id: appId))
+        let submissionResp = try await explainingRefusal {
+            try await client.request(APIEndpoint.v1.reviewSubmissions.post(
+                ReviewSubmissionCreateRequest(
+                    data: .init(
+                        type: .reviewSubmissions,
+                        attributes: .init(platform: sdkPlatform),
+                        relationships: .init(
+                            app: .init(data: .init(type: .apps, id: appId))
+                        )
                     )
                 )
-            )
-        )
-        let submissionResp = try await client.request(createReq)
+            ))
+        }
         let submissionId = submissionResp.data.id
 
         // Step 4: Add the version as a review submission item
-        let itemReq = APIEndpoint.v1.reviewSubmissionItems.post(
-            ReviewSubmissionItemCreateRequest(
-                data: .init(
-                    type: .reviewSubmissionItems,
-                    relationships: .init(
-                        reviewSubmission: .init(data: .init(type: .reviewSubmissions, id: submissionId)),
-                        appStoreVersion: .init(data: .init(type: .appStoreVersions, id: versionId))
-                    )
-                )
-            )
-        )
-        _ = try await client.request(itemReq)
+        _ = try await addItem(submissionId: submissionId, target: .appStoreVersion(versionId))
 
         // Step 5: Submit for review
         return try await patchSubmitted(id: submissionId, appId: appId, platform: platform)
@@ -245,7 +240,7 @@ public struct OpenAPISubmissionRepository: SubmissionRepository, @unchecked Send
                 )
             )
         )
-        let finalResp = try await client.request(submitReq)
+        let finalResp = try await explainingRefusal { try await client.request(submitReq) }
         return mapSubmission(finalResp.data, appId: appId, platform: platform)
     }
 
