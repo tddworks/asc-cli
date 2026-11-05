@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.18.8] - 2026-11-05
+
 ### Added
 - `asc asset-placements list|create|reorder --custom-product-page-localization-id <id>` places screenshots, previews, header and search results assets on a custom product page, also over REST. → [docs](docs/features/asset-library/README.md) ([#41](https://github.com/tddworks/asc-cli/pull/41))
 - `asc age-rating get` and `update` handle `socialMedia`, `socialMediaAgeRestricted` and `developerAgeRatingInfoUrl`, also over REST. → [docs](docs/features/age-rating/README.md)
@@ -119,7 +123,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [0.17](docs/changelog/0.17.md) · [0.16](docs/changelog/0.16.md) · [0.1](docs/changelog/0.1.md)
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.18.7...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.18.8...HEAD
+[0.18.8]: https://github.com/tddworks/asc-cli/compare/v0.18.7...v0.18.8
 [0.18.7]: https://github.com/tddworks/asc-cli/compare/v0.18.6...v0.18.7
 [0.18.6]: https://github.com/tddworks/asc-cli/compare/v0.18.5...v0.18.6
 [0.18.5]: https://github.com/tddworks/asc-cli/compare/v0.18.4...v0.18.5
