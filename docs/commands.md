@@ -2927,7 +2927,7 @@ asc age-rating get --app-info-id <app-info-id>
 Update the age rating declaration
 
 ```
-asc age-rating update --declaration-id <declaration-id> [--advertising <advertising>] [--gambling <gambling>] [--health-or-wellness-topics <health-or-wellness-topics>] [--loot-box <loot-box>] [--messaging-and-chat <messaging-and-chat>] [--parental-controls <parental-controls>] [--age-assurance <age-assurance>] [--unrestricted-web-access <unrestricted-web-access>] [--user-generated-content <user-generated-content>] [--alcohol-tobacco-drugs <alcohol-tobacco-drugs>] [--contests <contests>] [--gambling-simulated <gambling-simulated>] [--guns-weapons <guns-weapons>] [--medical-treatment <medical-treatment>] [--profanity <profanity>] [--sexual-content-graphic <sexual-content-graphic>] [--sexual-content <sexual-content>] [--horror-fear <horror-fear>] [--mature-suggestive <mature-suggestive>] [--violence-cartoon <violence-cartoon>] [--violence-realistic-prolonged <violence-realistic-prolonged>] [--violence-realistic <violence-realistic>] [--kids-age-band <kids-age-band>] [--age-rating-override <age-rating-override>] [--korea-age-rating-override <korea-age-rating-override>] [--grac-rating-classification-number <grac-rating-classification-number>]
+asc age-rating update --declaration-id <declaration-id> [--advertising <advertising>] [--gambling <gambling>] [--health-or-wellness-topics <health-or-wellness-topics>] [--loot-box <loot-box>] [--messaging-and-chat <messaging-and-chat>] [--parental-controls <parental-controls>] [--age-assurance <age-assurance>] [--unrestricted-web-access <unrestricted-web-access>] [--user-generated-content <user-generated-content>] [--social-media <social-media>] [--social-media-age-restricted <social-media-age-restricted>] [--alcohol-tobacco-drugs <alcohol-tobacco-drugs>] [--contests <contests>] [--gambling-simulated <gambling-simulated>] [--guns-weapons <guns-weapons>] [--medical-treatment <medical-treatment>] [--profanity <profanity>] [--sexual-content-graphic <sexual-content-graphic>] [--sexual-content <sexual-content>] [--horror-fear <horror-fear>] [--mature-suggestive <mature-suggestive>] [--violence-cartoon <violence-cartoon>] [--violence-realistic-prolonged <violence-realistic-prolonged>] [--violence-realistic <violence-realistic>] [--kids-age-band <kids-age-band>] [--age-rating-override <age-rating-override>] [--korea-age-rating-override <korea-age-rating-override>] [--grac-rating-classification-number <grac-rating-classification-number>] [--developer-age-rating-info-url <developer-age-rating-info-url>]
 ```
 
 | Flag | Required | Default | Description |
@@ -2942,6 +2942,8 @@ asc age-rating update --declaration-id <declaration-id> [--advertising <advertis
 | `--age-assurance` |  |  | Contains age assurance features (true/false) |
 | `--unrestricted-web-access` |  |  | Contains unrestricted web access (true/false) |
 | `--user-generated-content` |  |  | Contains user-generated content (true/false) |
+| `--social-media` |  |  | Contains social media features (true/false) |
+| `--social-media-age-restricted` |  |  | Social media features are age restricted (true/false) |
 | `--alcohol-tobacco-drugs` |  |  | Alcohol, tobacco or drug use intensity One of: NONE, INFREQUENT_OR_MILD, FREQUENT_OR_INTENSE, INFREQUENT, FREQUENT. |
 | `--contests` |  |  | Contests intensity One of: NONE, INFREQUENT_OR_MILD, FREQUENT_OR_INTENSE, INFREQUENT, FREQUENT. |
 | `--gambling-simulated` |  |  | Simulated gambling intensity One of: NONE, INFREQUENT_OR_MILD, FREQUENT_OR_INTENSE, INFREQUENT, FREQUENT. |
@@ -2959,6 +2961,7 @@ asc age-rating update --declaration-id <declaration-id> [--advertising <advertis
 | `--age-rating-override` |  |  | Age rating override (NONE/NINE_PLUS/THIRTEEN_PLUS/SIXTEEN_PLUS/EIGHTEEN_PLUS/UNRATED) One of: NONE, NINE_PLUS, THIRTEEN_PLUS, SIXTEEN_PLUS, EIGHTEEN_PLUS, UNRATED. |
 | `--korea-age-rating-override` |  |  | Korea age rating override (NONE/ALL/TWELVE_PLUS/FIFTEEN_PLUS/NINETEEN_PLUS) One of: NONE, ALL, TWELVE_PLUS, FIFTEEN_PLUS, NINETEEN_PLUS. |
 | `--grac-rating-classification-number` |  |  | Korea GRAC rating classification number |
+| `--developer-age-rating-info-url` |  |  | URL of your own age rating information |
 
 ## asc app-categories
 

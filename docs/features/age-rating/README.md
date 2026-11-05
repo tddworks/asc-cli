@@ -78,6 +78,9 @@ The PATCH body uses the JSON field names from the response (e.g. `{"isGambling":
 - `--age-rating-override` values are `NONE`, `NINE_PLUS`, `THIRTEEN_PLUS`, `SIXTEEN_PLUS`, `EIGHTEEN_PLUS`, `UNRATED`; Korea has its own `--korea-age-rating-override` (`NONE`, `ALL`, `TWELVE_PLUS`, `FIFTEEN_PLUS`, `NINETEEN_PLUS`). Korea's GRAC classification number goes in `--grac-rating-classification-number` (REST body key `gracRatingClassificationNumber`).
 - `--kids-age-band` values are `FIVE_AND_UNDER`, `SIX_TO_EIGHT`, `NINE_TO_ELEVEN`.
 - `ageRatingOverride` maps to Apple's non-deprecated `ageRatingOverrideV2` field.
+- Apple refuses review submissions until `socialMedia` is answered: `--social-media <bool>`, and `--social-media-age-restricted <bool>` when it's `true`. `asc versions check-readiness` reports unanswered questions. REST body keys are `isSocialMedia` and `isSocialMediaAgeRestricted`.
+- `--developer-age-rating-info-url` links your own age rating information (REST body key `developerAgeRatingInfoUrl`).
+- Known issue: the SDK always sends `kidsAgeBand` and `developerAgeRatingInfoUrl`, as `null` when unset, so check both after an update if your app uses them.
 
 ## See also
 [app-info-localizations](../app-info-localizations/README.md)

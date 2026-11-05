@@ -11,6 +11,7 @@ public struct VersionReadiness: Sendable, Equatable, Identifiable {
     public let buildCheck: BuildReadinessCheck
     public let pricingCheck: ReadinessCheck
     public let localizationCheck: LocalizationReadinessCheck
+    public let ageRatingCheck: ReadinessCheck
     // SHOULD FIX
     public let reviewContactCheck: ReadinessCheck
 
@@ -24,6 +25,7 @@ public struct VersionReadiness: Sendable, Equatable, Identifiable {
         buildCheck: BuildReadinessCheck,
         pricingCheck: ReadinessCheck,
         localizationCheck: LocalizationReadinessCheck,
+        ageRatingCheck: ReadinessCheck,
         reviewContactCheck: ReadinessCheck
     ) {
         self.id = id
@@ -35,6 +37,7 @@ public struct VersionReadiness: Sendable, Equatable, Identifiable {
         self.buildCheck = buildCheck
         self.pricingCheck = pricingCheck
         self.localizationCheck = localizationCheck
+        self.ageRatingCheck = ageRatingCheck
         self.reviewContactCheck = reviewContactCheck
     }
 }
@@ -44,7 +47,7 @@ public struct VersionReadiness: Sendable, Equatable, Identifiable {
 extension VersionReadiness: Codable {
     enum CodingKeys: String, CodingKey {
         case id, appId, versionString, state, isReadyToSubmit
-        case stateCheck, buildCheck, pricingCheck, localizationCheck, reviewContactCheck
+        case stateCheck, buildCheck, pricingCheck, localizationCheck, ageRatingCheck, reviewContactCheck
     }
 
     public init(from decoder: any Decoder) throws {
@@ -58,6 +61,7 @@ extension VersionReadiness: Codable {
         buildCheck = try c.decode(BuildReadinessCheck.self, forKey: .buildCheck)
         pricingCheck = try c.decode(ReadinessCheck.self, forKey: .pricingCheck)
         localizationCheck = try c.decode(LocalizationReadinessCheck.self, forKey: .localizationCheck)
+        ageRatingCheck = try c.decode(ReadinessCheck.self, forKey: .ageRatingCheck)
         reviewContactCheck = try c.decode(ReadinessCheck.self, forKey: .reviewContactCheck)
     }
 
@@ -72,6 +76,7 @@ extension VersionReadiness: Codable {
         try c.encode(buildCheck, forKey: .buildCheck)
         try c.encode(pricingCheck, forKey: .pricingCheck)
         try c.encode(localizationCheck, forKey: .localizationCheck)
+        try c.encode(ageRatingCheck, forKey: .ageRatingCheck)
         try c.encode(reviewContactCheck, forKey: .reviewContactCheck)
     }
 }

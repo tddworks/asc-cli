@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `asc asset-placements list|create|reorder --custom-product-page-localization-id <id>` places screenshots, previews, header and search results assets on a custom product page, also over REST. → [docs](docs/features/asset-library/README.md) ([#41](https://github.com/tddworks/asc-cli/pull/41))
+- `asc age-rating get` and `update` handle `socialMedia`, `socialMediaAgeRestricted` and `developerAgeRatingInfoUrl`, also over REST. → [docs](docs/features/age-rating/README.md)
+- `asc versions check-readiness` adds `ageRatingCheck`, which blocks `isReadyToSubmit` and names any unanswered age rating question. → [docs](docs/features/version-check-readiness/README.md)
+
+### Changed
+- appstoreconnect-swift-sdk updated to 4.6 (App Store Connect API 4.6). The `INSTALLS` sales report is deprecated: Apple stopped generating new ones on November 4, 2026. → [docs](docs/features/reports/README.md)
+
+### Fixed
+- `asc versions submit` now shows each reason Apple gives for refusing a version, instead of a generic 409.
+- `asc versions submit` no longer fails with "does not have any items" when retried after a refusal: it adds the version to the open draft unless it's already there.
 
 ---
 

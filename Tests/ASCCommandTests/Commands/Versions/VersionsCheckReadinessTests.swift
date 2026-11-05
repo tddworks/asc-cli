@@ -56,7 +56,126 @@ struct VersionsCheckReadinessTests {
         )
     }
 
+    private func makeAppInfo(id: String = "info-1", state: String = "PREPARE_FOR_SUBMISSION") -> AppInfo {
+        AppInfo(id: id, appId: "app-456", state: state)
+    }
+
+    private func makeDeclaration(id: String = "decl-1", isSocialMedia: Bool? = false) -> AgeRatingDeclaration {
+        AgeRatingDeclaration(
+            id: id, appInfoId: "info-1",
+            isAdvertising: false, isGambling: false, isHealthOrWellnessTopics: false, isLootBox: false,
+            isMessagingAndChat: false, isParentalControls: false, isAgeAssurance: false,
+            isUnrestrictedWebAccess: false, isUserGeneratedContent: false, isSocialMedia: isSocialMedia,
+            alcoholTobaccoOrDrugUseOrReferences: ContentIntensity.none, contests: ContentIntensity.none,
+            gamblingSimulated: ContentIntensity.none, gunsOrOtherWeapons: ContentIntensity.none,
+            medicalOrTreatmentInformation: ContentIntensity.none, profanityOrCrudeHumor: ContentIntensity.none,
+            sexualContentGraphicAndNudity: ContentIntensity.none, sexualContentOrNudity: ContentIntensity.none,
+            horrorOrFearThemes: ContentIntensity.none, matureOrSuggestiveThemes: ContentIntensity.none,
+            violenceCartoonOrFantasy: ContentIntensity.none, violenceRealisticProlongedGraphicOrSadistic: ContentIntensity.none,
+            violenceRealistic: ContentIntensity.none
+        )
+    }
+
+    private func makeAnsweredAgeRating() -> (MockAppInfoRepository, MockAgeRatingDeclarationRepository) {
+        let appInfoRepo = MockAppInfoRepository()
+        let ageRatingRepo = MockAgeRatingDeclarationRepository()
+        given(appInfoRepo).listAppInfos(appId: .value("app-456")).willReturn([makeAppInfo()])
+        given(ageRatingRepo).getDeclaration(appInfoId: .value("info-1")).willReturn(makeDeclaration())
+        return (appInfoRepo, ageRatingRepo)
+    }
+
+    /// Runs the check on an otherwise ready version, with the given age rating setup.
+    private func checkReadyVersion(
+        appInfoRepo: MockAppInfoRepository,
+        ageRatingRepo: MockAgeRatingDeclarationRepository
+    ) async throws -> String {
+        let mockVersionRepo = MockVersionRepository()
+        let mockAppRepo = MockAppRepository()
+        let mockBuildRepo = MockBuildRepository()
+        let mockReviewDetailRepo = MockReviewDetailRepository()
+        let mockLocalizationRepo = MockVersionLocalizationRepository()
+        let mockScreenshotRepo = MockScreenshotRepository()
+        let mockPricingRepo = MockPricingRepository()
+        given(mockAppRepo).getApp(id: .value("app-456")).willReturn(makeApp())
+        given(mockVersionRepo).getVersion(id: .value("v-123")).willReturn(makeEditable())
+        given(mockBuildRepo).getBuild(id: .value("build-55")).willReturn(makeBuild())
+        given(mockPricingRepo).hasPricing(appId: .value("app-456")).willReturn(true)
+        given(mockReviewDetailRepo).getReviewDetail(versionId: .value("v-123")).willReturn(makeReviewDetail())
+        given(mockLocalizationRepo).listLocalizations(versionId: .value("v-123")).willReturn([makeLocalization()])
+        given(mockScreenshotRepo).listScreenshotSets(localizationId: .value("loc-1")).willReturn([makeScreenshotSet()])
+
+        return try await VersionsCheckReadiness.parse(["--version-id", "v-123", "--pretty"]).execute(
+            versionRepo: mockVersionRepo,
+            appRepo: mockAppRepo,
+            buildRepo: mockBuildRepo,
+            reviewDetailRepo: mockReviewDetailRepo,
+            localizationRepo: mockLocalizationRepo,
+            screenshotRepo: mockScreenshotRepo,
+            pricingRepo: mockPricingRepo,
+            appInfoRepo: appInfoRepo,
+            ageRatingRepo: ageRatingRepo
+        )
+    }
+
     // MARK: - Tests
+
+    @Test func `should not be ready and should name social media when it is unanswered`() async throws {
+        let appInfoRepo = MockAppInfoRepository()
+        let ageRatingRepo = MockAgeRatingDeclarationRepository()
+        given(appInfoRepo).listAppInfos(appId: .value("app-456")).willReturn([makeAppInfo()])
+        given(ageRatingRepo).getDeclaration(appInfoId: .value("info-1")).willReturn(makeDeclaration(isSocialMedia: nil))
+
+        let output = try await checkReadyVersion(appInfoRepo: appInfoRepo, ageRatingRepo: ageRatingRepo)
+
+        #expect(output.contains(#""isReadyToSubmit" : false"#))
+        #expect(output.contains("""
+              "ageRatingCheck" : {
+                "message" : "Age rating questions not answered: socialMedia. Answer them with asc age-rating update --declaration-id decl-1",
+                "pass" : false
+              },
+        """))
+        #expect(!output.contains("asc versions submit"))
+    }
+
+    @Test func `should read the age rating of the app info being prepared, not the live one`() async throws {
+        let appInfoRepo = MockAppInfoRepository()
+        let ageRatingRepo = MockAgeRatingDeclarationRepository()
+        given(appInfoRepo).listAppInfos(appId: .value("app-456")).willReturn([
+            makeAppInfo(id: "info-live", state: "READY_FOR_DISTRIBUTION"),
+            makeAppInfo(id: "info-1", state: "PREPARE_FOR_SUBMISSION"),
+        ])
+        given(ageRatingRepo).getDeclaration(appInfoId: .value("info-live")).willReturn(makeDeclaration(isSocialMedia: nil))
+        given(ageRatingRepo).getDeclaration(appInfoId: .value("info-1")).willReturn(makeDeclaration(isSocialMedia: false))
+
+        let output = try await checkReadyVersion(appInfoRepo: appInfoRepo, ageRatingRepo: ageRatingRepo)
+
+        #expect(output.contains(#""isReadyToSubmit" : true"#))
+    }
+
+    @Test func `should read the age rating of a rejected app info rather than the live one`() async throws {
+        let appInfoRepo = MockAppInfoRepository()
+        let ageRatingRepo = MockAgeRatingDeclarationRepository()
+        given(appInfoRepo).listAppInfos(appId: .value("app-456")).willReturn([
+            makeAppInfo(id: "info-live", state: "READY_FOR_DISTRIBUTION"),
+            makeAppInfo(id: "info-1", state: "REJECTED"),
+        ])
+        given(ageRatingRepo).getDeclaration(appInfoId: .value("info-live")).willReturn(makeDeclaration(isSocialMedia: false))
+        given(ageRatingRepo).getDeclaration(appInfoId: .value("info-1")).willReturn(makeDeclaration(isSocialMedia: nil))
+
+        let output = try await checkReadyVersion(appInfoRepo: appInfoRepo, ageRatingRepo: ageRatingRepo)
+
+        #expect(output.contains(#""isReadyToSubmit" : false"#))
+    }
+
+    @Test func `should not be ready when the app has no app info to read an age rating from`() async throws {
+        let appInfoRepo = MockAppInfoRepository()
+        given(appInfoRepo).listAppInfos(appId: .value("app-456")).willReturn([])
+
+        let output = try await checkReadyVersion(appInfoRepo: appInfoRepo, ageRatingRepo: MockAgeRatingDeclarationRepository())
+
+        #expect(output.contains(#""isReadyToSubmit" : false"#))
+        #expect(output.contains(#""message" : "No app info found to read the age rating from""#))
+    }
 
     @Test func `version with valid build and pricing is ready to submit`() async throws {
         let mockVersionRepo = MockVersionRepository()
@@ -66,6 +185,7 @@ struct VersionsCheckReadinessTests {
         let mockLocalizationRepo = MockVersionLocalizationRepository()
         let mockScreenshotRepo = MockScreenshotRepository()
         let mockPricingRepo = MockPricingRepository()
+        let (mockAppInfoRepo, mockAgeRatingRepo) = makeAnsweredAgeRating()
         given(mockAppRepo).getApp(id: .value("app-456")).willReturn(makeApp())
 
         given(mockVersionRepo).getVersion(id: .value("v-123")).willReturn(makeEditable())
@@ -83,7 +203,9 @@ struct VersionsCheckReadinessTests {
             reviewDetailRepo: mockReviewDetailRepo,
             localizationRepo: mockLocalizationRepo,
             screenshotRepo: mockScreenshotRepo,
-            pricingRepo: mockPricingRepo
+            pricingRepo: mockPricingRepo,
+            appInfoRepo: mockAppInfoRepo,
+            ageRatingRepo: mockAgeRatingRepo
         )
 
         #expect(output == """
@@ -94,6 +216,9 @@ struct VersionsCheckReadinessTests {
                 "checkReadiness" : "asc versions check-readiness --version-id v-123",
                 "listLocalizations" : "asc version-localizations list --version-id v-123",
                 "submit" : "asc versions submit --version-id v-123"
+              },
+              "ageRatingCheck" : {
+                "pass" : true
               },
               "appId" : "app-456",
               "buildCheck" : {
@@ -145,6 +270,7 @@ struct VersionsCheckReadinessTests {
         let mockLocalizationRepo = MockVersionLocalizationRepository()
         let mockScreenshotRepo = MockScreenshotRepository()
         let mockPricingRepo = MockPricingRepository()
+        let (mockAppInfoRepo, mockAgeRatingRepo) = makeAnsweredAgeRating()
         given(mockAppRepo).getApp(id: .value("app-456")).willReturn(makeApp())
 
         given(mockVersionRepo).getVersion(id: .value("v-123")).willReturn(makeEditable(buildId: nil))
@@ -160,7 +286,9 @@ struct VersionsCheckReadinessTests {
             reviewDetailRepo: mockReviewDetailRepo,
             localizationRepo: mockLocalizationRepo,
             screenshotRepo: mockScreenshotRepo,
-            pricingRepo: mockPricingRepo
+            pricingRepo: mockPricingRepo,
+            appInfoRepo: mockAppInfoRepo,
+            ageRatingRepo: mockAgeRatingRepo
         )
 
         #expect(output == """
@@ -170,6 +298,9 @@ struct VersionsCheckReadinessTests {
               "affordances" : {
                 "checkReadiness" : "asc versions check-readiness --version-id v-123",
                 "listLocalizations" : "asc version-localizations list --version-id v-123"
+              },
+              "ageRatingCheck" : {
+                "pass" : true
               },
               "appId" : "app-456",
               "buildCheck" : {
@@ -211,6 +342,7 @@ struct VersionsCheckReadinessTests {
         let mockLocalizationRepo = MockVersionLocalizationRepository()
         let mockScreenshotRepo = MockScreenshotRepository()
         let mockPricingRepo = MockPricingRepository()
+        let (mockAppInfoRepo, mockAgeRatingRepo) = makeAnsweredAgeRating()
         given(mockAppRepo).getApp(id: .value("app-456")).willReturn(makeApp())
 
         let liveVersion = AppStoreVersion(
@@ -235,7 +367,9 @@ struct VersionsCheckReadinessTests {
             reviewDetailRepo: mockReviewDetailRepo,
             localizationRepo: mockLocalizationRepo,
             screenshotRepo: mockScreenshotRepo,
-            pricingRepo: mockPricingRepo
+            pricingRepo: mockPricingRepo,
+            appInfoRepo: mockAppInfoRepo,
+            ageRatingRepo: mockAgeRatingRepo
         )
 
         #expect(output == """
@@ -245,6 +379,9 @@ struct VersionsCheckReadinessTests {
               "affordances" : {
                 "checkReadiness" : "asc versions check-readiness --version-id v-123",
                 "listLocalizations" : "asc version-localizations list --version-id v-123"
+              },
+              "ageRatingCheck" : {
+                "pass" : true
               },
               "appId" : "app-456",
               "buildCheck" : {
@@ -288,6 +425,7 @@ struct VersionsCheckReadinessTests {
         let mockLocalizationRepo = MockVersionLocalizationRepository()
         let mockScreenshotRepo = MockScreenshotRepository()
         let mockPricingRepo = MockPricingRepository()
+        let (mockAppInfoRepo, mockAgeRatingRepo) = makeAnsweredAgeRating()
         given(mockAppRepo).getApp(id: .value("app-456")).willReturn(makeApp())
 
         given(mockVersionRepo).getVersion(id: .value("v-123")).willReturn(makeEditable())
@@ -310,7 +448,9 @@ struct VersionsCheckReadinessTests {
             reviewDetailRepo: mockReviewDetailRepo,
             localizationRepo: mockLocalizationRepo,
             screenshotRepo: mockScreenshotRepo,
-            pricingRepo: mockPricingRepo
+            pricingRepo: mockPricingRepo,
+            appInfoRepo: mockAppInfoRepo,
+            ageRatingRepo: mockAgeRatingRepo
         )
 
         #expect(output == """
@@ -321,6 +461,9 @@ struct VersionsCheckReadinessTests {
                 "checkReadiness" : "asc versions check-readiness --version-id v-123",
                 "listLocalizations" : "asc version-localizations list --version-id v-123",
                 "submit" : "asc versions submit --version-id v-123"
+              },
+              "ageRatingCheck" : {
+                "pass" : true
               },
               "appId" : "app-456",
               "buildCheck" : {
@@ -382,6 +525,7 @@ struct VersionsCheckReadinessTests {
         let mockLocalizationRepo = MockVersionLocalizationRepository()
         let mockScreenshotRepo = MockScreenshotRepository()
         let mockPricingRepo = MockPricingRepository()
+        let (mockAppInfoRepo, mockAgeRatingRepo) = makeAnsweredAgeRating()
         given(mockAppRepo).getApp(id: .value("app-456")).willReturn(makeApp())
 
         given(mockVersionRepo).getVersion(id: .value("v-123")).willReturn(makeEditable())
@@ -401,7 +545,9 @@ struct VersionsCheckReadinessTests {
             reviewDetailRepo: mockReviewDetailRepo,
             localizationRepo: mockLocalizationRepo,
             screenshotRepo: mockScreenshotRepo,
-            pricingRepo: mockPricingRepo
+            pricingRepo: mockPricingRepo,
+            appInfoRepo: mockAppInfoRepo,
+            ageRatingRepo: mockAgeRatingRepo
         )
 
         #expect(output == """
@@ -412,6 +558,9 @@ struct VersionsCheckReadinessTests {
                 "checkReadiness" : "asc versions check-readiness --version-id v-123",
                 "listLocalizations" : "asc version-localizations list --version-id v-123",
                 "submit" : "asc versions submit --version-id v-123"
+              },
+              "ageRatingCheck" : {
+                "pass" : true
               },
               "appId" : "app-456",
               "buildCheck" : {
