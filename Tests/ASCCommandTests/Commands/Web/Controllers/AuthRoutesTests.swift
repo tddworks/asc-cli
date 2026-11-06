@@ -34,4 +34,25 @@ struct AuthRoutesTests {
         #expect(status["name"] as? String == "me")
         #expect(status["issuerID"] == nil)
     }
+
+    @Test func `should reject an issuer ID that is not a string and save no account`() async throws {
+        let storage = FileAuthStorage(fileURL: FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("json"))
+        let router = Router(context: BasicWebSocketRequestContext.self)
+        AuthController(storage: storage).addRoutes(to: router.group("/api/v1"))
+
+        let body = #"{"keyId":"KEY123","issuerId":12345,"privateKeyPEM":"pem","name":"me"}"#
+        let (status, response) = try await Application(router: router).test(.router) { client in
+            try await client.execute(
+                uri: "/api/v1/auth/accounts",
+                method: .post,
+                body: ByteBuffer(string: body)
+            ) { ($0.status, String(buffer: $0.body)) }
+        }
+
+        #expect(status == .badRequest)
+        #expect(response == #"{"error":"issuerId must be a string"}"#)
+        #expect(try storage.loadAll() == [])
+    }
 }
