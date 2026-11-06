@@ -38,6 +38,35 @@ struct AuthUpdateTests {
         """)
     }
 
+    @Test func `should keep the account an individual key when adding a vendor number`() async throws {
+        let mockStorage = MockAuthStorage()
+        let credentials = AuthCredentials(keyID: "KEY123", issuerID: nil, privateKeyPEM: "pem")
+        given(mockStorage).load(name: .value("me")).willReturn(credentials)
+        given(mockStorage).save(.any, name: .value("me")).willReturn()
+
+        let cmd = try AuthUpdate.parse(["--name", "me", "--vendor-number", "88012345", "--pretty"])
+        let output = try await cmd.execute(storage: mockStorage)
+
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "check" : "asc auth check",
+                "list" : "asc auth list",
+                "login" : "asc auth login --key-id <id> --issuer-id <id> --private-key-path <path>",
+                "logout" : "asc auth logout"
+              },
+              "keyID" : "KEY123",
+              "name" : "me",
+              "source" : "file",
+              "vendorNumber" : "88012345"
+            }
+          ]
+        }
+        """)
+    }
+
     @Test func `update adds vendor number to named account`() async throws {
         let mockStorage = MockAuthStorage()
         let credentials = AuthCredentials(keyID: "KEY123", issuerID: "ISSUER456", privateKeyPEM: "pem")

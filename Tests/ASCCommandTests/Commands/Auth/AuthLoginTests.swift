@@ -39,6 +39,37 @@ struct AuthLoginTests {
         """)
     }
 
+    @Test func `should save an individual key when no issuer ID is given`() async throws {
+        let mockStorage = MockAuthStorage()
+        given(mockStorage).save(.any, name: .value("default")).willReturn()
+        given(mockStorage).setActive(name: .value("default")).willReturn()
+
+        var cmd = try AuthLogin.parse([
+            "--key-id", "KEY123",
+            "--private-key", "fake-private-key-content",
+            "--pretty",
+        ])
+        let output = try await cmd.execute(storage: mockStorage)
+
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "check" : "asc auth check",
+                "list" : "asc auth list",
+                "login" : "asc auth login --key-id <id> --issuer-id <id> --private-key-path <path>",
+                "logout" : "asc auth logout"
+              },
+              "keyID" : "KEY123",
+              "name" : "default",
+              "source" : "file"
+            }
+          ]
+        }
+        """)
+    }
+
     @Test func `login saves credentials under custom name when provided`() async throws {
         let mockStorage = MockAuthStorage()
         given(mockStorage).save(.any, name: .value("myorg")).willReturn()

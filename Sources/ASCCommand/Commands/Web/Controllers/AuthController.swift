@@ -32,9 +32,8 @@ struct AuthController: Sendable {
             guard let keyID = json["keyId"] as? String, !keyID.isEmpty else {
                 return jsonError("Missing keyId", status: .badRequest)
             }
-            guard let issuerID = json["issuerId"] as? String, !issuerID.isEmpty else {
-                return jsonError("Missing issuerId", status: .badRequest)
-            }
+            // No issuerId means an individual API key.
+            let issuerID = json["issuerId"] as? String
             guard let pem = json["privateKeyPEM"] as? String, !pem.isEmpty else {
                 return jsonError("Missing privateKeyPEM", status: .badRequest)
             }

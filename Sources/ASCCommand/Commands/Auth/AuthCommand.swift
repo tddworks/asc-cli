@@ -48,7 +48,7 @@ struct AuthCheck: AsyncParsableCommand {
         return try formatter.formatAgentItems(
             [status],
             headers: ["Name", "Key ID", "Issuer ID", "Source"],
-            rowMapper: { [$0.name ?? "", $0.keyID, $0.issuerID, $0.source.rawValue] }
+            rowMapper: { [$0.name ?? "", $0.keyID, $0.issuerID ?? "-", $0.source.rawValue] }
         )
     }
 }

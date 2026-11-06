@@ -14,8 +14,8 @@ struct AuthLogin: AsyncParsableCommand {
     @Option(name: .long, help: "App Store Connect API Key ID")
     var keyId: String
 
-    @Option(name: .long, help: "App Store Connect Issuer ID")
-    var issuerId: String
+    @Option(name: .long, help: "App Store Connect Issuer ID (omit for an individual API key)")
+    var issuerId: String?
 
     @Option(name: .long, help: "Account name (defaults to \"default\"); no spaces allowed")
     var name: String?
@@ -61,7 +61,7 @@ struct AuthLogin: AsyncParsableCommand {
         return try formatter.formatAgentItems(
             [status],
             headers: ["Name", "Key ID", "Issuer ID", "Source"],
-            rowMapper: { [$0.name ?? "", $0.keyID, $0.issuerID, $0.source.rawValue] },
+            rowMapper: { [$0.name ?? "", $0.keyID, $0.issuerID ?? "-", $0.source.rawValue] },
             affordanceMode: affordanceMode
         )
     }
