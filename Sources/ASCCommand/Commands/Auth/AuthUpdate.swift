@@ -60,7 +60,7 @@ struct AuthUpdate: AsyncParsableCommand {
         return try formatter.formatAgentItems(
             [status],
             headers: ["Name", "Key ID", "Issuer ID", "Source", "Vendor Number"],
-            rowMapper: { [$0.name ?? "", $0.keyID, $0.issuerID, $0.source.rawValue, $0.vendorNumber ?? ""] },
+            rowMapper: { [$0.name ?? "", $0.keyID, $0.issuerID ?? "-", $0.source.rawValue, $0.vendorNumber ?? ""] },
             affordanceMode: affordanceMode
         )
     }

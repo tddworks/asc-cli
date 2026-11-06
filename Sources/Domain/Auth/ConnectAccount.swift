@@ -1,13 +1,13 @@
 public struct ConnectAccount: Sendable, Equatable, Identifiable {
     public let name: String
     public let keyID: String
-    public let issuerID: String
+    public let issuerID: String?
     public let isActive: Bool
     public let vendorNumber: String?
 
     public var id: String { name }
 
-    public init(name: String, keyID: String, issuerID: String, isActive: Bool, vendorNumber: String? = nil) {
+    public init(name: String, keyID: String, issuerID: String?, isActive: Bool, vendorNumber: String? = nil) {
         self.name = name
         self.keyID = keyID
         self.issuerID = issuerID
@@ -25,7 +25,7 @@ extension ConnectAccount: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         name = try container.decode(String.self, forKey: .name)
         keyID = try container.decode(String.self, forKey: .keyID)
-        issuerID = try container.decode(String.self, forKey: .issuerID)
+        issuerID = try container.decodeIfPresent(String.self, forKey: .issuerID)
         isActive = try container.decode(Bool.self, forKey: .isActive)
         vendorNumber = try container.decodeIfPresent(String.self, forKey: .vendorNumber)
     }
@@ -34,7 +34,7 @@ extension ConnectAccount: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(name, forKey: .name)
         try container.encode(keyID, forKey: .keyID)
-        try container.encode(issuerID, forKey: .issuerID)
+        try container.encodeIfPresent(issuerID, forKey: .issuerID)
         try container.encode(isActive, forKey: .isActive)
         try container.encodeIfPresent(vendorNumber, forKey: .vendorNumber)
     }
@@ -57,6 +57,6 @@ extension ConnectAccount: Presentable {
         ["Name", "Key ID", "Issuer ID", "Active", "Vendor Number"]
     }
     public var tableRow: [String] {
-        [name, keyID, issuerID, isActive ? "*" : "", vendorNumber ?? "-"]
+        [name, keyID, issuerID ?? "-", isActive ? "*" : "", vendorNumber ?? "-"]
     }
 }

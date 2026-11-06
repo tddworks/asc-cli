@@ -48,6 +48,19 @@ struct AuthStatusTests {
         #expect(json.contains("\"name\":\"work\""))
     }
 
+    @Test func `should leave the issuer ID out of the JSON when the key is an individual key`() throws {
+        let status = AuthStatus(keyID: "KEY123", issuerID: nil, source: .environment)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        let json = String(decoding: try encoder.encode(status), as: UTF8.self)
+        #expect(json == #"{"keyID":"KEY123","source":"environment"}"#)
+    }
+
+    @Test func `should show a dash for the issuer ID in the table when the key is an individual key`() {
+        let status = AuthStatus(keyID: "KEY123", issuerID: nil, source: .environment)
+        #expect(status.tableRow == ["", "KEY123", "-", "environment", "-"])
+    }
+
     @Test func `auth status vendor number is omitted from JSON when nil`() throws {
         let status = AuthStatus(keyID: "KEY123", issuerID: "ISSUER456", source: .file)
         let data = try JSONEncoder().encode(status)

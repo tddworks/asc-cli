@@ -138,6 +138,16 @@ struct FileAuthStorageMultiAccountTests {
         #expect(loaded == nil)
     }
 
+    @Test func `should list a saved individual key without an issuer ID`() throws {
+        let storage = FileAuthStorage(fileURL: makeTempFileURL())
+        let individual = AuthCredentials(keyID: "KEY3", issuerID: nil, privateKeyPEM: "pem")
+
+        try storage.save(individual, name: "me")
+
+        #expect(try storage.load(name: "me") == individual)
+        #expect(try storage.loadAll() == [ConnectAccount(name: "me", keyID: "KEY3", issuerID: nil, isActive: true)])
+    }
+
     @Test func `load returns nil when no accounts saved`() throws {
         let url = makeTempFileURL()
         let storage = FileAuthStorage(fileURL: url)

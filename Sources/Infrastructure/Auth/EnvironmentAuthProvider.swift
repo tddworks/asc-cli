@@ -13,9 +13,8 @@ public struct EnvironmentAuthProvider: AuthProvider {
         guard let keyID = environment["ASC_KEY_ID"], !keyID.isEmpty else {
             throw AuthError.missingKeyID
         }
-        guard let issuerID = environment["ASC_ISSUER_ID"], !issuerID.isEmpty else {
-            throw AuthError.missingIssuerID
-        }
+        // No issuer ID means an individual API key.
+        let issuerID = environment["ASC_ISSUER_ID"].flatMap { $0.isEmpty ? nil : $0 }
 
         let privateKeyPEM: String
 

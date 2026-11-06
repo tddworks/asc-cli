@@ -376,7 +376,10 @@ public struct ClientFactory: Sendable {
         ])
     }
 
-    private func makeProvider(authProvider: any AuthProvider) throws -> APIProvider {
+    func makeProvider(
+        authProvider: any AuthProvider,
+        requestExecutor: any RequestExecutor = DefaultRequestExecutor()
+    ) throws -> APIProvider {
         let credentials = try authProvider.resolve()
         let strippedKey = credentials.privateKeyPEM
             .replacingOccurrences(of: "-----BEGIN PRIVATE KEY-----", with: "")
@@ -385,11 +388,19 @@ public struct ClientFactory: Sendable {
             .replacingOccurrences(of: "-----END EC PRIVATE KEY-----", with: "")
             .replacingOccurrences(of: "\n", with: "")
             .trimmingCharacters(in: .whitespaces)
-        let configuration = try APIConfiguration(
-            issuerID: credentials.issuerID,
-            privateKeyID: credentials.keyID,
-            privateKey: strippedKey
-        )
-        return APIProvider(configuration: configuration)
+        let configuration: APIConfiguration
+        if let issuerID = credentials.issuerID {
+            configuration = try APIConfiguration(
+                issuerID: issuerID,
+                privateKeyID: credentials.keyID,
+                privateKey: strippedKey
+            )
+        } else {
+            configuration = try APIConfiguration(
+                individualPrivateKeyID: credentials.keyID,
+                individualPrivateKey: strippedKey
+            )
+        }
+        return APIProvider(configuration: configuration, requestExecutor: requestExecutor)
     }
 }

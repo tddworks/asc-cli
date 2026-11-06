@@ -21,7 +21,7 @@ struct AuthList: AsyncParsableCommand {
         return try formatter.formatAgentItems(
             accounts,
             headers: ["Name", "Key ID", "Issuer ID", "Active"],
-            rowMapper: { [$0.name, $0.keyID, $0.issuerID, $0.isActive ? "*" : ""] },
+            rowMapper: { [$0.name, $0.keyID, $0.issuerID ?? "-", $0.isActive ? "*" : ""] },
             affordanceMode: affordanceMode
         )
     }

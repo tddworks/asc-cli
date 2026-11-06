@@ -66,6 +66,36 @@ struct AuthCheckTests {
         """)
     }
 
+    @Test func `should show no issuer ID when the active account is an individual key`() async throws {
+        let mockStorage = MockAuthStorage()
+        let mockEnv = MockAuthProvider()
+        let credentials = AuthCredentials(keyID: "KEY123", issuerID: nil, privateKeyPEM: "key")
+        let accounts = [ConnectAccount(name: "me", keyID: "KEY123", issuerID: nil, isActive: true)]
+        given(mockStorage).load(name: .value(nil)).willReturn(credentials)
+        given(mockStorage).loadAll().willReturn(accounts)
+
+        let cmd = try AuthCheck.parse(["--pretty"])
+        let output = try await cmd.execute(storage: mockStorage, envProvider: mockEnv)
+
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "check" : "asc auth check",
+                "list" : "asc auth list",
+                "login" : "asc auth login --key-id <id> --issuer-id <id> --private-key-path <path>",
+                "logout" : "asc auth logout"
+              },
+              "keyID" : "KEY123",
+              "name" : "me",
+              "source" : "file"
+            }
+          ]
+        }
+        """)
+    }
+
     @Test func `auth check throws when both storage empty and env provider fails`() async throws {
         let mockStorage = MockAuthStorage()
         let mockEnv = MockAuthProvider()

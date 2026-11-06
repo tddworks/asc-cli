@@ -1,5 +1,5 @@
 ---
-description: Save App Store Connect API keys as named accounts, switch between them, or use environment variables. Use when setting up credentials, managing several teams, or configuring CI.
+description: Save App Store Connect team or individual API keys as named accounts, switch between them, or use environment variables. Use when setting up credentials, managing several teams, or configuring CI.
 ---
 
 # Auth
@@ -62,6 +62,16 @@ asc auth logout                 # remove the active account
 
 `auth check` reports where credentials came from in `source`: `"file"` (includes `name`) or `"environment"` (no `name` field).
 
+### Use an individual API key
+
+An individual API key acts as the user it belongs to, with that user's role, and has no issuer ID. Leave out `--issuer-id`:
+
+```bash
+asc auth login --key-id KEYID123 --private-key-path ~/.asc/AuthKey_KEYID123.p8 --name me
+```
+
+`auth check` and `auth list` then have no `issuerID` field (`-` in tables). Requests are signed with `"sub": "user"` instead of an `iss` claim.
+
 ### Pass the key as PEM content instead of a file
 
 ```bash
@@ -83,7 +93,7 @@ asc auth update --name work --vendor-number 12345678
 
 ```bash
 export ASC_KEY_ID="YOUR_KEY_ID"
-export ASC_ISSUER_ID="YOUR_ISSUER_ID"
+export ASC_ISSUER_ID="YOUR_ISSUER_ID"   # leave unset or empty for an individual key
 export ASC_PRIVATE_KEY_PATH="~/.asc/AuthKey_XXXXXX.p8"
 # or ASC_PRIVATE_KEY_B64 (base64 of the key), or ASC_PRIVATE_KEY (PEM content)
 asc auth check   # source: "environment"
@@ -97,7 +107,7 @@ The same operations are reachable via `asc web-server`, so a local web app (e.g.
 
 | Method | Path | CLI equivalent | Body |
 |---|---|---|---|
-| POST | `/api/v1/auth/accounts` | `asc auth login` | `{ "keyId", "issuerId", "privateKeyPEM", "name"?, "vendorNumber"? }` |
+| POST | `/api/v1/auth/accounts` | `asc auth login` | `{ "keyId", "issuerId"?, "privateKeyPEM", "name"?, "vendorNumber"? }` (no `issuerId` for an individual key) |
 | GET | `/api/v1/auth/accounts` | `asc auth list` | — |
 | GET | `/api/v1/auth/accounts/active` | `asc auth check` (saved accounts only; no env-var fallback, 404 when none is active) | — |
 | PATCH | `/api/v1/auth/accounts/active` | `asc auth use NAME` | `{ "name": "personal" }` |
@@ -124,7 +134,7 @@ The response has the same `{ "data": [ ... ] }` shape as `asc auth login`.
 - **Security:** the REST auth routes write the API key PEM to `~/.asc/credentials.json`. `asc web-server` listens on all interfaces (`0.0.0.0`), so only run it on a trusted network or behind a firewall.
 - `login` needs `--private-key-path` (supports `~`) or `--private-key`; if both are passed, the path wins.
 - `login` makes the new account active. `logout` without `--name` removes the active account.
-- `credentials.json` stores every account (key ID, issuer ID, PEM) under `accounts`, plus the name of the `active` one. An old single-credential file is migrated to an account named `default` on first use.
+- `credentials.json` stores every account (key ID, issuer ID unless it's an individual key, PEM) under `accounts`, plus the name of the `active` one. An old single-credential file is migrated to an account named `default` on first use.
 
 ## See also
 

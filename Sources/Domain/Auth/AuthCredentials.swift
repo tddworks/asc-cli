@@ -1,10 +1,11 @@
 public struct AuthCredentials: Sendable, Equatable {
     public let keyID: String
-    public let issuerID: String
+    /// `nil` for an individual API key, which signs requests as its user instead of a team.
+    public let issuerID: String?
     public let privateKeyPEM: String
     public let vendorNumber: String?
 
-    public init(keyID: String, issuerID: String, privateKeyPEM: String, vendorNumber: String? = nil) {
+    public init(keyID: String, issuerID: String?, privateKeyPEM: String, vendorNumber: String? = nil) {
         self.keyID = keyID
         self.issuerID = issuerID
         self.privateKeyPEM = privateKeyPEM
@@ -15,7 +16,7 @@ public struct AuthCredentials: Sendable, Equatable {
         guard !keyID.isEmpty else {
             throw AuthError.missingKeyID
         }
-        guard !issuerID.isEmpty else {
+        guard issuerID?.isEmpty != true else {
             throw AuthError.missingIssuerID
         }
         guard !privateKeyPEM.isEmpty else {
@@ -32,7 +33,7 @@ extension AuthCredentials: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         keyID = try container.decode(String.self, forKey: .keyID)
-        issuerID = try container.decode(String.self, forKey: .issuerID)
+        issuerID = try container.decodeIfPresent(String.self, forKey: .issuerID)
         privateKeyPEM = try container.decode(String.self, forKey: .privateKeyPEM)
         vendorNumber = try container.decodeIfPresent(String.self, forKey: .vendorNumber)
     }
@@ -40,7 +41,7 @@ extension AuthCredentials: Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(keyID, forKey: .keyID)
-        try container.encode(issuerID, forKey: .issuerID)
+        try container.encodeIfPresent(issuerID, forKey: .issuerID)
         try container.encode(privateKeyPEM, forKey: .privateKeyPEM)
         try container.encodeIfPresent(vendorNumber, forKey: .vendorNumber)
     }
