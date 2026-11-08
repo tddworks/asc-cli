@@ -33,15 +33,24 @@ struct EnvironmentAuthProviderTests {
     }
 
     @Test
-    func `throws when issuer id is missing`() {
+    func `should resolve an individual key when no issuer ID is set`() throws {
         let env = [
             "ASC_KEY_ID": "KEY123",
             "ASC_PRIVATE_KEY": "key",
         ]
         let provider = EnvironmentAuthProvider(environment: env)
-        #expect(throws: AuthError.missingIssuerID) {
-            try provider.resolve()
-        }
+        #expect(try provider.resolve() == AuthCredentials(keyID: "KEY123", issuerID: nil, privateKeyPEM: "key"))
+    }
+
+    @Test
+    func `should resolve an individual key when the issuer ID is empty`() throws {
+        let env = [
+            "ASC_KEY_ID": "KEY123",
+            "ASC_ISSUER_ID": "",
+            "ASC_PRIVATE_KEY": "key",
+        ]
+        let provider = EnvironmentAuthProvider(environment: env)
+        #expect(try provider.resolve() == AuthCredentials(keyID: "KEY123", issuerID: nil, privateKeyPEM: "key"))
     }
 
     @Test

@@ -913,13 +913,13 @@ asc auth check
 Save API key credentials for authentication
 
 ```
-asc auth login --key-id <key-id> --issuer-id <issuer-id> [--name <name>] [--private-key-path <private-key-path>] [--private-key <private-key>] [--vendor-number <vendor-number>]
+asc auth login --key-id <key-id> [--issuer-id <issuer-id>] [--name <name>] [--private-key-path <private-key-path>] [--private-key <private-key>] [--vendor-number <vendor-number>]
 ```
 
 | Flag | Required | Default | Description |
 |---|---|---|---|
 | `--key-id` | yes |  | App Store Connect API Key ID |
-| `--issuer-id` | yes |  | App Store Connect Issuer ID |
+| `--issuer-id` |  |  | App Store Connect Issuer ID (omit for an individual API key) |
 | `--name` |  |  | Account name (defaults to "default"); no spaces allowed |
 | `--private-key-path` |  |  | Path to .p8 private key file |
 | `--private-key` |  |  | Private key PEM content (alternative to --private-key-path) |

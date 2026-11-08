@@ -33,6 +33,19 @@ struct ConnectAccountTests {
         #expect(json.contains("\"name\":\"personal\""))
     }
 
+    @Test func `should leave the issuer ID out of the JSON when the account is an individual key`() throws {
+        let account = ConnectAccount(name: "me", keyID: "KEY1", issuerID: nil, isActive: true)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        let json = String(decoding: try encoder.encode(account), as: UTF8.self)
+        #expect(json == #"{"isActive":true,"keyID":"KEY1","name":"me"}"#)
+    }
+
+    @Test func `should show a dash for the issuer ID in the table when the account is an individual key`() {
+        let account = ConnectAccount(name: "me", keyID: "KEY1", issuerID: nil, isActive: true)
+        #expect(account.tableRow == ["me", "KEY1", "-", "*", "-"])
+    }
+
     @Test func `connect account vendor number is omitted from JSON when nil`() throws {
         let account = ConnectAccount(name: "work", keyID: "KEY1", issuerID: "ISSUER1", isActive: true)
         let data = try JSONEncoder().encode(account)

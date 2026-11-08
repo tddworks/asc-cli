@@ -44,6 +44,31 @@ struct AuthListTests {
         """)
     }
 
+    @Test func `should list an individual key account without an issuer ID`() async throws {
+        let mockStorage = MockAuthStorage()
+        given(mockStorage).loadAll().willReturn([
+            ConnectAccount(name: "me", keyID: "KEY1", issuerID: nil, isActive: true),
+        ])
+
+        var cmd = try AuthList.parse(["--pretty"])
+        let output = try await cmd.execute(storage: mockStorage)
+
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "logout" : "asc auth logout --name me"
+              },
+              "isActive" : true,
+              "keyID" : "KEY1",
+              "name" : "me"
+            }
+          ]
+        }
+        """)
+    }
+
     @Test func `auth list returns empty data when no accounts saved`() async throws {
         let mockStorage = MockAuthStorage()
         given(mockStorage).loadAll().willReturn([])

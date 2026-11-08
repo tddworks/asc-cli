@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `asc auth login`, `ASC_*` environment variables and `POST /api/v1/auth/accounts` accept individual API keys: leave out the issuer ID. → [docs](docs/features/asc-auth/README.md#use-an-individual-api-key)
+
 ---
 
 ## [0.18.8] - 2026-11-05
