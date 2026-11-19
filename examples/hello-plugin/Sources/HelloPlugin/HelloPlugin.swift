@@ -1,6 +1,6 @@
 import Foundation
 import ASCPlugin
-import Domain
+import ASCKit
 import Hummingbird
 
 // MARK: - Entry point (required)

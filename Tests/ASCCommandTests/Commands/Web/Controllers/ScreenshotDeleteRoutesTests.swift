@@ -4,8 +4,7 @@ import HummingbirdWebSocket
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
-@testable import Infrastructure
+@testable import ASCKit
 
 @Suite
 struct ScreenshotDeleteRoutesTests {

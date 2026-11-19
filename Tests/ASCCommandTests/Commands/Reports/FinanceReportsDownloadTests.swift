@@ -1,13 +1,13 @@
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite
 struct FinanceReportsDownloadTests {
 
     @Test func `downloads finance report and outputs JSON with row data`() async throws {
-        let mockRepo = MockReportRepository()
+        let mockRepo = MockReports()
         given(mockRepo).downloadFinanceReport(
             vendorNumber: .any,
             reportType: .any,
@@ -40,7 +40,7 @@ struct FinanceReportsDownloadTests {
     }
 
     @Test func `resolves vendor number from storage when not provided`() async throws {
-        let mockRepo = MockReportRepository()
+        let mockRepo = MockReports()
         let mockStorage = MockAuthStorage()
         let accounts = [ConnectAccount(name: "work", keyID: "KEY1", issuerID: "ISS1", isActive: true, vendorNumber: "88012345")]
         given(mockStorage).loadAll().willReturn(accounts)
@@ -65,7 +65,7 @@ struct FinanceReportsDownloadTests {
     }
 
     @Test func `throws when vendor number missing from both flag and storage`() async throws {
-        let mockRepo = MockReportRepository()
+        let mockRepo = MockReports()
         let mockStorage = MockAuthStorage()
         given(mockStorage).loadAll().willReturn([])
 
@@ -81,7 +81,7 @@ struct FinanceReportsDownloadTests {
     }
 
     @Test func `table output includes row values`() async throws {
-        let mockRepo = MockReportRepository()
+        let mockRepo = MockReports()
         given(mockRepo).downloadFinanceReport(
             vendorNumber: .any,
             reportType: .any,

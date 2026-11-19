@@ -2,7 +2,7 @@ import Foundation
 import Testing
 import Mockable
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite
 struct AppShotsControllerTests {
@@ -25,7 +25,7 @@ struct AppShotsControllerTests {
     // MARK: - Themes list
 
     @Test func `themes list returns data with _links`() async throws {
-        let mockRepo = MockThemeRepository()
+        let mockRepo = MockThemes()
         given(mockRepo).listThemes().willReturn([
             makeTheme(id: "neon", name: "Neon"),
         ])

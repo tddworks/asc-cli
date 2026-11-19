@@ -127,48 +127,24 @@ extension AppStoreVersion: AffordanceProviding {
 
 ```
 Sources/
-├── Domain/           # Pure business logic, protocols, rich models (zero deps except Mockable)
-├── Infrastructure/   # Implementations: API client, auth provider
-└── ASCCommand/       # CLI executable + TUI: argument parsing, output formatting, interactive UI
+├── ASCKit/<Concept>/   # public face: rich models, state enums, affordances, @Mockable repositories (zero I/O)
+│   └── Internal/       # implementations: SDK adapters (appstoreconnect-swift-sdk), DTO mapping, auth providers
+│       └── System/     # only the bare outside call, ≤100 lines
+└── ASCCommand/         # CLI executable + TUI: argument parsing, output formatting, interactive UI
 ```
 
-Dependency flow: `ASCCommand -> Infrastructure -> Domain`
+Import flow: `ASCCommand -> ASCKit`. One folder per App Store Connect concept
+(`ASCKit/Apps/Builds/`, `ASCKit/Auth/`, …), each with its public face at the
+top and its implementations in `Internal/`. The layout and its rules:
+[concept-folders design](features/concept-folders/design.md).
 
-### Domain Layer
+**Key model design rules:**
 
-Pure value types and `@Mockable` protocols. No networking, no frameworks.
-
-| Directory | Contents |
-|-----------|----------|
-| `Apps/` | `App`, `AppStoreVersion` (+ `AppStorePlatform`, `AppStoreVersionState`), `AppRepository` protocol |
-| `Builds/` | `Build` model (version, state, expired), `BuildRepository` protocol |
-| `TestFlight/` | `BetaGroup`, `BetaTester` models, `TestFlightRepository` protocol |
-| `Screenshots/` | `AppStoreVersionLocalization`, `AppScreenshotSet`, `AppScreenshot`, `ScreenshotDisplayType` (32 display types), `ScreenshotRepository` protocol |
-| `Auth/` | `AuthCredentials` value object, `AuthProvider` protocol, `AuthError` enum |
-| `Shared/` | `PaginatedResponse<T>`, `OutputFormat` enum, `APIError` |
-
-**Key domain design rules:**
-
-- Every model carries its **parent ID** (e.g. `AppStoreVersion.appId`, `AppScreenshot.setId`)
+- Every model carries its **parent ID** (e.g. `AppStoreVersion.appId`, `AppScreenshot.setId`). The App Store Connect API does not include parent IDs in response bodies, so the `Internal/` mappers inject them from the request parameter.
 - State enums expose **semantic booleans** (`isLive`, `isEditable`, `isPending`, `isComplete`)
 - All models are `Sendable`, `Equatable`, `Codable` — the JSON encoding IS the public schema
 
-### Infrastructure Layer
-
-Implements Domain protocols using [appstoreconnect-swift-sdk](https://github.com/AvdLee/appstoreconnect-swift-sdk).
-
-| File | Role |
-|------|------|
-| `Auth/EnvironmentAuthProvider.swift` | Resolves credentials from environment variables |
-| `Apps/OpenAPIAppRepository.swift` | `AppRepository` — injects `appId` into each mapped `AppStoreVersion` |
-| `Builds/OpenAPIBuildRepository.swift` | `BuildRepository` implementation |
-| `TestFlight/OpenAPITestFlightRepository.swift` | `TestFlightRepository` implementation |
-| `Screenshots/OpenAPIScreenshotRepository.swift` | `ScreenshotRepository` — injects parent IDs at each level |
-| `Client/ClientFactory.swift` | Wires authenticated client from `AuthProvider` |
-
-Mappers always inject the parent ID from the request parameter into the response models, since the App Store Connect API does not include parent IDs in response bodies.
-
-### ASCCommand Layer (CLI + TUI)
+### ASCCommand (CLI + TUI)
 
 #### CLI Commands
 
@@ -196,7 +172,7 @@ Key files:
 
 #### TUI Mode (`asc tui`)
 
-Interactive terminal UI built with [TauTUI](https://github.com/steipete/TauTUI). Purely a presentation layer — reuses the same Domain protocols and Infrastructure implementations as the CLI.
+Interactive terminal UI built with [TauTUI](https://github.com/steipete/TauTUI). Purely a presentation layer — reuses the same `ASCKit` repositories as the CLI.
 
 Navigation follows the real App Store Connect resource hierarchy:
 
@@ -220,17 +196,9 @@ Chicago School TDD — state-based, not interaction-based. Tests verify what dom
 
 ```
 Tests/
-├── DomainTests/
-│   ├── Apps/         # AppTests, AppStoreVersionTests, AppStoreVersionStateTests, AppRepositoryTests
-│   ├── Builds/       # BuildTests
-│   ├── Auth/         # AuthCredentialsTests
-│   ├── Shared/       # PaginatedResponseTests
-│   ├── Screenshots/  # ScreenshotDisplayTypeTests, AppScreenshotSetTests, AppScreenshotTests, ScreenshotRepositoryTests
+├── ASCKitTests/      # mirrors Sources/ASCKit/ folder for folder — <Concept>/ and <Concept>/Internal/
 │   └── TestHelpers/  # MockRepositoryFactory
-├── InfrastructureTests/
-│   └── Auth/         # EnvironmentAuthProviderTests
-└── ASCCommandTests/
-    └── OutputFormatterTests
+└── ASCCommandTests/  # commands and REST routes, asserting the full output
 ```
 
 Test naming: backtick style (`func \`version is live when state is readyForSale\`()`). Mocking: `@Mockable` + `given().willReturn()`.

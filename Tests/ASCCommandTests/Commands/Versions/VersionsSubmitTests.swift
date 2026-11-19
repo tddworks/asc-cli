@@ -1,24 +1,26 @@
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite
 struct VersionsSubmitTests {
 
-    @Test func `submitted version returns submission in waitingForReview state`() async throws {
-        let mockRepo = MockSubmissionRepository()
-        given(mockRepo).submitVersion(versionId: .any).willReturn(
-            ReviewSubmission(
-                id: "sub-1",
-                appId: "app-42",
-                platform: .iOS,
-                state: .waitingForReview
-            )
-        )
+    private func draftThenSubmitted() -> MockSubmissionRepository {
+        let submissions = MockSubmissionRepository()
+        given(submissions).createSubmission(appId: .value("app-1"), platform: .value(.iOS))
+            .willReturn(ReviewSubmission(id: "sub-1", appId: "app-1", platform: .iOS, state: .readyForReview))
+        given(submissions).listSubmissionItems(submissionId: .value("sub-1")).willReturn([])
+        given(submissions).addItem(submissionId: .value("sub-1"), target: .value(.appStoreVersion("v-1")))
+            .willReturn(ReviewSubmissionItem(id: "item-1", submissionId: "sub-1", state: .readyForReview, linkedResourceId: "v-1"))
+        given(submissions).submit(submissionId: .value("sub-1"))
+            .willReturn(ReviewSubmission(id: "sub-1", appId: "app-1", platform: .iOS, state: .waitingForReview))
+        return submissions
+    }
 
+    @Test func `should show the submission waiting for review after submitting a version`() async throws {
         let cmd = try VersionsSubmit.parse(["--version-id", "v-1", "--pretty"])
-        let output = try await cmd.execute(repo: mockRepo)
+        let output = try await cmd.execute(versionRepo: appVersionRepo(), submissionRepo: draftThenSubmitted())
 
         #expect(output == """
         {
@@ -27,9 +29,9 @@ struct VersionsSubmitTests {
               "affordances" : {
                 "getSubmission" : "asc review-submissions get --submission-id sub-1",
                 "listItems" : "asc review-submissions items list --submission-id sub-1",
-                "listVersions" : "asc versions list --app-id app-42"
+                "listVersions" : "asc versions list --app-id app-1"
               },
-              "appId" : "app-42",
+              "appId" : "app-1",
               "id" : "sub-1",
               "platform" : "IOS",
               "state" : "WAITING_FOR_REVIEW"
@@ -37,6 +39,18 @@ struct VersionsSubmitTests {
           ]
         }
         """)
+    }
+
+    @Test func `should refuse to submit a version that is already on sale`() async throws {
+        let versions = MockVersionRepository()
+        given(versions).getVersion(id: .value("v-1")).willReturn(
+            AppStoreVersion(id: "v-1", appId: "app-1", versionString: "1.0", platform: .iOS, state: .readyForSale)
+        )
+        let cmd = try VersionsSubmit.parse(["--version-id", "v-1"])
+
+        await #expect(throws: ReviewSubmissionError.versionNotEditable(versionString: "1.0", state: .readyForSale)) {
+            try await cmd.execute(versionRepo: versions, submissionRepo: MockSubmissionRepository())
+        }
     }
 
     // MARK: - --with-products

@@ -5,7 +5,7 @@ The CLI equivalent of REST HATEOAS. Every JSON response embeds ready-to-run CLI 
 ## Protocol
 
 ```swift
-// Sources/Domain/Shared/AffordanceProviding.swift
+// Sources/ASCKit/Shared/AffordanceProviding.swift
 public protocol AffordanceProviding {
     var affordances: [String: String] { get }
 }
@@ -88,7 +88,7 @@ let output = try formatter.formatItems(versions, ...)
 
 ## Tests
 
-Add affordance tests in `Tests/DomainTests/Apps/AffordancesTests.swift`:
+Add affordance tests in `Tests/ASCKitTests/Apps/AffordancesTests.swift`:
 
 ```swift
 @Test func `app affordances include listVersions command`() {

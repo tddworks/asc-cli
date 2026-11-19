@@ -1,8 +1,7 @@
-import Domain
+import ASCKit
 import Foundation
 import Hummingbird
 import HummingbirdWebSocket
-import Infrastructure
 
 /// ASC's IAP localization field constraints. Public so future controllers and validators
 /// can stay in sync with the iOS app's `LocaleCard` limits (`limit: 30` / `limit: 45`).

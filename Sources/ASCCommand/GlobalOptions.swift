@@ -1,5 +1,5 @@
 import ArgumentParser
-import Domain
+import ASCKit
 
 struct GlobalOptions: ParsableArguments {
     @Option(name: .long, help: "Output format: json, table, markdown")

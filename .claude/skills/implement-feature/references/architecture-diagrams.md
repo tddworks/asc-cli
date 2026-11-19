@@ -45,18 +45,18 @@
 ## Full System Overview
 
 ```
-Domain Layer
+ASCKit/<Concept>/  (public face)
   App                AppStoreVersion       AppStoreVersionLocalization
   AppRepository      (+ affordances)       AppScreenshotSet
   BuildRepository    AppStoreVersionState  AppScreenshot
   TestFlight repos   ScreenshotRepository  AffordanceProviding
 
-Infrastructure Layer  (implements Domain protocols)
+ASCKit/<Concept>/Internal/  (implements the face's protocols)
   SDKAppRepository         SDKBuildRepository
   SDKTestFlightRepository  SDKScreenshotRepository
   ClientFactory            EnvironmentAuthProvider
 
-ASCCommand Layer
+ASCCommand  (the way in)
   asc apps list            → formatAgentItems  → {"data":[{...,"affordances":{...}}]}
   asc versions list        → formatAgentItems
   asc version-localizations list   → formatAgentItems
@@ -111,7 +111,7 @@ AsyncParsableCommand.run()
   ├─ ClientProvider.makeXRepository()
   │         │
   │         ▼
-  │   OpenAPI call → map SDK types → Domain structs (with parentId injected)
+  │   OpenAPI call → map SDK types → ASCKit structs (with parentId injected)
   │
   ├─ OutputFormatter.formatAgentItems(items, ...)
   │         │
@@ -141,17 +141,17 @@ AsyncParsableCommand.run()
 
 | File                                                        | Action   | Notes                                        |
 |-------------------------------------------------------------|----------|----------------------------------------------|
-| `Sources/Domain/X/XModel.swift`                            | Create   | Struct + AffordanceProviding                 |
-| `Sources/Domain/X/XRepository.swift`                       | Create   | @Mockable protocol                           |
-| `Sources/Infrastructure/X/SDKXRepository.swift`            | Create   | Implements XRepository, injects parent IDs   |
-| `Sources/Infrastructure/Client/ClientFactory.swift`        | Modify   | Add `makeXRepository()` factory              |
+| `Sources/ASCKit/X/XModel.swift`                            | Create   | Struct + AffordanceProviding                 |
+| `Sources/ASCKit/X/XRepository.swift`                       | Create   | @Mockable protocol                           |
+| `Sources/ASCKit/X/Internal/SDKXRepository.swift`           | Create   | Implements XRepository, injects parent IDs   |
+| `Sources/ASCKit/Shared/Internal/ClientFactory.swift`        | Modify   | Add `makeXRepository()` factory              |
 | `Sources/ASCCommand/Commands/X/XCommand.swift`             | Create   | AsyncParsableCommand group + List subcommand |
 | `Sources/ASCCommand/ASC.swift`                             | Modify   | Add XCommand to subcommands                  |
 | `Sources/ASCCommand/ClientProvider.swift`                  | Modify   | Add `makeXRepository()` static factory       |
-| `Tests/DomainTests/X/XModelTests.swift`                    | Create   | State, computed props, Codable               |
-| `Tests/DomainTests/X/XRepositoryTests.swift`               | Create   | Mock-based repository tests                  |
-| `Tests/DomainTests/Apps/AffordancesTests.swift`            | Modify   | Add affordance tests for new model           |
-| `Tests/DomainTests/TestHelpers/MockRepositoryFactory.swift`| Modify   | Add `makeX(...)` factory method              |
+| `Tests/ASCKitTests/X/XModelTests.swift`                    | Create   | State, computed props, Codable               |
+| `Tests/ASCKitTests/X/XRepositoryTests.swift`               | Create   | Mock-based repository tests                  |
+| `Tests/ASCKitTests/Apps/AffordancesTests.swift`            | Modify   | Add affordance tests for new model           |
+| `Tests/ASCKitTests/TestHelpers/MockRepositoryFactory.swift`| Modify   | Add `makeX(...)` factory method              |
 
 ---
 
@@ -170,7 +170,7 @@ AsyncParsableCommand.run()
 
 ### Files
 
-- `Sources/Domain/X/XModel.swift` — ...
+- `Sources/ASCKit/X/XModel.swift` — ...
 - ...
 
 **Proceed with TDD implementation?**

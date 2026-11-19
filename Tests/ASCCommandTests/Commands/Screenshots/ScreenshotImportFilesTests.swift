@@ -4,7 +4,7 @@ import ImageIO
 import Testing
 import UniformTypeIdentifiers
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite
 struct ScreenshotImportFilesTests {

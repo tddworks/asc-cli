@@ -2,7 +2,7 @@ import ArgumentParser
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite
 struct ReviewSubmissionsBuildTests {

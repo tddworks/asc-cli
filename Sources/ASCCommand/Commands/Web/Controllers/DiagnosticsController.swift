@@ -1,8 +1,7 @@
 import Foundation
-import Domain
+import ASCKit
 import Hummingbird
 import HummingbirdWebSocket
-import Infrastructure
 
 /// `GET /builds/:buildId/diagnostics?diagnostic-type=…` — a build's diagnostic signatures;
 /// `GET /diagnostics/:signatureId/logs` — the logs behind one signature.

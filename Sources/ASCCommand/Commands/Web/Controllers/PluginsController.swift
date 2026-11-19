@@ -1,9 +1,8 @@
 import ASCPlugin
-import Domain
+import ASCKit
 import Foundation
 import Hummingbird
 import HummingbirdWebSocket
-import Infrastructure
 
 /// /api/v1/plugins — Plugin routes.
 ///
@@ -14,7 +13,7 @@ import Infrastructure
 ///   GET    /plugins/market       ↔ asc plugins market list
 ///   GET    /plugins/market?q=…   ↔ asc plugins market search --query …
 struct PluginsController: Sendable {
-    let repo: any PluginRepository
+    let repo: any Plugins
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/plugins") { _, _ -> Response in

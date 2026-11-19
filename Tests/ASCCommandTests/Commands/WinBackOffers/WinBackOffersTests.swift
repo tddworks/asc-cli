@@ -1,7 +1,7 @@
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 private func makeOffer(id: String = "wb-1", subscriptionId: String = "sub-1") -> WinBackOffer {
     WinBackOffer(

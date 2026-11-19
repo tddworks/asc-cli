@@ -1,5 +1,5 @@
 import ArgumentParser
-import Domain
+import ASCKit
 
 struct SimulatorsBoot: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
@@ -11,11 +11,11 @@ struct SimulatorsBoot: AsyncParsableCommand {
     var udid: String
 
     func run() async throws {
-        let repo = ClientProvider.makeSimulatorRepository()
+        let repo = ClientProvider.makeSimulators()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SimulatorRepository) async throws -> String {
+    func execute(repo: any Simulators) async throws -> String {
         try await repo.bootSimulator(udid: udid)
         return "Simulator \(udid) booted successfully."
     }

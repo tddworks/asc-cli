@@ -1,5 +1,5 @@
 import ArgumentParser
-import Domain
+import ASCKit
 
 struct PluginsUninstall: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
@@ -11,11 +11,11 @@ struct PluginsUninstall: AsyncParsableCommand {
     var name: String
 
     func run() async throws {
-        let repo = ClientProvider.makePluginRepository()
+        let repo = ClientProvider.makePlugins()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any PluginRepository) async throws {
+    func execute(repo: any Plugins) async throws {
         try await repo.uninstall(name: name)
         print("Plugin '\(name)' uninstalled successfully.")
     }

@@ -1,6 +1,5 @@
-import Domain
+import ASCKit
 import Foundation
-import Infrastructure
 
 struct ClientProvider {
     static func makeAppRepository() throws -> any AppRepository {
@@ -291,16 +290,16 @@ struct ClientProvider {
 
     // MARK: - Simulators
 
-    static func makeSimulatorRepository() -> any SimulatorRepository {
-        ClientFactory().makeSimulatorRepository()
+    static func makeSimulators() -> any Simulators {
+        ClientFactory().makeSimulators()
     }
 
     // SimulatorInteractionRepository moved to ASCPro (pro feature)
 
     // MARK: - Skills
 
-    static func makeSkillRepository() -> any SkillRepository {
-        ClientFactory().makeSkillRepository()
+    static func makeSkills() -> any Skills {
+        ClientFactory().makeSkills()
     }
 
     static func makeSkillConfigStorage() -> any SkillConfigStorage {
@@ -309,8 +308,8 @@ struct ClientProvider {
 
     // MARK: - Plugins
 
-    static func makePluginRepository() -> any PluginRepository {
-        ClientFactory().makePluginRepository()
+    static func makePlugins() -> any Plugins {
+        ClientFactory().makePlugins()
     }
 
     static func makeTemplateRepository() -> AggregateTemplateRepository {
@@ -321,8 +320,24 @@ struct ClientProvider {
         AggregateGalleryTemplateRepository.shared
     }
 
-    static func makeThemeRepository() -> AggregateThemeRepository {
-        AggregateThemeRepository.shared
+    static func makeThemes() -> AggregateThemes {
+        AggregateThemes.shared
+    }
+
+    static func makeAuthStorage() -> any AuthStorage {
+        FileAuthStorage()
+    }
+
+    static func makeEnvironmentAuthProvider() -> any AuthProvider {
+        EnvironmentAuthProvider()
+    }
+
+    static func makeXcodeBuildRunner() -> any XcodeBuildRunner {
+        ProcessXcodeBuildRunner()
+    }
+
+    static func makeProjectConfigStorage() -> any ProjectConfigStorage {
+        FileProjectConfigStorage()
     }
 
     static func makeHTMLRenderer() -> any HTMLRenderer {
@@ -333,8 +348,8 @@ struct ClientProvider {
         FileAppShotsConfigStorage()
     }
 
-    static func makeAppWallRepository(token: String) -> any AppWallRepository {
-        GitHubAppWallRepository(token: token)
+    static func makeAppWall(token: String) -> any AppWall {
+        GitHubAppWall(token: token)
     }
 
     static func makeUserRepository() throws -> any UserRepository {
@@ -379,10 +394,10 @@ struct ClientProvider {
         return try factory.makeAppClipRepository(authProvider: authProvider)
     }
 
-    static func makeReportRepository() throws -> any ReportRepository {
+    static func makeReports() throws -> any Reports {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeReportRepository(authProvider: authProvider)
+        return try factory.makeReports(authProvider: authProvider)
     }
 
     static func makeAnalyticsReportRepository() throws -> any AnalyticsReportRepository {
@@ -433,8 +448,8 @@ struct ClientProvider {
         ClientFactory().makeIrisCookieProvider()
     }
 
-    static func makeIrisAuthRepository() -> any IrisAuthRepository {
-        IrisAuthSDKRepository()
+    static func makeIrisSignIn() -> any IrisSignIn {
+        IrisSDKSignIn()
     }
 
     static func makeIrisSessionRepository() -> any IrisSessionRepository {

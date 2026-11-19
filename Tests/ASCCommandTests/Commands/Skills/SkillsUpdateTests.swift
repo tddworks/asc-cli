@@ -1,13 +1,13 @@
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite("SkillsUpdate")
 struct SkillsUpdateTests {
 
     @Test func `update returns output from skills CLI`() async throws {
-        let mockRepo = MockSkillRepository()
+        let mockRepo = MockSkills()
         given(mockRepo).update().willReturn("Updated 3 skills")
 
         let cmd = try SkillsUpdate.parse([])

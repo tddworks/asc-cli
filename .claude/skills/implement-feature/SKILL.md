@@ -6,7 +6,7 @@ description: |
   (2) Creating domain models that follow user's mental model
   (3) Building new CLI commands that consume domain repositories
   (4) User asks "how do I implement X" or "add feature Y"
-  (5) Implementing any feature that spans Domain, Infrastructure, and ASCCommand layers
+  (5) Implementing any feature that spans a concept folder in ASCKit (its public face and Internal/) and ASCCommand
 ---
 
 # Implement Feature in asc-swift
@@ -24,10 +24,10 @@ Implement features using architecture-first design, TDD, rich domain models, and
 2. TDD IMPLEMENTATION (Always write tests FIRST)
    • NEVER write implementation code without a failing test
    • Think from user's mental model — test cases describe what the user expects, not internals
-   • Write domain tests first → then infrastructure tests → then command tests
+   • Write public-face tests first → then Internal/ adapter tests → then command tests
    • Each test must FAIL (red) before writing implementation
-   • Domain tests → Domain value types + AffordanceProviding + @Mockable protocol
-   • Infrastructure: SDK adapter injecting parent IDs, composing multi-call flows
+   • Public face (ASCKit/<Concept>/) → value types + AffordanceProviding + @Mockable protocol
+   • Internal/ (ASCKit/<Concept>/Internal/): SDK adapter injecting parent IDs, composing multi-call flows
    • Command: formatAgentItems → {"data":[{...,"affordances":{...}}]}
 
 3. REST EXPOSURE (no feature is done until reachable via REST)
@@ -110,6 +110,8 @@ See [command-affordances.md](references/command-affordances.md) for:
 
 ### 4. Repository protocol — primitives only, but allow composition in adapters
 
+`XxxRepository` is for CRUD over an aggregate only — a state change like `submit` is an update. A protocol that runs something outside asc-cli (sign in, boot, install, download) takes a role noun instead: `IrisSignIn`, `Simulators`, `Reports`. A workflow over aggregates (find the draft, add the item, submit) is a domain operation on the model, built from repository primitives — `version.submitForReview(to:)`, `SubmissionPlan.submit(repo:)` — never a repository method.
+
 ```swift
 @Mockable
 public protocol MyRepository: Sendable {
@@ -151,7 +153,7 @@ The REST controller calls the same `execute(repo:affordanceMode: .rest)` — no 
 When ASC paginates a relationship or splits a single user-visible resource across endpoints, compose them inside the SDK adapter. **Apple's parent-endpoint `include=foo` truncates the relationship to ~10 entries** — for full lists, hit the dedicated relationship endpoint with explicit `limit`. The iOS SDK does this for `fetchAvailability`, `fetchPriceSchedule`, `fetchEqualizations`, and others.
 
 ```swift
-public func getAvailability(iapId: String) async throws -> Domain.InAppPurchaseAvailability {
+public func getAvailability(iapId: String) async throws -> ASCKit.InAppPurchaseAvailability {
     // Two parallel calls — `include=availableTerritories` truncates to ~10.
     async let availResponse = client.request(
         APIEndpoint.v2.inAppPurchases.id(iapId).inAppPurchaseAvailability.get(parameters: .init())
@@ -163,8 +165,8 @@ public func getAvailability(iapId: String) async throws -> Domain.InAppPurchaseA
     )
     let (avail, terr) = try await (availResponse, terrResponse)
 
-    let territories = terr.data.map { Domain.Territory(id: $0.id, currency: $0.attributes?.currency) }
-    return Domain.InAppPurchaseAvailability(
+    let territories = terr.data.map { ASCKit.Territory(id: $0.id, currency: $0.attributes?.currency) }
+    return ASCKit.InAppPurchaseAvailability(
         id: avail.data.id, iapId: iapId,
         isAvailableInNewTerritories: avail.data.attributes?.isAvailableInNewTerritories ?? false,
         territories: territories
@@ -183,12 +185,12 @@ public func getAvailability(iapId: String) async throws -> Domain.InAppPurchaseA
 See [tdd-patterns.md](references/tdd-patterns.md) for complete patterns including:
 - `MockRepositoryFactory` (always use, never construct models inline)
 - Affordance tests
-- Infrastructure parent-ID injection tests
+- `Internal/` adapter parent-ID injection tests
 - `@Mockable` / `given().willReturn()` usage
 
 Name each test `should <outcome> [when <situation>]`, in the words of the person, agent or REST client who sees the result — never a method, type or mechanism verb → [Naming tests](references/tdd-patterns.md#naming-tests).
 
-### Phase 1: Domain
+### Phase 1: Public face (`ASCKit/<Concept>/`)
 
 ```swift
 @Test func `should belong to the parent it was listed under`() {
@@ -210,7 +212,7 @@ Name each test `should <outcome> [when <situation>]`, in the words of the person
 
 Both `affordances` and `apiLinks` derive from the same `structuredAffordances` — testing each catches both the CLI and REST surfaces in one set of assertions.
 
-### Phase 2: Infrastructure
+### Phase 2: Adapter (`ASCKit/<Concept>/Internal/`)
 
 ```swift
 @Test func `should tie each model to the parent it was listed under`() async throws {
@@ -337,7 +339,7 @@ Per CLAUDE.md, **a feature is not complete until it is reachable via REST.** Ste
    }
    ```
 
-6. **Advertise the resource** from `APIRoot.structuredAffordances` (`Sources/Domain/Shared/APIRoot.swift`) when it is a new top-level resource, so `GET /api/v1` lists it.
+6. **Advertise the resource** from `APIRoot.structuredAffordances` (`Sources/ASCKit/Shared/APIRoot.swift`) when it is a new top-level resource, so `GET /api/v1` lists it.
 
 7. Add a REST test in `Tests/ASCCommandTests/Commands/Web/RESTRoutesTests.swift` that calls `execute(repo:affordanceMode: .rest)` and asserts `_links` + the resolved REST path.
 
@@ -345,7 +347,7 @@ Per CLAUDE.md, **a feature is not complete until it is reachable via REST.** Ste
 
 **REST rules:**
 - CLI flag and REST query-param names match: `--expired-only` ↔ `?expired-only=true`, both calling the same repository method.
-- Helpers in `RESTRoutes.swift`: `restFormat(items)` (REST twin of `formatAgentItems(…, affordanceMode: .rest)`) and `jsonError(message, status:)` (from `Infrastructure/Web/ASCWebServer.swift`).
+- Helpers in `RESTRoutes.swift`: `restFormat(items)` (REST twin of `formatAgentItems(…, affordanceMode: .rest)`) and `jsonError(message, status:)` (from `ASCKit/Web/ASCWebServer.swift`).
 - `RESTPathResolver` maps affordance actions to HTTP: `list`/`get` → GET, `create`/`add` → POST to the parent's collection, `update` → PATCH, `delete`/`remove` → DELETE, anything else (e.g. `submit`) → POST `…/{id}/{action}`.
 - Controllers are structs with dependencies injected at init; repositories are constructed once in `RESTRoutes.configure`, never per request.
 
@@ -396,22 +398,22 @@ Docs follow `docs/documentation-design/README.md`: each fact has one home, and n
 - [ ] Files table filled
 - [ ] **User approval received**
 
-### Phase 1: Domain
+### Phase 1: Public face
 - [ ] `XModel.swift` — `struct` + `Sendable` + `Equatable` + `Identifiable` + `Codable`
-- [ ] Carries `parentId` (ASC API omits parent IDs from response — Infrastructure injects them)
+- [ ] Carries `parentId` (ASC API omits parent IDs from response — the `Internal/` mapper injects them)
 - [ ] `Presentable` conformance (`tableHeaders`, `tableRow`)
 - [ ] `AffordanceProviding` via `structuredAffordances` (NOT raw `affordances`)
 - [ ] State enum with semantic booleans (`isLive`, `isEditable`, `isPendingReview`, etc.)
 - [ ] `XRepository.swift` — `@Mockable` protocol with primitive methods only
 - [ ] `make*` factory added to `MockRepositoryFactory.swift`
-- [ ] Domain tests: model fields, semantic booleans, affordances, **and `apiLinks`** for the new keys
+- [ ] Public-face tests: model fields, semantic booleans, affordances, **and `apiLinks`** for the new keys
 
-### Phase 2: Infrastructure
+### Phase 2: Adapter (`Internal/`)
 - [ ] `SDKXRepository.swift` — implements protocol, injects parent IDs in mappers
 - [ ] Multi-call composition where needed (relationships paginate at ~10 — use dedicated endpoints with `limit:`)
 - [ ] Factory registered in `ClientFactory.swift`
 - [ ] `_xRoutes` registered AND touched in `RESTPathResolver.ensureInitialized()`
-- [ ] Infrastructure tests cover: parent ID injection, multi-call composition, >10-entry regression
+- [ ] `Internal/` adapter tests cover: parent ID injection, multi-call composition, >10-entry regression
 
 ### Phase 3: Command
 - [ ] `XCommand.swift` + subcommands using `formatAgentItems`

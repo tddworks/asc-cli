@@ -1,13 +1,13 @@
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite("SkillsCheck")
 struct SkillsCheckTests {
 
     @Test func `check shows up to date message`() async throws {
-        let mockRepo = MockSkillRepository()
+        let mockRepo = MockSkills()
         let mockStorage = MockSkillConfigStorage()
         given(mockRepo).check().willReturn(.upToDate)
         given(mockStorage).load().willReturn(nil)
@@ -20,7 +20,7 @@ struct SkillsCheckTests {
     }
 
     @Test func `check shows updates available message`() async throws {
-        let mockRepo = MockSkillRepository()
+        let mockRepo = MockSkills()
         let mockStorage = MockSkillConfigStorage()
         given(mockRepo).check().willReturn(.updatesAvailable)
         given(mockStorage).load().willReturn(nil)
@@ -33,7 +33,7 @@ struct SkillsCheckTests {
     }
 
     @Test func `check shows unavailable message`() async throws {
-        let mockRepo = MockSkillRepository()
+        let mockRepo = MockSkills()
         let mockStorage = MockSkillConfigStorage()
         given(mockRepo).check().willReturn(.unavailable)
         given(mockStorage).load().willReturn(nil)

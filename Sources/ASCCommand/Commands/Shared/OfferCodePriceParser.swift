@@ -1,5 +1,5 @@
 import ArgumentParser
-import Domain
+import ASCKit
 
 /// Parses CLI `--price <territory>=<price-point-id>` and `--free-territory <territory>`
 /// flags into the domain `OfferCodePriceInput` list.

@@ -1,5 +1,5 @@
 import ArgumentParser
-import Domain
+import ASCKit
 import Foundation
 
 extension ExistingScreenshotsPolicy: ExpressibleByArgument {}

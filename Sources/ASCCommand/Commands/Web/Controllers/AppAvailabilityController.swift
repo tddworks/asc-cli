@@ -1,8 +1,7 @@
 import Foundation
-import Domain
+import ASCKit
 import Hummingbird
 import HummingbirdWebSocket
-import Infrastructure
 
 /// `GET /apps/:appId/availability` — the app's availability (`data: []` when never set up).
 /// `POST /apps/:appId/availability` — set it up. Body keys match the CLI flags:

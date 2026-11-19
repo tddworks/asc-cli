@@ -2,7 +2,7 @@ import Foundation
 import Testing
 import Mockable
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite
 struct RESTRoutesTests {
@@ -46,7 +46,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `plugins updates list returns outdated entries with apply links`() async throws {
-        let mockRepo = MockPluginRepository()
+        let mockRepo = MockPlugins()
         given(mockRepo).listOutdated().willReturn([
             PluginUpdate(name: "Hello", installedVersion: "1.0.0", latestVersion: "1.2.0"),
         ])
@@ -58,7 +58,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `plugins update returns the freshly installed plugin`() async throws {
-        let mockRepo = MockPluginRepository()
+        let mockRepo = MockPlugins()
         given(mockRepo).update(name: .value("Hello")).willReturn(
             Plugin(id: "Hello.plugin", name: "Hello", version: "1.2.0", isInstalled: true, slug: "Hello.plugin")
         )
@@ -69,7 +69,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `plugins install returns the installed plugin in data wrapper`() async throws {
-        let mockRepo = MockPluginRepository()
+        let mockRepo = MockPlugins()
         given(mockRepo).install(name: .any).willReturn(
             Plugin(id: "Hello.plugin", name: "Hello", version: "1.0", author: "me", isInstalled: true, slug: "Hello.plugin")
         )
@@ -81,7 +81,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `plugins market search returns filtered list under data wrapper`() async throws {
-        let mockRepo = MockPluginRepository()
+        let mockRepo = MockPlugins()
         given(mockRepo).searchAvailable(query: .value("hello")).willReturn([
             Plugin(id: "Hello.plugin", name: "Hello", version: "1.0", author: "me"),
         ])
@@ -200,7 +200,7 @@ struct RESTRoutesTests {
     // MARK: - Simulators
 
     @Test func `simulators list returns JSON with _links`() async throws {
-        let mockRepo = MockSimulatorRepository()
+        let mockRepo = MockSimulators()
         given(mockRepo).listSimulators(filter: .any).willReturn([
             Simulator(id: "ABC-123", name: "iPhone 15", state: .booted, runtime: "iOS 17.0"),
         ])
@@ -287,7 +287,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `themes list returns data wrapper`() async throws {
-        let mockRepo = MockThemeRepository()
+        let mockRepo = MockThemes()
         given(mockRepo).listThemes().willReturn([])
         let output = try await AppShotsThemesList.parse(["--pretty"]).execute(repo: mockRepo, affordanceMode: .rest)
         #expect(output.contains("\"data\""))

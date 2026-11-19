@@ -1,7 +1,6 @@
 import ArgumentParser
-import Domain
+import ASCKit
 import Foundation
-import Infrastructure
 
 struct BuildsArchive: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
@@ -53,7 +52,7 @@ struct BuildsArchive: AsyncParsableCommand {
     var buildNumber: String?
 
     func run() async throws {
-        let runner = ProcessXcodeBuildRunner()
+        let runner = ClientProvider.makeXcodeBuildRunner()
         let uploadRepo = upload ? try ClientProvider.makeBuildUploadRepository() : nil
         print(try await execute(runner: runner, uploadRepo: uploadRepo))
     }

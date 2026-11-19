@@ -1,7 +1,6 @@
 import Foundation
 import TauTUI
-import Domain
-import Infrastructure
+import ASCKit
 
 @MainActor
 final class TUIApp {

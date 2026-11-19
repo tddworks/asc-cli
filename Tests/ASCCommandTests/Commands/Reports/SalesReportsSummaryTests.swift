@@ -1,13 +1,13 @@
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite
 struct SalesReportsSummaryTests {
 
     @Test func `aggregates 6 days into a summary with per-currency proceeds`() async throws {
-        let mockRepo = MockReportRepository()
+        let mockRepo = MockReports()
         let storage = MockAuthStorage()
         given(storage).loadAll().willReturn([
             ConnectAccount(name: "test", keyID: "K", issuerID: "I", isActive: true, vendorNumber: "123")
@@ -86,7 +86,7 @@ struct SalesReportsSummaryTests {
     }
 
     @Test func `single day window emits days=1`() async throws {
-        let mockRepo = MockReportRepository()
+        let mockRepo = MockReports()
         let storage = MockAuthStorage()
         given(storage).loadAll().willReturn([
             ConnectAccount(name: "test", keyID: "K", issuerID: "I", isActive: true, vendorNumber: "123")
@@ -109,7 +109,7 @@ struct SalesReportsSummaryTests {
     }
 
     @Test func `--from after --to rejects with validation error`() async throws {
-        let mockRepo = MockReportRepository()
+        let mockRepo = MockReports()
         let storage = MockAuthStorage()
         given(storage).loadAll().willReturn([
             ConnectAccount(name: "test", keyID: "K", issuerID: "I", isActive: true, vendorNumber: "123")

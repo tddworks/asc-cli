@@ -1,5 +1,5 @@
 import ArgumentParser
-import Domain
+import ASCKit
 
 struct SkillsList: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
@@ -10,11 +10,11 @@ struct SkillsList: AsyncParsableCommand {
     @OptionGroup var globals: GlobalOptions
 
     func run() async throws {
-        let repo = ClientProvider.makeSkillRepository()
+        let repo = ClientProvider.makeSkills()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SkillRepository) async throws -> String {
+    func execute(repo: any Skills) async throws -> String {
         let output = try await repo.listAvailable()
         return output
     }

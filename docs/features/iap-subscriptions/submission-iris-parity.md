@@ -40,8 +40,8 @@ The web UI expresses "alongside next version" via `submitWithNextAppStoreVersion
 
 ## Plumbing already in place
 
-- `Sources/Infrastructure/Iris/IrisClient.swift` — handles cookie injection, `[asc-ui]` CSRF header, JSON:API content-type
-- `Sources/Infrastructure/Iris/BrowserIrisCookieProvider.swift` — pulls cookies from the user's logged-in browser
+- `Sources/ASCKit/Iris/Internal/IrisClient.swift` — handles cookie injection, `[asc-ui]` CSRF header, JSON:API content-type
+- `Sources/ASCKit/Iris/Internal/BrowserIrisCookieProvider.swift` — pulls cookies from the user's logged-in browser
 - Working precedent: `IrisSDKAppBundleRepository` already calls iris through `IrisClient`
 
 ## Shipped approach (IAP)
@@ -133,4 +133,4 @@ Same gap exists at `POST /iris/v1/subscriptionSubmissions`. The implementation w
 ## See also
 
 - `docs/features/iap-subscriptions/lifecycle.md` — current submission CLI/REST commands
-- `Sources/Infrastructure/Iris/IrisClient.swift` — iris HTTP layer
+- `Sources/ASCKit/Iris/Internal/IrisClient.swift` — iris HTTP layer

@@ -1,15 +1,14 @@
 import ArgumentParser
-import Domain
+import ASCKit
 import Hummingbird
 import HummingbirdWebSocket
 import ASCPlugin
-import Infrastructure
 import Foundation
 
 /// /api/v1/app-shots — Screenshot template, theme, export, and AI generation.
 struct AppShotsController: Sendable {
     let templateRepo: any TemplateRepository
-    let themeRepo: any ThemeRepository
+    let themeRepo: any Themes
     let htmlRenderer: any HTMLRenderer
     let configStorage: any AppShotsConfigStorage
     let galleryTemplateRepo: any GalleryTemplateRepository

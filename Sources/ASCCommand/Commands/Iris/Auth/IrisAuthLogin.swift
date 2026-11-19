@@ -1,5 +1,5 @@
 import ArgumentParser
-import Domain
+import ASCKit
 import Foundation
 
 struct IrisAuthLogin: AsyncParsableCommand {
@@ -22,7 +22,7 @@ struct IrisAuthLogin: AsyncParsableCommand {
     func run() async throws {
         let resolvedPassword = try password ?? promptForPassword()
         let creds = IrisAuthCredentials(appleId: appleId, password: resolvedPassword)
-        let authRepo = ClientProvider.makeIrisAuthRepository()
+        let authRepo = ClientProvider.makeIrisSignIn()
         let sessionRepo = ClientProvider.makeIrisSessionRepository()
         let pendingURL = ClientProvider.pendingTwoFactorURL()
         let codePrompt: (() throws -> String)?
@@ -39,7 +39,7 @@ struct IrisAuthLogin: AsyncParsableCommand {
 
     func execute(
         credentials: IrisAuthCredentials,
-        authRepo: any IrisAuthRepository,
+        authRepo: any IrisSignIn,
         sessionRepo: any IrisSessionRepository,
         pendingURL: URL,
         interactivePromptForCode: (() throws -> String)? = nil,
