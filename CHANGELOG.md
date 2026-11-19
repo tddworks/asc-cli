@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `asc iris app-compliance list` and `declare` answer an app's App Compliance page (China mainland Security Assessment, AI generated content), No or Yes with its evidence, over CLI and REST. → [docs](docs/features/app-compliance/README.md)
+
 ### Changed
 - `asc versions submit` and `POST /api/v1/versions/:id/submit` refuse a version that can't be edited (e.g. Ready for Sale) before calling Apple, saying which states can go to review.
 - **Breaking (library):** one `ASCKit` module (`import ASCKit`); 7 non-CRUD repositories take role names (`IrisAuthRepository` → `IrisSignIn`, …); `SubmissionRepository.submitVersion` → `AppStoreVersion.submitForReview(to:)`. → [design](docs/features/concept-folders/design.md)

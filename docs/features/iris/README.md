@@ -96,6 +96,7 @@ Apps from `asc iris apps list` / `create` carry `listVersions` and `listAppInfos
 
 - `asc iris iap-submissions create|delete` — queue an IAP with the next app version, or dequeue it. See [Submit with products](../submit-with-products/README.md).
 - `asc iris resolution-center get` — read App Review's rejection messages. See [Resolution Center](../resolution-center/README.md).
+- `asc iris app-compliance list|declare` — answer the App Compliance page (China mainland Security Assessment, AIGC). See [App Compliance](../app-compliance/README.md).
 
 ## REST
 
@@ -104,6 +105,8 @@ Apps from `asc iris apps list` / `create` carry `listVersions` and `listAppInfos
 | POST | `/api/v1/iris/iap/:iapId/submissions` | `asc iris iap-submissions create` |
 | DELETE | `/api/v1/iris/iap-submissions/:submissionId` | `asc iris iap-submissions delete` |
 | GET | `/api/v1/iris/review-submissions/:submissionId/resolution-center` | `asc iris resolution-center get` |
+| GET | `/api/v1/iris/apps/:appId/compliance-requirements` | `asc iris app-compliance list` |
+| POST | `/api/v1/iris/apps/:appId/compliance-requirements/:requirementId/declare` | `asc iris app-compliance declare` |
 
 ## Gotchas
 

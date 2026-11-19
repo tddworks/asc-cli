@@ -7,6 +7,7 @@ New here? Start with the [README](../README.md). For every flag, see the [comman
 |---|---|
 | [age-rating](features/age-rating/README.md) | Read and update an app's age rating declaration (content descriptors, kids age band, regional overrides). Use when answering the age rating questionnaire or changing the store age rating. |
 | [app-clips](features/app-clips/README.md) | Manage App Clips, their default experiences, and the localized subtitles shown on App Clip cards. Use when setting up or editing an App Clip card. |
+| [app-compliance](features/app-compliance/README.md) | List and answer an app's App Compliance requirements (China mainland Security Assessment, AI generated content) via the iris web session. Use when App Store Connect asks for compliance info to keep an app on sale in a region. |
 | [app-icons](features/app-icons/README.md) | REST-only option that enriches the apps list with each app's icon as a sizable image template. Use when a client needs to render app icons from asc web-server. |
 | [app-info-localizations](features/app-info-localizations/README.md) | Manage per-locale app metadata (name, subtitle, privacy policy URL and text) on the App Store listing. Use when renaming the app, setting a subtitle, or adding a new listing locale. |
 | [app-infos](features/app-infos/README.md) | Manage app-level metadata (name, subtitle, privacy policy, categories) that persists across versions. Use when renaming an app, adding a locale's name/subtitle, or setting App Store categories. |

@@ -1,6 +1,6 @@
 # App Compliance — "Does your app offer AIGC services in China mainland?"
 
-**Status: DESIGN. Nothing is built.** Apple has no public API for App Compliance: it is absent from appstoreconnect-swift-sdk 4.6.1 and from Apple's own OpenAPI spec 4.6 (checked 2026-11-17). The web UI reads it from a private service outside `/iris/v1`, `ppm/compliancerequirements/v1`, which uses the same Apple ID session cookies. These calls have been captured (below): the requirements list (before and after a Yes was saved), the declarations, the form metadata for both kinds, with its request, and with Yes picked for each, a draft carrying files, the save of a first No (on two apps) and the save of an AIGC Yes with a file. and the save of a change to an Active declaration. Every read and write the page makes is captured.
+**Status: BUILT** (slices 1–5 and 7: list, declare No, declare Yes with evidence, CLI and REST). Slice 6, the check-readiness warning, waits on the list shipping. User guide: [README.md](README.md). Apple has no public API for App Compliance: it is absent from appstoreconnect-swift-sdk 4.6.1 and from Apple's own OpenAPI spec 4.6 (checked 2026-11-17). The web UI reads it from a private service outside `/iris/v1`, `ppm/compliancerequirements/v1`, which uses the same Apple ID session cookies. Every read and write the page makes is captured (below).
 
 This document owns **the declarations an app keeps current so it can stay on the store in a regulated region**. Its neighbours own the rest:
 
@@ -523,6 +523,15 @@ The iris repositories reach Apple through the `@Mockable IrisAPI` role, played b
 5. **Yes with evidence**: per-kind evidence types and file flags; files read from disk and sent base64 in `fileContent.fileData`. *Pinned: laws 9, 10.* The body is captured (AIGC Yes with a file).
 6. **Readiness** (after the list ships): `AppCompliance` collection + availability; check-readiness warns for a non-Active requirement only in a region the app is sold in (Open question 6).
 7. **Docs**: `README.md` for users, one CHANGELOG line, `make docs`, and a link from the iris README's "Other iris commands".
+
+## 6a · What the build settled
+
+- **The declaration the list reads holds only the answer.** `ComplianceDeclaration` is `{ id, answer: YES | NO }`; a Yes's evidence stays with Apple, since naming its stored fields would need the metadata for every row. The evidence types (`ComplianceEvidence`) are what a Yes *sends*.
+- **The account is asked of olympus on every call**, not read from a saved `teamId`, so a browser-cookie or `ASC_IRIS_COOKIES` session works the same as `asc iris auth login`. No `publicProviderId` → `ComplianceError.teamUnknown`.
+- **Law 1's owner is `ComplianceStatus(wireValue:)`**: Apple already sends `PENDING_COLLECT` for an unanswered requirement.
+- **The answer a form holds is its first field**, the Yes/No it opens with; only a Yes opens more fields.
+- **`declare` is one loop for every answer**: post the draft to `…/metadata`, fill each field Apple newly asks for (by the key in its label), repeat until Apple asks for nothing new, then save exactly those fields. Any field Apple won't take a change to stops it (law 5a). A No ends after its first pick.
+- **REST statuses**: 404 no such requirement on the app; 409 not declarable now, read-only, or a form asc doesn't understand; 422 evidence missing, mismatched or of a type the field refuses; 403 the role can't edit; 401 no team.
 
 ## 7 · Open questions
 
