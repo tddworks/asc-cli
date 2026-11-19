@@ -54,7 +54,7 @@ Example — after the SDK bump to 4.5.1, App Store Connect can send `koreaAgeRat
         ),
         links: .init(this: "")
     ))
-    let repo = SDKAgeRatingDeclarationRepository(client: stub)
+    let repo = SDKAgeRatingDeclarations(client: stub)
 
     // When - the real mapper reads it
     let declaration = try await repo.getDeclaration(appInfoId: "info-1")
@@ -67,7 +67,7 @@ Example — after the SDK bump to 4.5.1, App Store Connect can send `koreaAgeRat
 Run it and **watch it fail for the right reason** (the assertion, or the missing symbol the test names). Report the red line to the user before touching `Sources/`:
 
 ```bash
-swift test --filter 'SDKAgeRatingDeclarationRepositoryTests'
+swift test --filter 'SDKAgeRatingDeclarationsTests'
 ```
 
 ## Phase 3: Fix & Verify (Green)
