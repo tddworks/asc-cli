@@ -16,6 +16,11 @@ comment:
 ignore:
   - "Tests/**/*"
 
+  # The bare outside call — Process, URLSession, WebKit — ≤100 lines, no decisions.
+  # Its decisions live beside it in Internal/ and are unit-tested.
+  # (docs/features/concept-folders/design.md)
+  - "Sources/**/Internal/System/**"
+
   # TUI — terminal UI framework, not unit-testable
   - "Sources/ASCCommand/Commands/TUI/**/*"
 
@@ -50,8 +55,6 @@ ignore:
   # WebKit HTML renderer — WKWebView + AppKit GUI snapshot, not unit-testable
   - "Sources/ASCKit/Screenshots/Internal/WebKitHTMLRenderer.swift"
 
-  # Shell runner — spawns real subprocesses, not unit-testable
-  - "Sources/ASCKit/Skills/Internal/ShellRunner.swift"
 
   # Plugin marketplace — wraps PluginLoader (filesystem) + URLSession download + unzip
   - "Sources/ASCKit/Plugins/Internal/PluginMarketRepository.swift"
