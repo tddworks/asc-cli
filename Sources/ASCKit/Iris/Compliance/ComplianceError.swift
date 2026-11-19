@@ -5,6 +5,8 @@ public enum ComplianceError: Error, Equatable, Sendable, CustomStringConvertible
     case notDeclarable(kind: ComplianceKind, status: ComplianceStatus)
     /// The session doesn't say which team it belongs to (olympus gave no `publicProviderId`).
     case teamUnknown
+    /// No row with this requirement id on this app (a requirement is addressed by both, law 2).
+    case requirementNotFound(requirementId: String, appId: String)
     /// Apple serves the form without `editable` (law 5a): nothing was saved.
     case readOnly(kind: ComplianceKind)
     /// Apple forbade the save (403): the signed-in role can't edit App Compliance.
@@ -20,6 +22,8 @@ public enum ComplianceError: Error, Equatable, Sendable, CustomStringConvertible
             "Apple won't take a change to \(kind.displayName) right now: the App Compliance page shows it read-only."
         case .roleCannotEdit(let appId):
             "Your App Store Connect role can't edit App Compliance for app \(appId). Ask your Account Holder or an Admin."
+        case .requirementNotFound(let requirementId, let appId):
+            "App \(appId) has no compliance requirement \(requirementId). See `asc iris app-compliance list --app-id \(appId)`."
         case .teamUnknown:
             "Couldn't tell which team this App Store Connect session belongs to. Sign in again with `asc iris auth login`."
         }

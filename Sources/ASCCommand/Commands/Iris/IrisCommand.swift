@@ -9,6 +9,7 @@ struct IrisCommand: AsyncParsableCommand {
             IrisAppsCommand.self,
             IrisIAPSubmissionsCommand.self,
             IrisResolutionCenterCommand.self,
+            IrisAppComplianceCommand.self,
             IrisAuthCommand.self,
         ]
     )

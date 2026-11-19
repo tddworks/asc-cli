@@ -151,6 +151,10 @@ enum RESTRoutes {
             cookieProvider: ClientProvider.makeIrisCookieProvider(),
             repo: ClientProvider.makeIrisResolutionCenterRepository()
         ).addRoutes(to: v1)
+        IrisAppComplianceController(
+            cookieProvider: ClientProvider.makeIrisCookieProvider(),
+            repo: ClientProvider.makeIrisComplianceRepository()
+        ).addRoutes(to: v1)
         if let subSubmissionRepo = try? ClientProvider.makeSubscriptionSubmissionRepository() {
             SubscriptionSubmissionController(repo: subSubmissionRepo).addRoutes(to: v1)
         }

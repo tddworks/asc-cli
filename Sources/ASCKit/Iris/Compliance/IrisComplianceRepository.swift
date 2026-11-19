@@ -10,3 +10,14 @@ public protocol IrisComplianceRepository: Sendable {
     /// and answers the requirement as it now stands.
     func declare(session: IrisSession, requirement: ComplianceRequirement, answer: ComplianceAnswer) async throws -> ComplianceRequirement
 }
+
+extension IrisComplianceRepository {
+    /// The row for `requirementId` on `appId`: a requirement id names the compliance on every
+    /// app, so a row is found by both (law 2).
+    public func requirement(_ requirementId: String, appId: String, session: IrisSession) async throws -> ComplianceRequirement {
+        guard let row = try await listRequirements(session: session, appId: appId).first(where: { $0.id == requirementId }) else {
+            throw ComplianceError.requirementNotFound(requirementId: requirementId, appId: appId)
+        }
+        return row
+    }
+}
