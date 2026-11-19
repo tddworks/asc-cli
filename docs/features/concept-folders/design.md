@@ -4,7 +4,7 @@ description: The source layout reworked from layers (Domain/, Infrastructure/) t
 
 # Concept folders, not layers
 
-**Status: step 1 BUILT** (one `ASCKit` module, concept folders); steps 2–5 not built. asc-cli is split by layer: `Sources/Domain/`
+**Status: steps 1–2 BUILT** (one `ASCKit` module, concept folders; docs and skills follow); steps 3–5 not built. asc-cli is split by layer: `Sources/Domain/`
 and `Sources/Infrastructure/` are two modules that mirror each other folder
 for folder. Every concept therefore lives in two places, and every change to
 one touches both trees. The goal, stated as a test:
@@ -114,7 +114,7 @@ safety net; any step that moves a rule writes its test first.
 |---|---|---|---|---|
 | 0 | **this doc** | — | the target tree and rules | — |
 | 1 | **one module, concept folders** ✓ | `Domain` + `Infrastructure` targets, `DomainTests` + `InfrastructureTests` | `git mv` into `Sources/ASCKit/<Concept>/` and `<Concept>/Internal/`; `ScreenshotPlans` → `Screenshots/Internal/`; `Client` + infra `Shared` → `Shared/Internal/`; one `ASCKit` target, one `ASCKitTests`; `import Domain`/`Infrastructure` → `import ASCKit`; `Domain.X` → `ASCKit.X`. Library users and `examples/blitz-screenshots` change two imports to one (CHANGELOG line, `docs/library.md`) | — (move only; 787+ tests stay green) |
-| 2 | **docs and skills follow** | `CLAUDE.md`, `docs/design.md`, `implement-feature` / `fix-bug` / `improvement` skills describe `Domain → Infrastructure` (16 files) | describe concept folders; link this doc | — |
+| 2 | **docs and skills follow** ✓ | `CLAUDE.md`, `docs/design.md`, `implement-feature` / `fix-bug` / `improvement` skills describe `Domain → Infrastructure` (16 files) | describe concept folders; link this doc | — |
 | 3 | **one composition root** | `CompositeAuthProvider(` ×63 in `ASCCommand` | built once in `ClientProvider`; commands ask for it | "should authenticate with the stored credentials when no env vars are set" (existing behaviour, pinned) |
 | 4 | **`Internal/System/` per concept** (several PRs) | SDK call + mapping in one `SDK…Repository` | the mapping stays in `Internal/` and is tested from DTOs; only the request goes in `Internal/System/` | per concept: "should map a <resource> with its parent id" from a DTO, no SDK stub |
 | 5 | **names for roles** (several PRs) | 75 `XxxRepository` protocols, `XxxProvider`s | plural collection nouns (`Apps`, `Builds`), role nouns for the rest | per rename — none; behaviour unchanged |

@@ -1327,7 +1327,7 @@ Progressive migration — React app runs alongside the existing vanilla JS durin
 ### What stays unchanged
 
 - `apps/asc-web/console/` — unchanged (separate app)
-- `Sources/Infrastructure/Web/` — unchanged (same REST API)
+- `Sources/ASCKit/Web/` — unchanged (same REST API)
 - `Sources/ASCCommand/Commands/Web/` — unchanged (same controllers)
 - `Sources/ASCPlugin/` — unchanged (same plugin loading, manifest format)
 

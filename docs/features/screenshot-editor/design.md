@@ -147,11 +147,11 @@ homepage/editor/                          Web editor source
     └── *.png                             121 device bezels
 
 Sources/
-├── Domain/Screenshots/
+├── ASCKit/Apps/Versions/Localizations/ScreenshotSets/
 │   ├── ScreenshotImport.swift            ScreenshotManifest + nested types
 │   └── ScreenshotRepository.swift        Modified: added importScreenshots
 │
-├── Infrastructure/Screenshots/
+├── ASCKit/Apps/Versions/Localizations/ScreenshotSets/Internal/
 │   └── OpenAPIScreenshotRepository.swift Modified: implements importScreenshots
 │
 └── ASCCommand/Commands/Screenshots/

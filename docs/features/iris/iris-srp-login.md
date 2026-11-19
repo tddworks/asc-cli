@@ -8,7 +8,7 @@
 
 The iris private API at `https://appstoreconnect.apple.com/iris/v1/` is the only path Apple exposes for several App Store Connect features (notably `submitWithNextAppStoreVersion` for IAP/subscription submissions). Iris is gated by **session cookies obtained from an Apple ID login** at `idmsa.apple.com`.
 
-We already have **`BrowserIrisCookieProvider`** (`Sources/Infrastructure/Iris/BrowserIrisCookieProvider.swift`) which borrows cookies from the user's browser after they've signed in to App Store Connect manually. That works for desktop interactive use but **not for headless CI** — there's no browser to borrow from.
+We already have **`BrowserIrisCookieProvider`** (`Sources/ASCKit/Iris/Internal/BrowserIrisCookieProvider.swift`) which borrows cookies from the user's browser after they've signed in to App Store Connect manually. That works for desktop interactive use but **not for headless CI** — there's no browser to borrow from.
 
 Three paths considered. Only one survives:
 
@@ -93,7 +93,7 @@ The existing `BrowserIrisCookieProvider` is **not removed** — users on a deskt
 
 ```
 Sources/
-├── Domain/Auth/Iris/                                (new — pure value types & @Mockable protocols, zero I/O)
+├── ASCKit/Auth/Iris/                                (new — pure value types & @Mockable protocols, zero I/O)
 │   ├── IrisAuthCredentials.swift                    appleId, password
 │   ├── IrisAuthSession.swift                        cookies, scnt, serviceKey, appleIDSessionID, providerID, teamId, userEmail, expiresAt
 │   ├── IrisAuthRepository.swift                     @Mockable: login, requestTwoFactorCode, submitTwoFactorCode, logout
@@ -102,18 +102,18 @@ Sources/
 │   ├── TwoFactorChallenge.swift                     method (trustedDevice/phone), maskedDestination, codeLength
 │   └── PendingTwoFactorState.swift                  serialized partial session: scnt, serviceKey, appleIDSessionID, twoFactorCookieBag
 │
-├── Infrastructure/Iris/Auth/                        (new — implementations of Domain protocols)
+├── ASCKit/Iris/Internal/Auth/                       (new — implementations of the face's protocols)
 │   ├── SRP/                                         (Apple-specific glue on top of swift-srp)
 │   │   ├── AppleSRPClient.swift                     init() → A using swift-srp keys; completeWith(salt, B, iterations) computes Apple x via PBKDF2 then S using swift-srp's BigNum + config.k/g/N
 │   │   └── AppleM1.swift                            HKDF-SHA256-derived M1 — Apple's variant, distinct from RFC 2945 proof
 │   ├── IdmsaAPIClient.swift                         HTTP for idmsa.apple.com (signin/init, signin/complete, verify/<method>/securitycode, 2sv/trust); cookie jar & header threading
 │   ├── OlympusClient.swift                          olympus/v1/session for team metadata
-│   ├── IrisAuthSDKRepository.swift                  implements `Domain.IrisAuthRepository`; composes AppleSRPClient + IdmsaAPIClient + OlympusClient
-│   ├── KeychainIrisSessionRepository.swift             implements `Domain.IrisSessionRepository` via macOS Keychain (Security framework)
-│   ├── FileIrisSessionRepository.swift                 implements `Domain.IrisSessionRepository` via `~/.asc/iris/session.json`, written with `0600`
-│   ├── CompositeIrisSessionRepository.swift            implements `Domain.IrisSessionRepository` by trying Keychain first, falling back to file (so macOS gets keychain protection, Linux silently falls through)
-│   ├── KeychainIrisCookieProvider.swift             implements existing `Domain.IrisCookieProvider`; reads from any `IrisSessionRepository`
-│   └── CompositeIrisCookieProvider.swift            implements `Domain.IrisCookieProvider`; resolution order env → stored → browser
+│   ├── IrisAuthSDKRepository.swift                  implements `ASCKit.IrisAuthRepository`; composes AppleSRPClient + IdmsaAPIClient + OlympusClient
+│   ├── KeychainIrisSessionRepository.swift             implements `ASCKit.IrisSessionRepository` via macOS Keychain (Security framework)
+│   ├── FileIrisSessionRepository.swift                 implements `ASCKit.IrisSessionRepository` via `~/.asc/iris/session.json`, written with `0600`
+│   ├── CompositeIrisSessionRepository.swift            implements `ASCKit.IrisSessionRepository` by trying Keychain first, falling back to file (so macOS gets keychain protection, Linux silently falls through)
+│   ├── KeychainIrisCookieProvider.swift             implements existing `ASCKit.IrisCookieProvider`; reads from any `IrisSessionRepository`
+│   └── CompositeIrisCookieProvider.swift            implements `ASCKit.IrisCookieProvider`; resolution order env → stored → browser
 │
 └── ASCCommand/Commands/Iris/Auth/                   (new — CLI)
     ├── IrisAuthCommand.swift                        `asc iris auth`
@@ -234,7 +234,7 @@ Strict TDD. Each slice has a red test before any production code.
 
 ### Crypto primitives (slice 1)
 - **RFC 5054 base correctness comes free** — `swift-srp` already has its own test suite verified against RFC 5054 vectors, Mozilla's verifier vectors, and several cross-implementations. We do not re-test what they own.
-- **Apple-specific test vectors**: we test only our delta — Apple's PBKDF2-based `x` derivation and HKDF-based `M1`. Captured from a single real successful login through `mitmproxy`. Stored as `Tests/InfrastructureTests/Iris/Auth/Fixtures/apple-srp-vectors.json` (no real password — only the post-derivation values: salt, iterations, expected `x`, expected `M1`).
+- **Apple-specific test vectors**: we test only our delta — Apple's PBKDF2-based `x` derivation and HKDF-based `M1`. Captured from a single real successful login through `mitmproxy`. Stored as `Tests/ASCKitTests/Iris/Internal/Auth/Fixtures/apple-srp-vectors.json` (no real password — only the post-derivation values: salt, iterations, expected `x`, expected `M1`).
 
 ### Idmsa flow (slices 2–3)
 - `IdmsaAPIClient` accepts an injected `URLSession` (via `URLProtocol` mock or `XCTNetworking` shim).
@@ -284,5 +284,5 @@ Strict TDD. Each slice has a red test before any production code.
 ## See also
 
 - `docs/features/iap-subscriptions/submission-iris-parity.md` — the original gap that motivated this build
-- `Sources/Infrastructure/Iris/IrisClient.swift` — the iris HTTP layer that consumes the cookies SRP login produces
-- `Sources/Infrastructure/Iris/BrowserIrisCookieProvider.swift` — the existing browser-based path; remains as the third resolver in the composite
+- `Sources/ASCKit/Iris/Internal/IrisClient.swift` — the iris HTTP layer that consumes the cookies SRP login produces
+- `Sources/ASCKit/Iris/Internal/BrowserIrisCookieProvider.swift` — the existing browser-based path; remains as the third resolver in the composite

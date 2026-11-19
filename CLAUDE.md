@@ -25,7 +25,7 @@ Chicago School — state-based, not interaction-based: tests verify what domain 
 - Assert exact output values (`"READY_FOR_SALE"`, `"expired": true`), never "is non-empty" or "doesn't throw". Command tests assert the full JSON string.
 - Implement just enough to pass — no extra fields, no speculative branches.
 - Difficult to test = design problem. Never modify a test to make it pass; if it fails unexpectedly, the spec was wrong.
-- `@Testing` (not XCTest); `@Mockable` protocols with `given().willReturn()`; shared test data in `Tests/DomainTests/TestHelpers/MockRepositoryFactory.swift`.
+- `@Testing` (not XCTest); `@Mockable` protocols with `given().willReturn()`; shared test data in `Tests/ASCKitTests/TestHelpers/MockRepositoryFactory.swift`.
 
 ## Commands
 
@@ -41,20 +41,22 @@ make check-docs                      # broken links, doc size budgets
 
 ## Architecture
 
-Three strict layers, dependencies pointing one way: `ASCCommand → Infrastructure → Domain`.
+Concept folders, not layers. Imports point one way: `ASCCommand → ASCKit`.
 
 ```
 Sources/
-├── Domain/          # Pure value types, @Mockable protocols — zero I/O
-├── Infrastructure/  # Implements Domain protocols via appstoreconnect-swift-sdk
-└── ASCCommand/      # CLI entry (ASC.swift), output formatting, REST server (Commands/Web/), TUI
+├── ASCKit/<Concept>/            # public face: models, state enums, affordances, @Mockable repositories — zero I/O
+│   └── Internal/                # implementations: SDK adapters, DTO mapping, file storage
+│       └── System/              # only the bare outside call (SDK request, URLSession, WebKit), ≤100 lines
+├── ASCCommand/                  # the way in: CLI entry (ASC.swift), output formatting, REST commands, TUI
+└── ASCPlugin/                   # the plugin SDK third parties link
 ```
 
-Domain folders mirror the App Store Connect resource hierarchy (`Domain/Apps/Versions/Localizations/…`); Infrastructure and `Tests/` mirror Domain exactly. Look at the tree rather than a list here.
+Concept folders mirror the App Store Connect resource hierarchy (`ASCKit/Apps/Versions/Localizations/…`); `Tests/ASCKitTests/` mirrors `Sources/ASCKit/` folder for folder. A concept never reaches into another concept's `Internal/`; only `ASCCommand/ClientProvider.swift` names `Internal/` types. Look at the tree rather than a list here. Why: [concept-folders design](docs/features/concept-folders/design.md).
 
 **Rules every change follows:**
-- Domain models are `public struct` + `Sendable` + `Equatable` + `Codable`; the JSON encoding is the public schema. Optional text fields use `encodeIfPresent` so nil is omitted.
-- Every model carries its **parent ID** (`AppStoreVersion.appId`, `AppScreenshot.setId`). The API doesn't return parent IDs, so Infrastructure mappers inject them from the request.
+- Models are `public struct` + `Sendable` + `Equatable` + `Codable`; the JSON encoding is the public schema. Optional text fields use `encodeIfPresent` so nil is omitted.
+- Every model carries its **parent ID** (`AppStoreVersion.appId`, `AppScreenshot.setId`). The API doesn't return parent IDs, so the `Internal/` mappers inject them from the request.
 - State enums expose **semantic booleans** (`isLive`, `isEditable`, `isPending`) for agent decisions.
 - **CAEOAS:** every model provides `structuredAffordances` — ready-to-run next commands, state-aware (e.g. `submitForReview` only when `isEditable`). The CLI `affordances` and REST `_links` both derive from it.
 - **CLI and REST ship together:** a command that returns data is also exposed by `asc web-server`. A feature isn't done until it is reachable over REST.

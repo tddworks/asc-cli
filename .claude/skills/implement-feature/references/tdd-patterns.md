@@ -92,7 +92,7 @@ Use `@Test` and `@Suite` with backtick test names:
 
 ```swift
 import Testing
-@testable import Domain
+@testable import ASCKit
 
 @Suite
 struct AppStoreVersionTests {
@@ -114,7 +114,7 @@ struct AppStoreVersionTests {
 Never construct domain models inline in tests. Use the shared factory:
 
 ```swift
-// Tests/DomainTests/TestHelpers/MockRepositoryFactory.swift
+// Tests/ASCKitTests/TestHelpers/MockRepositoryFactory.swift
 // All params have sensible defaults
 
 MockRepositoryFactory.makeVersion(id: "v1", appId: "app-1", state: .readyForSale)
@@ -128,7 +128,7 @@ Add a new `make*` method when adding a new domain model.
 
 ## Affordance Tests
 
-Add to `Tests/DomainTests/Apps/AffordancesTests.swift` (or a domain-specific file):
+Add to `Tests/ASCKitTests/Apps/AffordancesTests.swift` (or a domain-specific file):
 
 ```swift
 @Test func `should point to the model's children and siblings`() {
@@ -174,7 +174,7 @@ struct VersionsListTests {
 }
 ```
 
-## Infrastructure Adapter Tests
+## `Internal/` Adapter Tests
 
 Stub the SDK response with `StubAPIClient`, read through the real `SDK*Repository`,
 assert the domain value:
@@ -225,25 +225,18 @@ struct AppStoreVersionStateTests {
 
 ```
 Tests/
-├── DomainTests/
+├── ASCKitTests/                          ← mirrors Sources/ASCKit/
 │   ├── Apps/
 │   │   ├── AppTests.swift
 │   │   ├── AppStoreVersionTests.swift
-│   │   ├── AppStoreVersionStateTests.swift
-│   │   ├── AppRepositoryTests.swift
-│   │   └── AffordancesTests.swift       ← all affordance tests
-│   ├── Screenshots/
-│   │   ├── AppStoreVersionLocalizationTests.swift
-│   │   ├── AppScreenshotSetTests.swift
-│   │   ├── AppScreenshotTests.swift
-│   │   └── ScreenshotRepositoryTests.swift
-│   ├── Builds/
+│   │   ├── AffordancesTests.swift        ← all affordance tests
+│   │   ├── Internal/                     ← adapter tests (parent-ID injection, mapping)
+│   │   └── Versions/Localizations/ScreenshotSets/…
 │   ├── Auth/
+│   │   └── Internal/
 │   ├── Shared/
 │   └── TestHelpers/
-│       └── MockRepositoryFactory.swift  ← shared factory
-├── InfrastructureTests/
-│   └── Auth/
+│       └── MockRepositoryFactory.swift   ← shared factory
 └── ASCCommandTests/
     └── OutputFormatterTests.swift
 ```
@@ -252,7 +245,7 @@ Tests/
 
 ```bash
 swift test                                              # All tests
-swift test --filter DomainTests                        # Domain only
+swift test --filter ASCKitTests                        # ASCKit only
 swift test --filter "AppStoreVersionTests"             # One suite
 ```
 

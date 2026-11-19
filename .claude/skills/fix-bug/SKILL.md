@@ -28,10 +28,10 @@ Fix the bug where the rule lives, not at a call site that happens to show it:
 
 | Symptom | Owner | Test lives in |
 |---|---|---|
-| Wrong `isLive` / `isEditable` / `isPending` | the state enum in `Sources/Domain/…` | `Tests/DomainTests/…` |
-| Missing or wrong next command / `_links` | the model's `structuredAffordances` (CLI and REST both derive from it) | `Tests/DomainTests/…` |
-| Field `null`, wrong value, missing parent ID | the `SDK*Repository` mapper in `Sources/Infrastructure/…` | `Tests/InfrastructureTests/…` |
-| A value App Store Connect sends shows as `null` | a domain enum missing a case the SDK has (mapped via `init(rawValue:)` → `nil`) | Domain + Infrastructure |
+| Wrong `isLive` / `isEditable` / `isPending` | the state enum in `Sources/ASCKit/<Concept>/` | `Tests/ASCKitTests/<Concept>/` |
+| Missing or wrong next command / `_links` | the model's `structuredAffordances` (CLI and REST both derive from it) | `Tests/ASCKitTests/<Concept>/` |
+| Field `null`, wrong value, missing parent ID | the `SDK*Repository` mapper in `Sources/ASCKit/<Concept>/Internal/` | `Tests/ASCKitTests/<Concept>/Internal/` |
+| A value App Store Connect sends shows as `null` | a domain enum missing a case the SDK has (mapped via `init(rawValue:)` → `nil`) | the concept's face + its `Internal/` mapper |
 | Wrong flag parsing, table, or JSON shape | the command in `Sources/ASCCommand/Commands/…` | `Tests/ASCCommandTests/…` |
 | CLI right but REST wrong (or the reverse) | the controller in `Commands/Web/Controllers/` — CLI and REST should share one path; make them | `Tests/ASCCommandTests/…` |
 

@@ -24,12 +24,12 @@ Required conformances:
 The ASC API never includes parent IDs in response bodies. The infrastructure mapper must inject them:
 
 ```swift
-// Infrastructure: inject parentId from the request parameter
+// Internal/ mapper: inject parentId from the request parameter
 private func mapLocalization(
     _ sdk: AppStoreVersionLocalization,
     versionId: String            // ← comes from the request, not the response
-) -> Domain.AppStoreVersionLocalization {
-    Domain.AppStoreVersionLocalization(
+) -> ASCKit.AppStoreVersionLocalization {
+    ASCKit.AppStoreVersionLocalization(
         id: sdk.id,
         versionId: versionId,    // ← injected
         locale: sdk.attributes?.locale ?? ""
@@ -123,7 +123,7 @@ Method naming convention: `list` prefix (not `fetch`).
 All tests use `MockRepositoryFactory` with sensible defaults — never construct models inline:
 
 ```swift
-// Tests/DomainTests/TestHelpers/MockRepositoryFactory.swift
+// Tests/ASCKitTests/TestHelpers/MockRepositoryFactory.swift
 enum MockRepositoryFactory {
     static func makeVersion(
         id: String = "v1",
@@ -147,24 +147,24 @@ let loc = MockRepositoryFactory.makeLocalization(versionId: "v-99")
 
 Add new `make*` methods to `MockRepositoryFactory` whenever you add a new domain model.
 
-## Infrastructure Mapper Pattern
+## `Internal/` Mapper Pattern
 
 Use private mapper functions (not static factory methods on the domain type):
 
 ```swift
-// In OpenAPIXxxRepository.swift (Infrastructure layer)
+// In OpenAPIXxxRepository.swift (in the concept's Internal/)
 private func mapVersion(
     _ sdkVersion: AppStoreConnect_Swift_SDK.AppStoreVersion,
     appId: String
-) -> Domain.AppStoreVersion {
-    let state = Domain.AppStoreVersionState(
+) -> ASCKit.AppStoreVersion {
+    let state = ASCKit.AppStoreVersionState(
         rawValue: sdkVersion.attributes?.appStoreState?.rawValue ?? ""
     ) ?? .prepareForSubmission
-    return Domain.AppStoreVersion(
+    return ASCKit.AppStoreVersion(
         id: sdkVersion.id,
         appId: appId,
         versionString: sdkVersion.attributes?.versionString ?? "",
-        platform: Domain.AppStorePlatform(rawValue: sdkVersion.attributes?.platform?.rawValue ?? "") ?? .iOS,
+        platform: ASCKit.AppStorePlatform(rawValue: sdkVersion.attributes?.platform?.rawValue ?? "") ?? .iOS,
         state: state,
         createdDate: sdkVersion.attributes?.createdDate
     )
@@ -264,7 +264,7 @@ The mock ignores the URL value — no real filesystem needed. `MockRepositoryFac
 
 ## What NOT to Put in Domain Models
 
-- No `import AppStoreConnect_Swift_SDK` (Infrastructure concern)
+- No `import AppStoreConnect_Swift_SDK` (an `Internal/` concern)
 - No CLI output formatting (ASCCommand concern)
 - No network code or `URLSession`
 - No SwiftUI or `@Observable` (this is a CLI, not a GUI app)

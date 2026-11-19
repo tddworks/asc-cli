@@ -4,7 +4,7 @@
 
 - All domain models: `Sendable` (struct is implicitly Sendable when all stored props are Sendable)
 - Repository protocols: `: Sendable` (required for `@Mockable` compatibility)
-- Infrastructure repos: `@unchecked Sendable` (hold `APIProvider` which is a reference type)
+- `Internal/` repos: `@unchecked Sendable` (hold `APIProvider` which is a reference type)
 - Commands: `AsyncParsableCommand` with `async throws func run()`
 
 ## Domain Models (Pure Structs)
@@ -31,7 +31,7 @@ public protocol AppRepository: Sendable {
 }
 ```
 
-## Infrastructure (APIProvider wrapper)
+## `Internal/` adapters (APIProvider wrapper)
 
 ```swift
 // @unchecked Sendable because APIProvider is a reference type

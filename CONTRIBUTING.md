@@ -17,14 +17,16 @@ swift build -c release && cp .build/release/asc /usr/local/bin/   # install from
 
 ## How the code is organised
 
-Three layers, dependencies pointing one way: `ASCCommand → Infrastructure → Domain`.
+Concept folders, not layers. Imports point one way: `ASCCommand → ASCKit`.
 
 ```
 Sources/
-├── Domain/          # Pure value types, @Mockable protocols — zero I/O
-├── Infrastructure/  # SDK adapters (appstoreconnect-swift-sdk), parent ID injection
-└── ASCCommand/      # CLI commands, REST server, output formatting, TUI
+├── ASCKit/<Concept>/  # public face: models, @Mockable repositories — zero I/O
+│   └── Internal/      # SDK adapters (appstoreconnect-swift-sdk), parent ID injection
+└── ASCCommand/        # CLI commands, REST server, output formatting, TUI
 ```
+
+`Tests/ASCKitTests/` mirrors `Sources/ASCKit/`. The layout's rules: [concept-folders design](docs/features/concept-folders/design.md).
 
 Why it's built this way (CAEOAS, rich domain models, parent IDs): [docs/design.md](docs/design.md).
 

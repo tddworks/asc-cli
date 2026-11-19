@@ -60,9 +60,9 @@ struct AppsList: AsyncParsableCommand {
 }
 ```
 
-## Stateless Infrastructure Types
+## Stateless `Internal/` Types
 
-Infrastructure types that don't hold mutable state use `struct`:
+`Internal/` types that don't hold mutable state use `struct`:
 
 ```swift
 // Stateless — reads environment at call time, no stored mutable state
@@ -129,7 +129,7 @@ func run() async throws {
 
 - [ ] Domain models are `struct` + `Sendable` (not `class`)
 - [ ] Repository protocols conform to `Sendable`
-- [ ] Infrastructure structs are stateless or explicitly `Sendable`
+- [ ] `Internal/` structs are stateless or explicitly `Sendable`
 - [ ] Commands use `AsyncParsableCommand` for async entry points
 - [ ] No `@unchecked Sendable` unless absolutely necessary with documented reason
 - [ ] All `async throws` propagate errors rather than swallowing them
