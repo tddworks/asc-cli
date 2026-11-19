@@ -1,88 +1,61 @@
 import Foundation
-import SweetCookieKit
 
-/// Resolves iris session cookies from browser cookie stores or environment.
+/// Resolves iris session cookies from the environment or a browser.
 ///
 /// Resolution order:
-/// 1. `ASC_IRIS_COOKIES` environment variable (for CI/CD)
-/// 2. Browser cookies from Chrome/Safari/Firefox (via SweetCookieKit)
+/// 1. `ASC_IRIS_COOKIES` environment variable (for CI/CD), when not blank
+/// 2. The first browser signed in to App Store Connect (holding `myacinfo`)
 public struct BrowserIrisCookieProvider: IrisCookieProvider {
-    public init() {}
+    /// `myacinfo` is set on .apple.com; the others (itctx, dqsid, wosid) on appstoreconnect.apple.com.
+    static let domains = ["apple.com", "appstoreconnect.apple.com"]
+    /// The cookies the iris API reads.
+    static let irisCookieNames: Set<String> = [
+        "myacinfo", "itctx", "itcdq", "dqsid", "wosid", "woinst", "dssf", "dssid2", "dc",
+    ]
+
+    private let environment: [String: String]
+    private let browsers: any BrowserCookieStores
+
+    public init() {
+        self.init(environment: ProcessInfo.processInfo.environment, browsers: SweetCookieKitStores())
+    }
+
+    init(environment: [String: String], browsers: any BrowserCookieStores) {
+        self.environment = environment
+        self.browsers = browsers
+    }
 
     public func resolveSession() throws -> IrisSession {
-        let (cookies, _) = try resolve()
-        return IrisSession(cookies: cookies)
+        IrisSession(cookies: try resolve().cookies)
     }
 
     public func resolveStatus() throws -> IrisStatus {
         let (cookies, source) = try resolve()
-        let count = cookies.components(separatedBy: "; ").count
-        return IrisStatus(source: source, cookieCount: count)
+        return IrisStatus(source: source, cookieCount: cookies.components(separatedBy: "; ").count)
     }
 
-    private func resolve() throws -> (String, IrisCookieSource) {
-        // 1. Check environment variable
-        if let envCookies = ProcessInfo.processInfo.environment["ASC_IRIS_COOKIES"],
-           !envCookies.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        {
-            return (envCookies, .environment)
+    private func resolve() throws -> (cookies: String, source: IrisCookieSource) {
+        if let fromEnvironment = environment["ASC_IRIS_COOKIES"],
+           !fromEnvironment.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return (fromEnvironment, .environment)
         }
-
-        // 2. Try extracting from browser cookies
-        if let browserCookies = fetchFromBrowser() {
-            return (browserCookies, .browser)
+        for cookies in browsers.cookiesPerBrowser(domains: Self.domains) {
+            if let header = Self.irisCookieHeader(from: cookies) {
+                return (header, .browser)
+            }
         }
-
         throw IrisCookieError.noCookiesFound
     }
 
-    private func fetchFromBrowser() -> String? {
-        let cookieClient = BrowserCookieClient()
-
-        // myacinfo is set on .apple.com (parent domain)
-        // other cookies (itctx, dqsid, wosid) are on appstoreconnect.apple.com
-        let queries: [BrowserCookieQuery] = [
-            BrowserCookieQuery(
-                domains: ["apple.com"],
-                domainMatch: .suffix,
-                includeExpired: false
-            ),
-            BrowserCookieQuery(
-                domains: ["appstoreconnect.apple.com"],
-                domainMatch: .suffix,
-                includeExpired: false
-            ),
-        ]
-
-        // Cookie names relevant for iris API
-        let wantedNames: Set<String> = [
-            "myacinfo", "itctx", "itcdq", "dqsid", "wosid", "woinst",
-            "dssf", "dssid2", "dc",
-        ]
-
-        for browser in Browser.allCases {
-            var cookieMap: [String: String] = [:]
-
-            for query in queries {
-                do {
-                    let storeRecords = try cookieClient.records(matching: query, in: browser)
-                    for storeRecord in storeRecords {
-                        for record in storeRecord.records where wantedNames.contains(record.name) {
-                            cookieMap[record.name] = record.value
-                        }
-                    }
-                } catch {
-                    continue
-                }
-            }
-
-            // myacinfo is the essential auth cookie
-            if cookieMap["myacinfo"] != nil {
-                let cookieString = cookieMap.map { "\($0.key)=\($0.value)" }.joined(separator: "; ")
-                return cookieString
-            }
+    /// The iris cookies as a `cookie` header, or `nil` when the browser isn't
+    /// signed in (no `myacinfo`). A later cookie of the same name wins.
+    private static func irisCookieHeader(from cookies: [BrowserCookie]) -> String? {
+        var byName: [String: String] = [:]
+        for cookie in cookies where irisCookieNames.contains(cookie.name) {
+            byName[cookie.name] = cookie.value
         }
-        return nil
+        guard byName["myacinfo"] != nil else { return nil }
+        return byName.sorted { $0.key < $1.key }.map { "\($0.key)=\($0.value)" }.joined(separator: "; ")
     }
 }
 
