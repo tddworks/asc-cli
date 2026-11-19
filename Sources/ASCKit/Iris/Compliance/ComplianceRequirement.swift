@@ -42,6 +42,7 @@ public struct ComplianceRequirement: Sendable, Equatable, Identifiable, Codable 
     /// Saves `answer` through `repo`, after checking this requirement may be declared.
     public func declare(_ answer: ComplianceAnswer, session: IrisSession, repo: any IrisComplianceRepository) async throws -> ComplianceRequirement {
         guard isDeclarable else { throw ComplianceError.notDeclarable(kind: kind, status: status) }
+        guard answer.fits(kind) else { throw ComplianceError.evidenceMismatch(kind: kind) }
         return try await repo.declare(session: session, requirement: self, answer: answer)
     }
 

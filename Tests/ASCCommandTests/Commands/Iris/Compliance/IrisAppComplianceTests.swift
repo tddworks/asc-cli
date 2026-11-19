@@ -116,6 +116,64 @@ struct IrisAppComplianceTests {
             == "App 1234567890 has no compliance requirement req-9. See `asc iris app-compliance list --app-id 1234567890`.")
     }
 
+    // MARK: - a Yes with evidence
+
+    private func file(_ name: String, _ contents: String) throws -> String {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathComponent(name)
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data(contents.utf8).write(to: url)
+        return url.path
+    }
+
+    @Test func `should declare a Security Assessment Yes with the proof and report read from disk`() async throws {
+        let proof = try file("proof.pdf", "P"), report = try file("report.png", "R")
+        let yes = ComplianceAnswer.offered(.securityAssessment(
+            proof: ComplianceFile(name: "proof.pdf", data: Data("P".utf8)), report: ComplianceFile(name: "report.png", data: Data("R".utf8))
+        ))
+        let repo = repo()
+        given(repo).declare(session: .any, requirement: .value(missing), answer: .value(yes)).willReturn(pending)
+        let cmd = try IrisAppComplianceDeclare.parse([
+            "--app-id", "1234567890", "--requirement-id", "req-1", "--answer", "yes", "--proof", proof, "--report", report,
+        ])
+
+        let output = try await cmd.execute(cookieProvider: cookies(), repo: repo)
+
+        #expect(output.contains("\"status\":\"PENDING_VERIFICATION\""))
+    }
+
+    @Test func `should say what a Yes still needs before sending anything`() async throws {
+        let cmd = try IrisAppComplianceDeclare.parse([
+            "--app-id", "1234567890", "--requirement-id", "req-1", "--answer", "yes", "--proof", try file("proof.pdf", "P"),
+        ])
+        let repo = repo()
+
+        await #expect(throws: ComplianceError.evidenceMissing(kind: .securityAssessment, missing: ["the Security Assessment Report"])) {
+            try await cmd.execute(cookieProvider: cookies(), repo: repo)
+        }
+        verify(repo).declare(session: .any, requirement: .any, answer: .any).called(0)
+    }
+
+    @Test func `should declare an AIGC Yes from its filing and third-party agreement`() async throws {
+        let aigc = ComplianceRequirement(id: "req-3", appId: "1234567890", kind: .aiGeneratedContent, regions: ["CHN"], isRequired: true,
+                                         status: .missingInfo, updatedAt: nil, requiredActions: [], declaration: nil)
+        let yes = ComplianceAnswer.offered(.aiGeneratedContent(
+            filing: .largeLanguageModel(name: "Example Model", filingNumber: "Example-0000"),
+            thirdParty: .used(authorization: ComplianceFile(name: "agreement.pdf", data: Data("A".utf8)))
+        ))
+        let repo = MockIrisComplianceRepository()
+        given(repo).listRequirements(session: .any, appId: .any).willReturn([aigc])
+        given(repo).declare(session: .any, requirement: .value(aigc), answer: .value(yes)).willReturn(pending)
+        let cmd = try IrisAppComplianceDeclare.parse([
+            "--app-id", "1234567890", "--requirement-id", "req-3", "--answer", "yes",
+            "--filing-type", "llm", "--filing-name", "Example Model", "--filing-number", "Example-0000",
+            "--third-party-authorization", try file("agreement.pdf", "A"),
+        ])
+
+        _ = try await cmd.execute(cookieProvider: cookies(), repo: repo)
+
+        verify(repo).declare(session: .any, requirement: .any, answer: .value(yes)).called(1)
+    }
+
     @Test func `should accept only yes or no as the answer`() {
         #expect(throws: (any Error).self) {
             try IrisAppComplianceDeclare.parse(["--app-id", "1234567890", "--requirement-id", "req-1", "--answer", "maybe"])

@@ -32,11 +32,13 @@ struct ComplianceConstraint: Decodable {
     struct Presentation: Decodable {
         let id: String
         let inputType: String
+        let label: String?
     }
 
     struct Validation: Decodable {
         let required: Bool?
         let editable: Bool?
+        let allowedFileTypes: [String]?
     }
 
     let presentation: Presentation
@@ -45,12 +47,44 @@ struct ComplianceConstraint: Decodable {
     var id: String { presentation.id }
     /// Apple marks a field `editable` only when it will take a change; a pending declaration has none.
     var isEditable: Bool { validation?.editable == true }
+    var isRequired: Bool { validation?.required == true }
+    var allowedFileTypes: [String] { validation?.allowedFileTypes ?? [] }
+    /// The field key inside its label's loc key (`…field.proofofacocb097.label` → `proofofacocb097`):
+    /// how a field is known, since its id is Apple's to choose (law 8).
+    var fieldKey: String? {
+        guard let parts = presentation.label?.split(separator: "."), let at = parts.firstIndex(of: "field"),
+              parts.index(after: at) < parts.endIndex else { return nil }
+        return String(parts[parts.index(after: at)])
+    }
+}
+
+/// One field of a draft: a `RADIO` or `TEXT` as `sValue`, a `FILE` as its base64 bytes in `fileContent`.
+struct ComplianceDraftField: Encodable, Equatable {
+    struct FileContent: Encodable, Equatable {
+        let fileData: String
+        let fileName: String
+        let fileType: String
+    }
+
+    let id: String
+    let sValue: String?
+    let fileContent: FileContent?
+
+    static func text(_ id: String, _ value: String) -> ComplianceDraftField {
+        ComplianceDraftField(id: id, sValue: value, fileContent: nil)
+    }
+
+    static func file(_ id: String, _ file: ComplianceFile) -> ComplianceDraftField {
+        ComplianceDraftField(id: id, sValue: nil, fileContent: FileContent(
+            fileData: file.data.base64EncodedString(), fileName: file.name, fileType: file.mimeType
+        ))
+    }
 }
 
 /// The draft Apple computes a form for (`…/metadata`).
 struct ComplianceMetadataRequest: Encodable {
     struct Draft: Encodable {
-        let fields: [ComplianceFieldValue]
+        let fields: [ComplianceDraftField]
     }
 
     let accountId: String
@@ -65,7 +99,7 @@ struct ComplianceSaveRequest: Encodable {
     let entityId: String
     let requirementId: String
     let formId: String?
-    let fields: [ComplianceFieldValue]
+    let fields: [ComplianceDraftField]
 }
 
 struct ComplianceFormsResponse: Decodable {

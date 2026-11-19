@@ -28,21 +28,33 @@ public struct IrisSDKComplianceRepository: IrisComplianceRepository {
         return Self.rows(requirements: requirements, forms: forms, appId: appId)
     }
 
-    /// Saves `answer` the way the App Compliance page does: ask Apple for the form, pick the
-    /// answer and ask again, then save exactly the fields the form asks for (laws 8, 10) —
-    /// a `POST` for a first answer, a `PUT` on the declaration for a change.
+    /// Saves `answer` the way the App Compliance page does: post the draft to Apple's form,
+    /// fill every field it newly asks for from the answer, and again until it asks for nothing
+    /// new; then save exactly the fields the form asks for (laws 8, 10) — a `POST` for a first
+    /// answer, a `PUT` on the declaration for a change.
     public func declare(session: IrisSession, requirement: ComplianceRequirement, answer: ComplianceAnswer) async throws -> ComplianceRequirement {
         let team = try await teamId(for: session)
         let entity = "accounts/\(team)/entities/\(requirement.appId)"
 
-        // The question's id comes from Apple's form, never from asc (law 8).
-        let empty = try await metadata(for: [], requirement: requirement, team: team, session: session)
-        guard let question = empty.question, question.isEditable else {
-            throw ComplianceError.readOnly(kind: requirement.kind)
+        var draft: [ComplianceDraftField] = []
+        var form = try await metadata(for: draft, requirement: requirement, team: team, session: session)
+        var settled = false
+        for _ in 0..<Self.maxPicks {
+            // Apple decides what may change: a field it won't take a change to stops everything (law 5a).
+            guard !form.constraints.isEmpty, form.constraints.values.allSatisfy(\.isEditable) else {
+                throw ComplianceError.readOnly(kind: requirement.kind)
+            }
+            let asked = form.constraints.values
+                .filter { field in !draft.contains { $0.id == field.id } }
+                .sorted { $0.id < $1.id }
+            if asked.isEmpty { settled = true; break }
+            for field in asked {
+                draft.append(try Self.fill(field, from: answer, kind: requirement.kind))
+            }
+            form = try await metadata(for: draft, requirement: requirement, team: team, session: session)
         }
-        let draft = [ComplianceFieldValue(id: question.id, sValue: answer.wireValue)]
-        let picked = try await metadata(for: draft, requirement: requirement, team: team, session: session)
-        let fields = draft.filter { picked.constraints[$0.id] != nil }
+        guard settled else { throw ComplianceError.formNotUnderstood(kind: requirement.kind, field: "a form that never settles") }
+        let fields = draft.filter { form.constraints[$0.id] != nil }
 
         let body = try Self.encoder.encode(ComplianceSaveRequest(
             accountId: team, entityId: requirement.appId, requirementId: requirement.id,
@@ -62,8 +74,29 @@ public struct IrisSDKComplianceRepository: IrisComplianceRepository {
         return rows.first { $0.id == requirement.id } ?? requirement
     }
 
+    /// The AIGC tree is three picks deep; more than this means a form asc doesn't understand.
+    private static let maxPicks = 8
+
+    /// One field Apple's form asks for, filled from the answer. A field is known by the key in
+    /// its label (law 8); a file must be a type the field accepts (law 9).
+    private static func fill(_ field: ComplianceConstraint, from answer: ComplianceAnswer, kind: ComplianceKind) throws -> ComplianceDraftField {
+        guard let key = field.fieldKey, let value = answer.value(forFieldKey: key) else {
+            throw ComplianceError.formNotUnderstood(kind: kind, field: field.fieldKey ?? field.id)
+        }
+        switch value {
+        case .text(let text):
+            return .text(field.id, text)
+        case .file(let file):
+            let allowed = field.allowedFileTypes
+            guard allowed.isEmpty || allowed.contains(file.fileExtension) else {
+                throw ComplianceError.fileTypeNotAllowed(fileName: file.name, allowed: allowed)
+            }
+            return .file(field.id, file)
+        }
+    }
+
     private func metadata(
-        for fields: [ComplianceFieldValue], requirement: ComplianceRequirement, team: String, session: IrisSession
+        for fields: [ComplianceDraftField], requirement: ComplianceRequirement, team: String, session: IrisSession
     ) async throws -> ComplianceFormMetadata {
         let body = try Self.encoder.encode(ComplianceMetadataRequest(
             accountId: team, entityId: requirement.appId, requirementId: requirement.id, form: .init(fields: fields)
@@ -77,7 +110,7 @@ public struct IrisSDKComplianceRepository: IrisComplianceRepository {
 
     private static let encoder: JSONEncoder = {
         let encoder = JSONEncoder()
-        encoder.outputFormatting = [.sortedKeys]
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
         return encoder
     }()
 
@@ -121,5 +154,43 @@ public struct IrisSDKComplianceRepository: IrisComplianceRepository {
             throw ComplianceError.teamUnknown
         }
         return team
+    }
+}
+
+/// What an answer gives each field of Apple's forms, known by the field key in its label.
+/// The keys are the captured ones (docs/features/app-compliance/design.md): a short label
+/// slug with a suffix, matched by the slug so a new suffix still reads.
+extension ComplianceAnswer {
+    enum FieldValue {
+        case text(String)
+        case file(ComplianceFile)
+    }
+
+    func value(forFieldKey key: String) -> FieldValue? {
+        // Every form opens with its Yes/No question ("Does your app …?").
+        if key.hasPrefix("doesyourap") { return .text(wireValue) }
+        guard case .offered(let evidence) = self else { return nil }
+        switch evidence {
+        case .securityAssessment(let proof, let report):
+            if key.hasPrefix("proofofaco") { return .file(proof) }
+            if key.hasPrefix("securityas") { return .file(report) }
+        case .aiGeneratedContent(let filing, let thirdParty):
+            switch (filing, key) {
+            case (_, let key) where key.hasPrefix("whichfilin"):
+                if case .algorithm = filing { return .text("ALGOR") }
+                return .text("LARGE")
+            case (.algorithm(let name, _), let key) where key.hasPrefix("algorithmn"): return .text(name)
+            case (.algorithm(_, let number), let key) where key.hasPrefix("algorithmf"): return .text(number)
+            case (.largeLanguageModel(let name, _), let key) where key.hasPrefix("llmname"): return .text(name)
+            case (.largeLanguageModel(_, let number), let key) where key.hasPrefix("llmfilingn"): return .text(number)
+            default: break
+            }
+            if key.hasPrefix("areyourapp") {
+                if case .used = thirdParty { return .text("YES") }
+                return .text("NO")
+            }
+            if key.hasPrefix("authorizat"), case .used(let authorization) = thirdParty { return .file(authorization) }
+        }
+        return nil
     }
 }
