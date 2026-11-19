@@ -17,11 +17,11 @@ Use `@Test` and `@Suite` instead of XCTest:
 ```swift
 import Testing
 import Foundation
-@testable import Domain
+@testable import App   // the module that holds Sources/Orders/
 
 @Suite
 struct OrderTests {
-    @Test func `order at pending status can be cancelled`() {
+    @Test func `should let a pending order be cancelled`() {
         let order = Order(items: [], status: .pending)
         #expect(order.canBeCancelled == true)
     }
@@ -31,7 +31,7 @@ struct OrderTests {
 ## Given-When-Then Structure
 
 ```swift
-@Test func `order computes total from items`() {
+@Test func `should total an order from its items`() {
     // Given
     let order = Order(items: [
         OrderItem(price: 10, quantity: 2),
@@ -54,13 +54,14 @@ Define mockable protocols for external dependencies:
 import Mockable
 
 @Mockable
-public protocol OrderRepository: Sendable {
+public protocol Orders: Sendable {
+    func all() async throws -> [Order]
     func fetch(id: OrderId) async throws -> Order
     func save(_ order: Order) async throws
 }
 
 @Mockable
-public protocol NetworkClient: Sendable {
+public protocol HTTP: Sendable {
     func request<T: Decodable>(_ endpoint: Endpoint) async throws -> T
 }
 ```
@@ -71,26 +72,26 @@ public protocol NetworkClient: Sendable {
 import Mockable
 
 @Suite
-struct OrderServiceTests {
-    @Test func `service returns order on fetch`() async throws {
+struct OrderBookTests {
+    @Test func `should give back the order it was asked for`() async throws {
         // Given - STUB dependencies to return data
-        let mockRepo = MockOrderRepository()
+        let mockOrders = MockOrders()
         let expectedOrder = Order(
             id: OrderId("123"),
             items: [OrderItem(price: 10, quantity: 1)],
             status: .pending
         )
-        given(mockRepo).fetch(id: any()).willReturn(expectedOrder)
+        given(mockOrders).fetch(id: any()).willReturn(expectedOrder)
 
-        let service = OrderService(repository: mockRepo)
+        let book = OrderBook(orders: mockOrders)
 
         // When
-        let result = try await service.getOrder(id: "123")
+        let result = try await book.getOrder(OrderId("123"))
 
         // Then - verify STATE, not that methods were called
         #expect(result.status == .pending)
         #expect(result.totalAmount == 10)
-        // AVOID: verify(mockRepo).fetch(id: any()).called(1)  // London school - don't do this
+        // AVOID: verify(mockOrders).fetch(id: any()).called(1)  // London school - don't do this
     }
 }
 ```
@@ -104,7 +105,7 @@ Test state and computed properties:
 ```swift
 @Suite
 struct MoneyTests {
-    @Test func `money adds correctly with same currency`() {
+    @Test func `should add two amounts in the same currency`() {
         let money1 = Money(amount: 10, currency: .usd)
         let money2 = Money(amount: 5, currency: .usd)
 
@@ -114,7 +115,7 @@ struct MoneyTests {
         #expect(result.currency == .usd)
     }
 
-    @Test func `money formats with currency symbol`() {
+    @Test func `should show an amount with its currency symbol`() {
         let money = Money(amount: 99.99, currency: .usd)
 
         #expect(money.formatted == "$99.99")
@@ -123,15 +124,15 @@ struct MoneyTests {
 
 @Suite
 struct OrderStatusTests {
-    @Test func `pending status needs attention`() {
+    @Test func `should need attention while pending`() {
         #expect(OrderStatus.pending.needsAttention == true)
     }
 
-    @Test func `delivered status is terminal`() {
+    @Test func `should be final once delivered`() {
         #expect(OrderStatus.delivered.isTerminal == true)
     }
 
-    @Test func `shipped status does not need attention`() {
+    @Test func `should not need attention once shipped`() {
         #expect(OrderStatus.shipped.needsAttention == false)
     }
 }
@@ -140,31 +141,31 @@ struct OrderStatusTests {
 ## Async Test Patterns
 
 ```swift
-@Test func `repository returns order on success`() async throws {
+@Test func `should load an order when the API answers`() async throws {
     // Given
-    let mockClient = MockNetworkClient()
-    given(mockClient).request(any()).willReturn(
+    let mockHTTP = MockHTTP()
+    given(mockHTTP).request(any()).willReturn(
         OrderDTO(id: "123", status: "pending", items: [])
     )
-    let repository = APIOrderRepository(client: mockClient)
+    let orders = APIOrders(http: mockHTTP)
 
     // When
-    let order = try await repository.fetch(id: OrderId("123"))
+    let order = try await orders.fetch(id: OrderId("123"))
 
     // Then
     #expect(order.id.value == "123")
     #expect(order.status == .pending)
 }
 
-@Test func `repository throws when network fails`() async {
+@Test func `should fail when the network is down`() async {
     // Given
-    let mockClient = MockNetworkClient()
-    given(mockClient).request(any()).willThrow(NetworkError.connectionFailed)
-    let repository = APIOrderRepository(client: mockClient)
+    let mockHTTP = MockHTTP()
+    given(mockHTTP).request(any()).willThrow(NetworkError.connectionFailed)
+    let orders = APIOrders(http: mockHTTP)
 
     // When/Then
-    await #expect(throws: RepositoryError.networkError) {
-        try await repository.fetch(id: OrderId("123"))
+    await #expect(throws: OrdersError.networkError) {
+        try await orders.fetch(id: OrderId("123"))
     }
 }
 ```
@@ -173,35 +174,35 @@ struct OrderStatusTests {
 
 ```swift
 @Suite
-struct OrderManagerTests {
-    @Test func `manager caches fetched orders`() async throws {
+struct OrderBookTests {
+    @Test func `should serve an order again without refetching it`() async throws {
         // Given
-        let mockRepo = MockOrderRepository()
+        let mockOrders = MockOrders()
         let order = Order(id: OrderId("123"), items: [], status: .pending)
-        given(mockRepo).fetch(id: any()).willReturn(order)
+        given(mockOrders).fetch(id: any()).willReturn(order)
 
-        let manager = OrderManager(repository: mockRepo)
+        let book = OrderBook(orders: mockOrders)
 
         // When - fetch twice
-        let first = try await manager.getOrder(OrderId("123"))
-        let second = try await manager.getOrder(OrderId("123"))
+        let first = try await book.getOrder(OrderId("123"))
+        let second = try await book.getOrder(OrderId("123"))
 
         // Then - both return same order (cached)
         #expect(first.id == second.id)
     }
 
-    @Test func `manager updates order status`() async throws {
+    @Test func `should show the new status after an update`() async throws {
         // Given
-        let mockRepo = MockOrderRepository()
+        let mockOrders = MockOrders()
         var order = Order(id: OrderId("123"), items: [], status: .pending)
-        given(mockRepo).fetch(id: any()).willReturn(order)
-        given(mockRepo).save(any()).willReturn(())
+        given(mockOrders).fetch(id: any()).willReturn(order)
+        given(mockOrders).save(any()).willReturn(())
 
-        let manager = OrderManager(repository: mockRepo)
+        let book = OrderBook(orders: mockOrders)
 
         // When
-        try await manager.updateStatus(OrderId("123"), to: .processing)
-        let updated = try await manager.getOrder(OrderId("123"))
+        try await book.updateStatus(OrderId("123"), to: .processing)
+        let updated = try await book.getOrder(OrderId("123"))
 
         // Then - verify state changed
         #expect(updated.status == .processing)
@@ -212,19 +213,22 @@ struct OrderManagerTests {
 ## Test Organization
 
 ```
-Tests/
-├── DomainTests/
-│   ├── Models/
-│   │   ├── OrderTests.swift        # Domain model behavior
-│   │   ├── MoneyTests.swift        # Value object behavior
-│   │   └── OrderStatusTests.swift  # Enum behavior
-│   └── Services/
-│       └── OrderManagerTests.swift # Actor behavior
-└── InfrastructureTests/
-    └── Repositories/
-        ├── APIOrderRepositoryTests.swift  # Repository behavior
-        └── OrderParsingTests.swift        # Parsing logic
+Tests/AppTests/                     # mirrors Sources/ folder for folder
+├── Core/
+│   └── MoneyTests.swift                # Value object behavior
+└── Orders/
+    ├── OrderTests.swift                # Public face: model behavior
+    ├── OrderStatusTests.swift          # Enum behavior
+    ├── OrderBookTests.swift         # Actor behavior
+    └── Internal/
+        ├── APIOrdersTests.swift  # Adapter behavior via MockHTTP
+        ├── OrderParsingTests.swift        # Parsing logic
+        └── System/
+            └── URLSessionHTTPTests.swift  # Integration only (real call, time-limited)
 ```
+
+A test lives at the same path as the source it covers. `Internal/System/` is
+the only folder coverage leaves out; everything else is unit-tested.
 
 ## Running Tests
 
@@ -233,7 +237,7 @@ Tests/
 swift test
 
 # Run specific test suite
-swift test --filter DomainTests
+swift test --filter OrderTests
 
 # Run specific test
 swift test --filter "OrderTests/order computes total from items"
@@ -246,7 +250,7 @@ swift test --filter "OrderTests/order computes total from items"
 | Test Type           | What to Assert                                    |
 |---------------------|---------------------------------------------------|
 | Domain models       | Computed properties, state after mutations        |
-| Services/Repos      | Return values, thrown errors, resulting state     |
+| Actors/collections | Return values, thrown errors, resulting state     |
 | Actors              | State after operations complete                   |
 
 ### What NOT to Test

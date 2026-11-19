@@ -178,10 +178,10 @@ final class OrderState: @unchecked Sendable {
     private(set) var orders: [Order] = []
     private(set) var isLoading: Bool = false
 
-    private let manager: OrderManager  // Actor
+    private let book: OrderBook  // Actor
 
-    init(manager: OrderManager) {
-        self.manager = manager
+    init(book: OrderBook) {
+        self.book = book
     }
 
     @MainActor
@@ -190,7 +190,7 @@ final class OrderState: @unchecked Sendable {
         defer { isLoading = false }
 
         do {
-            orders = try await manager.fetchAll()
+            orders = try await book.all()
         } catch {
             // Handle error
         }
@@ -199,10 +199,10 @@ final class OrderState: @unchecked Sendable {
     @MainActor
     func updateStatus(_ orderId: OrderId, to status: OrderStatus) async {
         do {
-            try await manager.updateStatus(orderId, to: status)
+            try await book.updateStatus(orderId, to: status)
             // Refresh the specific order
             if let index = orders.firstIndex(where: { $0.id == orderId }) {
-                orders[index] = try await manager.fetch(orderId)
+                orders[index] = try await book.getOrder(orderId)
             }
         } catch {
             // Handle error

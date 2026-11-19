@@ -4,41 +4,40 @@ ASCII diagrams for documenting feature architecture before implementation.
 
 ## Table of Contents
 
-- [Layered Architecture](#layered-architecture)
+- [Concept Folder Layout](#concept-folder-layout)
 - [Data Flow Diagrams](#data-flow-diagrams)
 - [Sequence Diagrams](#sequence-diagrams)
 - [Component Interaction Tables](#component-interaction-tables)
 
 ---
 
-## Layered Architecture
+## Concept Folder Layout
 
-### Three-Layer Pattern (Standard)
+No `Domain/` or `Infrastructure/` layer folders: each concept folder carries
+its public face at the top, its implementations in `Internal/`, and the bare
+outside call in `Internal/System/`.
+
+### One Concept (Standard)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        FEATURE: [Feature Name]                       │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                      │
-│  EXTERNAL              INFRASTRUCTURE           DOMAIN               │
-│  ┌─────────────┐       ┌─────────────────┐     ┌─────────────────┐  │
-│  │  [Source]   │──────▶│  [Repository/   │────▶│  [Model]        │  │
-│  │  (API/DB)   │       │   Client]       │     │  (value types)  │  │
-│  └─────────────┘       └─────────────────┘     └─────────────────┘  │
-│                                                        │             │
-│                                                        ▼             │
-│                                              ┌─────────────────┐     │
-│                                              │  [Service]      │     │
-│                                              │  (actor)        │     │
-│                                              └─────────────────┘     │
-│                                                       │              │
-│                                                       ▼              │
-│                        ┌───────────────────────────────────────┐    │
-│                        │  APP LAYER                             │    │
-│                        │  ┌─────────────────────────────────┐   │    │
-│                        │  │  [Views/Registration]            │   │    │
-│                        │  └─────────────────────────────────┘   │    │
-│                        └───────────────────────────────────────┘    │
+│  Sources/[Concept]/        [Concept]/Internal/   Internal/System/    │
+│  ┌─────────────────┐       ┌─────────────────┐   ┌───────────────┐   │
+│  │  [Model]        │◀──────│  [Adapter]      │──▶│ [Bare call]   │──▶ API/DB
+│  │  (value types)  │ impl. │  (decode, map,  │   │ (≤100 lines,  │   │
+│  │  [Role]         │       │   decisions)    │   │  no decisions)│   │
+│  │  (@Mockable)    │       └─────────────────┘   └───────────────┘   │
+│  │  [Actor]        │                                                 │
+│  └─────────────────┘                                                 │
+│          ▲ public face only                                          │
+│  ┌───────────────────────────────────────┐                           │
+│  │  Sources/App/                          │                           │
+│  │  [Views] · [Entry point: wires         │                           │
+│  │           Internal/ adapters in]       │                           │
+│  └───────────────────────────────────────┘                           │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -48,65 +47,50 @@ ASCII diagrams for documenting feature architecture before implementation.
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                          Swift App System                                │
 ├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  ┌────────────────────────────────────────────────────────────────────┐ │
-│  │                         Domain Layer                                │ │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐  │ │
-│  │  │ Order        │  │ User         │  │ OrderManager (actor)     │  │ │
-│  │  │ OrderStatus  │  │ Product      │  │ CartService              │  │ │
-│  │  └──────────────┘  └──────────────┘  └──────────────────────────┘  │ │
-│  └────────────────────────────────────────────────────────────────────┘ │
-│                                    ▲                                     │
-│                                    │ implements                          │
-│  ┌────────────────────────────────────────────────────────────────────┐ │
-│  │                      Infrastructure Layer                           │ │
-│  │  ┌────────────────────────────────────────────────────────────┐    │ │
-│  │  │                      Repositories                           │    │ │
-│  │  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────┐   │    │ │
-│  │  │  │ Order    │ │ User     │ │ Product  │ │ [NewRepo]    │   │    │ │
-│  │  │  │ Repo     │ │ Repo     │ │ Repo     │ │              │   │    │ │
-│  │  │  └──────────┘ └──────────┘ └──────────┘ └──────────────┘   │    │ │
-│  │  └────────────────────────────────────────────────────────────┘    │ │
-│  │                                                                     │ │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐  │ │
-│  │  │ NetworkClient│  │ DatabaseClient│  │ NotificationService     │  │ │
-│  │  └──────────────┘  └──────────────┘  └──────────────────────────┘  │ │
-│  └────────────────────────────────────────────────────────────────────┘ │
-│                                    ▲                                     │
-│                                    │ uses                                │
-│  ┌────────────────────────────────────────────────────────────────────┐ │
-│  │                          App Layer                                  │ │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐  │ │
-│  │  │ AppState     │  │ Views        │  │ App Entry Point          │  │ │
-│  │  │ (@Observable)│  │              │  │ (registration)           │  │ │
-│  │  └──────────────┘  └──────────────┘  └──────────────────────────┘  │ │
-│  └────────────────────────────────────────────────────────────────────┘ │
+│  Sources/App/            views (@Observable state) · entry point/wiring  │
+│        │ imports public faces                                            │
+│        ▼                                                                 │
+│  ┌──────────────────────┐ ┌──────────────────────┐ ┌──────────────────┐  │
+│  │ Orders/              │ │ Users/               │ │ [NewConcept]/    │  │
+│  │  Order, OrderStatus  │ │  User                │ │  [Model]         │  │
+│  │  Orders              │ │  Users               │ │  [Role]          │  │
+│  │  OrderBook (actor)   │ │                      │ │                  │  │
+│  │  Internal/           │ │  Internal/           │ │  Internal/       │  │
+│  │   APIOrders          │ │   APIUsers           │ │   [Adapter]      │  │
+│  │   OrderDTO           │ │   System/            │ │   System/        │  │
+│  └──────────────────────┘ └──────────────────────┘ └──────────────────┘  │
+│        │ every concept may use                                           │
+│        ▼                                                                 │
+│  Sources/Core/           ids · errors · HTTP role                        │
+│    Internal/System/      URLSessionHTTP (the one network call)           │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
+
+Concepts never reach into each other's `Internal/`.
 
 ---
 
 ## Data Flow Diagrams
 
-### Repository Data Flow
+### Collection Data Flow (Orders → APIOrders)
 
 ```
 ┌───────────┐     ┌───────────┐     ┌───────────┐     ┌───────────┐
-│  API/DB   │────▶│ Repository│────▶│  Mapper   │────▶│  Domain   │
+│  API/DB   │────▶│ APIOrders │────▶│  Mapper   │────▶│  Domain   │
 │  Response │     │  Fetch    │     │  Logic    │     │  Model    │
 └───────────┘     └───────────┘     └───────────┘     └───────────┘
      Raw               Fetch            Parse            Domain
      Data              Data             Data             Model
 ```
 
-### Service Orchestration Flow
+### Actor Orchestration Flow
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        SERVICE FLOW                                  │
+│                        ACTOR FLOW                                    │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                      │
-│  View ──▶ Service (actor) ──▶ Repository.fetch() ──▶ API/DB         │
+│  View ──▶ OrderBook (actor) ──▶ Orders.fetch() ──▶ API/DB          │
 │               │                                        │            │
 │               │                                        ▼            │
 │               │                              ┌─────────────────┐   │
@@ -135,7 +119,7 @@ ASCII diagrams for documenting feature architecture before implementation.
 
 ```
 ┌─────────┐     ┌───────────┐     ┌─────────────┐     ┌──────────────┐
-│  Repo   │────▶│ Try Fetch │────▶│   Success   │────▶│ Return Data  │
+│ Orders  │────▶│ Try Fetch │────▶│   Success   │────▶│ Return Data  │
 └─────────┘     └───────────┘     └─────────────┘     └──────────────┘
                       │
                       ▼ (failure)
@@ -146,7 +130,7 @@ ASCII diagrams for documenting feature architecture before implementation.
                                           │
                                           ▼
                                    ┌─────────────────┐
-                                   │ Service handles │
+                                   │ Actor handles   │
                                    │ or propagates   │
                                    └─────────────────┘
 ```
@@ -158,7 +142,7 @@ ASCII diagrams for documenting feature architecture before implementation.
 ### User Action Flow
 
 ```
-User          View          Service          Repository        API
+User          View          OrderBook        Orders            API
  │              │               │                │               │
  │──tap()──────▶│               │                │               │
  │              │──action()────▶│                │               │
@@ -176,7 +160,7 @@ User          View          Service          Repository        API
 ### State Change Notification
 
 ```
-Repository      Service         @Observable      View
+Orders          OrderBook       @Observable      View
   │                 │               │               │
   │──model─────────▶│               │               │
   │                 │──update()────▶│               │
@@ -195,46 +179,52 @@ Repository      Service         @Observable      View
 ### Standard Table Format
 
 ```
-| Component        | Purpose                 | Inputs           | Outputs         | Dependencies      |
-|------------------|-------------------------|------------------|-----------------|-------------------|
-| OrderRepository  | Fetches orders from API | OrderId          | Order           | NetworkClient     |
-| OrderManager     | Manages order lifecycle | Order, Status    | Updated Order   | OrderRepository   |
-| OrderMapper      | Converts DTO to domain  | OrderDTO         | Order           | None              |
+| Component    | Purpose                    | Inputs         | Outputs        | Dependencies |
+|--------------|----------------------------|----------------|----------------|--------------|
+| Orders       | The collection of orders   | OrderId        | Order          | -            |
+| APIOrders    | Plays Orders over the API  | OrderId        | Order          | HTTP         |
+| OrderBook    | Keeps orders current       | Order, Status  | Updated Order  | Orders       |
+| OrderMapper  | Converts DTO to an Order   | OrderDTO       | Order          | None         |
 ```
 
 ### Extended Table (for complex features)
 
 ```
-| Component        | Layer          | Protocol           | Creates/Modifies    | Test File                      |
-|------------------|----------------|--------------------|---------------------|--------------------------------|
-| APIOrderRepo     | Infrastructure | OrderRepository    | Creates             | APIOrderRepositoryTests.swift  |
-| OrderMapper      | Infrastructure | -                  | Creates             | OrderMapperTests.swift         |
-| OrderManager     | Domain         | -                  | Manages             | OrderManagerTests.swift        |
-| OrderListView    | App            | -                  | Displays            | -                              |
+| Component       | Place                  | Protocol | Creates/Modifies | Test File               |
+|-----------------|------------------------|----------|------------------|-------------------------|
+| APIOrders       | Orders/Internal/       | Orders   | Creates          | APIOrdersTests.swift    |
+| OrderMapper     | Orders/Internal/       | -        | Creates          | OrderMapperTests.swift  |
+| URLSessionHTTP  | Core/Internal/System/  | HTTP     | Creates          | (integration only)      |
+| OrderBook       | Orders/ (public face)  | -        | Manages          | OrderBookTests.swift    |
+| OrderListView   | App/                   | -        | Displays         | -                       |
 ```
 
 ### Files to Create/Modify Table
 
 ```
-| File Path                                       | Action   | Description                          |
-|-------------------------------------------------|----------|--------------------------------------|
-| Sources/Infrastructure/API/OrderRepository.swift | Create   | Implements OrderRepository protocol  |
-| Sources/Domain/Services/OrderManager.swift       | Create   | Actor managing order state           |
-| Tests/InfrastructureTests/OrderRepositoryTests.swift | Create | Repository behavior tests       |
-| Sources/App/Views/OrderListView.swift            | Create   | SwiftUI view for orders              |
-| Sources/App/App.swift                            | Modify   | Register dependencies                |
+| File Path                                            | Action | Description                     |
+|------------------------------------------------------|--------|---------------------------------|
+| docs/CANONICAL_MODEL.md                              | Modify | Orders in the tree, laws, words |
+| Sources/Orders/Orders.swift                          | Create | @Mockable collection (face)     |
+| Sources/Orders/OrderBook.swift                       | Create | Actor keeping orders current    |
+| Sources/Orders/Internal/APIOrders.swift              | Create | Plays Orders over the API       |
+| Tests/AppTests/Orders/OrderBookTests.swift           | Create | Actor behavior tests            |
+| Tests/AppTests/Orders/Internal/APIOrdersTests.swift  | Create | Adapter behavior tests          |
+| Sources/App/Views/OrderListView.swift                | Create | SwiftUI view for orders         |
+| Sources/App/App.swift                                | Modify | Wire APIOrders into Orders      |
 ```
 
 ---
 
-## Approval Prompt Template
+## Design Presentation Template
 
-After presenting the architecture, ask for user approval:
+Show the design, then start Phase 1 — no approval question:
 
 ```
-## Architecture Review
+## Design: [Feature Name]
 
-I've designed the architecture for [Feature Name]:
+### Canonical model
+[diff to docs/CANONICAL_MODEL.md, or "already covered by §<n>"]
 
 [Diagram Here]
 
@@ -246,12 +236,9 @@ I've designed the architecture for [Feature Name]:
 
 ### Files to Create/Modify
 
-- `Sources/.../NewFile.swift` - [Description]
-- `Tests/.../NewTests.swift` - [Description]
+- `Sources/<Concept>/NewType.swift` - [Description]
+- `Sources/<Concept>/Internal/NewAdapter.swift` - [Description]
+- `Tests/<Target>Tests/<Concept>/NewTypeTests.swift` - [Description]
 
-**Ready to proceed with TDD implementation?**
+Starting with the first failing test: `should <outcome> [when <situation>]`.
 ```
-
-Use AskUserQuestion with:
-- "Approve - proceed with implementation"
-- "Modify - I have feedback on the design"
