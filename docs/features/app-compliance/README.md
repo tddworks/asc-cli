@@ -30,7 +30,7 @@ Each requirement is a row, answered or not, with the page's STATUS:
 | `ACTIVE` | Answered, nothing pending: the app may stay on sale in the region | offered: a change |
 | `VERIFICATION_FAILED` | Apple rejected the evidence | offered: a resubmission |
 
-A compliance or status asc doesn't know yet is still listed, as Apple names it, and is never offered `declare`. A row also says which next commands apply (`affordances`, or `_links` over REST).
+A compliance or status asc doesn't know yet is still listed, as Apple names it, and is never offered `declare`. A row also says which next commands apply (`affordances`, or `_links` over REST). Like the page's table, the list shows each row's status and `declarationId`, not the stored answer or its files.
 
 ### Answer No
 
