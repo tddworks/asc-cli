@@ -52,7 +52,7 @@ struct BuildsArchive: AsyncParsableCommand {
     var buildNumber: String?
 
     func run() async throws {
-        let runner = ProcessXcodeBuildRunner()
+        let runner = ClientProvider.makeXcodeBuildRunner()
         let uploadRepo = upload ? try ClientProvider.makeBuildUploadRepository() : nil
         print(try await execute(runner: runner, uploadRepo: uploadRepo))
     }

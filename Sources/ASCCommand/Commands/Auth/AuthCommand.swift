@@ -18,8 +18,8 @@ struct AuthCheck: AsyncParsableCommand {
     @OptionGroup var globals: GlobalOptions
 
     func run() async throws {
-        let storage = FileAuthStorage()
-        let envProvider = EnvironmentAuthProvider()
+        let storage = ClientProvider.makeAuthStorage()
+        let envProvider = ClientProvider.makeEnvironmentAuthProvider()
         print(try await execute(storage: storage, envProvider: envProvider))
     }
 

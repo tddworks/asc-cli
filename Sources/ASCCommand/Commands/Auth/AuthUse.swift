@@ -13,7 +13,7 @@ struct AuthUse: AsyncParsableCommand {
     var name: String
 
     func run() async throws {
-        let storage = FileAuthStorage()
+        let storage = ClientProvider.makeAuthStorage()
         try await execute(storage: storage)
     }
 

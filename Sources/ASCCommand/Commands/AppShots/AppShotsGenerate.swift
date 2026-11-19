@@ -32,7 +32,7 @@ struct AppShotsGenerate: AsyncParsableCommand {
     var prompt: String?
 
     func run() async throws {
-        let configStorage = FileAppShotsConfigStorage()
+        let configStorage = ClientProvider.makeAppShotsConfigStorage()
         let apiKey = try resolveGeminiApiKey(geminiApiKey, configStorage: configStorage)
         let path = try await Self.run(
             file: file, apiKey: apiKey, model: model,

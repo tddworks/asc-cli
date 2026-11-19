@@ -10,7 +10,7 @@ struct AuthList: AsyncParsableCommand {
     @OptionGroup var globals: GlobalOptions
 
     func run() async throws {
-        let storage = FileAuthStorage()
+        let storage = ClientProvider.makeAuthStorage()
         print(try await execute(storage: storage))
     }
 

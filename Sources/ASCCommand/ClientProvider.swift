@@ -324,6 +324,22 @@ struct ClientProvider {
         AggregateThemeRepository.shared
     }
 
+    static func makeAuthStorage() -> any AuthStorage {
+        FileAuthStorage()
+    }
+
+    static func makeEnvironmentAuthProvider() -> any AuthProvider {
+        EnvironmentAuthProvider()
+    }
+
+    static func makeXcodeBuildRunner() -> any XcodeBuildRunner {
+        ProcessXcodeBuildRunner()
+    }
+
+    static func makeProjectConfigStorage() -> any ProjectConfigStorage {
+        FileProjectConfigStorage()
+    }
+
     static func makeHTMLRenderer() -> any HTMLRenderer {
         WebKitHTMLRenderer()
     }

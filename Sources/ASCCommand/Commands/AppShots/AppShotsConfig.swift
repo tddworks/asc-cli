@@ -17,7 +17,7 @@ struct AppShotsConfig: AsyncParsableCommand {
     var remove: Bool = false
 
     func run() async throws {
-        let storage = FileAppShotsConfigStorage()
+        let storage = ClientProvider.makeAppShotsConfigStorage()
         print(try await execute(storage: storage))
     }
 

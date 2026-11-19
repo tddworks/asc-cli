@@ -29,7 +29,7 @@ struct AuthLogin: AsyncParsableCommand {
     var vendorNumber: String?
 
     func run() async throws {
-        let storage = FileAuthStorage()
+        let storage = ClientProvider.makeAuthStorage()
         print(try await execute(storage: storage))
     }
 

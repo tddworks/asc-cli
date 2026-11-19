@@ -30,7 +30,7 @@ struct InitCommand: AsyncParsableCommand {
 
     func run() async throws {
         let repo = try ClientProvider.makeAppRepository()
-        let storage = FileProjectConfigStorage()
+        let storage = ClientProvider.makeProjectConfigStorage()
         print(try await execute(repo: repo, storage: storage))
     }
 
