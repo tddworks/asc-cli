@@ -45,9 +45,6 @@ ignore:
   # Iris auth — drives Apple SRP login + idmsa.apple.com HTTP, third-party-interactive
   - "Sources/ASCKit/Iris/Internal/Auth/**"
 
-  # WebKit HTML renderer — WKWebView + AppKit GUI snapshot, not unit-testable
-  - "Sources/ASCKit/Screenshots/Internal/WebKitHTMLRenderer.swift"
-
 
   # Plugin marketplace — wraps PluginLoader (filesystem) + URLSession download + unzip
   - "Sources/ASCKit/Plugins/Internal/PluginMarketRepository.swift"
