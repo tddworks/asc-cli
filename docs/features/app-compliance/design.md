@@ -495,7 +495,7 @@ requirement.structuredAffordances
 
 The adapter resolves the account itself: it uses `IrisAuthSession.teamId` when the session came from `asc iris auth login`, and otherwise calls `olympus/v1/session` (browser cookies and `ASC_IRIS_COOKIES` don't carry a team ID). The command never asks for `--account-id`, because a user can't see that value anywhere.
 
-`IrisClient` hard-codes the base `…/iris/v1`. It gets a second entry point for `…/ppm/compliancerequirements/v1` with the same cookies and headers. There is no new auth path.
+The iris repositories reach Apple through the `@Mockable IrisAPI` role, played by `IrisClient` in `Iris/Internal/System/`; the requests themselves are built by `IrisRequest`, which hard-codes the base `…/iris/v1`. `IrisRequest` gains the `…/ppm/compliancerequirements/v1` base with the same cookies and headers, and `IrisAPI` gains the calls the page makes there (a `PUT` for a change, beside the `get`, `post` and `delete` it has). There is no new auth path.
 
 ## 5 · Invariants (each law, one owner)
 
@@ -516,8 +516,8 @@ The adapter resolves the account itself: it uses `IrisAuthSession.teamId` when t
 ## 6 · Build sequence (test-first, each slice green)
 
 0. ~~**Capture**~~ Done. Every call the page makes is captured; nothing blocks slices 1–6. Also the AIGC Yes metadata, `metadata` for an answered requirement, and the Verification Failed status. The reads, and their responses after a Yes, are captured.
-1. **Domain**: `ComplianceKind`, `ComplianceStatus`, `ComplianceAnswer` (No only), `ComplianceRequirement` + affordances, `@Mockable IrisComplianceRepository`. *Pinned: laws 1, 3 (No), 4, 5.*
-2. **Infrastructure read**: `IrisClient` ppm base; account resolution; `listRequirements(session:appId:)` reading both captured fixtures (placeholder IDs) and joining them. *Pinned: laws 2, 6, 7; epoch-ms dates; `entity_id` query; unknown `formName` survives; an orphan declaration survives.*
+1. **Public face** (`Sources/ASCKit/Iris/Compliance/`): `ComplianceKind`, `ComplianceStatus`, `ComplianceAnswer` (No only), `ComplianceRequirement` + affordances, `@Mockable IrisComplianceRepository` (CRUD over requirements and declarations, so it keeps the `Repository` name; `requirement.declare(…)` is the workflow, on the model). *Pinned: laws 1, 3 (No), 4, 5.*
+2. **Read** (`Sources/ASCKit/Iris/Compliance/Internal/`, through `IrisAPI`): the ppm base on `IrisRequest`; account resolution; `listRequirements(session:appId:)` reading both captured fixtures (placeholder IDs) and joining them, tested on `MockIrisAPI`. *Pinned: laws 2, 6, 7; epoch-ms dates; `entity_id` query; unknown `formName` survives; an orphan declaration survives.*
 3. **`asc iris app-compliance list` + REST** `GET /api/v1/iris/apps/:appId/compliance-requirements`. *Pinned: full JSON snapshot; `_links.declare` only on eligible rows.*
 4. **`declare --answer no` + REST** (reads the requirement's metadata for the question's id, then saves; *pinned: law 8*) `POST /api/v1/iris/apps/:appId/compliance-requirements/:requirementId/declare` (the app is in the path because a requirement id alone names no row). A first answer is a `POST …/forms`; a change to an Active one is a `PUT …/forms/{formId}` (the requirement's `formId`). A pending one is never offered `declare`.
 5. **Yes with evidence**: per-kind evidence types and file flags; files read from disk and sent base64 in `fileContent.fileData`. *Pinned: laws 9, 10.* The body is captured (AIGC Yes with a file).
