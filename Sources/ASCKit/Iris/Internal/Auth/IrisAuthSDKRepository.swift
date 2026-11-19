@@ -5,8 +5,9 @@ import Foundation
 /// `AppleSRPClient` for crypto, `IdmsaAPIClient` for `idmsa.apple.com`, `OlympusClient`
 /// for ASC team metadata.
 public struct IrisAuthSDKRepository: IrisAuthRepository, @unchecked Sendable {
-    private let idmsa: IdmsaAPIClient
-    private let olympus: OlympusClient
+    private let idmsa: any AppleIDSignIn
+    private let olympus: any AppStoreConnectAccounts
+    private let now: @Sendable () -> Date
 
     /// App Store Connect's widget key — long-stable. Apple's web UI fetches this
     /// dynamically; we hardcode the observed value as a constant. If Apple ever rotates
@@ -15,10 +16,20 @@ public struct IrisAuthSDKRepository: IrisAuthRepository, @unchecked Sendable {
 
     public init(
         session: URLSession = .shared,
-        serviceKey: String = ascServiceKey
+        serviceKey: String = ascServiceKey,
+        now: @escaping @Sendable () -> Date = { Date() }
     ) {
-        self.idmsa = IdmsaAPIClient(session: session, serviceKey: serviceKey)
-        self.olympus = OlympusClient(session: session)
+        self.init(
+            signIn: IdmsaAPIClient(session: session, serviceKey: serviceKey),
+            accounts: OlympusClient(session: session),
+            now: now
+        )
+    }
+
+    init(signIn: any AppleIDSignIn, accounts: any AppStoreConnectAccounts, now: @escaping @Sendable () -> Date) {
+        self.idmsa = signIn
+        self.olympus = accounts
+        self.now = now
     }
 
     public func login(credentials: IrisAuthCredentials) async throws -> IrisAuthSession {
@@ -102,7 +113,7 @@ public struct IrisAuthSDKRepository: IrisAuthRepository, @unchecked Sendable {
         let olympusSession = try await olympus.fetchSession(cookies: cookies)
         // Best-guess expiry — iris cookies typically last ~30 days. We rebuild on
         // expiry since iris exposes no refresh endpoint.
-        let expiresAt = Date().addingTimeInterval(30 * 24 * 60 * 60)
+        let expiresAt = now().addingTimeInterval(30 * 24 * 60 * 60)
         return IrisAuthSession(
             cookies: cookies,
             scnt: scnt,
