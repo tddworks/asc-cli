@@ -13,7 +13,7 @@ import HummingbirdWebSocket
 ///   GET    /plugins/market       ↔ asc plugins market list
 ///   GET    /plugins/market?q=…   ↔ asc plugins market search --query …
 struct PluginsController: Sendable {
-    let repo: any PluginRepository
+    let repo: any Plugins
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/plugins") { _, _ -> Response in

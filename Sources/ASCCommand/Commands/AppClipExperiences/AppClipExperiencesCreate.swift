@@ -16,11 +16,11 @@ struct AppClipExperiencesCreate: AsyncParsableCommand {
     var action: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppClipRepository()
+        let repo = try ClientProvider.makeAppClips()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AppClipRepository) async throws -> String {
+    func execute(repo: any AppClips) async throws -> String {
         let parsedAction = try resolveAction()
         let experience = try await repo.createExperience(appClipId: appClipId, action: parsedAction)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)

@@ -26,11 +26,11 @@ struct AppInfoLocalizationsList: AsyncParsableCommand {
     var appInfoId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppInfoRepository()
+        let repo = try ClientProvider.makeAppInfos()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AppInfoRepository) async throws -> String {
+    func execute(repo: any AppInfos) async throws -> String {
         let locs = try await repo.listLocalizations(appInfoId: appInfoId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
@@ -59,11 +59,11 @@ struct AppInfoLocalizationsCreate: AsyncParsableCommand {
     var name: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppInfoRepository()
+        let repo = try ClientProvider.makeAppInfos()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AppInfoRepository) async throws -> String {
+    func execute(repo: any AppInfos) async throws -> String {
         let loc = try await repo.createLocalization(appInfoId: appInfoId, locale: locale, name: name)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
@@ -101,11 +101,11 @@ struct AppInfoLocalizationsUpdate: AsyncParsableCommand {
     var privacyPolicyText: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppInfoRepository()
+        let repo = try ClientProvider.makeAppInfos()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AppInfoRepository) async throws -> String {
+    func execute(repo: any AppInfos) async throws -> String {
         let loc = try await repo.updateLocalization(
             id: localizationId,
             name: name,
@@ -135,11 +135,11 @@ struct AppInfoLocalizationsDelete: AsyncParsableCommand {
     var localizationId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppInfoRepository()
+        let repo = try ClientProvider.makeAppInfos()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any AppInfoRepository) async throws {
+    func execute(repo: any AppInfos) async throws {
         try await repo.deleteLocalization(id: localizationId)
         print("{\"deleted\": \"\(localizationId)\"}")
     }

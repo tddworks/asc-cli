@@ -12,7 +12,7 @@ struct BuildsAddBetaGroupTests {
     }
 
     @Test func `execute adds beta group to build`() async throws {
-        let mockRepo = MockBuildRepository()
+        let mockRepo = MockBuilds()
         given(mockRepo).addBetaGroups(buildId: .any, betaGroupIds: .any).willReturn()
 
         let cmd = try BuildsAddBetaGroup.parse(["--build-id", "build-1", "--beta-group-id", "bg-42"])

@@ -7,7 +7,7 @@ import Testing
 struct AppClipsListTests {
 
     @Test func `listed app clips include appId bundleId and affordances`() async throws {
-        let mockRepo = MockAppClipRepository()
+        let mockRepo = MockAppClips()
         given(mockRepo).listAppClips(appId: .any).willReturn([
             AppClip(id: "clip-1", appId: "app-1", bundleId: "com.example.clip")
         ])
@@ -33,7 +33,7 @@ struct AppClipsListTests {
     }
 
     @Test func `listed app clips omit nil bundleId from JSON`() async throws {
-        let mockRepo = MockAppClipRepository()
+        let mockRepo = MockAppClips()
         given(mockRepo).listAppClips(appId: .any).willReturn([
             AppClip(id: "clip-1", appId: "app-1", bundleId: nil)
         ])
@@ -58,7 +58,7 @@ struct AppClipsListTests {
     }
 
     @Test func `table output includes clip id appId and bundleId`() async throws {
-        let mockRepo = MockAppClipRepository()
+        let mockRepo = MockAppClips()
         given(mockRepo).listAppClips(appId: .any).willReturn([
             AppClip(id: "clip-1", appId: "app-1", bundleId: "com.example.clip")
         ])

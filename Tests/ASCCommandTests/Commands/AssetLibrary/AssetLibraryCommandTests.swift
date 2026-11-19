@@ -7,7 +7,7 @@ import Testing
 struct AssetLibraryCommandTests {
 
     @Test func `should show the app's asset library with where to go next`() async throws {
-        let mockRepo = MockAssetLibraryRepository()
+        let mockRepo = MockAssetLibraries()
         given(mockRepo).getAssetLibrary(appId: .value("app-1")).willReturn(AppAssetLibrary(id: "lib-1", appId: "app-1"))
 
         let cmd = try AssetLibraryGet.parse(["--app-id", "app-1", "--pretty"])
@@ -32,7 +32,7 @@ struct AssetLibraryCommandTests {
     }
 
     @Test func `should list placement groups of the requested type and feature with how to place into them`() async throws {
-        let mockRepo = MockAssetLibraryRepository()
+        let mockRepo = MockAssetLibraries()
         given(mockRepo).listPlacementGroups(placementType: .value(.appScreenshot), feature: .value("APP_STORE_VERSIONS")).willReturn([
             AssetPlacementGroup(id: "IPHONE_DUO_PROFILE", placementType: .appScreenshot, platform: "IPHONE_APP_STORE",
                                 displayClass: "IPHONE_DUO", feature: "APP_STORE_VERSIONS", sizes: ["1290x2796"], maxCount: 10),

@@ -76,9 +76,9 @@ struct VersionsCheckReadinessTests {
         )
     }
 
-    private func makeAnsweredAgeRating() -> (MockAppInfoRepository, MockAgeRatingDeclarationRepository) {
-        let appInfoRepo = MockAppInfoRepository()
-        let ageRatingRepo = MockAgeRatingDeclarationRepository()
+    private func makeAnsweredAgeRating() -> (MockAppInfos, MockAgeRatingDeclarations) {
+        let appInfoRepo = MockAppInfos()
+        let ageRatingRepo = MockAgeRatingDeclarations()
         given(appInfoRepo).listAppInfos(appId: .value("app-456")).willReturn([makeAppInfo()])
         given(ageRatingRepo).getDeclaration(appInfoId: .value("info-1")).willReturn(makeDeclaration())
         return (appInfoRepo, ageRatingRepo)
@@ -86,16 +86,16 @@ struct VersionsCheckReadinessTests {
 
     /// Runs the check on an otherwise ready version, with the given age rating setup.
     private func checkReadyVersion(
-        appInfoRepo: MockAppInfoRepository,
-        ageRatingRepo: MockAgeRatingDeclarationRepository
+        appInfoRepo: MockAppInfos,
+        ageRatingRepo: MockAgeRatingDeclarations
     ) async throws -> String {
-        let mockVersionRepo = MockVersionRepository()
-        let mockAppRepo = MockAppRepository()
-        let mockBuildRepo = MockBuildRepository()
-        let mockReviewDetailRepo = MockReviewDetailRepository()
-        let mockLocalizationRepo = MockVersionLocalizationRepository()
-        let mockScreenshotRepo = MockScreenshotRepository()
-        let mockPricingRepo = MockPricingRepository()
+        let mockVersionRepo = MockAppStoreVersions()
+        let mockAppRepo = MockApps()
+        let mockBuildRepo = MockBuilds()
+        let mockReviewDetailRepo = MockReviewDetails()
+        let mockLocalizationRepo = MockVersionLocalizations()
+        let mockScreenshotRepo = MockAppScreenshots()
+        let mockPricingRepo = MockAppPrices()
         given(mockAppRepo).getApp(id: .value("app-456")).willReturn(makeApp())
         given(mockVersionRepo).getVersion(id: .value("v-123")).willReturn(makeEditable())
         given(mockBuildRepo).getBuild(id: .value("build-55")).willReturn(makeBuild())
@@ -120,8 +120,8 @@ struct VersionsCheckReadinessTests {
     // MARK: - Tests
 
     @Test func `should not be ready and should name social media when it is unanswered`() async throws {
-        let appInfoRepo = MockAppInfoRepository()
-        let ageRatingRepo = MockAgeRatingDeclarationRepository()
+        let appInfoRepo = MockAppInfos()
+        let ageRatingRepo = MockAgeRatingDeclarations()
         given(appInfoRepo).listAppInfos(appId: .value("app-456")).willReturn([makeAppInfo()])
         given(ageRatingRepo).getDeclaration(appInfoId: .value("info-1")).willReturn(makeDeclaration(isSocialMedia: nil))
 
@@ -138,8 +138,8 @@ struct VersionsCheckReadinessTests {
     }
 
     @Test func `should read the age rating of the app info being prepared, not the live one`() async throws {
-        let appInfoRepo = MockAppInfoRepository()
-        let ageRatingRepo = MockAgeRatingDeclarationRepository()
+        let appInfoRepo = MockAppInfos()
+        let ageRatingRepo = MockAgeRatingDeclarations()
         given(appInfoRepo).listAppInfos(appId: .value("app-456")).willReturn([
             makeAppInfo(id: "info-live", state: "READY_FOR_DISTRIBUTION"),
             makeAppInfo(id: "info-1", state: "PREPARE_FOR_SUBMISSION"),
@@ -153,8 +153,8 @@ struct VersionsCheckReadinessTests {
     }
 
     @Test func `should read the age rating of a rejected app info rather than the live one`() async throws {
-        let appInfoRepo = MockAppInfoRepository()
-        let ageRatingRepo = MockAgeRatingDeclarationRepository()
+        let appInfoRepo = MockAppInfos()
+        let ageRatingRepo = MockAgeRatingDeclarations()
         given(appInfoRepo).listAppInfos(appId: .value("app-456")).willReturn([
             makeAppInfo(id: "info-live", state: "READY_FOR_DISTRIBUTION"),
             makeAppInfo(id: "info-1", state: "REJECTED"),
@@ -168,23 +168,23 @@ struct VersionsCheckReadinessTests {
     }
 
     @Test func `should not be ready when the app has no app info to read an age rating from`() async throws {
-        let appInfoRepo = MockAppInfoRepository()
+        let appInfoRepo = MockAppInfos()
         given(appInfoRepo).listAppInfos(appId: .value("app-456")).willReturn([])
 
-        let output = try await checkReadyVersion(appInfoRepo: appInfoRepo, ageRatingRepo: MockAgeRatingDeclarationRepository())
+        let output = try await checkReadyVersion(appInfoRepo: appInfoRepo, ageRatingRepo: MockAgeRatingDeclarations())
 
         #expect(output.contains(#""isReadyToSubmit" : false"#))
         #expect(output.contains(#""message" : "No app info found to read the age rating from""#))
     }
 
     @Test func `version with valid build and pricing is ready to submit`() async throws {
-        let mockVersionRepo = MockVersionRepository()
-        let mockAppRepo = MockAppRepository()
-        let mockBuildRepo = MockBuildRepository()
-        let mockReviewDetailRepo = MockReviewDetailRepository()
-        let mockLocalizationRepo = MockVersionLocalizationRepository()
-        let mockScreenshotRepo = MockScreenshotRepository()
-        let mockPricingRepo = MockPricingRepository()
+        let mockVersionRepo = MockAppStoreVersions()
+        let mockAppRepo = MockApps()
+        let mockBuildRepo = MockBuilds()
+        let mockReviewDetailRepo = MockReviewDetails()
+        let mockLocalizationRepo = MockVersionLocalizations()
+        let mockScreenshotRepo = MockAppScreenshots()
+        let mockPricingRepo = MockAppPrices()
         let (mockAppInfoRepo, mockAgeRatingRepo) = makeAnsweredAgeRating()
         given(mockAppRepo).getApp(id: .value("app-456")).willReturn(makeApp())
 
@@ -263,13 +263,13 @@ struct VersionsCheckReadinessTests {
     }
 
     @Test func `version without linked build is not ready to submit`() async throws {
-        let mockVersionRepo = MockVersionRepository()
-        let mockAppRepo = MockAppRepository()
-        let mockBuildRepo = MockBuildRepository()
-        let mockReviewDetailRepo = MockReviewDetailRepository()
-        let mockLocalizationRepo = MockVersionLocalizationRepository()
-        let mockScreenshotRepo = MockScreenshotRepository()
-        let mockPricingRepo = MockPricingRepository()
+        let mockVersionRepo = MockAppStoreVersions()
+        let mockAppRepo = MockApps()
+        let mockBuildRepo = MockBuilds()
+        let mockReviewDetailRepo = MockReviewDetails()
+        let mockLocalizationRepo = MockVersionLocalizations()
+        let mockScreenshotRepo = MockAppScreenshots()
+        let mockPricingRepo = MockAppPrices()
         let (mockAppInfoRepo, mockAgeRatingRepo) = makeAnsweredAgeRating()
         given(mockAppRepo).getApp(id: .value("app-456")).willReturn(makeApp())
 
@@ -335,13 +335,13 @@ struct VersionsCheckReadinessTests {
     }
 
     @Test func `live version is not editable so cannot submit`() async throws {
-        let mockVersionRepo = MockVersionRepository()
-        let mockAppRepo = MockAppRepository()
-        let mockBuildRepo = MockBuildRepository()
-        let mockReviewDetailRepo = MockReviewDetailRepository()
-        let mockLocalizationRepo = MockVersionLocalizationRepository()
-        let mockScreenshotRepo = MockScreenshotRepository()
-        let mockPricingRepo = MockPricingRepository()
+        let mockVersionRepo = MockAppStoreVersions()
+        let mockAppRepo = MockApps()
+        let mockBuildRepo = MockBuilds()
+        let mockReviewDetailRepo = MockReviewDetails()
+        let mockLocalizationRepo = MockVersionLocalizations()
+        let mockScreenshotRepo = MockAppScreenshots()
+        let mockPricingRepo = MockAppPrices()
         let (mockAppInfoRepo, mockAgeRatingRepo) = makeAnsweredAgeRating()
         given(mockAppRepo).getApp(id: .value("app-456")).willReturn(makeApp())
 
@@ -418,13 +418,13 @@ struct VersionsCheckReadinessTests {
     }
 
     @Test func `secondary locale without screenshots does not block submission`() async throws {
-        let mockVersionRepo = MockVersionRepository()
-        let mockAppRepo = MockAppRepository()
-        let mockBuildRepo = MockBuildRepository()
-        let mockReviewDetailRepo = MockReviewDetailRepository()
-        let mockLocalizationRepo = MockVersionLocalizationRepository()
-        let mockScreenshotRepo = MockScreenshotRepository()
-        let mockPricingRepo = MockPricingRepository()
+        let mockVersionRepo = MockAppStoreVersions()
+        let mockAppRepo = MockApps()
+        let mockBuildRepo = MockBuilds()
+        let mockReviewDetailRepo = MockReviewDetails()
+        let mockLocalizationRepo = MockVersionLocalizations()
+        let mockScreenshotRepo = MockAppScreenshots()
+        let mockPricingRepo = MockAppPrices()
         let (mockAppInfoRepo, mockAgeRatingRepo) = makeAnsweredAgeRating()
         given(mockAppRepo).getApp(id: .value("app-456")).willReturn(makeApp())
 
@@ -518,13 +518,13 @@ struct VersionsCheckReadinessTests {
     }
 
     @Test func `missing review contact does not block submission`() async throws {
-        let mockVersionRepo = MockVersionRepository()
-        let mockAppRepo = MockAppRepository()
-        let mockBuildRepo = MockBuildRepository()
-        let mockReviewDetailRepo = MockReviewDetailRepository()
-        let mockLocalizationRepo = MockVersionLocalizationRepository()
-        let mockScreenshotRepo = MockScreenshotRepository()
-        let mockPricingRepo = MockPricingRepository()
+        let mockVersionRepo = MockAppStoreVersions()
+        let mockAppRepo = MockApps()
+        let mockBuildRepo = MockBuilds()
+        let mockReviewDetailRepo = MockReviewDetails()
+        let mockLocalizationRepo = MockVersionLocalizations()
+        let mockScreenshotRepo = MockAppScreenshots()
+        let mockPricingRepo = MockAppPrices()
         let (mockAppInfoRepo, mockAgeRatingRepo) = makeAnsweredAgeRating()
         given(mockAppRepo).getApp(id: .value("app-456")).willReturn(makeApp())
 

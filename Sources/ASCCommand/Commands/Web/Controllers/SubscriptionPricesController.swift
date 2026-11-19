@@ -5,7 +5,7 @@ import HummingbirdWebSocket
 
 /// Routes for batch-setting per-territory prices on a subscription.
 struct SubscriptionPricesController: Sendable {
-    let repo: any SubscriptionPriceRepository
+    let repo: any SubscriptionPrices
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.post("/subscriptions/:subscriptionId/prices/set-batch") { request, context -> Response in

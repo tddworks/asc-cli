@@ -40,11 +40,11 @@ struct GameCenterDetailGet: AsyncParsableCommand {
     var appId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeGameCenterRepository()
+        let repo = try ClientProvider.makeGameCenter()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any GameCenterRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any GameCenter, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let detail = try await repo.getDetail(appId: appId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems([detail], affordanceMode: affordanceMode)
@@ -77,11 +77,11 @@ struct GameCenterAchievementsList: AsyncParsableCommand {
     var detailId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeGameCenterRepository()
+        let repo = try ClientProvider.makeGameCenter()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any GameCenterRepository) async throws -> String {
+    func execute(repo: any GameCenter) async throws -> String {
         let items = try await repo.listAchievements(gameCenterDetailId: detailId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
@@ -119,11 +119,11 @@ struct GameCenterAchievementsCreate: AsyncParsableCommand {
     var repeatable: Bool = false
 
     func run() async throws {
-        let repo = try ClientProvider.makeGameCenterRepository()
+        let repo = try ClientProvider.makeGameCenter()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any GameCenterRepository) async throws -> String {
+    func execute(repo: any GameCenter) async throws -> String {
         let item = try await repo.createAchievement(
             gameCenterDetailId: detailId,
             referenceName: referenceName,
@@ -153,11 +153,11 @@ struct GameCenterAchievementsDelete: AsyncParsableCommand {
     var achievementId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeGameCenterRepository()
+        let repo = try ClientProvider.makeGameCenter()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any GameCenterRepository) async throws {
+    func execute(repo: any GameCenter) async throws {
         try await repo.deleteAchievement(id: achievementId)
     }
 }
@@ -188,11 +188,11 @@ struct GameCenterLeaderboardsList: AsyncParsableCommand {
     var detailId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeGameCenterRepository()
+        let repo = try ClientProvider.makeGameCenter()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any GameCenterRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any GameCenter, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let items = try await repo.listLeaderboards(gameCenterDetailId: detailId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(items, affordanceMode: affordanceMode)
@@ -223,11 +223,11 @@ struct GameCenterLeaderboardsCreate: AsyncParsableCommand {
     var submissionType: String = "BEST_SCORE"
 
     func run() async throws {
-        let repo = try ClientProvider.makeGameCenterRepository()
+        let repo = try ClientProvider.makeGameCenter()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any GameCenterRepository) async throws -> String {
+    func execute(repo: any GameCenter) async throws -> String {
         guard let sortType = ScoreSortType(rawValue: scoreSortType.uppercased()) else {
             throw ValidationError("Invalid --score-sort-type '\(scoreSortType)'. Use: ASC or DESC")
         }
@@ -262,11 +262,11 @@ struct GameCenterLeaderboardsDelete: AsyncParsableCommand {
     var leaderboardId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeGameCenterRepository()
+        let repo = try ClientProvider.makeGameCenter()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any GameCenterRepository) async throws {
+    func execute(repo: any GameCenter) async throws {
         try await repo.deleteLeaderboard(id: leaderboardId)
     }
 }

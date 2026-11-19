@@ -13,12 +13,12 @@ struct BetaAppLocalizationsGet: AsyncParsableCommand {
     var localizationId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeBetaAppLocalizationRepository()
+        let repo = try ClientProvider.makeBetaAppLocalizations()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any BetaAppLocalizationRepository,
+        repo: any BetaAppLocalizations,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let item = try await repo.getBetaAppLocalization(localizationId: localizationId)

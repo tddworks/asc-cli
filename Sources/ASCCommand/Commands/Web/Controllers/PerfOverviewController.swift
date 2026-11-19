@@ -6,7 +6,7 @@ import HummingbirdWebSocket
 /// `GET /apps/:appId/perf-overview?device-type=…` — the app's Xcode Organizer overview.
 /// The query param matches the CLI flag `--device-type`.
 struct PerfOverviewController: Sendable {
-    let repo: any PerfOverviewRepository
+    let repo: any PerfOverviews
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/apps/:appId/perf-overview") { request, context -> Response in

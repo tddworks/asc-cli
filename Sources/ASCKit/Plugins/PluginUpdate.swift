@@ -1,6 +1,6 @@
 /// An available update for an installed plugin.
 ///
-/// Returned by `PluginRepository.listOutdated()`. Represents the diff between
+/// Returned by `Plugins.listOutdated()`. Represents the diff between
 /// what's installed locally and what the marketplace offers.
 public struct PluginUpdate: Sendable, Equatable, Identifiable, Codable {
     public var id: String { name }

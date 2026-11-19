@@ -10,7 +10,7 @@ struct AppShotsTemplatesTests {
     // MARK: - List
 
     @Test func `list templates shows all templates with affordances`() async throws {
-        let mockRepo = MockTemplateRepository()
+        let mockRepo = MockTemplates()
         given(mockRepo).listTemplates(size: .value(nil)).willReturn([
             makeTemplate(id: "top-hero", name: "Top Hero"),
             makeTemplate(id: "minimal-light", name: "Minimal Light"),
@@ -25,7 +25,7 @@ struct AppShotsTemplatesTests {
     }
 
     @Test func `list templates filters by size`() async throws {
-        let mockRepo = MockTemplateRepository()
+        let mockRepo = MockTemplates()
         given(mockRepo).listTemplates(size: .value(.landscape)).willReturn([
             makeTemplate(id: "triple-fan", name: "Triple Fan"),
         ])
@@ -38,7 +38,7 @@ struct AppShotsTemplatesTests {
     // MARK: - Get
 
     @Test func `get template by id returns template detail`() async throws {
-        let mockRepo = MockTemplateRepository()
+        let mockRepo = MockTemplates()
         given(mockRepo).getTemplate(id: .value("top-hero")).willReturn(
             makeTemplate(id: "top-hero", name: "Top Hero")
         )
@@ -51,7 +51,7 @@ struct AppShotsTemplatesTests {
     }
 
     @Test func `get template returns error when not found`() async throws {
-        let mockRepo = MockTemplateRepository()
+        let mockRepo = MockTemplates()
         given(mockRepo).getTemplate(id: .value("nope")).willReturn(nil)
 
         let cmd = try AppShotsTemplatesGet.parse(["--id", "nope"])
@@ -65,7 +65,7 @@ struct AppShotsTemplatesTests {
     // MARK: - Apply
 
     @Test func `apply template returns screen design with preview`() async throws {
-        let mockRepo = MockTemplateRepository()
+        let mockRepo = MockTemplates()
         given(mockRepo).getTemplate(id: .value("top-hero")).willReturn(
             makeTemplate(id: "top-hero", name: "Top Hero")
         )
@@ -84,7 +84,7 @@ struct AppShotsTemplatesTests {
     }
 
     @Test func `apply with preview image renders HTML to PNG and writes file`() async throws {
-        let mockRepo = MockTemplateRepository()
+        let mockRepo = MockTemplates()
         given(mockRepo).getTemplate(id: .value("top-hero")).willReturn(
             makeTemplate(id: "top-hero", name: "Top Hero")
         )
@@ -112,7 +112,7 @@ struct AppShotsTemplatesTests {
     }
 
     @Test func `apply with preview html outputs HTML page`() async throws {
-        let mockRepo = MockTemplateRepository()
+        let mockRepo = MockTemplates()
         given(mockRepo).getTemplate(id: .value("top-hero")).willReturn(
             makeTemplate(id: "top-hero", name: "Top Hero")
         )
@@ -129,7 +129,7 @@ struct AppShotsTemplatesTests {
     }
 
     @Test func `apply returns error when template not found`() async throws {
-        let mockRepo = MockTemplateRepository()
+        let mockRepo = MockTemplates()
         given(mockRepo).getTemplate(id: .value("nope")).willReturn(nil)
 
         let cmd = try AppShotsTemplatesApply.parse([

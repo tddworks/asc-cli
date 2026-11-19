@@ -7,7 +7,7 @@ import Testing
 struct CertificatesRevokeTests {
 
     @Test func `execute revokes certificate`() async throws {
-        let mockRepo = MockCertificateRepository()
+        let mockRepo = MockCertificates()
         given(mockRepo).revokeCertificate(id: .any).willReturn()
 
         let cmd = try CertificatesRevoke.parse(["--certificate-id", "cert-42"])

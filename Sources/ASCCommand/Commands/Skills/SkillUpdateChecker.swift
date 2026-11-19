@@ -14,7 +14,7 @@ enum SkillUpdateChecker {
     static let checkInterval: TimeInterval = 24 * 60 * 60 // 24 hours
 
     static func checkIfNeeded(
-        repo: any SkillRepository,
+        repo: any Skills,
         storage: any SkillConfigStorage,
         environment: [String: String] = ProcessInfo.processInfo.environment,
         now: Date = Date()

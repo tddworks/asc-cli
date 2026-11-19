@@ -10,7 +10,7 @@ import HummingbirdWebSocket
 /// We surface ASC's error verbatim — no client-side gating yet (see readiness-checklist
 /// design note in CHANGELOG).
 struct IAPSubmissionController: Sendable {
-    let repo: any InAppPurchaseSubmissionRepository
+    let repo: any InAppPurchaseSubmissions
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.post("/iap/:iapId/submit") { _, context -> Response in

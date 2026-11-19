@@ -96,8 +96,8 @@ Sources/
 ├── ASCKit/Auth/Iris/                                (new — pure value types & @Mockable protocols, zero I/O)
 │   ├── IrisAuthCredentials.swift                    appleId, password
 │   ├── IrisAuthSession.swift                        cookies, scnt, serviceKey, appleIDSessionID, providerID, teamId, userEmail, expiresAt
-│   ├── IrisAuthRepository.swift                     @Mockable: login, requestTwoFactorCode, submitTwoFactorCode, logout
-│   ├── IrisSessionRepository.swift                     @Mockable: save(IrisAuthSession), load() throws -> IrisAuthSession?, clear()
+│   ├── IrisSignIn.swift                     @Mockable: login, requestTwoFactorCode, submitTwoFactorCode, logout
+│   ├── IrisSessions.swift                     @Mockable: save(IrisAuthSession), load() throws -> IrisAuthSession?, clear()
 │   ├── IrisAuthError.swift                          invalidCredentials, twoFactorRequired, twoFactorRejected, applePromptRequired, networkError
 │   ├── TwoFactorChallenge.swift                     method (trustedDevice/phone), maskedDestination, codeLength
 │   └── PendingTwoFactorState.swift                  serialized partial session: scnt, serviceKey, appleIDSessionID, twoFactorCookieBag
@@ -108,11 +108,11 @@ Sources/
 │   │   └── AppleM1.swift                            HKDF-SHA256-derived M1 — Apple's variant, distinct from RFC 2945 proof
 │   ├── IdmsaAPIClient.swift                         HTTP for idmsa.apple.com (signin/init, signin/complete, verify/<method>/securitycode, 2sv/trust); cookie jar & header threading
 │   ├── OlympusClient.swift                          olympus/v1/session for team metadata
-│   ├── IrisAuthSDKRepository.swift                  implements `ASCKit.IrisAuthRepository`; composes AppleSRPClient + IdmsaAPIClient + OlympusClient
-│   ├── KeychainIrisSessionRepository.swift             implements `ASCKit.IrisSessionRepository` via macOS Keychain (Security framework)
-│   ├── FileIrisSessionRepository.swift                 implements `ASCKit.IrisSessionRepository` via `~/.asc/iris/session.json`, written with `0600`
-│   ├── CompositeIrisSessionRepository.swift            implements `ASCKit.IrisSessionRepository` by trying Keychain first, falling back to file (so macOS gets keychain protection, Linux silently falls through)
-│   ├── KeychainIrisCookieProvider.swift             implements existing `ASCKit.IrisCookieProvider`; reads from any `IrisSessionRepository`
+│   ├── IrisSDKSignIn.swift                  implements `ASCKit.IrisSignIn`; composes AppleSRPClient + IdmsaAPIClient + OlympusClient
+│   ├── KeychainIrisSessionRepository.swift             implements `ASCKit.IrisSessions` via macOS Keychain (Security framework)
+│   ├── FileIrisSessions.swift                 implements `ASCKit.IrisSessions` via `~/.asc/iris/session.json`, written with `0600`
+│   ├── CompositeIrisSessionRepository.swift            implements `ASCKit.IrisSessions` by trying Keychain first, falling back to file (so macOS gets keychain protection, Linux silently falls through)
+│   ├── KeychainIrisCookieProvider.swift             implements existing `ASCKit.IrisCookieProvider`; reads from any `IrisSessions`
 │   └── CompositeIrisCookieProvider.swift            implements `ASCKit.IrisCookieProvider`; resolution order env → stored → browser
 │
 └── ASCCommand/Commands/Iris/Auth/                   (new — CLI)
@@ -122,7 +122,7 @@ Sources/
     └── IrisAuthLogout.swift                         `asc iris auth logout`
 ```
 
-`IrisCommand.subcommands` gets `IrisAuthCommand.self` appended. `ClientProvider` gets `makeIrisAuthRepository()` and `makeIrisCookieProvider()` updated to return `CompositeIrisCookieProvider`.
+`IrisCommand.subcommands` gets `IrisAuthCommand.self` appended. `ClientProvider` gets `makeIrisSignIn()` and `makeIrisCookieProvider()` updated to return `CompositeIrisCookieProvider`.
 
 ## Domain models
 
@@ -251,7 +251,7 @@ Strict TDD. Each slice has a red test before any production code.
 - Keychain tests: macOS-only, conditionally skipped on CI without keychain.
 
 ### CLI commands (slice 6)
-- Mock `IrisAuthRepository`, exact JSON snapshot per `formatAgentItems`.
+- Mock `IrisSignIn`, exact JSON snapshot per `formatAgentItems`.
 - Two-step flow: `login` returns `twoFactorRequired` → output mentions "verify-code" → `verify-code` succeeds → output shows team info.
 
 ## Milestones
@@ -259,7 +259,7 @@ Strict TDD. Each slice has a red test before any production code.
 | # | Slice | Done when |
 |---|---|---|
 | 1 | Add `swift-srp` to `Package.swift`; wire `AppleSRPClient` (Apple-x via PBKDF2, S via swift-srp's BigNum + config) and `AppleM1` (HKDF-derived) | Apple-captured test vectors pass; ~150 LoC + tests |
-| 2 | Idmsa happy path (no 2FA) | `IrisAuthRepository.login` returns full `IrisAuthSession` against stubbed Apple endpoints |
+| 2 | Idmsa happy path (no 2FA) | `IrisSignIn.login` returns full `IrisAuthSession` against stubbed Apple endpoints |
 | 3 | 2FA flow (trusted-device + phone) | `verifyTwoFactorCode` succeeds; `IrisAuthError.twoFactorRequired` carries the right `PendingTwoFactorState` |
 | 4 | Olympus + composite cookie provider | iris calls succeed end-to-end against a stubbed test server |
 | 5 | Keychain / file persistence | Login → restart process → cookies still resolve from storage |

@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionsDeleteTests {
 
     @Test func `delete subscription calls repo with subscription id`() async throws {
-        let mockRepo = MockSubscriptionRepository()
+        let mockRepo = MockSubscriptions()
         given(mockRepo).deleteSubscription(subscriptionId: .any).willReturn(())
 
         let cmd = try SubscriptionsDelete.parse(["--subscription-id", "sub-1"])

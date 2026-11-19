@@ -19,7 +19,7 @@ private func makeExperiment(
 struct ExperimentsListTests {
 
     @Test func `listed editable experiment shows fields and treatment, update, delete affordances`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         given(mockRepo).listExperiments(appId: .any, state: .any, limit: .any)
             .willReturn(PaginatedResponse(data: [makeExperiment()], nextCursor: nil))
 
@@ -53,7 +53,7 @@ struct ExperimentsListTests {
     }
 
     @Test func `listed running experiment shows stop affordance and startDate`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         given(mockRepo).listExperiments(appId: .any, state: .any, limit: .any)
             .willReturn(PaginatedResponse(data: [makeExperiment(state: .approved, startDate: "2026-09-01T00:00:00Z")], nextCursor: nil))
 
@@ -86,7 +86,7 @@ struct ExperimentsListTests {
     }
 
     @Test func `state flag is forwarded to the repository as a typed filter`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         given(mockRepo).listExperiments(appId: .any, state: .any, limit: .any)
             .willReturn(PaginatedResponse(data: [], nextCursor: nil))
 
@@ -98,7 +98,7 @@ struct ExperimentsListTests {
     }
 
     @Test func `unknown state flag is rejected`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         let cmd = try ExperimentsList.parse(["--app-id", "app-1", "--state", "BOGUS"])
         await #expect(throws: (any Error).self) {
             try await cmd.execute(repo: mockRepo)
@@ -106,7 +106,7 @@ struct ExperimentsListTests {
     }
 
     @Test func `table output lists name, platform, traffic and state`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         given(mockRepo).listExperiments(appId: .any, state: .any, limit: .any)
             .willReturn(PaginatedResponse(data: [makeExperiment()], nextCursor: nil))
 
@@ -123,7 +123,7 @@ struct ExperimentsListTests {
 struct ExperimentsGetTests {
 
     @Test func `get shows a single approved experiment with start affordance`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         given(mockRepo).getExperiment(experimentId: .any).willReturn(makeExperiment(state: .approved))
 
         let cmd = try ExperimentsGet.parse(["--experiment-id", "exp-1", "--pretty"])
@@ -159,7 +159,7 @@ struct ExperimentsGetTests {
 struct ExperimentsCreateTests {
 
     @Test func `create passes name, platform and traffic proportion and shows the new test`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         given(mockRepo).createExperiment(appId: .any, name: .any, platform: .any, trafficProportion: .any)
             .willReturn(makeExperiment())
 
@@ -176,7 +176,7 @@ struct ExperimentsCreateTests {
     }
 
     @Test func `create rejects traffic proportion outside 1-100`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         let cmd = try ExperimentsCreate.parse(["--app-id", "app-1", "--name", "X", "--traffic-proportion", "0"])
         await #expect(throws: (any Error).self) {
             try await cmd.execute(repo: mockRepo)
@@ -188,7 +188,7 @@ struct ExperimentsCreateTests {
     }
 
     @Test func `create rejects unknown platform`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         let cmd = try ExperimentsCreate.parse(["--app-id", "app-1", "--name", "X", "--platform", "android", "--traffic-proportion", "30"])
         await #expect(throws: (any Error).self) {
             try await cmd.execute(repo: mockRepo)
@@ -200,7 +200,7 @@ struct ExperimentsCreateTests {
 struct ExperimentsUpdateTests {
 
     @Test func `update forwards only the provided fields and never touches started`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         given(mockRepo).updateExperiment(experimentId: .any, name: .any, trafficProportion: .any, isStarted: .any)
             .willReturn(makeExperiment())
 
@@ -214,7 +214,7 @@ struct ExperimentsUpdateTests {
     }
 
     @Test func `update requires at least one field`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         let cmd = try ExperimentsUpdate.parse(["--experiment-id", "exp-1"])
         await #expect(throws: (any Error).self) {
             try await cmd.execute(repo: mockRepo)
@@ -226,7 +226,7 @@ struct ExperimentsUpdateTests {
 struct ExperimentsStartStopTests {
 
     @Test func `start sets started to true and shows the running test`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         given(mockRepo).updateExperiment(experimentId: .any, name: .any, trafficProportion: .any, isStarted: .any)
             .willReturn(makeExperiment(state: .approved, startDate: "2026-09-01T00:00:00Z"))
 
@@ -240,7 +240,7 @@ struct ExperimentsStartStopTests {
     }
 
     @Test func `stop sets started to false`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         given(mockRepo).updateExperiment(experimentId: .any, name: .any, trafficProportion: .any, isStarted: .any)
             .willReturn(makeExperiment(state: .stopped, startDate: "2026-09-01T00:00:00Z"))
 
@@ -258,7 +258,7 @@ struct ExperimentsStartStopTests {
 struct ExperimentsDeleteTests {
 
     @Test func `delete calls the repository with the experiment id`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         given(mockRepo).deleteExperiment(experimentId: .any).willReturn(())
 
         let cmd = try ExperimentsDelete.parse(["--experiment-id", "exp-1"])

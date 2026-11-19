@@ -7,7 +7,7 @@ import Testing
 struct UserInvitationsInviteTests {
 
     @Test func `invite returns invitation record with affordances`() async throws {
-        let mockRepo = MockUserRepository()
+        let mockRepo = MockUsers()
         given(mockRepo).inviteUser(
             email: .any,
             firstName: .any,
@@ -41,7 +41,7 @@ struct UserInvitationsInviteTests {
     }
 
     @Test func `invite rejects invalid role`() async throws {
-        let mockRepo = MockUserRepository()
+        let mockRepo = MockUsers()
 
         let cmd = try UserInvitationsInvite.parse([
             "--email", "x@example.com",
@@ -55,7 +55,7 @@ struct UserInvitationsInviteTests {
     }
 
     @Test func `invite with all-apps-visible passes flag to repository`() async throws {
-        let mockRepo = MockUserRepository()
+        let mockRepo = MockUsers()
         given(mockRepo).inviteUser(
             email: .any,
             firstName: .any,
@@ -89,7 +89,7 @@ struct UserInvitationsInviteTests {
     }
 
     @Test func `invite role filter applied to invitations list`() async throws {
-        let mockRepo = MockUserRepository()
+        let mockRepo = MockUsers()
         given(mockRepo).listUserInvitations(role: .value(.developer)).willReturn([
             UserInvitationRecord(
                 id: "inv-3",

@@ -4,7 +4,7 @@ import HummingbirdWebSocket
 
 /// Routes that return Apple's auto-equalized territory prices for a subscription price point.
 struct SubscriptionEqualizationsController: Sendable {
-    let repo: any SubscriptionPriceRepository
+    let repo: any SubscriptionPrices
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/subscription-price-points/:pricePointId/equalizations") { request, context -> Response in

@@ -46,14 +46,14 @@ struct AppScreenshotSetTests {
 
     @Test
     func `set is equatable regardless of injected repo`() {
-        let a = MockRepositoryFactory.makeScreenshotSet(id: "1", repo: MockScreenshotRepository())
-        let b = MockRepositoryFactory.makeScreenshotSet(id: "1", repo: MockScreenshotRepository())
+        let a = MockRepositoryFactory.makeScreenshotSet(id: "1", repo: MockAppScreenshots())
+        let b = MockRepositoryFactory.makeScreenshotSet(id: "1", repo: MockAppScreenshots())
         #expect(a == b)
     }
 
     @Test
     func `importScreenshots uses own id as setId`() async throws {
-        let mockRepo = MockScreenshotRepository()
+        let mockRepo = MockAppScreenshots()
         given(mockRepo).uploadScreenshot(setId: .value("set-42"), fileURL: .any)
             .willReturn(MockRepositoryFactory.makeScreenshot(setId: "set-42"))
 
@@ -68,7 +68,7 @@ struct AppScreenshotSetTests {
 
     @Test
     func `importScreenshots uploads entries sorted by order`() async throws {
-        let mockRepo = MockScreenshotRepository()
+        let mockRepo = MockAppScreenshots()
         given(mockRepo).uploadScreenshot(setId: .any, fileURL: .any)
             .willReturn(MockRepositoryFactory.makeScreenshot(id: "img-1"))
 
@@ -88,7 +88,7 @@ struct AppScreenshotSetTests {
 
     @Test
     func `importScreenshots skips entries with no matching imageURL`() async throws {
-        let set = MockRepositoryFactory.makeScreenshotSet(id: "set-1", repo: MockScreenshotRepository())
+        let set = MockRepositoryFactory.makeScreenshotSet(id: "set-1", repo: MockAppScreenshots())
         let results = try await set.importScreenshots(
             entries: [ScreenshotManifest.ScreenshotEntry(order: 1, file: "missing.png")],
             imageURLs: [:]

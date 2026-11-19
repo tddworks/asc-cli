@@ -8,7 +8,7 @@ import HummingbirdWebSocket
 /// Mirrors `asc iap-offer-code-one-time-codes list/create/update` so REST clients can
 /// generate sandbox or production redemption batches and toggle individual batches active.
 struct IAPOfferCodeOneTimeCodesController: Sendable {
-    let repo: any InAppPurchaseOfferCodeRepository
+    let repo: any InAppPurchaseOfferCodes
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/iap-offer-codes/:offerCodeId/one-time-codes") { _, context -> Response in

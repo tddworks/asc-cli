@@ -13,12 +13,12 @@ struct IAPVersionsList: AsyncParsableCommand {
     var iapId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeProductVersionRepository()
+        let repo = try ClientProvider.makeProductVersions()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any ProductVersionRepository,
+        repo: any ProductVersions,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let versions = try await repo.listInAppPurchaseVersions(iapId: iapId)

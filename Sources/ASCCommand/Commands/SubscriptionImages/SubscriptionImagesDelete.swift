@@ -13,11 +13,11 @@ struct SubscriptionImagesDelete: AsyncParsableCommand {
     var imageId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptionReviewRepository()
+        let repo = try ClientProvider.makeSubscriptionReviewAssets()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any SubscriptionReviewRepository) async throws {
+    func execute(repo: any SubscriptionReviewAssets) async throws {
         try await repo.deleteImage(imageId: imageId)
     }
 }

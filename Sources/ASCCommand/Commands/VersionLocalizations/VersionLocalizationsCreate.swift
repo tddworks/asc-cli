@@ -16,11 +16,11 @@ struct VersionLocalizationsCreate: AsyncParsableCommand {
     var locale: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeVersionLocalizationRepository()
+        let repo = try ClientProvider.makeVersionLocalizations()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any VersionLocalizationRepository) async throws -> String {
+    func execute(repo: any VersionLocalizations) async throws -> String {
         let created = try await repo.createLocalization(versionId: versionId, locale: locale)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

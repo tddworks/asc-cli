@@ -7,7 +7,7 @@ import Testing
 struct ScreenshotSetsDeleteTests {
 
     @Test func `should delete the screenshot set it was given`() async throws {
-        let mockRepo = MockScreenshotRepository()
+        let mockRepo = MockAppScreenshots()
         given(mockRepo).deleteScreenshotSet(setId: .value("set-1")).willReturn()
 
         let cmd = try ScreenshotSetsDelete.parse(["--set-id", "set-1"])
@@ -18,7 +18,7 @@ struct ScreenshotSetsDeleteTests {
     }
 
     @Test func `should report the App Store Connect error when the set cannot be deleted`() async throws {
-        let mockRepo = MockScreenshotRepository()
+        let mockRepo = MockAppScreenshots()
         given(mockRepo).deleteScreenshotSet(setId: .any).willThrow(APIError.notFound("set-404"))
 
         let cmd = try ScreenshotSetsDelete.parse(["--set-id", "set-404"])

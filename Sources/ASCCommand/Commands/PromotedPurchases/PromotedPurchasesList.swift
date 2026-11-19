@@ -16,12 +16,12 @@ struct PromotedPurchasesList: AsyncParsableCommand {
     var limit: Int?
 
     func run() async throws {
-        let repo = try ClientProvider.makePromotedPurchaseRepository()
+        let repo = try ClientProvider.makePromotedPurchases()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any PromotedPurchaseRepository,
+        repo: any PromotedPurchases,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let response = try await repo.listPromotedPurchases(appId: appId, limit: limit)

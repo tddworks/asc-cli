@@ -1,0 +1,18 @@
+import Mockable
+
+@Mockable
+public protocol SubscriptionLocalizations: Sendable {
+    func listLocalizations(subscriptionId: String) async throws -> [SubscriptionLocalization]
+    func createLocalization(
+        subscriptionId: String,
+        locale: String,
+        name: String,
+        description: String?
+    ) async throws -> SubscriptionLocalization
+    func updateLocalization(
+        localizationId: String,
+        name: String?,
+        description: String?
+    ) async throws -> SubscriptionLocalization
+    func deleteLocalization(localizationId: String) async throws
+}

@@ -8,7 +8,7 @@ import Mockable
 struct AppsControllerTests {
 
     @Test func `apps list with include icon attaches iconAsset per app`() async throws {
-        let mockRepo = MockAppRepository()
+        let mockRepo = MockApps()
         let asset = ImageAsset(
             templateUrl: "https://cdn.example.com/a/{w}x{h}bb.{f}",
             width: 512,
@@ -33,7 +33,7 @@ struct AppsControllerTests {
     }
 
     @Test func `app infos list returns JSON with _links and data wrapper`() async throws {
-        let mockRepo = MockAppInfoRepository()
+        let mockRepo = MockAppInfos()
         given(mockRepo).listAppInfos(appId: .any).willReturn([
             AppInfo(id: "ai-1", appId: "42", primaryCategoryId: "6014"),
         ])
@@ -49,7 +49,7 @@ struct AppsControllerTests {
     }
 
     @Test func `app info localizations list returns JSON with _links and fields`() async throws {
-        let mockRepo = MockAppInfoRepository()
+        let mockRepo = MockAppInfos()
         given(mockRepo).listLocalizations(appInfoId: .any).willReturn([
             AppInfoLocalization(
                 id: "loc-1",
@@ -75,7 +75,7 @@ struct AppsControllerTests {
     }
 
     @Test func `age rating get returns JSON with _links and data wrapper`() async throws {
-        let mockRepo = MockAgeRatingDeclarationRepository()
+        let mockRepo = MockAgeRatingDeclarations()
         given(mockRepo).getDeclaration(appInfoId: .any).willReturn(
             AgeRatingDeclaration(id: "rating-1", appInfoId: "ai-1", isGambling: false)
         )
@@ -93,7 +93,7 @@ struct AppsControllerTests {
     }
 
     @Test func `app info update returns updated record with category ids`() async throws {
-        let mockRepo = MockAppInfoRepository()
+        let mockRepo = MockAppInfos()
         given(mockRepo)
             .updateCategories(
                 id: .any,
@@ -131,7 +131,7 @@ struct AppsControllerTests {
     }
 
     @Test func `apps list without include icon omits iconAsset`() async throws {
-        let mockRepo = MockAppRepository()
+        let mockRepo = MockApps()
         given(mockRepo).listApps(limit: .any).willReturn(
             PaginatedResponse(data: [
                 App(id: "42", name: "MyApp", bundleId: "com.test"),

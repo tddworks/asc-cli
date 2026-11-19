@@ -3,7 +3,7 @@
 ## Key Rules
 
 - All domain models: `Sendable` (struct is implicitly Sendable when all stored props are Sendable)
-- Repository protocols: `: Sendable` (required for `@Mockable` compatibility)
+- Collection protocols: `: Sendable` (required for `@Mockable` compatibility)
 - `Internal/` repos: `@unchecked Sendable` (hold `APIProvider` which is a reference type)
 - Commands: `AsyncParsableCommand` with `async throws func run()`
 
@@ -25,7 +25,7 @@ public struct AppStoreVersion: Sendable, Equatable, Identifiable, Codable {
 
 ```swift
 @Mockable
-public protocol AppRepository: Sendable {
+public protocol Apps: Sendable {
     func listApps(limit: Int?) async throws -> PaginatedResponse<App>
     func listVersions(appId: String) async throws -> [AppStoreVersion]
 }
@@ -35,7 +35,7 @@ public protocol AppRepository: Sendable {
 
 ```swift
 // @unchecked Sendable because APIProvider is a reference type
-public struct SDKAppRepository: AppRepository, @unchecked Sendable {
+public struct SDKApps: Apps, @unchecked Sendable {
     private let provider: APIProvider
 
     public func listVersions(appId: String) async throws -> [AppStoreVersion] {
@@ -54,7 +54,7 @@ struct VersionsList: AsyncParsableCommand {
     @Option(name: .long) var appId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppRepository()
+        let repo = try ClientProvider.makeApps()
         let versions = try await repo.listVersions(appId: appId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         let output = try formatter.formatAgentItems(
@@ -74,7 +74,7 @@ struct VersionsList: AsyncParsableCommand {
 final class TUIApp {
     func loadVersions(for app: App) {
         Task { @MainActor in
-            let repo = try ClientProvider.makeAppRepository()
+            let repo = try ClientProvider.makeApps()
             let versions = try await repo.listVersions(appId: app.id)
             // update UI
         }

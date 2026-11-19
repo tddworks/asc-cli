@@ -7,7 +7,7 @@ import Testing
 struct IAPSubmitTests {
 
     @Test func `submitted iap includes submission id, iapId and affordances`() async throws {
-        let mockRepo = MockInAppPurchaseSubmissionRepository()
+        let mockRepo = MockInAppPurchaseSubmissions()
         given(mockRepo).submitInAppPurchase(iapId: .any)
             .willReturn(InAppPurchaseSubmission(id: "sub-1", iapId: "iap-1"))
 

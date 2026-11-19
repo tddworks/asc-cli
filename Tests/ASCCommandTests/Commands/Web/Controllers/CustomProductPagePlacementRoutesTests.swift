@@ -11,7 +11,7 @@ import Testing
 struct CustomProductPagePlacementRoutesTests {
 
     @Test func `should place a header image on a custom product page localization over REST`() async throws {
-        let placementRepo = MockAssetPlacementRepository()
+        let placementRepo = MockAssetPlacements()
         given(placementRepo).createPlacement(
             surface: .value(.customProductPageLocalization), localizationId: .value("cpl-1"), mediaType: .value(.image),
             assetId: .value("img-1"), placementType: .value(.productPageHeaderAsset), placementGroup: .value("DEFAULT_PROFILE")
@@ -33,7 +33,7 @@ struct CustomProductPagePlacementRoutesTests {
     }
 
     @Test func `should list a custom product page localization's placements over REST`() async throws {
-        let placementRepo = MockAssetPlacementRepository()
+        let placementRepo = MockAssetPlacements()
         given(placementRepo).listPlacements(
             surface: .value(.customProductPageLocalization), localizationId: .value("cpl-1"),
             placementType: .value(.appStoreSearchResultsAsset), placementGroup: .value(nil)
@@ -58,12 +58,12 @@ struct CustomProductPagePlacementRoutesTests {
         _ method: HTTPRequest.Method,
         _ uri: String,
         body: String? = nil,
-        placementRepo: MockAssetPlacementRepository
+        placementRepo: MockAssetPlacements
     ) async throws -> (HTTPResponse.Status, String) {
         let router = Router(context: BasicWebSocketRequestContext.self)
         AssetLibraryController(
-            libraryRepo: MockAssetLibraryRepository(), imageRepo: MockLibraryImageRepository(),
-            videoRepo: MockLibraryVideoRepository(), placementRepo: placementRepo
+            libraryRepo: MockAssetLibraries(), imageRepo: MockLibraryImages(),
+            videoRepo: MockLibraryVideos(), placementRepo: placementRepo
         ).addRoutes(to: router.group("/api/v1"))
         return try await Application(router: router).test(.router) { client in
             try await client.execute(

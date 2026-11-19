@@ -7,7 +7,7 @@ import Testing
 struct UserInvitationsCancelTests {
 
     @Test func `cancel calls repository with invitation id`() async throws {
-        let mockRepo = MockUserRepository()
+        let mockRepo = MockUsers()
         given(mockRepo).cancelUserInvitation(id: .value("inv-1")).willReturn()
 
         let cmd = try UserInvitationsCancel.parse(["--invitation-id", "inv-1"])

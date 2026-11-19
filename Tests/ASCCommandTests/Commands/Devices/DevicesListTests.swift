@@ -7,7 +7,7 @@ import Testing
 struct DevicesListTests {
 
     @Test func `table output includes all row fields`() async throws {
-        let mockRepo = MockDeviceRepository()
+        let mockRepo = MockDevices()
         given(mockRepo).listDevices(platform: .any).willReturn([
             Device(id: "dev-1", name: "iPhone 15", udid: "ABC-001", deviceClass: .iPhone, platform: .iOS, status: .enabled),
         ])
@@ -22,7 +22,7 @@ struct DevicesListTests {
     }
 
     @Test func `listed devices include udid class status and affordances`() async throws {
-        let mockRepo = MockDeviceRepository()
+        let mockRepo = MockDevices()
         given(mockRepo).listDevices(platform: .any).willReturn([
             Device(
                 id: "dev-1",

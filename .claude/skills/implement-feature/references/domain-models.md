@@ -103,13 +103,13 @@ public struct AppScreenshot: Sendable, Equatable, Identifiable, Codable {
 
 ```swift
 @Mockable
-public protocol AppRepository: Sendable {
+public protocol Apps: Sendable {
     func listApps(limit: Int?) async throws -> PaginatedResponse<App>
     func listVersions(appId: String) async throws -> [AppStoreVersion]
 }
 
 @Mockable
-public protocol ScreenshotRepository: Sendable {
+public protocol AppScreenshots: Sendable {
     func listLocalizations(versionId: String) async throws -> [AppStoreVersionLocalization]
     func listScreenshotSets(localizationId: String) async throws -> [AppScreenshotSet]
     func listScreenshots(setId: String) async throws -> [AppScreenshot]
@@ -152,7 +152,7 @@ Add new `make*` methods to `MockRepositoryFactory` whenever you add a new domain
 Use private mapper functions (not static factory methods on the domain type):
 
 ```swift
-// In OpenAPIXxxRepository.swift (in the concept's Internal/)
+// In Internal/SDKXxxs.swift (in the concept's Internal/)
 private func mapVersion(
     _ sdkVersion: AppStoreConnect_Swift_SDK.AppStoreVersion,
     appId: String
@@ -182,14 +182,14 @@ public final class AppScreenshotSet: Sendable, Equatable, Identifiable, Codable 
     public let screenshotDisplayType: ScreenshotDisplayType
     public let screenshotsCount: Int
 
-    private let repo: any ScreenshotRepository
+    private let repo: any AppScreenshots
 
     public init(
         id: String,
         localizationId: String,
         screenshotDisplayType: ScreenshotDisplayType,
         screenshotsCount: Int = 0,
-        repo: any ScreenshotRepository
+        repo: any AppScreenshots
     ) {
         self.id = id
         self.localizationId = localizationId
@@ -240,7 +240,7 @@ public final class AppScreenshotSet: Sendable, Equatable, Identifiable, Codable 
 
 ```swift
 @Test func `importScreenshots uploads entries sorted by order`() async throws {
-    let mockRepo = MockScreenshotRepository()
+    let mockRepo = MockAppScreenshots()
     given(mockRepo).uploadScreenshot(setId: .value("set-1"), fileURL: .any)
         .willReturn(MockRepositoryFactory.makeScreenshot(id: "img-1"))
 

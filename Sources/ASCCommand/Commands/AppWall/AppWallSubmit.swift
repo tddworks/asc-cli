@@ -33,11 +33,11 @@ struct AppWallSubmit: AsyncParsableCommand {
 
     func run() async throws {
         let token = try resolveGitHubToken()
-        let repo = ClientProvider.makeAppWallRepository(token: token)
+        let repo = ClientProvider.makeAppWall(token: token)
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AppWallRepository) async throws -> String {
+    func execute(repo: any AppWall) async throws -> String {
         let appIdURLs = appId.map { "https://apps.apple.com/app/id\($0)" }
         let allApps = appIdURLs + app
         let wallApp = AppWallApp(

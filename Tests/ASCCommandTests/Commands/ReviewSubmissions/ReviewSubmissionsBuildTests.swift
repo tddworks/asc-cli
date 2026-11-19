@@ -10,7 +10,7 @@ struct ReviewSubmissionsBuildTests {
     // MARK: - create
 
     @Test func `creating a submission shows the draft with commands to add items and submit`() async throws {
-        let mockRepo = MockSubmissionRepository()
+        let mockRepo = MockReviewSubmissions()
         given(mockRepo).createSubmission(appId: .value("app-1"), platform: .value(.iOS)).willReturn(
             ReviewSubmission(id: "sub-1", appId: "app-1", platform: .iOS, state: .readyForReview)
         )
@@ -40,7 +40,7 @@ struct ReviewSubmissionsBuildTests {
     }
 
     @Test func `creating a submission for macOS asks for a macOS draft`() async throws {
-        let mockRepo = MockSubmissionRepository()
+        let mockRepo = MockReviewSubmissions()
         given(mockRepo).createSubmission(appId: .any, platform: .value(.macOS)).willReturn(
             ReviewSubmission(id: "sub-2", appId: "app-1", platform: .macOS, state: .readyForReview)
         )
@@ -53,13 +53,13 @@ struct ReviewSubmissionsBuildTests {
 
     @Test func `creating a submission rejects an unknown platform`() async throws {
         let cmd = try ReviewSubmissionsCreate.parse(["--app-id", "app-1", "--platform", "android"])
-        await #expect(throws: ValidationError.self) { try await cmd.execute(repo: MockSubmissionRepository()) }
+        await #expect(throws: ValidationError.self) { try await cmd.execute(repo: MockReviewSubmissions()) }
     }
 
     // MARK: - items add
 
     @Test func `adding a subscription version shows the new item and how to remove it`() async throws {
-        let mockRepo = MockSubmissionRepository()
+        let mockRepo = MockReviewSubmissions()
         given(mockRepo).addItem(submissionId: .value("sub-1"), target: .value(.subscriptionVersion("sv-1"))).willReturn(
             ReviewSubmissionItem(id: "item-1", submissionId: "sub-1", state: .readyForReview,
                                  linkedResourceId: "sv-1", linkedResourceType: .subscriptionVersion)
@@ -96,7 +96,7 @@ struct ReviewSubmissionsBuildTests {
             ("--subscription-group-version-id", .subscriptionGroupVersion("x-1")),
         ]
         for (flag, target) in cases {
-            let mockRepo = MockSubmissionRepository()
+            let mockRepo = MockReviewSubmissions()
             given(mockRepo).addItem(submissionId: .any, target: .any).willReturn(
                 ReviewSubmissionItem(id: "item-1", submissionId: "sub-1", state: .readyForReview)
             )
@@ -108,16 +108,16 @@ struct ReviewSubmissionsBuildTests {
 
     @Test func `adding an item needs exactly one version flag`() async throws {
         let none = try ReviewSubmissionItemsAdd.parse(["--submission-id", "sub-1"])
-        await #expect(throws: ValidationError.self) { try await none.execute(repo: MockSubmissionRepository()) }
+        await #expect(throws: ValidationError.self) { try await none.execute(repo: MockReviewSubmissions()) }
 
         let two = try ReviewSubmissionItemsAdd.parse(["--submission-id", "sub-1", "--version-id", "v-1", "--iap-version-id", "iv-1"])
-        await #expect(throws: ValidationError.self) { try await two.execute(repo: MockSubmissionRepository()) }
+        await #expect(throws: ValidationError.self) { try await two.execute(repo: MockReviewSubmissions()) }
     }
 
     // MARK: - items remove
 
     @Test func `removing an item removes it from its submission`() async throws {
-        let mockRepo = MockSubmissionRepository()
+        let mockRepo = MockReviewSubmissions()
         given(mockRepo).removeItem(itemId: .any).willReturn()
 
         let cmd = try ReviewSubmissionItemsRemove.parse(["--item-id", "item-1"])
@@ -129,7 +129,7 @@ struct ReviewSubmissionsBuildTests {
     // MARK: - submit
 
     @Test func `submitting shows the submission waiting for review`() async throws {
-        let mockRepo = MockSubmissionRepository()
+        let mockRepo = MockReviewSubmissions()
         given(mockRepo).submit(submissionId: .value("sub-1")).willReturn(
             ReviewSubmission(id: "sub-1", appId: "app-1", platform: .iOS, state: .waitingForReview)
         )

@@ -2,7 +2,7 @@ import ASCPlugin
 import Foundation
 
 /// `~/.asc/plugins` on this Mac. Only the file system, `PluginLoader` and `unzip`
-/// calls live here; which plugin matches is `PluginMarketRepository`'s.
+/// calls live here; which plugin matches is `MarketplacePlugins`'s.
 struct LocalPluginsFolder: PluginsFolder {
     func installed() -> [InstalledPlugin] {
         PluginLoader.discover().map { plugin in

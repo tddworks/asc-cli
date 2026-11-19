@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionOffersCreateTests {
 
     @Test func `creates free trial offer and returns it with affordances`() async throws {
-        let mockRepo = MockSubscriptionIntroductoryOfferRepository()
+        let mockRepo = MockSubscriptionIntroductoryOffers()
         given(mockRepo).createIntroductoryOffer(
             subscriptionId: .any, duration: .any, offerMode: .any,
             numberOfPeriods: .any, startDate: .any, endDate: .any,
@@ -49,7 +49,7 @@ struct SubscriptionOffersCreateTests {
     }
 
     @Test func `throws for invalid duration`() async throws {
-        let mockRepo = MockSubscriptionIntroductoryOfferRepository()
+        let mockRepo = MockSubscriptionIntroductoryOffers()
         let cmd = try SubscriptionOffersCreate.parse([
             "--subscription-id", "sub-1",
             "--duration", "DAILY",
@@ -62,7 +62,7 @@ struct SubscriptionOffersCreateTests {
     }
 
     @Test func `throws for invalid mode`() async throws {
-        let mockRepo = MockSubscriptionIntroductoryOfferRepository()
+        let mockRepo = MockSubscriptionIntroductoryOffers()
         let cmd = try SubscriptionOffersCreate.parse([
             "--subscription-id", "sub-1",
             "--duration", "ONE_MONTH",
@@ -75,7 +75,7 @@ struct SubscriptionOffersCreateTests {
     }
 
     @Test func `throws when PAY_AS_YOU_GO missing price point id`() async throws {
-        let mockRepo = MockSubscriptionIntroductoryOfferRepository()
+        let mockRepo = MockSubscriptionIntroductoryOffers()
         let cmd = try SubscriptionOffersCreate.parse([
             "--subscription-id", "sub-1",
             "--duration", "ONE_MONTH",
@@ -88,7 +88,7 @@ struct SubscriptionOffersCreateTests {
     }
 
     @Test func `throws when PAY_UP_FRONT missing price point id`() async throws {
-        let mockRepo = MockSubscriptionIntroductoryOfferRepository()
+        let mockRepo = MockSubscriptionIntroductoryOffers()
         let cmd = try SubscriptionOffersCreate.parse([
             "--subscription-id", "sub-1",
             "--duration", "ONE_MONTH",
@@ -101,7 +101,7 @@ struct SubscriptionOffersCreateTests {
     }
 
     @Test func `succeeds when PAY_AS_YOU_GO with price point id`() async throws {
-        let mockRepo = MockSubscriptionIntroductoryOfferRepository()
+        let mockRepo = MockSubscriptionIntroductoryOffers()
         given(mockRepo).createIntroductoryOffer(
             subscriptionId: .any, duration: .any, offerMode: .any,
             numberOfPeriods: .any, startDate: .any, endDate: .any,

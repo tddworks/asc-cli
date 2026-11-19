@@ -5,7 +5,7 @@ import HummingbirdWebSocket
 /// Review versions of in-app purchases, subscriptions and subscription groups.
 /// A submittable version is sent to review by adding it to a review submission.
 struct ProductVersionsController: Sendable {
-    let repo: any ProductVersionRepository
+    let repo: any ProductVersions
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/iap/:iapId/versions") { _, context -> Response in

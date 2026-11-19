@@ -17,11 +17,11 @@ struct ScreenshotsUpload: AsyncParsableCommand {
     var file: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeScreenshotRepository()
+        let repo = try ClientProvider.makeAppScreenshots()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any ScreenshotRepository) async throws -> String {
+    func execute(repo: any AppScreenshots) async throws -> String {
         let fileURL = URL(fileURLWithPath: file)
         let screenshot = try await repo.uploadScreenshot(setId: setId, fileURL: fileURL)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)

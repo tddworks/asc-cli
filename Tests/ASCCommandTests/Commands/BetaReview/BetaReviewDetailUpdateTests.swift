@@ -7,7 +7,7 @@ import Testing
 struct BetaReviewDetailUpdateTests {
 
     @Test func `update detail shows updated contact info`() async throws {
-        let mockRepo = MockBetaAppReviewRepository()
+        let mockRepo = MockBetaAppReviews()
         given(mockRepo).updateDetail(id: .value("d-1"), update: .any)
             .willReturn(
                 BetaAppReviewDetail(

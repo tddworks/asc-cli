@@ -12,7 +12,7 @@ struct RESTRoutesTests {
     // MARK: - Apps
 
     @Test func `apps list returns JSON with _links`() async throws {
-        let mockRepo = MockAppRepository()
+        let mockRepo = MockApps()
         given(mockRepo).listApps(limit: .any).willReturn(
             PaginatedResponse(data: [App(id: "42", name: "MyApp", bundleId: "com.test")])
         )
@@ -24,7 +24,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `apps list returns data wrapper`() async throws {
-        let mockRepo = MockAppRepository()
+        let mockRepo = MockApps()
         given(mockRepo).listApps(limit: .any).willReturn(
             PaginatedResponse(data: [App(id: "1", name: "Test", bundleId: "com.test")])
         )
@@ -35,7 +35,7 @@ struct RESTRoutesTests {
     // MARK: - Versions
 
     @Test func `versions list returns JSON with _links`() async throws {
-        let mockRepo = MockVersionRepository()
+        let mockRepo = MockAppStoreVersions()
         given(mockRepo).listVersions(appId: .any).willReturn([
             AppStoreVersion(id: "v-1", appId: "42", versionString: "1.0", platform: .iOS, state: .prepareForSubmission),
         ])
@@ -46,7 +46,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `plugins updates list returns outdated entries with apply links`() async throws {
-        let mockRepo = MockPluginRepository()
+        let mockRepo = MockPlugins()
         given(mockRepo).listOutdated().willReturn([
             PluginUpdate(name: "Hello", installedVersion: "1.0.0", latestVersion: "1.2.0"),
         ])
@@ -58,7 +58,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `plugins update returns the freshly installed plugin`() async throws {
-        let mockRepo = MockPluginRepository()
+        let mockRepo = MockPlugins()
         given(mockRepo).update(name: .value("Hello")).willReturn(
             Plugin(id: "Hello.plugin", name: "Hello", version: "1.2.0", isInstalled: true, slug: "Hello.plugin")
         )
@@ -69,7 +69,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `plugins install returns the installed plugin in data wrapper`() async throws {
-        let mockRepo = MockPluginRepository()
+        let mockRepo = MockPlugins()
         given(mockRepo).install(name: .any).willReturn(
             Plugin(id: "Hello.plugin", name: "Hello", version: "1.0", author: "me", isInstalled: true, slug: "Hello.plugin")
         )
@@ -81,7 +81,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `plugins market search returns filtered list under data wrapper`() async throws {
-        let mockRepo = MockPluginRepository()
+        let mockRepo = MockPlugins()
         given(mockRepo).searchAvailable(query: .value("hello")).willReturn([
             Plugin(id: "Hello.plugin", name: "Hello", version: "1.0", author: "me"),
         ])
@@ -121,7 +121,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `age-rating update returns JSON with _links`() async throws {
-        let mockRepo = MockAgeRatingDeclarationRepository()
+        let mockRepo = MockAgeRatingDeclarations()
         given(mockRepo).updateDeclaration(id: .any, update: .any).willReturn(
             AgeRatingDeclaration(id: "decl-1", appInfoId: "info-42", isAdvertising: false)
         )
@@ -135,7 +135,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `apps update returns JSON with _links and contentRightsDeclaration`() async throws {
-        let mockRepo = MockAppRepository()
+        let mockRepo = MockApps()
         given(mockRepo).updateContentRights(appId: .any, declaration: .any).willReturn(
             App(id: "42", name: "Bakery", bundleId: "com.example", contentRightsDeclaration: .doesNotUseThirdPartyContent)
         )
@@ -150,7 +150,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `versions update returns JSON with _links`() async throws {
-        let mockRepo = MockVersionRepository()
+        let mockRepo = MockAppStoreVersions()
         given(mockRepo).updateVersion(
             id: .any,
             versionString: .any,
@@ -172,7 +172,7 @@ struct RESTRoutesTests {
     // MARK: - Version Localizations
 
     @Test func `version localizations list returns JSON with _links`() async throws {
-        let mockRepo = MockVersionLocalizationRepository()
+        let mockRepo = MockVersionLocalizations()
         given(mockRepo).listLocalizations(versionId: .any).willReturn([
             AppStoreVersionLocalization(id: "loc-1", versionId: "v-1", locale: "en-US", description: "A great app"),
         ])
@@ -200,7 +200,7 @@ struct RESTRoutesTests {
     // MARK: - Simulators
 
     @Test func `simulators list returns JSON with _links`() async throws {
-        let mockRepo = MockSimulatorRepository()
+        let mockRepo = MockSimulators()
         given(mockRepo).listSimulators(filter: .any).willReturn([
             Simulator(id: "ABC-123", name: "iPhone 15", state: .booted, runtime: "iOS 17.0"),
         ])
@@ -213,7 +213,7 @@ struct RESTRoutesTests {
     // MARK: - Builds
 
     @Test func `builds list returns JSON with _links`() async throws {
-        let mockRepo = MockBuildRepository()
+        let mockRepo = MockBuilds()
         given(mockRepo).listBuilds(appId: .any, platform: .any, version: .any, limit: .any).willReturn(
             PaginatedResponse(data: [Build(id: "b-1", version: "1.0", expired: false, processingState: .valid)])
         )
@@ -224,7 +224,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `builds set-encryption-compliance REST output contains updated build`() async throws {
-        let mockRepo = MockBuildRepository()
+        let mockRepo = MockBuilds()
         given(mockRepo).updateBuildEncryptionCompliance(buildId: .any, usesNonExemptEncryption: .any)
             .willReturn(Build(id: "b-1", version: "1.0", expired: false, processingState: .valid, usesNonExemptEncryption: false))
         let output = try await BuildsSetEncryptionCompliance.parse([
@@ -240,7 +240,7 @@ struct RESTRoutesTests {
     // MARK: - TestFlight
 
     @Test func `testflight groups list returns JSON with _links`() async throws {
-        let mockRepo = MockTestFlightRepository()
+        let mockRepo = MockTestFlight()
         given(mockRepo).listBetaGroups(appId: .any, limit: .any).willReturn(
             PaginatedResponse(data: [BetaGroup(id: "g-1", appId: "42", name: "External Testers", isInternalGroup: false)])
         )
@@ -253,7 +253,7 @@ struct RESTRoutesTests {
     // MARK: - Beta App Localizations
 
     @Test func `beta app localizations list returns JSON with _links to parent app`() async throws {
-        let mockRepo = MockBetaAppLocalizationRepository()
+        let mockRepo = MockBetaAppLocalizations()
         given(mockRepo).listBetaAppLocalizations(appId: .any).willReturn([
             BetaAppLocalization(id: "bal-1", appId: "42", locale: "en-US", description: "Welcome", feedbackEmail: "beta@example.com"),
         ])
@@ -266,7 +266,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `beta app localizations get returns _links for actions on this localization`() async throws {
-        let mockRepo = MockBetaAppLocalizationRepository()
+        let mockRepo = MockBetaAppLocalizations()
         given(mockRepo).getBetaAppLocalization(localizationId: .any).willReturn(
             BetaAppLocalization(id: "bal-7", appId: "99", locale: "ja", description: "ベータ")
         )
@@ -280,14 +280,14 @@ struct RESTRoutesTests {
     // MARK: - App Shots
 
     @Test func `templates list returns data wrapper`() async throws {
-        let mockRepo = MockTemplateRepository()
+        let mockRepo = MockTemplates()
         given(mockRepo).listTemplates(size: .any).willReturn([])
         let output = try await AppShotsTemplatesList.parse(["--pretty"]).execute(repo: mockRepo, affordanceMode: .rest)
         #expect(output.contains("\"data\""))
     }
 
     @Test func `themes list returns data wrapper`() async throws {
-        let mockRepo = MockThemeRepository()
+        let mockRepo = MockThemes()
         given(mockRepo).listThemes().willReturn([])
         let output = try await AppShotsThemesList.parse(["--pretty"]).execute(repo: mockRepo, affordanceMode: .rest)
         #expect(output.contains("\"data\""))
@@ -296,7 +296,7 @@ struct RESTRoutesTests {
     // MARK: - Review Submissions
 
     @Test func `review submissions list returns JSON with _links`() async throws {
-        let mockRepo = MockSubmissionRepository()
+        let mockRepo = MockReviewSubmissions()
         given(mockRepo).listSubmissions(appId: .any, states: .any, limit: .any).willReturn([
             ReviewSubmission(id: "sub-1", appId: "42", platform: .iOS, state: .waitingForReview),
         ])
@@ -312,7 +312,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `review submissions get returns JSON with _links`() async throws {
-        let mockRepo = MockSubmissionRepository()
+        let mockRepo = MockReviewSubmissions()
         given(mockRepo).getSubmission(id: .value("sub-1")).willReturn(
             ReviewSubmission(id: "sub-1", appId: "42", platform: .iOS, state: .unresolvedIssues)
         )
@@ -326,7 +326,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `review submission items list returns JSON with _links for parent and version`() async throws {
-        let mockRepo = MockSubmissionRepository()
+        let mockRepo = MockReviewSubmissions()
         given(mockRepo).listSubmissionItems(submissionId: .value("sub-1")).willReturn([
             ReviewSubmissionItem(id: "item-1", submissionId: "sub-1", state: .rejected,
                                  linkedResourceId: "v-9", linkedResourceType: .appStoreVersion),
@@ -344,7 +344,7 @@ struct RESTRoutesTests {
     // MARK: - Certificates REST filters
 
     @Test func `certificates list accepts limit via rest mode`() async throws {
-        let mockRepo = MockCertificateRepository()
+        let mockRepo = MockCertificates()
         given(mockRepo).listCertificates(certificateType: .any, limit: .value(200)).willReturn([
             Certificate(id: "cert-1", name: "Dist", certificateType: .iosDistribution),
         ])
@@ -365,7 +365,7 @@ struct RESTRoutesTests {
     // MARK: - Promoted Purchases
 
     @Test func `promoted purchases list returns JSON with _links pointing at REST paths`() async throws {
-        let mockRepo = MockPromotedPurchaseRepository()
+        let mockRepo = MockPromotedPurchases()
         given(mockRepo).listPromotedPurchases(appId: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
                 PromotedPurchase(
@@ -389,7 +389,7 @@ struct RESTRoutesTests {
     // MARK: - Subscription Group Localizations
 
     @Test func `subscription group localizations REST exposes nested path under group`() async throws {
-        let mockRepo = MockSubscriptionGroupLocalizationRepository()
+        let mockRepo = MockSubscriptionGroupLocalizations()
         given(mockRepo).listLocalizations(groupId: .any).willReturn([
             SubscriptionGroupLocalization(id: "loc-1", groupId: "grp-7", locale: "en-US", name: "Premium")
         ])
@@ -404,7 +404,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `subscription group localization create returns JSON with _links`() async throws {
-        let mockRepo = MockSubscriptionGroupLocalizationRepository()
+        let mockRepo = MockSubscriptionGroupLocalizations()
         given(mockRepo).createLocalization(groupId: .any, locale: .any, name: .any, customAppName: .any)
             .willReturn(SubscriptionGroupLocalization(
                 id: "loc-1", groupId: "grp-7", locale: "en-US", name: "Premium"
@@ -423,7 +423,7 @@ struct RESTRoutesTests {
     // MARK: - Review uploads (IAP + Subscription)
 
     @Test func `iap review screenshot upload returns JSON with _links pointing at iap-review-screenshot`() async throws {
-        let mockRepo = MockInAppPurchaseReviewRepository()
+        let mockRepo = MockInAppPurchaseReviewAssets()
         given(mockRepo).uploadReviewScreenshot(iapId: .any, fileURL: .any).willReturn(
             InAppPurchaseReviewScreenshot(id: "rs-1", iapId: "iap-7", fileName: "shot.png", fileSize: 1024, assetState: .complete)
         )
@@ -438,7 +438,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `iap image upload returns JSON with _links pointing at iap-images`() async throws {
-        let mockRepo = MockInAppPurchaseReviewRepository()
+        let mockRepo = MockInAppPurchaseReviewAssets()
         given(mockRepo).uploadImage(iapId: .any, fileURL: .any).willReturn(
             InAppPurchasePromotionalImage(id: "img-1", iapId: "iap-7", fileName: "promo.jpg", fileSize: 2048, state: .uploadComplete)
         )
@@ -453,7 +453,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `subscription review screenshot upload returns JSON with _links pointing at subscription-review-screenshot`() async throws {
-        let mockRepo = MockSubscriptionReviewRepository()
+        let mockRepo = MockSubscriptionReviewAssets()
         given(mockRepo).uploadReviewScreenshot(subscriptionId: .any, fileURL: .any).willReturn(
             SubscriptionReviewScreenshot(id: "srs-1", subscriptionId: "sub-7", fileName: "shot.png", fileSize: 1024, assetState: .complete)
         )
@@ -468,7 +468,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `subscription image upload returns JSON with _links pointing at subscription-images`() async throws {
-        let mockRepo = MockSubscriptionReviewRepository()
+        let mockRepo = MockSubscriptionReviewAssets()
         given(mockRepo).uploadImage(subscriptionId: .any, fileURL: .any).willReturn(
             SubscriptionPromotionalImage(id: "simg-1", subscriptionId: "sub-7", fileName: "promo.jpg", fileSize: 2048, state: .uploadComplete)
         )
@@ -483,7 +483,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `subscription group localization update returns JSON with _links`() async throws {
-        let mockRepo = MockSubscriptionGroupLocalizationRepository()
+        let mockRepo = MockSubscriptionGroupLocalizations()
         given(mockRepo).updateLocalization(localizationId: .any, name: .any, customAppName: .any)
             .willReturn(SubscriptionGroupLocalization(
                 id: "loc-1", groupId: "grp-7", locale: "en-US", name: "Renamed"
@@ -502,7 +502,7 @@ struct RESTRoutesTests {
     // MARK: - Subscription Pricing
 
     @Test func `subscription price-points REST exposes nested path under subscription`() async throws {
-        let mockRepo = MockSubscriptionPriceRepository()
+        let mockRepo = MockSubscriptionPrices()
         given(mockRepo).listPricePoints(subscriptionId: .any, territory: .any, limit: .any, cursor: .any)
             .willReturn(PaginatedResponse(data: [
                 SubscriptionPricePoint(id: "spp-1", subscriptionId: "sub-7", territory: "USA",
@@ -520,7 +520,7 @@ struct RESTRoutesTests {
     // MARK: - Subscription Promotional Offers
 
     @Test func `subscription promotional offers REST exposes nested paths`() async throws {
-        let mockRepo = MockSubscriptionPromotionalOfferRepository()
+        let mockRepo = MockSubscriptionPromotionalOffers()
         given(mockRepo).listPromotionalOffers(subscriptionId: .any).willReturn([
             SubscriptionPromotionalOffer(
                 id: "po-1", subscriptionId: "sub-7", name: "Winback",
@@ -541,7 +541,7 @@ struct RESTRoutesTests {
     // MARK: - Win-Back Offers
 
     @Test func `win-back offers REST exposes nested paths under subscription`() async throws {
-        let mockRepo = MockWinBackOfferRepository()
+        let mockRepo = MockWinBackOffers()
         given(mockRepo).listWinBackOffers(subscriptionId: .any).willReturn([
             WinBackOffer(
                 id: "wb-1", subscriptionId: "sub-7",
@@ -567,7 +567,7 @@ struct RESTRoutesTests {
     // MARK: - Offer Code Prices
 
     @Test func `iap offer code prices REST exposes nested path under offer code`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodeRepository()
+        let mockRepo = MockInAppPurchaseOfferCodes()
         given(mockRepo).listPrices(offerCodeId: .any).willReturn([
             InAppPurchaseOfferCodePrice(id: "p-1", offerCodeId: "oc-7", territory: "USA", pricePointId: "pp-1")
         ])
@@ -581,7 +581,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `subscription offer code prices REST exposes nested path under offer code`() async throws {
-        let mockRepo = MockSubscriptionOfferCodeRepository()
+        let mockRepo = MockSubscriptionOfferCodes()
         given(mockRepo).listPrices(offerCodeId: .any).willReturn([
             SubscriptionOfferCodePrice(id: "p-1", offerCodeId: "oc-7", territory: "USA", subscriptionPricePointId: "spp-1")
         ])
@@ -597,7 +597,7 @@ struct RESTRoutesTests {
     // MARK: - One-Time Use Codes (IAP + Subscription)
 
     @Test func `IAP one-time codes list REST resolves to nested path under offer code`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodeRepository()
+        let mockRepo = MockInAppPurchaseOfferCodes()
         given(mockRepo).listOneTimeUseCodes(offerCodeId: .any).willReturn([
             InAppPurchaseOfferCodeOneTimeUseCode(
                 id: "otc-1", offerCodeId: "oc-7", numberOfCodes: 100,
@@ -615,7 +615,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `IAP one-time codes update REST resolves to PATCH on the code id`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodeRepository()
+        let mockRepo = MockInAppPurchaseOfferCodes()
         given(mockRepo).updateOneTimeUseCode(oneTimeCodeId: .any, isActive: .any).willReturn(
             InAppPurchaseOfferCodeOneTimeUseCode(
                 id: "otc-1", offerCodeId: "oc-7", numberOfCodes: 100,
@@ -634,7 +634,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `subscription one-time codes list REST resolves to nested path under offer code`() async throws {
-        let mockRepo = MockSubscriptionOfferCodeRepository()
+        let mockRepo = MockSubscriptionOfferCodes()
         given(mockRepo).listOneTimeUseCodes(offerCodeId: .any).willReturn([
             SubscriptionOfferCodeOneTimeUseCode(
                 id: "otc-1", offerCodeId: "oc-7", numberOfCodes: 100,
@@ -652,7 +652,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `IAP offer codes create REST emits _links pointing back at parent IAP path`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodeRepository()
+        let mockRepo = MockInAppPurchaseOfferCodes()
         given(mockRepo).createOfferCode(
             iapId: .any, name: .any, customerEligibilities: .any, prices: .any
         ).willReturn(InAppPurchaseOfferCode(
@@ -673,7 +673,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `subscription offer codes create REST emits _links`() async throws {
-        let mockRepo = MockSubscriptionOfferCodeRepository()
+        let mockRepo = MockSubscriptionOfferCodes()
         given(mockRepo).createOfferCode(
             subscriptionId: .any, name: .any, customerEligibilities: .any,
             offerEligibility: .any, duration: .any, offerMode: .any, numberOfPeriods: .any,
@@ -701,7 +701,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `subscription one-time codes create REST forwards environment to repo and emits _links`() async throws {
-        let mockRepo = MockSubscriptionOfferCodeRepository()
+        let mockRepo = MockSubscriptionOfferCodes()
         given(mockRepo).createOneTimeUseCode(
             offerCodeId: .any, numberOfCodes: .any, expirationDate: .any, environment: .any
         ).willReturn(
@@ -731,7 +731,7 @@ struct RESTRoutesTests {
     // MARK: - IAP Review Assets
 
     @Test func `IAP review screenshot REST returns nested path under iap`() async throws {
-        let mockRepo = MockInAppPurchaseReviewRepository()
+        let mockRepo = MockInAppPurchaseReviewAssets()
         given(mockRepo).getReviewScreenshot(iapId: .any).willReturn(
             InAppPurchaseReviewScreenshot(id: "rs-1", iapId: "iap-7", fileName: "review.png",
                                           fileSize: 1234, assetState: .complete)
@@ -749,7 +749,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `IAP images REST returns nested path under iap`() async throws {
-        let mockRepo = MockInAppPurchaseReviewRepository()
+        let mockRepo = MockInAppPurchaseReviewAssets()
         given(mockRepo).listImages(iapId: .any).willReturn([
             InAppPurchasePromotionalImage(id: "img-1", iapId: "iap-7", fileName: "promo.png",
                                           fileSize: 9999, state: .approved)
@@ -766,7 +766,7 @@ struct RESTRoutesTests {
     // MARK: - Subscription Review Asset
 
     @Test func `subscription review screenshot REST returns nested path under subscription`() async throws {
-        let mockRepo = MockSubscriptionReviewRepository()
+        let mockRepo = MockSubscriptionReviewAssets()
         given(mockRepo).getReviewScreenshot(subscriptionId: .any).willReturn(
             SubscriptionReviewScreenshot(id: "rs-1", subscriptionId: "sub-7", fileName: "review.png",
                                          fileSize: 1234, assetState: .complete)
@@ -784,7 +784,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `promoted purchases REST suppresses update and delete links while in review`() async throws {
-        let mockRepo = MockPromotedPurchaseRepository()
+        let mockRepo = MockPromotedPurchases()
         given(mockRepo).listPromotedPurchases(appId: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
                 PromotedPurchase(
@@ -809,7 +809,7 @@ struct RESTRoutesTests {
     // MARK: - IAP detail listings (Localizations, Availability, OfferCodes, PricePoints)
 
     @Test func `IAP localizations list REST exposes nested path under iap`() async throws {
-        let mockRepo = MockInAppPurchaseLocalizationRepository()
+        let mockRepo = MockInAppPurchaseLocalizations()
         given(mockRepo).listLocalizations(iapId: .any).willReturn([
             InAppPurchaseLocalization(id: "loc-1", iapId: "iap-7", locale: "en-US", name: "Lifetime", description: "Lifetime pass", state: .approved)
         ])
@@ -823,7 +823,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `IAP availability get REST exposes nested path under iap`() async throws {
-        let mockRepo = MockInAppPurchaseAvailabilityRepository()
+        let mockRepo = MockInAppPurchaseAvailabilities()
         given(mockRepo).getAvailability(iapId: .any).willReturn(
             InAppPurchaseAvailability(id: "avail-1", iapId: "iap-7",
                                       isAvailableInNewTerritories: true,
@@ -839,7 +839,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `IAP availability create REST emits _links pointing back at parent IAP path`() async throws {
-        let mockRepo = MockInAppPurchaseAvailabilityRepository()
+        let mockRepo = MockInAppPurchaseAvailabilities()
         given(mockRepo).createAvailability(iapId: .any, isAvailableInNewTerritories: .any, territoryIds: .any)
             .willReturn(InAppPurchaseAvailability(
                 id: "iap-7", iapId: "iap-7",
@@ -862,7 +862,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `IAP offer codes list REST exposes nested path under iap`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodeRepository()
+        let mockRepo = MockInAppPurchaseOfferCodes()
         given(mockRepo).listOfferCodes(iapId: .any).willReturn([
             InAppPurchaseOfferCode(id: "oc-1", iapId: "iap-7", name: "Promo", customerEligibilities: [.nonSpender], isActive: true)
         ])
@@ -876,7 +876,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `IAP equalizations list REST exposes nested path under price point`() async throws {
-        let mockRepo = MockInAppPurchasePriceRepository()
+        let mockRepo = MockInAppPurchasePrices()
         given(mockRepo).listEqualizations(pricePointId: .any, limit: .any).willReturn([
             InAppPurchasePricePoint(id: "pp-USA", iapId: "", territory: "USA", customerPrice: "9.99", proceeds: "6.99"),
             InAppPurchasePricePoint(id: "pp-JPN", iapId: "", territory: "JPN", customerPrice: "1500", proceeds: "1050"),
@@ -892,7 +892,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `IAP price-schedule get REST exposes nested path under iap`() async throws {
-        let mockRepo = MockInAppPurchasePriceRepository()
+        let mockRepo = MockInAppPurchasePrices()
         given(mockRepo).getPriceSchedule(iapId: .any).willReturn(
             InAppPurchasePriceSchedule(id: "iap-7", iapId: "iap-7")
         )
@@ -906,7 +906,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `IAP price-schedule get REST returns empty data when no schedule`() async throws {
-        let mockRepo = MockInAppPurchasePriceRepository()
+        let mockRepo = MockInAppPurchasePrices()
         given(mockRepo).getPriceSchedule(iapId: .any).willReturn(nil)
 
         let output = try await IAPPriceScheduleGet.parse(["--iap-id", "iap-7", "--pretty"])
@@ -917,7 +917,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `IAP price-points list REST exposes nested path under iap`() async throws {
-        let mockRepo = MockInAppPurchasePriceRepository()
+        let mockRepo = MockInAppPurchasePrices()
         given(mockRepo).listPricePoints(iapId: .any, territory: .any, limit: .any, cursor: .any)
             .willReturn(PaginatedResponse(data: [
                 InAppPurchasePricePoint(id: "pp-1", iapId: "iap-7", territory: "USA", customerPrice: "9.99", proceeds: "6.99")
@@ -934,7 +934,7 @@ struct RESTRoutesTests {
     // MARK: - Subscription detail listings (Localizations, Availability, OfferCodes, IntroOffers)
 
     @Test func `subscriptions list REST exposes nested path under subscription group`() async throws {
-        let mockRepo = MockSubscriptionRepository()
+        let mockRepo = MockSubscriptions()
         given(mockRepo).listSubscriptions(groupId: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
                 Subscription(
@@ -957,7 +957,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `subscription localizations list REST exposes nested path under subscription`() async throws {
-        let mockRepo = MockSubscriptionLocalizationRepository()
+        let mockRepo = MockSubscriptionLocalizations()
         given(mockRepo).listLocalizations(subscriptionId: .any).willReturn([
             SubscriptionLocalization(id: "loc-1", subscriptionId: "sub-7", locale: "en-US", name: "Premium", description: "Premium plan", state: .approved)
         ])
@@ -971,7 +971,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `subscription availability get REST exposes nested path under subscription`() async throws {
-        let mockRepo = MockSubscriptionAvailabilityRepository()
+        let mockRepo = MockSubscriptionAvailabilities()
         given(mockRepo).getAvailability(subscriptionId: .any).willReturn(
             SubscriptionAvailability(id: "avail-1", subscriptionId: "sub-7",
                                      isAvailableInNewTerritories: true,
@@ -987,7 +987,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `subscription offer codes list REST exposes nested path under subscription`() async throws {
-        let mockRepo = MockSubscriptionOfferCodeRepository()
+        let mockRepo = MockSubscriptionOfferCodes()
         given(mockRepo).listOfferCodes(subscriptionId: .any).willReturn([
             SubscriptionOfferCode(id: "oc-1", subscriptionId: "sub-7", name: "Promo",
                                   customerEligibilities: [.new], offerEligibility: .introductory,
@@ -1006,7 +1006,7 @@ struct RESTRoutesTests {
         let mockCookieProvider = MockIrisCookieProvider()
         given(mockCookieProvider).resolveSession().willReturn(IrisSession(cookies: "myacinfo=test"))
 
-        let mockRepo = MockIrisInAppPurchaseSubmissionRepository()
+        let mockRepo = MockIrisInAppPurchaseSubmissions()
         given(mockRepo).submitInAppPurchase(
             session: .any, iapId: .any, submitWithNextAppStoreVersion: .any
         ).willReturn(
@@ -1027,7 +1027,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `subscription introductory offers list REST exposes nested path under subscription`() async throws {
-        let mockRepo = MockSubscriptionIntroductoryOfferRepository()
+        let mockRepo = MockSubscriptionIntroductoryOffers()
         given(mockRepo).listIntroductoryOffers(subscriptionId: .any).willReturn([
             SubscriptionIntroductoryOffer(id: "io-1", subscriptionId: "sub-7", duration: .oneMonth, offerMode: .freeTrial, numberOfPeriods: 1)
         ])
@@ -1046,7 +1046,7 @@ struct RESTRoutesTests {
         let mockCookieProvider = MockIrisCookieProvider()
         given(mockCookieProvider).resolveSession().willReturn(IrisSession(cookies: "myacinfo=test"))
 
-        let mockRepo = MockIrisResolutionCenterRepository()
+        let mockRepo = MockIrisResolutionCenter()
         given(mockRepo).getResolution(session: .any, submissionId: .value("sub-1")).willReturn(
             ResolutionCenterDetail(id: "thread-1", submissionId: "sub-1", threadState: "OPEN")
         )
@@ -1061,7 +1061,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `unresolved submission REST links to the iris resolution-center endpoint`() async throws {
-        let mockRepo = MockSubmissionRepository()
+        let mockRepo = MockReviewSubmissions()
         given(mockRepo).getSubmission(id: .value("sub-1")).willReturn(
             ReviewSubmission(id: "sub-1", appId: "app-1", platform: .macOS, state: .unresolvedIssues)
         )
@@ -1076,7 +1076,7 @@ struct RESTRoutesTests {
     // MARK: - Experiments (Product Page Optimization)
 
     @Test func `experiments list returns JSON with _links pointing at REST paths`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         given(mockRepo).listExperiments(appId: .any, state: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
                 AppStoreVersionExperiment(id: "exp-1", appId: "app-42", name: "Icon test", platform: .iOS,
@@ -1096,7 +1096,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `experiments REST exposes start link for approved unstarted test`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         given(mockRepo).getExperiment(experimentId: .any).willReturn(
             AppStoreVersionExperiment(id: "exp-1", appId: "app-42", name: "Icon test", platform: .iOS,
                                       trafficProportion: 30, state: .approved)
@@ -1111,7 +1111,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `experiment treatments REST exposes nested path under experiment`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         given(mockRepo).listTreatments(experimentId: .any, limit: .any).willReturn(
             PaginatedResponse(data: [ExperimentTreatment(id: "trt-1", experimentId: "exp-7", name: "Blue icon")], nextCursor: nil)
         )
@@ -1127,7 +1127,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `experiment treatment localizations REST exposes nested path under treatment`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         given(mockRepo).listTreatmentLocalizations(treatmentId: .any, limit: .any).willReturn([
             ExperimentTreatmentLocalization(id: "loc-1", treatmentId: "trt-7", locale: "en-US")
         ])
@@ -1142,7 +1142,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `app REST links include experiments`() async throws {
-        let mockRepo = MockAppRepository()
+        let mockRepo = MockApps()
         given(mockRepo).listApps(limit: .any).willReturn(
             PaginatedResponse(data: [App(id: "42", name: "MyApp", bundleId: "com.test")])
         )
@@ -1155,7 +1155,7 @@ struct RESTRoutesTests {
     // MARK: - Product versions
 
     @Test func `product version lists return REST links to siblings and to add to a submission`() async throws {
-        let mockRepo = MockProductVersionRepository()
+        let mockRepo = MockProductVersions()
         given(mockRepo).listInAppPurchaseVersions(iapId: .any).willReturn([
             ProductVersion(id: "iv-1", productId: "iap-1", kind: .inAppPurchase, version: 1, state: .prepareForSubmission),
         ])
@@ -1181,7 +1181,7 @@ struct RESTRoutesTests {
     // MARK: - Building a review submission
 
     @Test func `a draft submission links to adding items and submitting, and a new item links to removing it`() async throws {
-        let mockRepo = MockSubmissionRepository()
+        let mockRepo = MockReviewSubmissions()
         given(mockRepo).createSubmission(appId: .any, platform: .any).willReturn(
             ReviewSubmission(id: "sub-1", appId: "app-1", platform: .iOS, state: .readyForReview)
         )
@@ -1203,26 +1203,26 @@ struct RESTRoutesTests {
     }
 
     @Test func `a dry run over REST links each planned product to its versions`() async throws {
-        let versionRepo = MockVersionRepository()
+        let versionRepo = MockAppStoreVersions()
         given(versionRepo).getVersion(id: .any).willReturn(
             AppStoreVersion(id: "v-1", appId: "app-1", versionString: "1.0", platform: .iOS, state: .prepareForSubmission)
         )
-        let iaps = MockInAppPurchaseRepository()
+        let iaps = MockInAppPurchases()
         given(iaps).listInAppPurchases(appId: .any, limit: .any).willReturn(PaginatedResponse(data: [
             InAppPurchase(id: "iap-1", appId: "app-1", referenceName: "Lifetime", productId: "com.app.lifetime",
                           type: .nonConsumable, state: .readyToSubmit),
         ]))
-        let groups = MockSubscriptionGroupRepository()
+        let groups = MockSubscriptionGroups()
         given(groups).listSubscriptionGroups(appId: .any, limit: .any).willReturn(PaginatedResponse(data: []))
-        let productVersions = MockProductVersionRepository()
+        let productVersions = MockProductVersions()
         given(productVersions).listInAppPurchaseVersions(iapId: .any).willReturn([
             ProductVersion(id: "iv-1", productId: "iap-1", kind: .inAppPurchase, version: 1, state: .prepareForSubmission),
         ])
         let planner = SubmissionPlanner(iapRepo: iaps, groupRepo: groups,
-                                        subscriptionRepo: MockSubscriptionRepository(), productVersionRepo: productVersions)
+                                        subscriptionRepo: MockSubscriptions(), productVersionRepo: productVersions)
 
         let output = try await VersionsSubmit.parse(["--version-id", "v-1", "--dry-run"]).executeWithProducts(
-            submissionRepo: MockSubmissionRepository(), versionRepo: versionRepo, planner: planner, affordanceMode: .rest
+            submissionRepo: MockReviewSubmissions(), versionRepo: versionRepo, planner: planner, affordanceMode: .rest
         ).replacingOccurrences(of: "\\/", with: "/")
 
         #expect(output.contains("\"_links\""))
@@ -1233,7 +1233,7 @@ struct RESTRoutesTests {
     // MARK: - App pricing
 
     @Test func `app price points link to setting the app's price over REST`() async throws {
-        let mockRepo = MockPricingRepository()
+        let mockRepo = MockAppPrices()
         given(mockRepo).listPricePoints(appId: .any, territory: .any).willReturn([
             AppPricePoint(id: "pp-1", appId: "app-1", territory: "USA", customerPrice: "0.0", proceeds: "0.0"),
         ])
@@ -1249,7 +1249,7 @@ struct RESTRoutesTests {
     // MARK: - App availability
 
     @Test func `app availability links to itself over REST`() async throws {
-        let repo = MockAppAvailabilityRepository()
+        let repo = MockAppAvailabilities()
         given(repo).getAppAvailability(appId: .any).willReturn(
             AppAvailability(id: "avail-1", appId: "app-42", isAvailableInNewTerritories: true, territories: [])
         )
@@ -1264,7 +1264,7 @@ struct RESTRoutesTests {
     // MARK: - Performance overview
 
     @Test func `should link the performance overview to itself, app metrics and builds over REST`() async throws {
-        let repo = MockPerfOverviewRepository()
+        let repo = MockPerfOverviews()
         given(repo).getOverview(appId: .any, deviceType: .any).willReturn(
             PerformanceOverview(appId: "1234567890")
         )
@@ -1281,7 +1281,7 @@ struct RESTRoutesTests {
     // MARK: - Performance metrics & diagnostics
 
     @Test func `should link an app's metrics to the app's perf-metrics over REST`() async throws {
-        let repo = MockPerfMetricsRepository()
+        let repo = MockPerfMetrics()
         given(repo).listAppMetrics(appId: .any, metricType: .any).willReturn([
             PerformanceMetric(
                 id: "app-1-LAUNCH-launchTime", parentId: "app-1", parentType: .app,
@@ -1314,7 +1314,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `should link a build's metrics to the build's perf-metrics over REST`() async throws {
-        let repo = MockPerfMetricsRepository()
+        let repo = MockPerfMetrics()
         given(repo).listBuildMetrics(buildId: .any, metricType: .any).willReturn([
             PerformanceMetric(
                 id: "build-1-HANG-hangRate", parentId: "build-1", parentType: .build,
@@ -1347,7 +1347,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `should link a diagnostic signature to its logs and its build's diagnostics over REST`() async throws {
-        let repo = MockDiagnosticsRepository()
+        let repo = MockDiagnostics()
         given(repo).listSignatures(buildId: .any, diagnosticType: .any).willReturn([
             DiagnosticSignatureInfo(
                 id: "sig-1", buildId: "build-1", diagnosticType: .hangs,
@@ -1384,7 +1384,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `should link a diagnostic log back to its signature's logs over REST`() async throws {
-        let repo = MockDiagnosticsRepository()
+        let repo = MockDiagnostics()
         given(repo).listLogs(signatureId: .any).willReturn([
             DiagnosticLogEntry(id: "sig-1-0-0", signatureId: "sig-1", event: "hang"),
         ])
@@ -1414,7 +1414,7 @@ struct RESTRoutesTests {
     // MARK: - Game Center
 
     @Test func `should link a game's detail, achievements, leaderboards and blocked players over REST`() async throws {
-        let mockRepo = MockGameCenterRepository()
+        let mockRepo = MockGameCenter()
         given(mockRepo).getDetail(appId: .any)
             .willReturn(GameCenterDetail(id: "gc-1", appId: "app-1", isArcadeEnabled: false))
 
@@ -1453,7 +1453,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `should link a leaderboard's siblings, delete and score moderation over REST`() async throws {
-        let mockRepo = MockGameCenterRepository()
+        let mockRepo = MockGameCenter()
         given(mockRepo).listLeaderboards(gameCenterDetailId: .any).willReturn([
             GameCenterLeaderboard(id: "lb-1", gameCenterDetailId: "gc-1", referenceName: "All Time High",
                                   vendorIdentifier: "all_time_high", scoreSortType: .desc,
@@ -1495,7 +1495,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `should link block, block player and the score list for a visible score over REST`() async throws {
-        let mockRepo = MockGameCenterModerationRepository()
+        let mockRepo = MockGameCenterModeration()
         given(mockRepo).listScoreModerations(leaderboardId: .any, blockedOnly: .any).willReturn([
             GameCenterScoreModeration(id: "mod-1", leaderboardId: "lb-1", rank: "1", score: "9999",
                                       submittedDate: nil, isBlocked: false, isPreReleased: false, context: nil,
@@ -1542,7 +1542,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `should link unblock for a blocked score over REST`() async throws {
-        let mockRepo = MockGameCenterModerationRepository()
+        let mockRepo = MockGameCenterModeration()
         given(mockRepo).updateScoreModeration(id: .any, isBlocked: .any).willReturn(
             GameCenterScoreModeration(id: "mod-1", leaderboardId: nil, rank: nil, score: nil,
                                       submittedDate: nil, isBlocked: true, isPreReleased: false, context: nil,
@@ -1576,7 +1576,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `should link unblock and the blocked list for a blocked player over REST`() async throws {
-        let mockRepo = MockGameCenterModerationRepository()
+        let mockRepo = MockGameCenterModeration()
         given(mockRepo).listBlockedPlayers(gameCenterDetailId: .any).willReturn([
             GameCenterPlayer(id: "player-1", gameCenterDetailId: "gc-1", nickname: nil, bundleId: nil, isBlocked: true),
         ])
@@ -1608,7 +1608,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `should link block for an unblocked player over REST`() async throws {
-        let mockRepo = MockGameCenterModerationRepository()
+        let mockRepo = MockGameCenterModeration()
         given(mockRepo).updatePlayer(id: .any, isBlocked: .any).willReturn(
             GameCenterPlayer(id: "player-1", gameCenterDetailId: nil, nickname: nil, bundleId: nil, isBlocked: false)
         )
@@ -1637,7 +1637,7 @@ struct RESTRoutesTests {
     // MARK: - App Asset Library
 
     @Test func `should link the asset library to its images, videos, upload and placement groups over REST`() async throws {
-        let repo = MockAssetLibraryRepository()
+        let repo = MockAssetLibraries()
         given(repo).getAssetLibrary(appId: .any).willReturn(AppAssetLibrary(id: "lib-1", appId: "app-1"))
 
         let output = try await AssetLibraryGet.parse(["--app-id", "app-1"])
@@ -1647,7 +1647,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `should link a library image to its placements and deletion over REST`() async throws {
-        let repo = MockLibraryImageRepository()
+        let repo = MockLibraryImages()
         given(repo).listImages(libraryId: .any, imageId: .any, state: .any, category: .any).willReturn([
             LibraryImage(id: "img-1", libraryId: "lib-1", fileName: "home.png", fileSize: 1, category: .appScreenshotsAndPreviews, state: .inReview),
         ])
@@ -1659,7 +1659,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `should link a placement to deletion and reordering its group over REST`() async throws {
-        let repo = MockAssetPlacementRepository()
+        let repo = MockAssetPlacements()
         given(repo).listPlacements(surface: .any, localizationId: .any, placementType: .any, placementGroup: .any).willReturn([
             AssetPlacement(id: "pl-1", surface: .appStoreVersionLocalization, localizationId: "loc-1", mediaType: .image,
                            assetId: "img-1", placementType: .appScreenshot, placementGroup: "IPHONE_67", position: 1, state: .parentPrepareForSubmission),
@@ -1672,7 +1672,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `should link a version localization to its asset placements over REST`() async throws {
-        let repo = MockVersionLocalizationRepository()
+        let repo = MockVersionLocalizations()
         given(repo).listLocalizations(versionId: .any).willReturn([
             AppStoreVersionLocalization(id: "loc-1", versionId: "v-1", locale: "en-US"),
         ])
@@ -1684,7 +1684,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `should link a library video to its placements, archiving and deletion over REST`() async throws {
-        let repo = MockLibraryVideoRepository()
+        let repo = MockLibraryVideos()
         given(repo).listVideos(libraryId: .any, videoId: .any, state: .any, category: .any).willReturn([
             LibraryVideo(id: "vid-1", libraryId: "lib-1", fileName: "p.mp4", fileSize: 1, category: .appScreenshotsAndPreviews, state: .approved),
         ])
@@ -1696,7 +1696,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `should link a treatment localization's placements to reordering under the treatment localization over REST`() async throws {
-        let repo = MockAssetPlacementRepository()
+        let repo = MockAssetPlacements()
         given(repo).listPlacements(surface: .any, localizationId: .any, placementType: .any, placementGroup: .any).willReturn([
             AssetPlacement(id: "pl-1", surface: .experimentTreatmentLocalization, localizationId: "tl-1", mediaType: .image,
                            assetId: "img-1", placementType: .appScreenshot, placementGroup: "IPHONE_67", position: 1, state: .parentPrepareForSubmission),

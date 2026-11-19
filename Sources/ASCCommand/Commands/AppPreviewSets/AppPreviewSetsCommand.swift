@@ -22,11 +22,11 @@ struct AppPreviewSetsList: AsyncParsableCommand {
     var localizationId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makePreviewRepository()
+        let repo = try ClientProvider.makeAppPreviews()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any PreviewRepository) async throws -> String {
+    func execute(repo: any AppPreviews) async throws -> String {
         let sets = try await repo.listPreviewSets(localizationId: localizationId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
@@ -52,11 +52,11 @@ struct AppPreviewSetsCreate: AsyncParsableCommand {
     var previewType: String
 
     func run() async throws {
-        let repo = try ClientProvider.makePreviewRepository()
+        let repo = try ClientProvider.makeAppPreviews()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any PreviewRepository) async throws -> String {
+    func execute(repo: any AppPreviews) async throws -> String {
         guard let type = PreviewType(rawValue: previewType) else {
             throw ValidationError("Invalid preview type '\(previewType)'. Use a raw value like IPHONE_67, IPAD_PRO_3GEN_129, APPLE_TV, APPLE_VISION_PRO.")
         }

@@ -52,7 +52,7 @@ They don't care which Swift type, repository method or SDK call changed; that's 
 
 **Before (0.17.8):** a removed REST route is hidden at the end of an 1,100-char `Added` bullet:
 
-> - **`asc iris iap-submissions delete --submission-id <id>`** — iris-side dequeue of an IAP submission (`DELETE /iris/v1/inAppPurchaseSubmissions/{id}`). Iris-queued submissions don't round-trip through the public-SDK delete; they can only be removed via this iris-cookie-authed path. New `IrisClient.delete`, new `IrisInAppPurchaseSubmissionRepository.deleteSubmission(session:submissionId:)`. REST equivalent: … `RESTPathResolver.resourcePath` now converts spaces … Removed the short-lived public-SDK alias `POST /api/v1/iap/:iapId/unsubmit` (incorrect — …).
+> - **`asc iris iap-submissions delete --submission-id <id>`** — iris-side dequeue of an IAP submission (`DELETE /iris/v1/inAppPurchaseSubmissions/{id}`). Iris-queued submissions don't round-trip through the public-SDK delete; they can only be removed via this iris-cookie-authed path. New `IrisClient.delete`, new `IrisInAppPurchaseSubmissions.deleteSubmission(session:submissionId:)`. REST equivalent: … `RESTPathResolver.resourcePath` now converts spaces … Removed the short-lived public-SDK alias `POST /api/v1/iap/:iapId/unsubmit` (incorrect — …).
 
 A script calling `POST /api/v1/iap/:iapId/unsubmit` broke, and the only notice was the last sentence of a bullet about something else.
 

@@ -7,7 +7,7 @@ import Testing
 struct BuildsSetEncryptionComplianceTests {
 
     @Test func `set-encryption-compliance returns the updated build with affordances`() async throws {
-        let mockRepo = MockBuildRepository()
+        let mockRepo = MockBuilds()
         given(mockRepo).updateBuildEncryptionCompliance(buildId: .any, usesNonExemptEncryption: .any)
             .willReturn(Build(
                 id: "b-1", version: "1.0", expired: false,
@@ -43,7 +43,7 @@ struct BuildsSetEncryptionComplianceTests {
     }
 
     @Test func `set-encryption-compliance accepts true to declare non-exempt encryption`() async throws {
-        let mockRepo = MockBuildRepository()
+        let mockRepo = MockBuilds()
         given(mockRepo).updateBuildEncryptionCompliance(buildId: .any, usesNonExemptEncryption: .any)
             .willReturn(Build(
                 id: "b-1", version: "1.0", buildNumber: "42",

@@ -7,7 +7,7 @@ import Testing
 struct IAPAvailabilityGetTests {
 
     @Test func `get availability shows iapId, territories with currency and affordances`() async throws {
-        let mockRepo = MockInAppPurchaseAvailabilityRepository()
+        let mockRepo = MockInAppPurchaseAvailabilities()
         given(mockRepo).getAvailability(iapId: .any)
             .willReturn(InAppPurchaseAvailability(
                 id: "avail-1",

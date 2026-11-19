@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionLocalizationsCreateTests {
 
     @Test func `creates subscription localization with name and description and returns it with affordances`() async throws {
-        let mockRepo = MockSubscriptionLocalizationRepository()
+        let mockRepo = MockSubscriptionLocalizations()
         given(mockRepo).createLocalization(subscriptionId: .any, locale: .any, name: .any, description: .any)
             .willReturn(SubscriptionLocalization(
                 id: "loc-new",
@@ -47,7 +47,7 @@ struct SubscriptionLocalizationsCreateTests {
     }
 
     @Test func `creates subscription localization without description omits description from json`() async throws {
-        let mockRepo = MockSubscriptionLocalizationRepository()
+        let mockRepo = MockSubscriptionLocalizations()
         given(mockRepo).createLocalization(subscriptionId: .any, locale: .any, name: .any, description: .any)
             .willReturn(SubscriptionLocalization(
                 id: "loc-new",

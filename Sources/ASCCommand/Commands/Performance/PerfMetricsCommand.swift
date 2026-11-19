@@ -28,11 +28,11 @@ struct PerfMetricsList: AsyncParsableCommand {
     var metricType: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makePerfMetricsRepository()
+        let repo = try ClientProvider.makePerfMetrics()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any PerfMetricsRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any PerfMetrics, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let filter = metricType.flatMap { PerformanceMetricCategory(rawValue: $0) }
         let metrics: [PerformanceMetric]
 

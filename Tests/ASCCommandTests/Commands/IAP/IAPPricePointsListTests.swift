@@ -7,7 +7,7 @@ import Testing
 struct IAPPricePointsListTests {
 
     @Test func `listed price points include iapId, territory, price and affordances`() async throws {
-        let mockRepo = MockInAppPurchasePriceRepository()
+        let mockRepo = MockInAppPurchasePrices()
         given(mockRepo).listPricePoints(iapId: .any, territory: .any, limit: .any, cursor: .any)
             .willReturn(PaginatedResponse(data: [InAppPurchasePricePoint(
                 id: "pp-1", iapId: "iap-1", territory: "USA",
@@ -37,7 +37,7 @@ struct IAPPricePointsListTests {
     }
 
     @Test func `price point without territory omits setPrice affordance and nil fields`() async throws {
-        let mockRepo = MockInAppPurchasePriceRepository()
+        let mockRepo = MockInAppPurchasePrices()
         given(mockRepo).listPricePoints(iapId: .any, territory: .any, limit: .any, cursor: .any)
             .willReturn(PaginatedResponse(data: [InAppPurchasePricePoint(
                 id: "pp-2", iapId: "iap-1",

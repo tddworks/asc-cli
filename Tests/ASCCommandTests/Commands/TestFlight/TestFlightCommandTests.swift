@@ -7,7 +7,7 @@ import Testing
 struct BetaGroupsListTests {
 
     @Test func `groups list includes affordances and appId in json output`() async throws {
-        let mockRepo = MockTestFlightRepository()
+        let mockRepo = MockTestFlight()
         given(mockRepo).listBetaGroups(appId: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
                 BetaGroup(id: "g-1", appId: "app-1", name: "External Testers", isInternalGroup: false),
@@ -55,7 +55,7 @@ struct BetaGroupsListTests {
 struct BetaGroupsCreateTests {
 
     @Test func `groups create external returns group with affordances`() async throws {
-        let mockRepo = MockTestFlightRepository()
+        let mockRepo = MockTestFlight()
         given(mockRepo)
             .createBetaGroup(appId: .any, name: .any, isInternalGroup: .any, publicLinkEnabled: .any, feedbackEnabled: .any)
             .willReturn(BetaGroup(id: "g-new", appId: "app-1", name: "External Beta", isInternalGroup: false, publicLinkEnabled: true))
@@ -89,7 +89,7 @@ struct BetaGroupsCreateTests {
     }
 
     @Test func `groups create internal flag marks group as internal`() async throws {
-        let mockRepo = MockTestFlightRepository()
+        let mockRepo = MockTestFlight()
         given(mockRepo)
             .createBetaGroup(appId: .any, name: .any, isInternalGroup: .any, publicLinkEnabled: .any, feedbackEnabled: .any)
             .willReturn(BetaGroup(id: "g-int", appId: "app-1", name: "Company Team", isInternalGroup: true))
@@ -127,7 +127,7 @@ struct BetaGroupsCreateTests {
 struct BetaTestersListTests {
 
     @Test func `testers list includes affordances and groupId in json output`() async throws {
-        let mockRepo = MockTestFlightRepository()
+        let mockRepo = MockTestFlight()
         given(mockRepo).listBetaTesters(groupId: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
                 BetaTester(id: "t-1", groupId: "g-1", firstName: "Jane", lastName: "Doe", email: "jane@example.com", inviteType: .email),
@@ -158,7 +158,7 @@ struct BetaTestersListTests {
     }
 
     @Test func `testers list omits nil optional fields from json output`() async throws {
-        let mockRepo = MockTestFlightRepository()
+        let mockRepo = MockTestFlight()
         given(mockRepo).listBetaTesters(groupId: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
                 BetaTester(id: "t-1", groupId: "g-1", firstName: "Unknown", lastName: nil, email: nil, inviteType: nil),
@@ -190,7 +190,7 @@ struct BetaTestersListTests {
 struct BetaTestersAddTests {
 
     @Test func `testers add returns created tester with affordances`() async throws {
-        let mockRepo = MockTestFlightRepository()
+        let mockRepo = MockTestFlight()
         given(mockRepo).addBetaTester(groupId: .any, email: .any, firstName: .any, lastName: .any).willReturn(
             BetaTester(id: "t-new", groupId: "g-1", firstName: "New", lastName: nil, email: "new@example.com", inviteType: .email)
         )
@@ -222,7 +222,7 @@ struct BetaTestersAddTests {
 struct BetaTestersRemoveTests {
 
     @Test func `testers remove returns confirmation message`() async throws {
-        let mockRepo = MockTestFlightRepository()
+        let mockRepo = MockTestFlight()
         given(mockRepo).removeBetaTester(groupId: .any, testerId: .any).willReturn()
 
         let cmd = try BetaTestersRemove.parse(["--beta-group-id", "g-1", "--tester-id", "t-1"])
@@ -236,7 +236,7 @@ struct BetaTestersRemoveTests {
 struct BetaTestersImportTests {
 
     @Test func `testers import parses csv and adds each tester`() async throws {
-        let mockRepo = MockTestFlightRepository()
+        let mockRepo = MockTestFlight()
         given(mockRepo).addBetaTester(groupId: .any, email: .any, firstName: .any, lastName: .any)
             .willReturn(BetaTester(id: "t-1", groupId: "g-1", firstName: "Jane", lastName: "Doe", email: "jane@example.com"))
         given(mockRepo).addBetaTester(groupId: .any, email: .any, firstName: .any, lastName: .any)
@@ -281,7 +281,7 @@ struct BetaTestersImportTests {
     }
 
     @Test func `testers import skips header row and empty lines`() async throws {
-        let mockRepo = MockTestFlightRepository()
+        let mockRepo = MockTestFlight()
         given(mockRepo).addBetaTester(groupId: .any, email: .any, firstName: .any, lastName: .any)
             .willReturn(BetaTester(id: "t-1", groupId: "g-1", email: "single@example.com"))
 
@@ -316,7 +316,7 @@ struct BetaTestersImportTests {
 struct BetaTestersExportTests {
 
     @Test func `testers export formats testers as csv`() async throws {
-        let mockRepo = MockTestFlightRepository()
+        let mockRepo = MockTestFlight()
         given(mockRepo).listBetaTesters(groupId: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
                 BetaTester(id: "t-1", groupId: "g-1", firstName: "Jane", lastName: "Doe", email: "jane@example.com"),
@@ -335,7 +335,7 @@ struct BetaTestersExportTests {
     }
 
     @Test func `testers export handles nil name fields as empty strings in csv`() async throws {
-        let mockRepo = MockTestFlightRepository()
+        let mockRepo = MockTestFlight()
         given(mockRepo).listBetaTesters(groupId: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
                 BetaTester(id: "t-1", groupId: "g-1", firstName: nil, lastName: nil, email: "anon@example.com"),

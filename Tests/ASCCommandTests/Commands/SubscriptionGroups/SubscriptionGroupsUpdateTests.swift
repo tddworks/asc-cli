@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionGroupsUpdateTests {
 
     @Test func `updates subscription group reference name and returns updated record`() async throws {
-        let mockRepo = MockSubscriptionGroupRepository()
+        let mockRepo = MockSubscriptionGroups()
         given(mockRepo).updateSubscriptionGroup(groupId: .any, referenceName: .any)
             .willReturn(SubscriptionGroup(id: "grp-1", appId: "", referenceName: "Renamed Plans"))
 

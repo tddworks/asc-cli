@@ -16,11 +16,11 @@ struct SkillsInstall: AsyncParsableCommand {
     var all: Bool = false
 
     func run() async throws {
-        let repo = ClientProvider.makeSkillRepository()
+        let repo = ClientProvider.makeSkills()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SkillRepository) async throws -> String {
+    func execute(repo: any Skills) async throws -> String {
         if all {
             return try await repo.installAll()
         } else if let name {

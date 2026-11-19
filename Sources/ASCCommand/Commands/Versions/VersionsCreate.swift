@@ -19,11 +19,11 @@ struct VersionsCreate: AsyncParsableCommand {
     var platform: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeVersionRepository()
+        let repo = try ClientProvider.makeAppStoreVersions()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any VersionRepository) async throws -> String {
+    func execute(repo: any AppStoreVersions) async throws -> String {
         guard let appStorePlatform = AppStorePlatform(cliArgument: platform) else {
             throw ValidationError("Unknown platform '\(platform)'. Use: ios, macos, tvos, watchos, visionos")
         }

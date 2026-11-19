@@ -13,11 +13,11 @@ struct UsersList: AsyncParsableCommand {
     var role: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeUserRepository()
+        let repo = try ClientProvider.makeUsers()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any UserRepository) async throws -> String {
+    func execute(repo: any Users) async throws -> String {
         let domainRole = role.flatMap { UserRole(cliArgument: $0) }
         let items = try await repo.listUsers(role: domainRole)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)

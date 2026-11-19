@@ -11,11 +11,11 @@ struct ScreenshotsImportToLibraryTests {
     // MARK: - App Store Connect, stubbed to apply what it's sent
 
     private struct AppStoreConnect {
-        let versionRepo = MockVersionRepository()
-        let localizationRepo = MockVersionLocalizationRepository()
-        let libraryRepo = MockAssetLibraryRepository()
-        let imageRepo = MockLibraryImageRepository()
-        let placementRepo = MockAssetPlacementRepository()
+        let versionRepo = MockAppStoreVersions()
+        let localizationRepo = MockVersionLocalizations()
+        let libraryRepo = MockAssetLibraries()
+        let imageRepo = MockLibraryImages()
+        let placementRepo = MockAssetPlacements()
 
         init(
             versionState: AppStoreVersionState = .prepareForSubmission,

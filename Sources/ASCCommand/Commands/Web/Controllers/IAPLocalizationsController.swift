@@ -18,7 +18,7 @@ private func clamp(_ value: String, to limit: Int) -> String {
 
 /// Routes that return `InAppPurchaseLocalization` resources.
 struct IAPLocalizationsController: Sendable {
-    let repo: any InAppPurchaseLocalizationRepository
+    let repo: any InAppPurchaseLocalizations
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/iap/:iapId/localizations") { _, context -> Response in

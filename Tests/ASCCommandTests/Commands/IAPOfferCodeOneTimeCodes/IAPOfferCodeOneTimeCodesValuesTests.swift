@@ -7,7 +7,7 @@ import Testing
 struct IAPOfferCodeOneTimeCodesValuesTests {
 
     @Test func `returns CSV redemption values from repo`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodeRepository()
+        let mockRepo = MockInAppPurchaseOfferCodes()
         given(mockRepo).fetchOneTimeUseCodeValues(oneTimeCodeId: .any).willReturn("CODE1\nCODE2\nCODE3\n")
 
         let cmd = try IAPOfferCodeOneTimeCodesValues.parse(["--one-time-code-id", "otc-1"])

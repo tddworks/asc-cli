@@ -22,11 +22,11 @@ struct MarketList: AsyncParsableCommand {
     @OptionGroup var globals: GlobalOptions
 
     func run() async throws {
-        let repo = ClientProvider.makePluginRepository()
+        let repo = ClientProvider.makePlugins()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any PluginRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any Plugins, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let plugins = try await repo.listAvailable()
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
@@ -50,11 +50,11 @@ struct MarketSearch: AsyncParsableCommand {
     var query: String
 
     func run() async throws {
-        let repo = ClientProvider.makePluginRepository()
+        let repo = ClientProvider.makePlugins()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any PluginRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any Plugins, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let plugins = try await repo.searchAvailable(query: query)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

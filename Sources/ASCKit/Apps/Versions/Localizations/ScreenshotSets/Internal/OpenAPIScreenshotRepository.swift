@@ -1,7 +1,7 @@
 @preconcurrency import AppStoreConnect_Swift_SDK
 import Foundation
 
-public struct SDKScreenshotRepository: ScreenshotRepository, @unchecked Sendable {
+public struct SDKAppScreenshots: AppScreenshots, @unchecked Sendable {
     private let client: any APIClient
     private let uploader: UploadOperationsExecutor
 

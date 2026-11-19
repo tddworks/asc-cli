@@ -5,7 +5,7 @@ import HummingbirdWebSocket
 
 /// Routes that return `SubscriptionGroup` resources.
 struct SubscriptionGroupsController: Sendable {
-    let repo: any SubscriptionGroupRepository
+    let repo: any SubscriptionGroups
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/apps/:appId/subscription-groups") { _, context -> Response in

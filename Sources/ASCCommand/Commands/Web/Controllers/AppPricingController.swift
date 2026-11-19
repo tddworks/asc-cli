@@ -7,7 +7,7 @@ import HummingbirdWebSocket
 /// `GET /apps/:appId/price-points?territory=USA` and `POST /apps/:appId/prices/set`
 /// with body `{"base-territory": "USA", "price-point-id": "…"}` (camelCase keys also accepted).
 struct AppPricingController: Sendable {
-    let repo: any PricingRepository
+    let repo: any AppPrices
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/apps/:appId/price-points") { request, context -> Response in

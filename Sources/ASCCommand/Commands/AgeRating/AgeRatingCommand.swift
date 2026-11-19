@@ -23,11 +23,11 @@ struct AgeRatingGet: AsyncParsableCommand {
     var appInfoId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAgeRatingDeclarationRepository()
+        let repo = try ClientProvider.makeAgeRatingDeclarations()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AgeRatingDeclarationRepository) async throws -> String {
+    func execute(repo: any AgeRatingDeclarations) async throws -> String {
         let declaration = try await repo.getDeclaration(appInfoId: appInfoId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
@@ -142,11 +142,11 @@ struct AgeRatingUpdate: AsyncParsableCommand {
     var developerAgeRatingInfoUrl: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeAgeRatingDeclarationRepository()
+        let repo = try ClientProvider.makeAgeRatingDeclarations()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AgeRatingDeclarationRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any AgeRatingDeclarations, affordanceMode: AffordanceMode = .cli) async throws -> String {
         var update = AgeRatingDeclarationUpdate()
         update.isAdvertising = advertising
         update.isGambling = gambling

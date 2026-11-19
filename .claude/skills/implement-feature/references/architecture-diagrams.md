@@ -47,13 +47,13 @@
 ```
 ASCKit/<Concept>/  (public face)
   App                AppStoreVersion       AppStoreVersionLocalization
-  AppRepository      (+ affordances)       AppScreenshotSet
-  BuildRepository    AppStoreVersionState  AppScreenshot
-  TestFlight repos   ScreenshotRepository  AffordanceProviding
+  Apps      (+ affordances)       AppScreenshotSet
+  Builds    AppStoreVersionState  AppScreenshot
+  TestFlight repos   AppScreenshots  AffordanceProviding
 
 ASCKit/<Concept>/Internal/  (implements the face's protocols)
-  SDKAppRepository         SDKBuildRepository
-  SDKTestFlightRepository  SDKScreenshotRepository
+  SDKApps         SDKBuilds
+  SDKTestFlight  SDKAppScreenshots
   ClientFactory            EnvironmentAuthProvider
 
 ASCCommand  (the way in)
@@ -75,15 +75,15 @@ ASCCommand  (the way in)
 
 ```
 asc
-├── apps list [--limit N]                         AppRepository.listApps()
-├── versions list --app-id <id>                   AppRepository.listVersions()
-├── localizations list --version-id <id>          ScreenshotRepository.listLocalizations()
-├── screenshot-sets list --localization-id <id>   ScreenshotRepository.listScreenshotSets()
-├── screenshots list --set-id <id>                ScreenshotRepository.listScreenshots()
-├── builds list [--app-id <id>]                   BuildRepository.listBuilds()
+├── apps list [--limit N]                         Apps.listApps()
+├── versions list --app-id <id>                   Apps.listVersions()
+├── localizations list --version-id <id>          AppScreenshots.listLocalizations()
+├── screenshot-sets list --localization-id <id>   AppScreenshots.listScreenshotSets()
+├── screenshots list --set-id <id>                AppScreenshots.listScreenshots()
+├── builds list [--app-id <id>]                   Builds.listBuilds()
 ├── testflight
-│   ├── groups  [--app-id <id>]                   TestFlightRepository.listBetaGroups()
-│   └── testers [--group-id <id>]                 TestFlightRepository.listBetaTesters()
+│   ├── groups  [--app-id <id>]                   TestFlight.listBetaGroups()
+│   └── testers [--group-id <id>]                 TestFlight.listBetaTesters()
 ├── auth check
 ├── version
 └── tui
@@ -108,7 +108,7 @@ CLI args
   ▼
 AsyncParsableCommand.run()
   │
-  ├─ ClientProvider.makeXRepository()
+  ├─ ClientProvider.makeXs()
   │         │
   │         ▼
   │   OpenAPI call → map SDK types → ASCKit structs (with parentId injected)
@@ -142,14 +142,14 @@ AsyncParsableCommand.run()
 | File                                                        | Action   | Notes                                        |
 |-------------------------------------------------------------|----------|----------------------------------------------|
 | `Sources/ASCKit/X/XModel.swift`                            | Create   | Struct + AffordanceProviding                 |
-| `Sources/ASCKit/X/XRepository.swift`                       | Create   | @Mockable protocol                           |
-| `Sources/ASCKit/X/Internal/SDKXRepository.swift`           | Create   | Implements XRepository, injects parent IDs   |
-| `Sources/ASCKit/Shared/Internal/ClientFactory.swift`        | Modify   | Add `makeXRepository()` factory              |
+| `Sources/ASCKit/X/Xs.swift`                                | Create   | @Mockable protocol                           |
+| `Sources/ASCKit/X/Internal/SDKXs.swift`                    | Create   | Implements Xs, injects parent IDs           |
+| `Sources/ASCKit/Shared/Internal/ClientFactory.swift`        | Modify   | Add `makeXs()` factory              |
 | `Sources/ASCCommand/Commands/X/XCommand.swift`             | Create   | AsyncParsableCommand group + List subcommand |
 | `Sources/ASCCommand/ASC.swift`                             | Modify   | Add XCommand to subcommands                  |
-| `Sources/ASCCommand/ClientProvider.swift`                  | Modify   | Add `makeXRepository()` static factory       |
+| `Sources/ASCCommand/ClientProvider.swift`                  | Modify   | Add `makeXs()` static factory       |
 | `Tests/ASCKitTests/X/XModelTests.swift`                    | Create   | State, computed props, Codable               |
-| `Tests/ASCKitTests/X/XRepositoryTests.swift`               | Create   | Mock-based repository tests                  |
+| `Tests/ASCKitTests/X/SDKXsTests.swift`               | Create   | Mock-based repository tests                  |
 | `Tests/ASCKitTests/Apps/AffordancesTests.swift`            | Modify   | Add affordance tests for new model           |
 | `Tests/ASCKitTests/TestHelpers/MockRepositoryFactory.swift`| Modify   | Add `makeX(...)` factory method              |
 

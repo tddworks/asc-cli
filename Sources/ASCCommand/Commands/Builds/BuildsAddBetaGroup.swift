@@ -16,11 +16,11 @@ struct BuildsAddBetaGroup: AsyncParsableCommand {
     var betaGroupId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeBuildRepository()
+        let repo = try ClientProvider.makeBuilds()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any BuildRepository) async throws {
+    func execute(repo: any Builds) async throws {
         try await repo.addBetaGroups(buildId: buildId, betaGroupIds: [betaGroupId])
     }
 }

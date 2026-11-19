@@ -25,11 +25,11 @@ struct PromotedPurchasesUpdate: AsyncParsableCommand {
     var disabled: Bool = false
 
     func run() async throws {
-        let repo = try ClientProvider.makePromotedPurchaseRepository()
+        let repo = try ClientProvider.makePromotedPurchases()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any PromotedPurchaseRepository) async throws -> String {
+    func execute(repo: any PromotedPurchases) async throws -> String {
         let isVisible: Bool? = visible ? true : (hidden ? false : nil)
         let isEnabled: Bool? = enabled ? true : (disabled ? false : nil)
 

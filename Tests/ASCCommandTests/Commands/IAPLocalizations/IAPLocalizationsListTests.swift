@@ -7,7 +7,7 @@ import Testing
 struct IAPLocalizationsListTests {
 
     @Test func `listed iap localizations include iapId, locale, name and affordances`() async throws {
-        let mockRepo = MockInAppPurchaseLocalizationRepository()
+        let mockRepo = MockInAppPurchaseLocalizations()
         given(mockRepo).listLocalizations(iapId: .any)
             .willReturn([
                 InAppPurchaseLocalization(
@@ -42,7 +42,7 @@ struct IAPLocalizationsListTests {
     }
 
     @Test func `description is included when present`() async throws {
-        let mockRepo = MockInAppPurchaseLocalizationRepository()
+        let mockRepo = MockInAppPurchaseLocalizations()
         given(mockRepo).listLocalizations(iapId: .any)
             .willReturn([
                 InAppPurchaseLocalization(

@@ -4,7 +4,7 @@ import HummingbirdWebSocket
 
 /// Routes that return `WinBackOffer` resources and their per-territory prices.
 struct WinBackOffersController: Sendable {
-    let repo: any WinBackOfferRepository
+    let repo: any WinBackOffers
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/subscriptions/:subscriptionId/win-back-offers") { _, context -> Response in

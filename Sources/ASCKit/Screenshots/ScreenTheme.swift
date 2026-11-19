@@ -166,7 +166,7 @@ public struct ThemeAIHints: Sendable, Equatable, Codable {
     }
 }
 
-// MARK: - ThemeProvider & ThemeRepository
+// MARK: - ThemeProvider & Themes
 
 /// A provider that supplies visual themes.
 ///
@@ -215,7 +215,7 @@ public enum ThemeDesignError: Error, CustomStringConvertible {
 
 /// Repository for querying visual themes across all providers.
 @Mockable
-public protocol ThemeRepository: Sendable {
+public protocol Themes: Sendable {
     /// List all themes from all providers.
     func listThemes() async throws -> [ScreenTheme]
 

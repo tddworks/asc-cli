@@ -12,7 +12,7 @@ struct IrisIAPSubmissionsCreateTests {
             IrisSession(cookies: "myacinfo=test")
         )
 
-        let mockRepo = MockIrisInAppPurchaseSubmissionRepository()
+        let mockRepo = MockIrisInAppPurchaseSubmissions()
         given(mockRepo).submitInAppPurchase(
             session: .any, iapId: .any, submitWithNextAppStoreVersion: .any
         ).willReturn(
@@ -46,7 +46,7 @@ struct IrisIAPSubmissionsCreateTests {
             IrisSession(cookies: "myacinfo=test")
         )
 
-        let mockRepo = MockIrisInAppPurchaseSubmissionRepository()
+        let mockRepo = MockIrisInAppPurchaseSubmissions()
         given(mockRepo).submitInAppPurchase(
             session: .any, iapId: .any, submitWithNextAppStoreVersion: .value(false)
         ).willReturn(

@@ -35,7 +35,7 @@ struct IrisResolutionCenterGetTests {
         let mockCookieProvider = MockIrisCookieProvider()
         given(mockCookieProvider).resolveSession().willReturn(IrisSession(cookies: "myacinfo=test"))
 
-        let mockRepo = MockIrisResolutionCenterRepository()
+        let mockRepo = MockIrisResolutionCenter()
         given(mockRepo).getResolution(session: .any, submissionId: .value("sub-1")).willReturn(
             makeDetail(body: "Guideline 2.1 - Performance")
         )
@@ -84,7 +84,7 @@ struct IrisResolutionCenterGetTests {
         let mockCookieProvider = MockIrisCookieProvider()
         given(mockCookieProvider).resolveSession().willReturn(IrisSession(cookies: "myacinfo=test"))
 
-        let mockRepo = MockIrisResolutionCenterRepository()
+        let mockRepo = MockIrisResolutionCenter()
         given(mockRepo).getResolution(session: .any, submissionId: .value("sub-1")).willReturn(
             ResolutionCenterDetail(
                 id: "thread-1",
@@ -117,7 +117,7 @@ struct IrisResolutionCenterGetTests {
         let mockCookieProvider = MockIrisCookieProvider()
         given(mockCookieProvider).resolveSession().willReturn(IrisSession(cookies: "myacinfo=test"))
 
-        let mockRepo = MockIrisResolutionCenterRepository()
+        let mockRepo = MockIrisResolutionCenter()
         given(mockRepo).getResolution(session: .any, submissionId: .value("sub-1")).willReturn(
             makeDetail(body: "<p>Guideline 2.1 &amp; 2.3<br/>We were unable to review.</p>")
         )

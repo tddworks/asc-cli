@@ -2,304 +2,304 @@ import ASCKit
 import Foundation
 
 struct ClientProvider {
-    static func makeAppRepository() throws -> any AppRepository {
+    static func makeApps() throws -> any Apps {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeAppRepository(authProvider: authProvider)
+        return try factory.makeApps(authProvider: authProvider)
     }
 
-    static func makeVersionRepository() throws -> any VersionRepository {
+    static func makeAppStoreVersions() throws -> any AppStoreVersions {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeVersionRepository(authProvider: authProvider)
+        return try factory.makeAppStoreVersions(authProvider: authProvider)
     }
 
-    static func makeBuildRepository() throws -> any BuildRepository {
+    static func makeBuilds() throws -> any Builds {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeBuildRepository(authProvider: authProvider)
+        return try factory.makeBuilds(authProvider: authProvider)
     }
 
-    static func makeTestFlightRepository() throws -> any TestFlightRepository {
+    static func makeTestFlight() throws -> any TestFlight {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeTestFlightRepository(authProvider: authProvider)
+        return try factory.makeTestFlight(authProvider: authProvider)
     }
 
-    static func makeVersionLocalizationRepository() throws -> any VersionLocalizationRepository {
+    static func makeVersionLocalizations() throws -> any VersionLocalizations {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeVersionLocalizationRepository(authProvider: authProvider)
+        return try factory.makeVersionLocalizations(authProvider: authProvider)
     }
 
-    static func makeScreenshotRepository() throws -> any ScreenshotRepository {
+    static func makeAppScreenshots() throws -> any AppScreenshots {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeScreenshotRepository(authProvider: authProvider)
+        return try factory.makeAppScreenshots(authProvider: authProvider)
     }
 
-    static func makeAppInfoRepository() throws -> any AppInfoRepository {
+    static func makeAppInfos() throws -> any AppInfos {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeAppInfoRepository(authProvider: authProvider)
+        return try factory.makeAppInfos(authProvider: authProvider)
     }
 
-    static func makeAppCategoryRepository() throws -> any AppCategoryRepository {
+    static func makeAppCategories() throws -> any AppCategories {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeAppCategoryRepository(authProvider: authProvider)
+        return try factory.makeAppCategories(authProvider: authProvider)
     }
 
-    static func makeSubmissionRepository() throws -> any SubmissionRepository {
+    static func makeReviewSubmissions() throws -> any ReviewSubmissions {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeSubmissionRepository(authProvider: authProvider)
+        return try factory.makeReviewSubmissions(authProvider: authProvider)
     }
 
-    static func makeBundleIDRepository() throws -> any BundleIDRepository {
+    static func makeBundleIDs() throws -> any BundleIDs {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeBundleIDRepository(authProvider: authProvider)
+        return try factory.makeBundleIDs(authProvider: authProvider)
     }
 
-    static func makeCertificateRepository() throws -> any CertificateRepository {
+    static func makeCertificates() throws -> any Certificates {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeCertificateRepository(authProvider: authProvider)
+        return try factory.makeCertificates(authProvider: authProvider)
     }
 
-    static func makeDeviceRepository() throws -> any DeviceRepository {
+    static func makeDevices() throws -> any Devices {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeDeviceRepository(authProvider: authProvider)
+        return try factory.makeDevices(authProvider: authProvider)
     }
 
-    static func makeProfileRepository() throws -> any ProfileRepository {
+    static func makeProfiles() throws -> any Profiles {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeProfileRepository(authProvider: authProvider)
+        return try factory.makeProfiles(authProvider: authProvider)
     }
 
-    static func makeBuildUploadRepository() throws -> any BuildUploadRepository {
+    static func makeBuildUploads() throws -> any BuildUploads {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeBuildUploadRepository(authProvider: authProvider)
+        return try factory.makeBuildUploads(authProvider: authProvider)
     }
 
-    static func makeBetaBuildLocalizationRepository() throws -> any BetaBuildLocalizationRepository {
+    static func makeBetaBuildLocalizations() throws -> any BetaBuildLocalizations {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeBetaBuildLocalizationRepository(authProvider: authProvider)
+        return try factory.makeBetaBuildLocalizations(authProvider: authProvider)
     }
 
-    static func makeReviewDetailRepository() throws -> any ReviewDetailRepository {
+    static func makeReviewDetails() throws -> any ReviewDetails {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeReviewDetailRepository(authProvider: authProvider)
+        return try factory.makeReviewDetails(authProvider: authProvider)
     }
 
-    static func makePricingRepository() throws -> any PricingRepository {
+    static func makeAppPrices() throws -> any AppPrices {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makePricingRepository(authProvider: authProvider)
+        return try factory.makeAppPrices(authProvider: authProvider)
     }
 
-    static func makePreviewRepository() throws -> any PreviewRepository {
+    static func makeAppPreviews() throws -> any AppPreviews {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makePreviewRepository(authProvider: authProvider)
+        return try factory.makeAppPreviews(authProvider: authProvider)
     }
 
-    static func makeInAppPurchaseRepository() throws -> any InAppPurchaseRepository {
+    static func makeInAppPurchases() throws -> any InAppPurchases {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeInAppPurchaseRepository(authProvider: authProvider)
+        return try factory.makeInAppPurchases(authProvider: authProvider)
     }
 
-    static func makeInAppPurchaseLocalizationRepository() throws -> any InAppPurchaseLocalizationRepository {
+    static func makeInAppPurchaseLocalizations() throws -> any InAppPurchaseLocalizations {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeInAppPurchaseLocalizationRepository(authProvider: authProvider)
+        return try factory.makeInAppPurchaseLocalizations(authProvider: authProvider)
     }
 
-    static func makeSubscriptionGroupRepository() throws -> any SubscriptionGroupRepository {
+    static func makeSubscriptionGroups() throws -> any SubscriptionGroups {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeSubscriptionGroupRepository(authProvider: authProvider)
+        return try factory.makeSubscriptionGroups(authProvider: authProvider)
     }
 
-    static func makeSubscriptionRepository() throws -> any SubscriptionRepository {
+    static func makeSubscriptions() throws -> any Subscriptions {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeSubscriptionRepository(authProvider: authProvider)
+        return try factory.makeSubscriptions(authProvider: authProvider)
     }
 
-    static func makeSubscriptionLocalizationRepository() throws -> any SubscriptionLocalizationRepository {
+    static func makeSubscriptionLocalizations() throws -> any SubscriptionLocalizations {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeSubscriptionLocalizationRepository(authProvider: authProvider)
+        return try factory.makeSubscriptionLocalizations(authProvider: authProvider)
     }
 
-    static func makeSubscriptionGroupLocalizationRepository() throws -> any SubscriptionGroupLocalizationRepository {
+    static func makeSubscriptionGroupLocalizations() throws -> any SubscriptionGroupLocalizations {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeSubscriptionGroupLocalizationRepository(authProvider: authProvider)
+        return try factory.makeSubscriptionGroupLocalizations(authProvider: authProvider)
     }
 
-    static func makeInAppPurchaseSubmissionRepository() throws -> any InAppPurchaseSubmissionRepository {
+    static func makeInAppPurchaseSubmissions() throws -> any InAppPurchaseSubmissions {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeInAppPurchaseSubmissionRepository(authProvider: authProvider)
+        return try factory.makeInAppPurchaseSubmissions(authProvider: authProvider)
     }
 
-    static func makeProductVersionRepository() throws -> any ProductVersionRepository {
+    static func makeProductVersions() throws -> any ProductVersions {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeProductVersionRepository(authProvider: authProvider)
+        return try factory.makeProductVersions(authProvider: authProvider)
     }
 
-    static func makeInAppPurchasePriceRepository() throws -> any InAppPurchasePriceRepository {
+    static func makeInAppPurchasePrices() throws -> any InAppPurchasePrices {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeInAppPurchasePriceRepository(authProvider: authProvider)
+        return try factory.makeInAppPurchasePrices(authProvider: authProvider)
     }
 
-    static func makeSubscriptionPriceRepository() throws -> any SubscriptionPriceRepository {
+    static func makeSubscriptionPrices() throws -> any SubscriptionPrices {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeSubscriptionPriceRepository(authProvider: authProvider)
+        return try factory.makeSubscriptionPrices(authProvider: authProvider)
     }
 
-    static func makeSubscriptionSubmissionRepository() throws -> any SubscriptionSubmissionRepository {
+    static func makeSubscriptionSubmissions() throws -> any SubscriptionSubmissions {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeSubscriptionSubmissionRepository(authProvider: authProvider)
+        return try factory.makeSubscriptionSubmissions(authProvider: authProvider)
     }
 
-    static func makeSubscriptionPromotionalOfferRepository() throws -> any SubscriptionPromotionalOfferRepository {
+    static func makeSubscriptionPromotionalOffers() throws -> any SubscriptionPromotionalOffers {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeSubscriptionPromotionalOfferRepository(authProvider: authProvider)
+        return try factory.makeSubscriptionPromotionalOffers(authProvider: authProvider)
     }
 
-    static func makeWinBackOfferRepository() throws -> any WinBackOfferRepository {
+    static func makeWinBackOffers() throws -> any WinBackOffers {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeWinBackOfferRepository(authProvider: authProvider)
+        return try factory.makeWinBackOffers(authProvider: authProvider)
     }
 
-    static func makeAssetLibraryRepository() throws -> any AssetLibraryRepository {
-        try ClientFactory().makeAssetLibraryRepository(authProvider: CompositeAuthProvider())
+    static func makeAssetLibraries() throws -> any AssetLibraries {
+        try ClientFactory().makeAssetLibraries(authProvider: CompositeAuthProvider())
     }
 
-    static func makeLibraryImageRepository() throws -> any LibraryImageRepository {
-        try ClientFactory().makeLibraryImageRepository(authProvider: CompositeAuthProvider())
+    static func makeLibraryImages() throws -> any LibraryImages {
+        try ClientFactory().makeLibraryImages(authProvider: CompositeAuthProvider())
     }
 
-    static func makeLibraryVideoRepository() throws -> any LibraryVideoRepository {
-        try ClientFactory().makeLibraryVideoRepository(authProvider: CompositeAuthProvider())
+    static func makeLibraryVideos() throws -> any LibraryVideos {
+        try ClientFactory().makeLibraryVideos(authProvider: CompositeAuthProvider())
     }
 
-    static func makeAssetPlacementRepository() throws -> any AssetPlacementRepository {
-        try ClientFactory().makeAssetPlacementRepository(authProvider: CompositeAuthProvider())
+    static func makeAssetPlacements() throws -> any AssetPlacements {
+        try ClientFactory().makeAssetPlacements(authProvider: CompositeAuthProvider())
     }
 
-    static func makeExperimentRepository() throws -> any ExperimentRepository {
+    static func makeExperiments() throws -> any Experiments {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeExperimentRepository(authProvider: authProvider)
+        return try factory.makeExperiments(authProvider: authProvider)
     }
 
-    static func makePromotedPurchaseRepository() throws -> any PromotedPurchaseRepository {
+    static func makePromotedPurchases() throws -> any PromotedPurchases {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makePromotedPurchaseRepository(authProvider: authProvider)
+        return try factory.makePromotedPurchases(authProvider: authProvider)
     }
 
-    static func makeInAppPurchaseReviewRepository() throws -> any InAppPurchaseReviewRepository {
+    static func makeInAppPurchaseReviewAssets() throws -> any InAppPurchaseReviewAssets {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeInAppPurchaseReviewRepository(authProvider: authProvider)
+        return try factory.makeInAppPurchaseReviewAssets(authProvider: authProvider)
     }
 
-    static func makeSubscriptionReviewRepository() throws -> any SubscriptionReviewRepository {
+    static func makeSubscriptionReviewAssets() throws -> any SubscriptionReviewAssets {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeSubscriptionReviewRepository(authProvider: authProvider)
+        return try factory.makeSubscriptionReviewAssets(authProvider: authProvider)
     }
 
-    static func makeSubscriptionIntroductoryOfferRepository() throws -> any SubscriptionIntroductoryOfferRepository {
+    static func makeSubscriptionIntroductoryOffers() throws -> any SubscriptionIntroductoryOffers {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeSubscriptionIntroductoryOfferRepository(authProvider: authProvider)
+        return try factory.makeSubscriptionIntroductoryOffers(authProvider: authProvider)
     }
 
-    static func makeSubscriptionOfferCodeRepository() throws -> any SubscriptionOfferCodeRepository {
+    static func makeSubscriptionOfferCodes() throws -> any SubscriptionOfferCodes {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeSubscriptionOfferCodeRepository(authProvider: authProvider)
+        return try factory.makeSubscriptionOfferCodes(authProvider: authProvider)
     }
 
-    static func makeInAppPurchaseOfferCodeRepository() throws -> any InAppPurchaseOfferCodeRepository {
+    static func makeInAppPurchaseOfferCodes() throws -> any InAppPurchaseOfferCodes {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeInAppPurchaseOfferCodeRepository(authProvider: authProvider)
+        return try factory.makeInAppPurchaseOfferCodes(authProvider: authProvider)
     }
 
-    static func makeAgeRatingDeclarationRepository() throws -> any AgeRatingDeclarationRepository {
+    static func makeAgeRatingDeclarations() throws -> any AgeRatingDeclarations {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeAgeRatingDeclarationRepository(authProvider: authProvider)
+        return try factory.makeAgeRatingDeclarations(authProvider: authProvider)
     }
 
-    static func makeBetaAppReviewRepository() throws -> any BetaAppReviewRepository {
+    static func makeBetaAppReviews() throws -> any BetaAppReviews {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeBetaAppReviewRepository(authProvider: authProvider)
+        return try factory.makeBetaAppReviews(authProvider: authProvider)
     }
 
-    static func makeBetaAppLocalizationRepository() throws -> any BetaAppLocalizationRepository {
+    static func makeBetaAppLocalizations() throws -> any BetaAppLocalizations {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeBetaAppLocalizationRepository(authProvider: authProvider)
+        return try factory.makeBetaAppLocalizations(authProvider: authProvider)
     }
 
-    static func makeAppAvailabilityRepository() throws -> any AppAvailabilityRepository {
+    static func makeAppAvailabilities() throws -> any AppAvailabilities {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeAppAvailabilityRepository(authProvider: authProvider)
+        return try factory.makeAppAvailabilities(authProvider: authProvider)
     }
 
-    static func makeInAppPurchaseAvailabilityRepository() throws -> any InAppPurchaseAvailabilityRepository {
+    static func makeInAppPurchaseAvailabilities() throws -> any InAppPurchaseAvailabilities {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeInAppPurchaseAvailabilityRepository(authProvider: authProvider)
+        return try factory.makeInAppPurchaseAvailabilities(authProvider: authProvider)
     }
 
-    static func makeSubscriptionAvailabilityRepository() throws -> any SubscriptionAvailabilityRepository {
+    static func makeSubscriptionAvailabilities() throws -> any SubscriptionAvailabilities {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeSubscriptionAvailabilityRepository(authProvider: authProvider)
+        return try factory.makeSubscriptionAvailabilities(authProvider: authProvider)
     }
 
-    static func makeTerritoryRepository() throws -> any TerritoryRepository {
+    static func makeTerritories() throws -> any Territories {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeTerritoryRepository(authProvider: authProvider)
+        return try factory.makeTerritories(authProvider: authProvider)
     }
 
     // MARK: - Simulators
 
-    static func makeSimulatorRepository() -> any SimulatorRepository {
-        ClientFactory().makeSimulatorRepository()
+    static func makeSimulators() -> any Simulators {
+        ClientFactory().makeSimulators()
     }
 
     // SimulatorInteractionRepository moved to ASCPro (pro feature)
 
     // MARK: - Skills
 
-    static func makeSkillRepository() -> any SkillRepository {
-        ClientFactory().makeSkillRepository()
+    static func makeSkills() -> any Skills {
+        ClientFactory().makeSkills()
     }
 
     static func makeSkillConfigStorage() -> any SkillConfigStorage {
@@ -308,20 +308,20 @@ struct ClientProvider {
 
     // MARK: - Plugins
 
-    static func makePluginRepository() -> any PluginRepository {
-        ClientFactory().makePluginRepository()
+    static func makePlugins() -> any Plugins {
+        ClientFactory().makePlugins()
     }
 
-    static func makeTemplateRepository() -> AggregateTemplateRepository {
-        AggregateTemplateRepository.shared
+    static func makeTemplates() -> AggregateTemplates {
+        AggregateTemplates.shared
     }
 
-    static func makeGalleryTemplateRepository() -> AggregateGalleryTemplateRepository {
-        AggregateGalleryTemplateRepository.shared
+    static func makeGalleryTemplates() -> AggregateGalleryTemplates {
+        AggregateGalleryTemplates.shared
     }
 
-    static func makeThemeRepository() -> AggregateThemeRepository {
-        AggregateThemeRepository.shared
+    static func makeThemes() -> AggregateThemes {
+        AggregateThemes.shared
     }
 
     static func makeAuthStorage() -> any AuthStorage {
@@ -348,112 +348,112 @@ struct ClientProvider {
         FileAppShotsConfigStorage()
     }
 
-    static func makeAppWallRepository(token: String) -> any AppWallRepository {
-        GitHubAppWallRepository(token: token)
+    static func makeAppWall(token: String) -> any AppWall {
+        GitHubAppWall(token: token)
     }
 
-    static func makeUserRepository() throws -> any UserRepository {
+    static func makeUsers() throws -> any Users {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeUserRepository(authProvider: authProvider)
+        return try factory.makeUsers(authProvider: authProvider)
     }
 
-    static func makeXcodeCloudProductRepository() throws -> any XcodeCloudProductRepository {
+    static func makeXcodeCloudProducts() throws -> any XcodeCloudProducts {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeXcodeCloudProductRepository(authProvider: authProvider)
+        return try factory.makeXcodeCloudProducts(authProvider: authProvider)
     }
 
-    static func makeXcodeCloudWorkflowRepository() throws -> any XcodeCloudWorkflowRepository {
+    static func makeXcodeCloudWorkflows() throws -> any XcodeCloudWorkflows {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeXcodeCloudWorkflowRepository(authProvider: authProvider)
+        return try factory.makeXcodeCloudWorkflows(authProvider: authProvider)
     }
 
-    static func makeXcodeCloudBuildRunRepository() throws -> any XcodeCloudBuildRunRepository {
+    static func makeXcodeCloudBuildRuns() throws -> any XcodeCloudBuildRuns {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeXcodeCloudBuildRunRepository(authProvider: authProvider)
+        return try factory.makeXcodeCloudBuildRuns(authProvider: authProvider)
     }
 
-    static func makeGameCenterRepository() throws -> any GameCenterRepository {
+    static func makeGameCenter() throws -> any GameCenter {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeGameCenterRepository(authProvider: authProvider)
+        return try factory.makeGameCenter(authProvider: authProvider)
     }
 
-    static func makeGameCenterModerationRepository() throws -> any GameCenterModerationRepository {
+    static func makeGameCenterModeration() throws -> any GameCenterModeration {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeGameCenterModerationRepository(authProvider: authProvider)
+        return try factory.makeGameCenterModeration(authProvider: authProvider)
     }
 
-    static func makeAppClipRepository() throws -> any AppClipRepository {
+    static func makeAppClips() throws -> any AppClips {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeAppClipRepository(authProvider: authProvider)
+        return try factory.makeAppClips(authProvider: authProvider)
     }
 
-    static func makeReportRepository() throws -> any ReportRepository {
+    static func makeReports() throws -> any Reports {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeReportRepository(authProvider: authProvider)
+        return try factory.makeReports(authProvider: authProvider)
     }
 
-    static func makeAnalyticsReportRepository() throws -> any AnalyticsReportRepository {
+    static func makeAnalyticsReports() throws -> any AnalyticsReports {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeAnalyticsReportRepository(authProvider: authProvider)
+        return try factory.makeAnalyticsReports(authProvider: authProvider)
     }
 
-    static func makeCustomerReviewRepository() throws -> any CustomerReviewRepository {
+    static func makeCustomerReviews() throws -> any CustomerReviews {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeCustomerReviewRepository(authProvider: authProvider)
+        return try factory.makeCustomerReviews(authProvider: authProvider)
     }
 
-    static func makePerfMetricsRepository() throws -> any PerfMetricsRepository {
+    static func makePerfMetrics() throws -> any PerfMetrics {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makePerfMetricsRepository(authProvider: authProvider)
+        return try factory.makePerfMetrics(authProvider: authProvider)
     }
 
-    static func makePerfOverviewRepository() throws -> any PerfOverviewRepository {
+    static func makePerfOverviews() throws -> any PerfOverviews {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makePerfOverviewRepository(authProvider: authProvider)
+        return try factory.makePerfOverviews(authProvider: authProvider)
     }
 
-    static func makeDiagnosticsRepository() throws -> any DiagnosticsRepository {
+    static func makeDiagnostics() throws -> any Diagnostics {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeDiagnosticsRepository(authProvider: authProvider)
+        return try factory.makeDiagnostics(authProvider: authProvider)
     }
 
     // MARK: - Iris (private API, cookie-based auth)
 
-    static func makeIrisAppBundleRepository() -> any IrisAppBundleRepository {
-        ClientFactory().makeIrisAppBundleRepository()
+    static func makeIrisAppBundles() -> any IrisAppBundles {
+        ClientFactory().makeIrisAppBundles()
     }
 
-    static func makeIrisInAppPurchaseSubmissionRepository() -> any IrisInAppPurchaseSubmissionRepository {
-        ClientFactory().makeIrisInAppPurchaseSubmissionRepository()
+    static func makeIrisInAppPurchaseSubmissions() -> any IrisInAppPurchaseSubmissions {
+        ClientFactory().makeIrisInAppPurchaseSubmissions()
     }
 
-    static func makeIrisResolutionCenterRepository() -> any IrisResolutionCenterRepository {
-        ClientFactory().makeIrisResolutionCenterRepository()
+    static func makeIrisResolutionCenter() -> any IrisResolutionCenter {
+        ClientFactory().makeIrisResolutionCenter()
     }
 
     static func makeIrisCookieProvider() -> any IrisCookieProvider {
         ClientFactory().makeIrisCookieProvider()
     }
 
-    static func makeIrisAuthRepository() -> any IrisAuthRepository {
-        IrisAuthSDKRepository()
+    static func makeIrisSignIn() -> any IrisSignIn {
+        IrisSDKSignIn()
     }
 
-    static func makeIrisSessionRepository() -> any IrisSessionRepository {
-        FileIrisSessionRepository()
+    static func makeIrisSessions() -> any IrisSessions {
+        FileIrisSessions()
     }
 
     /// File path for the half-finished login state between `login` and `verify-code`.

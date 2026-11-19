@@ -8,8 +8,8 @@ import HummingbirdWebSocket
 /// `{"territory": ["USA", "JPN"]}` or `{"all-territories": true}`, plus optional
 /// `"available-in-new-territories": true`.
 struct AppAvailabilityController: Sendable {
-    let repo: any AppAvailabilityRepository
-    let territoryRepo: any TerritoryRepository
+    let repo: any AppAvailabilities
+    let territoryRepo: any Territories
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/apps/:appId/availability") { _, context -> Response in

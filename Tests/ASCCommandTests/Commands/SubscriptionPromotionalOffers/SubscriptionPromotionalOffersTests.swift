@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionPromotionalOffersListTests {
 
     @Test func `lists promotional offers with affordances`() async throws {
-        let mockRepo = MockSubscriptionPromotionalOfferRepository()
+        let mockRepo = MockSubscriptionPromotionalOffers()
         given(mockRepo).listPromotionalOffers(subscriptionId: .any).willReturn([
             SubscriptionPromotionalOffer(
                 id: "po-1", subscriptionId: "sub-1", name: "Winback",
@@ -45,7 +45,7 @@ struct SubscriptionPromotionalOffersListTests {
 struct SubscriptionPromotionalOffersCreateTests {
 
     @Test func `parses --price specs into territory and pricePointId`() async throws {
-        let mockRepo = MockSubscriptionPromotionalOfferRepository()
+        let mockRepo = MockSubscriptionPromotionalOffers()
         given(mockRepo).createPromotionalOffer(
             subscriptionId: .any, name: .any, offerCode: .any,
             duration: .any, offerMode: .any, numberOfPeriods: .any, prices: .any
@@ -83,7 +83,7 @@ struct SubscriptionPromotionalOffersCreateTests {
     }
 
     @Test func `throws when --price spec is malformed`() async throws {
-        let mockRepo = MockSubscriptionPromotionalOfferRepository()
+        let mockRepo = MockSubscriptionPromotionalOffers()
         let cmd = try SubscriptionPromotionalOffersCreate.parse([
             "--subscription-id", "sub-1",
             "--name", "Winback",
@@ -103,7 +103,7 @@ struct SubscriptionPromotionalOffersCreateTests {
 struct SubscriptionPromotionalOffersDeleteTests {
 
     @Test func `delete calls repo with offer id`() async throws {
-        let mockRepo = MockSubscriptionPromotionalOfferRepository()
+        let mockRepo = MockSubscriptionPromotionalOffers()
         given(mockRepo).deletePromotionalOffer(offerId: .any).willReturn(())
 
         let cmd = try SubscriptionPromotionalOffersDelete.parse(["--offer-id", "po-1"])
@@ -117,7 +117,7 @@ struct SubscriptionPromotionalOffersDeleteTests {
 struct SubscriptionPromotionalOffersPricesListTests {
 
     @Test func `lists prices with affordances`() async throws {
-        let mockRepo = MockSubscriptionPromotionalOfferRepository()
+        let mockRepo = MockSubscriptionPromotionalOffers()
         given(mockRepo).listPrices(offerId: .any).willReturn([
             SubscriptionPromotionalOfferPrice(id: "p-1", offerId: "po-1", territory: "USA", subscriptionPricePointId: "spp-1")
         ])

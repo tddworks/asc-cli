@@ -14,7 +14,7 @@ struct AppAvailabilityGet: AsyncParsableCommand {
     var appId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppAvailabilityRepository()
+        let repo = try ClientProvider.makeAppAvailabilities()
         let output = try await execute(repo: repo)
         print(output)
         if output.contains("\"data\" : [\n\n  ]") || output.contains("\"data\":[]") {
@@ -25,7 +25,7 @@ struct AppAvailabilityGet: AsyncParsableCommand {
         }
     }
 
-    func execute(repo: any AppAvailabilityRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any AppAvailabilities, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let availability = try await repo.getAppAvailability(appId: appId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         // nil → empty data array: availability was never set up (mirrors `iap-availability get`).

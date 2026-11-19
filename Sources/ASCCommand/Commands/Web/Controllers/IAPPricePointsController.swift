@@ -4,7 +4,7 @@ import HummingbirdWebSocket
 
 /// Routes that return `InAppPurchasePricePoint` resources.
 struct IAPPricePointsController: Sendable {
-    let repo: any InAppPurchasePriceRepository
+    let repo: any InAppPurchasePrices
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/iap/:iapId/price-points") { request, context -> Response in

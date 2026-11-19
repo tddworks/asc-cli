@@ -5,7 +5,7 @@ import HummingbirdWebSocket
 
 /// Routes that return `Build` resources (both fleet and per-app listings).
 struct BuildsController: Sendable {
-    let repo: any BuildRepository
+    let repo: any Builds
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/apps/:appId/builds") { _, context -> Response in

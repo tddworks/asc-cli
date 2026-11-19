@@ -7,7 +7,7 @@ import Testing
 struct VersionsUpdateTests {
 
     @Test func `updated version returns new version string with editable affordances`() async throws {
-        let mockRepo = MockVersionRepository()
+        let mockRepo = MockAppStoreVersions()
         given(mockRepo).updateVersion(
             id: .any,
             versionString: .any,
@@ -45,7 +45,7 @@ struct VersionsUpdateTests {
     }
 
     @Test func `copyright flag is forwarded to repo update`() async throws {
-        let mockRepo = MockVersionRepository()
+        let mockRepo = MockAppStoreVersions()
         given(mockRepo).updateVersion(
             id: .any, versionString: .any, copyright: .any, releaseType: .any, earliestReleaseDate: .any
         ).willReturn(
@@ -72,7 +72,7 @@ struct VersionsUpdateTests {
     }
 
     @Test func `release type and earliest release date flags are forwarded to repo update`() async throws {
-        let mockRepo = MockVersionRepository()
+        let mockRepo = MockAppStoreVersions()
         given(mockRepo).updateVersion(
             id: .any, versionString: .any, copyright: .any, releaseType: .any, earliestReleaseDate: .any
         ).willReturn(
@@ -101,7 +101,7 @@ struct VersionsUpdateTests {
     }
 
     @Test func `version flag stays optional when omitted`() async throws {
-        let mockRepo = MockVersionRepository()
+        let mockRepo = MockAppStoreVersions()
         given(mockRepo).updateVersion(
             id: .any, versionString: .any, copyright: .any, releaseType: .any, earliestReleaseDate: .any
         ).willReturn(

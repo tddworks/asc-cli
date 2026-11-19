@@ -5,7 +5,7 @@ import ASCKit
 
 /// /api/v1/territories — Territory routes.
 struct TerritoriesController: Sendable {
-    let repo: any TerritoryRepository
+    let repo: any Territories
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/territories") { _, _ -> Response in

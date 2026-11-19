@@ -7,7 +7,7 @@ import Testing
 struct ReviewSubmissionsListTests {
 
     @Test func `listed submissions show id, appId, state, platform, and affordances`() async throws {
-        let mockRepo = MockSubmissionRepository()
+        let mockRepo = MockReviewSubmissions()
         given(mockRepo).listSubmissions(appId: .value("app-42"), states: .any, limit: .any)
             .willReturn([
                 ReviewSubmission(id: "sub-1", appId: "app-42", platform: .iOS, state: .waitingForReview),
@@ -36,7 +36,7 @@ struct ReviewSubmissionsListTests {
     }
 
     @Test func `unresolved issues submission exposes listRejectedItems affordance`() async throws {
-        let mockRepo = MockSubmissionRepository()
+        let mockRepo = MockReviewSubmissions()
         given(mockRepo).listSubmissions(
             appId: .any,
             states: .any,
@@ -53,7 +53,7 @@ struct ReviewSubmissionsListTests {
     }
 
     @Test func `state filter parses comma-separated values and passes them to repo`() async throws {
-        let mockRepo = MockSubmissionRepository()
+        let mockRepo = MockReviewSubmissions()
         given(mockRepo).listSubmissions(
             appId: .value("app-1"),
             states: .value([.waitingForReview, .inReview, .readyForReview]),
@@ -78,7 +78,7 @@ struct ReviewSubmissionsListTests {
     }
 
     @Test func `unresolved issues state is preserved through listing`() async throws {
-        let mockRepo = MockSubmissionRepository()
+        let mockRepo = MockReviewSubmissions()
         given(mockRepo).listSubmissions(
             appId: .value("app-1"),
             states: .value([.unresolvedIssues]),
@@ -98,7 +98,7 @@ struct ReviewSubmissionsListTests {
     }
 
     @Test func `no state filter passes nil to repo and lists all states`() async throws {
-        let mockRepo = MockSubmissionRepository()
+        let mockRepo = MockReviewSubmissions()
         given(mockRepo).listSubmissions(
             appId: .value("app-1"),
             states: .value(nil),

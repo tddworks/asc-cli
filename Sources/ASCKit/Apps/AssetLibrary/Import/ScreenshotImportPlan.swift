@@ -162,8 +162,8 @@ extension ScreenshotImportPlan {
     /// reported as `failed`; the others carry on.
     public func execute(
         libraryId: String,
-        imageRepo: any LibraryImageRepository,
-        placementRepo: any AssetPlacementRepository,
+        imageRepo: any LibraryImages,
+        placementRepo: any AssetPlacements,
         sleep: @Sendable (UInt64) async throws -> Void
     ) async -> [ScreenshotImportGroupResult] {
         var imageIds: [String: String] = [:]
@@ -218,7 +218,7 @@ extension ScreenshotImportPlan {
         _ group: PlannedGroup,
         imageIds: [String: String],
         failures: [String: String],
-        placementRepo: any AssetPlacementRepository
+        placementRepo: any AssetPlacements
     ) async -> ScreenshotImportGroupResult {
         func failed(_ message: String) -> ScreenshotImportGroupResult {
             ScreenshotImportGroupResult(

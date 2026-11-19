@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionGroupsListTests {
 
     @Test func `listed subscription groups include appId, referenceName and affordances`() async throws {
-        let mockRepo = MockSubscriptionGroupRepository()
+        let mockRepo = MockSubscriptionGroups()
         given(mockRepo).listSubscriptionGroups(appId: .any, limit: .any)
             .willReturn(PaginatedResponse(data: [
                 SubscriptionGroup(id: "grp-1", appId: "app-1", referenceName: "Premium Plans")

@@ -25,11 +25,11 @@ struct AssetLibraryGet: AsyncParsableCommand {
     var appId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAssetLibraryRepository()
+        let repo = try ClientProvider.makeAssetLibraries()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AssetLibraryRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any AssetLibraries, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let library = try await repo.getAssetLibrary(appId: appId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems([library], affordanceMode: affordanceMode)
@@ -59,11 +59,11 @@ struct AssetPlacementGroupsList: AsyncParsableCommand {
     var feature: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeAssetLibraryRepository()
+        let repo = try ClientProvider.makeAssetLibraries()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AssetLibraryRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any AssetLibraries, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let groups = try await repo.listPlacementGroups(placementType: placementType, feature: feature)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(groups, affordanceMode: affordanceMode)

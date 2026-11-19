@@ -7,7 +7,7 @@ import Testing
 struct SkillsInstallTests {
 
     @Test func `install specific skill by name`() async throws {
-        let mockRepo = MockSkillRepository()
+        let mockRepo = MockSkills()
         given(mockRepo).install(name: .value("asc-cli")).willReturn("Installed asc-cli")
 
         let cmd = try SkillsInstall.parse(["--name", "asc-cli"])
@@ -17,7 +17,7 @@ struct SkillsInstallTests {
     }
 
     @Test func `install all skills when --all flag is used`() async throws {
-        let mockRepo = MockSkillRepository()
+        let mockRepo = MockSkills()
         given(mockRepo).installAll().willReturn("Installed 5 skills")
 
         let cmd = try SkillsInstall.parse(["--all"])
@@ -27,7 +27,7 @@ struct SkillsInstallTests {
     }
 
     @Test func `install all skills when no flags provided`() async throws {
-        let mockRepo = MockSkillRepository()
+        let mockRepo = MockSkills()
         given(mockRepo).installAll().willReturn("Installed all skills")
 
         let cmd = try SkillsInstall.parse([])

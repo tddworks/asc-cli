@@ -6,7 +6,7 @@ import HummingbirdWebSocket
 /// `GET /apps/:appId/perf-metrics` and `GET /builds/:buildId/perf-metrics` — power and
 /// performance metrics. The `metric-type` query param matches the CLI flag `--metric-type`.
 struct PerfMetricsController: Sendable {
-    let repo: any PerfMetricsRepository
+    let repo: any PerfMetrics
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/apps/:appId/perf-metrics") { request, context -> Response in

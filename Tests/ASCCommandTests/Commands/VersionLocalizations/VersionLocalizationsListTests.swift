@@ -7,7 +7,7 @@ import Testing
 struct VersionLocalizationsListTests {
 
     @Test func `listed localizations include affordances for navigation`() async throws {
-        let mockRepo = MockVersionLocalizationRepository()
+        let mockRepo = MockVersionLocalizations()
         given(mockRepo).listLocalizations(versionId: .any).willReturn([
             AppStoreVersionLocalization(id: "loc-1", versionId: "v-1", locale: "en-US"),
             AppStoreVersionLocalization(id: "loc-2", versionId: "v-1", locale: "zh-Hans"),

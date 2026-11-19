@@ -5,7 +5,7 @@ import HummingbirdWebSocket
 
 /// Routes that return `AppStoreVersion` resources.
 struct VersionsController: Sendable {
-    let repo: any VersionRepository
+    let repo: any AppStoreVersions
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/apps/:appId/versions") { _, context -> Response in

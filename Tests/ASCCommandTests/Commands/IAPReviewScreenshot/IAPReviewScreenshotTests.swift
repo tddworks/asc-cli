@@ -8,7 +8,7 @@ import Testing
 struct IAPReviewScreenshotGetTests {
 
     @Test func `returns the screenshot when present`() async throws {
-        let mockRepo = MockInAppPurchaseReviewRepository()
+        let mockRepo = MockInAppPurchaseReviewAssets()
         given(mockRepo).getReviewScreenshot(iapId: .any).willReturn(
             InAppPurchaseReviewScreenshot(id: "rs-1", iapId: "iap-1", fileName: "review.png", fileSize: 1234)
         )
@@ -21,7 +21,7 @@ struct IAPReviewScreenshotGetTests {
     }
 
     @Test func `returns empty data array when no screenshot`() async throws {
-        let mockRepo = MockInAppPurchaseReviewRepository()
+        let mockRepo = MockInAppPurchaseReviewAssets()
         given(mockRepo).getReviewScreenshot(iapId: .any).willReturn(nil)
 
         let cmd = try IAPReviewScreenshotGet.parse(["--iap-id", "iap-1", "--pretty"])
@@ -41,7 +41,7 @@ struct IAPReviewScreenshotGetTests {
 struct IAPReviewScreenshotDeleteTests {
 
     @Test func `delete calls repo with screenshot id`() async throws {
-        let mockRepo = MockInAppPurchaseReviewRepository()
+        let mockRepo = MockInAppPurchaseReviewAssets()
         given(mockRepo).deleteReviewScreenshot(screenshotId: .any).willReturn(())
 
         let cmd = try IAPReviewScreenshotDelete.parse(["--screenshot-id", "rs-1"])
@@ -55,7 +55,7 @@ struct IAPReviewScreenshotDeleteTests {
 struct IAPImagesListTests {
 
     @Test func `lists promotional images with affordances`() async throws {
-        let mockRepo = MockInAppPurchaseReviewRepository()
+        let mockRepo = MockInAppPurchaseReviewAssets()
         given(mockRepo).listImages(iapId: .any).willReturn([
             InAppPurchasePromotionalImage(id: "img-1", iapId: "iap-1", fileName: "promo.png", fileSize: 9999)
         ])
@@ -73,7 +73,7 @@ struct IAPImagesListTests {
 struct IAPImagesDeleteTests {
 
     @Test func `delete image calls repo with image id`() async throws {
-        let mockRepo = MockInAppPurchaseReviewRepository()
+        let mockRepo = MockInAppPurchaseReviewAssets()
         given(mockRepo).deleteImage(imageId: .any).willReturn(())
 
         let cmd = try IAPImagesDelete.parse(["--image-id", "img-1"])

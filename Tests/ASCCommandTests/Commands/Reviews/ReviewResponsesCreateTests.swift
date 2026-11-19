@@ -7,7 +7,7 @@ import Testing
 struct ReviewResponsesCreateTests {
 
     @Test func `create response returns new response with pending state`() async throws {
-        let mockRepo = MockCustomerReviewRepository()
+        let mockRepo = MockCustomerReviews()
         given(mockRepo).createResponse(reviewId: .any, responseBody: .any).willReturn(
             CustomerReviewResponse(
                 id: "resp-new",

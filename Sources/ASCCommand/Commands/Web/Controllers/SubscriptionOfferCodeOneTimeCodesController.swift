@@ -7,7 +7,7 @@ import HummingbirdWebSocket
 ///
 /// Mirrors `asc subscription-offer-code-one-time-codes list/create/update`.
 struct SubscriptionOfferCodeOneTimeCodesController: Sendable {
-    let repo: any SubscriptionOfferCodeRepository
+    let repo: any SubscriptionOfferCodes
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/subscription-offer-codes/:offerCodeId/one-time-codes") { _, context -> Response in

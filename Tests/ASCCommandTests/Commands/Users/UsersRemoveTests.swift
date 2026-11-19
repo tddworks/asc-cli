@@ -7,7 +7,7 @@ import Testing
 struct UsersRemoveTests {
 
     @Test func `remove calls repository with user id`() async throws {
-        let mockRepo = MockUserRepository()
+        let mockRepo = MockUsers()
         given(mockRepo).removeUser(id: .value("u-1")).willReturn()
 
         let cmd = try UsersRemove.parse(["--user-id", "u-1"])

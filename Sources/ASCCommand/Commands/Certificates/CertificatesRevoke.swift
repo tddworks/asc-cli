@@ -13,11 +13,11 @@ struct CertificatesRevoke: AsyncParsableCommand {
     var certificateId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeCertificateRepository()
+        let repo = try ClientProvider.makeCertificates()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any CertificateRepository) async throws {
+    func execute(repo: any Certificates) async throws {
         try await repo.revokeCertificate(id: certificateId)
     }
 }

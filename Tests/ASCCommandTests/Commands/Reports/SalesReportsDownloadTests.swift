@@ -7,7 +7,7 @@ import Testing
 struct SalesReportsDownloadTests {
 
     @Test func `downloads sales report and outputs JSON with row data`() async throws {
-        let mockRepo = MockReportRepository()
+        let mockRepo = MockReports()
         given(mockRepo).downloadSalesReport(
             vendorNumber: .any,
             reportType: .any,
@@ -42,7 +42,7 @@ struct SalesReportsDownloadTests {
     }
 
     @Test func `downloads sales report with report date`() async throws {
-        let mockRepo = MockReportRepository()
+        let mockRepo = MockReports()
         given(mockRepo).downloadSalesReport(
             vendorNumber: .any,
             reportType: .any,
@@ -78,7 +78,7 @@ struct SalesReportsDownloadTests {
     }
 
     @Test func `table output includes row values`() async throws {
-        let mockRepo = MockReportRepository()
+        let mockRepo = MockReports()
         given(mockRepo).downloadSalesReport(
             vendorNumber: .any,
             reportType: .any,
@@ -105,7 +105,7 @@ struct SalesReportsDownloadTests {
     }
 
     @Test func `resolves vendor number from storage when not provided`() async throws {
-        let mockRepo = MockReportRepository()
+        let mockRepo = MockReports()
         let mockStorage = MockAuthStorage()
         let accounts = [ConnectAccount(name: "work", keyID: "KEY1", issuerID: "ISS1", isActive: true, vendorNumber: "88012345")]
         given(mockStorage).loadAll().willReturn(accounts)
@@ -132,7 +132,7 @@ struct SalesReportsDownloadTests {
     }
 
     @Test func `explicit vendor number overrides stored value`() async throws {
-        let mockRepo = MockReportRepository()
+        let mockRepo = MockReports()
         let mockStorage = MockAuthStorage()
         let accounts = [ConnectAccount(name: "work", keyID: "KEY1", issuerID: "ISS1", isActive: true, vendorNumber: "stored")]
         given(mockStorage).loadAll().willReturn(accounts)
@@ -160,7 +160,7 @@ struct SalesReportsDownloadTests {
     }
 
     @Test func `throws when vendor number missing from both flag and storage`() async throws {
-        let mockRepo = MockReportRepository()
+        let mockRepo = MockReports()
         let mockStorage = MockAuthStorage()
         given(mockStorage).loadAll().willReturn([])
 
@@ -176,7 +176,7 @@ struct SalesReportsDownloadTests {
     }
 
     @Test func `forwards --version flag to repository as filterVersion`() async throws {
-        let mockRepo = MockReportRepository()
+        let mockRepo = MockReports()
         given(mockRepo).downloadSalesReport(
             vendorNumber: .any,
             reportType: .any,
@@ -202,7 +202,7 @@ struct SalesReportsDownloadTests {
     }
 
     @Test func `handles empty report`() async throws {
-        let mockRepo = MockReportRepository()
+        let mockRepo = MockReports()
         given(mockRepo).downloadSalesReport(
             vendorNumber: .any,
             reportType: .any,

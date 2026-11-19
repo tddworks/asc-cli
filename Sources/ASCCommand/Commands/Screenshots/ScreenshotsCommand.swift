@@ -21,11 +21,11 @@ struct ScreenshotsList: AsyncParsableCommand {
     var setId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeScreenshotRepository()
+        let repo = try ClientProvider.makeAppScreenshots()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any ScreenshotRepository) async throws -> String {
+    func execute(repo: any AppScreenshots) async throws -> String {
         let screenshots = try await repo.listScreenshots(setId: setId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

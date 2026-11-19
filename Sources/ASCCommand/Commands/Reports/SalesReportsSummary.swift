@@ -20,12 +20,12 @@ struct SalesReportsSummary: AsyncParsableCommand {
     var to: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeReportRepository()
+        let repo = try ClientProvider.makeReports()
         let storage = ClientProvider.makeAuthStorage()
         print(try await execute(repo: repo, storage: storage))
     }
 
-    func execute(repo: any ReportRepository, storage: any AuthStorage = ClientProvider.makeAuthStorage()) async throws -> String {
+    func execute(repo: any Reports, storage: any AuthStorage = ClientProvider.makeAuthStorage()) async throws -> String {
         let resolvedVendorNumber = try VendorNumberResolver.resolve(explicit: vendorNumber, storage: storage)
         let dates = try expandDateRange(from: from, to: to)
 

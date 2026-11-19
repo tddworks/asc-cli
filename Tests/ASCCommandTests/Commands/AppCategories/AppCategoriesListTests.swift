@@ -7,7 +7,7 @@ import Testing
 struct AppCategoriesListTests {
 
     @Test func `listed categories include id platforms and affordances`() async throws {
-        let mockRepo = MockAppCategoryRepository()
+        let mockRepo = MockAppCategories()
         given(mockRepo).listCategories(platform: .any).willReturn([
             AppCategory(id: "6014", platforms: ["IOS"], parentId: nil),
         ])
@@ -33,7 +33,7 @@ struct AppCategoriesListTests {
     }
 
     @Test func `listed subcategory includes parent id`() async throws {
-        let mockRepo = MockAppCategoryRepository()
+        let mockRepo = MockAppCategories()
         given(mockRepo).listCategories(platform: .any).willReturn([
             AppCategory(id: "6014-action", platforms: ["IOS"], parentId: "6014"),
         ])

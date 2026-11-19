@@ -7,7 +7,7 @@ import Testing
 struct PluginsUpdateTests {
 
     @Test func `updated plugin is returned with the new version and installed affordances`() async throws {
-        let mockRepo = MockPluginRepository()
+        let mockRepo = MockPlugins()
         given(mockRepo).update(name: .value("Hello")).willReturn(
             Plugin(
                 id: "Hello.plugin",

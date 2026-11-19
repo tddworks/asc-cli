@@ -16,12 +16,12 @@ struct BuildsSetEncryptionCompliance: AsyncParsableCommand {
     var usesNonExemptEncryption: Bool
 
     func run() async throws {
-        let repo = try ClientProvider.makeBuildRepository()
+        let repo = try ClientProvider.makeBuilds()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any BuildRepository,
+        repo: any Builds,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let build = try await repo.updateBuildEncryptionCompliance(

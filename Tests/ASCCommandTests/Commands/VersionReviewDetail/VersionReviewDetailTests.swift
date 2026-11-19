@@ -7,7 +7,7 @@ import Testing
 struct VersionReviewDetailGetTests {
 
     @Test func `get review detail returns affordances and all fields`() async throws {
-        let mockRepo = MockReviewDetailRepository()
+        let mockRepo = MockReviewDetails()
         given(mockRepo).getReviewDetail(versionId: .any).willReturn(
             AppStoreReviewDetail(
                 id: "rd-1",
@@ -45,7 +45,7 @@ struct VersionReviewDetailGetTests {
     }
 
     @Test func `get review detail omits nil optional fields from JSON`() async throws {
-        let mockRepo = MockReviewDetailRepository()
+        let mockRepo = MockReviewDetails()
         given(mockRepo).getReviewDetail(versionId: .any).willReturn(
             AppStoreReviewDetail(id: "rd-empty", versionId: "v-2", demoAccountRequired: false)
         )
@@ -75,7 +75,7 @@ struct VersionReviewDetailGetTests {
 struct VersionReviewDetailUpdateTests {
 
     @Test func `update review detail returns updated record with affordances`() async throws {
-        let mockRepo = MockReviewDetailRepository()
+        let mockRepo = MockReviewDetails()
         given(mockRepo).upsertReviewDetail(versionId: .any, update: .any).willReturn(
             AppStoreReviewDetail(
                 id: "rd-2",

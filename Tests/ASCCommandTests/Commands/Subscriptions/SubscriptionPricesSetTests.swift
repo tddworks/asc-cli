@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionPricesSetTests {
 
     @Test func `set price posts subscriptionId, territory and pricePointId`() async throws {
-        let mockRepo = MockSubscriptionPriceRepository()
+        let mockRepo = MockSubscriptionPrices()
         given(mockRepo).setPrice(
             subscriptionId: .any, territory: .any, pricePointId: .any,
             startDate: .any, preserveCurrentPrice: .any
@@ -30,7 +30,7 @@ struct SubscriptionPricesSetTests {
     }
 
     @Test func `start-date and preserve-current-price flag pass through`() async throws {
-        let mockRepo = MockSubscriptionPriceRepository()
+        let mockRepo = MockSubscriptionPrices()
         given(mockRepo).setPrice(
             subscriptionId: .any, territory: .any, pricePointId: .any,
             startDate: .any, preserveCurrentPrice: .any

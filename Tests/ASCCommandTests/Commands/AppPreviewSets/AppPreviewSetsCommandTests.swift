@@ -9,7 +9,7 @@ struct AppPreviewSetsCommandTests {
     // MARK: - list
 
     @Test func `listed preview sets include affordances for navigation`() async throws {
-        let mockRepo = MockPreviewRepository()
+        let mockRepo = MockAppPreviews()
         given(mockRepo).listPreviewSets(localizationId: .any).willReturn([
             AppPreviewSet(id: "set-1", localizationId: "loc-1", previewType: .iphone67, previewsCount: 3),
         ])
@@ -36,7 +36,7 @@ struct AppPreviewSetsCommandTests {
     }
 
     @Test func `listed preview sets returns empty data array when none exist`() async throws {
-        let mockRepo = MockPreviewRepository()
+        let mockRepo = MockAppPreviews()
         given(mockRepo).listPreviewSets(localizationId: .any).willReturn([])
 
         let cmd = try AppPreviewSetsList.parse(["--localization-id", "loc-1", "--pretty"])
@@ -52,7 +52,7 @@ struct AppPreviewSetsCommandTests {
     }
 
     @Test func `table output for preview sets includes all row fields`() async throws {
-        let mockRepo = MockPreviewRepository()
+        let mockRepo = MockAppPreviews()
         given(mockRepo).listPreviewSets(localizationId: .any).willReturn([
             AppPreviewSet(id: "set-1", localizationId: "loc-1", previewType: .iphone67, previewsCount: 2),
         ])
@@ -69,7 +69,7 @@ struct AppPreviewSetsCommandTests {
     // MARK: - create
 
     @Test func `created preview set is returned with affordances`() async throws {
-        let mockRepo = MockPreviewRepository()
+        let mockRepo = MockAppPreviews()
         given(mockRepo).createPreviewSet(localizationId: .any, previewType: .any).willReturn(
             AppPreviewSet(id: "set-new", localizationId: "loc-1", previewType: .iphone67, previewsCount: 0)
         )
@@ -96,7 +96,7 @@ struct AppPreviewSetsCommandTests {
     }
 
     @Test func `unknown preview type throws validation error`() async throws {
-        let mockRepo = MockPreviewRepository()
+        let mockRepo = MockAppPreviews()
         let cmd = try AppPreviewSetsCreate.parse(["--localization-id", "loc-1", "--preview-type", "INVALID_TYPE"])
         await #expect(throws: (any Error).self) {
             try await cmd.execute(repo: mockRepo)
@@ -104,7 +104,7 @@ struct AppPreviewSetsCommandTests {
     }
 
     @Test func `created Apple TV preview set returns correct preview type`() async throws {
-        let mockRepo = MockPreviewRepository()
+        let mockRepo = MockAppPreviews()
         given(mockRepo).createPreviewSet(localizationId: .any, previewType: .any).willReturn(
             AppPreviewSet(id: "set-1", localizationId: "loc-42", previewType: .appleTV, previewsCount: 0)
         )

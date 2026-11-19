@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionPricePointsListTests {
 
     @Test func `listed price points include subscriptionId, territory, prices and affordances`() async throws {
-        let mockRepo = MockSubscriptionPriceRepository()
+        let mockRepo = MockSubscriptionPrices()
         given(mockRepo).listPricePoints(subscriptionId: .any, territory: .any, limit: .any, cursor: .any)
             .willReturn(PaginatedResponse(data: [
                 SubscriptionPricePoint(
@@ -54,7 +54,7 @@ struct SubscriptionPricePointsListTests {
     }
 
     @Test func `passes nil territory when flag omitted`() async throws {
-        let mockRepo = MockSubscriptionPriceRepository()
+        let mockRepo = MockSubscriptionPrices()
         given(mockRepo).listPricePoints(subscriptionId: .any, territory: .any, limit: .any, cursor: .any)
             .willReturn(PaginatedResponse(data: [], nextCursor: nil))
 

@@ -108,11 +108,13 @@ See [command-affordances.md](references/command-affordances.md) for:
 - `formatAgentItems` vs `formatItems`
 - JSON output shape `{"data":[{...,"affordances":{...}}]}`
 
-### 4. Repository protocol — primitives only, but allow composition in adapters
+### 4. The collection protocol — primitives only, but allow composition in adapters
+
+Name it for what it holds: the **plural of the aggregate** (`Apps`, `Builds`, `AppStoreVersions`), never `XxxRepository`. A protocol that isn't a collection takes a role noun (`IrisSignIn`, `TestFlight`, `Reports`). Its implementations are named for how they do it (`SDKBuilds`, `SimctlSimulators`).
 
 ```swift
 @Mockable
-public protocol MyRepository: Sendable {
+public protocol MyModels: Sendable {
     func listMyModels(parentId: String) async throws -> [MyModel]
 }
 ```
@@ -402,12 +404,12 @@ Docs follow `docs/documentation-design/README.md`: each fact has one home, and n
 - [ ] `Presentable` conformance (`tableHeaders`, `tableRow`)
 - [ ] `AffordanceProviding` via `structuredAffordances` (NOT raw `affordances`)
 - [ ] State enum with semantic booleans (`isLive`, `isEditable`, `isPendingReview`, etc.)
-- [ ] `XRepository.swift` — `@Mockable` protocol with primitive methods only
+- [ ] `Xs.swift` — `@Mockable` collection protocol named as the plural (`Builds`), primitive methods only
 - [ ] `make*` factory added to `MockRepositoryFactory.swift`
 - [ ] Public-face tests: model fields, semantic booleans, affordances, **and `apiLinks`** for the new keys
 
 ### Phase 2: Adapter (`Internal/`)
-- [ ] `SDKXRepository.swift` — implements protocol, injects parent IDs in mappers
+- [ ] `Internal/SDKXs.swift` — implements the protocol, injects parent IDs in mappers
 - [ ] Multi-call composition where needed (relationships paginate at ~10 — use dedicated endpoints with `limit:`)
 - [ ] Factory registered in `ClientFactory.swift`
 - [ ] `_xRoutes` registered AND touched in `RESTPathResolver.ensureInitialized()`

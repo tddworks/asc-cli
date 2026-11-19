@@ -8,7 +8,7 @@ import Testing
 struct CertificatesListTests {
 
     @Test func `listed certificates include type and affordances`() async throws {
-        let mockRepo = MockCertificateRepository()
+        let mockRepo = MockCertificates()
         given(mockRepo).listCertificates(certificateType: .any, limit: .any).willReturn([
             Certificate(id: "cert-1", name: "iOS Distribution", certificateType: .iosDistribution),
         ])
@@ -33,7 +33,7 @@ struct CertificatesListTests {
     }
 
     @Test func `table output includes all row fields`() async throws {
-        let mockRepo = MockCertificateRepository()
+        let mockRepo = MockCertificates()
         given(mockRepo).listCertificates(certificateType: .any, limit: .any).willReturn([
             Certificate(id: "cert-1", name: "iOS Dist", certificateType: .iosDistribution),
         ])
@@ -49,7 +49,7 @@ struct CertificatesListTests {
     @Test func `expired-only flag filters out unexpired certificates`() async throws {
         let past = Date(timeIntervalSince1970: 1_000_000_000) // year 2001 — expired
         let future = Date(timeIntervalSinceNow: 31_536_000)   // one year from now
-        let mockRepo = MockCertificateRepository()
+        let mockRepo = MockCertificates()
         given(mockRepo).listCertificates(certificateType: .any, limit: .any).willReturn([
             Certificate(id: "cert-expired", name: "Old", certificateType: .iosDistribution, expirationDate: past),
             Certificate(id: "cert-fresh", name: "Fresh", certificateType: .iosDistribution, expirationDate: future),
@@ -66,7 +66,7 @@ struct CertificatesListTests {
         let cutoff = Date(timeIntervalSince1970: 1_700_000_000)
         let earlier = Date(timeIntervalSince1970: 1_600_000_000)
         let later = Date(timeIntervalSince1970: 1_800_000_000)
-        let mockRepo = MockCertificateRepository()
+        let mockRepo = MockCertificates()
         given(mockRepo).listCertificates(certificateType: .any, limit: .any).willReturn([
             Certificate(id: "cert-early", name: "Early", certificateType: .iosDistribution, expirationDate: earlier),
             Certificate(id: "cert-late", name: "Late", certificateType: .iosDistribution, expirationDate: later),
@@ -83,7 +83,7 @@ struct CertificatesListTests {
     @Test func `before flag accepts date-only YYYY-MM-DD`() async throws {
         let earlier = Date(timeIntervalSince1970: 1_600_000_000) // 2020-09
         let later = Date(timeIntervalSince1970: 2_000_000_000)   // 2033-05
-        let mockRepo = MockCertificateRepository()
+        let mockRepo = MockCertificates()
         given(mockRepo).listCertificates(certificateType: .any, limit: .any).willReturn([
             Certificate(id: "cert-early", name: "Early", certificateType: .iosDistribution, expirationDate: earlier),
             Certificate(id: "cert-late", name: "Late", certificateType: .iosDistribution, expirationDate: later),
@@ -97,7 +97,7 @@ struct CertificatesListTests {
     }
 
     @Test func `limit flag is forwarded to repository`() async throws {
-        let mockRepo = MockCertificateRepository()
+        let mockRepo = MockCertificates()
         given(mockRepo).listCertificates(certificateType: .any, limit: .value(200)).willReturn([])
 
         let cmd = try CertificatesList.parse(["--limit", "200", "--pretty"])
@@ -113,7 +113,7 @@ struct CertificatesListTests {
     }
 
     @Test func `optional certificate fields are omitted when nil`() async throws {
-        let mockRepo = MockCertificateRepository()
+        let mockRepo = MockCertificates()
         given(mockRepo).listCertificates(certificateType: .any, limit: .any).willReturn([
             Certificate(
                 id: "cert-1",

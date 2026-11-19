@@ -7,7 +7,7 @@ import Testing
 struct AppsListTests {
 
     @Test func `listed apps include name bundleId and affordances`() async throws {
-        let mockRepo = MockAppRepository()
+        let mockRepo = MockApps()
         given(mockRepo).listApps(limit: .any).willReturn(
             PaginatedResponse(data: [
                 App(id: "app-1", name: "My App", bundleId: "com.example.app", sku: "SKU1"),
@@ -43,7 +43,7 @@ struct AppsListTests {
     }
 
     @Test func `sku is omitted from output when not set`() async throws {
-        let mockRepo = MockAppRepository()
+        let mockRepo = MockApps()
         given(mockRepo).listApps(limit: .any).willReturn(
             PaginatedResponse(data: [
                 App(id: "app-1", name: "No SKU App", bundleId: "com.example"),

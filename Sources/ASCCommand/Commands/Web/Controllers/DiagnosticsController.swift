@@ -7,7 +7,7 @@ import HummingbirdWebSocket
 /// `GET /diagnostics/:signatureId/logs` — the logs behind one signature.
 /// The query param matches the CLI flag `--diagnostic-type`.
 struct DiagnosticsController: Sendable {
-    let repo: any DiagnosticsRepository
+    let repo: any Diagnostics
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/builds/:buildId/diagnostics") { request, context -> Response in

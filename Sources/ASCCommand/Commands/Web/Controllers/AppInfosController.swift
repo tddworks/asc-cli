@@ -12,7 +12,7 @@ private func optionalString(_ value: Any?) -> String? {
 
 /// Routes that return `AppInfo` and `AppInfoLocalization` resources.
 struct AppInfosController: Sendable {
-    let repo: any AppInfoRepository
+    let repo: any AppInfos
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/apps/:appId/app-infos") { _, context -> Response in

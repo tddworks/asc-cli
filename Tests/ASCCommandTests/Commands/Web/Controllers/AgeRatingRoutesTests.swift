@@ -12,7 +12,7 @@ import Testing
 struct AgeRatingRoutesTests {
 
     @Test func `should save the social media answers over REST`() async throws {
-        let repo = MockAgeRatingDeclarationRepository()
+        let repo = MockAgeRatingDeclarations()
         given(repo).updateDeclaration(id: .value("decl-1"), update: .any).willProduce { id, update in
             AgeRatingDeclaration(
                 id: id,

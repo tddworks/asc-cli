@@ -7,7 +7,7 @@ import Testing
 struct AppInfosUpdateTests {
 
     @Test func `updated app info with primary category is returned with affordances`() async throws {
-        let mockRepo = MockAppInfoRepository()
+        let mockRepo = MockAppInfos()
         given(mockRepo)
             .updateCategories(
                 id: .any,
@@ -49,7 +49,7 @@ struct AppInfosUpdateTests {
     }
 
     @Test func `update passes all category flags to repository`() async throws {
-        let mockRepo = MockAppInfoRepository()
+        let mockRepo = MockAppInfos()
         var capturedPrimary: String??
         var capturedSecondary: String??
         given(mockRepo)

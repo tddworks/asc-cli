@@ -16,11 +16,11 @@ struct ProfilesList: AsyncParsableCommand {
     var type: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeProfileRepository()
+        let repo = try ClientProvider.makeProfiles()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any ProfileRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any Profiles, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let profileType = type.flatMap { ProfileType(rawValue: $0.uppercased()) }
         let items = try await repo.listProfiles(bundleIdId: bundleIdId, profileType: profileType)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)

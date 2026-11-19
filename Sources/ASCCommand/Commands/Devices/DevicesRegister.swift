@@ -19,11 +19,11 @@ struct DevicesRegister: AsyncParsableCommand {
     var platform: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeDeviceRepository()
+        let repo = try ClientProvider.makeDevices()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any DeviceRepository) async throws -> String {
+    func execute(repo: any Devices) async throws -> String {
         guard let domainPlatform = BundleIDPlatform(cliArgument: platform) else {
             throw ValidationError("Invalid platform '\(platform)'. Use ios or macos.")
         }

@@ -7,7 +7,7 @@ import Testing
 struct IAPLocalizationsDeleteTests {
 
     @Test func `delete localization calls repo with localization id`() async throws {
-        let mockRepo = MockInAppPurchaseLocalizationRepository()
+        let mockRepo = MockInAppPurchaseLocalizations()
         given(mockRepo).deleteLocalization(localizationId: .any).willReturn(())
 
         let cmd = try IAPLocalizationsDelete.parse(["--localization-id", "loc-1"])

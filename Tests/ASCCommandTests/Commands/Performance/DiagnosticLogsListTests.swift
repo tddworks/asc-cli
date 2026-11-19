@@ -7,7 +7,7 @@ import Mockable
 struct DiagnosticLogsListTests {
 
     @Test func `listed diagnostic logs show metadata and affordances`() async throws {
-        let mockRepo = MockDiagnosticsRepository()
+        let mockRepo = MockDiagnostics()
         given(mockRepo).listLogs(signatureId: .any).willReturn([
             DiagnosticLogEntry(
                 id: "sig-1-0-0",

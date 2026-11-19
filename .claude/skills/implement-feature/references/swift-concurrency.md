@@ -23,16 +23,16 @@ public enum ProcessingState: String, Sendable {
 
 ## Async Repository Methods
 
-All repository protocols use `async throws`:
+All collection protocols use `async throws`:
 
 ```swift
 @Mockable
-public protocol AppRepository: Sendable {
+public protocol Apps: Sendable {
     func fetchApps(limit: Int?) async throws -> [App]
 }
 
 @Mockable
-public protocol BuildRepository: Sendable {
+public protocol Builds: Sendable {
     func fetchBuilds(appId: String?, limit: Int?) async throws -> [Build]
 }
 ```
@@ -53,7 +53,7 @@ struct AppsList: AsyncParsableCommand {
     var limit: Int = 50
 
     func run() async throws {
-        let repo = ClientProvider.makeAppRepository(globalOptions)
+        let repo = ClientProvider.makeApps(globalOptions)
         let apps = try await repo.fetchApps(limit: limit)
         OutputFormatter.print(apps, format: globalOptions.output)
     }
@@ -105,7 +105,7 @@ func run() async throws {
 ```swift
 // Use async throws in @Test functions
 @Test func `fetchApps returns apps`() async throws {
-    let mockRepo = MockAppRepository()
+    let mockRepo = MockApps()
     given(mockRepo).fetchApps(limit: .any).willReturn([
         App(id: "1", name: "Test App", bundleId: "com.test.app", sku: nil, primaryLocale: "en-US")
     ])
@@ -116,7 +116,7 @@ func run() async throws {
 
 // Test error throwing with await #expect(throws:)
 @Test func `fetchApps propagates auth error`() async {
-    let mockRepo = MockAppRepository()
+    let mockRepo = MockApps()
     given(mockRepo).fetchApps(limit: .any).willThrow(APIError.unauthorized)
 
     await #expect(throws: APIError.unauthorized) {
@@ -128,7 +128,7 @@ func run() async throws {
 ## Swift 6.2 Strict Concurrency Checklist
 
 - [ ] Domain models are `struct` + `Sendable` (not `class`)
-- [ ] Repository protocols conform to `Sendable`
+- [ ] Collection protocols conform to `Sendable`
 - [ ] `Internal/` structs are stateless or explicitly `Sendable`
 - [ ] Commands use `AsyncParsableCommand` for async entry points
 - [ ] No `@unchecked Sendable` unless absolutely necessary with documented reason

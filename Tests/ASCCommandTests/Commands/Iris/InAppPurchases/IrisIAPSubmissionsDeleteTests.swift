@@ -12,7 +12,7 @@ struct IrisIAPSubmissionsDeleteTests {
             IrisSession(cookies: "myacinfo=test")
         )
 
-        let mockRepo = MockIrisInAppPurchaseSubmissionRepository()
+        let mockRepo = MockIrisInAppPurchaseSubmissions()
         given(mockRepo).deleteSubmission(session: .any, submissionId: .any).willReturn(())
 
         let cmd = try IrisIAPSubmissionsDelete.parse(["--submission-id", "iap-7"])

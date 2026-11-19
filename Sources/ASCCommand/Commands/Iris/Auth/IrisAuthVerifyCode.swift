@@ -14,16 +14,16 @@ struct IrisAuthVerifyCode: AsyncParsableCommand {
     var code: String
 
     func run() async throws {
-        let authRepo = ClientProvider.makeIrisAuthRepository()
-        let sessionRepo = ClientProvider.makeIrisSessionRepository()
+        let authRepo = ClientProvider.makeIrisSignIn()
+        let sessionRepo = ClientProvider.makeIrisSessions()
         let pendingURL = ClientProvider.pendingTwoFactorURL()
         print(try await execute(code: code, authRepo: authRepo, sessionRepo: sessionRepo, pendingURL: pendingURL))
     }
 
     func execute(
         code: String,
-        authRepo: any IrisAuthRepository,
-        sessionRepo: any IrisSessionRepository,
+        authRepo: any IrisSignIn,
+        sessionRepo: any IrisSessions,
         pendingURL: URL,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {

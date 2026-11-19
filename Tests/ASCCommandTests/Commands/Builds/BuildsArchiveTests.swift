@@ -106,7 +106,7 @@ struct BuildsArchiveTests {
         given(mockRunner).exportArchive(request: .any)
             .willReturn(ExportResult(ipaPath: "/tmp/export/MyApp.ipa", exportPath: "/tmp/export"))
 
-        let mockUploadRepo = MockBuildUploadRepository()
+        let mockUploadRepo = MockBuildUploads()
         given(mockUploadRepo).uploadBuild(appId: .any, version: .any, buildNumber: .any, platform: .any, fileURL: .any)
             .willReturn(BuildUpload(id: "up-1", appId: "app-1", version: "1.0.0", buildNumber: "42", platform: .iOS, state: .complete))
 

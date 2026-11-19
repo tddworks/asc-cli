@@ -72,8 +72,8 @@ struct SDKSubscriptionReviewRepositoryUploadTests {
         #expect(stub.requests.map { "\($0.method) \($0.path)" } == ["POST /v1/subscriptionImages"])
     }
 
-    static func repo(_ stub: StubAPIClient, http: any HTTPPerforming = SequencedStubHTTPClient()) -> SDKSubscriptionReviewRepository {
-        SDKSubscriptionReviewRepository(client: stub, uploader: UploadOperationsExecutor(http: http), pollDelayNanos: 0, pollMaxAttempts: 1)
+    static func repo(_ stub: StubAPIClient, http: any HTTPPerforming = SequencedStubHTTPClient()) -> SDKSubscriptionReviewAssets {
+        SDKSubscriptionReviewAssets(client: stub, uploader: UploadOperationsExecutor(http: http), pollDelayNanos: 0, pollMaxAttempts: 1)
     }
 
     static func screenshot(_ json: String) throws -> SubscriptionAppStoreReviewScreenshotResponse {

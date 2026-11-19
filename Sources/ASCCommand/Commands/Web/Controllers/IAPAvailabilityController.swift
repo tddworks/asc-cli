@@ -5,11 +5,11 @@ import HummingbirdWebSocket
 
 /// Routes that return the per-territory availability of an in-app purchase.
 struct IAPAvailabilityController: Sendable {
-    let repo: any InAppPurchaseAvailabilityRepository
+    let repo: any InAppPurchaseAvailabilities
     /// Used to seed a synthetic "all 175 territories available" response when ASC has no
     /// availability resource yet — matches the iOS app's default UX for fresh IAPs (the
     /// view defaults `selectedIds = Set(app.territories.map(\.id))`).
-    let territoryRepo: any TerritoryRepository
+    let territoryRepo: any Territories
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/iap/:iapId/availability") { _, context -> Response in

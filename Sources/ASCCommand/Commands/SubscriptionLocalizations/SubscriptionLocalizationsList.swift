@@ -13,12 +13,12 @@ struct SubscriptionLocalizationsList: AsyncParsableCommand {
     var subscriptionId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptionLocalizationRepository()
+        let repo = try ClientProvider.makeSubscriptionLocalizations()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any SubscriptionLocalizationRepository,
+        repo: any SubscriptionLocalizations,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let items = try await repo.listLocalizations(subscriptionId: subscriptionId)

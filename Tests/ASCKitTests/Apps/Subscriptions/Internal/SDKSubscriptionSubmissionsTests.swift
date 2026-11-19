@@ -1,0 +1,31 @@
+@preconcurrency import AppStoreConnect_Swift_SDK
+import Testing
+@testable import ASCKit
+
+@Suite
+struct SDKSubscriptionSubmissionsTests {
+
+    @Test func `submitSubscription injects subscriptionId into result`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(SubscriptionSubmissionResponse(
+            data: AppStoreConnect_Swift_SDK.SubscriptionSubmission(
+                type: .subscriptionSubmissions,
+                id: "submit-1"
+            ),
+            links: .init(this: "")
+        ))
+
+        let repo = SDKSubscriptionSubmissions(client: stub)
+        let result = try await repo.submitSubscription(subscriptionId: "sub-abc")
+
+        #expect(result.id == "submit-1")
+        #expect(result.subscriptionId == "sub-abc")
+    }
+
+    @Test func `deleteSubmission performs void request via manual DELETE`() async throws {
+        let stub = StubAPIClient()
+        let repo = SDKSubscriptionSubmissions(client: stub)
+        try await repo.deleteSubmission(submissionId: "sub-1")
+        #expect(stub.voidRequestCalled == true)
+    }
+}

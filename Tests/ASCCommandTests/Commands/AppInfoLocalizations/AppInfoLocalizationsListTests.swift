@@ -7,7 +7,7 @@ import Testing
 struct AppInfoLocalizationsListTests {
 
     @Test func `listed app info localizations include affordances for navigation`() async throws {
-        let mockRepo = MockAppInfoRepository()
+        let mockRepo = MockAppInfos()
         given(mockRepo).listLocalizations(appInfoId: .any).willReturn([
             AppInfoLocalization(id: "loc-1", appInfoId: "info-1", locale: "en-US", name: "My App", subtitle: "Do things"),
         ])

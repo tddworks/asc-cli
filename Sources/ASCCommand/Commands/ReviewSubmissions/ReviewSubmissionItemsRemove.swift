@@ -13,11 +13,11 @@ struct ReviewSubmissionItemsRemove: AsyncParsableCommand {
     var itemId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubmissionRepository()
+        let repo = try ClientProvider.makeReviewSubmissions()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any SubmissionRepository) async throws {
+    func execute(repo: any ReviewSubmissions) async throws {
         try await repo.removeItem(itemId: itemId)
     }
 }

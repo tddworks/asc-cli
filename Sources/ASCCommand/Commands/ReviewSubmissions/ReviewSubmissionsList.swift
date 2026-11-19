@@ -20,11 +20,11 @@ struct ReviewSubmissionsList: AsyncParsableCommand {
     var limit: Int?
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubmissionRepository()
+        let repo = try ClientProvider.makeReviewSubmissions()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubmissionRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any ReviewSubmissions, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let parsedStates = state.map { csv in
             csv.split(separator: ",").compactMap {
                 ReviewSubmissionState(rawValue: String($0).trimmingCharacters(in: .whitespaces).uppercased())

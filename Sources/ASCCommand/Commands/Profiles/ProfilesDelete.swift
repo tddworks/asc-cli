@@ -13,11 +13,11 @@ struct ProfilesDelete: AsyncParsableCommand {
     var profileId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeProfileRepository()
+        let repo = try ClientProvider.makeProfiles()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any ProfileRepository) async throws {
+    func execute(repo: any Profiles) async throws {
         try await repo.deleteProfile(id: profileId)
     }
 }

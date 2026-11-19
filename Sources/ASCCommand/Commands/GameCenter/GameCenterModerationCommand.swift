@@ -30,11 +30,11 @@ struct GameCenterScoreModerationsList: AsyncParsableCommand {
     var blockedOnly: Bool = false
 
     func run() async throws {
-        let repo = try ClientProvider.makeGameCenterModerationRepository()
+        let repo = try ClientProvider.makeGameCenterModeration()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any GameCenterModerationRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any GameCenterModeration, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let items = try await repo.listScoreModerations(leaderboardId: leaderboardId, blockedOnly: blockedOnly)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(items, affordanceMode: affordanceMode)
@@ -53,11 +53,11 @@ struct GameCenterScoreModerationsBlock: AsyncParsableCommand {
     var moderationId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeGameCenterModerationRepository()
+        let repo = try ClientProvider.makeGameCenterModeration()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any GameCenterModerationRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any GameCenterModeration, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let items = [try await repo.updateScoreModeration(id: moderationId, isBlocked: true)]
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(items, affordanceMode: affordanceMode)
@@ -76,11 +76,11 @@ struct GameCenterScoreModerationsUnblock: AsyncParsableCommand {
     var moderationId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeGameCenterModerationRepository()
+        let repo = try ClientProvider.makeGameCenterModeration()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any GameCenterModerationRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any GameCenterModeration, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let items = [try await repo.updateScoreModeration(id: moderationId, isBlocked: false)]
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(items, affordanceMode: affordanceMode)
@@ -109,11 +109,11 @@ struct GameCenterBlockedPlayersList: AsyncParsableCommand {
     var detailId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeGameCenterModerationRepository()
+        let repo = try ClientProvider.makeGameCenterModeration()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any GameCenterModerationRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any GameCenterModeration, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let items = try await repo.listBlockedPlayers(gameCenterDetailId: detailId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(items, affordanceMode: affordanceMode)
@@ -142,11 +142,11 @@ struct GameCenterPlayersBlock: AsyncParsableCommand {
     var playerId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeGameCenterModerationRepository()
+        let repo = try ClientProvider.makeGameCenterModeration()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any GameCenterModerationRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any GameCenterModeration, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let items = [try await repo.updatePlayer(id: playerId, isBlocked: true)]
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(items, affordanceMode: affordanceMode)
@@ -165,11 +165,11 @@ struct GameCenterPlayersUnblock: AsyncParsableCommand {
     var playerId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeGameCenterModerationRepository()
+        let repo = try ClientProvider.makeGameCenterModeration()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any GameCenterModerationRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any GameCenterModeration, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let items = [try await repo.updatePlayer(id: playerId, isBlocked: false)]
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(items, affordanceMode: affordanceMode)

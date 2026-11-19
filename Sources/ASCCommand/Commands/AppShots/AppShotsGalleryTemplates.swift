@@ -21,11 +21,11 @@ struct AppShotsGalleryTemplatesList: AsyncParsableCommand {
     @OptionGroup var globals: GlobalOptions
 
     func run() async throws {
-        let repo = ClientProvider.makeGalleryTemplateRepository()
+        let repo = ClientProvider.makeGalleryTemplates()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any GalleryTemplateRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any GalleryTemplates, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let galleries = try await repo.listGalleries()
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
@@ -54,11 +54,11 @@ struct AppShotsGalleryTemplatesGet: AsyncParsableCommand {
     var preview: Bool = false
 
     func run() async throws {
-        let repo = ClientProvider.makeGalleryTemplateRepository()
+        let repo = ClientProvider.makeGalleryTemplates()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any GalleryTemplateRepository) async throws -> String {
+    func execute(repo: any GalleryTemplates) async throws -> String {
         guard let gallery = try await repo.getGallery(templateId: id) else {
             throw ValidationError("Gallery template '\(id)' not found. Run `asc app-shots gallery-templates list` to see available templates.")
         }

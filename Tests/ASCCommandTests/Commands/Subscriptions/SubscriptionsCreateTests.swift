@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionsCreateTests {
 
     @Test func `creates subscription and returns it with affordances`() async throws {
-        let mockRepo = MockSubscriptionRepository()
+        let mockRepo = MockSubscriptions()
         given(mockRepo).createSubscription(groupId: .any, name: .any, productId: .any, period: .any, isFamilySharable: .any, groupLevel: .any)
             .willReturn(Subscription(
                 id: "sub-new",
@@ -68,7 +68,7 @@ struct SubscriptionsCreateTests {
     }
 
     @Test func `throws for invalid subscription period`() async throws {
-        let mockRepo = MockSubscriptionRepository()
+        let mockRepo = MockSubscriptions()
         let cmd = try SubscriptionsCreate.parse([
             "--group-id", "grp-1",
             "--name", "Monthly",

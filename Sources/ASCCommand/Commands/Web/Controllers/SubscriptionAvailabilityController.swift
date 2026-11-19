@@ -4,9 +4,9 @@ import HummingbirdWebSocket
 
 /// Routes that return the per-territory availability of a subscription.
 struct SubscriptionAvailabilityController: Sendable {
-    let repo: any SubscriptionAvailabilityRepository
+    let repo: any SubscriptionAvailabilities
     /// Same synthetic-default rationale as `IAPAvailabilityController.territoryRepo`.
-    let territoryRepo: any TerritoryRepository
+    let territoryRepo: any Territories
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/subscriptions/:subscriptionId/availability") { _, context -> Response in

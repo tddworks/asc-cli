@@ -7,7 +7,7 @@ import Testing
 struct BundleIDsDeleteTests {
 
     @Test func `execute deletes bundle id`() async throws {
-        let mockRepo = MockBundleIDRepository()
+        let mockRepo = MockBundleIDs()
         given(mockRepo).deleteBundleID(id: .any).willReturn()
 
         let cmd = try BundleIDsDelete.parse(["--bundle-id-id", "bid-42"])

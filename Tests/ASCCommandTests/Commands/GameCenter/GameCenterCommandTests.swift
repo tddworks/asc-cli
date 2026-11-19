@@ -7,7 +7,7 @@ import Testing
 struct GameCenterDetailGetTests {
 
     @Test func `detail get table output includes id appId and arcade enabled status`() async throws {
-        let mockRepo = MockGameCenterRepository()
+        let mockRepo = MockGameCenter()
         given(mockRepo).getDetail(appId: .any)
             .willReturn(GameCenterDetail(id: "gc-1", appId: "app-1", isArcadeEnabled: false))
 
@@ -20,7 +20,7 @@ struct GameCenterDetailGetTests {
     }
 
     @Test func `detail get returns id, appId, isArcadeEnabled and affordances`() async throws {
-        let mockRepo = MockGameCenterRepository()
+        let mockRepo = MockGameCenter()
         given(mockRepo).getDetail(appId: .any)
             .willReturn(GameCenterDetail(id: "gc-1", appId: "app-1", isArcadeEnabled: true))
 
@@ -51,7 +51,7 @@ struct GameCenterDetailGetTests {
 struct GameCenterAchievementsListTests {
 
     @Test func `achievements list returns id, detailId, and affordances`() async throws {
-        let mockRepo = MockGameCenterRepository()
+        let mockRepo = MockGameCenter()
         given(mockRepo).listAchievements(gameCenterDetailId: .any)
             .willReturn([
                 GameCenterAchievement(
@@ -92,7 +92,7 @@ struct GameCenterAchievementsListTests {
     }
 
     @Test func `table output includes achievement fields`() async throws {
-        let mockRepo = MockGameCenterRepository()
+        let mockRepo = MockGameCenter()
         given(mockRepo).listAchievements(gameCenterDetailId: .any)
             .willReturn([
                 GameCenterAchievement(
@@ -120,7 +120,7 @@ struct GameCenterAchievementsListTests {
 struct GameCenterAchievementsCreateTests {
 
     @Test func `achievement create returns created achievement with affordances`() async throws {
-        let mockRepo = MockGameCenterRepository()
+        let mockRepo = MockGameCenter()
         given(mockRepo).createAchievement(
             gameCenterDetailId: .any,
             referenceName: .any,
@@ -176,7 +176,7 @@ struct GameCenterAchievementsCreateTests {
 struct GameCenterAchievementsDeleteTests {
 
     @Test func `achievement delete calls repo`() async throws {
-        let mockRepo = MockGameCenterRepository()
+        let mockRepo = MockGameCenter()
         given(mockRepo).deleteAchievement(id: .any).willReturn(())
 
         let cmd = try GameCenterAchievementsDelete.parse(["--achievement-id", "ach-1"])
@@ -190,7 +190,7 @@ struct GameCenterAchievementsDeleteTests {
 struct GameCenterLeaderboardsListTests {
 
     @Test func `table output includes leaderboard fields`() async throws {
-        let mockRepo = MockGameCenterRepository()
+        let mockRepo = MockGameCenter()
         given(mockRepo).listLeaderboards(gameCenterDetailId: .any)
             .willReturn([
                 GameCenterLeaderboard(
@@ -214,7 +214,7 @@ struct GameCenterLeaderboardsListTests {
     }
 
     @Test func `leaderboards list returns id, detailId, and affordances`() async throws {
-        let mockRepo = MockGameCenterRepository()
+        let mockRepo = MockGameCenter()
         given(mockRepo).listLeaderboards(gameCenterDetailId: .any)
             .willReturn([
                 GameCenterLeaderboard(
@@ -258,7 +258,7 @@ struct GameCenterLeaderboardsListTests {
 struct GameCenterLeaderboardsCreateTests {
 
     @Test func `leaderboard create returns created leaderboard with affordances`() async throws {
-        let mockRepo = MockGameCenterRepository()
+        let mockRepo = MockGameCenter()
         given(mockRepo).createLeaderboard(
             gameCenterDetailId: .any,
             referenceName: .any,
@@ -312,7 +312,7 @@ struct GameCenterLeaderboardsCreateTests {
 struct GameCenterLeaderboardsCreateValidationTests {
 
     @Test func `invalid score sort type throws validation error`() async throws {
-        let mockRepo = MockGameCenterRepository()
+        let mockRepo = MockGameCenter()
 
         let cmd = try GameCenterLeaderboardsCreate.parse([
             "--detail-id", "gc-1",
@@ -329,7 +329,7 @@ struct GameCenterLeaderboardsCreateValidationTests {
     }
 
     @Test func `invalid submission type throws validation error`() async throws {
-        let mockRepo = MockGameCenterRepository()
+        let mockRepo = MockGameCenter()
 
         let cmd = try GameCenterLeaderboardsCreate.parse([
             "--detail-id", "gc-1",
@@ -351,7 +351,7 @@ struct GameCenterLeaderboardsCreateValidationTests {
 struct GameCenterLeaderboardsDeleteTests {
 
     @Test func `leaderboard delete calls repo`() async throws {
-        let mockRepo = MockGameCenterRepository()
+        let mockRepo = MockGameCenter()
         given(mockRepo).deleteLeaderboard(id: .any).willReturn(())
 
         let cmd = try GameCenterLeaderboardsDelete.parse(["--leaderboard-id", "lb-1"])

@@ -27,11 +27,11 @@ struct AppShotsTemplatesList: AsyncParsableCommand {
     var preview: Bool = false
 
     func run() async throws {
-        let repo = ClientProvider.makeTemplateRepository()
+        let repo = ClientProvider.makeTemplates()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any TemplateRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any Templates, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let templates = try await repo.listTemplates(size: size)
 
         if preview {
@@ -82,11 +82,11 @@ struct AppShotsTemplatesGet: AsyncParsableCommand {
     var preview: Bool = false
 
     func run() async throws {
-        let repo = ClientProvider.makeTemplateRepository()
+        let repo = ClientProvider.makeTemplates()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any TemplateRepository) async throws -> String {
+    func execute(repo: any Templates) async throws -> String {
         guard let template = try await repo.getTemplate(id: id) else {
             throw ValidationError("Template '\(id)' not found. Run `asc app-shots templates list` to see available templates.")
         }
@@ -145,7 +145,7 @@ struct AppShotsTemplatesApply: AsyncParsableCommand {
     var imageOutput: String?
 
     func run() async throws {
-        let repo = ClientProvider.makeTemplateRepository()
+        let repo = ClientProvider.makeTemplates()
         if preview == .image {
             let renderer = ClientProvider.makeHTMLRenderer()
             print(try await execute(repo: repo, renderer: renderer))
@@ -154,7 +154,7 @@ struct AppShotsTemplatesApply: AsyncParsableCommand {
         }
     }
 
-    func execute(repo: any TemplateRepository, renderer: (any HTMLRenderer)? = nil) async throws -> String {
+    func execute(repo: any Templates, renderer: (any HTMLRenderer)? = nil) async throws -> String {
         guard let template = try await repo.getTemplate(id: id) else {
             throw ValidationError("Template '\(id)' not found. Run `asc app-shots templates list` to see available templates.")
         }

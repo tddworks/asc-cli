@@ -13,11 +13,11 @@ struct AppClipExperienceLocalizationsDelete: AsyncParsableCommand {
     var localizationId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppClipRepository()
+        let repo = try ClientProvider.makeAppClips()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any AppClipRepository) async throws {
+    func execute(repo: any AppClips) async throws {
         try await repo.deleteLocalization(id: localizationId)
     }
 }

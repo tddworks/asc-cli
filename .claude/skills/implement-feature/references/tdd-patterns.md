@@ -21,7 +21,7 @@ should <outcome the person / agent / REST client observes> [when <App Store Conn
 - **Say what the observer gets, not which code runs.** The actors are the
   person running `asc`, an agent reading the JSON and its affordances, a REST
   client of `asc web-server`, and App Store Connect itself. The name never
-  holds a method or type name (`execute`, `getDeclaration`, `SDKAppRepository`)
+  holds a method or type name (`execute`, `getDeclaration`, `SDKApps`)
   or a mechanism verb (`returns`, `calls`, `passes`, `forwards`, `maps`,
   `parses`, `injects`). JSON keys and CLI flags are fine — they are the public
   schema the observer reads.
@@ -156,7 +156,7 @@ answer proves nothing.
 struct VersionsListTests {
     @Test func `should list the app's versions with their state`() async throws {
         // Given - STUB what App Store Connect has
-        let mockRepo = MockVersionRepository()
+        let mockRepo = MockAppStoreVersions()
         given(mockRepo).listVersions(appId: .any).willReturn([
             MockRepositoryFactory.makeVersion(id: "v1", appId: "app-1", state: .readyForSale)
         ])
@@ -181,14 +181,14 @@ assert the domain value:
 
 ```swift
 @Suite
-struct SDKAgeRatingDeclarationRepositoryTests {
+struct SDKAgeRatingDeclarationsTests {
     @Test func `should tie the age rating to the app info it was read from`() async throws {
         let stub = StubAPIClient()
         stub.willReturn(AgeRatingDeclarationResponse(
             data: AgeRatingDeclaration(type: .ageRatingDeclarations, id: "decl-1"),
             links: .init(this: "")
         ))
-        let repo = SDKAgeRatingDeclarationRepository(client: stub)
+        let repo = SDKAgeRatingDeclarations(client: stub)
 
         let result = try await repo.getDeclaration(appInfoId: "info-42")
 

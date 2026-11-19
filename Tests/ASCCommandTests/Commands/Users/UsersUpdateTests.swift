@@ -7,7 +7,7 @@ import Testing
 struct UsersUpdateTests {
 
     @Test func `update returns team member with new roles`() async throws {
-        let mockRepo = MockUserRepository()
+        let mockRepo = MockUsers()
         given(mockRepo).updateUser(id: .any, roles: .any).willReturn(
             TeamMember(
                 id: "u-1",
@@ -28,7 +28,7 @@ struct UsersUpdateTests {
     }
 
     @Test func `update rejects invalid role`() async throws {
-        let mockRepo = MockUserRepository()
+        let mockRepo = MockUsers()
 
         let cmd = try UsersUpdate.parse(["--user-id", "u-1", "--role", "INVALID"])
         await #expect(throws: (any Error).self) {
@@ -37,7 +37,7 @@ struct UsersUpdateTests {
     }
 
     @Test func `update passes multiple roles to repository`() async throws {
-        let mockRepo = MockUserRepository()
+        let mockRepo = MockUsers()
         given(mockRepo).updateUser(id: .any, roles: .any).willReturn(
             TeamMember(
                 id: "u-1",

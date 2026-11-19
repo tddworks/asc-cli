@@ -7,7 +7,7 @@ import Testing
 struct PluginsMarketTests {
 
     @Test func `market list shows available plugins with install affordance`() async throws {
-        let mockRepo = MockPluginRepository()
+        let mockRepo = MockPlugins()
         given(mockRepo).listAvailable().willReturn([
             Plugin(
                 id: "asc-pro", name: "ASC Pro", version: "1.0",
@@ -28,7 +28,7 @@ struct PluginsMarketTests {
     }
 
     @Test func `market search filters by query`() async throws {
-        let mockRepo = MockPluginRepository()
+        let mockRepo = MockPlugins()
         given(mockRepo).searchAvailable(query: .value("sim")).willReturn([
             Plugin(id: "asc-pro", name: "ASC Pro", version: "1.0",
                    description: "Simulator streaming",
@@ -43,7 +43,7 @@ struct PluginsMarketTests {
     }
 
     @Test func `market list shows uninstall affordance for installed plugins`() async throws {
-        let mockRepo = MockPluginRepository()
+        let mockRepo = MockPlugins()
         given(mockRepo).listAvailable().willReturn([
             Plugin(id: "asc-pro", name: "ASC Pro", version: "1.0",
                    description: "Pro features",

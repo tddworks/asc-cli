@@ -22,11 +22,11 @@ struct IAPCreate: AsyncParsableCommand {
     var type: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchaseRepository()
+        let repo = try ClientProvider.makeInAppPurchases()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any InAppPurchaseRepository) async throws -> String {
+    func execute(repo: any InAppPurchases) async throws -> String {
         guard let iapType = InAppPurchaseType(cliArgument: type) else {
             throw ValidationError("Invalid type '\(type)'. Use: consumable, non-consumable, non-renewing-subscription")
         }

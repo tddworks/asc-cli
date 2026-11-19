@@ -7,7 +7,7 @@ import Testing
 struct VersionsCreateTests {
 
     @Test func `created iOS version is returned in prepare for submission state`() async throws {
-        let mockRepo = MockVersionRepository()
+        let mockRepo = MockAppStoreVersions()
         given(mockRepo).createVersion(appId: .any, versionString: .any, platform: .any).willReturn(
             AppStoreVersion(id: "v-new", appId: "app-1", versionString: "2.0.0", platform: .iOS, state: .prepareForSubmission)
         )
@@ -39,7 +39,7 @@ struct VersionsCreateTests {
     }
 
     @Test func `created macOS version returns version with macOS platform`() async throws {
-        let mockRepo = MockVersionRepository()
+        let mockRepo = MockAppStoreVersions()
         given(mockRepo).createVersion(appId: .any, versionString: .any, platform: .any).willReturn(
             AppStoreVersion(id: "v-1", appId: "app-42", versionString: "3.1.0", platform: .macOS, state: .prepareForSubmission)
         )

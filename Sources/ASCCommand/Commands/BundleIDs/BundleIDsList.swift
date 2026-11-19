@@ -16,11 +16,11 @@ struct BundleIDsList: AsyncParsableCommand {
     var identifier: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeBundleIDRepository()
+        let repo = try ClientProvider.makeBundleIDs()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any BundleIDRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any BundleIDs, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let domainPlatform = platform.flatMap { BundleIDPlatform(cliArgument: $0) }
         let items = try await repo.listBundleIDs(platform: domainPlatform, identifier: identifier)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)

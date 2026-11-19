@@ -29,11 +29,11 @@ struct BuildsUpload: AsyncParsableCommand {
     var wait: Bool = false
 
     func run() async throws {
-        let repo = try ClientProvider.makeBuildUploadRepository()
+        let repo = try ClientProvider.makeBuildUploads()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any BuildUploadRepository) async throws -> String {
+    func execute(repo: any BuildUploads) async throws -> String {
         let fileURL = URL(fileURLWithPath: file)
 
         let resolvedPlatform: BuildUploadPlatform
@@ -66,7 +66,7 @@ struct BuildsUpload: AsyncParsableCommand {
         )
     }
 
-    private func poll(uploadId: String, repo: any BuildUploadRepository) async throws -> BuildUpload {
+    private func poll(uploadId: String, repo: any BuildUploads) async throws -> BuildUpload {
         while true {
             let upload = try await repo.getBuildUpload(id: uploadId)
             if upload.state.hasFailed {

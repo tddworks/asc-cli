@@ -13,11 +13,11 @@ struct AnalyticsReportsDelete: AsyncParsableCommand {
     var requestId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAnalyticsReportRepository()
+        let repo = try ClientProvider.makeAnalyticsReports()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AnalyticsReportRepository) async throws -> String {
+    func execute(repo: any AnalyticsReports) async throws -> String {
         try await repo.deleteRequest(id: requestId)
         return "Deleted analytics report request \(requestId)"
     }

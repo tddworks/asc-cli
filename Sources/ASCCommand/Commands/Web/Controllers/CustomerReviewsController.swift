@@ -4,7 +4,7 @@ import HummingbirdWebSocket
 
 /// Routes that return `CustomerReview` resources.
 struct CustomerReviewsController: Sendable {
-    let repo: any CustomerReviewRepository
+    let repo: any CustomerReviews
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/apps/:appId/reviews") { _, context -> Response in

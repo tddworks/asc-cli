@@ -18,7 +18,7 @@ struct SDKBuildUploadRepositoryUploadTests {
             try Self.file(#"{"data":{"type":"buildUploadFiles","id":"file-1","attributes":{"fileName":"MyApp.ipa","fileSize":7}},"links":{"self":""}}"#),
         ])
 
-        let upload = try await SDKBuildUploadRepository(client: stub).uploadBuild(
+        let upload = try await SDKBuildUploads(client: stub).uploadBuild(
             appId: "app-1", version: "1.2.0", buildNumber: "42", platform: .iOS, fileURL: file
         )
 
@@ -40,7 +40,7 @@ struct SDKBuildUploadRepositoryUploadTests {
         http.enqueue(json: "", statusCode: 500)
 
         await #expect(throws: (any Error).self) {
-            try await SDKBuildUploadRepository(client: stub, uploader: UploadOperationsExecutor(http: http)).uploadBuild(
+            try await SDKBuildUploads(client: stub, uploader: UploadOperationsExecutor(http: http)).uploadBuild(
                 appId: "app-1", version: "1.2.0", buildNumber: "42", platform: .iOS, fileURL: file
             )
         }
@@ -56,7 +56,7 @@ struct SDKBuildUploadRepositoryUploadTests {
         http.enqueue(json: "", statusCode: 200)
 
         await #expect(throws: (any Error).self) {
-            _ = try await SDKBuildUploadRepository(client: stub, uploader: UploadOperationsExecutor(http: http)).uploadBuild(
+            _ = try await SDKBuildUploads(client: stub, uploader: UploadOperationsExecutor(http: http)).uploadBuild(
                 appId: "app-1", version: "1.2.0", buildNumber: "42", platform: .iOS, fileURL: file
             )
         }

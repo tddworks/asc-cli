@@ -29,13 +29,13 @@ struct IrisAppsCreate: AsyncParsableCommand {
 
     func run() async throws {
         let cookieProvider = ClientProvider.makeIrisCookieProvider()
-        let repo = ClientProvider.makeIrisAppBundleRepository()
+        let repo = ClientProvider.makeIrisAppBundles()
         print(try await execute(cookieProvider: cookieProvider, repo: repo))
     }
 
     func execute(
         cookieProvider: any IrisCookieProvider,
-        repo: any IrisAppBundleRepository
+        repo: any IrisAppBundles
     ) async throws -> String {
         let session = try cookieProvider.resolveSession()
         let app = try await repo.createApp(

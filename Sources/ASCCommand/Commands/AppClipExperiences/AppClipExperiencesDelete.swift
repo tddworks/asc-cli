@@ -13,11 +13,11 @@ struct AppClipExperiencesDelete: AsyncParsableCommand {
     var experienceId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppClipRepository()
+        let repo = try ClientProvider.makeAppClips()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any AppClipRepository) async throws {
+    func execute(repo: any AppClips) async throws {
         try await repo.deleteExperience(id: experienceId)
     }
 }

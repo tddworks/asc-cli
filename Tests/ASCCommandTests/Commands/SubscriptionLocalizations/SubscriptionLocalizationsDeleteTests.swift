@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionLocalizationsDeleteTests {
 
     @Test func `delete localization calls repo with localization id`() async throws {
-        let mockRepo = MockSubscriptionLocalizationRepository()
+        let mockRepo = MockSubscriptionLocalizations()
         given(mockRepo).deleteLocalization(localizationId: .any).willReturn(())
 
         let cmd = try SubscriptionLocalizationsDelete.parse(["--localization-id", "loc-1"])

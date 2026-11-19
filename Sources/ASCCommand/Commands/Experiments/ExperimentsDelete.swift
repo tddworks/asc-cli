@@ -13,11 +13,11 @@ struct ExperimentsDelete: AsyncParsableCommand {
     var experimentId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeExperimentRepository()
+        let repo = try ClientProvider.makeExperiments()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any ExperimentRepository) async throws {
+    func execute(repo: any Experiments) async throws {
         try await repo.deleteExperiment(experimentId: experimentId)
     }
 }

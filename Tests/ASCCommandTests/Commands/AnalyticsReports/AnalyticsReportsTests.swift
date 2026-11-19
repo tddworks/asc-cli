@@ -7,7 +7,7 @@ import Testing
 struct AnalyticsReportsRequestTests {
 
     @Test func `creates a one-time snapshot request with affordances`() async throws {
-        let mockRepo = MockAnalyticsReportRepository()
+        let mockRepo = MockAnalyticsReports()
         given(mockRepo).createRequest(appId: .any, accessType: .any).willReturn(
             AnalyticsReportRequest(id: "req-1", appId: "app-1", accessType: .oneTimeSnapshot, isStoppedDueToInactivity: nil)
         )
@@ -38,7 +38,7 @@ struct AnalyticsReportsRequestTests {
 struct AnalyticsReportsListTests {
 
     @Test func `lists requests with affordances`() async throws {
-        let mockRepo = MockAnalyticsReportRepository()
+        let mockRepo = MockAnalyticsReports()
         given(mockRepo).listRequests(appId: .any, accessType: .any).willReturn([
             AnalyticsReportRequest(id: "req-1", appId: "app-1", accessType: .ongoing, isStoppedDueToInactivity: nil)
         ])
@@ -74,7 +74,7 @@ struct AnalyticsReportsDeleteTests {
     }
 
     @Test func `deletes request and outputs confirmation`() async throws {
-        let mockRepo = MockAnalyticsReportRepository()
+        let mockRepo = MockAnalyticsReports()
         given(mockRepo).deleteRequest(id: .any).willReturn(())
 
         let cmd = try AnalyticsReportsDelete.parse(["--request-id", "req-1"])
@@ -88,7 +88,7 @@ struct AnalyticsReportsDeleteTests {
 struct AnalyticsReportsReportsListTests {
 
     @Test func `lists reports with affordances`() async throws {
-        let mockRepo = MockAnalyticsReportRepository()
+        let mockRepo = MockAnalyticsReports()
         given(mockRepo).listReports(requestId: .any, category: .any).willReturn([
             AnalyticsReport(id: "rpt-1", requestId: "req-1", name: "App Downloads", category: .appStoreEngagement)
         ])
@@ -119,7 +119,7 @@ struct AnalyticsReportsReportsListTests {
 struct AnalyticsReportsInstancesListTests {
 
     @Test func `lists instances with affordances`() async throws {
-        let mockRepo = MockAnalyticsReportRepository()
+        let mockRepo = MockAnalyticsReports()
         given(mockRepo).listInstances(reportId: .any, granularity: .any).willReturn([
             AnalyticsReportInstance(id: "inst-1", reportId: "rpt-1", granularity: .daily, processingDate: "2024-01-15")
         ])
@@ -150,7 +150,7 @@ struct AnalyticsReportsInstancesListTests {
 struct AnalyticsReportsSegmentsListTests {
 
     @Test func `lists segments with affordances`() async throws {
-        let mockRepo = MockAnalyticsReportRepository()
+        let mockRepo = MockAnalyticsReports()
         given(mockRepo).listSegments(instanceId: .any).willReturn([
             AnalyticsReportSegment(id: "seg-1", instanceId: "inst-1", checksum: "abc123", sizeInBytes: 2048, url: "https://example.com/data.tsv")
         ])

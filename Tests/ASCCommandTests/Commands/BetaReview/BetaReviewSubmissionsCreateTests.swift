@@ -7,7 +7,7 @@ import Testing
 struct BetaReviewSubmissionsCreateTests {
 
     @Test func `created submission shows waiting for review state`() async throws {
-        let mockRepo = MockBetaAppReviewRepository()
+        let mockRepo = MockBetaAppReviews()
         given(mockRepo).createSubmission(buildId: .value("build-1"))
             .willReturn(
                 BetaAppReviewSubmission(id: "sub-new", buildId: "build-1", state: .waitingForReview)

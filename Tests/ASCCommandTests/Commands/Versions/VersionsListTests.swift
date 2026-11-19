@@ -7,7 +7,7 @@ import Testing
 struct VersionsListTests {
 
     @Test func `live version includes navigation affordances`() async throws {
-        let mockRepo = MockVersionRepository()
+        let mockRepo = MockAppStoreVersions()
         given(mockRepo).listVersions(appId: .any).willReturn([
             AppStoreVersion(id: "v-1", appId: "app-1", versionString: "2.3.0", platform: .iOS, state: .readyForSale),
         ])

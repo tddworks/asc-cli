@@ -4,7 +4,7 @@ import HummingbirdWebSocket
 
 /// Routes that return `AppStoreVersionLocalization` resources.
 struct VersionLocalizationsController: Sendable {
-    let repo: any VersionLocalizationRepository
+    let repo: any VersionLocalizations
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/versions/:versionId/localizations") { _, context -> Response in

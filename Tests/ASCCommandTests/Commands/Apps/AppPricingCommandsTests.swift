@@ -7,7 +7,7 @@ import Testing
 struct AppPricingCommandsTests {
 
     @Test func `listed price points show the price and the command to set it`() async throws {
-        let mockRepo = MockPricingRepository()
+        let mockRepo = MockAppPrices()
         given(mockRepo).listPricePoints(appId: .value("app-1"), territory: .value("USA")).willReturn([
             AppPricePoint(id: "pp-1", appId: "app-1", territory: "USA", customerPrice: "4.99", proceeds: "4.24"),
         ])
@@ -35,7 +35,7 @@ struct AppPricingCommandsTests {
     }
 
     @Test func `price points can be listed for another territory`() async throws {
-        let mockRepo = MockPricingRepository()
+        let mockRepo = MockAppPrices()
         given(mockRepo).listPricePoints(appId: .any, territory: .any).willReturn([])
 
         _ = try await AppsPricePointsList.parse(["--app-id", "app-1", "--territory", "JPN"]).execute(repo: mockRepo)
@@ -44,7 +44,7 @@ struct AppPricingCommandsTests {
     }
 
     @Test func `setting the price shows the new schedule`() async throws {
-        let mockRepo = MockPricingRepository()
+        let mockRepo = MockAppPrices()
         given(mockRepo).setPriceSchedule(appId: .value("app-1"), baseTerritory: .value("USA"), pricePointId: .value("pp-1"))
             .willReturn(AppPriceSchedule(id: "sched-1", appId: "app-1", baseTerritory: "USA"))
 

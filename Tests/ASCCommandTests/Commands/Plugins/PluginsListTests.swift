@@ -7,7 +7,7 @@ import Testing
 struct PluginsListTests {
 
     @Test func `list shows installed plugins with affordances`() async throws {
-        let mockRepo = MockPluginRepository()
+        let mockRepo = MockPlugins()
         given(mockRepo).listInstalled().willReturn([
             Plugin(id: "asc-pro", name: "ASC Pro", version: "1.0",
                    description: "Simulator streaming", author: "tddworks",
@@ -23,7 +23,7 @@ struct PluginsListTests {
     }
 
     @Test func `list shows empty data when no plugins installed`() async throws {
-        let mockRepo = MockPluginRepository()
+        let mockRepo = MockPlugins()
         given(mockRepo).listInstalled().willReturn([])
 
         let cmd = try PluginsList.parse(["--pretty"])

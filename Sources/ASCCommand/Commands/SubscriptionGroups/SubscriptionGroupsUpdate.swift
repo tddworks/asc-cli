@@ -16,11 +16,11 @@ struct SubscriptionGroupsUpdate: AsyncParsableCommand {
     var referenceName: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptionGroupRepository()
+        let repo = try ClientProvider.makeSubscriptionGroups()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubscriptionGroupRepository) async throws -> String {
+    func execute(repo: any SubscriptionGroups) async throws -> String {
         let item = try await repo.updateSubscriptionGroup(groupId: groupId, referenceName: referenceName)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

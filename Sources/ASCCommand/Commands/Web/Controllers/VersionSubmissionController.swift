@@ -7,8 +7,8 @@ import HummingbirdWebSocket
 /// version in the same review submission; `?dry-run=true` lists those items and
 /// submits nothing. Query names match the CLI's `--with-products` / `--dry-run`.
 struct VersionSubmissionController: Sendable {
-    let submissionRepo: any SubmissionRepository
-    let versionRepo: any VersionRepository
+    let submissionRepo: any ReviewSubmissions
+    let versionRepo: any AppStoreVersions
     let planner: SubmissionPlanner
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {

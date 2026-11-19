@@ -7,7 +7,7 @@ import Testing
 struct ScreenshotSetsListTests {
 
     @Test func `listed screenshot sets include affordances for navigation`() async throws {
-        let mockRepo = MockScreenshotRepository()
+        let mockRepo = MockAppScreenshots()
         given(mockRepo).listScreenshotSets(localizationId: .any).willReturn([
             AppScreenshotSet(id: "set-1", localizationId: "loc-1", screenshotDisplayType: .iphone67, screenshotsCount: 3),
         ])

@@ -7,7 +7,7 @@ import Testing
 struct IAPCreateTests {
 
     @Test func `creates iap and returns it with affordances`() async throws {
-        let mockRepo = MockInAppPurchaseRepository()
+        let mockRepo = MockInAppPurchases()
         given(mockRepo).createInAppPurchase(appId: .any, referenceName: .any, productId: .any, type: .any)
             .willReturn(InAppPurchase(
                 id: "iap-new",
@@ -61,7 +61,7 @@ struct IAPCreateTests {
     }
 
     @Test func `throws for invalid iap type`() async throws {
-        let mockRepo = MockInAppPurchaseRepository()
+        let mockRepo = MockInAppPurchases()
         let cmd = try IAPCreate.parse([
             "--app-id", "app-1",
             "--reference-name", "Upgrade",

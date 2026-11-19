@@ -16,12 +16,12 @@ struct IAPOfferCodeOneTimeCodesUpdate: AsyncParsableCommand {
     var active: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchaseOfferCodeRepository()
+        let repo = try ClientProvider.makeInAppPurchaseOfferCodes()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any InAppPurchaseOfferCodeRepository,
+        repo: any InAppPurchaseOfferCodes,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         guard let isActive = Bool(active) else {

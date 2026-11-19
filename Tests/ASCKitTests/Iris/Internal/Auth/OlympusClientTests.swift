@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import ASCKit
 
-/// Private URLProtocol subclass — see `IrisSDKInAppPurchaseSubmissionRepositoryTests`
+/// Private URLProtocol subclass — see `IrisSDKInAppPurchaseSubmissionsTests`
 /// for the rationale (avoids racing the shared `URLProtocolStub.handler` static used
 /// by `IdmsaAPIClientTests` when suites run in parallel).
 final class OlympusURLProtocolStub: URLProtocol, @unchecked Sendable {

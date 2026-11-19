@@ -25,13 +25,13 @@ struct IrisResolutionCenterGet: AsyncParsableCommand {
 
     func run() async throws {
         let cookieProvider = ClientProvider.makeIrisCookieProvider()
-        let repo = ClientProvider.makeIrisResolutionCenterRepository()
+        let repo = ClientProvider.makeIrisResolutionCenter()
         print(try await execute(cookieProvider: cookieProvider, repo: repo))
     }
 
     func execute(
         cookieProvider: any IrisCookieProvider,
-        repo: any IrisResolutionCenterRepository,
+        repo: any IrisResolutionCenter,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let session = try cookieProvider.resolveSession()

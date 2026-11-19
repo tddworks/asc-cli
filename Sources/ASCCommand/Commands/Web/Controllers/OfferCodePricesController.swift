@@ -4,8 +4,8 @@ import HummingbirdWebSocket
 
 /// Routes that return per-territory prices attached to IAP and subscription offer codes.
 struct OfferCodePricesController: Sendable {
-    let iapRepo: any InAppPurchaseOfferCodeRepository
-    let subRepo: any SubscriptionOfferCodeRepository
+    let iapRepo: any InAppPurchaseOfferCodes
+    let subRepo: any SubscriptionOfferCodes
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/iap-offer-codes/:offerCodeId/prices") { _, context -> Response in

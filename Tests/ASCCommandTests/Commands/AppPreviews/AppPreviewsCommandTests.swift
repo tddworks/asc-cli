@@ -9,7 +9,7 @@ struct AppPreviewsCommandTests {
     // MARK: - list
 
     @Test func `listed previews include file metadata and affordances`() async throws {
-        let mockRepo = MockPreviewRepository()
+        let mockRepo = MockAppPreviews()
         given(mockRepo).listPreviews(setId: .any).willReturn([
             AppPreview(
                 id: "prev-1",
@@ -46,7 +46,7 @@ struct AppPreviewsCommandTests {
     }
 
     @Test func `previews without optional fields omit them from json`() async throws {
-        let mockRepo = MockPreviewRepository()
+        let mockRepo = MockAppPreviews()
         given(mockRepo).listPreviews(setId: .any).willReturn([
             AppPreview(
                 id: "prev-1",
@@ -77,7 +77,7 @@ struct AppPreviewsCommandTests {
     }
 
     @Test func `previews in processing state include video delivery state`() async throws {
-        let mockRepo = MockPreviewRepository()
+        let mockRepo = MockAppPreviews()
         given(mockRepo).listPreviews(setId: .any).willReturn([
             AppPreview(
                 id: "prev-1",
@@ -114,7 +114,7 @@ struct AppPreviewsCommandTests {
     }
 
     @Test func `table output for previews includes all row fields`() async throws {
-        let mockRepo = MockPreviewRepository()
+        let mockRepo = MockAppPreviews()
         given(mockRepo).listPreviews(setId: .any).willReturn([
             AppPreview(
                 id: "prev-1",
@@ -138,7 +138,7 @@ struct AppPreviewsCommandTests {
     // MARK: - upload
 
     @Test func `uploaded preview is returned with file metadata and affordances`() async throws {
-        let mockRepo = MockPreviewRepository()
+        let mockRepo = MockAppPreviews()
         given(mockRepo).uploadPreview(setId: .any, fileURL: .any, previewFrameTimeCode: .any).willReturn(
             AppPreview(
                 id: "prev-new",
@@ -175,7 +175,7 @@ struct AppPreviewsCommandTests {
     }
 
     @Test func `upload with preview frame timecode passes timecode to repository`() async throws {
-        let mockRepo = MockPreviewRepository()
+        let mockRepo = MockAppPreviews()
         given(mockRepo).uploadPreview(setId: .any, fileURL: .any, previewFrameTimeCode: .any).willReturn(
             AppPreview(
                 id: "prev-1",

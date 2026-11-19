@@ -25,11 +25,11 @@ struct IAPUpdate: AsyncParsableCommand {
     var notFamilySharable: Bool = false
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchaseRepository()
+        let repo = try ClientProvider.makeInAppPurchases()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any InAppPurchaseRepository) async throws -> String {
+    func execute(repo: any InAppPurchases) async throws -> String {
         let isFamilySharable: Bool? = familySharable ? true : (notFamilySharable ? false : nil)
         let item = try await repo.updateInAppPurchase(
             iapId: iapId,

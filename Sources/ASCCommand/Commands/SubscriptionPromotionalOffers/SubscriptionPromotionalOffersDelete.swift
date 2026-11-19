@@ -13,11 +13,11 @@ struct SubscriptionPromotionalOffersDelete: AsyncParsableCommand {
     var offerId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptionPromotionalOfferRepository()
+        let repo = try ClientProvider.makeSubscriptionPromotionalOffers()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any SubscriptionPromotionalOfferRepository) async throws {
+    func execute(repo: any SubscriptionPromotionalOffers) async throws {
         try await repo.deletePromotionalOffer(offerId: offerId)
     }
 }

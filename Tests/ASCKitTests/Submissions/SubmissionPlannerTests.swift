@@ -11,10 +11,10 @@ struct SubmissionPlannerTests {
     )
 
     private struct Repos {
-        let iaps = MockInAppPurchaseRepository()
-        let groups = MockSubscriptionGroupRepository()
-        let subscriptions = MockSubscriptionRepository()
-        let versions = MockProductVersionRepository()
+        let iaps = MockInAppPurchases()
+        let groups = MockSubscriptionGroups()
+        let subscriptions = MockSubscriptions()
+        let versions = MockProductVersions()
 
         var planner: SubmissionPlanner {
             SubmissionPlanner(iapRepo: iaps, groupRepo: groups, subscriptionRepo: subscriptions, productVersionRepo: versions)
@@ -118,7 +118,7 @@ struct SubmissionPlannerTests {
             PlannedReviewItem(kind: .appStoreVersion, versionId: "v-1", productId: "app-1", name: "1.0"),
             PlannedReviewItem(kind: .inAppPurchaseVersion, versionId: "iv-1", productId: "iap-1", name: "Lifetime"),
         ])
-        let repo = MockSubmissionRepository()
+        let repo = MockReviewSubmissions()
         given(repo).createSubmission(appId: .any, platform: .any).willReturn(
             MockRepositoryFactory.makeReviewSubmission(id: "sub-1", appId: "app-1", state: .readyForReview)
         )
@@ -141,7 +141,7 @@ struct SubmissionPlannerTests {
             PlannedReviewItem(kind: .appStoreVersion, versionId: "v-1", productId: "app-1", name: "1.0"),
             PlannedReviewItem(kind: .inAppPurchaseVersion, versionId: "iv-1", productId: "iap-1", name: "Lifetime"),
         ])
-        let repo = MockSubmissionRepository()
+        let repo = MockReviewSubmissions()
         given(repo).createSubmission(appId: .any, platform: .any).willReturn(
             MockRepositoryFactory.makeReviewSubmission(id: "sub-1", state: .readyForReview)
         )

@@ -8,9 +8,9 @@ import Foundation
 /// is present or the session has expired. Composition with browser/env cookies is the
 /// composite's job, not this provider's.
 public struct StoredSRPIrisCookieProvider: IrisCookieProvider {
-    private let sessionRepository: any IrisSessionRepository
+    private let sessionRepository: any IrisSessions
 
-    public init(sessionRepository: any IrisSessionRepository = FileIrisSessionRepository()) {
+    public init(sessionRepository: any IrisSessions = FileIrisSessions()) {
         self.sessionRepository = sessionRepository
     }
 

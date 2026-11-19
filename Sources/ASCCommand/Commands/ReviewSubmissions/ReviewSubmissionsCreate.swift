@@ -16,11 +16,11 @@ struct ReviewSubmissionsCreate: AsyncParsableCommand {
     var platform: String = "ios"
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubmissionRepository()
+        let repo = try ClientProvider.makeReviewSubmissions()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubmissionRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any ReviewSubmissions, affordanceMode: AffordanceMode = .cli) async throws -> String {
         guard let appStorePlatform = AppStorePlatform(cliArgument: platform) else {
             throw ValidationError("Unknown platform '\(platform)'. Use: ios, macos, tvos, visionos")
         }

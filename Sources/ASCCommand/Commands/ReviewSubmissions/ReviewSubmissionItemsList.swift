@@ -16,11 +16,11 @@ struct ReviewSubmissionItemsList: AsyncParsableCommand {
     var state: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubmissionRepository()
+        let repo = try ClientProvider.makeReviewSubmissions()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubmissionRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any ReviewSubmissions, affordanceMode: AffordanceMode = .cli) async throws -> String {
         var items = try await repo.listSubmissionItems(submissionId: submissionId)
         if let filter = state.flatMap({ ReviewSubmissionItemState(rawValue: $0.uppercased()) }) {
             items = items.filter { $0.state == filter }

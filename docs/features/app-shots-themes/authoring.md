@@ -44,10 +44,10 @@ struct MyThemeProvider: ThemeProvider {
 }
 
 // Register at plugin startup:
-await AggregateThemeRepository.shared.register(provider: MyThemeProvider())
+await AggregateThemes.shared.register(provider: MyThemeProvider())
 ```
 
-`AggregateThemeRepository` finds which provider owns the requested theme and delegates `compose()` / `design()` to it.
+`AggregateThemes` finds which provider owns the requested theme and delegates `compose()` / `design()` to it.
 
 For an example of the prompt `buildContext()` produces, for a "Space" theme:
 

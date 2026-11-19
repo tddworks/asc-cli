@@ -54,7 +54,7 @@ struct SDKSubmissionRepositoryTests {
             links: .init(this: "")
         ))
 
-        let repo = OpenAPISubmissionRepository(client: stub)
+        let repo = OpenAPIReviewSubmissions(client: stub)
         let result = try await repo.submitVersion(versionId: "v-1")
 
         #expect(result.id == "sub-99")
@@ -99,7 +99,7 @@ struct SDKSubmissionRepositoryTests {
             links: .init(this: "")
         ))
 
-        let repo = OpenAPISubmissionRepository(client: stub)
+        let repo = OpenAPIReviewSubmissions(client: stub)
         let result = try await repo.submitVersion(versionId: "v-2")
 
         #expect(result.platform == .macOS)
@@ -153,7 +153,7 @@ struct SDKSubmissionRepositoryTests {
             links: .init(this: "")
         ))
 
-        let repo = OpenAPISubmissionRepository(client: stub)
+        let repo = OpenAPIReviewSubmissions(client: stub)
         let result = try await repo.submitVersion(versionId: "v-3")
 
         #expect(result.id == "sub-existing")
@@ -181,7 +181,7 @@ struct SDKSubmissionRepositoryTests {
             links: .init(this: "")
         ))
 
-        let repo = OpenAPISubmissionRepository(client: stub)
+        let repo = OpenAPIReviewSubmissions(client: stub)
         let results = try await repo.listSubmissions(appId: "app-42", states: nil, limit: nil)
 
         #expect(results.count == 2)
@@ -205,7 +205,7 @@ struct SDKSubmissionRepositoryTests {
             links: .init(this: "")
         ))
 
-        let repo = OpenAPISubmissionRepository(client: stub)
+        let repo = OpenAPIReviewSubmissions(client: stub)
         let result = try await repo.getSubmission(id: "sub-77")
 
         #expect(result.id == "sub-77")
@@ -240,7 +240,7 @@ struct SDKSubmissionRepositoryTests {
             links: .init(this: "")
         ))
 
-        let repo = OpenAPISubmissionRepository(client: stub)
+        let repo = OpenAPIReviewSubmissions(client: stub)
         let results = try await repo.listSubmissionItems(submissionId: "sub-1")
 
         #expect(results.count == 2)
@@ -266,7 +266,7 @@ struct SDKSubmissionRepositoryTests {
             links: .init(this: "")
         ))
 
-        let repo = OpenAPISubmissionRepository(client: stub)
+        let repo = OpenAPIReviewSubmissions(client: stub)
         let results = try await repo.listSubmissionItems(submissionId: "sub-1")
 
         #expect(results.first?.linkedResourceId == nil)
@@ -287,7 +287,7 @@ struct SDKSubmissionRepositoryTests {
             links: .init(this: "")
         ))
 
-        let repo = OpenAPISubmissionRepository(client: stub)
+        let repo = OpenAPIReviewSubmissions(client: stub)
         let results = try await repo.listSubmissions(
             appId: "app-9",
             states: [.inReview, .waitingForReview],
@@ -304,7 +304,7 @@ struct SDKSubmissionRepositoryTests {
         let stub = StubAPIClient()
         stub.willReturn(ReviewSubmissionItemsResponse(data: [], links: .init(this: "")))
 
-        let repo = OpenAPISubmissionRepository(client: stub)
+        let repo = OpenAPIReviewSubmissions(client: stub)
         _ = try await repo.listSubmissionItems(submissionId: "sub-1")
 
         let query = Dictionary(uniqueKeysWithValues: (stub.lastQuery ?? []).map { ($0.0, $0.1 ?? "") })
@@ -340,7 +340,7 @@ struct SDKSubmissionRepositoryTests {
             links: .init(this: "")
         ))
 
-        let repo = OpenAPISubmissionRepository(client: stub)
+        let repo = OpenAPIReviewSubmissions(client: stub)
         let items = try await repo.listSubmissionItems(submissionId: "sub-1")
 
         #expect(items.map(\.linkedResourceType) == [.inAppPurchaseVersion, .subscriptionVersion, .subscriptionGroupVersion])
@@ -357,7 +357,7 @@ struct SDKSubmissionRepositoryTests {
             links: .init(this: "")
         ))
 
-        let repo = OpenAPISubmissionRepository(client: stub)
+        let repo = OpenAPIReviewSubmissions(client: stub)
         let submission = try await repo.createSubmission(appId: "app-1", platform: .iOS)
 
         #expect(submission == ASCKit.ReviewSubmission(id: "draft-1", appId: "app-1", platform: .iOS, state: .readyForReview))
@@ -373,7 +373,7 @@ struct SDKSubmissionRepositoryTests {
             links: .init(this: "")
         ))
 
-        let repo = OpenAPISubmissionRepository(client: stub)
+        let repo = OpenAPIReviewSubmissions(client: stub)
         let submission = try await repo.createSubmission(appId: "app-1", platform: .iOS)
 
         #expect(submission == ASCKit.ReviewSubmission(id: "new-1", appId: "app-1", platform: .iOS, state: .readyForReview))
@@ -396,7 +396,7 @@ struct SDKSubmissionRepositoryTests {
                 links: .init(this: "")
             ))
 
-            let repo = OpenAPISubmissionRepository(client: stub)
+            let repo = OpenAPIReviewSubmissions(client: stub)
             let item = try await repo.addItem(submissionId: "sub-1", target: target)
 
             let post = stub.requests.first { $0.method == "POST" }
@@ -413,7 +413,7 @@ struct SDKSubmissionRepositoryTests {
     @Test func `removing an item deletes it from its submission`() async throws {
         let stub = StubAPIClient()
 
-        let repo = OpenAPISubmissionRepository(client: stub)
+        let repo = OpenAPIReviewSubmissions(client: stub)
         try await repo.removeItem(itemId: "item-1")
 
         #expect(stub.requests.map { "\($0.method) \($0.path)" } == ["DELETE /v1/reviewSubmissionItems/item-1"])
@@ -428,7 +428,7 @@ struct SDKSubmissionRepositoryTests {
             links: .init(this: "")
         ))
 
-        let repo = OpenAPISubmissionRepository(client: stub)
+        let repo = OpenAPIReviewSubmissions(client: stub)
         let submission = try await repo.submit(submissionId: "sub-1")
 
         let patch = stub.requests.first { $0.method == "PATCH" }
@@ -463,7 +463,7 @@ struct SDKSubmissionRepositoryTests {
         let stub = StubAPIClient()
         stub.errorToThrow = appVersionNotReviewable()
 
-        let repo = OpenAPISubmissionRepository(client: stub)
+        let repo = OpenAPIReviewSubmissions(client: stub)
         await #expect {
             _ = try await repo.addItem(submissionId: "sub-1", target: .appStoreVersion("v-1"))
         } throws: { error in
@@ -479,7 +479,7 @@ struct SDKSubmissionRepositoryTests {
         let stub = StubAPIClient()
         stub.errorToThrow = appVersionNotReviewable()
 
-        let repo = OpenAPISubmissionRepository(client: stub)
+        let repo = OpenAPIReviewSubmissions(client: stub)
         await #expect {
             _ = try await repo.submit(submissionId: "sub-1")
         } throws: { error in
@@ -495,7 +495,7 @@ struct SDKSubmissionRepositoryTests {
                           detail: "An unexpected error occurred on the server side."),
         ]), nil)
 
-        let repo = OpenAPISubmissionRepository(client: stub)
+        let repo = OpenAPIReviewSubmissions(client: stub)
         await #expect {
             _ = try await repo.addItem(submissionId: "sub-1", target: .appStoreVersion("v-1"))
         } throws: { error in
@@ -539,7 +539,7 @@ struct SDKSubmissionRepositoryTests {
     @Test func `should add the version before submitting when the open draft is empty`() async throws {
         let stub = submitVersionStub(openDrafts: [openDraft], itemsInDraft: [])
 
-        let submission = try await OpenAPISubmissionRepository(client: stub).submitVersion(versionId: "v-1")
+        let submission = try await OpenAPIReviewSubmissions(client: stub).submitVersion(versionId: "v-1")
 
         #expect(stub.requests.filter { $0.method != "GET" }.map { "\($0.method) \($0.path)" } == [
             "POST /v1/reviewSubmissionItems",
@@ -558,7 +558,7 @@ struct SDKSubmissionRepositoryTests {
             ),
         ])
 
-        let submission = try await OpenAPISubmissionRepository(client: stub).submitVersion(versionId: "v-1")
+        let submission = try await OpenAPIReviewSubmissions(client: stub).submitVersion(versionId: "v-1")
 
         #expect(stub.requests.filter { $0.method != "GET" }.map { "\($0.method) \($0.path)" } == [
             "PATCH /v1/reviewSubmissions/sub-1",
@@ -574,7 +574,7 @@ struct SDKSubmissionRepositoryTests {
             ),
         ])
 
-        _ = try await OpenAPISubmissionRepository(client: stub).submitVersion(versionId: "v-1")
+        _ = try await OpenAPIReviewSubmissions(client: stub).submitVersion(versionId: "v-1")
 
         #expect(stub.requests.filter { $0.method != "GET" }.map { "\($0.method) \($0.path)" } == [
             "POST /v1/reviewSubmissionItems",
@@ -592,7 +592,7 @@ struct SDKSubmissionRepositoryTests {
         stub.errorsByRequest[refusedRequest] = appVersionNotReviewable()
 
         await #expect {
-            _ = try await OpenAPISubmissionRepository(client: stub).submitVersion(versionId: "v-1")
+            _ = try await OpenAPIReviewSubmissions(client: stub).submitVersion(versionId: "v-1")
         } throws: { error in
             String(describing: error) == """
             Apple refused the review submission: This resource cannot be reviewed, please check associated errors to see why.

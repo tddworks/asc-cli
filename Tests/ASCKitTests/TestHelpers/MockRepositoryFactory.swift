@@ -172,7 +172,7 @@ struct MockRepositoryFactory {
         localizationId: String = "loc-1",
         displayType: ScreenshotDisplayType = .iphone67,
         screenshotsCount: Int = 0,
-        repo: (any ScreenshotRepository)? = nil
+        repo: (any AppScreenshots)? = nil
     ) -> AppScreenshotSet {
         AppScreenshotSet(
             id: id,

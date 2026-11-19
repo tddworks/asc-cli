@@ -7,7 +7,7 @@ import Testing
 struct VersionsSubmitTests {
 
     @Test func `submitted version returns submission in waitingForReview state`() async throws {
-        let mockRepo = MockSubmissionRepository()
+        let mockRepo = MockReviewSubmissions()
         given(mockRepo).submitVersion(versionId: .any).willReturn(
             ReviewSubmission(
                 id: "sub-1",
@@ -41,28 +41,28 @@ struct VersionsSubmitTests {
 
     // MARK: - --with-products
 
-    private func planner(iapRepo: MockInAppPurchaseRepository, versionRepo: MockProductVersionRepository) -> SubmissionPlanner {
-        let groups = MockSubscriptionGroupRepository()
+    private func planner(iapRepo: MockInAppPurchases, versionRepo: MockProductVersions) -> SubmissionPlanner {
+        let groups = MockSubscriptionGroups()
         given(groups).listSubscriptionGroups(appId: .any, limit: .any).willReturn(PaginatedResponse(data: []))
         return SubmissionPlanner(iapRepo: iapRepo, groupRepo: groups,
-                                 subscriptionRepo: MockSubscriptionRepository(), productVersionRepo: versionRepo)
+                                 subscriptionRepo: MockSubscriptions(), productVersionRepo: versionRepo)
     }
 
-    private func readyLifetimeIAP() -> (MockInAppPurchaseRepository, MockProductVersionRepository) {
-        let iaps = MockInAppPurchaseRepository()
+    private func readyLifetimeIAP() -> (MockInAppPurchases, MockProductVersions) {
+        let iaps = MockInAppPurchases()
         given(iaps).listInAppPurchases(appId: .any, limit: .any).willReturn(PaginatedResponse(data: [
             InAppPurchase(id: "iap-1", appId: "app-1", referenceName: "Lifetime", productId: "com.app.lifetime",
                           type: .nonConsumable, state: .readyToSubmit),
         ]))
-        let versions = MockProductVersionRepository()
+        let versions = MockProductVersions()
         given(versions).listInAppPurchaseVersions(iapId: .any).willReturn([
             ProductVersion(id: "iv-1", productId: "iap-1", kind: .inAppPurchase, version: 1, state: .prepareForSubmission),
         ])
         return (iaps, versions)
     }
 
-    private func appVersionRepo() -> MockVersionRepository {
-        let repo = MockVersionRepository()
+    private func appVersionRepo() -> MockAppStoreVersions {
+        let repo = MockAppStoreVersions()
         given(repo).getVersion(id: .value("v-1")).willReturn(
             AppStoreVersion(id: "v-1", appId: "app-1", versionString: "1.0", platform: .iOS, state: .prepareForSubmission)
         )
@@ -71,7 +71,7 @@ struct VersionsSubmitTests {
 
     @Test func `a dry run lists what would go to review with the app version and submits nothing`() async throws {
         let (iaps, versions) = readyLifetimeIAP()
-        let submissions = MockSubmissionRepository()
+        let submissions = MockReviewSubmissions()
 
         let cmd = try VersionsSubmit.parse(["--version-id", "v-1", "--with-products", "--dry-run", "--pretty"])
         let output = try await cmd.executeWithProducts(
@@ -108,7 +108,7 @@ struct VersionsSubmitTests {
 
     @Test func `with products the app version and ready products are submitted together`() async throws {
         let (iaps, versions) = readyLifetimeIAP()
-        let submissions = MockSubmissionRepository()
+        let submissions = MockReviewSubmissions()
         given(submissions).createSubmission(appId: .any, platform: .any).willReturn(
             ReviewSubmission(id: "sub-1", appId: "app-1", platform: .iOS, state: .readyForReview)
         )

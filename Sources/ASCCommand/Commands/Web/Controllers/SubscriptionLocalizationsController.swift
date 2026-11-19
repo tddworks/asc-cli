@@ -4,7 +4,7 @@ import HummingbirdWebSocket
 
 /// Routes that return `SubscriptionLocalization` resources.
 struct SubscriptionLocalizationsController: Sendable {
-    let repo: any SubscriptionLocalizationRepository
+    let repo: any SubscriptionLocalizations
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/subscriptions/:subscriptionId/localizations") { _, context -> Response in

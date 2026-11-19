@@ -11,12 +11,12 @@ struct SkillsCheck: AsyncParsableCommand {
     @OptionGroup var globals: GlobalOptions
 
     func run() async throws {
-        let repo = ClientProvider.makeSkillRepository()
+        let repo = ClientProvider.makeSkills()
         let storage = ClientProvider.makeSkillConfigStorage()
         print(try await execute(repo: repo, storage: storage))
     }
 
-    func execute(repo: any SkillRepository, storage: any SkillConfigStorage) async throws -> String {
+    func execute(repo: any Skills, storage: any SkillConfigStorage) async throws -> String {
         let result = try await repo.check()
 
         // Persist the check timestamp

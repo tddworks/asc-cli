@@ -56,6 +56,7 @@ Concept folders mirror the App Store Connect resource hierarchy (`ASCKit/Apps/Ve
 
 **Rules every change follows:**
 - Models are `public struct` + `Sendable` + `Equatable` + `Codable`; the JSON encoding is the public schema. Optional text fields use `encodeIfPresent` so nil is omitted.
+- **Name a protocol for what it is:** a collection takes the plural of its aggregate (`Apps`, `Builds`), anything else a role noun (`IrisSignIn`); never `XxxRepository`, `XxxService`, `XxxManager`. Implementations say how (`SDKBuilds`).
 - Every model carries its **parent ID** (`AppStoreVersion.appId`, `AppScreenshot.setId`). The API doesn't return parent IDs, so the `Internal/` mappers inject them from the request.
 - State enums expose **semantic booleans** (`isLive`, `isEditable`, `isPending`) for agent decisions.
 - **CAEOAS:** every model provides `structuredAffordances` — ready-to-run next commands, state-aware (e.g. `submitForReview` only when `isEditable`). The CLI `affordances` and REST `_links` both derive from it.

@@ -5,338 +5,338 @@ public struct ClientFactory: Sendable {
 
     public init() {}
 
-    public func makeAppRepository(authProvider: any AuthProvider) throws -> any AppRepository {
+    public func makeApps(authProvider: any AuthProvider) throws -> any Apps {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKAppRepository(client: provider)
+        return SDKApps(client: provider)
     }
 
-    public func makeVersionRepository(authProvider: any AuthProvider) throws -> any VersionRepository {
+    public func makeAppStoreVersions(authProvider: any AuthProvider) throws -> any AppStoreVersions {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKVersionRepository(client: provider)
+        return SDKAppStoreVersions(client: provider)
     }
 
-    public func makeBuildRepository(authProvider: any AuthProvider) throws -> any BuildRepository {
+    public func makeBuilds(authProvider: any AuthProvider) throws -> any Builds {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKBuildRepository(client: provider)
+        return SDKBuilds(client: provider)
     }
 
-    public func makeTestFlightRepository(authProvider: any AuthProvider) throws -> any TestFlightRepository {
+    public func makeTestFlight(authProvider: any AuthProvider) throws -> any TestFlight {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKTestFlightRepository(client: provider)
+        return SDKTestFlight(client: provider)
     }
 
-    public func makeVersionLocalizationRepository(authProvider: any AuthProvider) throws -> any VersionLocalizationRepository {
+    public func makeVersionLocalizations(authProvider: any AuthProvider) throws -> any VersionLocalizations {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKLocalizationRepository(client: provider)
+        return SDKVersionLocalizations(client: provider)
     }
 
-    public func makeScreenshotRepository(authProvider: any AuthProvider) throws -> any ScreenshotRepository {
+    public func makeAppScreenshots(authProvider: any AuthProvider) throws -> any AppScreenshots {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKScreenshotRepository(client: provider)
+        return SDKAppScreenshots(client: provider)
     }
 
-    public func makeAppInfoRepository(authProvider: any AuthProvider) throws -> any AppInfoRepository {
+    public func makeAppInfos(authProvider: any AuthProvider) throws -> any AppInfos {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKAppInfoRepository(client: provider)
+        return SDKAppInfos(client: provider)
     }
 
-    public func makeAppCategoryRepository(authProvider: any AuthProvider) throws -> any AppCategoryRepository {
+    public func makeAppCategories(authProvider: any AuthProvider) throws -> any AppCategories {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKAppCategoryRepository(client: provider)
+        return SDKAppCategories(client: provider)
     }
 
-    public func makeSubmissionRepository(authProvider: any AuthProvider) throws -> any SubmissionRepository {
+    public func makeReviewSubmissions(authProvider: any AuthProvider) throws -> any ReviewSubmissions {
         let provider = try makeProvider(authProvider: authProvider)
-        return OpenAPISubmissionRepository(client: provider)
+        return OpenAPIReviewSubmissions(client: provider)
     }
 
-    public func makeBundleIDRepository(authProvider: any AuthProvider) throws -> any BundleIDRepository {
+    public func makeBundleIDs(authProvider: any AuthProvider) throws -> any BundleIDs {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKBundleIDRepository(client: provider)
+        return SDKBundleIDs(client: provider)
     }
 
-    public func makeCertificateRepository(authProvider: any AuthProvider) throws -> any CertificateRepository {
+    public func makeCertificates(authProvider: any AuthProvider) throws -> any Certificates {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKCertificateRepository(client: provider)
+        return SDKCertificates(client: provider)
     }
 
-    public func makeDeviceRepository(authProvider: any AuthProvider) throws -> any DeviceRepository {
+    public func makeDevices(authProvider: any AuthProvider) throws -> any Devices {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKDeviceRepository(client: provider)
+        return SDKDevices(client: provider)
     }
 
-    public func makeProfileRepository(authProvider: any AuthProvider) throws -> any ProfileRepository {
+    public func makeProfiles(authProvider: any AuthProvider) throws -> any Profiles {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKProfileRepository(client: provider)
+        return SDKProfiles(client: provider)
     }
 
-    public func makeBuildUploadRepository(authProvider: any AuthProvider) throws -> any BuildUploadRepository {
+    public func makeBuildUploads(authProvider: any AuthProvider) throws -> any BuildUploads {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKBuildUploadRepository(client: provider)
+        return SDKBuildUploads(client: provider)
     }
 
-    public func makeBetaBuildLocalizationRepository(authProvider: any AuthProvider) throws -> any BetaBuildLocalizationRepository {
+    public func makeBetaBuildLocalizations(authProvider: any AuthProvider) throws -> any BetaBuildLocalizations {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKBetaBuildLocalizationRepository(client: provider)
+        return SDKBetaBuildLocalizations(client: provider)
     }
 
-    public func makeReviewDetailRepository(authProvider: any AuthProvider) throws -> any ReviewDetailRepository {
+    public func makeReviewDetails(authProvider: any AuthProvider) throws -> any ReviewDetails {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKReviewDetailRepository(client: provider)
+        return SDKReviewDetails(client: provider)
     }
 
-    public func makePricingRepository(authProvider: any AuthProvider) throws -> any PricingRepository {
+    public func makeAppPrices(authProvider: any AuthProvider) throws -> any AppPrices {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKPricingRepository(client: provider)
+        return SDKAppPrices(client: provider)
     }
 
-    public func makePreviewRepository(authProvider: any AuthProvider) throws -> any PreviewRepository {
+    public func makeAppPreviews(authProvider: any AuthProvider) throws -> any AppPreviews {
         let provider = try makeProvider(authProvider: authProvider)
-        return OpenAPIPreviewRepository(client: provider)
+        return OpenAPIAppPreviews(client: provider)
     }
 
-    public func makeInAppPurchaseRepository(authProvider: any AuthProvider) throws -> any InAppPurchaseRepository {
+    public func makeInAppPurchases(authProvider: any AuthProvider) throws -> any InAppPurchases {
         let provider = try makeProvider(authProvider: authProvider)
         // Best-effort iris enrichment for `submitWithNextAppStoreVersion`. The closure
         // resolves iris cookies on every list call (so freshly-logged-in sessions are
         // picked up); any failure — no cookies, network error, malformed response —
         // returns an empty map and the SDK list still succeeds with the flag = false.
         let cookieProvider = makeIrisCookieProvider()
-        let stateRepo = IrisSDKInAppPurchaseStateRepository()
+        let stateRepo = IrisSDKInAppPurchaseStates()
         let irisFlagsProvider: @Sendable (String) async -> [String: Bool] = { appId in
             guard let session = try? cookieProvider.resolveSession() else { return [:] }
             return (try? await stateRepo.fetchSubmitFlags(session: session, appId: appId)) ?? [:]
         }
-        return SDKInAppPurchaseRepository(client: provider, irisFlagsProvider: irisFlagsProvider)
+        return SDKInAppPurchases(client: provider, irisFlagsProvider: irisFlagsProvider)
     }
 
-    public func makeInAppPurchaseLocalizationRepository(authProvider: any AuthProvider) throws -> any InAppPurchaseLocalizationRepository {
+    public func makeInAppPurchaseLocalizations(authProvider: any AuthProvider) throws -> any InAppPurchaseLocalizations {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKInAppPurchaseLocalizationRepository(client: provider)
+        return SDKInAppPurchaseLocalizations(client: provider)
     }
 
-    public func makeSubscriptionGroupRepository(authProvider: any AuthProvider) throws -> any SubscriptionGroupRepository {
+    public func makeSubscriptionGroups(authProvider: any AuthProvider) throws -> any SubscriptionGroups {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKSubscriptionGroupRepository(client: provider)
+        return SDKSubscriptionGroups(client: provider)
     }
 
-    public func makeSubscriptionRepository(authProvider: any AuthProvider) throws -> any SubscriptionRepository {
+    public func makeSubscriptions(authProvider: any AuthProvider) throws -> any Subscriptions {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKSubscriptionRepository(client: provider)
+        return SDKSubscriptions(client: provider)
     }
 
-    public func makeSubscriptionLocalizationRepository(authProvider: any AuthProvider) throws -> any SubscriptionLocalizationRepository {
+    public func makeSubscriptionLocalizations(authProvider: any AuthProvider) throws -> any SubscriptionLocalizations {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKSubscriptionLocalizationRepository(client: provider)
+        return SDKSubscriptionLocalizations(client: provider)
     }
 
-    public func makeSubscriptionGroupLocalizationRepository(authProvider: any AuthProvider) throws -> any SubscriptionGroupLocalizationRepository {
+    public func makeSubscriptionGroupLocalizations(authProvider: any AuthProvider) throws -> any SubscriptionGroupLocalizations {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKSubscriptionGroupLocalizationRepository(client: provider)
+        return SDKSubscriptionGroupLocalizations(client: provider)
     }
 
-    public func makeInAppPurchaseSubmissionRepository(authProvider: any AuthProvider) throws -> any InAppPurchaseSubmissionRepository {
+    public func makeInAppPurchaseSubmissions(authProvider: any AuthProvider) throws -> any InAppPurchaseSubmissions {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKInAppPurchaseSubmissionRepository(client: provider)
+        return SDKInAppPurchaseSubmissions(client: provider)
     }
 
-    public func makeProductVersionRepository(authProvider: any AuthProvider) throws -> any ProductVersionRepository {
+    public func makeProductVersions(authProvider: any AuthProvider) throws -> any ProductVersions {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKProductVersionRepository(client: provider)
+        return SDKProductVersions(client: provider)
     }
 
-    public func makeInAppPurchasePriceRepository(authProvider: any AuthProvider) throws -> any InAppPurchasePriceRepository {
+    public func makeInAppPurchasePrices(authProvider: any AuthProvider) throws -> any InAppPurchasePrices {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKInAppPurchasePriceRepository(client: provider)
+        return SDKInAppPurchasePrices(client: provider)
     }
 
-    public func makeSubscriptionPriceRepository(authProvider: any AuthProvider) throws -> any SubscriptionPriceRepository {
+    public func makeSubscriptionPrices(authProvider: any AuthProvider) throws -> any SubscriptionPrices {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKSubscriptionPriceRepository(client: provider)
+        return SDKSubscriptionPrices(client: provider)
     }
 
-    public func makeSubscriptionSubmissionRepository(authProvider: any AuthProvider) throws -> any SubscriptionSubmissionRepository {
+    public func makeSubscriptionSubmissions(authProvider: any AuthProvider) throws -> any SubscriptionSubmissions {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKSubscriptionSubmissionRepository(client: provider)
+        return SDKSubscriptionSubmissions(client: provider)
     }
 
-    public func makeSubscriptionIntroductoryOfferRepository(authProvider: any AuthProvider) throws -> any SubscriptionIntroductoryOfferRepository {
+    public func makeSubscriptionIntroductoryOffers(authProvider: any AuthProvider) throws -> any SubscriptionIntroductoryOffers {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKSubscriptionIntroductoryOfferRepository(client: provider)
+        return SDKSubscriptionIntroductoryOffers(client: provider)
     }
 
-    public func makeSubscriptionPromotionalOfferRepository(authProvider: any AuthProvider) throws -> any SubscriptionPromotionalOfferRepository {
+    public func makeSubscriptionPromotionalOffers(authProvider: any AuthProvider) throws -> any SubscriptionPromotionalOffers {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKSubscriptionPromotionalOfferRepository(client: provider)
+        return SDKSubscriptionPromotionalOffers(client: provider)
     }
 
-    public func makeWinBackOfferRepository(authProvider: any AuthProvider) throws -> any WinBackOfferRepository {
+    public func makeWinBackOffers(authProvider: any AuthProvider) throws -> any WinBackOffers {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKWinBackOfferRepository(client: provider)
+        return SDKWinBackOffers(client: provider)
     }
 
-    public func makeAssetLibraryRepository(authProvider: any AuthProvider) throws -> any AssetLibraryRepository {
+    public func makeAssetLibraries(authProvider: any AuthProvider) throws -> any AssetLibraries {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKAssetLibraryRepository(client: provider)
+        return SDKAssetLibraries(client: provider)
     }
 
-    public func makeLibraryImageRepository(authProvider: any AuthProvider) throws -> any LibraryImageRepository {
+    public func makeLibraryImages(authProvider: any AuthProvider) throws -> any LibraryImages {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKLibraryImageRepository(client: provider)
+        return SDKLibraryImages(client: provider)
     }
 
-    public func makeLibraryVideoRepository(authProvider: any AuthProvider) throws -> any LibraryVideoRepository {
+    public func makeLibraryVideos(authProvider: any AuthProvider) throws -> any LibraryVideos {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKLibraryVideoRepository(client: provider)
+        return SDKLibraryVideos(client: provider)
     }
 
-    public func makeAssetPlacementRepository(authProvider: any AuthProvider) throws -> any AssetPlacementRepository {
+    public func makeAssetPlacements(authProvider: any AuthProvider) throws -> any AssetPlacements {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKAssetPlacementRepository(client: provider)
+        return SDKAssetPlacements(client: provider)
     }
 
-    public func makeExperimentRepository(authProvider: any AuthProvider) throws -> any ExperimentRepository {
+    public func makeExperiments(authProvider: any AuthProvider) throws -> any Experiments {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKExperimentRepository(client: provider)
+        return SDKExperiments(client: provider)
     }
 
-    public func makePromotedPurchaseRepository(authProvider: any AuthProvider) throws -> any PromotedPurchaseRepository {
+    public func makePromotedPurchases(authProvider: any AuthProvider) throws -> any PromotedPurchases {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKPromotedPurchaseRepository(client: provider)
+        return SDKPromotedPurchases(client: provider)
     }
 
-    public func makeInAppPurchaseReviewRepository(authProvider: any AuthProvider) throws -> any InAppPurchaseReviewRepository {
+    public func makeInAppPurchaseReviewAssets(authProvider: any AuthProvider) throws -> any InAppPurchaseReviewAssets {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKInAppPurchaseReviewRepository(client: provider)
+        return SDKInAppPurchaseReviewAssets(client: provider)
     }
 
-    public func makeSubscriptionReviewRepository(authProvider: any AuthProvider) throws -> any SubscriptionReviewRepository {
+    public func makeSubscriptionReviewAssets(authProvider: any AuthProvider) throws -> any SubscriptionReviewAssets {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKSubscriptionReviewRepository(client: provider)
+        return SDKSubscriptionReviewAssets(client: provider)
     }
 
-    public func makeSubscriptionOfferCodeRepository(authProvider: any AuthProvider) throws -> any SubscriptionOfferCodeRepository {
+    public func makeSubscriptionOfferCodes(authProvider: any AuthProvider) throws -> any SubscriptionOfferCodes {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKSubscriptionOfferCodeRepository(client: provider)
+        return SDKSubscriptionOfferCodes(client: provider)
     }
 
-    public func makeInAppPurchaseOfferCodeRepository(authProvider: any AuthProvider) throws -> any InAppPurchaseOfferCodeRepository {
+    public func makeInAppPurchaseOfferCodes(authProvider: any AuthProvider) throws -> any InAppPurchaseOfferCodes {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKInAppPurchaseOfferCodeRepository(client: provider)
+        return SDKInAppPurchaseOfferCodes(client: provider)
     }
 
-    public func makeAgeRatingDeclarationRepository(authProvider: any AuthProvider) throws -> any AgeRatingDeclarationRepository {
+    public func makeAgeRatingDeclarations(authProvider: any AuthProvider) throws -> any AgeRatingDeclarations {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKAgeRatingDeclarationRepository(client: provider)
+        return SDKAgeRatingDeclarations(client: provider)
     }
 
-    public func makeUserRepository(authProvider: any AuthProvider) throws -> any UserRepository {
+    public func makeUsers(authProvider: any AuthProvider) throws -> any Users {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKUserRepository(client: provider)
+        return SDKUsers(client: provider)
     }
 
-    public func makeXcodeCloudProductRepository(authProvider: any AuthProvider) throws -> any XcodeCloudProductRepository {
+    public func makeXcodeCloudProducts(authProvider: any AuthProvider) throws -> any XcodeCloudProducts {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKXcodeCloudProductRepository(client: provider)
+        return SDKXcodeCloudProducts(client: provider)
     }
 
-    public func makeXcodeCloudWorkflowRepository(authProvider: any AuthProvider) throws -> any XcodeCloudWorkflowRepository {
+    public func makeXcodeCloudWorkflows(authProvider: any AuthProvider) throws -> any XcodeCloudWorkflows {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKXcodeCloudWorkflowRepository(client: provider)
+        return SDKXcodeCloudWorkflows(client: provider)
     }
 
-    public func makeXcodeCloudBuildRunRepository(authProvider: any AuthProvider) throws -> any XcodeCloudBuildRunRepository {
+    public func makeXcodeCloudBuildRuns(authProvider: any AuthProvider) throws -> any XcodeCloudBuildRuns {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKXcodeCloudBuildRunRepository(client: provider)
+        return SDKXcodeCloudBuildRuns(client: provider)
     }
 
-    public func makeGameCenterRepository(authProvider: any AuthProvider) throws -> any GameCenterRepository {
+    public func makeGameCenter(authProvider: any AuthProvider) throws -> any GameCenter {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKGameCenterRepository(client: provider)
+        return SDKGameCenter(client: provider)
     }
 
-    public func makeGameCenterModerationRepository(authProvider: any AuthProvider) throws -> any GameCenterModerationRepository {
+    public func makeGameCenterModeration(authProvider: any AuthProvider) throws -> any GameCenterModeration {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKGameCenterModerationRepository(client: provider)
+        return SDKGameCenterModeration(client: provider)
     }
 
-    public func makeAppClipRepository(authProvider: any AuthProvider) throws -> any AppClipRepository {
+    public func makeAppClips(authProvider: any AuthProvider) throws -> any AppClips {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKAppClipRepository(client: provider)
+        return SDKAppClips(client: provider)
     }
 
-    public func makeReportRepository(authProvider: any AuthProvider) throws -> any ReportRepository {
+    public func makeReports(authProvider: any AuthProvider) throws -> any Reports {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKReportRepository(client: provider)
+        return SDKReports(client: provider)
     }
 
-    public func makeAnalyticsReportRepository(authProvider: any AuthProvider) throws -> any AnalyticsReportRepository {
+    public func makeAnalyticsReports(authProvider: any AuthProvider) throws -> any AnalyticsReports {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKAnalyticsReportRepository(client: provider)
+        return SDKAnalyticsReports(client: provider)
     }
 
-    public func makeCustomerReviewRepository(authProvider: any AuthProvider) throws -> any CustomerReviewRepository {
+    public func makeCustomerReviews(authProvider: any AuthProvider) throws -> any CustomerReviews {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKCustomerReviewRepository(client: provider)
+        return SDKCustomerReviews(client: provider)
     }
 
-    public func makePerfMetricsRepository(authProvider: any AuthProvider) throws -> any PerfMetricsRepository {
+    public func makePerfMetrics(authProvider: any AuthProvider) throws -> any PerfMetrics {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKPerfMetricsRepository(client: provider)
+        return SDKPerfMetrics(client: provider)
     }
 
-    public func makePerfOverviewRepository(authProvider: any AuthProvider) throws -> any PerfOverviewRepository {
+    public func makePerfOverviews(authProvider: any AuthProvider) throws -> any PerfOverviews {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKPerfOverviewRepository(client: provider)
+        return SDKPerfOverviews(client: provider)
     }
 
-    public func makeDiagnosticsRepository(authProvider: any AuthProvider) throws -> any DiagnosticsRepository {
+    public func makeDiagnostics(authProvider: any AuthProvider) throws -> any Diagnostics {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKDiagnosticsRepository(client: provider)
+        return SDKDiagnostics(client: provider)
     }
 
-    public func makeBetaAppReviewRepository(authProvider: any AuthProvider) throws -> any BetaAppReviewRepository {
+    public func makeBetaAppReviews(authProvider: any AuthProvider) throws -> any BetaAppReviews {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKBetaAppReviewRepository(client: provider)
+        return SDKBetaAppReviews(client: provider)
     }
 
-    public func makeBetaAppLocalizationRepository(authProvider: any AuthProvider) throws -> any BetaAppLocalizationRepository {
+    public func makeBetaAppLocalizations(authProvider: any AuthProvider) throws -> any BetaAppLocalizations {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKBetaAppLocalizationRepository(client: provider)
+        return SDKBetaAppLocalizations(client: provider)
     }
 
-    public func makeInAppPurchaseAvailabilityRepository(authProvider: any AuthProvider) throws -> any InAppPurchaseAvailabilityRepository {
+    public func makeInAppPurchaseAvailabilities(authProvider: any AuthProvider) throws -> any InAppPurchaseAvailabilities {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKInAppPurchaseAvailabilityRepository(client: provider)
+        return SDKInAppPurchaseAvailabilities(client: provider)
     }
 
-    public func makeSubscriptionAvailabilityRepository(authProvider: any AuthProvider) throws -> any SubscriptionAvailabilityRepository {
+    public func makeSubscriptionAvailabilities(authProvider: any AuthProvider) throws -> any SubscriptionAvailabilities {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKSubscriptionAvailabilityRepository(client: provider)
+        return SDKSubscriptionAvailabilities(client: provider)
     }
 
-    public func makeAppAvailabilityRepository(authProvider: any AuthProvider) throws -> any AppAvailabilityRepository {
+    public func makeAppAvailabilities(authProvider: any AuthProvider) throws -> any AppAvailabilities {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKAppAvailabilityRepository(client: provider)
+        return SDKAppAvailabilities(client: provider)
     }
 
-    public func makeTerritoryRepository(authProvider: any AuthProvider) throws -> any TerritoryRepository {
+    public func makeTerritories(authProvider: any AuthProvider) throws -> any Territories {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKTerritoryRepository(client: provider)
+        return SDKTerritories(client: provider)
     }
 
     // MARK: - Simulators (no ASC auth needed — local xcrun simctl)
 
-    public func makeSimulatorRepository() -> any SimulatorRepository {
-        SimctlSimulatorRepository()
+    public func makeSimulators() -> any Simulators {
+        SimctlSimulators()
     }
 
     // SimulatorInteractionRepository moved to ASCPro (pro feature)
 
     // MARK: - Skills (no ASC auth needed — subprocess + local filesystem)
 
-    public func makeSkillRepository() -> any SkillRepository {
-        ProcessSkillRepository()
+    public func makeSkills() -> any Skills {
+        ProcessSkills()
     }
 
     public func makeSkillConfigStorage() -> any SkillConfigStorage {
@@ -345,24 +345,24 @@ public struct ClientFactory: Sendable {
 
     // MARK: - Plugins (no ASC auth needed — local filesystem + GitHub registry)
 
-    public func makePluginRepository() -> any PluginRepository {
-        PluginMarketRepository(sources: [
+    public func makePlugins() -> any Plugins {
+        MarketplacePlugins(sources: [
             GitHubPluginSource(owner: "tddworks", repo: "asc-registry"),
         ])
     }
 
     // MARK: - Iris (private API, cookie-based auth)
 
-    public func makeIrisAppBundleRepository() -> any IrisAppBundleRepository {
-        IrisSDKAppBundleRepository()
+    public func makeIrisAppBundles() -> any IrisAppBundles {
+        IrisSDKAppBundles()
     }
 
-    public func makeIrisInAppPurchaseSubmissionRepository() -> any IrisInAppPurchaseSubmissionRepository {
-        IrisSDKInAppPurchaseSubmissionRepository()
+    public func makeIrisInAppPurchaseSubmissions() -> any IrisInAppPurchaseSubmissions {
+        IrisSDKInAppPurchaseSubmissions()
     }
 
-    public func makeIrisResolutionCenterRepository() -> any IrisResolutionCenterRepository {
-        IrisSDKResolutionCenterRepository()
+    public func makeIrisResolutionCenter() -> any IrisResolutionCenter {
+        IrisSDKResolutionCenter()
     }
 
     public func makeIrisCookieProvider() -> any IrisCookieProvider {

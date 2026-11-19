@@ -4,7 +4,7 @@ import HummingbirdWebSocket
 
 /// Routes that return `PromotedPurchase` resources (App Store product page promoted slots).
 struct PromotedPurchasesController: Sendable {
-    let repo: any PromotedPurchaseRepository
+    let repo: any PromotedPurchases
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/apps/:appId/promoted-purchases") { _, context -> Response in

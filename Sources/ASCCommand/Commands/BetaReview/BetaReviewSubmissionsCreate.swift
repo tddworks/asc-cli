@@ -13,11 +13,11 @@ struct BetaReviewSubmissionsCreate: AsyncParsableCommand {
     var buildId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeBetaAppReviewRepository()
+        let repo = try ClientProvider.makeBetaAppReviews()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any BetaAppReviewRepository) async throws -> String {
+    func execute(repo: any BetaAppReviews) async throws -> String {
         let submission = try await repo.createSubmission(buildId: buildId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

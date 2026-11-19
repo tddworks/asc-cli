@@ -17,7 +17,7 @@ Contributor notes for the browser editor in `homepage/editor/` and the import co
 │  │  js/app.js       state      │   │  (AsyncParsableCommand)      │  │
 │  │  js/compositor.js  Canvas2D │   │  → /usr/bin/unzip            │  │
 │  │  js/texts.js    drag layers │   │  → JSONDecoder → Manifest    │  │
-│  │  js/export.js   JSZip ZIP   │   │  → ScreenshotRepository      │  │
+│  │  js/export.js   JSZip ZIP   │   │  → AppScreenshots      │  │
 │  │  js/devices.js  async load  │   └──────────────────────────────┘  │
 │  │  frames/devices.json        │                                      │
 │  └──────────────────────────────┘   Domain                            │
@@ -26,7 +26,7 @@ Contributor notes for the browser editor in `homepage/editor/` and the import co
 │  ASC API                            │  ├ LocalizationManifest      │  │
 │  ┌──────────────────────────────┐   │  └ ScreenshotEntry            │  │
 │  │  listLocalizations           │   │                              │  │
-│  │  createLocalization          │   │  ScreenshotRepository        │  │
+│  │  createLocalization          │   │  AppScreenshots        │  │
 │  │  listScreenshotSets          │◀──│  + importScreenshots(...)    │  │
 │  │  createScreenshotSet         │   └──────────────────────────────┘  │
 │  │  uploadScreenshot (3-step)   │                                      │
@@ -62,13 +62,13 @@ public struct ScreenshotManifest: Codable, Sendable {
 }
 ```
 
-### Updated `ScreenshotRepository`
+### Updated `AppScreenshots`
 
 `importScreenshots` was added to the existing `@Mockable` protocol:
 
 ```swift
 @Mockable
-public protocol ScreenshotRepository: Sendable {
+public protocol AppScreenshots: Sendable {
     // ... existing methods ...
     func importScreenshots(
         versionId: String,
@@ -149,7 +149,7 @@ homepage/editor/                          Web editor source
 Sources/
 ├── ASCKit/Apps/Versions/Localizations/ScreenshotSets/
 │   ├── ScreenshotImport.swift            ScreenshotManifest + nested types
-│   └── ScreenshotRepository.swift        Modified: added importScreenshots
+│   └── AppScreenshots.swift        Modified: added importScreenshots
 │
 ├── ASCKit/Apps/Versions/Localizations/ScreenshotSets/Internal/
 │   └── OpenAPIScreenshotRepository.swift Modified: implements importScreenshots

@@ -16,11 +16,11 @@ struct AnalyticsReportsReportsList: AsyncParsableCommand {
     var category: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeAnalyticsReportRepository()
+        let repo = try ClientProvider.makeAnalyticsReports()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AnalyticsReportRepository) async throws -> String {
+    func execute(repo: any AnalyticsReports) async throws -> String {
         let parsed = category.flatMap { AnalyticsCategory(cliArgument: $0) }
         let reports = try await repo.listReports(requestId: requestId, category: parsed)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)

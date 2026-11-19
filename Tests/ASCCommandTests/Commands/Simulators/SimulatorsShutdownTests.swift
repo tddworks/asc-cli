@@ -7,7 +7,7 @@ import Testing
 struct SimulatorsShutdownTests {
 
     @Test func `shutdown simulator returns success message with udid`() async throws {
-        let mockRepo = MockSimulatorRepository()
+        let mockRepo = MockSimulators()
         given(mockRepo).shutdownSimulator(udid: .value("ABCD-1234")).willReturn(())
 
         let cmd = try SimulatorsShutdown.parse(["--udid", "ABCD-1234"])

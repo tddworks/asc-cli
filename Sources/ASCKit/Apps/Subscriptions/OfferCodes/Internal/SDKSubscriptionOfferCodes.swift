@@ -1,0 +1,321 @@
+import Foundation
+@preconcurrency import AppStoreConnect_Swift_SDK
+
+public struct SDKSubscriptionOfferCodes: SubscriptionOfferCodes, @unchecked Sendable {
+    private let client: any APIClient
+
+    public init(client: any APIClient) {
+        self.client = client
+    }
+
+    // MARK: - Offer Codes
+
+    public func listOfferCodes(subscriptionId: String) async throws -> [ASCKit.SubscriptionOfferCode] {
+        let request = APIEndpoint.v1.subscriptions.id(subscriptionId).offerCodes.get()
+        let response = try await client.request(request)
+        return response.data.map { mapOfferCode($0, subscriptionId: subscriptionId) }
+    }
+
+    public func createOfferCode(
+        subscriptionId: String,
+        name: String,
+        customerEligibilities: [ASCKit.SubscriptionCustomerEligibility],
+        offerEligibility: ASCKit.SubscriptionOfferEligibility,
+        duration: ASCKit.SubscriptionOfferDuration,
+        offerMode: ASCKit.SubscriptionOfferMode,
+        numberOfPeriods: Int,
+        isAutoRenewEnabled: Bool,
+        prices: [ASCKit.OfferCodePriceInput]
+    ) async throws -> ASCKit.SubscriptionOfferCode {
+        let sdkEligibilities = customerEligibilities.compactMap {
+            AppStoreConnect_Swift_SDK.SubscriptionCustomerEligibility(rawValue: mapCustomerEligibilityToSDK($0))
+        }
+        let sdkOfferEligibility = AppStoreConnect_Swift_SDK.SubscriptionOfferEligibility(rawValue: mapOfferEligibilityToSDK(offerEligibility))
+            ?? .stackWithIntroOffers
+        let sdkDuration = AppStoreConnect_Swift_SDK.SubscriptionOfferDuration(rawValue: duration.rawValue) ?? .oneMonth
+        let sdkMode = AppStoreConnect_Swift_SDK.SubscriptionOfferMode(rawValue: offerMode.rawValue) ?? .freeTrial
+
+        // Same `${local-price-N}` placeholder pattern as IAP — ties `included[]` items
+        // back to the parent's `relationships.prices.data` references.
+        let pricesPayload: [(localId: String, input: ASCKit.OfferCodePriceInput)] = prices.enumerated().map {
+            (localId: "${local-price-\($0.offset + 1)}", input: $0.element)
+        }
+        let pricesRelationship = pricesPayload.map {
+            SubscriptionOfferCodeCreateRequest.Data.Relationships.Prices.Datum(
+                type: .subscriptionOfferCodePrices, id: $0.localId
+            )
+        }
+        let included: [SubscriptionOfferCodePriceInlineCreate] = pricesPayload.map { entry in
+            SubscriptionOfferCodePriceInlineCreate(
+                type: .subscriptionOfferCodePrices,
+                id: entry.localId,
+                relationships: .init(
+                    territory: .init(data: .init(type: .territories, id: entry.input.territory)),
+                    subscriptionPricePoint: entry.input.pricePointId.map {
+                        .init(data: .init(type: .subscriptionPricePoints, id: $0))
+                    }
+                )
+            )
+        }
+
+        let body = SubscriptionOfferCodeCreateRequest(
+            data: .init(
+                type: .subscriptionOfferCodes,
+                attributes: .init(
+                    name: name,
+                    customerEligibilities: sdkEligibilities,
+                    offerEligibility: sdkOfferEligibility,
+                    duration: sdkDuration,
+                    offerMode: sdkMode,
+                    numberOfPeriods: numberOfPeriods,
+                    isAutoRenewEnabled: isAutoRenewEnabled
+                ),
+                relationships: .init(
+                    subscription: .init(data: .init(type: .subscriptions, id: subscriptionId)),
+                    prices: .init(data: pricesRelationship)
+                )
+            ),
+            included: included.isEmpty ? nil : included
+        )
+        let response = try await client.request(APIEndpoint.v1.subscriptionOfferCodes.post(body))
+        return mapOfferCode(response.data, subscriptionId: subscriptionId)
+    }
+
+    public func updateOfferCode(offerCodeId: String, isActive: Bool) async throws -> ASCKit.SubscriptionOfferCode {
+        let body = SubscriptionOfferCodeUpdateRequest(
+            data: .init(
+                type: .subscriptionOfferCodes,
+                id: offerCodeId,
+                attributes: .init(isActive: isActive)
+            )
+        )
+        let response = try await client.request(APIEndpoint.v1.subscriptionOfferCodes.id(offerCodeId).patch(body))
+        return mapOfferCode(response.data, subscriptionId: "")
+    }
+
+    // MARK: - Custom Codes
+
+    public func listCustomCodes(offerCodeId: String) async throws -> [ASCKit.SubscriptionOfferCodeCustomCode] {
+        let request = APIEndpoint.v1.subscriptionOfferCodes.id(offerCodeId).customCodes.get()
+        let response = try await client.request(request)
+        return response.data.map { mapCustomCode($0, offerCodeId: offerCodeId) }
+    }
+
+    public func createCustomCode(
+        offerCodeId: String,
+        customCode: String,
+        numberOfCodes: Int,
+        expirationDate: String?
+    ) async throws -> ASCKit.SubscriptionOfferCodeCustomCode {
+        let body = SubscriptionOfferCodeCustomCodeCreateRequest(
+            data: .init(
+                type: .subscriptionOfferCodeCustomCodes,
+                attributes: .init(
+                    customCode: customCode,
+                    numberOfCodes: numberOfCodes,
+                    expirationDate: expirationDate
+                ),
+                relationships: .init(
+                    offerCode: .init(data: .init(type: .subscriptionOfferCodes, id: offerCodeId))
+                )
+            )
+        )
+        let response = try await client.request(APIEndpoint.v1.subscriptionOfferCodeCustomCodes.post(body))
+        return mapCustomCode(response.data, offerCodeId: offerCodeId)
+    }
+
+    public func updateCustomCode(customCodeId: String, isActive: Bool) async throws -> ASCKit.SubscriptionOfferCodeCustomCode {
+        let body = SubscriptionOfferCodeCustomCodeUpdateRequest(
+            data: .init(
+                type: .subscriptionOfferCodeCustomCodes,
+                id: customCodeId,
+                attributes: .init(isActive: isActive)
+            )
+        )
+        let response = try await client.request(APIEndpoint.v1.subscriptionOfferCodeCustomCodes.id(customCodeId).patch(body))
+        return mapCustomCode(response.data, offerCodeId: "")
+    }
+
+    // MARK: - One-Time Use Codes
+
+    public func listOneTimeUseCodes(offerCodeId: String) async throws -> [ASCKit.SubscriptionOfferCodeOneTimeUseCode] {
+        let request = APIEndpoint.v1.subscriptionOfferCodes.id(offerCodeId).oneTimeUseCodes.get()
+        let response = try await client.request(request)
+        return response.data.map { mapOneTimeUseCode($0, offerCodeId: offerCodeId) }
+    }
+
+    public func createOneTimeUseCode(
+        offerCodeId: String,
+        numberOfCodes: Int,
+        expirationDate: String,
+        environment: ASCKit.OfferCodeEnvironment
+    ) async throws -> ASCKit.SubscriptionOfferCodeOneTimeUseCode {
+        let sdkEnv = AppStoreConnect_Swift_SDK.OfferCodeEnvironment(rawValue: environment.rawValue)
+        let body = SubscriptionOfferCodeOneTimeUseCodeCreateRequest(
+            data: .init(
+                type: .subscriptionOfferCodeOneTimeUseCodes,
+                attributes: .init(
+                    numberOfCodes: numberOfCodes,
+                    expirationDate: expirationDate,
+                    environment: sdkEnv
+                ),
+                relationships: .init(
+                    offerCode: .init(data: .init(type: .subscriptionOfferCodes, id: offerCodeId))
+                )
+            )
+        )
+        let response = try await client.request(APIEndpoint.v1.subscriptionOfferCodeOneTimeUseCodes.post(body))
+        return mapOneTimeUseCode(response.data, offerCodeId: offerCodeId)
+    }
+
+    public func updateOneTimeUseCode(oneTimeCodeId: String, isActive: Bool) async throws -> ASCKit.SubscriptionOfferCodeOneTimeUseCode {
+        let body = SubscriptionOfferCodeOneTimeUseCodeUpdateRequest(
+            data: .init(
+                type: .subscriptionOfferCodeOneTimeUseCodes,
+                id: oneTimeCodeId,
+                attributes: .init(isActive: isActive)
+            )
+        )
+        let response = try await client.request(APIEndpoint.v1.subscriptionOfferCodeOneTimeUseCodes.id(oneTimeCodeId).patch(body))
+        return mapOneTimeUseCode(response.data, offerCodeId: "")
+    }
+
+    public func fetchOneTimeUseCodeValues(oneTimeCodeId: String) async throws -> String {
+        let request = APIEndpoint.v1.subscriptionOfferCodeOneTimeUseCodes.id(oneTimeCodeId).values.get
+        return try await client.request(request)
+    }
+
+    // MARK: - Prices
+
+    public func listPrices(offerCodeId: String) async throws -> [ASCKit.SubscriptionOfferCodePrice] {
+        // One price per territory — follow every page to get all 175. `include` makes Apple
+        // return each price's territory and price point linkage, which the mapper reads.
+        let pages = try await client.requestAllPages(
+            APIEndpoint.v1.subscriptionOfferCodes.id(offerCodeId).prices.get(parameters: .init(limit: 200, include: [.territory, .subscriptionPricePoint])),
+            nextCursor: { $0.meta?.paging.nextCursor }
+        )
+        return pages.flatMap(\.data).map { mapPrice($0, offerCodeId: offerCodeId) }
+    }
+
+    private func mapPrice(
+        _ sdk: AppStoreConnect_Swift_SDK.SubscriptionOfferCodePrice,
+        offerCodeId: String
+    ) -> ASCKit.SubscriptionOfferCodePrice {
+        ASCKit.SubscriptionOfferCodePrice(
+            id: sdk.id,
+            offerCodeId: offerCodeId,
+            territory: sdk.relationships?.territory?.data?.id,
+            subscriptionPricePointId: sdk.relationships?.subscriptionPricePoint?.data?.id
+        )
+    }
+
+    // MARK: - Mappers
+
+    private func mapOfferCode(
+        _ sdk: AppStoreConnect_Swift_SDK.SubscriptionOfferCode,
+        subscriptionId: String
+    ) -> ASCKit.SubscriptionOfferCode {
+        let customerEligibilities = (sdk.attributes?.customerEligibilities ?? []).compactMap { sdkEligibility -> ASCKit.SubscriptionCustomerEligibility? in
+            mapCustomerEligibilityToDomain(sdkEligibility)
+        }
+        let offerEligibility = sdk.attributes?.offerEligibility.flatMap { mapOfferEligibilityToDomain($0) } ?? .stackable
+        let durationRaw = sdk.attributes?.duration?.rawValue ?? ASCKit.SubscriptionOfferDuration.oneMonth.rawValue
+        let duration = ASCKit.SubscriptionOfferDuration(rawValue: durationRaw) ?? .oneMonth
+        let modeRaw = sdk.attributes?.offerMode?.rawValue ?? ASCKit.SubscriptionOfferMode.freeTrial.rawValue
+        let offerMode = ASCKit.SubscriptionOfferMode(rawValue: modeRaw) ?? .freeTrial
+
+        return ASCKit.SubscriptionOfferCode(
+            id: sdk.id,
+            subscriptionId: subscriptionId,
+            name: sdk.attributes?.name ?? "",
+            customerEligibilities: customerEligibilities,
+            offerEligibility: offerEligibility,
+            duration: duration,
+            offerMode: offerMode,
+            numberOfPeriods: sdk.attributes?.numberOfPeriods ?? 1,
+            totalNumberOfCodes: sdk.attributes?.totalNumberOfCodes,
+            productionCodeCount: sdk.attributes?.productionCodeCount,
+            sandboxCodeCount: sdk.attributes?.sandboxCodeCount,
+            isActive: sdk.attributes?.isActive ?? false
+        )
+    }
+
+    private func mapCustomCode(
+        _ sdk: AppStoreConnect_Swift_SDK.SubscriptionOfferCodeCustomCode,
+        offerCodeId: String
+    ) -> ASCKit.SubscriptionOfferCodeCustomCode {
+        let createdDateString: String? = sdk.attributes?.createdDate.map { ISO8601DateFormatter().string(from: $0) }
+
+        return ASCKit.SubscriptionOfferCodeCustomCode(
+            id: sdk.id,
+            offerCodeId: offerCodeId,
+            customCode: sdk.attributes?.customCode ?? "",
+            numberOfCodes: sdk.attributes?.numberOfCodes ?? 0,
+            createdDate: createdDateString,
+            expirationDate: sdk.attributes?.expirationDate,
+            isActive: sdk.attributes?.isActive ?? false
+        )
+    }
+
+    private func mapOneTimeUseCode(
+        _ sdk: AppStoreConnect_Swift_SDK.SubscriptionOfferCodeOneTimeUseCode,
+        offerCodeId: String
+    ) -> ASCKit.SubscriptionOfferCodeOneTimeUseCode {
+        let createdDateString: String? = sdk.attributes?.createdDate.map { ISO8601DateFormatter().string(from: $0) }
+        let environment: ASCKit.OfferCodeEnvironment? = sdk.attributes?.environment.flatMap {
+            ASCKit.OfferCodeEnvironment(rawValue: $0.rawValue)
+        }
+
+        return ASCKit.SubscriptionOfferCodeOneTimeUseCode(
+            id: sdk.id,
+            offerCodeId: offerCodeId,
+            numberOfCodes: sdk.attributes?.numberOfCodes ?? 0,
+            createdDate: createdDateString,
+            expirationDate: sdk.attributes?.expirationDate,
+            isActive: sdk.attributes?.isActive ?? false,
+            environment: environment
+        )
+    }
+
+    // MARK: - Eligibility Mapping
+
+    /// Maps domain customer eligibility to SDK raw value
+    /// Domain: NEW, LAPSED, WIN_BACK, PAID_SUBSCRIBER
+    /// SDK:    NEW, EXISTING, EXPIRED
+    private func mapCustomerEligibilityToSDK(_ domain: ASCKit.SubscriptionCustomerEligibility) -> String {
+        switch domain {
+        case .new: return "NEW"
+        case .lapsed: return "EXPIRED"
+        case .winBack: return "EXPIRED"
+        case .paidSubscriber: return "EXISTING"
+        }
+    }
+
+    /// Maps SDK customer eligibility to domain
+    private func mapCustomerEligibilityToDomain(_ sdk: AppStoreConnect_Swift_SDK.SubscriptionCustomerEligibility) -> ASCKit.SubscriptionCustomerEligibility? {
+        switch sdk {
+        case .new: return .new
+        case .existing: return .paidSubscriber
+        case .expired: return .lapsed
+        }
+    }
+
+    /// Maps domain offer eligibility to SDK raw value
+    /// Domain: STACKABLE, INTRODUCTORY, SUBSCRIPTION_OFFER
+    /// SDK:    STACK_WITH_INTRO_OFFERS, REPLACE_INTRO_OFFERS
+    private func mapOfferEligibilityToSDK(_ domain: ASCKit.SubscriptionOfferEligibility) -> String {
+        switch domain {
+        case .stackable: return "STACK_WITH_INTRO_OFFERS"
+        case .introductory: return "REPLACE_INTRO_OFFERS"
+        case .subscriptionOffer: return "STACK_WITH_INTRO_OFFERS"
+        }
+    }
+
+    /// Maps SDK offer eligibility to domain
+    private func mapOfferEligibilityToDomain(_ sdk: AppStoreConnect_Swift_SDK.SubscriptionOfferEligibility) -> ASCKit.SubscriptionOfferEligibility {
+        switch sdk {
+        case .stackWithIntroOffers: return .stackable
+        case .replaceIntroOffers: return .introductory
+        }
+    }
+}

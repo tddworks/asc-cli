@@ -8,7 +8,7 @@ import HummingbirdWebSocket
 /// Apple constraint: the first subscription within a group must be submitted with a
 /// new app version; subsequent submissions are standalone. ASC enforces this.
 struct SubscriptionSubmissionController: Sendable {
-    let repo: any SubscriptionSubmissionRepository
+    let repo: any SubscriptionSubmissions
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.post("/subscriptions/:subscriptionId/submit") { _, context -> Response in

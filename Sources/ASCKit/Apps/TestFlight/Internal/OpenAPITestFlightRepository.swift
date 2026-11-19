@@ -1,6 +1,6 @@
 @preconcurrency import AppStoreConnect_Swift_SDK
 
-public struct SDKTestFlightRepository: TestFlightRepository, @unchecked Sendable {
+public struct SDKTestFlight: TestFlight, @unchecked Sendable {
     private let client: any APIClient
 
     public init(client: any APIClient) {

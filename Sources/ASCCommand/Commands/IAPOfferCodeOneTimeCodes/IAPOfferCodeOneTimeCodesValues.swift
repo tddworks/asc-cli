@@ -13,11 +13,11 @@ struct IAPOfferCodeOneTimeCodesValues: AsyncParsableCommand {
     var oneTimeCodeId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchaseOfferCodeRepository()
+        let repo = try ClientProvider.makeInAppPurchaseOfferCodes()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any InAppPurchaseOfferCodeRepository) async throws -> String {
+    func execute(repo: any InAppPurchaseOfferCodes) async throws -> String {
         try await repo.fetchOneTimeUseCodeValues(oneTimeCodeId: oneTimeCodeId)
     }
 }

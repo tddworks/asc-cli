@@ -25,11 +25,11 @@ struct DiagnosticsList: AsyncParsableCommand {
     var diagnosticType: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeDiagnosticsRepository()
+        let repo = try ClientProvider.makeDiagnostics()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any DiagnosticsRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any Diagnostics, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let filter = diagnosticType.flatMap { DiagnosticType(rawValue: $0) }
         let signatures = try await repo.listSignatures(buildId: buildId, diagnosticType: filter)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)

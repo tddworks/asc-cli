@@ -7,7 +7,7 @@ import Testing
 struct ProfilesDeleteTests {
 
     @Test func `execute deletes profile`() async throws {
-        let mockRepo = MockProfileRepository()
+        let mockRepo = MockProfiles()
         given(mockRepo).deleteProfile(id: .any).willReturn()
 
         let cmd = try ProfilesDelete.parse(["--profile-id", "prof-42"])

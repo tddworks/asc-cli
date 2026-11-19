@@ -16,7 +16,7 @@ struct SDKVersionRepositoryCreateTests {
             links: .init(this: "")
         ))
 
-        let repo = SDKVersionRepository(client: stub)
+        let repo = SDKAppStoreVersions(client: stub)
         let result = try await repo.createVersion(appId: "app-42", versionString: "2.0.0", platform: .iOS)
 
         #expect(result.id == "v-new")
@@ -37,14 +37,14 @@ struct SDKVersionRepositoryCreateTests {
             links: .init(this: "")
         ))
 
-        let repo = SDKVersionRepository(client: stub)
+        let repo = SDKAppStoreVersions(client: stub)
         let result = try await repo.createVersion(appId: "app-1", versionString: "1.0.0", platform: .macOS)
 
         #expect(result.platform == .macOS)
     }
 
     @Test func `createVersion throws for unsupported platform`() async throws {
-        let repo = SDKVersionRepository(client: StubAPIClient())
+        let repo = SDKAppStoreVersions(client: StubAPIClient())
         await #expect(throws: (any Error).self) {
             try await repo.createVersion(appId: "app-1", versionString: "1.0.0", platform: .watchOS)
         }
@@ -61,7 +61,7 @@ struct SDKVersionRepositoryCreateTests {
             links: .init(this: "")
         ))
 
-        let repo = SDKVersionRepository(client: stub)
+        let repo = SDKAppStoreVersions(client: stub)
         await #expect(throws: (any Error).self) {
             try await repo.createVersion(appId: "app-1", versionString: "1.0.0", platform: .iOS)
         }

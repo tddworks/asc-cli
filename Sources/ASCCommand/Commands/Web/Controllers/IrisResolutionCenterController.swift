@@ -11,7 +11,7 @@ import HummingbirdWebSocket
 /// `?plain-text=true` mirrors the CLI's `--plain-text` flag (HTML → text).
 struct IrisResolutionCenterController: Sendable {
     let cookieProvider: any IrisCookieProvider
-    let repo: any IrisResolutionCenterRepository
+    let repo: any IrisResolutionCenter
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/iris/review-submissions/:submissionId/resolution-center") { request, context -> Response in

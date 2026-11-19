@@ -13,12 +13,12 @@ struct IAPPriceScheduleGet: AsyncParsableCommand {
     var iapId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchasePriceRepository()
+        let repo = try ClientProvider.makeInAppPurchasePrices()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any InAppPurchasePriceRepository,
+        repo: any InAppPurchasePrices,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let schedule = try await repo.getPriceSchedule(iapId: iapId)

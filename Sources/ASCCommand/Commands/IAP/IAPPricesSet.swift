@@ -19,11 +19,11 @@ struct IAPPricesSet: AsyncParsableCommand {
     var pricePointId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchasePriceRepository()
+        let repo = try ClientProvider.makeInAppPurchasePrices()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any InAppPurchasePriceRepository) async throws -> String {
+    func execute(repo: any InAppPurchasePrices) async throws -> String {
         let schedule = try await repo.setPriceSchedule(
             iapId: iapId,
             baseTerritory: baseTerritory,

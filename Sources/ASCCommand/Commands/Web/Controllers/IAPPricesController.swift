@@ -7,7 +7,7 @@ import HummingbirdWebSocket
 /// `baseTerritory` is how the iOS app implements "Change Base Territory" — ASC replaces
 /// the previous schedule with a new one and equalizes other territories from the new base.
 struct IAPPricesController: Sendable {
-    let repo: any InAppPurchasePriceRepository
+    let repo: any InAppPurchasePrices
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.post("/iap/:iapId/prices/set") { request, context -> Response in

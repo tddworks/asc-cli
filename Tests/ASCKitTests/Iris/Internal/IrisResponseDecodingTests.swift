@@ -87,7 +87,7 @@ struct IrisResponseDecodingTests {
     // MARK: - mapToAppBundle
 
     @Test func `maps resource to AppBundle with all fields`() {
-        let repo = IrisSDKAppBundleRepository()
+        let repo = IrisSDKAppBundles()
         let resource = makeResource(
             id: "app-1",
             name: "Test",
@@ -106,28 +106,28 @@ struct IrisResponseDecodingTests {
     }
 
     @Test func `maps resource with nil name uses fallback`() {
-        let repo = IrisSDKAppBundleRepository()
+        let repo = IrisSDKAppBundles()
         let resource = makeResource(id: "app-1")
         let bundle = repo.mapToAppBundle(resource, fallbackName: "Fallback")
         #expect(bundle.name == "Fallback")
     }
 
     @Test func `maps resource with nil name and no fallback uses empty string`() {
-        let repo = IrisSDKAppBundleRepository()
+        let repo = IrisSDKAppBundles()
         let resource = makeResource(id: "app-1")
         let bundle = repo.mapToAppBundle(resource)
         #expect(bundle.name == "")
     }
 
     @Test func `maps resource with nil platforms uses empty array`() {
-        let repo = IrisSDKAppBundleRepository()
+        let repo = IrisSDKAppBundles()
         let resource = makeResource(id: "app-1")
         let bundle = repo.mapToAppBundle(resource)
         #expect(bundle.platforms == [])
     }
 
     @Test func `maps resource with nil primaryLocale defaults to en-US`() {
-        let repo = IrisSDKAppBundleRepository()
+        let repo = IrisSDKAppBundles()
         let resource = makeResource(id: "app-1")
         let bundle = repo.mapToAppBundle(resource)
         #expect(bundle.primaryLocale == "en-US")

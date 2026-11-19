@@ -13,11 +13,11 @@ struct SimulatorsList: AsyncParsableCommand {
     var booted: Bool = false
 
     func run() async throws {
-        let repo = ClientProvider.makeSimulatorRepository()
+        let repo = ClientProvider.makeSimulators()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SimulatorRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any Simulators, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let filter: SimulatorFilter = booted ? .booted : .available
         let items = try await repo.listSimulators(filter: filter)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)

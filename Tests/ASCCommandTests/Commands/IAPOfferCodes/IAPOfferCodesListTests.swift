@@ -7,7 +7,7 @@ import Testing
 struct IAPOfferCodesListTests {
 
     @Test func `listed offer codes include name eligibilities active and affordances`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodeRepository()
+        let mockRepo = MockInAppPurchaseOfferCodes()
         given(mockRepo).listOfferCodes(iapId: .any)
             .willReturn([
                 InAppPurchaseOfferCode(
@@ -31,7 +31,7 @@ struct IAPOfferCodesListTests {
     }
 
     @Test func `table output includes all row fields`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodeRepository()
+        let mockRepo = MockInAppPurchaseOfferCodes()
         given(mockRepo).listOfferCodes(iapId: .any)
             .willReturn([
                 InAppPurchaseOfferCode(

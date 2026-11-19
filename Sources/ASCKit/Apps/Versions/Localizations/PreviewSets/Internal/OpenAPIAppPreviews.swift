@@ -1,0 +1,155 @@
+@preconcurrency import AppStoreConnect_Swift_SDK
+import Foundation
+
+public struct OpenAPIAppPreviews: AppPreviews, @unchecked Sendable {
+    private let client: any APIClient
+    private let uploader: UploadOperationsExecutor
+
+    public init(client: any APIClient, uploader: UploadOperationsExecutor = UploadOperationsExecutor()) {
+        self.client = client
+        self.uploader = uploader
+    }
+
+    public func listPreviewSets(localizationId: String) async throws -> [ASCKit.AppPreviewSet] {
+        let request = APIEndpoint.v1.appStoreVersionLocalizations.id(localizationId).appPreviewSets.get(
+            parameters: .init(include: [.appPreviews])
+        )
+        let response = try await client.request(request)
+        return response.data.map { mapPreviewSet($0, localizationId: localizationId) }
+    }
+
+    public func createPreviewSet(localizationId: String, previewType: ASCKit.PreviewType) async throws -> ASCKit.AppPreviewSet {
+        guard let sdkPreviewType = AppStoreConnect_Swift_SDK.PreviewType(rawValue: previewType.rawValue) else {
+            throw ASCKit.APIError.unknown("Unsupported preview type: \(previewType.rawValue)")
+        }
+        let body = AppPreviewSetCreateRequest(
+            data: .init(
+                type: .appPreviewSets,
+                attributes: .init(previewType: sdkPreviewType),
+                relationships: .init(
+                    appStoreVersionLocalization: .init(
+                        data: .init(type: .appStoreVersionLocalizations, id: localizationId)
+                    )
+                )
+            )
+        )
+        let response = try await client.request(APIEndpoint.v1.appPreviewSets.post(body))
+        return mapPreviewSet(response.data, localizationId: localizationId)
+    }
+
+    public func listPreviews(setId: String) async throws -> [ASCKit.AppPreview] {
+        let request = APIEndpoint.v1.appPreviewSets.id(setId).appPreviews.get()
+        let response = try await client.request(request)
+        return response.data.map { mapPreview($0, setId: setId) }
+    }
+
+    public func uploadPreview(setId: String, fileURL: URL, previewFrameTimeCode: String?) async throws -> ASCKit.AppPreview {
+        let fileData = try Data(contentsOf: fileURL)
+        let fileName = fileURL.lastPathComponent
+        let fileSize = fileData.count
+        let mimeType = mimeTypeForFileName(fileName)
+
+        // Step 1: Reserve preview slot
+        let reserveBody = AppPreviewCreateRequest(
+            data: .init(
+                type: .appPreviews,
+                attributes: .init(
+                    fileSize: fileSize,
+                    fileName: fileName,
+                    previewFrameTimeCode: previewFrameTimeCode,
+                    mimeType: mimeType
+                ),
+                relationships: .init(
+                    appPreviewSet: .init(data: .init(type: .appPreviewSets, id: setId))
+                )
+            )
+        )
+        let reserved = try await client.request(APIEndpoint.v1.appPreviews.post(reserveBody))
+        let previewId = reserved.data.id
+        let uploadOps = reserved.data.attributes?.uploadOperations ?? []
+
+        // Step 2: Upload video data via each upload operation
+        try await uploader.upload(fileURL: fileURL, operations: uploadOps)
+
+        // Step 3: Confirm upload with MD5 checksum
+        let md5 = fileData.md5HexString
+        let confirmBody = AppPreviewUpdateRequest(
+            data: .init(
+                type: .appPreviews,
+                id: previewId,
+                attributes: .init(sourceFileChecksum: md5, isUploaded: true)
+            )
+        )
+        let confirmed = try await client.request(APIEndpoint.v1.appPreviews.id(previewId).patch(confirmBody))
+        return mapPreview(confirmed.data, setId: setId)
+    }
+
+    // MARK: - Mappers (inject parent IDs)
+
+    private func mapPreviewSet(
+        _ sdkSet: AppStoreConnect_Swift_SDK.AppPreviewSet,
+        localizationId: String
+    ) -> ASCKit.AppPreviewSet {
+        let previewType = ASCKit.PreviewType(rawValue: sdkSet.attributes?.previewType?.rawValue ?? "") ?? .iphone67
+        let count = sdkSet.relationships?.appPreviews?.data?.count ?? 0
+        return ASCKit.AppPreviewSet(
+            id: sdkSet.id,
+            localizationId: localizationId,
+            previewType: previewType,
+            previewsCount: count
+        )
+    }
+
+    private func mapPreview(
+        _ sdkPreview: AppStoreConnect_Swift_SDK.AppPreview,
+        setId: String
+    ) -> ASCKit.AppPreview {
+        let assetState = mapAssetState(sdkPreview.attributes?.assetDeliveryState?.state)
+        let videoState = mapVideoState(sdkPreview.attributes?.videoDeliveryState?.state)
+        return ASCKit.AppPreview(
+            id: sdkPreview.id,
+            setId: setId,
+            fileName: sdkPreview.attributes?.fileName ?? "",
+            fileSize: sdkPreview.attributes?.fileSize ?? 0,
+            mimeType: sdkPreview.attributes?.mimeType,
+            assetDeliveryState: assetState,
+            videoDeliveryState: videoState,
+            videoURL: sdkPreview.attributes?.videoURL,
+            previewFrameTimeCode: sdkPreview.attributes?.previewFrameTimeCode
+        )
+    }
+
+    private func mapAssetState(
+        _ state: AppStoreConnect_Swift_SDK.AppMediaAssetState.State?
+    ) -> ASCKit.AppPreview.AssetDeliveryState? {
+        guard let state else { return nil }
+        switch state {
+        case .awaitingUpload: return .awaitingUpload
+        case .uploadComplete: return .uploadComplete
+        case .complete: return .complete
+        case .failed: return .failed
+        }
+    }
+
+    private func mapVideoState(
+        _ state: AppStoreConnect_Swift_SDK.AppMediaVideoState.State?
+    ) -> ASCKit.AppPreview.VideoDeliveryState? {
+        guard let state else { return nil }
+        switch state {
+        case .awaitingUpload: return .awaitingUpload
+        case .uploadComplete: return .uploadComplete
+        case .processing: return .processing
+        case .complete: return .complete
+        case .failed: return .failed
+        }
+    }
+
+    private func mimeTypeForFileName(_ fileName: String) -> String {
+        switch (fileName as NSString).pathExtension.lowercased() {
+        case "mp4": return "video/mp4"
+        case "mov": return "video/quicktime"
+        case "m4v": return "video/x-m4v"
+        default: return "application/octet-stream"
+        }
+    }
+}

@@ -7,7 +7,7 @@ import Testing
 struct UserInvitationsListTests {
 
     @Test func `listed invitations include email roles and cancel affordance`() async throws {
-        let mockRepo = MockUserRepository()
+        let mockRepo = MockUsers()
         given(mockRepo).listUserInvitations(role: .any).willReturn([
             UserInvitationRecord(
                 id: "inv-1",

@@ -4,7 +4,7 @@ import HummingbirdWebSocket
 
 /// Routes that return `AppScreenshot` resources.
 struct ScreenshotsController: Sendable {
-    let repo: any ScreenshotRepository
+    let repo: any AppScreenshots
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/screenshot-sets/:setId/screenshots") { _, context -> Response in

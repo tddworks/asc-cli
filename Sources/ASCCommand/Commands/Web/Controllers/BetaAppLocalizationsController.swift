@@ -4,7 +4,7 @@ import HummingbirdWebSocket
 
 /// Routes that return `BetaAppLocalization` resources.
 struct BetaAppLocalizationsController: Sendable {
-    let repo: any BetaAppLocalizationRepository
+    let repo: any BetaAppLocalizations
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/apps/:appId/beta-app-localizations") { _, context -> Response in

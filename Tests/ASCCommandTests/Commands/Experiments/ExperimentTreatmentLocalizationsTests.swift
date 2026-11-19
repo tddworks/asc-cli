@@ -7,7 +7,7 @@ import Testing
 struct ExperimentTreatmentLocalizationsTests {
 
     @Test func `listed localizations show locale and delete affordance`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         given(mockRepo).listTreatmentLocalizations(treatmentId: .any, limit: .any).willReturn([
             ExperimentTreatmentLocalization(id: "loc-1", treatmentId: "trt-1", locale: "en-US"),
         ])
@@ -34,7 +34,7 @@ struct ExperimentTreatmentLocalizationsTests {
     }
 
     @Test func `create passes locale and shows the new localization`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         given(mockRepo).createTreatmentLocalization(treatmentId: .any, locale: .any)
             .willReturn(ExperimentTreatmentLocalization(id: "loc-2", treatmentId: "trt-1", locale: "de-DE"))
 
@@ -47,7 +47,7 @@ struct ExperimentTreatmentLocalizationsTests {
     }
 
     @Test func `delete calls the repository with the localization id`() async throws {
-        let mockRepo = MockExperimentRepository()
+        let mockRepo = MockExperiments()
         given(mockRepo).deleteTreatmentLocalization(localizationId: .any).willReturn(())
 
         let cmd = try ExperimentTreatmentLocalizationsDelete.parse(["--localization-id", "loc-1"])

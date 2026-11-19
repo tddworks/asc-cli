@@ -56,11 +56,11 @@ struct WinBackOffersCreate: AsyncParsableCommand {
     var price: [String] = []
 
     func run() async throws {
-        let repo = try ClientProvider.makeWinBackOfferRepository()
+        let repo = try ClientProvider.makeWinBackOffers()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any WinBackOfferRepository) async throws -> String {
+    func execute(repo: any WinBackOffers) async throws -> String {
         guard let durationEnum = SubscriptionOfferDuration(rawValue: duration) else {
             throw ValidationError("Invalid duration: \(duration)")
         }

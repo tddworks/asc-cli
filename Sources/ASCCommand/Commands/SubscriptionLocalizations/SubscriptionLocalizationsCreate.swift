@@ -22,11 +22,11 @@ struct SubscriptionLocalizationsCreate: AsyncParsableCommand {
     var description: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptionLocalizationRepository()
+        let repo = try ClientProvider.makeSubscriptionLocalizations()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubscriptionLocalizationRepository) async throws -> String {
+    func execute(repo: any SubscriptionLocalizations) async throws -> String {
         let item = try await repo.createLocalization(
             subscriptionId: subscriptionId,
             locale: locale,

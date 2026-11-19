@@ -22,12 +22,12 @@ struct ExperimentsCreate: AsyncParsableCommand {
     var trafficProportion: Int
 
     func run() async throws {
-        let repo = try ClientProvider.makeExperimentRepository()
+        let repo = try ClientProvider.makeExperiments()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any ExperimentRepository,
+        repo: any Experiments,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         guard let appStorePlatform = AppStorePlatform(cliArgument: platform) else {

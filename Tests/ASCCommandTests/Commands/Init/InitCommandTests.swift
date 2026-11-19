@@ -9,7 +9,7 @@ struct InitCommandTests {
     // MARK: - --app-id mode
 
     @Test func `app-id resolves app by ID and saves config`() async throws {
-        let mockRepo = MockAppRepository()
+        let mockRepo = MockApps()
         let mockStorage = MockProjectConfigStorage()
         given(mockRepo).getApp(id: .any).willReturn(
             App(id: "app-123", name: "My App", bundleId: "com.example.app")
@@ -42,7 +42,7 @@ struct InitCommandTests {
     // MARK: - --name mode
 
     @Test func `name finds matching app case-insensitively and saves config`() async throws {
-        let mockRepo = MockAppRepository()
+        let mockRepo = MockApps()
         let mockStorage = MockProjectConfigStorage()
         given(mockRepo).listApps(limit: .any).willReturn(
             PaginatedResponse(data: [
@@ -59,7 +59,7 @@ struct InitCommandTests {
     }
 
     @Test func `name throws when no matching app found`() async throws {
-        let mockRepo = MockAppRepository()
+        let mockRepo = MockApps()
         let mockStorage = MockProjectConfigStorage()
         given(mockRepo).listApps(limit: .any).willReturn(
             PaginatedResponse(data: [
@@ -76,7 +76,7 @@ struct InitCommandTests {
     // MARK: - Auto-detect mode
 
     @Test func `auto-detect matches app by bundle ID from xcodeproj`() async throws {
-        let mockRepo = MockAppRepository()
+        let mockRepo = MockApps()
         let mockStorage = MockProjectConfigStorage()
         given(mockRepo).listApps(limit: .any).willReturn(
             PaginatedResponse(data: [
@@ -96,7 +96,7 @@ struct InitCommandTests {
     }
 
     @Test func `auto-detect throws when scanner finds no bundle IDs`() async throws {
-        let mockRepo = MockAppRepository()
+        let mockRepo = MockApps()
         let mockStorage = MockProjectConfigStorage()
 
         var cmd = try InitCommand.parse([])
@@ -112,7 +112,7 @@ struct InitCommandTests {
     // MARK: - Review contact flags
 
     @Test func `init with contact flags saves review contact in config`() async throws {
-        let mockRepo = MockAppRepository()
+        let mockRepo = MockApps()
         let mockStorage = MockProjectConfigStorage()
         given(mockRepo).getApp(id: .any).willReturn(
             App(id: "app-123", name: "My App", bundleId: "com.example.app")
@@ -154,7 +154,7 @@ struct InitCommandTests {
     }
 
     @Test func `init without contact flags omits contact from config`() async throws {
-        let mockRepo = MockAppRepository()
+        let mockRepo = MockApps()
         let mockStorage = MockProjectConfigStorage()
         given(mockRepo).getApp(id: .any).willReturn(
             App(id: "app-123", name: "My App", bundleId: "com.example.app")
@@ -173,7 +173,7 @@ struct InitCommandTests {
     // MARK: - Auto-detect error cases
 
     @Test func `auto-detect throws when no ASC app matches bundle ID`() async throws {
-        let mockRepo = MockAppRepository()
+        let mockRepo = MockApps()
         let mockStorage = MockProjectConfigStorage()
         given(mockRepo).listApps(limit: .any).willReturn(
             PaginatedResponse(data: [

@@ -22,12 +22,12 @@ struct SubscriptionGroupLocalizationsCreate: AsyncParsableCommand {
     var customAppName: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptionGroupLocalizationRepository()
+        let repo = try ClientProvider.makeSubscriptionGroupLocalizations()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any SubscriptionGroupLocalizationRepository,
+        repo: any SubscriptionGroupLocalizations,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let item = try await repo.createLocalization(

@@ -10,7 +10,7 @@ import ASCKit
 /// `filter[app]` as required, so fleet listing isn't possible without
 /// aggregating per-app on the client side.
 struct ReviewSubmissionsController: Sendable {
-    let submissionRepo: any SubmissionRepository
+    let submissionRepo: any ReviewSubmissions
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/apps/:appId/review-submissions") { request, context -> Response in

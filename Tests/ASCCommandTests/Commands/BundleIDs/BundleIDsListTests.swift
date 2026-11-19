@@ -7,7 +7,7 @@ import Testing
 struct BundleIDsListTests {
 
     @Test func `listed bundle ids include identifier platform and affordances`() async throws {
-        let mockRepo = MockBundleIDRepository()
+        let mockRepo = MockBundleIDs()
         given(mockRepo).listBundleIDs(platform: .any, identifier: .any).willReturn([
             BundleID(id: "bid-1", name: "My App", identifier: "com.example.app", platform: .iOS),
         ])
@@ -34,7 +34,7 @@ struct BundleIDsListTests {
     }
 
     @Test func `table output includes all row fields`() async throws {
-        let mockRepo = MockBundleIDRepository()
+        let mockRepo = MockBundleIDs()
         given(mockRepo).listBundleIDs(platform: .any, identifier: .any).willReturn([
             BundleID(id: "bid-1", name: "My App", identifier: "com.example.app", platform: .iOS),
         ])
@@ -48,7 +48,7 @@ struct BundleIDsListTests {
     }
 
     @Test func `seed id is omitted from output when not set`() async throws {
-        let mockRepo = MockBundleIDRepository()
+        let mockRepo = MockBundleIDs()
         given(mockRepo).listBundleIDs(platform: .any, identifier: .any).willReturn([
             BundleID(id: "bid-1", name: "My App", identifier: "com.example.app", platform: .macOS),
         ])

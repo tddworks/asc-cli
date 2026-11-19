@@ -16,11 +16,11 @@ struct AppsPricePointsList: AsyncParsableCommand {
     var territory: String = "USA"
 
     func run() async throws {
-        let repo = try ClientProvider.makePricingRepository()
+        let repo = try ClientProvider.makeAppPrices()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any PricingRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any AppPrices, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let points = try await repo.listPricePoints(appId: appId, territory: territory)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(points, affordanceMode: affordanceMode)

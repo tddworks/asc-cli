@@ -7,7 +7,7 @@ import Testing
 struct IAPListTests {
 
     @Test func `listed iaps include appId, productId, type, state and affordances`() async throws {
-        let mockRepo = MockInAppPurchaseRepository()
+        let mockRepo = MockInAppPurchases()
         given(mockRepo).listInAppPurchases(appId: .any, limit: .any)
             .willReturn(PaginatedResponse(data: [
                 InAppPurchase(
@@ -57,7 +57,7 @@ struct IAPListTests {
     }
 
     @Test func `listed iap with reviewNote surfaces it in JSON output`() async throws {
-        let mockRepo = MockInAppPurchaseRepository()
+        let mockRepo = MockInAppPurchases()
         given(mockRepo).listInAppPurchases(appId: .any, limit: .any)
             .willReturn(PaginatedResponse(data: [
                 InAppPurchase(
@@ -78,7 +78,7 @@ struct IAPListTests {
     }
 
     @Test func `table output includes all row fields`() async throws {
-        let mockRepo = MockInAppPurchaseRepository()
+        let mockRepo = MockInAppPurchases()
         given(mockRepo).listInAppPurchases(appId: .any, limit: .any)
             .willReturn(PaginatedResponse(data: [
                 InAppPurchase(

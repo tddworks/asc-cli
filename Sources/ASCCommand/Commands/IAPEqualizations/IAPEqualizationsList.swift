@@ -16,12 +16,12 @@ struct IAPEqualizationsList: AsyncParsableCommand {
     var limit: Int?
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchasePriceRepository()
+        let repo = try ClientProvider.makeInAppPurchasePrices()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any InAppPurchasePriceRepository,
+        repo: any InAppPurchasePrices,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let items = try await repo.listEqualizations(pricePointId: pricePointId, limit: limit)

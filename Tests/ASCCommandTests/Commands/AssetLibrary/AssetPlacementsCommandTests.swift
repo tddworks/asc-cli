@@ -9,7 +9,7 @@ struct AssetPlacementsCommandTests {
     // MARK: - list
 
     @Test func `should list a localization's placements in display order with what can be done next`() async throws {
-        let mockRepo = MockAssetPlacementRepository()
+        let mockRepo = MockAssetPlacements()
         given(mockRepo).listPlacements(
             surface: .value(.appStoreVersionLocalization), localizationId: .value("loc-1"),
             placementType: .value(.appScreenshot), placementGroup: .value("IPHONE_67")
@@ -50,7 +50,7 @@ struct AssetPlacementsCommandTests {
     }
 
     @Test func `should list everywhere an image is placed`() async throws {
-        let mockRepo = MockAssetPlacementRepository()
+        let mockRepo = MockAssetPlacements()
         given(mockRepo).listAssetPlacements(mediaType: .value(.image), assetId: .value("img-1")).willReturn([
             AssetPlacement(id: "pl-1", surface: .appStoreVersionLocalization, localizationId: "loc-1", mediaType: .image,
                            assetId: "img-1", placementType: .appScreenshot, placementGroup: "IPHONE_67", state: .parentApproved),
@@ -70,7 +70,7 @@ struct AssetPlacementsCommandTests {
     }
 
     @Test func `should list a treatment localization's placements`() async throws {
-        let mockRepo = MockAssetPlacementRepository()
+        let mockRepo = MockAssetPlacements()
         given(mockRepo).listPlacements(
             surface: .value(.experimentTreatmentLocalization), localizationId: .value("tl-1"), placementType: .value(nil), placementGroup: .value(nil)
         ).willReturn([
@@ -85,7 +85,7 @@ struct AssetPlacementsCommandTests {
     }
 
     @Test func `should list everywhere a video is placed`() async throws {
-        let mockRepo = MockAssetPlacementRepository()
+        let mockRepo = MockAssetPlacements()
         given(mockRepo).listAssetPlacements(mediaType: .value(.video), assetId: .value("vid-1")).willReturn([
             AssetPlacement(id: "pl-1", surface: .appStoreVersionLocalization, localizationId: "loc-1", mediaType: .video,
                            assetId: "vid-1", placementType: .appPreview, placementGroup: "IPHONE_67", state: .parentApproved),
@@ -100,7 +100,7 @@ struct AssetPlacementsCommandTests {
     // MARK: - create
 
     @Test func `should place the image on the localization and show the new placement`() async throws {
-        let mockRepo = MockAssetPlacementRepository()
+        let mockRepo = MockAssetPlacements()
         given(mockRepo).createPlacement(
             surface: .value(.appStoreVersionLocalization), localizationId: .value("loc-1"), mediaType: .value(.image),
             assetId: .value("img-1"), placementType: .value(.appScreenshot), placementGroup: .value("IPHONE_67")
@@ -118,7 +118,7 @@ struct AssetPlacementsCommandTests {
     }
 
     @Test func `should place a video on a treatment localization`() async throws {
-        let mockRepo = MockAssetPlacementRepository()
+        let mockRepo = MockAssetPlacements()
         given(mockRepo).createPlacement(
             surface: .value(.experimentTreatmentLocalization), localizationId: .value("tl-1"), mediaType: .value(.video),
             assetId: .value("vid-1"), placementType: .value(.appPreview), placementGroup: .value("IPHONE_67")
@@ -136,7 +136,7 @@ struct AssetPlacementsCommandTests {
     }
 
     @Test func `should place a header image on a custom product page localization`() async throws {
-        let mockRepo = MockAssetPlacementRepository()
+        let mockRepo = MockAssetPlacements()
         given(mockRepo).createPlacement(
             surface: .value(.customProductPageLocalization), localizationId: .value("cpl-1"), mediaType: .value(.image),
             assetId: .value("img-1"), placementType: .value(.productPageHeaderAsset), placementGroup: .value("DEFAULT_PROFILE")
@@ -155,7 +155,7 @@ struct AssetPlacementsCommandTests {
     }
 
     @Test func `should list a custom product page localization's placements`() async throws {
-        let mockRepo = MockAssetPlacementRepository()
+        let mockRepo = MockAssetPlacements()
         given(mockRepo).listPlacements(
             surface: .value(.customProductPageLocalization), localizationId: .value("cpl-1"),
             placementType: .value(.appStoreSearchResultsAsset), placementGroup: .value(nil)
@@ -202,7 +202,7 @@ struct AssetPlacementsCommandTests {
     // MARK: - reorder
 
     @Test func `should reorder a group on a treatment localization`() async throws {
-        let mockRepo = MockAssetPlacementRepository()
+        let mockRepo = MockAssetPlacements()
         given(mockRepo).reorderPlacements(
             surface: .value(.experimentTreatmentLocalization), localizationId: .value("tl-1"),
             placementGroup: .value("IPHONE_67"), placementIds: .value(["pl-1"])
@@ -219,7 +219,7 @@ struct AssetPlacementsCommandTests {
 
 
     @Test func `should show the group in the order it was given`() async throws {
-        let mockRepo = MockAssetPlacementRepository()
+        let mockRepo = MockAssetPlacements()
         given(mockRepo).reorderPlacements(
             surface: .value(.appStoreVersionLocalization), localizationId: .value("loc-1"),
             placementGroup: .value("IPHONE_67"), placementIds: .value(["pl-2", "pl-1"])
@@ -241,7 +241,7 @@ struct AssetPlacementsCommandTests {
     // MARK: - delete
 
     @Test func `should report App Store Connect's refusal to delete a placement once the version is in review`() async throws {
-        let mockRepo = MockAssetPlacementRepository()
+        let mockRepo = MockAssetPlacements()
         given(mockRepo).deletePlacement(placementId: .value("pl-1")).willThrow(APIError.unknown("STATE_ERROR.INVALID_STATE"))
 
         let cmd = try AssetPlacementsDelete.parse(["--placement-id", "pl-1"])

@@ -25,11 +25,11 @@ struct ReviewSubmissionItemsAdd: AsyncParsableCommand {
     var subscriptionGroupVersionId: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubmissionRepository()
+        let repo = try ClientProvider.makeReviewSubmissions()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubmissionRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any ReviewSubmissions, affordanceMode: AffordanceMode = .cli) async throws -> String {
         guard let target = ReviewItemTarget(
             versionId: versionId,
             iapVersionId: iapVersionId,

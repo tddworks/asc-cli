@@ -10,11 +10,11 @@ struct PluginsUpdates: AsyncParsableCommand {
     @OptionGroup var globals: GlobalOptions
 
     func run() async throws {
-        let repo = ClientProvider.makePluginRepository()
+        let repo = ClientProvider.makePlugins()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any PluginRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any Plugins, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let updates = try await repo.listOutdated()
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

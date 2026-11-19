@@ -7,7 +7,7 @@ import Testing
 struct IAPOfferCodeOneTimeCodesCreateTests {
 
     @Test func `creates IAP one-time codes and returns result with affordances`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodeRepository()
+        let mockRepo = MockInAppPurchaseOfferCodes()
         given(mockRepo).createOneTimeUseCode(
             offerCodeId: .any, numberOfCodes: .any, expirationDate: .any, environment: .any
         ).willReturn(InAppPurchaseOfferCodeOneTimeUseCode(
@@ -32,7 +32,7 @@ struct IAPOfferCodeOneTimeCodesCreateTests {
     }
 
     @Test func `defaults environment to production when flag omitted`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodeRepository()
+        let mockRepo = MockInAppPurchaseOfferCodes()
         given(mockRepo).createOneTimeUseCode(
             offerCodeId: .any, numberOfCodes: .any, expirationDate: .any, environment: .any
         ).willReturn(InAppPurchaseOfferCodeOneTimeUseCode(
@@ -59,7 +59,7 @@ struct IAPOfferCodeOneTimeCodesCreateTests {
     }
 
     @Test func `forwards sandbox environment to repository`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodeRepository()
+        let mockRepo = MockInAppPurchaseOfferCodes()
         given(mockRepo).createOneTimeUseCode(
             offerCodeId: .any, numberOfCodes: .any, expirationDate: .any, environment: .any
         ).willReturn(InAppPurchaseOfferCodeOneTimeUseCode(

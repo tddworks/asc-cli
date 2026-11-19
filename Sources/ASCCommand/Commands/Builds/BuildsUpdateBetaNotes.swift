@@ -19,11 +19,11 @@ struct BuildsUpdateBetaNotes: AsyncParsableCommand {
     var notes: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeBetaBuildLocalizationRepository()
+        let repo = try ClientProvider.makeBetaBuildLocalizations()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any BetaBuildLocalizationRepository) async throws -> String {
+    func execute(repo: any BetaBuildLocalizations) async throws -> String {
         let loc = try await repo.upsertBetaBuildLocalization(buildId: buildId, locale: locale, whatsNew: notes)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

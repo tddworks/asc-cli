@@ -27,22 +27,22 @@ struct VersionsSubmit: AsyncParsableCommand {
     func run() async throws {
         if withProducts || dryRun {
             let planner = SubmissionPlanner(
-                iapRepo: try ClientProvider.makeInAppPurchaseRepository(),
-                groupRepo: try ClientProvider.makeSubscriptionGroupRepository(),
-                subscriptionRepo: try ClientProvider.makeSubscriptionRepository(),
-                productVersionRepo: try ClientProvider.makeProductVersionRepository()
+                iapRepo: try ClientProvider.makeInAppPurchases(),
+                groupRepo: try ClientProvider.makeSubscriptionGroups(),
+                subscriptionRepo: try ClientProvider.makeSubscriptions(),
+                productVersionRepo: try ClientProvider.makeProductVersions()
             )
             print(try await executeWithProducts(
-                submissionRepo: try ClientProvider.makeSubmissionRepository(),
-                versionRepo: try ClientProvider.makeVersionRepository(),
+                submissionRepo: try ClientProvider.makeReviewSubmissions(),
+                versionRepo: try ClientProvider.makeAppStoreVersions(),
                 planner: planner
             ))
         } else {
-            print(try await execute(repo: try ClientProvider.makeSubmissionRepository()))
+            print(try await execute(repo: try ClientProvider.makeReviewSubmissions()))
         }
     }
 
-    func execute(repo: any SubmissionRepository) async throws -> String {
+    func execute(repo: any ReviewSubmissions) async throws -> String {
         let submission = try await repo.submitVersion(versionId: versionId)
 
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
@@ -54,8 +54,8 @@ struct VersionsSubmit: AsyncParsableCommand {
     }
 
     func executeWithProducts(
-        submissionRepo: any SubmissionRepository,
-        versionRepo: any VersionRepository,
+        submissionRepo: any ReviewSubmissions,
+        versionRepo: any AppStoreVersions,
         planner: SubmissionPlanner,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {

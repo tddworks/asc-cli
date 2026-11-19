@@ -171,7 +171,7 @@ final class TUIApp {
 
     private func loadApps() async {
         do {
-            let repo = try ClientProvider.makeAppRepository()
+            let repo = try ClientProvider.makeApps()
             let response = try await repo.listApps(limit: nil)
             let items = response.data.map { app in
                 SelectItem(value: app.id, label: app.displayName, description: app.bundleId)
@@ -233,7 +233,7 @@ final class TUIApp {
 
     private func loadVersions(for app: App) async {
         do {
-            let repo = try ClientProvider.makeVersionRepository()
+            let repo = try ClientProvider.makeAppStoreVersions()
             let versions = try await repo.listVersions(appId: app.id)
 
             guard !versions.isEmpty else {
@@ -267,7 +267,7 @@ final class TUIApp {
 
     private func loadLocalizations(for version: AppStoreVersion) async {
         do {
-            let repo = try ClientProvider.makeVersionLocalizationRepository()
+            let repo = try ClientProvider.makeVersionLocalizations()
             let localizations = try await repo.listLocalizations(versionId: version.id)
 
             guard !localizations.isEmpty else {
@@ -307,7 +307,7 @@ final class TUIApp {
 
     private func loadScreenshotSets(for localization: AppStoreVersionLocalization) async {
         do {
-            let repo = try ClientProvider.makeScreenshotRepository()
+            let repo = try ClientProvider.makeAppScreenshots()
             let sets = try await repo.listScreenshotSets(localizationId: localization.id)
 
             guard !sets.isEmpty else {
@@ -343,7 +343,7 @@ final class TUIApp {
 
     private func loadScreenshots(for set: AppScreenshotSet) async {
         do {
-            let repo = try ClientProvider.makeScreenshotRepository()
+            let repo = try ClientProvider.makeAppScreenshots()
             let screenshots = try await repo.listScreenshots(setId: set.id)
 
             let header = [
@@ -372,7 +372,7 @@ final class TUIApp {
 
     private func loadBuilds() async {
         do {
-            let repo = try ClientProvider.makeBuildRepository()
+            let repo = try ClientProvider.makeBuilds()
             let response = try await repo.listBuilds(appId: nil, platform: nil, version: nil, limit: nil)
             let items = response.data.map { build in
                 let state = build.processingState.rawValue
@@ -441,7 +441,7 @@ final class TUIApp {
 
     private func loadBetaGroups() async {
         do {
-            let repo = try ClientProvider.makeTestFlightRepository()
+            let repo = try ClientProvider.makeTestFlight()
             let response = try await repo.listBetaGroups(appId: nil, limit: nil)
             let items = response.data.map { group in
                 let type = group.isInternalGroup ? "Internal" : "External"
@@ -476,7 +476,7 @@ final class TUIApp {
             return
         }
         do {
-            let repo = try ClientProvider.makeTestFlightRepository()
+            let repo = try ClientProvider.makeTestFlight()
             let response = try await repo.listBetaTesters(groupId: groupId, limit: nil)
             let items = response.data.map { tester in
                 SelectItem(

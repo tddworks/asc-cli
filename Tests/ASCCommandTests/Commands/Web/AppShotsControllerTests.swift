@@ -10,7 +10,7 @@ struct AppShotsControllerTests {
     // MARK: - Templates list
 
     @Test func `templates list returns data with _links`() async throws {
-        let mockRepo = MockTemplateRepository()
+        let mockRepo = MockTemplates()
         given(mockRepo).listTemplates(size: .any).willReturn([
             makeTemplate(id: "hero", name: "Hero"),
         ])
@@ -25,7 +25,7 @@ struct AppShotsControllerTests {
     // MARK: - Themes list
 
     @Test func `themes list returns data with _links`() async throws {
-        let mockRepo = MockThemeRepository()
+        let mockRepo = MockThemes()
         given(mockRepo).listThemes().willReturn([
             makeTheme(id: "neon", name: "Neon"),
         ])

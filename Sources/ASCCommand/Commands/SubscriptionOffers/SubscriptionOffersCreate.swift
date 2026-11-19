@@ -34,11 +34,11 @@ struct SubscriptionOffersCreate: AsyncParsableCommand {
     var endDate: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptionIntroductoryOfferRepository()
+        let repo = try ClientProvider.makeSubscriptionIntroductoryOffers()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubscriptionIntroductoryOfferRepository) async throws -> String {
+    func execute(repo: any SubscriptionIntroductoryOffers) async throws -> String {
         guard let offerDuration = SubscriptionOfferDuration(rawValue: duration) else {
             throw ValidationError("Invalid duration '\(duration)'. Use: THREE_DAYS, ONE_WEEK, TWO_WEEKS, ONE_MONTH, TWO_MONTHS, THREE_MONTHS, SIX_MONTHS, ONE_YEAR")
         }

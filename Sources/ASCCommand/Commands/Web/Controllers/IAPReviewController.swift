@@ -5,7 +5,7 @@ import HummingbirdWebSocket
 
 /// Routes that return IAP review screenshot + promotional images.
 struct IAPReviewController: Sendable {
-    let repo: any InAppPurchaseReviewRepository
+    let repo: any InAppPurchaseReviewAssets
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/iap/:iapId/review-screenshot") { _, context -> Response in

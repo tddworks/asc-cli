@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionOfferCodesPricesListTests {
 
     @Test func `lists subscription offer code prices with affordances`() async throws {
-        let mockRepo = MockSubscriptionOfferCodeRepository()
+        let mockRepo = MockSubscriptionOfferCodes()
         given(mockRepo).listPrices(offerCodeId: .any).willReturn([
             SubscriptionOfferCodePrice(id: "p-1", offerCodeId: "oc-1", territory: "USA", subscriptionPricePointId: "spp-7")
         ])
