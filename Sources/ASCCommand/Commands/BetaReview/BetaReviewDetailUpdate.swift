@@ -37,11 +37,11 @@ struct BetaReviewDetailUpdate: AsyncParsableCommand {
     var notes: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeBetaAppReviews()
+        let repo = try ClientProvider.makeBetaAppReviewRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any BetaAppReviews) async throws -> String {
+    func execute(repo: any BetaAppReviewRepository) async throws -> String {
         let update = ASCKit.BetaAppReviewDetailUpdate(
             contactFirstName: contactFirstName,
             contactLastName: contactLastName,

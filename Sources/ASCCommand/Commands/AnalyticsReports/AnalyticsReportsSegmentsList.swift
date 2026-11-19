@@ -13,11 +13,11 @@ struct AnalyticsReportsSegmentsList: AsyncParsableCommand {
     var instanceId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAnalyticsReports()
+        let repo = try ClientProvider.makeAnalyticsReportRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AnalyticsReports) async throws -> String {
+    func execute(repo: any AnalyticsReportRepository) async throws -> String {
         let segments = try await repo.listSegments(instanceId: instanceId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(segments)

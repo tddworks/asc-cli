@@ -22,11 +22,11 @@ struct AppPreviewsList: AsyncParsableCommand {
     var setId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppPreviews()
+        let repo = try ClientProvider.makePreviewRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AppPreviews) async throws -> String {
+    func execute(repo: any PreviewRepository) async throws -> String {
         let previews = try await repo.listPreviews(setId: setId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
@@ -63,11 +63,11 @@ struct AppPreviewsUpload: AsyncParsableCommand {
     var previewFrameTimeCode: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppPreviews()
+        let repo = try ClientProvider.makePreviewRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AppPreviews) async throws -> String {
+    func execute(repo: any PreviewRepository) async throws -> String {
         let fileURL = URL(fileURLWithPath: file)
         let preview = try await repo.uploadPreview(
             setId: setId,

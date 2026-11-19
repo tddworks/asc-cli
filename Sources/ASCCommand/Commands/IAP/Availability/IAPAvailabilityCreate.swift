@@ -19,12 +19,12 @@ struct IAPAvailabilityCreate: AsyncParsableCommand {
     var territory: [String] = []
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchaseAvailabilities()
+        let repo = try ClientProvider.makeInAppPurchaseAvailabilityRepository()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any InAppPurchaseAvailabilities,
+        repo: any InAppPurchaseAvailabilityRepository,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let availability = try await repo.createAvailability(

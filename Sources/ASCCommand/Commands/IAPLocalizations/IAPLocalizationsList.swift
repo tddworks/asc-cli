@@ -13,12 +13,12 @@ struct IAPLocalizationsList: AsyncParsableCommand {
     var iapId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchaseLocalizations()
+        let repo = try ClientProvider.makeInAppPurchaseLocalizationRepository()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any InAppPurchaseLocalizations,
+        repo: any InAppPurchaseLocalizationRepository,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let items = try await repo.listLocalizations(iapId: iapId)

@@ -7,7 +7,7 @@ import Testing
 struct IAPDeleteTests {
 
     @Test func `delete iap calls repo with iap id`() async throws {
-        let mockRepo = MockInAppPurchases()
+        let mockRepo = MockInAppPurchaseRepository()
         given(mockRepo).deleteInAppPurchase(iapId: .any).willReturn(())
 
         let cmd = try IAPDelete.parse(["--iap-id", "iap-1"])

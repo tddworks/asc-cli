@@ -7,7 +7,7 @@ import Testing
 struct IAPAvailabilityCreateTests {
 
     @Test func `create availability shows created record with territories and currency`() async throws {
-        let mockRepo = MockInAppPurchaseAvailabilities()
+        let mockRepo = MockInAppPurchaseAvailabilityRepository()
         given(mockRepo).createAvailability(iapId: .any, isAvailableInNewTerritories: .any, territoryIds: .any)
             .willReturn(InAppPurchaseAvailability(
                 id: "avail-new",

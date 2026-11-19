@@ -7,7 +7,7 @@ import Testing
 struct BetaReviewSubmissionsListTests {
 
     @Test func `listed submissions show id, buildId, state, and affordances`() async throws {
-        let mockRepo = MockBetaAppReviews()
+        let mockRepo = MockBetaAppReviewRepository()
         given(mockRepo).listSubmissions(buildId: .value("build-1"))
             .willReturn([
                 BetaAppReviewSubmission(id: "sub-1", buildId: "build-1", state: .waitingForReview),
@@ -34,7 +34,7 @@ struct BetaReviewSubmissionsListTests {
     }
 
     @Test func `listed submissions show approved state`() async throws {
-        let mockRepo = MockBetaAppReviews()
+        let mockRepo = MockBetaAppReviewRepository()
         given(mockRepo).listSubmissions(buildId: .value("build-1"))
             .willReturn([
                 BetaAppReviewSubmission(id: "sub-1", buildId: "build-1", state: .approved),

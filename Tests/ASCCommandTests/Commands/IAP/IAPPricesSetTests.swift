@@ -7,7 +7,7 @@ import Testing
 struct IAPPricesSetTests {
 
     @Test func `set price returns schedule id, iapId and affordances`() async throws {
-        let mockRepo = MockInAppPurchasePrices()
+        let mockRepo = MockInAppPurchasePriceRepository()
         given(mockRepo).setPriceSchedule(iapId: .any, baseTerritory: .any, pricePointId: .any)
             .willReturn(InAppPurchasePriceSchedule(id: "sched-1", iapId: "iap-1"))
 

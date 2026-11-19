@@ -7,7 +7,7 @@ import Testing
 struct AgeRatingGetTests {
 
     @Test func `age-rating get returns declaration with id and affordances`() async throws {
-        let mockRepo = MockAgeRatingDeclarations()
+        let mockRepo = MockAgeRatingDeclarationRepository()
         given(mockRepo).getDeclaration(appInfoId: .any)
             .willReturn(AgeRatingDeclaration(id: "decl-1", appInfoId: "info-42"))
 
@@ -31,7 +31,7 @@ struct AgeRatingGetTests {
     }
 
     @Test func `age-rating get includes non-nil content fields in output`() async throws {
-        let mockRepo = MockAgeRatingDeclarations()
+        let mockRepo = MockAgeRatingDeclarationRepository()
         given(mockRepo).getDeclaration(appInfoId: .any)
             .willReturn(AgeRatingDeclaration(
                 id: "decl-2",

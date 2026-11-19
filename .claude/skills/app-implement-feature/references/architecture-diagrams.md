@@ -53,10 +53,10 @@ outside call in `Internal/System/`.
 │  ┌──────────────────────┐ ┌──────────────────────┐ ┌──────────────────┐  │
 │  │ Orders/              │ │ Users/               │ │ [NewConcept]/    │  │
 │  │  Order, OrderStatus  │ │  User                │ │  [Model]         │  │
-│  │  Orders              │ │  Users               │ │  [Role]          │  │
+│  │  OrderRepository              │ │  UserRepository               │ │  [Role]          │  │
 │  │  OrderBook (actor)   │ │                      │ │                  │  │
 │  │  Internal/           │ │  Internal/           │ │  Internal/       │  │
-│  │   APIOrders          │ │   APIUsers           │ │   [Adapter]      │  │
+│  │   APIOrderRepository          │ │   APIUserRepository           │ │   [Adapter]      │  │
 │  │   OrderDTO           │ │   System/            │ │   System/        │  │
 │  └──────────────────────┘ └──────────────────────┘ └──────────────────┘  │
 │        │ every concept may use                                           │
@@ -72,11 +72,11 @@ Concepts never reach into each other's `Internal/`.
 
 ## Data Flow Diagrams
 
-### Collection Data Flow (Orders → APIOrders)
+### Collection Data Flow (OrderRepository → APIOrderRepository)
 
 ```
 ┌───────────┐     ┌───────────┐     ┌───────────┐     ┌───────────┐
-│  API/DB   │────▶│ APIOrders │────▶│  Mapper   │────▶│  Domain   │
+│  API/DB   │────▶│ APIOrderRepository │────▶│  Mapper   │────▶│  Domain   │
 │  Response │     │  Fetch    │     │  Logic    │     │  Model    │
 └───────────┘     └───────────┘     └───────────┘     └───────────┘
      Raw               Fetch            Parse            Domain
@@ -90,7 +90,7 @@ Concepts never reach into each other's `Internal/`.
 │                        ACTOR FLOW                                    │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                      │
-│  View ──▶ OrderBook (actor) ──▶ Orders.fetch() ──▶ API/DB          │
+│  View ──▶ OrderBook (actor) ──▶ OrderRepository.fetch() ──▶ API/DB          │
 │               │                                        │            │
 │               │                                        ▼            │
 │               │                              ┌─────────────────┐   │
@@ -119,7 +119,7 @@ Concepts never reach into each other's `Internal/`.
 
 ```
 ┌─────────┐     ┌───────────┐     ┌─────────────┐     ┌──────────────┐
-│ Orders  │────▶│ Try Fetch │────▶│   Success   │────▶│ Return Data  │
+│ OrderRepository  │────▶│ Try Fetch │────▶│   Success   │────▶│ Return Data  │
 └─────────┘     └───────────┘     └─────────────┘     └──────────────┘
                       │
                       ▼ (failure)
@@ -142,7 +142,7 @@ Concepts never reach into each other's `Internal/`.
 ### User Action Flow
 
 ```
-User          View          OrderBook        Orders            API
+User          View          OrderBook        OrderRepository            API
  │              │               │                │               │
  │──tap()──────▶│               │                │               │
  │              │──action()────▶│                │               │
@@ -160,7 +160,7 @@ User          View          OrderBook        Orders            API
 ### State Change Notification
 
 ```
-Orders          OrderBook       @Observable      View
+OrderRepository          OrderBook       @Observable      View
   │                 │               │               │
   │──model─────────▶│               │               │
   │                 │──update()────▶│               │
@@ -181,9 +181,9 @@ Orders          OrderBook       @Observable      View
 ```
 | Component    | Purpose                    | Inputs         | Outputs        | Dependencies |
 |--------------|----------------------------|----------------|----------------|--------------|
-| Orders       | The collection of orders   | OrderId        | Order          | -            |
-| APIOrders    | Plays Orders over the API  | OrderId        | Order          | HTTP         |
-| OrderBook    | Keeps orders current       | Order, Status  | Updated Order  | Orders       |
+| OrderRepository       | The collection of orders   | OrderId        | Order          | -            |
+| APIOrderRepository    | Plays OrderRepository over the API  | OrderId        | Order          | HTTP         |
+| OrderBook    | Keeps orders current       | Order, Status  | Updated Order  | OrderRepository       |
 | OrderMapper  | Converts DTO to an Order   | OrderDTO       | Order          | None         |
 ```
 
@@ -192,7 +192,7 @@ Orders          OrderBook       @Observable      View
 ```
 | Component       | Place                  | Protocol | Creates/Modifies | Test File               |
 |-----------------|------------------------|----------|------------------|-------------------------|
-| APIOrders       | Orders/Internal/       | Orders   | Creates          | APIOrdersTests.swift    |
+| APIOrderRepository       | Orders/Internal/       | OrderRepository   | Creates          | APIOrderRepositoryTests.swift    |
 | OrderMapper     | Orders/Internal/       | -        | Creates          | OrderMapperTests.swift  |
 | URLSessionHTTP  | Core/Internal/System/  | HTTP     | Creates          | (integration only)      |
 | OrderBook       | Orders/ (public face)  | -        | Manages          | OrderBookTests.swift    |
@@ -205,13 +205,13 @@ Orders          OrderBook       @Observable      View
 | File Path                                            | Action | Description                     |
 |------------------------------------------------------|--------|---------------------------------|
 | docs/CANONICAL_MODEL.md                              | Modify | Orders in the tree, laws, words |
-| Sources/Orders/Orders.swift                          | Create | @Mockable collection (face)     |
+| Sources/Orders/OrderRepository.swift                          | Create | @Mockable collection (face)     |
 | Sources/Orders/OrderBook.swift                       | Create | Actor keeping orders current    |
-| Sources/Orders/Internal/APIOrders.swift              | Create | Plays Orders over the API       |
+| Sources/Orders/Internal/APIOrderRepository.swift              | Create | Plays OrderRepository over the API       |
 | Tests/AppTests/Orders/OrderBookTests.swift           | Create | Actor behavior tests            |
-| Tests/AppTests/Orders/Internal/APIOrdersTests.swift  | Create | Adapter behavior tests          |
+| Tests/AppTests/Orders/Internal/APIOrderRepositoryTests.swift  | Create | Adapter behavior tests          |
 | Sources/App/Views/OrderListView.swift                | Create | SwiftUI view for orders         |
-| Sources/App/App.swift                                | Modify | Wire APIOrders into Orders      |
+| Sources/App/App.swift                                | Modify | Wire APIOrderRepository into OrderRepository      |
 ```
 
 ---

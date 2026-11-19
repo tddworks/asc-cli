@@ -16,12 +16,12 @@ struct ExperimentTreatmentsList: AsyncParsableCommand {
     var limit: Int?
 
     func run() async throws {
-        let repo = try ClientProvider.makeExperiments()
+        let repo = try ClientProvider.makeExperimentRepository()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any Experiments,
+        repo: any ExperimentRepository,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let response = try await repo.listTreatments(experimentId: experimentId, limit: limit)

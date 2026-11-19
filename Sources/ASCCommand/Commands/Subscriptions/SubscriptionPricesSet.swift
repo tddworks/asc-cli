@@ -25,11 +25,11 @@ struct SubscriptionPricesSet: AsyncParsableCommand {
     var preserveCurrentPrice: Bool = false
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptionPrices()
+        let repo = try ClientProvider.makeSubscriptionPriceRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubscriptionPrices) async throws -> String {
+    func execute(repo: any SubscriptionPriceRepository) async throws -> String {
         let preserveFlag: Bool? = preserveCurrentPrice ? true : nil
         let item = try await repo.setPrice(
             subscriptionId: subscriptionId,

@@ -7,7 +7,7 @@ import Testing
 struct VersionLocalizationsCreateTests {
 
     @Test func `created localization is returned with affordances`() async throws {
-        let mockRepo = MockVersionLocalizations()
+        let mockRepo = MockVersionLocalizationRepository()
         given(mockRepo).createLocalization(versionId: .any, locale: .any).willReturn(
             AppStoreVersionLocalization(id: "loc-new", versionId: "v-1", locale: "en-US")
         )
@@ -35,7 +35,7 @@ struct VersionLocalizationsCreateTests {
     }
 
     @Test func `created zh-Hans localization returns correct locale`() async throws {
-        let mockRepo = MockVersionLocalizations()
+        let mockRepo = MockVersionLocalizationRepository()
         given(mockRepo).createLocalization(versionId: .any, locale: .any).willReturn(
             AppStoreVersionLocalization(id: "loc-new", versionId: "v-99", locale: "zh-Hans")
         )

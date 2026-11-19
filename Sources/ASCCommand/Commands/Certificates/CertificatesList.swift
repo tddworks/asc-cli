@@ -23,11 +23,11 @@ struct CertificatesList: AsyncParsableCommand {
     var before: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeCertificates()
+        let repo = try ClientProvider.makeCertificateRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any Certificates, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any CertificateRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let certType = type.flatMap { CertificateType(rawValue: $0.uppercased()) }
         var items = try await repo.listCertificates(certificateType: certType, limit: limit)
 

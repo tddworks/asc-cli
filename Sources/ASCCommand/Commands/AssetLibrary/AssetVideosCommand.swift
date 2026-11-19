@@ -31,11 +31,11 @@ struct AssetVideosList: AsyncParsableCommand {
     var category: AssetCategory?
 
     func run() async throws {
-        let repo = try ClientProvider.makeLibraryVideos()
+        let repo = try ClientProvider.makeLibraryVideoRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any LibraryVideos, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any LibraryVideoRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let videos = try await repo.listVideos(libraryId: libraryId, videoId: videoId, state: state, category: category)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(videos, affordanceMode: affordanceMode)
@@ -69,12 +69,12 @@ struct AssetVideosUpload: AsyncParsableCommand {
     var wait: Bool = false
 
     func run() async throws {
-        let repo = try ClientProvider.makeLibraryVideos()
+        let repo = try ClientProvider.makeLibraryVideoRepository()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any LibraryVideos,
+        repo: any LibraryVideoRepository,
         affordanceMode: AffordanceMode = .cli,
         sleep: @Sendable (UInt64) async throws -> Void = { try await Task.sleep(nanoseconds: $0) }
     ) async throws -> String {
@@ -119,11 +119,11 @@ struct AssetVideosUpdate: AsyncParsableCommand {
     }
 
     func run() async throws {
-        let repo = try ClientProvider.makeLibraryVideos()
+        let repo = try ClientProvider.makeLibraryVideoRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any LibraryVideos, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any LibraryVideoRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let video = try await repo.updateVideo(libraryId: libraryId, videoId: videoId, referenceName: referenceName, isArchived: archived)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems([video], affordanceMode: affordanceMode)
@@ -142,11 +142,11 @@ struct AssetVideosDelete: AsyncParsableCommand {
     var videoId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeLibraryVideos()
+        let repo = try ClientProvider.makeLibraryVideoRepository()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any LibraryVideos) async throws {
+    func execute(repo: any LibraryVideoRepository) async throws {
         try await repo.deleteVideo(videoId: videoId)
     }
 }

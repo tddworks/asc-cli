@@ -7,7 +7,7 @@ import Testing
 struct AssetLibraryControllerTests {
 
     @Test func `should place the image sent over REST on the localization`() async throws {
-        let mockRepo = MockAssetPlacements()
+        let mockRepo = MockAssetPlacementRepository()
         given(mockRepo).createPlacement(
             surface: .value(.appStoreVersionLocalization), localizationId: .value("loc-1"), mediaType: .value(.image),
             assetId: .value("img-1"), placementType: .value(.appScreenshot), placementGroup: .value("IPHONE_67")
@@ -23,7 +23,7 @@ struct AssetLibraryControllerTests {
     }
 
     @Test func `should place a video sent over REST on a treatment localization`() async throws {
-        let mockRepo = MockAssetPlacements()
+        let mockRepo = MockAssetPlacementRepository()
         given(mockRepo).createPlacement(
             surface: .value(.experimentTreatmentLocalization), localizationId: .value("tl-1"), mediaType: .value(.video),
             assetId: .value("vid-1"), placementType: .value(.appPreview), placementGroup: .value("IPHONE_67")
@@ -39,7 +39,7 @@ struct AssetLibraryControllerTests {
     }
 
     @Test func `should rename and archive an image over REST with the same fields as the CLI`() async throws {
-        let mockRepo = MockLibraryImages()
+        let mockRepo = MockLibraryImageRepository()
         given(mockRepo).updateImage(libraryId: .value("lib-1"), imageId: .value("img-1"), referenceName: .value("Home"), isArchived: .value(true))
             .willReturn(LibraryImage(id: "img-1", libraryId: "lib-1", fileName: "home.png", fileSize: 1,
                                      category: .appScreenshotsAndPreviews, state: .archived, referenceName: "Home"))
@@ -53,12 +53,12 @@ struct AssetLibraryControllerTests {
 
     @Test func `should refuse a REST image update that changes nothing`() async throws {
         await #expect(throws: AssetLibraryController.BadRequest("Provide referenceName or archived")) {
-            _ = try await AssetLibraryController.updateImage(imageId: "img-1", json: ["libraryId": "lib-1"], repo: MockLibraryImages())
+            _ = try await AssetLibraryController.updateImage(imageId: "img-1", json: ["libraryId": "lib-1"], repo: MockLibraryImageRepository())
         }
     }
 
     @Test func `should refuse a REST placement that names no asset or an unknown placement type`() async throws {
-        let mockRepo = MockAssetPlacements()
+        let mockRepo = MockAssetPlacementRepository()
 
         await #expect(throws: AssetLibraryController.BadRequest("Provide imageId or videoId, placementType and placementGroup")) {
             _ = try await AssetLibraryController.createPlacement(
@@ -69,7 +69,7 @@ struct AssetLibraryControllerTests {
     }
 
     @Test func `should reorder the group in the order sent over REST`() async throws {
-        let mockRepo = MockAssetPlacements()
+        let mockRepo = MockAssetPlacementRepository()
         given(mockRepo).reorderPlacements(
             surface: .value(.appStoreVersionLocalization), localizationId: .value("loc-1"),
             placementGroup: .value("IPHONE_67"), placementIds: .value(["pl-2", "pl-1"])
@@ -84,7 +84,7 @@ struct AssetLibraryControllerTests {
     }
 
     @Test func `should refuse a REST reorder without a group or placements`() async throws {
-        let mockRepo = MockAssetPlacements()
+        let mockRepo = MockAssetPlacementRepository()
 
         await #expect(throws: AssetLibraryController.BadRequest("Provide placementGroup and placementIds")) {
             _ = try await AssetLibraryController.reorderPlacements(

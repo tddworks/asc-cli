@@ -9,10 +9,10 @@ import HummingbirdWebSocket
 /// JSON bodies use the flags in camelCase (`imageId`/`videoId`, `placementType`, `placementGroup`,
 /// `placementIds`, `libraryId`, `referenceName`, `archived`).
 struct AssetLibraryController: Sendable {
-    let libraryRepo: any AssetLibraries
-    let imageRepo: any LibraryImages
-    let videoRepo: any LibraryVideos
-    let placementRepo: any AssetPlacements
+    let libraryRepo: any AssetLibraryRepository
+    let imageRepo: any LibraryImageRepository
+    let videoRepo: any LibraryVideoRepository
+    let placementRepo: any AssetPlacementRepository
 
     struct BadRequest: Error, Equatable {
         let message: String
@@ -222,7 +222,7 @@ struct AssetLibraryController: Sendable {
         surface: PlacementSurface,
         localizationId: String,
         json: [String: Any],
-        repo: any AssetPlacements
+        repo: any AssetPlacementRepository
     ) async throws -> AssetPlacement {
         let asset: (AssetMediaType, String)? = (json["videoId"] as? String).map { (.video, $0) }
             ?? (json["imageId"] as? String).map { (.image, $0) }
@@ -237,7 +237,7 @@ struct AssetLibraryController: Sendable {
     }
 
     /// Body: `{"libraryId", "referenceName"?, "archived"?}` — the `asset-images update` flags.
-    static func updateImage(imageId: String, json: [String: Any], repo: any LibraryImages) async throws -> LibraryImage {
+    static func updateImage(imageId: String, json: [String: Any], repo: any LibraryImageRepository) async throws -> LibraryImage {
         let (referenceName, archived) = try updateFields(json)
         return try await repo.updateImage(
             libraryId: json["libraryId"] as? String ?? "", imageId: imageId, referenceName: referenceName, isArchived: archived
@@ -245,7 +245,7 @@ struct AssetLibraryController: Sendable {
     }
 
     /// Body: `{"libraryId", "referenceName"?, "archived"?}` — the `asset-videos update` flags.
-    static func updateVideo(videoId: String, json: [String: Any], repo: any LibraryVideos) async throws -> LibraryVideo {
+    static func updateVideo(videoId: String, json: [String: Any], repo: any LibraryVideoRepository) async throws -> LibraryVideo {
         let (referenceName, archived) = try updateFields(json)
         return try await repo.updateVideo(
             libraryId: json["libraryId"] as? String ?? "", videoId: videoId, referenceName: referenceName, isArchived: archived
@@ -264,7 +264,7 @@ struct AssetLibraryController: Sendable {
         surface: PlacementSurface,
         localizationId: String,
         json: [String: Any],
-        repo: any AssetPlacements
+        repo: any AssetPlacementRepository
     ) async throws -> [AssetPlacement] {
         guard let placementGroup = json["placementGroup"] as? String,
               let placementIds = json["placementIds"] as? [String], !placementIds.isEmpty

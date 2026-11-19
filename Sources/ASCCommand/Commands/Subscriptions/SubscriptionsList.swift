@@ -16,12 +16,12 @@ struct SubscriptionsList: AsyncParsableCommand {
     var limit: Int?
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptions()
+        let repo = try ClientProvider.makeSubscriptionRepository()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any Subscriptions,
+        repo: any SubscriptionRepository,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let response = try await repo.listSubscriptions(groupId: groupId, limit: limit)

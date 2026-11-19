@@ -19,11 +19,11 @@ struct AppClipExperienceLocalizationsCreate: AsyncParsableCommand {
     var subtitle: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppClips()
+        let repo = try ClientProvider.makeAppClipRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AppClips) async throws -> String {
+    func execute(repo: any AppClipRepository) async throws -> String {
         let localization = try await repo.createLocalization(experienceId: experienceId, locale: locale, subtitle: subtitle)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

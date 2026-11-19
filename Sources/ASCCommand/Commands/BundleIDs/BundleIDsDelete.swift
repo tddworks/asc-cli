@@ -13,11 +13,11 @@ struct BundleIDsDelete: AsyncParsableCommand {
     var bundleIdId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeBundleIDs()
+        let repo = try ClientProvider.makeBundleIDRepository()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any BundleIDs) async throws {
+    func execute(repo: any BundleIDRepository) async throws {
         try await repo.deleteBundleID(id: bundleIdId)
     }
 }

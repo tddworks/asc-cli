@@ -7,7 +7,7 @@ import Testing
 struct BuildsListTests {
 
     @Test func `valid build includes TestFlight affordances`() async throws {
-        let mockRepo = MockBuilds()
+        let mockRepo = MockBuildRepository()
         given(mockRepo).listBuilds(appId: .any, platform: .any, version: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
                 Build(id: "b-1", version: "42", expired: false, processingState: .valid),
@@ -37,7 +37,7 @@ struct BuildsListTests {
     }
 
     @Test func `build with platform and buildNumber shows all fields in JSON`() async throws {
-        let mockRepo = MockBuilds()
+        let mockRepo = MockBuildRepository()
         given(mockRepo).listBuilds(appId: .any, platform: .any, version: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
                 Build(id: "b-1", version: "1.2.0", expired: false, processingState: .valid, buildNumber: "42", platform: .iOS),
@@ -69,7 +69,7 @@ struct BuildsListTests {
     }
 
     @Test func `table output includes build number and platform columns`() async throws {
-        let mockRepo = MockBuilds()
+        let mockRepo = MockBuildRepository()
         given(mockRepo).listBuilds(appId: .any, platform: .any, version: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
                 Build(id: "b-1", version: "1.0", expired: false, processingState: .valid, buildNumber: "10", platform: .iOS),
@@ -87,7 +87,7 @@ struct BuildsListTests {
     }
 
     @Test func `platform and version options are passed to repository`() async throws {
-        let mockRepo = MockBuilds()
+        let mockRepo = MockBuildRepository()
         given(mockRepo).listBuilds(appId: .any, platform: .value(.iOS), version: .value("1.0"), limit: .any).willReturn(
             PaginatedResponse(data: [], nextCursor: nil)
         )
@@ -105,7 +105,7 @@ struct BuildsListTests {
     }
 
     @Test func `expired build has no affordances`() async throws {
-        let mockRepo = MockBuilds()
+        let mockRepo = MockBuildRepository()
         given(mockRepo).listBuilds(appId: .any, platform: .any, version: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
                 Build(id: "b-1", version: "1", expired: true, processingState: .valid),

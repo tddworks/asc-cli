@@ -28,12 +28,12 @@ struct BetaAppLocalizationsUpdate: AsyncParsableCommand {
     var tvOsPrivacyPolicy: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeBetaAppLocalizations()
+        let repo = try ClientProvider.makeBetaAppLocalizationRepository()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any BetaAppLocalizations,
+        repo: any BetaAppLocalizationRepository,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let update = BetaAppLocalizationUpdate(

@@ -54,7 +54,7 @@ Define mockable protocols for external dependencies:
 import Mockable
 
 @Mockable
-public protocol Orders: Sendable {
+public protocol OrderRepository: Sendable {
     func all() async throws -> [Order]
     func fetch(id: OrderId) async throws -> Order
     func save(_ order: Order) async throws
@@ -75,7 +75,7 @@ import Mockable
 struct OrderBookTests {
     @Test func `should give back the order it was asked for`() async throws {
         // Given - STUB dependencies to return data
-        let mockOrders = MockOrders()
+        let mockOrders = MockOrderRepository()
         let expectedOrder = Order(
             id: OrderId("123"),
             items: [OrderItem(price: 10, quantity: 1)],
@@ -147,7 +147,7 @@ struct OrderStatusTests {
     given(mockHTTP).request(any()).willReturn(
         OrderDTO(id: "123", status: "pending", items: [])
     )
-    let orders = APIOrders(http: mockHTTP)
+    let orders = APIOrderRepository(http: mockHTTP)
 
     // When
     let order = try await orders.fetch(id: OrderId("123"))
@@ -161,7 +161,7 @@ struct OrderStatusTests {
     // Given
     let mockHTTP = MockHTTP()
     given(mockHTTP).request(any()).willThrow(NetworkError.connectionFailed)
-    let orders = APIOrders(http: mockHTTP)
+    let orders = APIOrderRepository(http: mockHTTP)
 
     // When/Then
     await #expect(throws: OrdersError.networkError) {
@@ -177,7 +177,7 @@ struct OrderStatusTests {
 struct OrderBookTests {
     @Test func `should serve an order again without refetching it`() async throws {
         // Given
-        let mockOrders = MockOrders()
+        let mockOrders = MockOrderRepository()
         let order = Order(id: OrderId("123"), items: [], status: .pending)
         given(mockOrders).fetch(id: any()).willReturn(order)
 
@@ -193,7 +193,7 @@ struct OrderBookTests {
 
     @Test func `should show the new status after an update`() async throws {
         // Given
-        let mockOrders = MockOrders()
+        let mockOrders = MockOrderRepository()
         var order = Order(id: OrderId("123"), items: [], status: .pending)
         given(mockOrders).fetch(id: any()).willReturn(order)
         given(mockOrders).save(any()).willReturn(())
@@ -221,7 +221,7 @@ Tests/AppTests/                     # mirrors Sources/ folder for folder
     ├── OrderStatusTests.swift          # Enum behavior
     ├── OrderBookTests.swift         # Actor behavior
     └── Internal/
-        ├── APIOrdersTests.swift  # Adapter behavior via MockHTTP
+        ├── APIOrderRepositoryTests.swift  # Adapter behavior via MockHTTP
         ├── OrderParsingTests.swift        # Parsing logic
         └── System/
             └── URLSessionHTTPTests.swift  # Integration only (real call, time-limited)

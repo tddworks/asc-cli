@@ -6,10 +6,10 @@ import ASCKit
 
 /// /api/v1/certificates, bundle-ids, devices, profiles — Code signing routes.
 struct CodeSigningController: Sendable {
-    let certRepo: any Certificates
-    let bundleIDRepo: any BundleIDs
-    let deviceRepo: any Devices
-    let profileRepo: any Profiles
+    let certRepo: any CertificateRepository
+    let bundleIDRepo: any BundleIDRepository
+    let deviceRepo: any DeviceRepository
+    let profileRepo: any ProfileRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/certificates") { request, _ -> Response in

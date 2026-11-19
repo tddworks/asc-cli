@@ -22,11 +22,11 @@ struct BuildsList: AsyncParsableCommand {
     var limit: Int?
 
     func run() async throws {
-        let repo = try ClientProvider.makeBuilds()
+        let repo = try ClientProvider.makeBuildRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any Builds, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any BuildRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let platformFilter = platform.flatMap { BuildUploadPlatform(cliArgument: $0) }
         let response = try await repo.listBuilds(appId: appId, platform: platformFilter, version: version, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)

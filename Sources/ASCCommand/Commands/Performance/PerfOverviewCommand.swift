@@ -25,11 +25,11 @@ struct PerfOverviewGet: AsyncParsableCommand {
     var deviceType: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makePerfOverviews()
+        let repo = try ClientProvider.makePerfOverviewRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any PerfOverviews, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any PerfOverviewRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let overview = try await repo.getOverview(appId: appId, deviceType: deviceType)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems([overview], affordanceMode: affordanceMode)

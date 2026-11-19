@@ -75,9 +75,9 @@ what sits in `Internal/`, and the one bare call in `Internal/System/`:
 ```
 Sources/Orders/                 Orders/Internal/                 Orders/Internal/System/
 ┌──────────────────┐           ┌──────────────────────┐ any      ┌────────────────────────┐
-│ Order, OrderItem │           │ APIOrders            │ HTTP     │ URLSessionHTTP         │
+│ Order, OrderItem │           │ APIOrderRepository   │ HTTP     │ URLSessionHTTP         │
 │ (values + rules) │ ◀──────── │ (request, decode,    │ ───────▶ │ (≤100 lines: only the  │
-│ Orders           │ implements│  map DTO → Order,    │          │  URLSession call)      │
+│ OrderRepository  │ implements│  map DTO → Order,    │          │  URLSession call)      │
 │ (@Mockable role) │           │  error mapping)      │ ◀─ Mock  └────────────────────────┘
 │ OrderBook (actor)│           └──────────────────────┘   HTTP
 └──────────────────┘                                       in tests
@@ -97,8 +97,8 @@ List each component with:
 ```
 | Component  | Purpose               | Inputs       | Outputs      | Dependencies |
 |------------|-----------------------|--------------|--------------|--------------|
-| Users      | Find and save users   | UserId       | User         | HTTP         |
-| OrderBook  | Keep orders current   | Order, User  | Order        | Orders       |
+| UserRepository | Find and save users | UserId     | User         | HTTP            |
+| OrderBook  | Keep orders current   | Order, User  | Order        | OrderRepository |
 ```
 
 ### Step 4: Show the design, then build
@@ -167,7 +167,7 @@ struct OrderRow: View {
 
 ```swift
 @Mockable
-public protocol Orders: Sendable {
+public protocol OrderRepository: Sendable {
     func all() async throws -> [Order]
     func fetch(id: OrderId) async throws -> Order
     func save(_ order: Order) async throws
@@ -188,12 +188,12 @@ domain**, never for its architectural pattern:
   one, the abstraction isn't named yet — keep going until the noun describes
   what the thing *is* (`OrderBook`, `Checkout`, `HTTP`, `Subprocess`). If no
   noun comes, the abstraction probably shouldn't exist yet.
-- **Aggregate persistence takes the plural of the aggregate** — `Orders`,
-  `Users`, `Books` — never the suffix `XxxRepository`. This carve-out is only
-  for collection-like load / save / delete by identity; anything else (an
-  adapter, an event source, a process) gets a role noun.
-- **Implementations are named for how they do it**: `APIOrders`,
-  `SQLiteOrders`, `URLSessionHTTP`, `InMemoryOrders` — each plays the role it
+- **`XxxRepository` is for CRUD only** — `OrderRepository`, `UserRepository`:
+  load / save / delete an aggregate by identity. Anything that does more than
+  CRUD — a workflow (sign in, submit for review, boot), an adapter, an event
+  source, a process — gets a role noun (`Checkout`, `SignIn`, `Subprocess`).
+- **Implementations are named for how they do it**: `APIOrderRepository`,
+  `SQLiteOrderRepository`, `URLSessionHTTP`, `InMemoryOrderRepository` — each plays the role it
   is named after.
 - **Tests are named for the outcome**, in the user's words:
   `` `should show the new status after an update` ``, never the method or
@@ -211,16 +211,16 @@ Sources/
 ├── Orders/                         # one folder per concept (nest sub-concepts: Orders/Items/)
 │   ├── Order.swift                 # PUBLIC FACE — values with behaviour,
 │   ├── OrderStatus.swift           #   @Mockable roles, actors; what other folders may use
-│   ├── Orders.swift                #   (Orders = the collection of Order: load / save by id)
+│   ├── OrderRepository.swift       #   (CRUD for Order: load / save / delete by id)
 │   └── Internal/                   # IMPLEMENTATIONS — adapters that play the roles,
-│       ├── APIOrders.swift         #   DTOs, mappers, wire formats; decisions, unit-tested
+│       ├── APIOrderRepository.swift#   DTOs, mappers, wire formats; decisions, unit-tested
 │       ├── OrderDTO.swift
 │       └── System/                 # THE BARE OUTSIDE CALL — URLSession, a DB driver,
 │           └── URLSessionHTTP.swift #  Process, a private symbol; ≤100 lines, no decisions
 └── App/                            # THE WAY IN — SwiftUI views (no ViewModel), entry point, wiring
 Tests/<Target>Tests/                # mirrors Sources/ folder for folder
 ├── Orders/OrderTests.swift
-└── Orders/Internal/APIOrdersTests.swift
+└── Orders/Internal/APIOrderRepositoryTests.swift
 ```
 
 | Part | Location | Holds | Tested how |
@@ -237,7 +237,7 @@ Tests/<Target>Tests/                # mirrors Sources/ folder for folder
 - **A concept that fits no folder is a missing word** — ask before inventing a folder.
 
 **Key patterns:**
-- **Collections of aggregates** - Data access behind a plural-noun protocol (`Orders`) in the public face
+- **Repository for CRUD only** - Aggregate load / save / delete behind `XxxRepository` in the public face; a workflow (sign in, submit, boot) takes a role noun
 - **Protocol-Based DI** - `@Mockable` for testing
 - **Chicago School TDD** - Test state, not interactions
 - **No ViewModel layer** - Views consume the public face directly
@@ -283,7 +283,7 @@ An actor in the public face is tested against a stubbed role:
 @Suite
 struct OrderBookTests {
     @Test func `should give back the order it was asked for`() async throws {
-        let orders = MockOrders()
+        let orders = MockOrderRepository()
         given(orders).fetch(id: any()).willReturn(Order(items: [], status: .pending))
 
         let book = OrderBook(orders: orders)
@@ -301,14 +301,14 @@ mock (`MockHTTP`) and assert on the domain value it produces:
 
 ```swift
 @Suite
-struct APIOrdersTests {
+struct APIOrderRepositoryTests {
     @Test func `should load an order when the API answers`() async throws {
         let http = MockHTTP()
         given(http).request(any()).willReturn(
             OrderDTO(id: "123", status: "pending", items: [])
         )
 
-        let order = try await APIOrders(http: http).fetch(id: OrderId("123"))
+        let order = try await APIOrderRepository(http: http).fetch(id: OrderId("123"))
 
         #expect(order.id.value == "123")
         #expect(order.status == .pending)
@@ -319,7 +319,7 @@ struct APIOrdersTests {
         given(http).request(any()).willThrow(NetworkError.connectionFailed)
 
         await #expect(throws: OrdersError.networkError) {
-            try await APIOrders(http: http).fetch(id: OrderId("123"))
+            try await APIOrderRepository(http: http).fetch(id: OrderId("123"))
         }
     }
 }
@@ -360,7 +360,7 @@ Wire the `Internal/` implementations into their roles at the app entry point (th
 ### Design (Phase 0)
 - [ ] Place the change in `docs/CANONICAL_MODEL.md` (concept, owner of every law it adds); update the doc first if it doesn't cover it
 - [ ] Ask the five questions of every type touched ([domain-shape](references/domain-shape.md))
-- [ ] Name every new type for its domain role — no `Service` / `Manager` / `Port` / `Repository` suffixes
+- [ ] Name every new type for its domain role — no `Service` / `Manager` / `Port` suffixes; `Repository` only for CRUD
 - [ ] Create ASCII diagram: public face · `Internal/` · `Internal/System/`
 - [ ] Show the design and files to touch, then proceed (no approval question)
 

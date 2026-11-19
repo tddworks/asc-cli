@@ -7,7 +7,7 @@ import Testing
 struct BetaAppLocalizationsCreateTests {
 
     @Test func `creates beta app localization with description and feedback email`() async throws {
-        let mockRepo = MockBetaAppLocalizations()
+        let mockRepo = MockBetaAppLocalizationRepository()
         given(mockRepo).createBetaAppLocalization(appId: .any, locale: .any, update: .any)
             .willReturn(BetaAppLocalization(
                 id: "bal-new",

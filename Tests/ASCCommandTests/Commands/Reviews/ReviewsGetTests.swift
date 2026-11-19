@@ -7,7 +7,7 @@ import Testing
 struct ReviewsGetTests {
 
     @Test func `get review shows full review details with affordances`() async throws {
-        let mockRepo = MockCustomerReviews()
+        let mockRepo = MockCustomerReviewRepository()
         given(mockRepo).getReview(reviewId: .any).willReturn(
             CustomerReview(
                 id: "rev-1",

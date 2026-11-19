@@ -13,11 +13,11 @@ struct AppClipExperiencesList: AsyncParsableCommand {
     var appClipId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppClips()
+        let repo = try ClientProvider.makeAppClipRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AppClips) async throws -> String {
+    func execute(repo: any AppClipRepository) async throws -> String {
         let experiences = try await repo.listExperiences(appClipId: appClipId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(experiences)

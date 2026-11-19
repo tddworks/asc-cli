@@ -7,7 +7,7 @@ import Testing
 struct AgeRatingUpdateTests {
 
     @Test func `age-rating update returns updated declaration with exact JSON`() async throws {
-        let mockRepo = MockAgeRatingDeclarations()
+        let mockRepo = MockAgeRatingDeclarationRepository()
         given(mockRepo).updateDeclaration(id: .any, update: .any)
             .willReturn(AgeRatingDeclaration(
                 id: "decl-1",
@@ -43,7 +43,7 @@ struct AgeRatingUpdateTests {
     }
 
     @Test func `age-rating update passes only specified flags`() async throws {
-        let mockRepo = MockAgeRatingDeclarations()
+        let mockRepo = MockAgeRatingDeclarationRepository()
 
         var capturedUpdate: AgeRatingDeclarationUpdate?
         given(mockRepo).updateDeclaration(id: .any, update: .any)
@@ -70,7 +70,7 @@ struct AgeRatingUpdateTests {
 
     @Test func `should set a Korea override of twelve plus`() async throws {
         // Given - App Store Connect applies the override it is sent
-        let mockRepo = MockAgeRatingDeclarations()
+        let mockRepo = MockAgeRatingDeclarationRepository()
         given(mockRepo).updateDeclaration(id: .any, update: .any)
             .willProduce { id, update in
                 AgeRatingDeclaration(id: id, appInfoId: "info-42", koreaAgeRatingOverride: update.koreaAgeRatingOverride)
@@ -104,7 +104,7 @@ struct AgeRatingUpdateTests {
 
     @Test func `should set Korea's GRAC classification number`() async throws {
         // Given - App Store Connect applies the number it is sent
-        let mockRepo = MockAgeRatingDeclarations()
+        let mockRepo = MockAgeRatingDeclarationRepository()
         given(mockRepo).updateDeclaration(id: .any, update: .any)
             .willProduce { id, update in
                 AgeRatingDeclaration(id: id, appInfoId: "info-42", gracRatingClassificationNumber: update.gracRatingClassificationNumber)
@@ -137,7 +137,7 @@ struct AgeRatingUpdateTests {
     }
 
     @Test func `should save and show the social media answers`() async throws {
-        let mockRepo = MockAgeRatingDeclarations()
+        let mockRepo = MockAgeRatingDeclarationRepository()
         given(mockRepo).updateDeclaration(id: .any, update: .any)
             .willProduce { id, update in
                 AgeRatingDeclaration(

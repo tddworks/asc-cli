@@ -7,7 +7,7 @@ import Testing
 struct ReviewsListTests {
 
     @Test func `listed reviews include rating territory and affordances`() async throws {
-        let mockRepo = MockCustomerReviews()
+        let mockRepo = MockCustomerReviewRepository()
         given(mockRepo).listReviews(appId: .any).willReturn([
             CustomerReview(
                 id: "rev-1",

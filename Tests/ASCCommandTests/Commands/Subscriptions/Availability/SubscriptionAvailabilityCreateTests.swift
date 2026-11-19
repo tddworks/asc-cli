@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionAvailabilityCreateTests {
 
     @Test func `create availability shows created record with territories and currency`() async throws {
-        let mockRepo = MockSubscriptionAvailabilities()
+        let mockRepo = MockSubscriptionAvailabilityRepository()
         given(mockRepo).createAvailability(subscriptionId: .any, isAvailableInNewTerritories: .any, territoryIds: .any)
             .willReturn(SubscriptionAvailability(
                 id: "avail-new",

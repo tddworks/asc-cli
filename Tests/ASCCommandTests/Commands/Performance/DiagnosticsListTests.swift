@@ -7,7 +7,7 @@ import Mockable
 struct DiagnosticsListTests {
 
     @Test func `diagnostic type filter is parsed from CLI argument`() async throws {
-        let mockRepo = MockDiagnostics()
+        let mockRepo = MockDiagnosticsRepository()
         given(mockRepo).listSignatures(buildId: .any, diagnosticType: .any).willReturn([])
         let cmd = try DiagnosticsList.parse(["--build-id", "build-1", "--diagnostic-type", "DISK_WRITES"])
         let output = try await cmd.execute(repo: mockRepo)
@@ -15,7 +15,7 @@ struct DiagnosticsListTests {
     }
 
     @Test func `listed diagnostic signatures show type, weight, and affordances`() async throws {
-        let mockRepo = MockDiagnostics()
+        let mockRepo = MockDiagnosticsRepository()
         given(mockRepo).listSignatures(buildId: .any, diagnosticType: .any).willReturn([
             DiagnosticSignatureInfo(
                 id: "sig-1",

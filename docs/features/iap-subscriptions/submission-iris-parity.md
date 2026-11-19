@@ -42,7 +42,7 @@ The web UI expresses "alongside next version" via `submitWithNextAppStoreVersion
 
 - `Sources/ASCKit/Iris/Internal/IrisClient.swift` — handles cookie injection, `[asc-ui]` CSRF header, JSON:API content-type
 - `Sources/ASCKit/Iris/Internal/BrowserIrisCookieProvider.swift` — pulls cookies from the user's logged-in browser
-- Working precedent: `IrisSDKAppBundles` already calls iris through `IrisClient`
+- Working precedent: `IrisSDKAppBundleRepository` already calls iris through `IrisClient`
 
 ## Shipped approach (IAP)
 
@@ -110,8 +110,8 @@ For an established-app IAP that's ready, the agent sees both `submit` and `addTo
 
 #### Where the two signals come from
 
-- **`isFirstTimeSubmission`** — derived per-batch in `SDKInAppPurchases.listInAppPurchases`. Every IAP returned for the app is checked via `InAppPurchaseState.hasBeenApproved` (`approved | developerRemovedFromSale | removedFromSale`); if zero are shipped, every unapproved IAP gets `true`. **Zero extra API calls** — derived from data already in the listing response.
-- **`submitWithNextAppStoreVersion`** — best-effort enrichment via `IrisSDKInAppPurchaseStates.fetchSubmitFlags`. One iris call per `iap list`, server-side filtered to `state=READY_TO_SUBMIT` with only the one field. Failures (no iris cookies, network error, malformed response) silently leave the flag `false` so CI scripts using API-key auth keep their existing JSON output unchanged.
+- **`isFirstTimeSubmission`** — derived per-batch in `SDKInAppPurchaseRepository.listInAppPurchases`. Every IAP returned for the app is checked via `InAppPurchaseState.hasBeenApproved` (`approved | developerRemovedFromSale | removedFromSale`); if zero are shipped, every unapproved IAP gets `true`. **Zero extra API calls** — derived from data already in the listing response.
+- **`submitWithNextAppStoreVersion`** — best-effort enrichment via `IrisSDKInAppPurchaseStateRepository.fetchSubmitFlags`. One iris call per `iap list`, server-side filtered to `state=READY_TO_SUBMIT` with only the one field. Failures (no iris cookies, network error, malformed response) silently leave the flag `false` so CI scripts using API-key auth keep their existing JSON output unchanged.
 
 **Caveat — only `iap list` has this context.** `isFirstTimeSubmission` and the iris enrichment are computed on the list path only; an IAP returned by any other command (e.g. `iap create` or `iap update`) has `isFirstTimeSubmission` defaulting to `false`. Agents that need the right affordance should `list` first.
 

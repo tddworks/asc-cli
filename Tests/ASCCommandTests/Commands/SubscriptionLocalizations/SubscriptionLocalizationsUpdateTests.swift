@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionLocalizationsUpdateTests {
 
     @Test func `updates subscription localization name and description and returns updated record with affordances`() async throws {
-        let mockRepo = MockSubscriptionLocalizations()
+        let mockRepo = MockSubscriptionLocalizationRepository()
         given(mockRepo).updateLocalization(localizationId: .any, name: .any, description: .any)
             .willReturn(SubscriptionLocalization(
                 id: "loc-1",

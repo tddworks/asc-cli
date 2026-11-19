@@ -8,7 +8,7 @@ import HummingbirdWebSocket
 /// submits nothing. Query names match the CLI's `--with-products` / `--dry-run`.
 struct VersionSubmissionController: Sendable {
     let submissionRepo: any ReviewSubmissions
-    let versionRepo: any AppStoreVersions
+    let versionRepo: any VersionRepository
     let planner: SubmissionPlanner
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {

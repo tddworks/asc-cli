@@ -16,11 +16,11 @@ struct ScreenshotSetsCreate: AsyncParsableCommand {
     var displayType: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppScreenshots()
+        let repo = try ClientProvider.makeScreenshotRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AppScreenshots) async throws -> String {
+    func execute(repo: any ScreenshotRepository) async throws -> String {
         guard let screenshotDisplayType = ScreenshotDisplayType(rawValue: displayType) else {
             throw ValidationError("Unknown display type '\(displayType)'")
         }

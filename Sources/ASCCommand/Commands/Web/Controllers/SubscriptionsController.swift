@@ -5,7 +5,7 @@ import HummingbirdWebSocket
 
 /// Routes that return `Subscription` resources nested under a subscription group.
 struct SubscriptionsController: Sendable {
-    let repo: any Subscriptions
+    let repo: any SubscriptionRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/subscription-groups/:groupId/subscriptions") { request, context -> Response in
@@ -27,7 +27,7 @@ struct SubscriptionsController: Sendable {
     static func update(
         subscriptionId: String,
         json: [String: Any],
-        repo: any Subscriptions
+        repo: any SubscriptionRepository
     ) async throws -> Subscription {
         let marketSettings = (json["marketSetting"] as? [String])?.compactMap(SubscriptionMarketSetting.init(rawValue:))
         return try await repo.updateSubscription(

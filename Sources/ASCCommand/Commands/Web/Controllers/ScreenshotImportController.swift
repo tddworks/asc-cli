@@ -8,11 +8,11 @@ import HummingbirdWebSocket
 /// export ZIP. Query params match the CLI flags (`existing`, `dry-run`, repeated
 /// `placement-group`). Synchronous: the response arrives once every group is placed.
 struct ScreenshotImportController: Sendable {
-    let versionRepo: any AppStoreVersions
-    let localizationRepo: any VersionLocalizations
-    let libraryRepo: any AssetLibraries
-    let imageRepo: any LibraryImages
-    let placementRepo: any AssetPlacements
+    let versionRepo: any VersionRepository
+    let localizationRepo: any VersionLocalizationRepository
+    let libraryRepo: any AssetLibraryRepository
+    let imageRepo: any LibraryImageRepository
+    let placementRepo: any AssetPlacementRepository
 
     /// Export ZIPs hold every locale's screenshots.
     static let maxZipBytes = 500 * 1024 * 1024

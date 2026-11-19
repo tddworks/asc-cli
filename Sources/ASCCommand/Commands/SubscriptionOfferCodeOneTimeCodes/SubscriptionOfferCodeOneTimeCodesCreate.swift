@@ -22,12 +22,12 @@ struct SubscriptionOfferCodeOneTimeCodesCreate: AsyncParsableCommand {
     var environment: OfferCodeEnvironment = .production
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptionOfferCodes()
+        let repo = try ClientProvider.makeSubscriptionOfferCodeRepository()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any SubscriptionOfferCodes,
+        repo: any SubscriptionOfferCodeRepository,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let item = try await repo.createOneTimeUseCode(

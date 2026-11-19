@@ -18,7 +18,7 @@ struct SDKScreenshotRepositoryCreateTests {
             links: .init(this: "")
         ))
 
-        let repo = SDKAppScreenshots(client: stub)
+        let repo = SDKScreenshotRepository(client: stub)
         let result = try await repo.createScreenshotSet(localizationId: "loc-42", displayType: .iphone67)
 
         #expect(result.id == "set-new")
@@ -37,7 +37,7 @@ struct SDKScreenshotRepositoryCreateTests {
             links: .init(this: "")
         ))
 
-        let repo = SDKAppScreenshots(client: stub)
+        let repo = SDKScreenshotRepository(client: stub)
         let result = try await repo.createScreenshotSet(localizationId: "loc-1", displayType: .iphone67)
 
         // A set with repo injected does not throw "requires a repository"
@@ -56,7 +56,7 @@ struct SDKScreenshotRepositoryCreateTests {
             links: .init(this: "")
         ))
 
-        let repo = SDKAppScreenshots(client: stub)
+        let repo = SDKScreenshotRepository(client: stub)
         let result = try await repo.createScreenshotSet(localizationId: "loc-1", displayType: .ipadPro3gen11)
 
         #expect(result.screenshotDisplayType == .ipadPro3gen11)

@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionVersionsListTests {
 
     @Test func `listed subscription versions in review do not offer adding them to a submission`() async throws {
-        let mockRepo = MockProductVersions()
+        let mockRepo = MockProductVersionRepository()
         given(mockRepo).listSubscriptionVersions(subscriptionId: .value("sub-1")).willReturn([
             ProductVersion(id: "sv-1", productId: "sub-1", kind: .subscription, version: 2, state: .waitingForReview),
         ])

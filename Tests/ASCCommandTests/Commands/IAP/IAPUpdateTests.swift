@@ -7,7 +7,7 @@ import Testing
 struct IAPUpdateTests {
 
     @Test func `updates iap reference name and review note and returns updated record`() async throws {
-        let mockRepo = MockInAppPurchases()
+        let mockRepo = MockInAppPurchaseRepository()
         given(mockRepo).updateInAppPurchase(
             iapId: .any, referenceName: .any, reviewNote: .any, isFamilySharable: .any
         ).willReturn(InAppPurchase(
@@ -35,7 +35,7 @@ struct IAPUpdateTests {
     }
 
     @Test func `family-sharable flag passes true to repo`() async throws {
-        let mockRepo = MockInAppPurchases()
+        let mockRepo = MockInAppPurchaseRepository()
         given(mockRepo).updateInAppPurchase(
             iapId: .any, referenceName: .any, reviewNote: .any, isFamilySharable: .any
         ).willReturn(InAppPurchase(
@@ -53,7 +53,7 @@ struct IAPUpdateTests {
     }
 
     @Test func `not-family-sharable flag passes false to repo`() async throws {
-        let mockRepo = MockInAppPurchases()
+        let mockRepo = MockInAppPurchaseRepository()
         given(mockRepo).updateInAppPurchase(
             iapId: .any, referenceName: .any, reviewNote: .any, isFamilySharable: .any
         ).willReturn(InAppPurchase(

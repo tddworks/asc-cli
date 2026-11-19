@@ -14,7 +14,7 @@ struct OpenAPIPreviewRepositoryUploadTests {
             try Self.preview(#"{"data":{"type":"appPreviews","id":"prev-1","attributes":{"fileName":"demo.mov","fileSize":7,"mimeType":"video/quicktime","previewFrameTimeCode":"00:00:05:00","videoDeliveryState":{"state":"UPLOAD_COMPLETE"}}},"links":{"self":""}}"#),
         ])
 
-        let preview = try await OpenAPIAppPreviews(client: stub).uploadPreview(setId: "pset-1", fileURL: file, previewFrameTimeCode: "00:00:05:00")
+        let preview = try await OpenAPIPreviewRepository(client: stub).uploadPreview(setId: "pset-1", fileURL: file, previewFrameTimeCode: "00:00:05:00")
 
         #expect(preview == AppPreview(id: "prev-1", setId: "pset-1", fileName: "demo.mov", fileSize: 7, mimeType: "video/quicktime",
                                       videoDeliveryState: .uploadComplete, previewFrameTimeCode: "00:00:05:00"))
@@ -32,7 +32,7 @@ struct OpenAPIPreviewRepositoryUploadTests {
         http.enqueue(json: "", statusCode: 500)
 
         await #expect(throws: (any Error).self) {
-            try await OpenAPIAppPreviews(client: stub, uploader: UploadOperationsExecutor(http: http)).uploadPreview(setId: "pset-1", fileURL: file, previewFrameTimeCode: nil)
+            try await OpenAPIPreviewRepository(client: stub, uploader: UploadOperationsExecutor(http: http)).uploadPreview(setId: "pset-1", fileURL: file, previewFrameTimeCode: nil)
         }
         #expect(stub.requests.map { "\($0.method) \($0.path)" } == ["POST /v1/appPreviews"])
     }
@@ -45,7 +45,7 @@ struct OpenAPIPreviewRepositoryUploadTests {
         http.enqueue(json: "", statusCode: 200)
 
         await #expect(throws: (any Error).self) {
-            _ = try await OpenAPIAppPreviews(client: stub, uploader: UploadOperationsExecutor(http: http)).uploadPreview(setId: "pset-1", fileURL: file, previewFrameTimeCode: nil)
+            _ = try await OpenAPIPreviewRepository(client: stub, uploader: UploadOperationsExecutor(http: http)).uploadPreview(setId: "pset-1", fileURL: file, previewFrameTimeCode: nil)
         }
         #expect(http.capturedRequests.isEmpty)
         #expect(stub.requests.map { "\($0.method) \($0.path)" } == ["POST /v1/appPreviews"])

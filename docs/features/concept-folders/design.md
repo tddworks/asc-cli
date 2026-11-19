@@ -4,7 +4,7 @@ description: The source layout reworked from layers (Domain/, Infrastructure/) t
 
 # Concept folders, not layers
 
-**Status: BUILT** — steps 1–5: one `ASCKit` module in concept folders; docs and skills follow; one composition root, held by a test; every adapter's decisions tested with only the bare call in `Internal/System/`; protocols named for what they are. asc-cli is split by layer: `Sources/Domain/`
+**Status: BUILT** — steps 1–5: one `ASCKit` module in concept folders; docs and skills follow; one composition root, held by a test; every adapter's decisions tested with only the bare call in `Internal/System/`; `Repository` for CRUD, role nouns for workflows. asc-cli is split by layer: `Sources/Domain/`
 and `Sources/Infrastructure/` are two modules that mirror each other folder
 for folder. Every concept therefore lives in two places, and every change to
 one touches both trees. The goal, stated as a test:
@@ -27,7 +27,7 @@ one touches both trees. The goal, stated as a test:
 | **The two trees already disagree** | `Domain/Screenshots/` is implemented by `Infrastructure/ScreenshotPlans/`; `Infrastructure/Client/`, `Web/` and `Iris/Auth/` have no Domain twin | finding an implementation means knowing a second name |
 | **The module split is paid for by hand** | 613 `Domain.X` qualifiers in 69 files, to tell a Domain type from the SDK type of the same name (`Domain.Territory` vs the SDK's `Territory`) | every new adapter repeats the qualifier dance |
 | **Implementations leak to the way in** | `ASCCommand` imports `Infrastructure` in 80 files; outside `ClientProvider`, 14 files name 12 implementation types (22 uses) — `FileAuthStorage()` in 10 auth and report commands, and `RESTRoutes` builds its own `CompositeAuthProvider`, `ClientFactory` and five more | swapping an implementation (keychain auth storage, another renderer) edits every command that names it |
-| **The outside call is mixed with decisions** | the SDK adapters are already split right: they depend on the narrow `APIClient` role, whose real implementation is the SDK's own `APIProvider`, and 472 tests drive them through `StubAPIClient`. The rest are not: seven adapters (`ShellRunner`, `IrisClient`, `WebKitHTMLRenderer`, `BrowserIrisCookieProvider`, `IrisSDKAppBundles`, `IrisSDKSignIn`, `MarketplacePlugins`, ~860 lines) hold their decisions beside a `Process`, `URLSession`, WebKit or cookie call, and `codecov.yml` skips each by file path | their decisions — argv, environment, status → error, parsing — have no test |
+| **The outside call is mixed with decisions** | the SDK adapters are already split right: they depend on the narrow `APIClient` role, whose real implementation is the SDK's own `APIProvider`, and 472 tests drive them through `StubAPIClient`. The rest are not: seven adapters (`ShellRunner`, `IrisClient`, `WebKitHTMLRenderer`, `BrowserIrisCookieProvider`, `IrisSDKAppBundleRepository`, `IrisSDKSignIn`, `MarketplacePlugins`, ~860 lines) hold their decisions beside a `Process`, `URLSession`, WebKit or cookie call, and `codecov.yml` skips each by file path | their decisions — argv, environment, status → error, parsing — have no test |
 
 ## 2 · The shape — outside to inside
 
@@ -58,11 +58,11 @@ Sources/
     ├── Shared/                   the kernel: Affordance, APIError, OutputFormat, pagination, RESTPathResolver
     │   └── Internal/             APIClient, ClientFactory, HTTPPerforming, SDKFilter, uploads
     ├── Apps/
-    │   ├── App.swift  Apps.swift  App+RESTRoutes.swift      public face
+    │   ├── App.swift  AppRepository.swift  App+RESTRoutes.swift      public face
     │   ├── Internal/OpenAPIAppRepository.swift                        implementation
     │   ├── Builds/
-    │   │   ├── Build.swift  Builds.swift …                    public face
-    │   │   └── Internal/SDKBuilds.swift …                    implementation
+    │   │   ├── Build.swift  BuildRepository.swift …                    public face
+    │   │   └── Internal/SDKBuildRepository.swift …                    implementation
     │   ├── Versions/  TestFlight/  InAppPurchases/  Subscriptions/  …  (same shape, nested as today)
     ├── Auth/            Internal/  (FileAuthProvider, EnvironmentAuthProvider, CompositeAuthProvider)
     ├── Iris/            Internal/  Internal/Auth/  Internal/Auth/SRP/
@@ -117,7 +117,7 @@ safety net; any step that moves a rule writes its test first.
 | 2 | **docs and skills follow** ✓ | `CLAUDE.md`, `docs/design.md`, `implement-feature` / `fix-bug` / `improvement` skills describe `Domain → Infrastructure` (16 files) | describe concept folders; link this doc | — |
 | 3 | **one composition root** ✓ | 22 uses of 12 `Internal/` types in 14 `ASCCommand` files outside `ClientProvider`; `RESTRoutes` wires its own `ClientFactory` | `ClientProvider` gains `makeAuthStorage`, `makeEnvironmentAuthProvider`, `makeXcodeBuildRunner`, `makeProjectConfigStorage`; commands and `RESTRoutes` ask it for the public protocol | "should build every concept's Internal implementation only in the composition root" |
 | 4 | **`Internal/System/` per adapter** ✓ (one commit each) | seven untested adapters mix decisions with I/O; `codecov.yml` lists each file | each adapter's decisions become a tested value or orchestrator in `Internal/`; only the call stays, ≤100 lines, in `Internal/System/`; the per-file ignores become one `**/Internal/System/**` rule. The SDK adapters stay as they are | per adapter, its decisions: e.g. "should add the given variables on top of the inherited environment" |
-| 5 | **names for roles** ✓ | 75 `XxxRepository` protocols and their ~75 implementations | collections take the plural of the aggregate (`Apps`, `Builds`, `AppStoreVersions`, `AppScreenshots`); the rest a role noun (`IrisSignIn`, `TestFlight`, `GameCenter`, `Reports`, `AppPrices`, `ReviewSubmissions`, `…ReviewAssets`); implementations say how (`SDKBuilds`, `SimctlSimulators`, `MarketplacePlugins`); mocks, `make…` factories and file names follow. `XxxProvider`s stay: providing is what they do, and the rule bans Service / Manager / Port / Helper / Repository | none — behaviour unchanged; 2,958 tests before and after |
+| 5 | **names for roles** ✓ | 75 `XxxRepository` protocols, 11 of which run a workflow rather than CRUD | `XxxRepository` stays for the 64 CRUD protocols. The 11 workflows take role nouns: `IrisSignIn`, `Reports`, `ReviewSubmissions`, `InAppPurchaseSubmissions`, `SubscriptionSubmissions`, `IrisInAppPurchaseSubmissions`, `AppWall`, `Simulators`, `Skills`, `Plugins`, `Themes`; their implementations, mocks and `make…` factories follow. `XxxProvider`s stay | none — behaviour unchanged; 2,958 tests before and after |
 
 Step 1 removes most of §1's cost on its own; 3 and 4 make the fence real; 5 is
 cosmetic and can wait.

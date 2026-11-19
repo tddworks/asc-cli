@@ -12,7 +12,7 @@ struct VersionsSetBuildTests {
     }
 
     @Test func `execute links build to version`() async throws {
-        let mockRepo = MockAppStoreVersions()
+        let mockRepo = MockVersionRepository()
         given(mockRepo).setBuild(versionId: .any, buildId: .any).willReturn()
 
         let cmd = try VersionsSetBuild.parse(["--version-id", "v-1", "--build-id", "build-42"])

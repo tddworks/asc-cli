@@ -13,15 +13,15 @@ struct VersionsCheckReadiness: AsyncParsableCommand {
     var versionId: String
 
     func run() async throws {
-        let versionRepo = try ClientProvider.makeAppStoreVersions()
-        let appRepo = try ClientProvider.makeApps()
-        let buildRepo = try ClientProvider.makeBuilds()
-        let reviewDetailRepo = try ClientProvider.makeReviewDetails()
-        let localizationRepo = try ClientProvider.makeVersionLocalizations()
-        let screenshotRepo = try ClientProvider.makeAppScreenshots()
-        let pricingRepo = try ClientProvider.makeAppPrices()
-        let appInfoRepo = try ClientProvider.makeAppInfos()
-        let ageRatingRepo = try ClientProvider.makeAgeRatingDeclarations()
+        let versionRepo = try ClientProvider.makeVersionRepository()
+        let appRepo = try ClientProvider.makeAppRepository()
+        let buildRepo = try ClientProvider.makeBuildRepository()
+        let reviewDetailRepo = try ClientProvider.makeReviewDetailRepository()
+        let localizationRepo = try ClientProvider.makeVersionLocalizationRepository()
+        let screenshotRepo = try ClientProvider.makeScreenshotRepository()
+        let pricingRepo = try ClientProvider.makePricingRepository()
+        let appInfoRepo = try ClientProvider.makeAppInfoRepository()
+        let ageRatingRepo = try ClientProvider.makeAgeRatingDeclarationRepository()
         print(try await execute(
             versionRepo: versionRepo,
             appRepo: appRepo,
@@ -36,15 +36,15 @@ struct VersionsCheckReadiness: AsyncParsableCommand {
     }
 
     func execute(
-        versionRepo: any AppStoreVersions,
-        appRepo: any Apps,
-        buildRepo: any Builds,
-        reviewDetailRepo: any ReviewDetails,
-        localizationRepo: any VersionLocalizations,
-        screenshotRepo: any AppScreenshots,
-        pricingRepo: any AppPrices,
-        appInfoRepo: any AppInfos,
-        ageRatingRepo: any AgeRatingDeclarations
+        versionRepo: any VersionRepository,
+        appRepo: any AppRepository,
+        buildRepo: any BuildRepository,
+        reviewDetailRepo: any ReviewDetailRepository,
+        localizationRepo: any VersionLocalizationRepository,
+        screenshotRepo: any ScreenshotRepository,
+        pricingRepo: any PricingRepository,
+        appInfoRepo: any AppInfoRepository,
+        ageRatingRepo: any AgeRatingDeclarationRepository
     ) async throws -> String {
         // 1. Fetch version (includes appId + buildId)
         let version = try await versionRepo.getVersion(id: versionId)

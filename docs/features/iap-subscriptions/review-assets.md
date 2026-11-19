@@ -121,5 +121,5 @@ Upload and delete are CLI-only (multipart-style chunked upload would be a separa
 ## Testing
 
 ```bash
-swift test --filter 'ReviewScreenshot|PromotionalImage|SDKInAppPurchaseReviewAssets|SDKSubscriptionReviewAssets'
+swift test --filter 'ReviewScreenshot|PromotionalImage|SDKInAppPurchaseReviewRepository|SDKSubscriptionReviewRepository'
 ```

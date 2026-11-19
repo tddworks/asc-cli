@@ -20,11 +20,11 @@ struct CertificatesCreate: AsyncParsableCommand {
     var csrContent: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeCertificates()
+        let repo = try ClientProvider.makeCertificateRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any Certificates) async throws -> String {
+    func execute(repo: any CertificateRepository) async throws -> String {
         guard let certType = CertificateType(rawValue: type.uppercased()) else {
             throw ValidationError("Invalid certificate type '\(type)'.")
         }

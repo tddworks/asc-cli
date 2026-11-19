@@ -7,7 +7,7 @@ import Testing
 struct AppInfoLocalizationsCreateTests {
 
     @Test func `created localization is returned with id and locale`() async throws {
-        let mockRepo = MockAppInfos()
+        let mockRepo = MockAppInfoRepository()
         given(mockRepo)
             .createLocalization(appInfoId: .any, locale: .any, name: .any)
             .willReturn(AppInfoLocalization(id: "loc-1", appInfoId: "info-1", locale: "en-US", name: "My App"))
@@ -40,7 +40,7 @@ struct AppInfoLocalizationsCreateTests {
     }
 
     @Test func `table output includes all row fields`() async throws {
-        let mockRepo = MockAppInfos()
+        let mockRepo = MockAppInfoRepository()
         given(mockRepo)
             .createLocalization(appInfoId: .any, locale: .any, name: .any)
             .willReturn(AppInfoLocalization(id: "loc-2", appInfoId: "info-1", locale: "zh-Hans", name: "我的应用", subtitle: "副标题"))

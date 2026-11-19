@@ -12,7 +12,7 @@ struct IrisAppsListTests {
             IrisSession(cookies: "myacinfo=test")
         )
 
-        let mockRepo = MockIrisAppBundles()
+        let mockRepo = MockIrisAppBundleRepository()
         given(mockRepo).listAppBundles(session: .any).willReturn([
             AppBundle(
                 id: "app-1",

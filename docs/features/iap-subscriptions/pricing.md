@@ -81,5 +81,5 @@ IAP pricing endpoints live alongside the IAP resource (see [IAP REST routes](REA
 ## Testing
 
 ```bash
-swift test --filter 'SubscriptionPricePoint|SDKSubscriptionPrices|SubscriptionPricesSet'
+swift test --filter 'SubscriptionPricePoint|SDKSubscriptionPriceRepository|SubscriptionPricesSet'
 ```

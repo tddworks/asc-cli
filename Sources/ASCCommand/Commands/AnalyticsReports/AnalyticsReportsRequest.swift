@@ -16,11 +16,11 @@ struct AnalyticsReportsRequest: AsyncParsableCommand {
     var accessType: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAnalyticsReports()
+        let repo = try ClientProvider.makeAnalyticsReportRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AnalyticsReports) async throws -> String {
+    func execute(repo: any AnalyticsReportRepository) async throws -> String {
         guard let parsed = AnalyticsAccessType(cliArgument: accessType) else {
             throw ValidationError("Invalid access type: \(accessType)")
         }

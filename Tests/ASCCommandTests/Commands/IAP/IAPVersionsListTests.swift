@@ -7,7 +7,7 @@ import Testing
 struct IAPVersionsListTests {
 
     @Test func `listed IAP versions show state and the command to add them to a submission`() async throws {
-        let mockRepo = MockProductVersions()
+        let mockRepo = MockProductVersionRepository()
         given(mockRepo).listInAppPurchaseVersions(iapId: .value("iap-1")).willReturn([
             ProductVersion(id: "iv-1", productId: "iap-1", kind: .inAppPurchase, version: 1, state: .prepareForSubmission),
         ])

@@ -7,7 +7,7 @@ import Testing
 struct BundleIDsCreateTests {
 
     @Test func `execute creates bundle id and returns it`() async throws {
-        let mockRepo = MockBundleIDs()
+        let mockRepo = MockBundleIDRepository()
         given(mockRepo).createBundleID(name: .any, identifier: .any, platform: .any)
             .willReturn(BundleID(id: "bid-new", name: "My App", identifier: "com.example.app", platform: .iOS))
 
@@ -33,7 +33,7 @@ struct BundleIDsCreateTests {
     }
 
     @Test func `execute throws for invalid platform`() async throws {
-        let mockRepo = MockBundleIDs()
+        let mockRepo = MockBundleIDRepository()
         let cmd = try BundleIDsCreate.parse(["--name", "My App", "--identifier", "com.example.app", "--platform", "unknown"])
         await #expect(throws: (any Error).self) {
             try await cmd.execute(repo: mockRepo)
@@ -41,7 +41,7 @@ struct BundleIDsCreateTests {
     }
 
     @Test func `table output includes all row fields`() async throws {
-        let mockRepo = MockBundleIDs()
+        let mockRepo = MockBundleIDRepository()
         given(mockRepo).createBundleID(name: .any, identifier: .any, platform: .any)
             .willReturn(BundleID(id: "bid-1", name: "Test App", identifier: "com.test.app", platform: .macOS))
 

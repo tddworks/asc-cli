@@ -7,7 +7,7 @@ import Testing
 struct IAPLocalizationsCreateTests {
 
     @Test func `creates iap localization with name and description and returns it with affordances`() async throws {
-        let mockRepo = MockInAppPurchaseLocalizations()
+        let mockRepo = MockInAppPurchaseLocalizationRepository()
         given(mockRepo).createLocalization(iapId: .any, locale: .any, name: .any, description: .any)
             .willReturn(InAppPurchaseLocalization(
                 id: "loc-new",
@@ -47,7 +47,7 @@ struct IAPLocalizationsCreateTests {
     }
 
     @Test func `creates iap localization without description omits description from json`() async throws {
-        let mockRepo = MockInAppPurchaseLocalizations()
+        let mockRepo = MockInAppPurchaseLocalizationRepository()
         given(mockRepo).createLocalization(iapId: .any, locale: .any, name: .any, description: .any)
             .willReturn(InAppPurchaseLocalization(
                 id: "loc-new",

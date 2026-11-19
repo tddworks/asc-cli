@@ -13,11 +13,11 @@ struct IAPDelete: AsyncParsableCommand {
     var iapId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchases()
+        let repo = try ClientProvider.makeInAppPurchaseRepository()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any InAppPurchases) async throws {
+    func execute(repo: any InAppPurchaseRepository) async throws {
         try await repo.deleteInAppPurchase(iapId: iapId)
     }
 }

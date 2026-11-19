@@ -7,7 +7,7 @@ import Testing
 struct AppsUpdateTests {
 
     @Test func `updated content rights declaration returns app with declaration set`() async throws {
-        let mockRepo = MockApps()
+        let mockRepo = MockAppRepository()
         given(mockRepo).updateContentRights(appId: .any, declaration: .any).willReturn(
             App(id: "app-9", name: "Bakery", bundleId: "com.example.bakery", contentRightsDeclaration: .doesNotUseThirdPartyContent)
         )

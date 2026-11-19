@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionReviewScreenshotGetTests {
 
     @Test func `returns the screenshot when present`() async throws {
-        let mockRepo = MockSubscriptionReviewAssets()
+        let mockRepo = MockSubscriptionReviewRepository()
         given(mockRepo).getReviewScreenshot(subscriptionId: .any).willReturn(
             SubscriptionReviewScreenshot(id: "rs-1", subscriptionId: "sub-1", fileName: "review.png", fileSize: 1234)
         )
@@ -24,7 +24,7 @@ struct SubscriptionReviewScreenshotGetTests {
 struct SubscriptionReviewScreenshotDeleteTests {
 
     @Test func `delete calls repo with screenshot id`() async throws {
-        let mockRepo = MockSubscriptionReviewAssets()
+        let mockRepo = MockSubscriptionReviewRepository()
         given(mockRepo).deleteReviewScreenshot(screenshotId: .any).willReturn(())
 
         let cmd = try SubscriptionReviewScreenshotDelete.parse(["--screenshot-id", "rs-1"])

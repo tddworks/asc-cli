@@ -50,14 +50,14 @@ struct ScreenshotsImport: AsyncParsableCommand {
     func run() async throws {
         let (manifest, imageURLs, tempDir) = try Self.unzipAndParse(zipURL: URL(fileURLWithPath: from))
         defer { try? FileManager.default.removeItem(at: tempDir) }
-        let localizationRepo = try ClientProvider.makeVersionLocalizations()
+        let localizationRepo = try ClientProvider.makeVersionLocalizationRepository()
 
         guard toLibrary else {
             FileHandle.standardError.write(Data((
                 "Note: screenshot sets are deprecated in App Store Connect API 4.5.1 — "
                 + "add --to-library to import into the app's asset library instead.\n"
             ).utf8))
-            let screenshotRepo = try ClientProvider.makeAppScreenshots()
+            let screenshotRepo = try ClientProvider.makeScreenshotRepository()
             print(try await execute(localizationRepo: localizationRepo, screenshotRepo: screenshotRepo, manifest: manifest, imageURLs: imageURLs))
             return
         }
@@ -65,11 +65,11 @@ struct ScreenshotsImport: AsyncParsableCommand {
         let report = try await executeToLibrary(
             manifest: manifest,
             files: try ScreenshotImportFiles.read(manifest: manifest, imageURLs: imageURLs),
-            versionRepo: try ClientProvider.makeAppStoreVersions(),
+            versionRepo: try ClientProvider.makeVersionRepository(),
             localizationRepo: localizationRepo,
-            libraryRepo: try ClientProvider.makeAssetLibraries(),
-            imageRepo: try ClientProvider.makeLibraryImages(),
-            placementRepo: try ClientProvider.makeAssetPlacements()
+            libraryRepo: try ClientProvider.makeAssetLibraryRepository(),
+            imageRepo: try ClientProvider.makeLibraryImageRepository(),
+            placementRepo: try ClientProvider.makeAssetPlacementRepository()
         )
         print(report.output)
         if !report.isSuccess { throw ExitCode.failure }
@@ -78,8 +78,8 @@ struct ScreenshotsImport: AsyncParsableCommand {
     // MARK: - Testable core (no I/O)
 
     func execute(
-        localizationRepo: any VersionLocalizations,
-        screenshotRepo: any AppScreenshots,
+        localizationRepo: any VersionLocalizationRepository,
+        screenshotRepo: any ScreenshotRepository,
         manifest: ScreenshotManifest,
         imageURLs: [String: URL]
     ) async throws -> String {
@@ -130,11 +130,11 @@ struct ScreenshotsImport: AsyncParsableCommand {
     func executeToLibrary(
         manifest: ScreenshotManifest,
         files: [ScreenshotImportFile],
-        versionRepo: any AppStoreVersions,
-        localizationRepo: any VersionLocalizations,
-        libraryRepo: any AssetLibraries,
-        imageRepo: any LibraryImages,
-        placementRepo: any AssetPlacements,
+        versionRepo: any VersionRepository,
+        localizationRepo: any VersionLocalizationRepository,
+        libraryRepo: any AssetLibraryRepository,
+        imageRepo: any LibraryImageRepository,
+        placementRepo: any AssetPlacementRepository,
         affordanceMode: AffordanceMode = .cli,
         sleep: @Sendable (UInt64) async throws -> Void = { try await Task.sleep(nanoseconds: $0) }
     ) async throws -> ScreenshotImportReport {

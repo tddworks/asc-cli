@@ -41,28 +41,28 @@ struct VersionsSubmitTests {
 
     // MARK: - --with-products
 
-    private func planner(iapRepo: MockInAppPurchases, versionRepo: MockProductVersions) -> SubmissionPlanner {
-        let groups = MockSubscriptionGroups()
+    private func planner(iapRepo: MockInAppPurchaseRepository, versionRepo: MockProductVersionRepository) -> SubmissionPlanner {
+        let groups = MockSubscriptionGroupRepository()
         given(groups).listSubscriptionGroups(appId: .any, limit: .any).willReturn(PaginatedResponse(data: []))
         return SubmissionPlanner(iapRepo: iapRepo, groupRepo: groups,
-                                 subscriptionRepo: MockSubscriptions(), productVersionRepo: versionRepo)
+                                 subscriptionRepo: MockSubscriptionRepository(), productVersionRepo: versionRepo)
     }
 
-    private func readyLifetimeIAP() -> (MockInAppPurchases, MockProductVersions) {
-        let iaps = MockInAppPurchases()
+    private func readyLifetimeIAP() -> (MockInAppPurchaseRepository, MockProductVersionRepository) {
+        let iaps = MockInAppPurchaseRepository()
         given(iaps).listInAppPurchases(appId: .any, limit: .any).willReturn(PaginatedResponse(data: [
             InAppPurchase(id: "iap-1", appId: "app-1", referenceName: "Lifetime", productId: "com.app.lifetime",
                           type: .nonConsumable, state: .readyToSubmit),
         ]))
-        let versions = MockProductVersions()
+        let versions = MockProductVersionRepository()
         given(versions).listInAppPurchaseVersions(iapId: .any).willReturn([
             ProductVersion(id: "iv-1", productId: "iap-1", kind: .inAppPurchase, version: 1, state: .prepareForSubmission),
         ])
         return (iaps, versions)
     }
 
-    private func appVersionRepo() -> MockAppStoreVersions {
-        let repo = MockAppStoreVersions()
+    private func appVersionRepo() -> MockVersionRepository {
+        let repo = MockVersionRepository()
         given(repo).getVersion(id: .value("v-1")).willReturn(
             AppStoreVersion(id: "v-1", appId: "app-1", versionString: "1.0", platform: .iOS, state: .prepareForSubmission)
         )

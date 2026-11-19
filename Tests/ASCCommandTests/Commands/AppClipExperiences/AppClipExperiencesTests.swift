@@ -7,7 +7,7 @@ import Testing
 struct AppClipExperiencesListTests {
 
     @Test func `listed experiences include appClipId action and affordances`() async throws {
-        let mockRepo = MockAppClips()
+        let mockRepo = MockAppClipRepository()
         given(mockRepo).listExperiences(appClipId: .any).willReturn([
             AppClipDefaultExperience(id: "exp-1", appClipId: "clip-1", action: .open)
         ])
@@ -34,7 +34,7 @@ struct AppClipExperiencesListTests {
     }
 
     @Test func `listed experiences omit nil action from JSON`() async throws {
-        let mockRepo = MockAppClips()
+        let mockRepo = MockAppClipRepository()
         given(mockRepo).listExperiences(appClipId: .any).willReturn([
             AppClipDefaultExperience(id: "exp-1", appClipId: "clip-1", action: nil)
         ])
@@ -60,7 +60,7 @@ struct AppClipExperiencesListTests {
     }
 
     @Test func `table output includes experience id and action`() async throws {
-        let mockRepo = MockAppClips()
+        let mockRepo = MockAppClipRepository()
         given(mockRepo).listExperiences(appClipId: .any).willReturn([
             AppClipDefaultExperience(id: "exp-1", appClipId: "clip-1", action: .open)
         ])
@@ -78,7 +78,7 @@ struct AppClipExperiencesListTests {
 struct AppClipExperiencesCreateTests {
 
     @Test func `create experience returns created experience with affordances`() async throws {
-        let mockRepo = MockAppClips()
+        let mockRepo = MockAppClipRepository()
         given(mockRepo).createExperience(appClipId: .any, action: .any).willReturn(
             AppClipDefaultExperience(id: "exp-new", appClipId: "clip-1", action: .view)
         )
@@ -105,7 +105,7 @@ struct AppClipExperiencesCreateTests {
     }
 
     @Test func `create experience without action creates with nil action`() async throws {
-        let mockRepo = MockAppClips()
+        let mockRepo = MockAppClipRepository()
         given(mockRepo).createExperience(appClipId: .any, action: .any).willReturn(
             AppClipDefaultExperience(id: "exp-new", appClipId: "clip-1", action: nil)
         )
@@ -140,7 +140,7 @@ struct AppClipExperiencesDeleteTests {
     }
 
     @Test func `delete experience calls repo with experience id`() async throws {
-        let mockRepo = MockAppClips()
+        let mockRepo = MockAppClipRepository()
         given(mockRepo).deleteExperience(id: .any).willReturn(())
 
         let cmd = try AppClipExperiencesDelete.parse(["--experience-id", "exp-1"])

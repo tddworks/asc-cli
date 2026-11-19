@@ -7,7 +7,7 @@ import Testing
 struct BetaAppLocalizationsDeleteTests {
 
     @Test func `delete beta app localization calls repo with localization id`() async throws {
-        let mockRepo = MockBetaAppLocalizations()
+        let mockRepo = MockBetaAppLocalizationRepository()
         given(mockRepo).deleteBetaAppLocalization(localizationId: .any).willReturn(())
 
         let cmd = try BetaAppLocalizationsDelete.parse(["--localization-id", "bal-1"])

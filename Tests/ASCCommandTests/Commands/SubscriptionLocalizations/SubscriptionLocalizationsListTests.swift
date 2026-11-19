@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionLocalizationsListTests {
 
     @Test func `listed subscription localizations include subscriptionId, locale, name and affordances`() async throws {
-        let mockRepo = MockSubscriptionLocalizations()
+        let mockRepo = MockSubscriptionLocalizationRepository()
         given(mockRepo).listLocalizations(subscriptionId: .any)
             .willReturn([
                 SubscriptionLocalization(

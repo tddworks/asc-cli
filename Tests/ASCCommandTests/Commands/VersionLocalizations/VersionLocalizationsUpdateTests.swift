@@ -7,7 +7,7 @@ import Testing
 struct VersionLocalizationsUpdateTests {
 
     @Test func `updated localization is returned with whatsNew text`() async throws {
-        let mockRepo = MockVersionLocalizations()
+        let mockRepo = MockVersionLocalizationRepository()
         given(mockRepo).updateLocalization(
             localizationId: .any,
             whatsNew: .any,
@@ -53,7 +53,7 @@ struct VersionLocalizationsUpdateTests {
     }
 
     @Test func `update with all optional fields returns full content`() async throws {
-        let mockRepo = MockVersionLocalizations()
+        let mockRepo = MockVersionLocalizationRepository()
         given(mockRepo).updateLocalization(
             localizationId: .any,
             whatsNew: .any,

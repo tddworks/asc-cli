@@ -7,7 +7,7 @@ import Testing
 struct IAPOfferCodesPricesListTests {
 
     @Test func `lists prices and returns them with affordances`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodes()
+        let mockRepo = MockInAppPurchaseOfferCodeRepository()
         given(mockRepo).listPrices(offerCodeId: .any).willReturn([
             InAppPurchaseOfferCodePrice(id: "p-1", offerCodeId: "oc-1", territory: "USA", pricePointId: "pp-9")
         ])

@@ -21,11 +21,11 @@ struct VersionLocalizationsList: AsyncParsableCommand {
     var versionId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeVersionLocalizations()
+        let repo = try ClientProvider.makeVersionLocalizationRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any VersionLocalizations, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any VersionLocalizationRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let localizations = try await repo.listLocalizations(versionId: versionId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(localizations, affordanceMode: affordanceMode)

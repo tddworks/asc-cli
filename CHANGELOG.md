@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- **Breaking (library):** the `ASCKit` product is one module, `ASCKit`; replace `import Domain` and `import Infrastructure` with `import ASCKit`, and drop the `Repository` suffix from protocol names: collections are plural (`AppRepository` → `Apps`, `BuildRepository` → `Builds`, `VersionRepository` → `AppStoreVersions`), the rest role nouns (`IrisAuthRepository` → `IrisSignIn`), and `ClientFactory.makeXRepository` → `makeXs`. The CLI and REST API are unchanged. → [design](docs/features/concept-folders/design.md)
+- **Breaking (library):** `ASCKit` is one module (`import ASCKit` replaces `import Domain` / `import Infrastructure`), and the 11 non-CRUD repositories take role names (`IrisAuthRepository` → `IrisSignIn`, …). CLI and REST unchanged. → [design](docs/features/concept-folders/design.md)
 
 ---
 

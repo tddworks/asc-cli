@@ -31,11 +31,11 @@ struct VersionLocalizationsUpdate: AsyncParsableCommand {
     var promotionalText: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeVersionLocalizations()
+        let repo = try ClientProvider.makeVersionLocalizationRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any VersionLocalizations) async throws -> String {
+    func execute(repo: any VersionLocalizationRepository) async throws -> String {
         let updated = try await repo.updateLocalization(
             localizationId: localizationId,
             whatsNew: whatsNew,

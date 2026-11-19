@@ -10,7 +10,7 @@ struct AssetImagesCommandTests {
     // MARK: - list
 
     @Test func `should list the library's images with their state and what can be done with each`() async throws {
-        let mockRepo = MockLibraryImages()
+        let mockRepo = MockLibraryImageRepository()
         given(mockRepo).listImages(libraryId: .value("lib-1"), imageId: .value(nil), state: .value(.prepareForSubmission), category: .value(nil)).willReturn([
             LibraryImage(id: "img-1", libraryId: "lib-1", fileName: "home.png", fileSize: 14619,
                          category: .appScreenshotsAndPreviews, state: .prepareForSubmission, referenceName: "Home", specId: "spec-1",
@@ -47,7 +47,7 @@ struct AssetImagesCommandTests {
     }
 
     @Test func `should show just one image when asked for it by id`() async throws {
-        let mockRepo = MockLibraryImages()
+        let mockRepo = MockLibraryImageRepository()
         given(mockRepo).listImages(libraryId: .value("lib-1"), imageId: .value("img-2"), state: .value(nil), category: .value(.creativeAssets)).willReturn([
             LibraryImage(id: "img-2", libraryId: "lib-1", fileName: "card.png", fileSize: 10, category: .creativeAssets, state: .uploadComplete),
         ])
@@ -80,7 +80,7 @@ struct AssetImagesCommandTests {
     // MARK: - upload
 
     @Test func `should show the uploaded image while App Store Connect processes it`() async throws {
-        let mockRepo = MockLibraryImages()
+        let mockRepo = MockLibraryImageRepository()
         given(mockRepo).uploadImage(libraryId: .value("lib-1"), fileURL: .any, category: .value(.appScreenshotsAndPreviews), referenceName: .value("Home"))
             .willReturn(LibraryImage(id: "img-1", libraryId: "lib-1", fileName: "home.png", fileSize: 7,
                                      category: .appScreenshotsAndPreviews, state: .uploadComplete, referenceName: "Home"))
@@ -112,7 +112,7 @@ struct AssetImagesCommandTests {
     }
 
     @Test func `should wait until App Store Connect has processed the image when asked to wait`() async throws {
-        let mockRepo = MockLibraryImages()
+        let mockRepo = MockLibraryImageRepository()
         given(mockRepo).uploadImage(libraryId: .any, fileURL: .any, category: .value(.creativeAssets), referenceName: .value(nil))
             .willReturn(LibraryImage(id: "img-1", libraryId: "lib-1", fileName: "card.png", fileSize: 7, category: .creativeAssets, state: .uploadComplete))
         given(mockRepo).listImages(libraryId: .value("lib-1"), imageId: .value("img-1"), state: .value(nil), category: .value(nil))
@@ -150,7 +150,7 @@ struct AssetImagesCommandTests {
     }
 
     @Test func `should stop waiting and show why when processing fails`() async throws {
-        let mockRepo = MockLibraryImages()
+        let mockRepo = MockLibraryImageRepository()
         given(mockRepo).uploadImage(libraryId: .any, fileURL: .any, category: .any, referenceName: .any)
             .willReturn(LibraryImage(id: "img-1", libraryId: "lib-1", fileName: "bad.png", fileSize: 7, category: .appScreenshotsAndPreviews, state: .uploadComplete))
         given(mockRepo).listImages(libraryId: .any, imageId: .any, state: .any, category: .any)
@@ -166,7 +166,7 @@ struct AssetImagesCommandTests {
     // MARK: - update
 
     @Test func `should rename the image and show it under its new name`() async throws {
-        let mockRepo = MockLibraryImages()
+        let mockRepo = MockLibraryImageRepository()
         given(mockRepo).updateImage(libraryId: .value("lib-1"), imageId: .value("img-1"), referenceName: .value("Home (Fall)"), isArchived: .value(nil))
             .willReturn(LibraryImage(id: "img-1", libraryId: "lib-1", fileName: "home.png", fileSize: 7,
                                      category: .appScreenshotsAndPreviews, state: .approved, referenceName: "Home (Fall)"))
@@ -186,7 +186,7 @@ struct AssetImagesCommandTests {
     // MARK: - delete
 
     @Test func `should report App Store Connect's refusal to delete an image that is still placed`() async throws {
-        let mockRepo = MockLibraryImages()
+        let mockRepo = MockLibraryImageRepository()
         given(mockRepo).deleteImage(imageId: .value("img-1")).willThrow(APIError.unknown("STATE_ERROR.ASSET_HAS_PLACEMENTS"))
 
         let cmd = try AssetImagesDelete.parse(["--image-id", "img-1"])

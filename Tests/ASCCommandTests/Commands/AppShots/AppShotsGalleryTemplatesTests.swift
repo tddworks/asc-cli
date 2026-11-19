@@ -10,7 +10,7 @@ struct AppShotsGalleryTemplatesTests {
     // MARK: - List
 
     @Test func `list gallery templates returns galleries with affordances`() async throws {
-        let mockRepo = MockGalleryTemplates()
+        let mockRepo = MockGalleryTemplateRepository()
         let gallery = Gallery(appName: "TestApp", screenshots: ["s0.png", "s1.png"])
         gallery.template = GalleryTemplate(id: "neon-pop", name: "Neon Pop", screens: [
             .hero: ScreenLayout(headline: TextSlot(y: 0.07, size: 0.08)),
@@ -28,7 +28,7 @@ struct AppShotsGalleryTemplatesTests {
     }
 
     @Test func `list gallery templates table format`() async throws {
-        let mockRepo = MockGalleryTemplates()
+        let mockRepo = MockGalleryTemplateRepository()
         let gallery = Gallery(appName: "TestApp", screenshots: ["s0.png"])
         gallery.template = GalleryTemplate(id: "neon", name: "Neon", screens: [:])
         gallery.palette = GalleryPalette(id: "p", name: "P", background: "#000")
@@ -43,7 +43,7 @@ struct AppShotsGalleryTemplatesTests {
     // MARK: - Get
 
     @Test func `get gallery template returns specific gallery`() async throws {
-        let mockRepo = MockGalleryTemplates()
+        let mockRepo = MockGalleryTemplateRepository()
         let gallery = Gallery(appName: "BezelBlend", screenshots: ["s0.png"])
         gallery.template = GalleryTemplate(id: "neon-pop", name: "Neon Pop", screens: [:])
         gallery.palette = GalleryPalette(id: "p", name: "P", background: "#000")
@@ -56,7 +56,7 @@ struct AppShotsGalleryTemplatesTests {
     }
 
     @Test func `get gallery template returns error when not found`() async throws {
-        let mockRepo = MockGalleryTemplates()
+        let mockRepo = MockGalleryTemplateRepository()
         given(mockRepo).getGallery(templateId: .value("nope")).willReturn(nil)
 
         let cmd = try AppShotsGalleryTemplatesGet.parse(["--id", "nope"])
@@ -69,7 +69,7 @@ struct AppShotsGalleryTemplatesTests {
     }
 
     @Test func `get gallery template with preview flag returns HTML`() async throws {
-        let mockRepo = MockGalleryTemplates()
+        let mockRepo = MockGalleryTemplateRepository()
         let gallery = Gallery(appName: "TestApp", screenshots: ["s0.png"])
         gallery.template = GalleryTemplate(id: "neon-pop", name: "Neon Pop", screens: [
             .hero: ScreenLayout(headline: TextSlot(y: 0.07, size: 0.08)),

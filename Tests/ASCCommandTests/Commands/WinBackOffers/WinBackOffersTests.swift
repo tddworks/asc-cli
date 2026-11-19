@@ -18,7 +18,7 @@ private func makeOffer(id: String = "wb-1", subscriptionId: String = "sub-1") ->
 struct WinBackOffersListTests {
 
     @Test func `lists win-back offers with affordances`() async throws {
-        let mockRepo = MockWinBackOffers()
+        let mockRepo = MockWinBackOfferRepository()
         given(mockRepo).listWinBackOffers(subscriptionId: .any).willReturn([makeOffer()])
 
         let cmd = try WinBackOffersList.parse(["--subscription-id", "sub-1", "--pretty"])
@@ -33,7 +33,7 @@ struct WinBackOffersListTests {
 struct WinBackOffersCreateTests {
 
     @Test func `create passes through eligibility, dates and prices`() async throws {
-        let mockRepo = MockWinBackOffers()
+        let mockRepo = MockWinBackOfferRepository()
         given(mockRepo).createWinBackOffer(
             subscriptionId: .any, referenceName: .any, offerId: .any,
             duration: .any, offerMode: .any, periodCount: .any,
@@ -84,7 +84,7 @@ struct WinBackOffersCreateTests {
     }
 
     @Test func `throws when priority invalid`() async throws {
-        let mockRepo = MockWinBackOffers()
+        let mockRepo = MockWinBackOfferRepository()
         let cmd = try WinBackOffersCreate.parse([
             "--subscription-id", "sub-1",
             "--reference-name", "X",
@@ -108,7 +108,7 @@ struct WinBackOffersCreateTests {
 struct WinBackOffersUpdateTests {
 
     @Test func `update passes through optional fields`() async throws {
-        let mockRepo = MockWinBackOffers()
+        let mockRepo = MockWinBackOfferRepository()
         given(mockRepo).updateWinBackOffer(
             offerId: .any, startDate: .any, endDate: .any,
             priority: .any, promotionIntent: .any,
@@ -143,7 +143,7 @@ struct WinBackOffersUpdateTests {
 struct WinBackOffersDeleteTests {
 
     @Test func `delete calls repo with offer id`() async throws {
-        let mockRepo = MockWinBackOffers()
+        let mockRepo = MockWinBackOfferRepository()
         given(mockRepo).deleteWinBackOffer(offerId: .any).willReturn(())
 
         let cmd = try WinBackOffersDelete.parse(["--offer-id", "wb-1"])
@@ -157,7 +157,7 @@ struct WinBackOffersDeleteTests {
 struct WinBackOffersPricesListTests {
 
     @Test func `lists prices with affordances`() async throws {
-        let mockRepo = MockWinBackOffers()
+        let mockRepo = MockWinBackOfferRepository()
         given(mockRepo).listPrices(offerId: .any).willReturn([
             WinBackOfferPrice(id: "p-1", offerId: "wb-1", territory: "USA", subscriptionPricePointId: "spp-1")
         ])

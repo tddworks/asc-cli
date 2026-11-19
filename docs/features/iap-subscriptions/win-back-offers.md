@@ -26,7 +26,7 @@ wait-months                 # minimum gap between offers shown to the same custo
 
 ## SDK gap
 
-The generated `WinBackOfferPriceInlineCreate` is missing `territory` and `subscriptionPricePoint` relationship fields. `SDKWinBackOffers.createWinBackOffer` builds the body manually with a private `AnyCodable` type-erased enum. The ID convention matches ASC web (`${newPromoOfferPrice-N}`, 1-based).
+The generated `WinBackOfferPriceInlineCreate` is missing `territory` and `subscriptionPricePoint` relationship fields. `SDKWinBackOfferRepository.createWinBackOffer` builds the body manually with a private `AnyCodable` type-erased enum. The ID convention matches ASC web (`${newPromoOfferPrice-N}`, 1-based).
 
 ## Domain model
 

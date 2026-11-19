@@ -98,7 +98,7 @@ struct AppShotsThemesTests {
         given(mockThemeRepo).compose(themeId: .value("space"), html: .any, canvasWidth: .any, canvasHeight: .any)
             .willReturn("<div>themed output</div>")
 
-        let mockTemplateRepo = MockTemplates()
+        let mockTemplateRepo = MockTemplateRepository()
         given(mockTemplateRepo).getTemplate(id: .value("top-hero")).willReturn(
             makeTemplate(id: "top-hero", name: "Top Hero")
         )
@@ -118,7 +118,7 @@ struct AppShotsThemesTests {
         given(mockThemeRepo).compose(themeId: .value("space"), html: .any, canvasWidth: .any, canvasHeight: .any)
             .willReturn("<div>themed output</div>")
 
-        let mockTemplateRepo = MockTemplates()
+        let mockTemplateRepo = MockTemplateRepository()
         given(mockTemplateRepo).getTemplate(id: .value("top-hero")).willReturn(
             makeTemplate(id: "top-hero", name: "Top Hero")
         )
@@ -151,7 +151,7 @@ struct AppShotsThemesTests {
         given(mockThemeRepo).compose(themeId: .value("space"), html: .any, canvasWidth: .any, canvasHeight: .any)
             .willReturn("<div>themed</div>")
 
-        let mockTemplateRepo = MockTemplates()
+        let mockTemplateRepo = MockTemplateRepository()
         given(mockTemplateRepo).getTemplate(id: .value("top-hero")).willReturn(
             makeTemplate(id: "top-hero", name: "Top Hero")
         )
@@ -199,7 +199,7 @@ struct AppShotsThemesTests {
         let data = try JSONEncoder().encode(design)
         try data.write(to: URL(fileURLWithPath: designPath))
 
-        let mockTemplateRepo = MockTemplates()
+        let mockTemplateRepo = MockTemplateRepository()
         given(mockTemplateRepo).getTemplate(id: .value("top-hero")).willReturn(
             makeTemplate(id: "top-hero", name: "Top Hero")
         )
@@ -219,7 +219,7 @@ struct AppShotsThemesTests {
 
     @Test func `apply fails when template not found`() async throws {
         let mockThemeRepo = MockThemes()
-        let mockTemplateRepo = MockTemplates()
+        let mockTemplateRepo = MockTemplateRepository()
         given(mockTemplateRepo).getTemplate(id: .value("nope")).willReturn(nil)
 
         let cmd = try AppShotsThemesApply.parse([

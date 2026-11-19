@@ -53,13 +53,13 @@ struct BuildsArchive: AsyncParsableCommand {
 
     func run() async throws {
         let runner = ClientProvider.makeXcodeBuildRunner()
-        let uploadRepo = upload ? try ClientProvider.makeBuildUploads() : nil
+        let uploadRepo = upload ? try ClientProvider.makeBuildUploadRepository() : nil
         print(try await execute(runner: runner, uploadRepo: uploadRepo))
     }
 
     func execute(
         runner: any XcodeBuildRunner,
-        uploadRepo: (any BuildUploads)? = nil
+        uploadRepo: (any BuildUploadRepository)? = nil
     ) async throws -> String {
         // Resolve platform
         let resolvedPlatform: BuildUploadPlatform

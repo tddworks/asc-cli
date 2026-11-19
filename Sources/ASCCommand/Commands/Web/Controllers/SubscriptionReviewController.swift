@@ -5,7 +5,7 @@ import HummingbirdWebSocket
 
 /// Routes that return the subscription review screenshot and promotional images.
 struct SubscriptionReviewController: Sendable {
-    let repo: any SubscriptionReviewAssets
+    let repo: any SubscriptionReviewRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/subscriptions/:subscriptionId/review-screenshot") { _, context -> Response in

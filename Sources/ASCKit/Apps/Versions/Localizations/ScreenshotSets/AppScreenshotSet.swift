@@ -7,14 +7,14 @@ public final class AppScreenshotSet: Identifiable, @unchecked Sendable {
     public let screenshotDisplayType: ScreenshotDisplayType
     public let screenshotsCount: Int
 
-    private let repo: (any AppScreenshots)?
+    private let repo: (any ScreenshotRepository)?
 
     public init(
         id: String,
         localizationId: String,
         screenshotDisplayType: ScreenshotDisplayType,
         screenshotsCount: Int = 0,
-        repo: (any AppScreenshots)? = nil
+        repo: (any ScreenshotRepository)? = nil
     ) {
         self.id = id
         self.localizationId = localizationId

@@ -10,11 +10,11 @@ struct TerritoriesList: AsyncParsableCommand {
     @OptionGroup var globals: GlobalOptions
 
     func run() async throws {
-        let repo = try ClientProvider.makeTerritories()
+        let repo = try ClientProvider.makeTerritoryRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any Territories, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any TerritoryRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let territories = try await repo.listTerritories()
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(territories, affordanceMode: affordanceMode)

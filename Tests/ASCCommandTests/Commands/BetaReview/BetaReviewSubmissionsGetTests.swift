@@ -7,7 +7,7 @@ import Testing
 struct BetaReviewSubmissionsGetTests {
 
     @Test func `get submission shows details with affordances`() async throws {
-        let mockRepo = MockBetaAppReviews()
+        let mockRepo = MockBetaAppReviewRepository()
         given(mockRepo).getSubmission(id: .value("sub-1"))
             .willReturn(
                 BetaAppReviewSubmission(id: "sub-1", buildId: "build-42", state: .approved)

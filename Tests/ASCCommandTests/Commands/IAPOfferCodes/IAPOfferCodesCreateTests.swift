@@ -7,7 +7,7 @@ import Testing
 struct IAPOfferCodesCreateTests {
 
     @Test func `creates IAP offer code and returns it with affordances`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodes()
+        let mockRepo = MockInAppPurchaseOfferCodeRepository()
         given(mockRepo).createOfferCode(
             iapId: .any, name: .any, customerEligibilities: .any, prices: .any
         ).willReturn(InAppPurchaseOfferCode(
@@ -32,7 +32,7 @@ struct IAPOfferCodesCreateTests {
     }
 
     @Test func `throws for invalid eligibility`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodes()
+        let mockRepo = MockInAppPurchaseOfferCodeRepository()
         let cmd = try IAPOfferCodesCreate.parse([
             "--iap-id", "iap-1",
             "--name", "TEST",
@@ -44,7 +44,7 @@ struct IAPOfferCodesCreateTests {
     }
 
     @Test func `forwards paid and free per-territory prices to repository`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodes()
+        let mockRepo = MockInAppPurchaseOfferCodeRepository()
         given(mockRepo).createOfferCode(
             iapId: .any, name: .any, customerEligibilities: .any, prices: .any
         ).willReturn(InAppPurchaseOfferCode(
@@ -73,7 +73,7 @@ struct IAPOfferCodesCreateTests {
     }
 
     @Test func `defaults to empty prices array when no flags provided`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodes()
+        let mockRepo = MockInAppPurchaseOfferCodeRepository()
         given(mockRepo).createOfferCode(
             iapId: .any, name: .any, customerEligibilities: .any, prices: .any
         ).willReturn(InAppPurchaseOfferCode(
@@ -95,7 +95,7 @@ struct IAPOfferCodesCreateTests {
     }
 
     @Test func `rejects malformed --price flag`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodes()
+        let mockRepo = MockInAppPurchaseOfferCodeRepository()
         let cmd = try IAPOfferCodesCreate.parse([
             "--iap-id", "iap-1",
             "--name", "TEST",

@@ -7,7 +7,7 @@ import Testing
 struct PerfOverviewGetTests {
 
     @Test func `should show what regressed, each metric against its goal and the top hotspots for the device type asked for`() async throws {
-        let mockRepo = MockPerfOverviews()
+        let mockRepo = MockPerfOverviewRepository()
         given(mockRepo).getOverview(appId: .value("1234567890"), deviceType: .value("iPhone")).willReturn(
             PerformanceOverview(
                 appId: "1234567890",
@@ -94,7 +94,7 @@ struct PerfOverviewGetTests {
     }
 
     @Test func `should show nothing regressed when App Store Connect has no performance data for the app`() async throws {
-        let mockRepo = MockPerfOverviews()
+        let mockRepo = MockPerfOverviewRepository()
         given(mockRepo).getOverview(appId: .value("1234567890"), deviceType: .value(nil)).willReturn(
             PerformanceOverview(appId: "1234567890", platform: "iOS", bundleId: "com.example.app")
         )

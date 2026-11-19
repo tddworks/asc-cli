@@ -35,11 +35,11 @@ struct BetaGroupsList: AsyncParsableCommand {
     var limit: Int?
 
     func run() async throws {
-        let repo = try ClientProvider.makeTestFlight()
+        let repo = try ClientProvider.makeTestFlightRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any TestFlight, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any TestFlightRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let response = try await repo.listBetaGroups(appId: appId, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(response.data, affordanceMode: affordanceMode)
@@ -70,11 +70,11 @@ struct BetaGroupsCreate: AsyncParsableCommand {
     var feedbackEnabled: Bool = false
 
     func run() async throws {
-        let repo = try ClientProvider.makeTestFlight()
+        let repo = try ClientProvider.makeTestFlightRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any TestFlight) async throws -> String {
+    func execute(repo: any TestFlightRepository) async throws -> String {
         let group = try await repo.createBetaGroup(
             appId: appId,
             name: name,
@@ -118,11 +118,11 @@ struct BetaTestersList: AsyncParsableCommand {
     var limit: Int?
 
     func run() async throws {
-        let repo = try ClientProvider.makeTestFlight()
+        let repo = try ClientProvider.makeTestFlightRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any TestFlight) async throws -> String {
+    func execute(repo: any TestFlightRepository) async throws -> String {
         let response = try await repo.listBetaTesters(groupId: betaGroupId, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(response.data)
@@ -150,11 +150,11 @@ struct BetaTestersAdd: AsyncParsableCommand {
     var lastName: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeTestFlight()
+        let repo = try ClientProvider.makeTestFlightRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any TestFlight) async throws -> String {
+    func execute(repo: any TestFlightRepository) async throws -> String {
         let tester = try await repo.addBetaTester(groupId: betaGroupId, email: email, firstName: firstName, lastName: lastName)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems([tester])
@@ -176,11 +176,11 @@ struct BetaTestersRemove: AsyncParsableCommand {
     var testerId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeTestFlight()
+        let repo = try ClientProvider.makeTestFlightRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any TestFlight) async throws -> String {
+    func execute(repo: any TestFlightRepository) async throws -> String {
         try await repo.removeBetaTester(groupId: betaGroupId, testerId: testerId)
         return "Removed tester \(testerId) from group \(betaGroupId)"
     }
@@ -201,12 +201,12 @@ struct BetaTestersImport: AsyncParsableCommand {
     var file: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeTestFlight()
+        let repo = try ClientProvider.makeTestFlightRepository()
         let content = try String(contentsOfFile: file, encoding: .utf8)
         print(try await execute(repo: repo, csvContent: content))
     }
 
-    func execute(repo: any TestFlight, csvContent: String) async throws -> String {
+    func execute(repo: any TestFlightRepository, csvContent: String) async throws -> String {
         let entries = parseCSV(csvContent)
 
         var added: [BetaTester] = []
@@ -263,11 +263,11 @@ struct BetaTestersExport: AsyncParsableCommand {
     var limit: Int?
 
     func run() async throws {
-        let repo = try ClientProvider.makeTestFlight()
+        let repo = try ClientProvider.makeTestFlightRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any TestFlight) async throws -> String {
+    func execute(repo: any TestFlightRepository) async throws -> String {
         let response = try await repo.listBetaTesters(groupId: betaGroupId, limit: limit)
         return formatCSV(response.data)
     }

@@ -16,11 +16,11 @@ struct VersionsSetBuild: AsyncParsableCommand {
     var buildId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppStoreVersions()
+        let repo = try ClientProvider.makeVersionRepository()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any AppStoreVersions) async throws {
+    func execute(repo: any VersionRepository) async throws {
         try await repo.setBuild(versionId: versionId, buildId: buildId)
     }
 }

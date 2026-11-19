@@ -27,14 +27,14 @@ struct VersionsSubmit: AsyncParsableCommand {
     func run() async throws {
         if withProducts || dryRun {
             let planner = SubmissionPlanner(
-                iapRepo: try ClientProvider.makeInAppPurchases(),
-                groupRepo: try ClientProvider.makeSubscriptionGroups(),
-                subscriptionRepo: try ClientProvider.makeSubscriptions(),
-                productVersionRepo: try ClientProvider.makeProductVersions()
+                iapRepo: try ClientProvider.makeInAppPurchaseRepository(),
+                groupRepo: try ClientProvider.makeSubscriptionGroupRepository(),
+                subscriptionRepo: try ClientProvider.makeSubscriptionRepository(),
+                productVersionRepo: try ClientProvider.makeProductVersionRepository()
             )
             print(try await executeWithProducts(
                 submissionRepo: try ClientProvider.makeReviewSubmissions(),
-                versionRepo: try ClientProvider.makeAppStoreVersions(),
+                versionRepo: try ClientProvider.makeVersionRepository(),
                 planner: planner
             ))
         } else {
@@ -55,7 +55,7 @@ struct VersionsSubmit: AsyncParsableCommand {
 
     func executeWithProducts(
         submissionRepo: any ReviewSubmissions,
-        versionRepo: any AppStoreVersions,
+        versionRepo: any VersionRepository,
         planner: SubmissionPlanner,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {

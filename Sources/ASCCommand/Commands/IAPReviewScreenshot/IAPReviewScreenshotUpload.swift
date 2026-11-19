@@ -17,12 +17,12 @@ struct IAPReviewScreenshotUpload: AsyncParsableCommand {
     var file: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchaseReviewAssets()
+        let repo = try ClientProvider.makeInAppPurchaseReviewRepository()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any InAppPurchaseReviewAssets,
+        repo: any InAppPurchaseReviewRepository,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let url = URL(fileURLWithPath: file)

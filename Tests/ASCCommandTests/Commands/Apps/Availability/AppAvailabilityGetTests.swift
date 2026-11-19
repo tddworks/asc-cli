@@ -7,7 +7,7 @@ import Testing
 struct AppAvailabilityGetTests {
 
     @Test func `get app availability shows per-territory status with content reasons`() async throws {
-        let mockRepo = MockAppAvailabilities()
+        let mockRepo = MockAppAvailabilityRepository()
         given(mockRepo).getAppAvailability(appId: .any)
             .willReturn(AppAvailability(
                 id: "avail-1",
@@ -74,7 +74,7 @@ struct AppAvailabilityGetTests {
     }
 
     @Test func `an app with no availability set up shows no data`() async throws {
-        let mockRepo = MockAppAvailabilities()
+        let mockRepo = MockAppAvailabilityRepository()
         given(mockRepo).getAppAvailability(appId: .any).willReturn(nil)
 
         let output = try await AppAvailabilityGet.parse(["--app-id", "app-42", "--pretty"]).execute(repo: mockRepo)

@@ -5,7 +5,7 @@ import HummingbirdWebSocket
 
 /// Routes that return `AgeRatingDeclaration` resources.
 struct AgeRatingController: Sendable {
-    let repo: any AgeRatingDeclarations
+    let repo: any AgeRatingDeclarationRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         // Canonical nested path matches the resolver's `_links.getAgeRating`.

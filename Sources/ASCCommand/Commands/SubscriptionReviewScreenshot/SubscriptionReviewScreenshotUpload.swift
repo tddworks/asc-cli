@@ -17,12 +17,12 @@ struct SubscriptionReviewScreenshotUpload: AsyncParsableCommand {
     var file: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptionReviewAssets()
+        let repo = try ClientProvider.makeSubscriptionReviewRepository()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any SubscriptionReviewAssets,
+        repo: any SubscriptionReviewRepository,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let url = URL(fileURLWithPath: file)

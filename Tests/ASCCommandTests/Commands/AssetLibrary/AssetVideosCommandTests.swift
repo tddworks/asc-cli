@@ -8,7 +8,7 @@ import Testing
 struct AssetVideosCommandTests {
 
     @Test func `should list the library's videos with their preview frame and what can be done with each`() async throws {
-        let mockRepo = MockLibraryVideos()
+        let mockRepo = MockLibraryVideoRepository()
         given(mockRepo).listVideos(libraryId: .value("lib-1"), videoId: .value(nil), state: .value(nil), category: .value(nil)).willReturn([
             LibraryVideo(id: "vid-1", libraryId: "lib-1", fileName: "preview.mp4", fileSize: 10,
                          category: .appScreenshotsAndPreviews, state: .prepareForSubmission,
@@ -43,7 +43,7 @@ struct AssetVideosCommandTests {
     }
 
     @Test func `should upload the video with its preview frame and wait until App Store Connect has processed it`() async throws {
-        let mockRepo = MockLibraryVideos()
+        let mockRepo = MockLibraryVideoRepository()
         given(mockRepo).uploadVideo(libraryId: .value("lib-1"), fileURL: .any, category: .value(.appScreenshotsAndPreviews),
                                     referenceName: .value("Fall"), previewFrameTimeCode: .value("00:00:05:00"))
             .willReturn(LibraryVideo(id: "vid-1", libraryId: "lib-1", fileName: "p.mp4", fileSize: 9, category: .appScreenshotsAndPreviews, state: .uploadComplete))
@@ -60,7 +60,7 @@ struct AssetVideosCommandTests {
     }
 
     @Test func `should archive an approved video`() async throws {
-        let mockRepo = MockLibraryVideos()
+        let mockRepo = MockLibraryVideoRepository()
         given(mockRepo).updateVideo(libraryId: .value("lib-1"), videoId: .value("vid-1"), referenceName: .value(nil), isArchived: .value(true))
             .willReturn(LibraryVideo(id: "vid-1", libraryId: "lib-1", fileName: "p.mp4", fileSize: 9, category: .appScreenshotsAndPreviews, state: .archived))
 
@@ -77,7 +77,7 @@ struct AssetVideosCommandTests {
     }
 
     @Test func `should report App Store Connect's refusal to delete a video that is still placed`() async throws {
-        let mockRepo = MockLibraryVideos()
+        let mockRepo = MockLibraryVideoRepository()
         given(mockRepo).deleteVideo(videoId: .value("vid-1")).willThrow(APIError.unknown("STATE_ERROR.ASSET_HAS_PLACEMENTS"))
 
         let cmd = try AssetVideosDelete.parse(["--video-id", "vid-1"])

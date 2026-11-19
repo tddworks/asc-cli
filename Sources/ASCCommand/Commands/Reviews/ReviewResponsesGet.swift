@@ -13,11 +13,11 @@ struct ReviewResponsesGet: AsyncParsableCommand {
     var reviewId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeCustomerReviews()
+        let repo = try ClientProvider.makeCustomerReviewRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any CustomerReviews) async throws -> String {
+    func execute(repo: any CustomerReviewRepository) async throws -> String {
         let response = try await repo.getResponse(reviewId: reviewId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

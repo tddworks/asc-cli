@@ -11,7 +11,7 @@ private func makeTreatment(id: String = "trt-1", experimentId: String = "exp-1",
 struct ExperimentTreatmentsListTests {
 
     @Test func `listed treatments show icon name and localization affordances`() async throws {
-        let mockRepo = MockExperiments()
+        let mockRepo = MockExperimentRepository()
         given(mockRepo).listTreatments(experimentId: .any, limit: .any)
             .willReturn(PaginatedResponse(data: [makeTreatment()], nextCursor: nil))
 
@@ -45,7 +45,7 @@ struct ExperimentTreatmentsListTests {
 struct ExperimentTreatmentsCreateTests {
 
     @Test func `create passes name and icon and shows the new treatment`() async throws {
-        let mockRepo = MockExperiments()
+        let mockRepo = MockExperimentRepository()
         given(mockRepo).createTreatment(experimentId: .any, name: .any, appIconName: .any).willReturn(makeTreatment())
 
         let cmd = try ExperimentTreatmentsCreate.parse([
@@ -65,7 +65,7 @@ struct ExperimentTreatmentsCreateTests {
 struct ExperimentTreatmentsUpdateTests {
 
     @Test func `update forwards only the provided fields`() async throws {
-        let mockRepo = MockExperiments()
+        let mockRepo = MockExperimentRepository()
         given(mockRepo).updateTreatment(treatmentId: .any, name: .any, appIconName: .any).willReturn(makeTreatment())
 
         let cmd = try ExperimentTreatmentsUpdate.parse(["--treatment-id", "trt-1", "--name", "Red icon"])
@@ -75,7 +75,7 @@ struct ExperimentTreatmentsUpdateTests {
     }
 
     @Test func `update requires at least one field`() async throws {
-        let mockRepo = MockExperiments()
+        let mockRepo = MockExperimentRepository()
         let cmd = try ExperimentTreatmentsUpdate.parse(["--treatment-id", "trt-1"])
         await #expect(throws: (any Error).self) {
             try await cmd.execute(repo: mockRepo)
@@ -87,7 +87,7 @@ struct ExperimentTreatmentsUpdateTests {
 struct ExperimentTreatmentsDeleteTests {
 
     @Test func `delete calls the repository with the treatment id`() async throws {
-        let mockRepo = MockExperiments()
+        let mockRepo = MockExperimentRepository()
         given(mockRepo).deleteTreatment(treatmentId: .any).willReturn(())
 
         let cmd = try ExperimentTreatmentsDelete.parse(["--treatment-id", "trt-1"])

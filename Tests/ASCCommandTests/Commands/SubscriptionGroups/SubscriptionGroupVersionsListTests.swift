@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionGroupVersionsListTests {
 
     @Test func `listed subscription group versions show the command to add them to a submission`() async throws {
-        let mockRepo = MockProductVersions()
+        let mockRepo = MockProductVersionRepository()
         given(mockRepo).listSubscriptionGroupVersions(groupId: .value("grp-1")).willReturn([
             ProductVersion(id: "gv-1", productId: "grp-1", kind: .subscriptionGroup, version: 1, state: .prepareForSubmission),
         ])

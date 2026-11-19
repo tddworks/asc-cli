@@ -10,7 +10,7 @@ import Testing
 struct ScreenshotDeleteRoutesTests {
 
     @Test func `should confirm the screenshot was deleted over REST`() async throws {
-        let repo = MockAppScreenshots()
+        let repo = MockScreenshotRepository()
         given(repo).deleteScreenshot(screenshotId: .value("shot-1")).willReturn()
 
         let (status, body) = try await Self.delete("/api/v1/screenshots/shot-1") {
@@ -22,7 +22,7 @@ struct ScreenshotDeleteRoutesTests {
     }
 
     @Test func `should confirm the screenshot set was deleted over REST`() async throws {
-        let repo = MockAppScreenshots()
+        let repo = MockScreenshotRepository()
         given(repo).deleteScreenshotSet(setId: .value("set-1")).willReturn()
 
         let (status, body) = try await Self.delete("/api/v1/screenshot-sets/set-1") {

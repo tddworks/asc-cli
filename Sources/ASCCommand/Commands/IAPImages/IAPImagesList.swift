@@ -13,12 +13,12 @@ struct IAPImagesList: AsyncParsableCommand {
     var iapId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchaseReviewAssets()
+        let repo = try ClientProvider.makeInAppPurchaseReviewRepository()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any InAppPurchaseReviewAssets,
+        repo: any InAppPurchaseReviewRepository,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let items = try await repo.listImages(iapId: iapId)

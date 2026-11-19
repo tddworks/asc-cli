@@ -36,11 +36,11 @@ struct XcodeCloudProductsList: AsyncParsableCommand {
     var appId: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeXcodeCloudProducts()
+        let repo = try ClientProvider.makeXcodeCloudProductRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any XcodeCloudProducts) async throws -> String {
+    func execute(repo: any XcodeCloudProductRepository) async throws -> String {
         let products = try await repo.listProducts(appId: appId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
@@ -73,11 +73,11 @@ struct XcodeCloudWorkflowsList: AsyncParsableCommand {
     var productId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeXcodeCloudWorkflows()
+        let repo = try ClientProvider.makeXcodeCloudWorkflowRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any XcodeCloudWorkflows) async throws -> String {
+    func execute(repo: any XcodeCloudWorkflowRepository) async throws -> String {
         let workflows = try await repo.listWorkflows(productId: productId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
@@ -114,11 +114,11 @@ struct XcodeCloudBuildsList: AsyncParsableCommand {
     var workflowId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeXcodeCloudBuildRuns()
+        let repo = try ClientProvider.makeXcodeCloudBuildRunRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any XcodeCloudBuildRuns) async throws -> String {
+    func execute(repo: any XcodeCloudBuildRunRepository) async throws -> String {
         let runs = try await repo.listBuildRuns(workflowId: workflowId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
@@ -141,11 +141,11 @@ struct XcodeCloudBuildsGet: AsyncParsableCommand {
     var buildRunId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeXcodeCloudBuildRuns()
+        let repo = try ClientProvider.makeXcodeCloudBuildRunRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any XcodeCloudBuildRuns) async throws -> String {
+    func execute(repo: any XcodeCloudBuildRunRepository) async throws -> String {
         let run = try await repo.getBuildRun(id: buildRunId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
@@ -171,11 +171,11 @@ struct XcodeCloudBuildsStart: AsyncParsableCommand {
     var clean: Bool = false
 
     func run() async throws {
-        let repo = try ClientProvider.makeXcodeCloudBuildRuns()
+        let repo = try ClientProvider.makeXcodeCloudBuildRunRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any XcodeCloudBuildRuns) async throws -> String {
+    func execute(repo: any XcodeCloudBuildRunRepository) async throws -> String {
         let run = try await repo.startBuildRun(workflowId: workflowId, clean: clean)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

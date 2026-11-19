@@ -7,8 +7,8 @@ import Testing
 struct GameCenterControllerTests {
 
     /// Stubs App Store Connect so the created achievement echoes what it was sent.
-    private func achievementEchoingRepo() -> MockGameCenter {
-        let mockRepo = MockGameCenter()
+    private func achievementEchoingRepo() -> MockGameCenterRepository {
+        let mockRepo = MockGameCenterRepository()
         given(mockRepo).createAchievement(
             gameCenterDetailId: .any, referenceName: .any, vendorIdentifier: .any,
             points: .any, isShowBeforeEarned: .any, isRepeatable: .any
@@ -23,8 +23,8 @@ struct GameCenterControllerTests {
     }
 
     /// Stubs App Store Connect so the created leaderboard echoes what it was sent.
-    private func leaderboardEchoingRepo() -> MockGameCenter {
-        let mockRepo = MockGameCenter()
+    private func leaderboardEchoingRepo() -> MockGameCenterRepository {
+        let mockRepo = MockGameCenterRepository()
         given(mockRepo).createLeaderboard(
             gameCenterDetailId: .any, referenceName: .any, vendorIdentifier: .any,
             scoreSortType: .any, submissionType: .any
@@ -76,7 +76,7 @@ struct GameCenterControllerTests {
             _ = try await GameCenterController.createAchievement(
                 detailId: "gc-1",
                 json: ["referenceName": "First Win", "vendorIdentifier": "com.example.first-win"],
-                repo: MockGameCenter()
+                repo: MockGameCenterRepository()
             )
         }
     }
@@ -119,7 +119,7 @@ struct GameCenterControllerTests {
             _ = try await GameCenterController.createLeaderboard(
                 detailId: "gc-1",
                 json: ["referenceName": "All Time High", "vendorIdentifier": "com.example.high-score", "scoreSortType": "SIDEWAYS"],
-                repo: MockGameCenter()
+                repo: MockGameCenterRepository()
             )
         }
     }
@@ -132,7 +132,7 @@ struct GameCenterControllerTests {
                     "referenceName": "All Time High", "vendorIdentifier": "com.example.high-score",
                     "scoreSortType": "DESC", "submissionType": "AVERAGE_SCORE",
                 ],
-                repo: MockGameCenter()
+                repo: MockGameCenterRepository()
             )
         }
     }

@@ -7,7 +7,7 @@ import Testing
 struct BuildsUploadsGetTests {
 
     @Test func `execute returns upload with affordances`() async throws {
-        let mockRepo = MockBuildUploads()
+        let mockRepo = MockBuildUploadRepository()
         given(mockRepo).getBuildUpload(id: .any)
             .willReturn(BuildUpload(id: "up-1", appId: "app-1", version: "2.0", buildNumber: "55", platform: .iOS, state: .complete))
 
@@ -35,7 +35,7 @@ struct BuildsUploadsGetTests {
     }
 
     @Test func `table output includes id version build and state`() async throws {
-        let mockRepo = MockBuildUploads()
+        let mockRepo = MockBuildUploadRepository()
         given(mockRepo).getBuildUpload(id: .any)
             .willReturn(BuildUpload(id: "up-1", appId: "app-1", version: "1.0", buildNumber: "10", platform: .macOS, state: .processing))
 

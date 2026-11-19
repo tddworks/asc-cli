@@ -7,7 +7,7 @@ import Testing
 struct BetaAppLocalizationsListTests {
 
     @Test func `listed beta app localizations show appId, locale, description and affordances`() async throws {
-        let mockRepo = MockBetaAppLocalizations()
+        let mockRepo = MockBetaAppLocalizationRepository()
         given(mockRepo).listBetaAppLocalizations(appId: .any)
             .willReturn([
                 BetaAppLocalization(

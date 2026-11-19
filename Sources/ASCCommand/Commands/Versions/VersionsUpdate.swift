@@ -25,11 +25,11 @@ struct VersionsUpdate: AsyncParsableCommand {
     var earliestReleaseDate: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppStoreVersions()
+        let repo = try ClientProvider.makeVersionRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AppStoreVersions, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any VersionRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let updated = try await repo.updateVersion(
             id: versionId,
             versionString: version,

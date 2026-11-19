@@ -41,11 +41,11 @@ struct SubscriptionsUpdate: AsyncParsableCommand {
     var marketSetting: [SubscriptionMarketSetting] = []
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptions()
+        let repo = try ClientProvider.makeSubscriptionRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any Subscriptions) async throws -> String {
+    func execute(repo: any SubscriptionRepository) async throws -> String {
         let isFamilySharable: Bool? = familySharable ? true : (notFamilySharable ? false : nil)
         let item = try await repo.updateSubscription(
             subscriptionId: subscriptionId,

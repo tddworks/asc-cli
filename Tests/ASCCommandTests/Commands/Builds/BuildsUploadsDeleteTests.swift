@@ -12,7 +12,7 @@ struct BuildsUploadsDeleteTests {
     }
 
     @Test func `execute deletes upload record`() async throws {
-        let mockRepo = MockBuildUploads()
+        let mockRepo = MockBuildUploadRepository()
         given(mockRepo).deleteBuildUpload(id: .any).willReturn()
 
         let cmd = try BuildsUploadsDelete.parse(["--upload-id", "up-42"])

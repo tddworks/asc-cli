@@ -32,7 +32,7 @@ extension AppCategory: AffordanceProviding {
 }
 
 @Mockable
-public protocol AppCategories: Sendable {
+public protocol AppCategoryRepository: Sendable {
     func listCategories(platform: String?) async throws -> [AppCategory]
     func getCategory(id: String) async throws -> AppCategory
 }

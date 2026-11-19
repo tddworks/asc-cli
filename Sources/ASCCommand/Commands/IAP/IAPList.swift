@@ -16,11 +16,11 @@ struct IAPList: AsyncParsableCommand {
     var limit: Int?
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchases()
+        let repo = try ClientProvider.makeInAppPurchaseRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any InAppPurchases, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any InAppPurchaseRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let response = try await repo.listInAppPurchases(appId: appId, limit: limit)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(response.data, affordanceMode: affordanceMode)

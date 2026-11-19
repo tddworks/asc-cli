@@ -75,16 +75,16 @@ extension PlannedReviewItem: Presentable {
 /// subscription that is `READY_TO_SUBMIT` and has a submittable version, plus
 /// the version of each subscription group one of them belongs to.
 public struct SubmissionPlanner: Sendable {
-    let iapRepo: any InAppPurchases
-    let groupRepo: any SubscriptionGroups
-    let subscriptionRepo: any Subscriptions
-    let productVersionRepo: any ProductVersions
+    let iapRepo: any InAppPurchaseRepository
+    let groupRepo: any SubscriptionGroupRepository
+    let subscriptionRepo: any SubscriptionRepository
+    let productVersionRepo: any ProductVersionRepository
 
     public init(
-        iapRepo: any InAppPurchases,
-        groupRepo: any SubscriptionGroups,
-        subscriptionRepo: any Subscriptions,
-        productVersionRepo: any ProductVersions
+        iapRepo: any InAppPurchaseRepository,
+        groupRepo: any SubscriptionGroupRepository,
+        subscriptionRepo: any SubscriptionRepository,
+        productVersionRepo: any ProductVersionRepository
     ) {
         self.iapRepo = iapRepo
         self.groupRepo = groupRepo

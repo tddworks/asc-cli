@@ -12,7 +12,7 @@ struct ReviewResponsesDeleteTests {
     }
 
     @Test func `delete response calls repository`() async throws {
-        let mockRepo = MockCustomerReviews()
+        let mockRepo = MockCustomerReviewRepository()
         given(mockRepo).deleteResponse(responseId: .any).willReturn(())
 
         let cmd = try ReviewResponsesDelete.parse(["--response-id", "resp-1"])

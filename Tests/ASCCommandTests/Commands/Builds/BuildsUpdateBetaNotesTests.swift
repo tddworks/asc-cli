@@ -7,7 +7,7 @@ import Testing
 struct BuildsUpdateBetaNotesTests {
 
     @Test func `execute returns localization with notes`() async throws {
-        let mockRepo = MockBetaBuildLocalizations()
+        let mockRepo = MockBetaBuildLocalizationRepository()
         given(mockRepo).upsertBetaBuildLocalization(buildId: .any, locale: .any, whatsNew: .any)
             .willReturn(BetaBuildLocalization(id: "bbl-1", buildId: "build-1", locale: "en-US", whatsNew: "Bug fixes"))
 
@@ -32,7 +32,7 @@ struct BuildsUpdateBetaNotesTests {
     }
 
     @Test func `table output includes locale and notes fields`() async throws {
-        let mockRepo = MockBetaBuildLocalizations()
+        let mockRepo = MockBetaBuildLocalizationRepository()
         given(mockRepo).upsertBetaBuildLocalization(buildId: .any, locale: .any, whatsNew: .any)
             .willReturn(BetaBuildLocalization(id: "bbl-1", buildId: "build-1", locale: "en-US", whatsNew: "New feature"))
 

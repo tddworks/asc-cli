@@ -13,11 +13,11 @@ struct ScreenshotsDelete: AsyncParsableCommand {
     var screenshotId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppScreenshots()
+        let repo = try ClientProvider.makeScreenshotRepository()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any AppScreenshots) async throws {
+    func execute(repo: any ScreenshotRepository) async throws {
         try await repo.deleteScreenshot(screenshotId: screenshotId)
     }
 }

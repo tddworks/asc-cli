@@ -97,7 +97,7 @@ Sources/
 │   ├── IrisAuthCredentials.swift                    appleId, password
 │   ├── IrisAuthSession.swift                        cookies, scnt, serviceKey, appleIDSessionID, providerID, teamId, userEmail, expiresAt
 │   ├── IrisSignIn.swift                     @Mockable: login, requestTwoFactorCode, submitTwoFactorCode, logout
-│   ├── IrisSessions.swift                     @Mockable: save(IrisAuthSession), load() throws -> IrisAuthSession?, clear()
+│   ├── IrisSessionRepository.swift                     @Mockable: save(IrisAuthSession), load() throws -> IrisAuthSession?, clear()
 │   ├── IrisAuthError.swift                          invalidCredentials, twoFactorRequired, twoFactorRejected, applePromptRequired, networkError
 │   ├── TwoFactorChallenge.swift                     method (trustedDevice/phone), maskedDestination, codeLength
 │   └── PendingTwoFactorState.swift                  serialized partial session: scnt, serviceKey, appleIDSessionID, twoFactorCookieBag
@@ -109,10 +109,10 @@ Sources/
 │   ├── IdmsaAPIClient.swift                         HTTP for idmsa.apple.com (signin/init, signin/complete, verify/<method>/securitycode, 2sv/trust); cookie jar & header threading
 │   ├── OlympusClient.swift                          olympus/v1/session for team metadata
 │   ├── IrisSDKSignIn.swift                  implements `ASCKit.IrisSignIn`; composes AppleSRPClient + IdmsaAPIClient + OlympusClient
-│   ├── KeychainIrisSessionRepository.swift             implements `ASCKit.IrisSessions` via macOS Keychain (Security framework)
-│   ├── FileIrisSessions.swift                 implements `ASCKit.IrisSessions` via `~/.asc/iris/session.json`, written with `0600`
-│   ├── CompositeIrisSessionRepository.swift            implements `ASCKit.IrisSessions` by trying Keychain first, falling back to file (so macOS gets keychain protection, Linux silently falls through)
-│   ├── KeychainIrisCookieProvider.swift             implements existing `ASCKit.IrisCookieProvider`; reads from any `IrisSessions`
+│   ├── KeychainIrisSessionRepository.swift             implements `ASCKit.IrisSessionRepository` via macOS Keychain (Security framework)
+│   ├── FileIrisSessionRepository.swift                 implements `ASCKit.IrisSessionRepository` via `~/.asc/iris/session.json`, written with `0600`
+│   ├── CompositeIrisSessionRepository.swift            implements `ASCKit.IrisSessionRepository` by trying Keychain first, falling back to file (so macOS gets keychain protection, Linux silently falls through)
+│   ├── KeychainIrisCookieProvider.swift             implements existing `ASCKit.IrisCookieProvider`; reads from any `IrisSessionRepository`
 │   └── CompositeIrisCookieProvider.swift            implements `ASCKit.IrisCookieProvider`; resolution order env → stored → browser
 │
 └── ASCCommand/Commands/Iris/Auth/                   (new — CLI)

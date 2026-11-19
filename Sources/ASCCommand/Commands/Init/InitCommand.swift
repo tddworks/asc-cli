@@ -29,13 +29,13 @@ struct InitCommand: AsyncParsableCommand {
     var contactEmail: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeApps()
+        let repo = try ClientProvider.makeAppRepository()
         let storage = ClientProvider.makeProjectConfigStorage()
         print(try await execute(repo: repo, storage: storage))
     }
 
     func execute(
-        repo: any Apps,
+        repo: any AppRepository,
         storage: any ProjectConfigStorage,
         bundleIdScanner: (String) -> [String] = { XcodeProjectScanner.scan(directory: $0) }
     ) async throws -> String {

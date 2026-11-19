@@ -4,7 +4,7 @@ import HummingbirdWebSocket
 
 /// Routes that return the manual price schedule for an in-app purchase.
 struct IAPPriceScheduleController: Sendable {
-    let repo: any InAppPurchasePrices
+    let repo: any InAppPurchasePriceRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/iap/:iapId/price-schedule") { _, context -> Response in

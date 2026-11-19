@@ -5,7 +5,7 @@ import HummingbirdWebSocket
 
 /// Routes that return `App` resources.
 struct AppsController: Sendable {
-    let repo: any Apps
+    let repo: any AppRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/apps") { request, _ -> Response in
@@ -43,7 +43,7 @@ struct AppsController: Sendable {
 
     /// Load apps and, when requested, enrich each one with its icon asset.
     /// Icon fetch is parallel across apps; nil icons are tolerated.
-    static func loadApps(repo: any Apps, includeIcon: Bool) async throws -> [App] {
+    static func loadApps(repo: any AppRepository, includeIcon: Bool) async throws -> [App] {
         let apps = try await repo.listApps(limit: nil).data
         guard includeIcon else { return apps }
 

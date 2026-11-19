@@ -1,6 +1,6 @@
 @preconcurrency import AppStoreConnect_Swift_SDK
 
-public struct SDKApps: Apps, @unchecked Sendable {
+public struct SDKAppRepository: AppRepository, @unchecked Sendable {
     private let client: any APIClient
 
     public init(client: any APIClient) {

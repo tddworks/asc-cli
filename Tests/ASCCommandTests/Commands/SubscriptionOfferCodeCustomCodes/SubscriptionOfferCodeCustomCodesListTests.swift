@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionOfferCodeCustomCodesListTests {
 
     @Test func `listed custom codes include customCode numberOfCodes and affordances`() async throws {
-        let mockRepo = MockSubscriptionOfferCodes()
+        let mockRepo = MockSubscriptionOfferCodeRepository()
         given(mockRepo).listCustomCodes(offerCodeId: .any)
             .willReturn([
                 SubscriptionOfferCodeCustomCode(
@@ -31,7 +31,7 @@ struct SubscriptionOfferCodeCustomCodesListTests {
     }
 
     @Test func `table output includes all row fields`() async throws {
-        let mockRepo = MockSubscriptionOfferCodes()
+        let mockRepo = MockSubscriptionOfferCodeRepository()
         given(mockRepo).listCustomCodes(offerCodeId: .any)
             .willReturn([
                 SubscriptionOfferCodeCustomCode(

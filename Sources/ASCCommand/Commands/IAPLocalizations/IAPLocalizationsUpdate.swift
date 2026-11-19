@@ -19,11 +19,11 @@ struct IAPLocalizationsUpdate: AsyncParsableCommand {
     var description: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchaseLocalizations()
+        let repo = try ClientProvider.makeInAppPurchaseLocalizationRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any InAppPurchaseLocalizations) async throws -> String {
+    func execute(repo: any InAppPurchaseLocalizationRepository) async throws -> String {
         let item = try await repo.updateLocalization(
             localizationId: localizationId,
             name: name,

@@ -25,11 +25,11 @@ struct UserInvitationsInvite: AsyncParsableCommand {
     var allAppsVisible: Bool = false
 
     func run() async throws {
-        let repo = try ClientProvider.makeUsers()
+        let repo = try ClientProvider.makeUserRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any Users) async throws -> String {
+    func execute(repo: any UserRepository) async throws -> String {
         let domainRoles = try role.map { raw -> UserRole in
             guard let r = UserRole(cliArgument: raw) else {
                 throw ValidationError("Invalid role '\(raw)'. Valid values: \(UserRole.allCases.map(\.rawValue).joined(separator: ", "))")

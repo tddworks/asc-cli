@@ -35,8 +35,8 @@ struct ScreenshotsImportTests {
     // MARK: - Output format
 
     @Test func `import uploads screenshots and returns results`() async throws {
-        let mockLocRepo = MockVersionLocalizations()
-        let mockSsRepo = MockAppScreenshots()
+        let mockLocRepo = MockVersionLocalizationRepository()
+        let mockSsRepo = MockScreenshotRepository()
         given(mockLocRepo).listLocalizations(versionId: .any).willReturn([
             AppStoreVersionLocalization(id: "loc-1", versionId: "v1", locale: "en-US"),
         ])
@@ -76,8 +76,8 @@ struct ScreenshotsImportTests {
     // MARK: - Find-or-create localization
 
     @Test func `import reuses existing localization when locale matches`() async throws {
-        let mockLocRepo = MockVersionLocalizations()
-        let mockSsRepo = MockAppScreenshots()
+        let mockLocRepo = MockVersionLocalizationRepository()
+        let mockSsRepo = MockScreenshotRepository()
         given(mockLocRepo).listLocalizations(versionId: .any).willReturn([
             AppStoreVersionLocalization(id: "loc-existing", versionId: "v1", locale: "en-US"),
         ])
@@ -101,8 +101,8 @@ struct ScreenshotsImportTests {
     }
 
     @Test func `import creates localization when locale is not found`() async throws {
-        let mockLocRepo = MockVersionLocalizations()
-        let mockSsRepo = MockAppScreenshots()
+        let mockLocRepo = MockVersionLocalizationRepository()
+        let mockSsRepo = MockScreenshotRepository()
         given(mockLocRepo).listLocalizations(versionId: .any).willReturn([])
         given(mockLocRepo).createLocalization(versionId: .any, locale: .any)
             .willReturn(AppStoreVersionLocalization(id: "loc-new", versionId: "v1", locale: "ja"))
@@ -128,8 +128,8 @@ struct ScreenshotsImportTests {
     // MARK: - Find-or-create screenshot set
 
     @Test func `import reuses existing screenshot set when display type matches`() async throws {
-        let mockLocRepo = MockVersionLocalizations()
-        let mockSsRepo = MockAppScreenshots()
+        let mockLocRepo = MockVersionLocalizationRepository()
+        let mockSsRepo = MockScreenshotRepository()
         given(mockLocRepo).listLocalizations(versionId: .any).willReturn([
             AppStoreVersionLocalization(id: "loc-1", versionId: "v1", locale: "en-US"),
         ])
@@ -153,8 +153,8 @@ struct ScreenshotsImportTests {
     }
 
     @Test func `table output includes all row fields`() async throws {
-        let mockLocRepo = MockVersionLocalizations()
-        let mockSsRepo = MockAppScreenshots()
+        let mockLocRepo = MockVersionLocalizationRepository()
+        let mockSsRepo = MockScreenshotRepository()
         given(mockLocRepo).listLocalizations(versionId: .any).willReturn([
             AppStoreVersionLocalization(id: "loc-1", versionId: "v1", locale: "en-US"),
         ])
@@ -179,8 +179,8 @@ struct ScreenshotsImportTests {
     }
 
     @Test func `import creates screenshot set when display type is not found`() async throws {
-        let mockLocRepo = MockVersionLocalizations()
-        let mockSsRepo = MockAppScreenshots()
+        let mockLocRepo = MockVersionLocalizationRepository()
+        let mockSsRepo = MockScreenshotRepository()
         given(mockLocRepo).listLocalizations(versionId: .any).willReturn([
             AppStoreVersionLocalization(id: "loc-1", versionId: "v1", locale: "en-US"),
         ])

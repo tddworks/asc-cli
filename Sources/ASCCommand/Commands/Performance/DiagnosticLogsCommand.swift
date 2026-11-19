@@ -22,11 +22,11 @@ struct DiagnosticLogsList: AsyncParsableCommand {
     var signatureId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeDiagnostics()
+        let repo = try ClientProvider.makeDiagnosticsRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any Diagnostics, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any DiagnosticsRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let logs = try await repo.listLogs(signatureId: signatureId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(logs, affordanceMode: affordanceMode)

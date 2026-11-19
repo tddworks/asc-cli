@@ -4,7 +4,7 @@ import HummingbirdWebSocket
 
 /// Routes that return `AppCategory` resources.
 struct AppCategoriesController: Sendable {
-    let repo: any AppCategories
+    let repo: any AppCategoryRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/app-categories") { request, _ -> Response in

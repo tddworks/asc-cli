@@ -4,7 +4,7 @@ import HummingbirdWebSocket
 
 /// Routes that return TestFlight `BetaGroup` resources.
 struct TestFlightController: Sendable {
-    let repo: any TestFlight
+    let repo: any TestFlightRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.get("/apps/:appId/testflight") { _, context -> Response in

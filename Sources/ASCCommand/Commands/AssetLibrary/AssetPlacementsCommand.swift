@@ -41,11 +41,11 @@ struct AssetPlacementsList: AsyncParsableCommand {
     }
 
     func run() async throws {
-        let repo = try ClientProvider.makeAssetPlacements()
+        let repo = try ClientProvider.makeAssetPlacementRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AssetPlacements, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any AssetPlacementRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let placements: [AssetPlacement]
         if let (surface, localizationId) = surface.selected {
             placements = try await repo.listPlacements(
@@ -91,11 +91,11 @@ struct AssetPlacementsCreate: AsyncParsableCommand {
     }
 
     func run() async throws {
-        let repo = try ClientProvider.makeAssetPlacements()
+        let repo = try ClientProvider.makeAssetPlacementRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AssetPlacements, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any AssetPlacementRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         guard let (surface, localizationId) = surface.selected else { throw ValidationError("Pass a localization") }
         let (mediaType, assetId): (AssetMediaType, String) = videoId.map { (.video, $0) } ?? (.image, imageId ?? "")
         let placement = try await repo.createPlacement(
@@ -119,11 +119,11 @@ struct AssetPlacementsDelete: AsyncParsableCommand {
     var placementId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAssetPlacements()
+        let repo = try ClientProvider.makeAssetPlacementRepository()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any AssetPlacements) async throws {
+    func execute(repo: any AssetPlacementRepository) async throws {
         try await repo.deletePlacement(placementId: placementId)
     }
 }
@@ -148,11 +148,11 @@ struct AssetPlacementsReorder: AsyncParsableCommand {
     }
 
     func run() async throws {
-        let repo = try ClientProvider.makeAssetPlacements()
+        let repo = try ClientProvider.makeAssetPlacementRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AssetPlacements, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any AssetPlacementRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let ids = placementIds.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
         guard let (surface, localizationId) = surface.selected else { throw ValidationError("Pass a localization") }
         let placements = try await repo.reorderPlacements(

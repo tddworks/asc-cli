@@ -150,7 +150,7 @@ struct AppShotsThemesApplyDesign: AsyncParsableCommand {
     var canvasHeight: Int = 2868
 
     func run() async throws {
-        let templateRepo = ClientProvider.makeTemplates()
+        let templateRepo = ClientProvider.makeTemplateRepository()
         if preview == .image {
             let renderer = ClientProvider.makeHTMLRenderer()
             print(try await execute(templateRepo: templateRepo, renderer: renderer))
@@ -159,7 +159,7 @@ struct AppShotsThemesApplyDesign: AsyncParsableCommand {
         }
     }
 
-    func execute(templateRepo: any Templates, renderer: (any HTMLRenderer)? = nil) async throws -> String {
+    func execute(templateRepo: any TemplateRepository, renderer: (any HTMLRenderer)? = nil) async throws -> String {
         let designData = try Data(contentsOf: URL(fileURLWithPath: design))
         let themeDesign = try JSONDecoder().decode(ThemeDesign.self, from: designData)
 
@@ -237,7 +237,7 @@ struct AppShotsThemesApply: AsyncParsableCommand {
 
     func run() async throws {
         let themeRepo = ClientProvider.makeThemes()
-        let templateRepo = ClientProvider.makeTemplates()
+        let templateRepo = ClientProvider.makeTemplateRepository()
         if preview == .image {
             let renderer = ClientProvider.makeHTMLRenderer()
             print(try await execute(themeRepo: themeRepo, templateRepo: templateRepo, renderer: renderer))
@@ -246,7 +246,7 @@ struct AppShotsThemesApply: AsyncParsableCommand {
         }
     }
 
-    func execute(themeRepo: any Themes, templateRepo: any Templates, renderer: (any HTMLRenderer)? = nil) async throws -> String {
+    func execute(themeRepo: any Themes, templateRepo: any TemplateRepository, renderer: (any HTMLRenderer)? = nil) async throws -> String {
         guard let tmpl = try await templateRepo.getTemplate(id: template) else {
             throw ValidationError("Template '\(template)' not found. Run `asc app-shots templates list` to see available templates.")
         }

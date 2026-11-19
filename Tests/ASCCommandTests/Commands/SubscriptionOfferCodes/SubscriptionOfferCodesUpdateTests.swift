@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionOfferCodesUpdateTests {
 
     @Test func `deactivates offer code and returns updated result`() async throws {
-        let mockRepo = MockSubscriptionOfferCodes()
+        let mockRepo = MockSubscriptionOfferCodeRepository()
         given(mockRepo).updateOfferCode(offerCodeId: .any, isActive: .any)
             .willReturn(SubscriptionOfferCode(
                 id: "oc-1",
@@ -29,7 +29,7 @@ struct SubscriptionOfferCodesUpdateTests {
     }
 
     @Test func `throws for invalid active value`() async throws {
-        let mockRepo = MockSubscriptionOfferCodes()
+        let mockRepo = MockSubscriptionOfferCodeRepository()
         let cmd = try SubscriptionOfferCodesUpdate.parse(["--offer-code-id", "oc-1", "--active", "maybe"])
         await #expect(throws: (any Error).self) {
             try await cmd.execute(repo: mockRepo)

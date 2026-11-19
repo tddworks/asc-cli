@@ -7,7 +7,7 @@ import Testing
 struct TerritoriesListTests {
 
     @Test func `listed territories show id, currency and affordances`() async throws {
-        let mockRepo = MockTerritories()
+        let mockRepo = MockTerritoryRepository()
         given(mockRepo).listTerritories()
             .willReturn([
                 Territory(id: "USA", currency: "USD"),

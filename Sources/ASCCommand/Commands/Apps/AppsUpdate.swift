@@ -19,11 +19,11 @@ struct AppsUpdate: AsyncParsableCommand {
     var contentRightsDeclaration: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeApps()
+        let repo = try ClientProvider.makeAppRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any Apps, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any AppRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let declaration = try validateDeclaration()
         let updated = try await repo.updateContentRights(appId: appId, declaration: declaration)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)

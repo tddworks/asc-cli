@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionOffersListTests {
 
     @Test func `listed offers include subscriptionId duration mode and affordances`() async throws {
-        let mockRepo = MockSubscriptionIntroductoryOffers()
+        let mockRepo = MockSubscriptionIntroductoryOfferRepository()
         given(mockRepo).listIntroductoryOffers(subscriptionId: .any)
             .willReturn([
                 SubscriptionIntroductoryOffer(
@@ -42,7 +42,7 @@ struct SubscriptionOffersListTests {
     }
 
     @Test func `table output includes all row fields`() async throws {
-        let mockRepo = MockSubscriptionIntroductoryOffers()
+        let mockRepo = MockSubscriptionIntroductoryOfferRepository()
         given(mockRepo).listIntroductoryOffers(subscriptionId: .any)
             .willReturn([
                 SubscriptionIntroductoryOffer(

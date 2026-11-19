@@ -13,8 +13,8 @@ struct CertificatesCreateTests {
     -----END CERTIFICATE REQUEST-----
     """
 
-    private func makeMock(id: String = "cert-1") -> MockCertificates {
-        let mock = MockCertificates()
+    private func makeMock(id: String = "cert-1") -> MockCertificateRepository {
+        let mock = MockCertificateRepository()
         given(mock).createCertificate(certificateType: .any, csrContent: .any).willReturn(
             Certificate(id: id, name: "Mac App Distribution", certificateType: .macAppDistribution)
         )
@@ -86,7 +86,7 @@ struct CertificatesCreateTests {
     @Test func `create with neither flag throws validation error`() async throws {
         let cmd = try CertificatesCreate.parse(["--type", "IOS_DISTRIBUTION"])
         await #expect(throws: (any Error).self) {
-            _ = try await cmd.execute(repo: MockCertificates())
+            _ = try await cmd.execute(repo: MockCertificateRepository())
         }
     }
 
@@ -101,7 +101,7 @@ struct CertificatesCreateTests {
             "--csr-path", tmpFile.path,
         ])
         await #expect(throws: (any Error).self) {
-            _ = try await cmd.execute(repo: MockCertificates())
+            _ = try await cmd.execute(repo: MockCertificateRepository())
         }
     }
 }

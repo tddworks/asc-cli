@@ -11,10 +11,10 @@ struct SubmissionPlannerTests {
     )
 
     private struct Repos {
-        let iaps = MockInAppPurchases()
-        let groups = MockSubscriptionGroups()
-        let subscriptions = MockSubscriptions()
-        let versions = MockProductVersions()
+        let iaps = MockInAppPurchaseRepository()
+        let groups = MockSubscriptionGroupRepository()
+        let subscriptions = MockSubscriptionRepository()
+        let versions = MockProductVersionRepository()
 
         var planner: SubmissionPlanner {
             SubmissionPlanner(iapRepo: iaps, groupRepo: groups, subscriptionRepo: subscriptions, productVersionRepo: versions)

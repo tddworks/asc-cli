@@ -31,11 +31,11 @@ struct PromotedPurchasesCreate: AsyncParsableCommand {
     var disabled: Bool = false
 
     func run() async throws {
-        let repo = try ClientProvider.makePromotedPurchases()
+        let repo = try ClientProvider.makePromotedPurchaseRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any PromotedPurchases) async throws -> String {
+    func execute(repo: any PromotedPurchaseRepository) async throws -> String {
         guard iapId != nil || subscriptionId != nil else {
             throw ValidationError("Either --iap-id or --subscription-id is required")
         }

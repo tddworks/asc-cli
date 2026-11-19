@@ -7,7 +7,7 @@ import Testing
 struct UsersListTests {
 
     @Test func `listed users include roles and affordances`() async throws {
-        let mockRepo = MockUsers()
+        let mockRepo = MockUserRepository()
         given(mockRepo).listUsers(role: .any).willReturn([
             TeamMember(
                 id: "u-1",
@@ -32,7 +32,7 @@ struct UsersListTests {
     }
 
     @Test func `table output includes username and roles`() async throws {
-        let mockRepo = MockUsers()
+        let mockRepo = MockUserRepository()
         given(mockRepo).listUsers(role: .any).willReturn([
             TeamMember(
                 id: "u-1",
@@ -54,7 +54,7 @@ struct UsersListTests {
     }
 
     @Test func `role filter is passed to repository`() async throws {
-        let mockRepo = MockUsers()
+        let mockRepo = MockUserRepository()
         given(mockRepo).listUsers(role: .value(.developer)).willReturn([
             TeamMember(
                 id: "u-2",

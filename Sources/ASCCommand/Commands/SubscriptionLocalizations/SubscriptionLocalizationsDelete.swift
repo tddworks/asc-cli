@@ -13,11 +13,11 @@ struct SubscriptionLocalizationsDelete: AsyncParsableCommand {
     var localizationId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptionLocalizations()
+        let repo = try ClientProvider.makeSubscriptionLocalizationRepository()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any SubscriptionLocalizations) async throws {
+    func execute(repo: any SubscriptionLocalizationRepository) async throws {
         try await repo.deleteLocalization(localizationId: localizationId)
     }
 }

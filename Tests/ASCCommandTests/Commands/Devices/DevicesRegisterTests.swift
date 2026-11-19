@@ -7,7 +7,7 @@ import Testing
 struct DevicesRegisterTests {
 
     @Test func `execute registers device and returns it`() async throws {
-        let mockRepo = MockDevices()
+        let mockRepo = MockDeviceRepository()
         given(mockRepo).registerDevice(name: .any, udid: .any, platform: .any)
             .willReturn(Device(id: "dev-new", name: "My iPhone", udid: "UDID-001", deviceClass: .iPhone, platform: .iOS, status: .enabled))
 
@@ -20,7 +20,7 @@ struct DevicesRegisterTests {
     }
 
     @Test func `execute throws for invalid platform`() async throws {
-        let mockRepo = MockDevices()
+        let mockRepo = MockDeviceRepository()
         let cmd = try DevicesRegister.parse(["--name", "My Device", "--udid", "UDID-001", "--platform", "tvos"])
         await #expect(throws: (any Error).self) {
             try await cmd.execute(repo: mockRepo)
@@ -28,7 +28,7 @@ struct DevicesRegisterTests {
     }
 
     @Test func `table output includes all row fields`() async throws {
-        let mockRepo = MockDevices()
+        let mockRepo = MockDeviceRepository()
         given(mockRepo).registerDevice(name: .any, udid: .any, platform: .any)
             .willReturn(Device(id: "dev-1", name: "iPad Pro", udid: "UDID-002", deviceClass: .iPad, platform: .iOS, status: .enabled))
 

@@ -7,7 +7,7 @@ import Testing
 struct XcodeCloudProductsListTests {
 
     @Test func `listed products include app id and affordances`() async throws {
-        let mockRepo = MockXcodeCloudProducts()
+        let mockRepo = MockXcodeCloudProductRepository()
         given(mockRepo).listProducts(appId: .any).willReturn([
             XcodeCloudProduct(id: "prod-1", appId: "app-42", name: "My App CI", productType: .app),
         ])
@@ -38,7 +38,7 @@ struct XcodeCloudProductsListTests {
 struct XcodeCloudWorkflowsListTests {
 
     @Test func `listed workflows include product id and affordances`() async throws {
-        let mockRepo = MockXcodeCloudWorkflows()
+        let mockRepo = MockXcodeCloudWorkflowRepository()
         given(mockRepo).listWorkflows(productId: .value("prod-1")).willReturn([
             XcodeCloudWorkflow(id: "wf-1", productId: "prod-1", name: "CI Build", isEnabled: true, isLockedForEditing: false),
         ])
@@ -67,7 +67,7 @@ struct XcodeCloudWorkflowsListTests {
     }
 
     @Test func `disabled workflow omits startBuild affordance`() async throws {
-        let mockRepo = MockXcodeCloudWorkflows()
+        let mockRepo = MockXcodeCloudWorkflowRepository()
         given(mockRepo).listWorkflows(productId: .value("prod-1")).willReturn([
             XcodeCloudWorkflow(id: "wf-2", productId: "prod-1", name: "Disabled CI", isEnabled: false, isLockedForEditing: false),
         ])
@@ -99,7 +99,7 @@ struct XcodeCloudWorkflowsListTests {
 struct XcodeCloudBuildsListTests {
 
     @Test func `listed build runs include workflow id and affordances`() async throws {
-        let mockRepo = MockXcodeCloudBuildRuns()
+        let mockRepo = MockXcodeCloudBuildRunRepository()
         given(mockRepo).listBuildRuns(workflowId: .value("wf-1")).willReturn([
             XcodeCloudBuildRun(
                 id: "run-1", workflowId: "wf-1", number: 5,
@@ -137,7 +137,7 @@ struct XcodeCloudBuildsListTests {
 struct XcodeCloudBuildsGetTests {
 
     @Test func `get build run returns single build run with affordances`() async throws {
-        let mockRepo = MockXcodeCloudBuildRuns()
+        let mockRepo = MockXcodeCloudBuildRunRepository()
         given(mockRepo).getBuildRun(id: .value("run-99")).willReturn(
             XcodeCloudBuildRun(
                 id: "run-99", workflowId: "wf-1", number: 12,
@@ -174,7 +174,7 @@ struct XcodeCloudBuildsGetTests {
 struct XcodeCloudBuildsStartTests {
 
     @Test func `start build returns new build run with affordances`() async throws {
-        let mockRepo = MockXcodeCloudBuildRuns()
+        let mockRepo = MockXcodeCloudBuildRunRepository()
         given(mockRepo).startBuildRun(workflowId: .value("wf-1"), clean: .value(false)).willReturn(
             XcodeCloudBuildRun(
                 id: "run-100", workflowId: "wf-1", number: nil,
@@ -206,7 +206,7 @@ struct XcodeCloudBuildsStartTests {
     }
 
     @Test func `start build with clean flag calls repo with clean true`() async throws {
-        let mockRepo = MockXcodeCloudBuildRuns()
+        let mockRepo = MockXcodeCloudBuildRunRepository()
         given(mockRepo).startBuildRun(workflowId: .value("wf-1"), clean: .value(true)).willReturn(
             XcodeCloudBuildRun(id: "run-101", workflowId: "wf-1", executionProgress: .pending)
         )

@@ -37,11 +37,11 @@ struct WinBackOffersUpdate: AsyncParsableCommand {
     var waitMonths: Int?
 
     func run() async throws {
-        let repo = try ClientProvider.makeWinBackOffers()
+        let repo = try ClientProvider.makeWinBackOfferRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any WinBackOffers) async throws -> String {
+    func execute(repo: any WinBackOfferRepository) async throws -> String {
         let priorityEnum: WinBackOfferPriority? = try priority.map { raw in
             guard let v = WinBackOfferPriority(rawValue: raw) else {
                 throw ValidationError("Invalid priority: \(raw)")

@@ -7,7 +7,7 @@ import Testing
 struct BuildsUploadsListTests {
 
     @Test func `execute returns list of uploads`() async throws {
-        let mockRepo = MockBuildUploads()
+        let mockRepo = MockBuildUploadRepository()
         given(mockRepo).listBuildUploads(appId: .any).willReturn([
             BuildUpload(id: "up-1", appId: "app-1", version: "1.0", buildNumber: "1", platform: .iOS, state: .complete),
             BuildUpload(id: "up-2", appId: "app-1", version: "1.1", buildNumber: "2", platform: .iOS, state: .processing),
@@ -23,7 +23,7 @@ struct BuildsUploadsListTests {
     }
 
     @Test func `table output includes all row fields`() async throws {
-        let mockRepo = MockBuildUploads()
+        let mockRepo = MockBuildUploadRepository()
         given(mockRepo).listBuildUploads(appId: .any).willReturn([
             BuildUpload(id: "up-1", appId: "app-1", version: "2.0", buildNumber: "99", platform: .iOS, state: .failed),
         ])

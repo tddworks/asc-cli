@@ -19,11 +19,11 @@ struct BuildsNextNumber: AsyncParsableCommand {
     var platform: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeBuilds()
+        let repo = try ClientProvider.makeBuildRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any Builds) async throws -> String {
+    func execute(repo: any BuildRepository) async throws -> String {
         guard let platformValue = BuildUploadPlatform(cliArgument: platform) else {
             throw ValidationError("Invalid platform '\(platform)'. Use: ios, macos, tvos, visionos")
         }

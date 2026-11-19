@@ -7,7 +7,7 @@ import Testing
 struct ReviewResponsesGetTests {
 
     @Test func `get response shows response body state and affordances`() async throws {
-        let mockRepo = MockCustomerReviews()
+        let mockRepo = MockCustomerReviewRepository()
         given(mockRepo).getResponse(reviewId: .any).willReturn(
             CustomerReviewResponse(
                 id: "resp-1",

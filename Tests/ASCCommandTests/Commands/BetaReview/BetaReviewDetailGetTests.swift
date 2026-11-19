@@ -7,7 +7,7 @@ import Testing
 struct BetaReviewDetailGetTests {
 
     @Test func `get detail shows contact info and affordances`() async throws {
-        let mockRepo = MockBetaAppReviews()
+        let mockRepo = MockBetaAppReviewRepository()
         given(mockRepo).getDetail(appId: .value("app-1"))
             .willReturn(
                 BetaAppReviewDetail(
@@ -45,7 +45,7 @@ struct BetaReviewDetailGetTests {
     }
 
     @Test func `get detail omits nil optional fields`() async throws {
-        let mockRepo = MockBetaAppReviews()
+        let mockRepo = MockBetaAppReviewRepository()
         given(mockRepo).getDetail(appId: .value("app-1"))
             .willReturn(
                 BetaAppReviewDetail(id: "d-1", appId: "app-1")

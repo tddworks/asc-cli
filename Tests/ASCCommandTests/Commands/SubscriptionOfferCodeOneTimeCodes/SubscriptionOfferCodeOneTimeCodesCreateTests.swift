@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionOfferCodeOneTimeCodesCreateTests {
 
     @Test func `creates one-time codes and returns result with affordances`() async throws {
-        let mockRepo = MockSubscriptionOfferCodes()
+        let mockRepo = MockSubscriptionOfferCodeRepository()
         given(mockRepo).createOneTimeUseCode(
             offerCodeId: .any, numberOfCodes: .any, expirationDate: .any, environment: .any
         ).willReturn(SubscriptionOfferCodeOneTimeUseCode(
@@ -32,7 +32,7 @@ struct SubscriptionOfferCodeOneTimeCodesCreateTests {
     }
 
     @Test func `defaults environment to production when flag omitted`() async throws {
-        let mockRepo = MockSubscriptionOfferCodes()
+        let mockRepo = MockSubscriptionOfferCodeRepository()
         given(mockRepo).createOneTimeUseCode(
             offerCodeId: .any, numberOfCodes: .any, expirationDate: .any, environment: .any
         ).willReturn(SubscriptionOfferCodeOneTimeUseCode(
@@ -59,7 +59,7 @@ struct SubscriptionOfferCodeOneTimeCodesCreateTests {
     }
 
     @Test func `forwards sandbox environment to repository`() async throws {
-        let mockRepo = MockSubscriptionOfferCodes()
+        let mockRepo = MockSubscriptionOfferCodeRepository()
         given(mockRepo).createOneTimeUseCode(
             offerCodeId: .any, numberOfCodes: .any, expirationDate: .any, environment: .any
         ).willReturn(SubscriptionOfferCodeOneTimeUseCode(

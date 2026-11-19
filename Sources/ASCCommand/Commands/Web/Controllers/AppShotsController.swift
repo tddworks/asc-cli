@@ -7,11 +7,11 @@ import Foundation
 
 /// /api/v1/app-shots — Screenshot template, theme, export, and AI generation.
 struct AppShotsController: Sendable {
-    let templateRepo: any Templates
+    let templateRepo: any TemplateRepository
     let themeRepo: any Themes
     let htmlRenderer: any HTMLRenderer
     let configStorage: any AppShotsConfigStorage
-    let galleryTemplateRepo: any GalleryTemplates
+    let galleryTemplateRepo: any GalleryTemplateRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
 

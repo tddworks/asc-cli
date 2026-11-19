@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionOfferCodesCreateTests {
 
     @Test func `creates offer code and returns it with affordances`() async throws {
-        let mockRepo = MockSubscriptionOfferCodes()
+        let mockRepo = MockSubscriptionOfferCodeRepository()
         given(mockRepo).createOfferCode(
             subscriptionId: .any, name: .any, customerEligibilities: .any,
             offerEligibility: .any, duration: .any, offerMode: .any,
@@ -44,7 +44,7 @@ struct SubscriptionOfferCodesCreateTests {
     }
 
     @Test func `forwards paid prices and isAutoRenewEnabled true by default`() async throws {
-        let mockRepo = MockSubscriptionOfferCodes()
+        let mockRepo = MockSubscriptionOfferCodeRepository()
         given(mockRepo).createOfferCode(
             subscriptionId: .any, name: .any, customerEligibilities: .any,
             offerEligibility: .any, duration: .any, offerMode: .any,
@@ -81,7 +81,7 @@ struct SubscriptionOfferCodesCreateTests {
     }
 
     @Test func `forwards isAutoRenewEnabled false when flag set`() async throws {
-        let mockRepo = MockSubscriptionOfferCodes()
+        let mockRepo = MockSubscriptionOfferCodeRepository()
         given(mockRepo).createOfferCode(
             subscriptionId: .any, name: .any, customerEligibilities: .any,
             offerEligibility: .any, duration: .any, offerMode: .any,
@@ -114,7 +114,7 @@ struct SubscriptionOfferCodesCreateTests {
     }
 
     @Test func `throws for invalid duration`() async throws {
-        let mockRepo = MockSubscriptionOfferCodes()
+        let mockRepo = MockSubscriptionOfferCodeRepository()
         let cmd = try SubscriptionOfferCodesCreate.parse([
             "--subscription-id", "sub-1",
             "--name", "TEST",
@@ -130,7 +130,7 @@ struct SubscriptionOfferCodesCreateTests {
     }
 
     @Test func `throws for invalid mode`() async throws {
-        let mockRepo = MockSubscriptionOfferCodes()
+        let mockRepo = MockSubscriptionOfferCodeRepository()
         let cmd = try SubscriptionOfferCodesCreate.parse([
             "--subscription-id", "sub-1",
             "--name", "TEST",
@@ -146,7 +146,7 @@ struct SubscriptionOfferCodesCreateTests {
     }
 
     @Test func `throws for invalid eligibility`() async throws {
-        let mockRepo = MockSubscriptionOfferCodes()
+        let mockRepo = MockSubscriptionOfferCodeRepository()
         let cmd = try SubscriptionOfferCodesCreate.parse([
             "--subscription-id", "sub-1",
             "--name", "TEST",
@@ -162,7 +162,7 @@ struct SubscriptionOfferCodesCreateTests {
     }
 
     @Test func `throws for invalid offer eligibility`() async throws {
-        let mockRepo = MockSubscriptionOfferCodes()
+        let mockRepo = MockSubscriptionOfferCodeRepository()
         let cmd = try SubscriptionOfferCodesCreate.parse([
             "--subscription-id", "sub-1",
             "--name", "TEST",

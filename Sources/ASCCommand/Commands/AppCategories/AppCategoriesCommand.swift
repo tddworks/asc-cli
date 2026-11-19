@@ -21,11 +21,11 @@ struct AppCategoriesGet: AsyncParsableCommand {
     var categoryId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppCategories()
+        let repo = try ClientProvider.makeAppCategoryRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AppCategories, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any AppCategoryRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let category = try await repo.getCategory(id: categoryId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems([category], affordanceMode: affordanceMode)
@@ -44,11 +44,11 @@ struct AppCategoriesList: AsyncParsableCommand {
     var platform: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppCategories()
+        let repo = try ClientProvider.makeAppCategoryRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AppCategories) async throws -> String {
+    func execute(repo: any AppCategoryRepository) async throws -> String {
         let categories = try await repo.listCategories(platform: platform)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

@@ -14,7 +14,7 @@ struct SDKScreenshotRepositoryUploadTests {
             try Self.screenshot(#"{"data":{"type":"appScreenshots","id":"shot-1","attributes":{"fileName":"home.png","fileSize":7,"assetDeliveryState":{"state":"UPLOAD_COMPLETE"}}},"links":{"self":""}}"#),
         ])
 
-        let screenshot = try await SDKAppScreenshots(client: stub).uploadScreenshot(setId: "set-1", fileURL: file)
+        let screenshot = try await SDKScreenshotRepository(client: stub).uploadScreenshot(setId: "set-1", fileURL: file)
 
         #expect(screenshot == AppScreenshot(id: "shot-1", setId: "set-1", fileName: "home.png", fileSize: 7, assetState: .uploadComplete))
         #expect(stub.requests.map { "\($0.method) \($0.path) \($0.body ?? "")" } == [
@@ -31,7 +31,7 @@ struct SDKScreenshotRepositoryUploadTests {
         http.enqueue(json: "", statusCode: 500)
 
         await #expect(throws: (any Error).self) {
-            try await SDKAppScreenshots(client: stub, uploader: UploadOperationsExecutor(http: http)).uploadScreenshot(setId: "set-1", fileURL: file)
+            try await SDKScreenshotRepository(client: stub, uploader: UploadOperationsExecutor(http: http)).uploadScreenshot(setId: "set-1", fileURL: file)
         }
         #expect(stub.requests.map { "\($0.method) \($0.path)" } == ["POST /v1/appScreenshots"])
     }
@@ -44,7 +44,7 @@ struct SDKScreenshotRepositoryUploadTests {
         http.enqueue(json: "", statusCode: 200)
 
         await #expect(throws: (any Error).self) {
-            _ = try await SDKAppScreenshots(client: stub, uploader: UploadOperationsExecutor(http: http)).uploadScreenshot(setId: "set-1", fileURL: file)
+            _ = try await SDKScreenshotRepository(client: stub, uploader: UploadOperationsExecutor(http: http)).uploadScreenshot(setId: "set-1", fileURL: file)
         }
         #expect(http.capturedRequests.isEmpty)
         #expect(stub.requests.map { "\($0.method) \($0.path)" } == ["POST /v1/appScreenshots"])

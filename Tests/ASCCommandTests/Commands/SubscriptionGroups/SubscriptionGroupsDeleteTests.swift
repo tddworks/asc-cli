@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionGroupsDeleteTests {
 
     @Test func `delete subscription group calls repo with group id`() async throws {
-        let mockRepo = MockSubscriptionGroups()
+        let mockRepo = MockSubscriptionGroupRepository()
         given(mockRepo).deleteSubscriptionGroup(groupId: .any).willReturn(())
 
         let cmd = try SubscriptionGroupsDelete.parse(["--group-id", "grp-1"])

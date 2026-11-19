@@ -7,7 +7,7 @@ import Testing
 struct IAPOfferCodeCustomCodesCreateTests {
 
     @Test func `creates IAP custom code and returns result with affordances`() async throws {
-        let mockRepo = MockInAppPurchaseOfferCodes()
+        let mockRepo = MockInAppPurchaseOfferCodeRepository()
         given(mockRepo).createCustomCode(
             offerCodeId: .any, customCode: .any,
             numberOfCodes: .any, expirationDate: .any

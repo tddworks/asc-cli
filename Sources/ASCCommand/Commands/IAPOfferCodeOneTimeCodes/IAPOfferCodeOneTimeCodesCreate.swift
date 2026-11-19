@@ -32,12 +32,12 @@ struct IAPOfferCodeOneTimeCodesCreate: AsyncParsableCommand {
     var environment: OfferCodeEnvironment = .production
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchaseOfferCodes()
+        let repo = try ClientProvider.makeInAppPurchaseOfferCodeRepository()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any InAppPurchaseOfferCodes,
+        repo: any InAppPurchaseOfferCodeRepository,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let item = try await repo.createOneTimeUseCode(

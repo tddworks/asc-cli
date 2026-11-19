@@ -31,11 +31,11 @@ struct AssetImagesList: AsyncParsableCommand {
     var category: AssetCategory?
 
     func run() async throws {
-        let repo = try ClientProvider.makeLibraryImages()
+        let repo = try ClientProvider.makeLibraryImageRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any LibraryImages, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any LibraryImageRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let images = try await repo.listImages(libraryId: libraryId, imageId: imageId, state: state, category: category)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(images, affordanceMode: affordanceMode)
@@ -66,12 +66,12 @@ struct AssetImagesUpload: AsyncParsableCommand {
     var wait: Bool = false
 
     func run() async throws {
-        let repo = try ClientProvider.makeLibraryImages()
+        let repo = try ClientProvider.makeLibraryImageRepository()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any LibraryImages,
+        repo: any LibraryImageRepository,
         affordanceMode: AffordanceMode = .cli,
         sleep: @Sendable (UInt64) async throws -> Void = { try await Task.sleep(nanoseconds: $0) }
     ) async throws -> String {
@@ -115,11 +115,11 @@ struct AssetImagesUpdate: AsyncParsableCommand {
     }
 
     func run() async throws {
-        let repo = try ClientProvider.makeLibraryImages()
+        let repo = try ClientProvider.makeLibraryImageRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any LibraryImages, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any LibraryImageRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let image = try await repo.updateImage(libraryId: libraryId, imageId: imageId, referenceName: referenceName, isArchived: archived)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems([image], affordanceMode: affordanceMode)
@@ -138,11 +138,11 @@ struct AssetImagesDelete: AsyncParsableCommand {
     var imageId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeLibraryImages()
+        let repo = try ClientProvider.makeLibraryImageRepository()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any LibraryImages) async throws {
+    func execute(repo: any LibraryImageRepository) async throws {
         try await repo.deleteImage(imageId: imageId)
     }
 }

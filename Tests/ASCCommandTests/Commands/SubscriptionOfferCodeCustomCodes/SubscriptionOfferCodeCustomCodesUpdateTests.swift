@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionOfferCodeCustomCodesUpdateTests {
 
     @Test func `deactivates custom code and returns updated result`() async throws {
-        let mockRepo = MockSubscriptionOfferCodes()
+        let mockRepo = MockSubscriptionOfferCodeRepository()
         given(mockRepo).updateCustomCode(customCodeId: .any, isActive: .any)
             .willReturn(SubscriptionOfferCodeCustomCode(
                 id: "cc-1",
@@ -25,7 +25,7 @@ struct SubscriptionOfferCodeCustomCodesUpdateTests {
     }
 
     @Test func `throws for invalid active value`() async throws {
-        let mockRepo = MockSubscriptionOfferCodes()
+        let mockRepo = MockSubscriptionOfferCodeRepository()
         let cmd = try SubscriptionOfferCodeCustomCodesUpdate.parse(["--custom-code-id", "cc-1", "--active", "maybe"])
         await #expect(throws: (any Error).self) {
             try await cmd.execute(repo: mockRepo)

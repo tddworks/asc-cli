@@ -13,11 +13,11 @@ struct SubscriptionOfferCodeOneTimeCodesValues: AsyncParsableCommand {
     var oneTimeCodeId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptionOfferCodes()
+        let repo = try ClientProvider.makeSubscriptionOfferCodeRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubscriptionOfferCodes) async throws -> String {
+    func execute(repo: any SubscriptionOfferCodeRepository) async throws -> String {
         try await repo.fetchOneTimeUseCodeValues(oneTimeCodeId: oneTimeCodeId)
     }
 }

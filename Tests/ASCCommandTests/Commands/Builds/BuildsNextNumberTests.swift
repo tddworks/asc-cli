@@ -7,7 +7,7 @@ import Testing
 struct BuildsNextNumberTests {
 
     @Test func `next number is 4 when highest build is 3`() async throws {
-        let mockRepo = MockBuilds()
+        let mockRepo = MockBuildRepository()
         given(mockRepo).listBuilds(appId: .value("app-1"), platform: .value(.iOS), version: .value("1.0.1"), limit: .any).willReturn(
             PaginatedResponse(data: [
                 Build(id: "b-1", version: "1.0.1", buildNumber: "3", platform: .iOS),
@@ -36,7 +36,7 @@ struct BuildsNextNumberTests {
     }
 
     @Test func `next number is 1 when no builds exist`() async throws {
-        let mockRepo = MockBuilds()
+        let mockRepo = MockBuildRepository()
         given(mockRepo).listBuilds(appId: .value("app-1"), platform: .value(.iOS), version: .value("2.0"), limit: .any).willReturn(
             PaginatedResponse(data: [], nextCursor: nil)
         )
@@ -61,7 +61,7 @@ struct BuildsNextNumberTests {
     }
 
     @Test func `plain output shows just the number`() async throws {
-        let mockRepo = MockBuilds()
+        let mockRepo = MockBuildRepository()
         given(mockRepo).listBuilds(appId: .any, platform: .any, version: .any, limit: .any).willReturn(
             PaginatedResponse(data: [
                 Build(id: "b-1", version: "1.0", buildNumber: "7"),

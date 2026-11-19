@@ -177,7 +177,7 @@ private struct Refused: LocalizedError {
 
 /// An asset library that keeps what it's sent. Images are processed after `readsUntilProcessed`
 /// reads; files named in `failing` fail processing with that reason.
-private final class FakeLibrary: LibraryImages, @unchecked Sendable {
+private final class FakeLibrary: LibraryImageRepository, @unchecked Sendable {
     private let lock = NSLock()
     private var stored: [LibraryImage] = []
     private var reads: [String: Int] = [:]
@@ -224,7 +224,7 @@ private final class FakeLibrary: LibraryImages, @unchecked Sendable {
 }
 
 /// Placements that apply what they're sent: create appends, delete removes, reorder reorders.
-private final class FakePlacements: AssetPlacements, @unchecked Sendable {
+private final class FakePlacements: AssetPlacementRepository, @unchecked Sendable {
     private let lock = NSLock()
     private var stored: [AssetPlacement]
     private var created = 0

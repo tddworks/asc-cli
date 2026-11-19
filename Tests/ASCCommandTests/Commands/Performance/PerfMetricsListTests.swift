@@ -7,7 +7,7 @@ import Mockable
 struct PerfMetricsListTests {
 
     @Test func `listed app metrics show category, value, and affordances`() async throws {
-        let mockRepo = MockPerfMetrics()
+        let mockRepo = MockPerfMetricsRepository()
         given(mockRepo).listAppMetrics(appId: .any, metricType: .any).willReturn([
             PerformanceMetric(
                 id: "app-1-LAUNCH-launchTime",
@@ -48,7 +48,7 @@ struct PerfMetricsListTests {
     }
 
     @Test func `metric type filter is parsed from CLI argument`() async throws {
-        let mockRepo = MockPerfMetrics()
+        let mockRepo = MockPerfMetricsRepository()
         given(mockRepo).listAppMetrics(appId: .any, metricType: .any).willReturn([])
         let cmd = try PerfMetricsList.parse(["--app-id", "app-1", "--metric-type", "DISK"])
         let output = try await cmd.execute(repo: mockRepo)
@@ -56,7 +56,7 @@ struct PerfMetricsListTests {
     }
 
     @Test func `listed build metrics use build parent type`() async throws {
-        let mockRepo = MockPerfMetrics()
+        let mockRepo = MockPerfMetricsRepository()
         given(mockRepo).listBuildMetrics(buildId: .any, metricType: .any).willReturn([
             PerformanceMetric(
                 id: "build-1-HANG-hangRate",

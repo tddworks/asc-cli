@@ -16,11 +16,11 @@ struct AnalyticsReportsInstancesList: AsyncParsableCommand {
     var granularity: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeAnalyticsReports()
+        let repo = try ClientProvider.makeAnalyticsReportRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AnalyticsReports) async throws -> String {
+    func execute(repo: any AnalyticsReportRepository) async throws -> String {
         let parsed = granularity.flatMap { AnalyticsGranularity(cliArgument: $0) }
         let instances = try await repo.listInstances(reportId: reportId, granularity: parsed)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)

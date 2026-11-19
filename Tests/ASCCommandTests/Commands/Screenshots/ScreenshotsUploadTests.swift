@@ -7,7 +7,7 @@ import Testing
 struct ScreenshotsUploadTests {
 
     @Test func `uploaded screenshot is returned with file metadata`() async throws {
-        let mockRepo = MockAppScreenshots()
+        let mockRepo = MockScreenshotRepository()
         given(mockRepo).uploadScreenshot(setId: .any, fileURL: .any).willReturn(
             AppScreenshot(id: "img-new", setId: "set-1", fileName: "hero.png", fileSize: 2_048_000, assetState: .complete, imageWidth: 1290, imageHeight: 2796)
         )
@@ -37,7 +37,7 @@ struct ScreenshotsUploadTests {
     }
 
     @Test func `table output includes all row fields`() async throws {
-        let mockRepo = MockAppScreenshots()
+        let mockRepo = MockScreenshotRepository()
         given(mockRepo).uploadScreenshot(setId: .any, fileURL: .any).willReturn(
             AppScreenshot(id: "img-1", setId: "set-1", fileName: "screen.png", fileSize: 1_048_576, assetState: .complete, imageWidth: 390, imageHeight: 844)
         )

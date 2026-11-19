@@ -33,11 +33,11 @@ struct ProfilesCreate: AsyncParsableCommand {
     var deviceIds: [String] = []
 
     func run() async throws {
-        let repo = try ClientProvider.makeProfiles()
+        let repo = try ClientProvider.makeProfileRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any Profiles) async throws -> String {
+    func execute(repo: any ProfileRepository) async throws -> String {
         guard let profileType = ProfileType(rawValue: type.uppercased()) else {
             throw ValidationError("Invalid profile type '\(type)'.")
         }

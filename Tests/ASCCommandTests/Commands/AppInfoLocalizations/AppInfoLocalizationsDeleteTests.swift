@@ -7,7 +7,7 @@ import Testing
 struct AppInfoLocalizationsDeleteTests {
 
     @Test func `delete calls repository and prints deleted id`() async throws {
-        let mockRepo = MockAppInfos()
+        let mockRepo = MockAppInfoRepository()
         given(mockRepo)
             .deleteLocalization(id: .any)
             .willReturn(())

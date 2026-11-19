@@ -13,11 +13,11 @@ struct WinBackOffersDelete: AsyncParsableCommand {
     var offerId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeWinBackOffers()
+        let repo = try ClientProvider.makeWinBackOfferRepository()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any WinBackOffers) async throws {
+    func execute(repo: any WinBackOfferRepository) async throws {
         try await repo.deleteWinBackOffer(offerId: offerId)
     }
 }

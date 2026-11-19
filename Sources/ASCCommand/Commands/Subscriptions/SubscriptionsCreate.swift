@@ -28,11 +28,11 @@ struct SubscriptionsCreate: AsyncParsableCommand {
     var groupLevel: Int?
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptions()
+        let repo = try ClientProvider.makeSubscriptionRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any Subscriptions) async throws -> String {
+    func execute(repo: any SubscriptionRepository) async throws -> String {
         guard let subscriptionPeriod = SubscriptionPeriod(rawValue: period) else {
             throw ValidationError("Invalid period '\(period)'. Use: ONE_WEEK, ONE_MONTH, TWO_MONTHS, THREE_MONTHS, SIX_MONTHS, ONE_YEAR")
         }

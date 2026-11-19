@@ -8,7 +8,7 @@ import HummingbirdWebSocket
 ///
 /// Query-param names match the CLI flags: `?state=&limit=`.
 struct ExperimentsController: Sendable {
-    let repo: any Experiments
+    let repo: any ExperimentRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         // MARK: Experiments

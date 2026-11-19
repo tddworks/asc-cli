@@ -87,9 +87,9 @@ public protocol PaymentProcessor: Sendable {
     func refund(transactionId: String, amount: Decimal) async throws -> RefundResult
 }
 
-// Aggregate persistence takes the plural of the aggregate — never `XxxRepository`.
+// CRUD for an aggregate: XxxRepository. Anything more than CRUD takes a role noun.
 @Mockable
-public protocol Orders: Sendable {
+public protocol OrderRepository: Sendable {
     func all() async throws -> [Order]
     func fetch(id: OrderId) async throws -> Order
     func save(_ order: Order) async throws
@@ -199,10 +199,10 @@ Use actors for stateful domain objects (named for what they are, never `XxxManag
 
 ```swift
 public actor OrderBook {
-    private let orders: any Orders
+    private let orders: any OrderRepository
     private var cachedOrders: [OrderId: Order] = [:]
 
-    public init(orders: any Orders) {
+    public init(orders: any OrderRepository) {
         self.orders = orders
     }
 

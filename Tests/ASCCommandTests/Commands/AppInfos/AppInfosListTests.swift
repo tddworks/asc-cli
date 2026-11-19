@@ -7,7 +7,7 @@ import Testing
 struct AppInfosListTests {
 
     @Test func `listed app infos include affordances for navigation`() async throws {
-        let mockRepo = MockAppInfos()
+        let mockRepo = MockAppInfoRepository()
         given(mockRepo).listAppInfos(appId: .any).willReturn([
             AppInfo(id: "info-1", appId: "app-1"),
         ])

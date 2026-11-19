@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionsListTests {
 
     @Test func `listed subscriptions include groupId, period, state and affordances`() async throws {
-        let mockRepo = MockSubscriptions()
+        let mockRepo = MockSubscriptionRepository()
         given(mockRepo).listSubscriptions(groupId: .any, limit: .any)
             .willReturn(PaginatedResponse(data: [
                 Subscription(
@@ -64,7 +64,7 @@ struct SubscriptionsListTests {
     }
 
     @Test func `listed subscription with reviewNote surfaces it in JSON output`() async throws {
-        let mockRepo = MockSubscriptions()
+        let mockRepo = MockSubscriptionRepository()
         given(mockRepo).listSubscriptions(groupId: .any, limit: .any)
             .willReturn(PaginatedResponse(data: [
                 Subscription(
@@ -86,7 +86,7 @@ struct SubscriptionsListTests {
     }
 
     @Test func `table output includes all row fields`() async throws {
-        let mockRepo = MockSubscriptions()
+        let mockRepo = MockSubscriptionRepository()
         given(mockRepo).listSubscriptions(groupId: .any, limit: .any)
             .willReturn(PaginatedResponse(data: [
                 Subscription(
@@ -108,7 +108,7 @@ struct SubscriptionsListTests {
     }
 
     @Test func `should show multi-seat status and markets when App Store Connect sends them`() async throws {
-        let mockRepo = MockSubscriptions()
+        let mockRepo = MockSubscriptionRepository()
         given(mockRepo).listSubscriptions(groupId: .any, limit: .any)
             .willReturn(PaginatedResponse(data: [
                 Subscription(

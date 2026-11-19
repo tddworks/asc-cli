@@ -23,11 +23,11 @@ struct VersionReviewDetailGet: AsyncParsableCommand {
     var versionId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeReviewDetails()
+        let repo = try ClientProvider.makeReviewDetailRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any ReviewDetails) async throws -> String {
+    func execute(repo: any ReviewDetailRepository) async throws -> String {
         let detail = try await repo.getReviewDetail(versionId: versionId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
@@ -81,11 +81,11 @@ struct VersionReviewDetailUpdate: AsyncParsableCommand {
     var notes: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeReviewDetails()
+        let repo = try ClientProvider.makeReviewDetailRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any ReviewDetails) async throws -> String {
+    func execute(repo: any ReviewDetailRepository) async throws -> String {
         let update = ReviewDetailUpdate(
             contactFirstName: contactFirstName,
             contactLastName: contactLastName,

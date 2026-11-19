@@ -23,14 +23,14 @@ struct AppAvailabilityCreate: AsyncParsableCommand {
 
     func run() async throws {
         print(try await execute(
-            repo: try ClientProvider.makeAppAvailabilities(),
-            territoryRepo: try ClientProvider.makeTerritories()
+            repo: try ClientProvider.makeAppAvailabilityRepository(),
+            territoryRepo: try ClientProvider.makeTerritoryRepository()
         ))
     }
 
     func execute(
-        repo: any AppAvailabilities,
-        territoryRepo: any Territories,
+        repo: any AppAvailabilityRepository,
+        territoryRepo: any TerritoryRepository,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         guard allTerritories != !territory.isEmpty else {

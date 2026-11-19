@@ -33,11 +33,11 @@ struct SubscriptionPromotionalOffersCreate: AsyncParsableCommand {
     var price: [String] = []
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptionPromotionalOffers()
+        let repo = try ClientProvider.makeSubscriptionPromotionalOfferRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubscriptionPromotionalOffers) async throws -> String {
+    func execute(repo: any SubscriptionPromotionalOfferRepository) async throws -> String {
         guard let durationEnum = SubscriptionOfferDuration(rawValue: duration) else {
             throw ValidationError("Invalid duration: \(duration)")
         }

@@ -23,7 +23,7 @@ struct IrisAuthLogin: AsyncParsableCommand {
         let resolvedPassword = try password ?? promptForPassword()
         let creds = IrisAuthCredentials(appleId: appleId, password: resolvedPassword)
         let authRepo = ClientProvider.makeIrisSignIn()
-        let sessionRepo = ClientProvider.makeIrisSessions()
+        let sessionRepo = ClientProvider.makeIrisSessionRepository()
         let pendingURL = ClientProvider.pendingTwoFactorURL()
         let codePrompt: (() throws -> String)?
         if interactive {
@@ -40,7 +40,7 @@ struct IrisAuthLogin: AsyncParsableCommand {
     func execute(
         credentials: IrisAuthCredentials,
         authRepo: any IrisSignIn,
-        sessionRepo: any IrisSessions,
+        sessionRepo: any IrisSessionRepository,
         pendingURL: URL,
         interactivePromptForCode: (() throws -> String)? = nil,
         affordanceMode: AffordanceMode = .cli

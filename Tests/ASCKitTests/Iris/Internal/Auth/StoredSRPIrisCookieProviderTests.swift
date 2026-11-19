@@ -23,7 +23,7 @@ struct StoredSRPIrisCookieProviderTests {
     }
 
     @Test func `resolveSession returns cookies from the persisted session when it has not expired`() throws {
-        let storage = MockIrisSessions()
+        let storage = MockIrisSessionRepository()
         given(storage).current().willReturn(
             session(cookies: "myacinfo=1; itctx=2", expiresAt: Date().addingTimeInterval(3600))
         )
@@ -33,7 +33,7 @@ struct StoredSRPIrisCookieProviderTests {
     }
 
     @Test func `resolveSession throws noCookiesFound when storage is empty`() {
-        let storage = MockIrisSessions()
+        let storage = MockIrisSessionRepository()
         given(storage).current().willReturn(nil)
         let provider = StoredSRPIrisCookieProvider(sessionRepository: storage)
         #expect(throws: IrisCookieError.noCookiesFound) {
@@ -42,7 +42,7 @@ struct StoredSRPIrisCookieProviderTests {
     }
 
     @Test func `resolveSession throws when the persisted session has expired`() {
-        let storage = MockIrisSessions()
+        let storage = MockIrisSessionRepository()
         given(storage).current().willReturn(
             session(expiresAt: Date(timeIntervalSinceNow: -60))
         )
@@ -53,7 +53,7 @@ struct StoredSRPIrisCookieProviderTests {
     }
 
     @Test func `resolveStatus reports srpLogin source and counts cookies`() throws {
-        let storage = MockIrisSessions()
+        let storage = MockIrisSessionRepository()
         given(storage).current().willReturn(
             session(
                 cookies: "myacinfo=1; itctx=2; dqsid=3",

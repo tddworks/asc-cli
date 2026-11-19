@@ -19,11 +19,11 @@ struct SubscriptionAvailabilityCreate: AsyncParsableCommand {
     var territory: [String] = []
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptionAvailabilities()
+        let repo = try ClientProvider.makeSubscriptionAvailabilityRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubscriptionAvailabilities) async throws -> String {
+    func execute(repo: any SubscriptionAvailabilityRepository) async throws -> String {
         let availability = try await repo.createAvailability(
             subscriptionId: subscriptionId,
             isAvailableInNewTerritories: availableInNewTerritories,

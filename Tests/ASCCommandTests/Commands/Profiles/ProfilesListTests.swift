@@ -7,7 +7,7 @@ import Testing
 struct ProfilesListTests {
 
     @Test func `listed profiles include bundleIdId type state and affordances`() async throws {
-        let mockRepo = MockProfiles()
+        let mockRepo = MockProfileRepository()
         given(mockRepo).listProfiles(bundleIdId: .any, profileType: .any).willReturn([
             Profile(
                 id: "prof-1",
@@ -41,7 +41,7 @@ struct ProfilesListTests {
     }
 
     @Test func `table output includes all row fields`() async throws {
-        let mockRepo = MockProfiles()
+        let mockRepo = MockProfileRepository()
         given(mockRepo).listProfiles(bundleIdId: .any, profileType: .any).willReturn([
             Profile(id: "prof-1", name: "My Profile", profileType: .iosAppStore, profileState: .active, bundleIdId: "bid-1"),
         ])
@@ -55,7 +55,7 @@ struct ProfilesListTests {
     }
 
     @Test func `invalid profile state renders in output`() async throws {
-        let mockRepo = MockProfiles()
+        let mockRepo = MockProfileRepository()
         given(mockRepo).listProfiles(bundleIdId: .any, profileType: .any).willReturn([
             Profile(
                 id: "prof-2",

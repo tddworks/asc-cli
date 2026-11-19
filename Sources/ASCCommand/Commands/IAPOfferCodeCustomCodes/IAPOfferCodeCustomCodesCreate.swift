@@ -22,11 +22,11 @@ struct IAPOfferCodeCustomCodesCreate: AsyncParsableCommand {
     var expirationDate: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchaseOfferCodes()
+        let repo = try ClientProvider.makeInAppPurchaseOfferCodeRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any InAppPurchaseOfferCodes) async throws -> String {
+    func execute(repo: any InAppPurchaseOfferCodeRepository) async throws -> String {
         let item = try await repo.createCustomCode(
             offerCodeId: offerCodeId,
             customCode: customCode,

@@ -31,7 +31,7 @@ private func makeScore(
 struct GameCenterScoreModerationsListTests {
 
     @Test func `should list the leaderboard's scores with their player and next moderation steps`() async throws {
-        let mockRepo = MockGameCenterModeration()
+        let mockRepo = MockGameCenterModerationRepository()
         given(mockRepo).listScoreModerations(leaderboardId: .any, blockedOnly: .any).willReturn([makeScore()])
 
         let cmd = try GameCenterScoreModerationsList.parse(["--leaderboard-id", "lb-1", "--pretty"])
@@ -66,7 +66,7 @@ struct GameCenterScoreModerationsListTests {
     }
 
     @Test func `should show only blocked scores when asked for blocked only`() async throws {
-        let mockRepo = MockGameCenterModeration()
+        let mockRepo = MockGameCenterModerationRepository()
         given(mockRepo).listScoreModerations(leaderboardId: .value("lb-1"), blockedOnly: .value(true))
             .willReturn([makeScore(id: "mod-2", isBlocked: true)])
         given(mockRepo).listScoreModerations(leaderboardId: .value("lb-1"), blockedOnly: .value(false))
@@ -87,7 +87,7 @@ struct GameCenterScoreModerationsListTests {
 struct GameCenterScoreModerationsBlockTests {
 
     @Test func `should show the score as blocked and offer unblock`() async throws {
-        let mockRepo = MockGameCenterModeration()
+        let mockRepo = MockGameCenterModerationRepository()
         given(mockRepo).updateScoreModeration(id: .value("mod-1"), isBlocked: .value(true))
             .willReturn(makeScore(leaderboardId: nil, isBlocked: true, playerNickname: nil, isPlayerBlocked: nil))
 
@@ -122,7 +122,7 @@ struct GameCenterScoreModerationsBlockTests {
 struct GameCenterScoreModerationsUnblockTests {
 
     @Test func `should show the score as visible again and offer block`() async throws {
-        let mockRepo = MockGameCenterModeration()
+        let mockRepo = MockGameCenterModerationRepository()
         given(mockRepo).updateScoreModeration(id: .value("mod-1"), isBlocked: .value(false))
             .willReturn(makeScore(leaderboardId: nil, isBlocked: false, playerNickname: nil, isPlayerBlocked: nil))
 
@@ -157,7 +157,7 @@ struct GameCenterScoreModerationsUnblockTests {
 struct GameCenterBlockedPlayersListTests {
 
     @Test func `should list the game's blocked players and offer to unblock each`() async throws {
-        let mockRepo = MockGameCenterModeration()
+        let mockRepo = MockGameCenterModerationRepository()
         given(mockRepo).listBlockedPlayers(gameCenterDetailId: .any).willReturn([
             GameCenterPlayer(id: "player-1", gameCenterDetailId: "gc-1", nickname: "Player One",
                              bundleId: "com.example.game", isBlocked: true),
@@ -190,7 +190,7 @@ struct GameCenterBlockedPlayersListTests {
 struct GameCenterPlayersBlockTests {
 
     @Test func `should show the player as blocked and offer unblock`() async throws {
-        let mockRepo = MockGameCenterModeration()
+        let mockRepo = MockGameCenterModerationRepository()
         given(mockRepo).updatePlayer(id: .value("player-1"), isBlocked: .value(true)).willReturn(
             GameCenterPlayer(id: "player-1", gameCenterDetailId: nil, nickname: "Player One",
                              bundleId: nil, isBlocked: true)
@@ -220,7 +220,7 @@ struct GameCenterPlayersBlockTests {
 struct GameCenterPlayersUnblockTests {
 
     @Test func `should show the player as unblocked and offer block`() async throws {
-        let mockRepo = MockGameCenterModeration()
+        let mockRepo = MockGameCenterModerationRepository()
         given(mockRepo).updatePlayer(id: .value("player-1"), isBlocked: .value(false)).willReturn(
             GameCenterPlayer(id: "player-1", gameCenterDetailId: nil, nickname: "Player One",
                              bundleId: nil, isBlocked: false)

@@ -13,11 +13,11 @@ struct BuildsUploadsGet: AsyncParsableCommand {
     var uploadId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeBuildUploads()
+        let repo = try ClientProvider.makeBuildUploadRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any BuildUploads) async throws -> String {
+    func execute(repo: any BuildUploadRepository) async throws -> String {
         let upload = try await repo.getBuildUpload(id: uploadId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

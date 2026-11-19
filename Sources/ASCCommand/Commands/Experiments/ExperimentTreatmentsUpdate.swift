@@ -19,12 +19,12 @@ struct ExperimentTreatmentsUpdate: AsyncParsableCommand {
     var appIconName: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeExperiments()
+        let repo = try ClientProvider.makeExperimentRepository()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any Experiments,
+        repo: any ExperimentRepository,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         guard name != nil || appIconName != nil else {

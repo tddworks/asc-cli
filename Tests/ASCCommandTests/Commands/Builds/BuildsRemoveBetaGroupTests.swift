@@ -12,7 +12,7 @@ struct BuildsRemoveBetaGroupTests {
     }
 
     @Test func `execute removes beta group from build`() async throws {
-        let mockRepo = MockBuilds()
+        let mockRepo = MockBuildRepository()
         given(mockRepo).removeBetaGroups(buildId: .any, betaGroupIds: .any).willReturn()
 
         let cmd = try BuildsRemoveBetaGroup.parse(["--build-id", "build-1", "--beta-group-id", "bg-42"])

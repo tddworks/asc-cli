@@ -15,7 +15,7 @@ struct IrisAuthVerifyCode: AsyncParsableCommand {
 
     func run() async throws {
         let authRepo = ClientProvider.makeIrisSignIn()
-        let sessionRepo = ClientProvider.makeIrisSessions()
+        let sessionRepo = ClientProvider.makeIrisSessionRepository()
         let pendingURL = ClientProvider.pendingTwoFactorURL()
         print(try await execute(code: code, authRepo: authRepo, sessionRepo: sessionRepo, pendingURL: pendingURL))
     }
@@ -23,7 +23,7 @@ struct IrisAuthVerifyCode: AsyncParsableCommand {
     func execute(
         code: String,
         authRepo: any IrisSignIn,
-        sessionRepo: any IrisSessions,
+        sessionRepo: any IrisSessionRepository,
         pendingURL: URL,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {

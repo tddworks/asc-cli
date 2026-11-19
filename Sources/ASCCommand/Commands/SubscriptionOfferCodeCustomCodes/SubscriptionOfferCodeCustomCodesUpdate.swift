@@ -16,11 +16,11 @@ struct SubscriptionOfferCodeCustomCodesUpdate: AsyncParsableCommand {
     var active: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptionOfferCodes()
+        let repo = try ClientProvider.makeSubscriptionOfferCodeRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubscriptionOfferCodes) async throws -> String {
+    func execute(repo: any SubscriptionOfferCodeRepository) async throws -> String {
         guard let isActive = Bool(active) else {
             throw ValidationError("Invalid value '\(active)' for --active. Use: true, false")
         }

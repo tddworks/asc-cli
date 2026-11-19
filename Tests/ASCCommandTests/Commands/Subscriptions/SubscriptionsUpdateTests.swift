@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionsUpdateTests {
 
     @Test func `updates subscription name and review note and returns updated record`() async throws {
-        let mockRepo = MockSubscriptions()
+        let mockRepo = MockSubscriptionRepository()
         given(mockRepo).updateSubscription(
             subscriptionId: .any, name: .any, isFamilySharable: .any, groupLevel: .any, subscriptionPeriod: .any, reviewNote: .any,
             multiSeatStatus: .any, marketSettings: .any
@@ -37,7 +37,7 @@ struct SubscriptionsUpdateTests {
     }
 
     @Test func `family-sharable flag passes true to repo`() async throws {
-        let mockRepo = MockSubscriptions()
+        let mockRepo = MockSubscriptionRepository()
         given(mockRepo).updateSubscription(
             subscriptionId: .any, name: .any, isFamilySharable: .any, groupLevel: .any, subscriptionPeriod: .any, reviewNote: .any,
             multiSeatStatus: .any, marketSettings: .any
@@ -58,7 +58,7 @@ struct SubscriptionsUpdateTests {
     }
 
     @Test func `group-level passes through to repo`() async throws {
-        let mockRepo = MockSubscriptions()
+        let mockRepo = MockSubscriptionRepository()
         given(mockRepo).updateSubscription(
             subscriptionId: .any, name: .any, isFamilySharable: .any, groupLevel: .any, subscriptionPeriod: .any, reviewNote: .any,
             multiSeatStatus: .any, marketSettings: .any
@@ -79,7 +79,7 @@ struct SubscriptionsUpdateTests {
     }
 
     @Test func `period passes through to repo`() async throws {
-        let mockRepo = MockSubscriptions()
+        let mockRepo = MockSubscriptionRepository()
         given(mockRepo).updateSubscription(
             subscriptionId: .any, name: .any, isFamilySharable: .any, groupLevel: .any, subscriptionPeriod: .any, reviewNote: .any,
             multiSeatStatus: .any, marketSettings: .any
@@ -100,7 +100,7 @@ struct SubscriptionsUpdateTests {
     }
 
     @Test func `should show the multi-seat status and markets App Store Connect saved when updating`() async throws {
-        let mockRepo = MockSubscriptions()
+        let mockRepo = MockSubscriptionRepository()
         given(mockRepo).updateSubscription(
             subscriptionId: .any, name: .any, isFamilySharable: .any, groupLevel: .any, subscriptionPeriod: .any, reviewNote: .any,
             multiSeatStatus: .any, marketSettings: .any

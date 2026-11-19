@@ -8,8 +8,8 @@ import HummingbirdWebSocket
 ///
 /// Query-param names match the CLI flags: `?blocked-only=true`.
 struct GameCenterController: Sendable {
-    let repo: any GameCenter
-    let moderationRepo: any GameCenterModeration
+    let repo: any GameCenterRepository
+    let moderationRepo: any GameCenterModerationRepository
 
     /// A request body missing a required field; surfaced to the client as a 400.
     struct BadRequest: Error, Equatable {
@@ -110,7 +110,7 @@ struct GameCenterController: Sendable {
     static func createAchievement(
         detailId: String,
         json: [String: Any],
-        repo: any GameCenter
+        repo: any GameCenterRepository
     ) async throws -> GameCenterAchievement {
         guard let referenceName = json["referenceName"] as? String,
               let vendorIdentifier = json["vendorIdentifier"] as? String,
@@ -131,7 +131,7 @@ struct GameCenterController: Sendable {
     static func createLeaderboard(
         detailId: String,
         json: [String: Any],
-        repo: any GameCenter
+        repo: any GameCenterRepository
     ) async throws -> GameCenterLeaderboard {
         guard let referenceName = json["referenceName"] as? String,
               let vendorIdentifier = json["vendorIdentifier"] as? String,

@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionGroupLocalizationsListTests {
 
     @Test func `lists localizations and returns them with affordances`() async throws {
-        let mockRepo = MockSubscriptionGroupLocalizations()
+        let mockRepo = MockSubscriptionGroupLocalizationRepository()
         given(mockRepo).listLocalizations(groupId: .any).willReturn([
             SubscriptionGroupLocalization(id: "loc-1", groupId: "grp-1", locale: "en-US", name: "Premium")
         ])
@@ -39,7 +39,7 @@ struct SubscriptionGroupLocalizationsListTests {
 struct SubscriptionGroupLocalizationsCreateTests {
 
     @Test func `create posts groupId, locale, name and customAppName`() async throws {
-        let mockRepo = MockSubscriptionGroupLocalizations()
+        let mockRepo = MockSubscriptionGroupLocalizationRepository()
         given(mockRepo).createLocalization(groupId: .any, locale: .any, name: .any, customAppName: .any)
             .willReturn(SubscriptionGroupLocalization(
                 id: "loc-new", groupId: "grp-1", locale: "en-US",
@@ -67,7 +67,7 @@ struct SubscriptionGroupLocalizationsCreateTests {
 struct SubscriptionGroupLocalizationsUpdateTests {
 
     @Test func `update passes localizationId, name and customAppName`() async throws {
-        let mockRepo = MockSubscriptionGroupLocalizations()
+        let mockRepo = MockSubscriptionGroupLocalizationRepository()
         given(mockRepo).updateLocalization(localizationId: .any, name: .any, customAppName: .any)
             .willReturn(SubscriptionGroupLocalization(id: "loc-1", groupId: "", locale: "en-US", name: "Renamed"))
 
@@ -89,7 +89,7 @@ struct SubscriptionGroupLocalizationsUpdateTests {
 struct SubscriptionGroupLocalizationsDeleteTests {
 
     @Test func `delete calls repo with localization id`() async throws {
-        let mockRepo = MockSubscriptionGroupLocalizations()
+        let mockRepo = MockSubscriptionGroupLocalizationRepository()
         given(mockRepo).deleteLocalization(localizationId: .any).willReturn(())
 
         let cmd = try SubscriptionGroupLocalizationsDelete.parse(["--localization-id", "loc-1"])

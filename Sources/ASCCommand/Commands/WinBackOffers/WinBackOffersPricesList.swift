@@ -13,12 +13,12 @@ struct WinBackOffersPricesList: AsyncParsableCommand {
     var offerId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeWinBackOffers()
+        let repo = try ClientProvider.makeWinBackOfferRepository()
         print(try await execute(repo: repo))
     }
 
     func execute(
-        repo: any WinBackOffers,
+        repo: any WinBackOfferRepository,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let items = try await repo.listPrices(offerId: offerId)

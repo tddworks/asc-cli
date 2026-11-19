@@ -13,11 +13,11 @@ struct BuildsUploadsDelete: AsyncParsableCommand {
     var uploadId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeBuildUploads()
+        let repo = try ClientProvider.makeBuildUploadRepository()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any BuildUploads) async throws {
+    func execute(repo: any BuildUploadRepository) async throws {
         try await repo.deleteBuildUpload(id: uploadId)
     }
 }

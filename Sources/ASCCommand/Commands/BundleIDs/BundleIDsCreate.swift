@@ -19,11 +19,11 @@ struct BundleIDsCreate: AsyncParsableCommand {
     var platform: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeBundleIDs()
+        let repo = try ClientProvider.makeBundleIDRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any BundleIDs) async throws -> String {
+    func execute(repo: any BundleIDRepository) async throws -> String {
         guard let domainPlatform = BundleIDPlatform(cliArgument: platform) else {
             throw ValidationError("Invalid platform '\(platform)'. Use ios, macos, or universal.")
         }

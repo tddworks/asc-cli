@@ -11,7 +11,7 @@ struct IrisAuthLogout: AsyncParsableCommand {
     @OptionGroup var globals: GlobalOptions
 
     func run() async throws {
-        let sessionRepo = ClientProvider.makeIrisSessions()
+        let sessionRepo = ClientProvider.makeIrisSessionRepository()
         let pendingURL = ClientProvider.pendingTwoFactorURL()
         try sessionRepo.delete()
         try? FileManager.default.removeItem(at: pendingURL)

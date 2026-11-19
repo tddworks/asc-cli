@@ -21,11 +21,11 @@ struct AppInfosList: AsyncParsableCommand {
     var appId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppInfos()
+        let repo = try ClientProvider.makeAppInfoRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AppInfos) async throws -> String {
+    func execute(repo: any AppInfoRepository) async throws -> String {
         let infos = try await repo.listAppInfos(appId: appId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
@@ -66,11 +66,11 @@ struct AppInfosUpdate: AsyncParsableCommand {
     var secondarySubcategoryTwo: String?
 
     func run() async throws {
-        let repo = try ClientProvider.makeAppInfos()
+        let repo = try ClientProvider.makeAppInfoRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any AppInfos) async throws -> String {
+    func execute(repo: any AppInfoRepository) async throws -> String {
         let info = try await repo.updateCategories(
             id: appInfoId,
             primaryCategoryId: primaryCategory,

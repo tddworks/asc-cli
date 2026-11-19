@@ -7,8 +7,8 @@ import Testing
 struct SubscriptionsControllerTests {
 
     /// Stubs App Store Connect so the saved subscription echoes the attributes it was sent.
-    private func echoingRepo() -> MockSubscriptions {
-        let mockRepo = MockSubscriptions()
+    private func echoingRepo() -> MockSubscriptionRepository {
+        let mockRepo = MockSubscriptionRepository()
         given(mockRepo).updateSubscription(
             subscriptionId: .any, name: .any, isFamilySharable: .any, groupLevel: .any, subscriptionPeriod: .any, reviewNote: .any,
             multiSeatStatus: .any, marketSettings: .any

@@ -7,7 +7,7 @@ import Testing
 struct ProfilesCreateTests {
 
     @Test func `execute creates profile and returns it`() async throws {
-        let mockRepo = MockProfiles()
+        let mockRepo = MockProfileRepository()
         given(mockRepo).createProfile(name: .any, profileType: .any, bundleIdId: .any, certificateIds: .any, deviceIds: .any)
             .willReturn(Profile(id: "prof-new", name: "My Profile", profileType: .iosAppStore, profileState: .active, bundleIdId: "bid-1"))
 
@@ -40,7 +40,7 @@ struct ProfilesCreateTests {
     }
 
     @Test func `execute throws for invalid profile type`() async throws {
-        let mockRepo = MockProfiles()
+        let mockRepo = MockProfileRepository()
         let cmd = try ProfilesCreate.parse([
             "--name", "My Profile",
             "--type", "INVALID_TYPE",
@@ -53,7 +53,7 @@ struct ProfilesCreateTests {
     }
 
     @Test func `table output includes all row fields`() async throws {
-        let mockRepo = MockProfiles()
+        let mockRepo = MockProfileRepository()
         given(mockRepo).createProfile(name: .any, profileType: .any, bundleIdId: .any, certificateIds: .any, deviceIds: .any)
             .willReturn(Profile(id: "prof-1", name: "Mac Store", profileType: .macAppStore, profileState: .active, bundleIdId: "bid-2"))
 

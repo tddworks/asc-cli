@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionGroupsCreateTests {
 
     @Test func `creates subscription group and returns it with affordances`() async throws {
-        let mockRepo = MockSubscriptionGroups()
+        let mockRepo = MockSubscriptionGroupRepository()
         given(mockRepo).createSubscriptionGroup(appId: .any, referenceName: .any)
             .willReturn(SubscriptionGroup(
                 id: "grp-new",
