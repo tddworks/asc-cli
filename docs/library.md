@@ -23,8 +23,7 @@ targets: [
 ## Example
 
 ```swift
-import Domain
-import Infrastructure
+import ASCKit
 
 // 1. Provide credentials (inline, env vars, or your own AuthProvider)
 let credentials = AuthCredentials(
@@ -57,4 +56,4 @@ let builds = try await buildRepo.listBuilds(appId: "YOUR_APP_ID", platform: nil,
 
 ## Repositories
 
-`ClientFactory` has a `make…Repository(authProvider:)` method for every domain area: apps, builds, versions, TestFlight, screenshots, in-app purchases, subscriptions, reports, code signing, Xcode Cloud and more. The full list is in [`Sources/Infrastructure/Client/ClientFactory.swift`](../Sources/Infrastructure/Client/ClientFactory.swift); each returns a protocol from the `Domain` module.
+`ClientFactory` has a `make…Repository(authProvider:)` method for every domain area: apps, builds, versions, TestFlight, screenshots, in-app purchases, subscriptions, reports, code signing, Xcode Cloud and more. The full list is in [`Sources/ASCKit/Shared/Internal/ClientFactory.swift`](../Sources/ASCKit/Shared/Internal/ClientFactory.swift); each returns a protocol from the concept's public face.

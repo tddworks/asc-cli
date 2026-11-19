@@ -1,5 +1,5 @@
 import ArgumentParser
-import Domain
+import ASCKit
 import Foundation
 
 /// `asc iris resolution-center get --submission-id <id>` — reads App Review's

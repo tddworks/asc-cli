@@ -1,7 +1,6 @@
 import ArgumentParser
-import Domain
+import ASCKit
 import Foundation
-import Infrastructure
 
 struct AuthLogin: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
@@ -30,7 +29,7 @@ struct AuthLogin: AsyncParsableCommand {
     var vendorNumber: String?
 
     func run() async throws {
-        let storage = FileAuthStorage()
+        let storage = ClientProvider.makeAuthStorage()
         print(try await execute(storage: storage))
     }
 

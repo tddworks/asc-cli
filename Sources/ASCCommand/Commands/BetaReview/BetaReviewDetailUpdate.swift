@@ -1,5 +1,5 @@
 import ArgumentParser
-import Domain
+import ASCKit
 
 struct BetaReviewDetailUpdate: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
@@ -42,7 +42,7 @@ struct BetaReviewDetailUpdate: AsyncParsableCommand {
     }
 
     func execute(repo: any BetaAppReviewRepository) async throws -> String {
-        let update = Domain.BetaAppReviewDetailUpdate(
+        let update = ASCKit.BetaAppReviewDetailUpdate(
             contactFirstName: contactFirstName,
             contactLastName: contactLastName,
             contactPhone: contactPhone,

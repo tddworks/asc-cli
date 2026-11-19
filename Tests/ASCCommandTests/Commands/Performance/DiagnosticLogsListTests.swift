@@ -1,6 +1,6 @@
 import Testing
 import Mockable
-@testable import Domain
+@testable import ASCKit
 @testable import ASCCommand
 
 @Suite

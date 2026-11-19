@@ -1,5 +1,5 @@
 import ArgumentParser
-import Domain
+import ASCKit
 
 struct VersionsSubmit: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
@@ -38,12 +38,16 @@ struct VersionsSubmit: AsyncParsableCommand {
                 planner: planner
             ))
         } else {
-            print(try await execute(repo: try ClientProvider.makeSubmissionRepository()))
+            print(try await execute(
+                versionRepo: try ClientProvider.makeVersionRepository(),
+                submissionRepo: try ClientProvider.makeSubmissionRepository()
+            ))
         }
     }
 
-    func execute(repo: any SubmissionRepository) async throws -> String {
-        let submission = try await repo.submitVersion(versionId: versionId)
+    func execute(versionRepo: any VersionRepository, submissionRepo: any SubmissionRepository) async throws -> String {
+        let version = try await versionRepo.getVersion(id: versionId)
+        let submission = try await version.submitForReview(to: submissionRepo)
 
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

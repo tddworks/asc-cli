@@ -1,0 +1,82 @@
+@preconcurrency import AppStoreConnect_Swift_SDK
+
+public struct SDKAppRepository: AppRepository, @unchecked Sendable {
+    private let client: any APIClient
+
+    public init(client: any APIClient) {
+        self.client = client
+    }
+
+    public func listApps(limit: Int?) async throws -> PaginatedResponse<ASCKit.App> {
+        let request = APIEndpoint.v1.apps.get(parameters: .init(
+            limit: limit
+        ))
+        let response = try await client.request(request)
+        let apps = response.data.map { mapApp($0) }
+        let nextCursor = response.links.next
+        return PaginatedResponse(data: apps, nextCursor: nextCursor)
+    }
+
+    public func getApp(id: String) async throws -> ASCKit.App {
+        let request = APIEndpoint.v1.apps.id(id).get()
+        let response = try await client.request(request)
+        return mapApp(response.data)
+    }
+
+    public func fetchAppIcon(appId: String) async throws -> ASCKit.ImageAsset? {
+        let request = APIEndpoint.v1.apps.id(appId).appStoreVersions.get(
+            parameters: .init(
+                fieldsBuilds: [.iconAssetToken],
+                include: [.build]
+            )
+        )
+        let response = try await client.request(request)
+
+        var buildsById: [String: AppStoreConnect_Swift_SDK.Build] = [:]
+        for item in response.included ?? [] {
+            if case .build(let build) = item {
+                buildsById[build.id] = build
+            }
+        }
+
+        for version in response.data {
+            guard let buildId = version.relationships?.build?.data?.id,
+                  let build = buildsById[buildId],
+                  let token = build.attributes?.iconAssetToken,
+                  let templateURL = token.templateURL,
+                  let width = token.width,
+                  let height = token.height
+            else { continue }
+            return ASCKit.ImageAsset(templateUrl: templateURL, width: width, height: height)
+        }
+        return nil
+    }
+
+    public func updateContentRights(appId: String, declaration: ASCKit.ContentRightsDeclaration?) async throws -> ASCKit.App {
+        let sdkDeclaration = declaration.map { AppUpdateRequest.Data.Attributes.ContentRightsDeclaration(rawValue: $0.rawValue) } ?? nil
+        let body = AppUpdateRequest(
+            data: .init(
+                type: .apps,
+                id: appId,
+                attributes: .init(contentRightsDeclaration: sdkDeclaration)
+            )
+        )
+        let response = try await client.request(APIEndpoint.v1.apps.id(appId).patch(body))
+        return mapApp(response.data)
+    }
+
+    private func mapApp(_ sdkApp: AppStoreConnect_Swift_SDK.App) -> ASCKit.App {
+        let rights: ASCKit.ContentRightsDeclaration? = {
+            guard let raw = sdkApp.attributes?.contentRightsDeclaration?.rawValue else { return nil }
+            return ASCKit.ContentRightsDeclaration(rawValue: raw)
+        }()
+        return ASCKit.App(
+            id: sdkApp.id,
+            name: sdkApp.attributes?.name ?? "",
+            bundleId: sdkApp.attributes?.bundleID ?? "",
+            sku: sdkApp.attributes?.sku,
+            primaryLocale: sdkApp.attributes?.primaryLocale,
+            contentRightsDeclaration: rights
+        )
+    }
+}

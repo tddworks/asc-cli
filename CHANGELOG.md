@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- `asc versions submit` and `POST /api/v1/versions/:id/submit` refuse a version that can't be edited (e.g. Ready for Sale) before calling Apple, saying which states can go to review.
+- **Breaking (library):** one `ASCKit` module (`import ASCKit`); 7 non-CRUD repositories take role names (`IrisAuthRepository` → `IrisSignIn`, …); `SubmissionRepository.submitVersion` → `AppStoreVersion.submitForReview(to:)`. → [design](docs/features/concept-folders/design.md)
+
+### Fixed
+- Command Center's Submit for Review no longer reports success when `versions submit` fails; it says the submission didn't go and points to the command log.
+
 ---
 
 ## [0.18.9] - 2026-11-08

@@ -1,6 +1,5 @@
-import Domain
+import ASCKit
 import Hummingbird
-import Infrastructure
 import ASCPlugin
 import Foundation
 
@@ -16,78 +15,76 @@ enum RESTRoutes {
 
         let v1 = router.group("/api/v1")
 
-        // Create shared auth + factory once
-        let auth = CompositeAuthProvider()
-        let factory = ClientFactory()
+        // Every repository comes from the one composition root, ClientProvider.
 
         // App resource hierarchy — one focused controller per resource type.
         // Order is incidental; each controller registers its own routes.
-        if let appRepo = try? factory.makeAppRepository(authProvider: auth) {
+        if let appRepo = try? ClientProvider.makeAppRepository() {
             AppsController(repo: appRepo).addRoutes(to: v1)
         }
-        if let versionRepo = try? factory.makeVersionRepository(authProvider: auth) {
+        if let versionRepo = try? ClientProvider.makeVersionRepository() {
             VersionsController(repo: versionRepo).addRoutes(to: v1)
         }
-        if let localizationRepo = try? factory.makeVersionLocalizationRepository(authProvider: auth) {
+        if let localizationRepo = try? ClientProvider.makeVersionLocalizationRepository() {
             VersionLocalizationsController(repo: localizationRepo).addRoutes(to: v1)
         }
-        if let screenshotRepo = try? factory.makeScreenshotRepository(authProvider: auth) {
+        if let screenshotRepo = try? ClientProvider.makeScreenshotRepository() {
             ScreenshotSetsController(repo: screenshotRepo).addRoutes(to: v1)
             ScreenshotsController(repo: screenshotRepo).addRoutes(to: v1)
         }
-        if let libraryRepo = try? factory.makeAssetLibraryRepository(authProvider: auth),
-           let imageRepo = try? factory.makeLibraryImageRepository(authProvider: auth),
-           let videoRepo = try? factory.makeLibraryVideoRepository(authProvider: auth),
-           let placementRepo = try? factory.makeAssetPlacementRepository(authProvider: auth) {
+        if let libraryRepo = try? ClientProvider.makeAssetLibraryRepository(),
+           let imageRepo = try? ClientProvider.makeLibraryImageRepository(),
+           let videoRepo = try? ClientProvider.makeLibraryVideoRepository(),
+           let placementRepo = try? ClientProvider.makeAssetPlacementRepository() {
             AssetLibraryController(
                 libraryRepo: libraryRepo, imageRepo: imageRepo, videoRepo: videoRepo, placementRepo: placementRepo
             ).addRoutes(to: v1)
-            if let versionRepo = try? factory.makeVersionRepository(authProvider: auth),
-               let localizationRepo = try? factory.makeVersionLocalizationRepository(authProvider: auth) {
+            if let versionRepo = try? ClientProvider.makeVersionRepository(),
+               let localizationRepo = try? ClientProvider.makeVersionLocalizationRepository() {
                 ScreenshotImportController(
                     versionRepo: versionRepo, localizationRepo: localizationRepo, libraryRepo: libraryRepo,
                     imageRepo: imageRepo, placementRepo: placementRepo
                 ).addRoutes(to: v1)
             }
         }
-        if let buildRepo = try? factory.makeBuildRepository(authProvider: auth) {
+        if let buildRepo = try? ClientProvider.makeBuildRepository() {
             BuildsController(repo: buildRepo).addRoutes(to: v1)
         }
-        if let testFlightRepo = try? factory.makeTestFlightRepository(authProvider: auth) {
+        if let testFlightRepo = try? ClientProvider.makeTestFlightRepository() {
             TestFlightController(repo: testFlightRepo).addRoutes(to: v1)
         }
-        if let betaAppLocRepo = try? factory.makeBetaAppLocalizationRepository(authProvider: auth) {
+        if let betaAppLocRepo = try? ClientProvider.makeBetaAppLocalizationRepository() {
             BetaAppLocalizationsController(repo: betaAppLocRepo).addRoutes(to: v1)
         }
-        if let reviewRepo = try? factory.makeCustomerReviewRepository(authProvider: auth) {
+        if let reviewRepo = try? ClientProvider.makeCustomerReviewRepository() {
             CustomerReviewsController(repo: reviewRepo).addRoutes(to: v1)
         }
-        if let iapRepo = try? factory.makeInAppPurchaseRepository(authProvider: auth) {
+        if let iapRepo = try? ClientProvider.makeInAppPurchaseRepository() {
             IAPController(repo: iapRepo).addRoutes(to: v1)
         }
-        if let subscriptionGroupRepo = try? factory.makeSubscriptionGroupRepository(authProvider: auth) {
+        if let subscriptionGroupRepo = try? ClientProvider.makeSubscriptionGroupRepository() {
             SubscriptionGroupsController(repo: subscriptionGroupRepo).addRoutes(to: v1)
         }
-        if let subscriptionRepo = try? factory.makeSubscriptionRepository(authProvider: auth) {
+        if let subscriptionRepo = try? ClientProvider.makeSubscriptionRepository() {
             SubscriptionsController(repo: subscriptionRepo).addRoutes(to: v1)
         }
-        if let promotedRepo = try? factory.makePromotedPurchaseRepository(authProvider: auth) {
+        if let promotedRepo = try? ClientProvider.makePromotedPurchaseRepository() {
             PromotedPurchasesController(repo: promotedRepo).addRoutes(to: v1)
         }
-        if let availabilityRepo = try? factory.makeAppAvailabilityRepository(authProvider: auth),
-           let territoryRepo = try? factory.makeTerritoryRepository(authProvider: auth) {
+        if let availabilityRepo = try? ClientProvider.makeAppAvailabilityRepository(),
+           let territoryRepo = try? ClientProvider.makeTerritoryRepository() {
             AppAvailabilityController(repo: availabilityRepo, territoryRepo: territoryRepo).addRoutes(to: v1)
         }
-        if let pricingRepo = try? factory.makePricingRepository(authProvider: auth) {
+        if let pricingRepo = try? ClientProvider.makePricingRepository() {
             AppPricingController(repo: pricingRepo).addRoutes(to: v1)
         }
-        if let productVersionRepo = try? factory.makeProductVersionRepository(authProvider: auth) {
+        if let productVersionRepo = try? ClientProvider.makeProductVersionRepository() {
             ProductVersionsController(repo: productVersionRepo).addRoutes(to: v1)
-            if let submissionRepo = try? factory.makeSubmissionRepository(authProvider: auth),
-               let versionRepo = try? factory.makeVersionRepository(authProvider: auth),
-               let iapRepo = try? factory.makeInAppPurchaseRepository(authProvider: auth),
-               let groupRepo = try? factory.makeSubscriptionGroupRepository(authProvider: auth),
-               let subscriptionRepo = try? factory.makeSubscriptionRepository(authProvider: auth) {
+            if let submissionRepo = try? ClientProvider.makeSubmissionRepository(),
+               let versionRepo = try? ClientProvider.makeVersionRepository(),
+               let iapRepo = try? ClientProvider.makeInAppPurchaseRepository(),
+               let groupRepo = try? ClientProvider.makeSubscriptionGroupRepository(),
+               let subscriptionRepo = try? ClientProvider.makeSubscriptionRepository() {
                 VersionSubmissionController(
                     submissionRepo: submissionRepo,
                     versionRepo: versionRepo,
@@ -96,80 +93,80 @@ enum RESTRoutes {
                 ).addRoutes(to: v1)
             }
         }
-        if let perfOverviewRepo = try? factory.makePerfOverviewRepository(authProvider: auth) {
+        if let perfOverviewRepo = try? ClientProvider.makePerfOverviewRepository() {
             PerfOverviewController(repo: perfOverviewRepo).addRoutes(to: v1)
         }
-        if let perfMetricsRepo = try? factory.makePerfMetricsRepository(authProvider: auth) {
+        if let perfMetricsRepo = try? ClientProvider.makePerfMetricsRepository() {
             PerfMetricsController(repo: perfMetricsRepo).addRoutes(to: v1)
         }
-        if let diagnosticsRepo = try? factory.makeDiagnosticsRepository(authProvider: auth) {
+        if let diagnosticsRepo = try? ClientProvider.makeDiagnosticsRepository() {
             DiagnosticsController(repo: diagnosticsRepo).addRoutes(to: v1)
         }
-        if let experimentRepo = try? factory.makeExperimentRepository(authProvider: auth) {
+        if let experimentRepo = try? ClientProvider.makeExperimentRepository() {
             ExperimentsController(repo: experimentRepo).addRoutes(to: v1)
         }
-        if let gameCenterRepo = try? factory.makeGameCenterRepository(authProvider: auth),
-           let moderationRepo = try? factory.makeGameCenterModerationRepository(authProvider: auth) {
+        if let gameCenterRepo = try? ClientProvider.makeGameCenterRepository(),
+           let moderationRepo = try? ClientProvider.makeGameCenterModerationRepository() {
             GameCenterController(repo: gameCenterRepo, moderationRepo: moderationRepo).addRoutes(to: v1)
         }
-        if let groupLocRepo = try? factory.makeSubscriptionGroupLocalizationRepository(authProvider: auth) {
+        if let groupLocRepo = try? ClientProvider.makeSubscriptionGroupLocalizationRepository() {
             SubscriptionGroupLocalizationsController(repo: groupLocRepo).addRoutes(to: v1)
         }
-        if let promoRepo = try? factory.makeSubscriptionPromotionalOfferRepository(authProvider: auth) {
+        if let promoRepo = try? ClientProvider.makeSubscriptionPromotionalOfferRepository() {
             SubscriptionPromotionalOffersController(repo: promoRepo).addRoutes(to: v1)
         }
-        if let winBackRepo = try? factory.makeWinBackOfferRepository(authProvider: auth) {
+        if let winBackRepo = try? ClientProvider.makeWinBackOfferRepository() {
             WinBackOffersController(repo: winBackRepo).addRoutes(to: v1)
         }
-        if let subPriceRepo = try? factory.makeSubscriptionPriceRepository(authProvider: auth) {
+        if let subPriceRepo = try? ClientProvider.makeSubscriptionPriceRepository() {
             SubscriptionPricePointsController(repo: subPriceRepo).addRoutes(to: v1)
             SubscriptionPriceScheduleController(repo: subPriceRepo).addRoutes(to: v1)
             SubscriptionEqualizationsController(repo: subPriceRepo).addRoutes(to: v1)
             SubscriptionPricesController(repo: subPriceRepo).addRoutes(to: v1)
         }
-        if let iapOfferCodeRepo = try? factory.makeInAppPurchaseOfferCodeRepository(authProvider: auth),
-           let subOfferCodeRepo = try? factory.makeSubscriptionOfferCodeRepository(authProvider: auth) {
+        if let iapOfferCodeRepo = try? ClientProvider.makeInAppPurchaseOfferCodeRepository(),
+           let subOfferCodeRepo = try? ClientProvider.makeSubscriptionOfferCodeRepository() {
             OfferCodePricesController(iapRepo: iapOfferCodeRepo, subRepo: subOfferCodeRepo).addRoutes(to: v1)
         }
-        if let iapOfferCodeRepo = try? factory.makeInAppPurchaseOfferCodeRepository(authProvider: auth) {
+        if let iapOfferCodeRepo = try? ClientProvider.makeInAppPurchaseOfferCodeRepository() {
             IAPOfferCodeOneTimeCodesController(repo: iapOfferCodeRepo).addRoutes(to: v1)
         }
-        if let subOfferCodeRepo = try? factory.makeSubscriptionOfferCodeRepository(authProvider: auth) {
+        if let subOfferCodeRepo = try? ClientProvider.makeSubscriptionOfferCodeRepository() {
             SubscriptionOfferCodeOneTimeCodesController(repo: subOfferCodeRepo).addRoutes(to: v1)
         }
-        if let iapReviewRepo = try? factory.makeInAppPurchaseReviewRepository(authProvider: auth) {
+        if let iapReviewRepo = try? ClientProvider.makeInAppPurchaseReviewRepository() {
             IAPReviewController(repo: iapReviewRepo).addRoutes(to: v1)
         }
-        if let subReviewRepo = try? factory.makeSubscriptionReviewRepository(authProvider: auth) {
+        if let subReviewRepo = try? ClientProvider.makeSubscriptionReviewRepository() {
             SubscriptionReviewController(repo: subReviewRepo).addRoutes(to: v1)
         }
-        if let iapSubmissionRepo = try? factory.makeInAppPurchaseSubmissionRepository(authProvider: auth) {
+        if let iapSubmissionRepo = try? ClientProvider.makeInAppPurchaseSubmissionRepository() {
             IAPSubmissionController(repo: iapSubmissionRepo).addRoutes(to: v1)
         }
         IrisIAPSubmissionsController(
-            cookieProvider: factory.makeIrisCookieProvider(),
-            repo: factory.makeIrisInAppPurchaseSubmissionRepository()
+            cookieProvider: ClientProvider.makeIrisCookieProvider(),
+            repo: ClientProvider.makeIrisInAppPurchaseSubmissionRepository()
         ).addRoutes(to: v1)
         IrisResolutionCenterController(
-            cookieProvider: factory.makeIrisCookieProvider(),
-            repo: factory.makeIrisResolutionCenterRepository()
+            cookieProvider: ClientProvider.makeIrisCookieProvider(),
+            repo: ClientProvider.makeIrisResolutionCenterRepository()
         ).addRoutes(to: v1)
-        if let subSubmissionRepo = try? factory.makeSubscriptionSubmissionRepository(authProvider: auth) {
+        if let subSubmissionRepo = try? ClientProvider.makeSubscriptionSubmissionRepository() {
             SubscriptionSubmissionController(repo: subSubmissionRepo).addRoutes(to: v1)
         }
 
         // IAP detail listings
-        if let iapLocRepo = try? factory.makeInAppPurchaseLocalizationRepository(authProvider: auth) {
+        if let iapLocRepo = try? ClientProvider.makeInAppPurchaseLocalizationRepository() {
             IAPLocalizationsController(repo: iapLocRepo).addRoutes(to: v1)
         }
-        if let iapAvailRepo = try? factory.makeInAppPurchaseAvailabilityRepository(authProvider: auth),
-           let territoryRepo = try? factory.makeTerritoryRepository(authProvider: auth) {
+        if let iapAvailRepo = try? ClientProvider.makeInAppPurchaseAvailabilityRepository(),
+           let territoryRepo = try? ClientProvider.makeTerritoryRepository() {
             IAPAvailabilityController(repo: iapAvailRepo, territoryRepo: territoryRepo).addRoutes(to: v1)
         }
-        if let iapOfferCodeRepo = try? factory.makeInAppPurchaseOfferCodeRepository(authProvider: auth) {
+        if let iapOfferCodeRepo = try? ClientProvider.makeInAppPurchaseOfferCodeRepository() {
             IAPOfferCodesController(repo: iapOfferCodeRepo).addRoutes(to: v1)
         }
-        if let iapPriceRepo = try? factory.makeInAppPurchasePriceRepository(authProvider: auth) {
+        if let iapPriceRepo = try? ClientProvider.makeInAppPurchasePriceRepository() {
             IAPPricePointsController(repo: iapPriceRepo).addRoutes(to: v1)
             IAPPriceScheduleController(repo: iapPriceRepo).addRoutes(to: v1)
             IAPEqualizationsController(repo: iapPriceRepo).addRoutes(to: v1)
@@ -177,60 +174,60 @@ enum RESTRoutes {
         }
 
         // Subscription detail listings
-        if let subLocRepo = try? factory.makeSubscriptionLocalizationRepository(authProvider: auth) {
+        if let subLocRepo = try? ClientProvider.makeSubscriptionLocalizationRepository() {
             SubscriptionLocalizationsController(repo: subLocRepo).addRoutes(to: v1)
         }
-        if let subAvailRepo = try? factory.makeSubscriptionAvailabilityRepository(authProvider: auth),
-           let territoryRepo = try? factory.makeTerritoryRepository(authProvider: auth) {
+        if let subAvailRepo = try? ClientProvider.makeSubscriptionAvailabilityRepository(),
+           let territoryRepo = try? ClientProvider.makeTerritoryRepository() {
             SubscriptionAvailabilityController(repo: subAvailRepo, territoryRepo: territoryRepo).addRoutes(to: v1)
         }
-        if let subOfferCodeRepo = try? factory.makeSubscriptionOfferCodeRepository(authProvider: auth) {
+        if let subOfferCodeRepo = try? ClientProvider.makeSubscriptionOfferCodeRepository() {
             SubscriptionOfferCodesController(repo: subOfferCodeRepo).addRoutes(to: v1)
         }
-        if let subIntroRepo = try? factory.makeSubscriptionIntroductoryOfferRepository(authProvider: auth) {
+        if let subIntroRepo = try? ClientProvider.makeSubscriptionIntroductoryOfferRepository() {
             SubscriptionIntroductoryOffersController(repo: subIntroRepo).addRoutes(to: v1)
         }
-        if let appInfoRepo = try? factory.makeAppInfoRepository(authProvider: auth) {
+        if let appInfoRepo = try? ClientProvider.makeAppInfoRepository() {
             AppInfosController(repo: appInfoRepo).addRoutes(to: v1)
         }
-        if let appCategoryRepo = try? factory.makeAppCategoryRepository(authProvider: auth) {
+        if let appCategoryRepo = try? ClientProvider.makeAppCategoryRepository() {
             AppCategoriesController(repo: appCategoryRepo).addRoutes(to: v1)
         }
-        if let ageRatingRepo = try? factory.makeAgeRatingDeclarationRepository(authProvider: auth) {
+        if let ageRatingRepo = try? ClientProvider.makeAgeRatingDeclarationRepository() {
             AgeRatingController(repo: ageRatingRepo).addRoutes(to: v1)
         }
 
         // Code signing
         if let signing = try? CodeSigningController(
-            certRepo: factory.makeCertificateRepository(authProvider: auth),
-            bundleIDRepo: factory.makeBundleIDRepository(authProvider: auth),
-            deviceRepo: factory.makeDeviceRepository(authProvider: auth),
-            profileRepo: factory.makeProfileRepository(authProvider: auth)
+            certRepo: ClientProvider.makeCertificateRepository(),
+            bundleIDRepo: ClientProvider.makeBundleIDRepository(),
+            deviceRepo: ClientProvider.makeDeviceRepository(),
+            profileRepo: ClientProvider.makeProfileRepository()
         ) { signing.addRoutes(to: v1) }
 
         // Review submissions
         if let submissions = try? ReviewSubmissionsController(
-            submissionRepo: factory.makeSubmissionRepository(authProvider: auth)
+            submissionRepo: ClientProvider.makeSubmissionRepository()
         ) { submissions.addRoutes(to: v1) }
 
         // Auth — manages the credential store the rest of the controllers consume.
-        AuthController(storage: FileAuthStorage()).addRoutes(to: v1)
+        AuthController(storage: ClientProvider.makeAuthStorage()).addRoutes(to: v1)
 
         // Non-authenticated resources
-        SimulatorsController(repo: factory.makeSimulatorRepository()).addRoutes(to: v1)
-        PluginsController(repo: factory.makePluginRepository()).addRoutes(to: v1)
+        SimulatorsController(repo: ClientProvider.makeSimulators()).addRoutes(to: v1)
+        PluginsController(repo: ClientProvider.makePlugins()).addRoutes(to: v1)
 
         if let territories = try? TerritoriesController(
-            repo: factory.makeTerritoryRepository(authProvider: auth)
+            repo: ClientProvider.makeTerritoryRepository()
         ) { territories.addRoutes(to: v1) }
 
         // App Shots
         AppShotsController(
-            templateRepo: AggregateTemplateRepository.shared,
-            themeRepo: AggregateThemeRepository.shared,
-            htmlRenderer: WebKitHTMLRenderer(),
-            configStorage: FileAppShotsConfigStorage(),
-            galleryTemplateRepo: AggregateGalleryTemplateRepository.shared
+            templateRepo: ClientProvider.makeTemplateRepository(),
+            themeRepo: ClientProvider.makeThemes(),
+            htmlRenderer: ClientProvider.makeHTMLRenderer(),
+            configStorage: ClientProvider.makeAppShotsConfigStorage(),
+            galleryTemplateRepo: ClientProvider.makeGalleryTemplateRepository()
         ).addRoutes(to: v1)
     }
 }

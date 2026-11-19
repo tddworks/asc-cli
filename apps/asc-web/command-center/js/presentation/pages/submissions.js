@@ -64,7 +64,13 @@ async function checkReadiness() {
 async function submitForReview() {
   const vid = document.getElementById('submitVersionId')?.value || 'v-ps-002';
   showToast('Submitting...', 'info');
-  await DataProvider.fetch(`versions submit --version-id ${vid}`);
+  const submission = await DataProvider.fetch(`versions submit --version-id ${vid}`);
+  // DataProvider answers null when the command fails (e.g. the version can't be
+  // edited, or Apple refused it); the reason is already in the command log.
+  if (!submission) {
+    showToast('Not submitted for review — see the command log for why.', 'error');
+    return;
+  }
   showToast('Submitted for App Store Review!', 'success');
 }
 

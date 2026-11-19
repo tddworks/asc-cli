@@ -1,5 +1,5 @@
 import ArgumentParser
-import Domain
+import ASCKit
 import Foundation
 
 struct AppShotsThemesCommand: AsyncParsableCommand {
@@ -27,11 +27,11 @@ struct AppShotsThemesList: AsyncParsableCommand {
     @OptionGroup var globals: GlobalOptions
 
     func run() async throws {
-        let repo = ClientProvider.makeThemeRepository()
+        let repo = ClientProvider.makeThemes()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any ThemeRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any Themes, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let themes = try await repo.listThemes()
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(
@@ -60,11 +60,11 @@ struct AppShotsThemesGet: AsyncParsableCommand {
     var context: Bool = false
 
     func run() async throws {
-        let repo = ClientProvider.makeThemeRepository()
+        let repo = ClientProvider.makeThemes()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any ThemeRepository) async throws -> String {
+    func execute(repo: any Themes) async throws -> String {
         guard let theme = try await repo.getTheme(id: id) else {
             throw ValidationError("Theme '\(id)' not found. Run `asc app-shots themes list` to see available themes.")
         }
@@ -96,11 +96,11 @@ struct AppShotsThemesDesign: AsyncParsableCommand {
     var id: String
 
     func run() async throws {
-        let repo = ClientProvider.makeThemeRepository()
+        let repo = ClientProvider.makeThemes()
         print(try await execute(themeRepo: repo))
     }
 
-    func execute(themeRepo: any ThemeRepository) async throws -> String {
+    func execute(themeRepo: any Themes) async throws -> String {
         let design = try await themeRepo.design(themeId: id)
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -236,7 +236,7 @@ struct AppShotsThemesApply: AsyncParsableCommand {
     var imageOutput: String?
 
     func run() async throws {
-        let themeRepo = ClientProvider.makeThemeRepository()
+        let themeRepo = ClientProvider.makeThemes()
         let templateRepo = ClientProvider.makeTemplateRepository()
         if preview == .image {
             let renderer = ClientProvider.makeHTMLRenderer()
@@ -246,7 +246,7 @@ struct AppShotsThemesApply: AsyncParsableCommand {
         }
     }
 
-    func execute(themeRepo: any ThemeRepository, templateRepo: any TemplateRepository, renderer: (any HTMLRenderer)? = nil) async throws -> String {
+    func execute(themeRepo: any Themes, templateRepo: any TemplateRepository, renderer: (any HTMLRenderer)? = nil) async throws -> String {
         guard let tmpl = try await templateRepo.getTemplate(id: template) else {
             throw ValidationError("Template '\(template)' not found. Run `asc app-shots templates list` to see available templates.")
         }

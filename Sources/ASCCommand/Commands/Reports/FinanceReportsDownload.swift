@@ -1,6 +1,5 @@
 import ArgumentParser
-import Domain
-import Infrastructure
+import ASCKit
 
 struct FinanceReportsDownload: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
@@ -23,12 +22,12 @@ struct FinanceReportsDownload: AsyncParsableCommand {
     var reportDate: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeReportRepository()
-        let storage = FileAuthStorage()
+        let repo = try ClientProvider.makeReports()
+        let storage = ClientProvider.makeAuthStorage()
         print(try await execute(repo: repo, storage: storage))
     }
 
-    func execute(repo: any ReportRepository, storage: any AuthStorage = FileAuthStorage()) async throws -> String {
+    func execute(repo: any Reports, storage: any AuthStorage = ClientProvider.makeAuthStorage()) async throws -> String {
         let resolvedVendorNumber = try VendorNumberResolver.resolve(explicit: vendorNumber, storage: storage)
 
         guard let parsedReportType = FinanceReportType(cliArgument: reportType) else {

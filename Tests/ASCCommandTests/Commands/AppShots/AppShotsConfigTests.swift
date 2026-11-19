@@ -2,7 +2,7 @@ import Foundation
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite
 struct AppShotsConfigCommandTests {
@@ -20,7 +20,7 @@ struct AppShotsConfigCommandTests {
 
     @Test func `config shows file key when no flags given`() async throws {
         let mockStorage = MockAppShotsConfigStorage()
-        given(mockStorage).load().willReturn(Domain.AppShotsConfig(geminiApiKey: "AIzaSyBUwwho8MWw9gsPDAuIp"))
+        given(mockStorage).load().willReturn(ASCKit.AppShotsConfig(geminiApiKey: "AIzaSyBUwwho8MWw9gsPDAuIp"))
 
         var cmd = try AppShotsConfig.parse([])
         let output = try await cmd.execute(storage: mockStorage)
@@ -58,7 +58,7 @@ struct AppShotsGenerateKeyResolutionTests {
 
     @Test func `resolveApiKey falls back to config file`() throws {
         let mockStorage = MockAppShotsConfigStorage()
-        given(mockStorage).load().willReturn(Domain.AppShotsConfig(geminiApiKey: "stored-key"))
+        given(mockStorage).load().willReturn(ASCKit.AppShotsConfig(geminiApiKey: "stored-key"))
         let key = try resolveGeminiApiKey(nil, configStorage: mockStorage)
         #expect(key == "stored-key")
     }

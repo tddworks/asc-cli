@@ -1,6 +1,6 @@
 import Foundation
 import ArgumentParser
-import Domain
+import ASCKit
 
 struct AppAvailabilityGet: AsyncParsableCommand {
     static let configuration = CommandConfiguration(

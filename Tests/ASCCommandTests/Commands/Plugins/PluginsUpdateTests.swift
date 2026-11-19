@@ -1,13 +1,13 @@
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite("PluginsUpdate — apply an update to one plugin")
 struct PluginsUpdateTests {
 
     @Test func `updated plugin is returned with the new version and installed affordances`() async throws {
-        let mockRepo = MockPluginRepository()
+        let mockRepo = MockPlugins()
         given(mockRepo).update(name: .value("Hello")).willReturn(
             Plugin(
                 id: "Hello.plugin",

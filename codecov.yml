@@ -16,12 +16,17 @@ comment:
 ignore:
   - "Tests/**/*"
 
+  # The bare outside call — Process, URLSession, WebKit — ≤100 lines, no decisions.
+  # Its decisions live beside it in Internal/ and are unit-tested.
+  # (docs/features/concept-folders/design.md)
+  - "Sources/**/Internal/System/**"
+
   # TUI — terminal UI framework, not unit-testable
   - "Sources/ASCCommand/Commands/TUI/**/*"
 
   # Composition roots — wire real SDK clients, not unit-testable
   - "Sources/ASCCommand/ClientProvider.swift"
-  - "Sources/Infrastructure/Client/ClientFactory.swift"
+  - "Sources/ASCKit/Shared/Internal/ClientFactory.swift"
 
   # Entry points (minimal logic, hard to unit test)
   - "Sources/ASCCommand/ASC.swift"
@@ -35,26 +40,8 @@ ignore:
 
   # Web server runtime — Hummingbird server, certs, dylib loading
   - "Sources/ASCCommand/Commands/Web/**/*"
-  - "Sources/Infrastructure/Web/**/*"
+  - "Sources/ASCKit/Web/**/*"
 
-  # Iris — real browser cookie extraction and HTTP calls, not unit-testable
-  - "Sources/Infrastructure/Iris/BrowserIrisCookieProvider.swift"
-  - "Sources/Infrastructure/Iris/IrisClient.swift"
-
-  # Iris auth — drives Apple SRP login + idmsa.apple.com HTTP, third-party-interactive
-  - "Sources/Infrastructure/Iris/Auth/**"
-
-  # Iris private app-bundle API — Apple iris HTTP adapter, third-party-interactive
-  - "Sources/Infrastructure/Iris/AppBundles/**"
-
-  # WebKit HTML renderer — WKWebView + AppKit GUI snapshot, not unit-testable
-  - "Sources/Infrastructure/ScreenshotPlans/WebKitHTMLRenderer.swift"
-
-  # Shell runner — spawns real subprocesses, not unit-testable
-  - "Sources/Infrastructure/Skills/ShellRunner.swift"
-
-  # Plugin marketplace — wraps PluginLoader (filesystem) + URLSession download + unzip
-  - "Sources/Infrastructure/Plugins/PluginMarketRepository.swift"
 
   # Simulator stream — HTTP server, subprocess management, AXe shell integration
   - "Sources/Infrastructure/Simulators/DeviceStreamServer.swift"

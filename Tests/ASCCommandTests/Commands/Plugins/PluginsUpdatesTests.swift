@@ -1,13 +1,13 @@
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite("PluginsUpdates — list outdated plugins")
 struct PluginsUpdatesTests {
 
     @Test func `outdated plugins are listed with installed and latest versions plus update affordance`() async throws {
-        let mockRepo = MockPluginRepository()
+        let mockRepo = MockPlugins()
         given(mockRepo).listOutdated().willReturn([
             PluginUpdate(
                 name: "Hello",
@@ -37,7 +37,7 @@ struct PluginsUpdatesTests {
     }
 
     @Test func `no outdated plugins returns empty data array`() async throws {
-        let mockRepo = MockPluginRepository()
+        let mockRepo = MockPlugins()
         given(mockRepo).listOutdated().willReturn([])
         let cmd = try PluginsUpdates.parse(["--pretty"])
         let output = try await cmd.execute(repo: mockRepo)

@@ -1,5 +1,5 @@
 import ArgumentParser
-import Domain
+import ASCKit
 
 extension SubscriptionPeriod: ExpressibleByArgument {}
 extension SubscriptionMultiSeatStatus: ExpressibleByArgument {}

@@ -1,7 +1,6 @@
 import ArgumentParser
-import Domain
+import ASCKit
 import Foundation
-import Infrastructure
 
 struct AppShotsConfig: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
@@ -18,7 +17,7 @@ struct AppShotsConfig: AsyncParsableCommand {
     var remove: Bool = false
 
     func run() async throws {
-        let storage = FileAppShotsConfigStorage()
+        let storage = ClientProvider.makeAppShotsConfigStorage()
         print(try await execute(storage: storage))
     }
 
@@ -29,7 +28,7 @@ struct AppShotsConfig: AsyncParsableCommand {
         }
 
         if let key = geminiApiKey, !key.isEmpty {
-            let config = Domain.AppShotsConfig(geminiApiKey: key)
+            let config = ASCKit.AppShotsConfig(geminiApiKey: key)
             try storage.save(config)
             let masked = String(key.prefix(8)) + "..." + String(key.suffix(4))
             return "Gemini API key saved to ~/.asc/app-shots-config.json (\(masked))"

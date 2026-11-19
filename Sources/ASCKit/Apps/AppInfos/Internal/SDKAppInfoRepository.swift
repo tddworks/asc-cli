@@ -1,0 +1,125 @@
+@preconcurrency import AppStoreConnect_Swift_SDK
+
+public struct SDKAppInfoRepository: AppInfoRepository, @unchecked Sendable {
+    private let client: any APIClient
+
+    public init(client: any APIClient) {
+        self.client = client
+    }
+
+    public func listAppInfos(appId: String) async throws -> [ASCKit.AppInfo] {
+        // `fields[appInfos]` alone returns only relationship `links`, not `data.id`.
+        // `include=...` forces ASC to populate `data` so we can read the category ids.
+        let request = APIEndpoint.v1.apps.id(appId).appInfos.get(
+            parameters: .init(
+                fieldsAppInfos: [
+                    .appStoreState, .state, .appStoreAgeRating,
+                    .primaryCategory, .primarySubcategoryOne, .primarySubcategoryTwo,
+                    .secondaryCategory, .secondarySubcategoryOne, .secondarySubcategoryTwo,
+                ],
+                fieldsAppCategories: [.parent],
+                include: [
+                    .primaryCategory, .primarySubcategoryOne, .primarySubcategoryTwo,
+                    .secondaryCategory, .secondarySubcategoryOne, .secondarySubcategoryTwo,
+                ]
+            )
+        )
+        let response = try await client.request(request)
+        return response.data.map { mapAppInfo($0, appId: appId) }
+    }
+
+    public func listLocalizations(appInfoId: String) async throws -> [ASCKit.AppInfoLocalization] {
+        let request = APIEndpoint.v1.appInfos.id(appInfoId).appInfoLocalizations.get()
+        let response = try await client.request(request)
+        return response.data.map { mapLocalization($0, appInfoId: appInfoId) }
+    }
+
+    public func createLocalization(appInfoId: String, locale: String, name: String) async throws -> ASCKit.AppInfoLocalization {
+        let body = AppInfoLocalizationCreateRequest(
+            data: .init(
+                type: .appInfoLocalizations,
+                attributes: .init(locale: locale, name: name),
+                relationships: .init(appInfo: .init(data: .init(type: .appInfos, id: appInfoId)))
+            )
+        )
+        let response = try await client.request(APIEndpoint.v1.appInfoLocalizations.post(body))
+        return mapLocalization(response.data, appInfoId: appInfoId)
+    }
+
+    public func updateLocalization(id: String, name: String?, subtitle: String?, privacyPolicyUrl: String?, privacyChoicesUrl: String?, privacyPolicyText: String?) async throws -> ASCKit.AppInfoLocalization {
+        let body = AppInfoLocalizationUpdateRequest(
+            data: .init(
+                type: .appInfoLocalizations,
+                id: id,
+                attributes: .init(name: name, subtitle: subtitle, privacyPolicyURL: privacyPolicyUrl, privacyChoicesURL: privacyChoicesUrl, privacyPolicyText: privacyPolicyText)
+            )
+        )
+        let response = try await client.request(APIEndpoint.v1.appInfoLocalizations.id(id).patch(body))
+        let appInfoId = response.data.relationships?.appInfo?.data?.id ?? ""
+        return mapLocalization(response.data, appInfoId: appInfoId)
+    }
+
+    public func deleteLocalization(id: String) async throws {
+        try await client.request(APIEndpoint.v1.appInfoLocalizations.id(id).delete)
+    }
+
+    public func updateCategories(
+        id: String,
+        primaryCategoryId: String?,
+        primarySubcategoryOneId: String?,
+        primarySubcategoryTwoId: String?,
+        secondaryCategoryId: String?,
+        secondarySubcategoryOneId: String?,
+        secondarySubcategoryTwoId: String?
+    ) async throws -> ASCKit.AppInfo {
+        let relationships = AppInfoUpdateRequest.Data.Relationships(
+            primaryCategory: primaryCategoryId.map { .init(data: .init(type: .appCategories, id: $0)) },
+            primarySubcategoryOne: primarySubcategoryOneId.map { .init(data: .init(type: .appCategories, id: $0)) },
+            primarySubcategoryTwo: primarySubcategoryTwoId.map { .init(data: .init(type: .appCategories, id: $0)) },
+            secondaryCategory: secondaryCategoryId.map { .init(data: .init(type: .appCategories, id: $0)) },
+            secondarySubcategoryOne: secondarySubcategoryOneId.map { .init(data: .init(type: .appCategories, id: $0)) },
+            secondarySubcategoryTwo: secondarySubcategoryTwoId.map { .init(data: .init(type: .appCategories, id: $0)) }
+        )
+        let body = AppInfoUpdateRequest(data: .init(type: .appInfos, id: id, relationships: relationships))
+        let response = try await client.request(APIEndpoint.v1.appInfos.id(id).patch(body))
+        let appId = response.data.relationships?.app?.data?.id ?? ""
+        return mapAppInfo(response.data, appId: appId)
+    }
+
+    // MARK: - Mappers
+
+    private func mapAppInfo(
+        _ sdkInfo: AppStoreConnect_Swift_SDK.AppInfo,
+        appId: String
+    ) -> ASCKit.AppInfo {
+        ASCKit.AppInfo(
+            id: sdkInfo.id,
+            appId: appId,
+            appStoreState: sdkInfo.attributes?.appStoreState?.rawValue,
+            state: sdkInfo.attributes?.state?.rawValue,
+            appStoreAgeRating: sdkInfo.attributes?.appStoreAgeRating?.rawValue,
+            primaryCategoryId: sdkInfo.relationships?.primaryCategory?.data?.id,
+            primarySubcategoryOneId: sdkInfo.relationships?.primarySubcategoryOne?.data?.id,
+            primarySubcategoryTwoId: sdkInfo.relationships?.primarySubcategoryTwo?.data?.id,
+            secondaryCategoryId: sdkInfo.relationships?.secondaryCategory?.data?.id,
+            secondarySubcategoryOneId: sdkInfo.relationships?.secondarySubcategoryOne?.data?.id,
+            secondarySubcategoryTwoId: sdkInfo.relationships?.secondarySubcategoryTwo?.data?.id
+        )
+    }
+
+    private func mapLocalization(
+        _ sdkLoc: AppStoreConnect_Swift_SDK.AppInfoLocalization,
+        appInfoId: String
+    ) -> ASCKit.AppInfoLocalization {
+        ASCKit.AppInfoLocalization(
+            id: sdkLoc.id,
+            appInfoId: appInfoId,
+            locale: sdkLoc.attributes?.locale ?? "",
+            name: sdkLoc.attributes?.name,
+            subtitle: sdkLoc.attributes?.subtitle,
+            privacyPolicyUrl: sdkLoc.attributes?.privacyPolicyURL,
+            privacyChoicesUrl: sdkLoc.attributes?.privacyChoicesURL,
+            privacyPolicyText: sdkLoc.attributes?.privacyPolicyText
+        )
+    }
+}

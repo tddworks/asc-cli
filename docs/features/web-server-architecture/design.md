@@ -18,7 +18,7 @@ Browser (asccli.app)  ←──HTTP/WS──→  Swift Server (localhost:8420)
 │  ASCCommand                                                   │
 │  └── WebServerCommand.swift    CLI entry, command runner      │
 ├──────────────────────────────────────────────────────────────┤
-│  Infrastructure/Web                                           │
+│  ASCKit/Web                                                   │
 │  ├── ASCWebServer.swift        Hummingbird app, routes,       │
 │  │                             plugin loading, HTTPS           │
 │  ├── CORSMiddleware.swift      Cross-origin for asccli.app    │
@@ -98,11 +98,11 @@ Sources/
 ├── ASCPlugin/
 │   ├── ASCPlugin.swift           # @objc protocol, ASCRouter typealias
 │   └── PluginLoader.swift        # .plugin/.framework/.dylib discovery
-├── Infrastructure/Web/
+├── ASCKit/Web/
 │   ├── ASCWebServer.swift        # Hummingbird server, plugin loading
 │   ├── CORSMiddleware.swift      # CORS for asccli.app → localhost
 │   └── SelfSignedCert.swift      # HTTPS cert management
-├── Domain/Shared/
+├── ASCKit/Shared/
 │   └── AffordanceRegistry.swift  # Plugin affordance extension
 └── ASCCommand/Commands/Web/
     └── WebServerCommand.swift    # CLI entry point

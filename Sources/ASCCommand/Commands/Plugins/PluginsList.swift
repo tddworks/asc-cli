@@ -1,5 +1,5 @@
 import ArgumentParser
-import Domain
+import ASCKit
 
 struct PluginsList: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
@@ -10,11 +10,11 @@ struct PluginsList: AsyncParsableCommand {
     @OptionGroup var globals: GlobalOptions
 
     func run() async throws {
-        let repo = ClientProvider.makePluginRepository()
+        let repo = ClientProvider.makePlugins()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any PluginRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
+    func execute(repo: any Plugins, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let plugins = try await repo.listInstalled()
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(plugins, affordanceMode: affordanceMode)

@@ -1,7 +1,6 @@
 import ArgumentParser
-import Domain
+import ASCKit
 import Foundation
-import Infrastructure
 
 struct InitCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
@@ -31,7 +30,7 @@ struct InitCommand: AsyncParsableCommand {
 
     func run() async throws {
         let repo = try ClientProvider.makeAppRepository()
-        let storage = FileProjectConfigStorage()
+        let storage = ClientProvider.makeProjectConfigStorage()
         print(try await execute(repo: repo, storage: storage))
     }
 

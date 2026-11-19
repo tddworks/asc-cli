@@ -1,5 +1,5 @@
 import ArgumentParser
-import Domain
+import ASCKit
 
 enum VendorNumberResolver {
     static func resolve(explicit: String?, storage: any AuthStorage) throws -> String {

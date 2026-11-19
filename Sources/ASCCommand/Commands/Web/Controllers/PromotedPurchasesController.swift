@@ -1,7 +1,6 @@
-import Domain
+import ASCKit
 import Hummingbird
 import HummingbirdWebSocket
-import Infrastructure
 
 /// Routes that return `PromotedPurchase` resources (App Store product page promoted slots).
 struct PromotedPurchasesController: Sendable {

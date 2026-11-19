@@ -1,7 +1,7 @@
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 private func makeTreatment(id: String = "trt-1", experimentId: String = "exp-1", appIconName: String? = "AppIcon-Blue") -> ExperimentTreatment {
     ExperimentTreatment(id: id, experimentId: experimentId, name: "Blue icon", appIconName: appIconName)

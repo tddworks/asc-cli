@@ -102,7 +102,7 @@ Use `formatter.formatAgentItems()` (not `formatItems`) for commands that should 
 
 **Test approach**: `OutputFormatterTests` with known domain model inputs; affordance tests in `AffordancesTests.swift`
 
-### 3. Infrastructure Improvements
+### 3. Adapter (`Internal/`) Improvements
 
 Enhance OpenAPI adapters or error handling:
 
@@ -163,15 +163,15 @@ swift test  # Must remain all green
 
 | Layer | Location | Improvement Examples |
 |-------|----------|---------------------|
-| **Domain** | `Sources/Domain/` | New computed properties, convenience methods, better enums |
-| **Infrastructure** | `Sources/Infrastructure/` | Better error mapping, additional field mapping |
+| **Public face** | `Sources/ASCKit/<Concept>/` | New computed properties, convenience methods, better enums |
+| **Implementations** | `Sources/ASCKit/<Concept>/Internal/` | Better error mapping, additional field mapping |
 | **ASCCommand** | `Sources/ASCCommand/` | Output formatting, command options, TUI enhancements |
 
 ## Guidelines
 
 ### Do
 - Keep changes focused and minimal
-- Put the rule on the type that owns it — a state enum's semantic boolean, a model's `structuredAffordances`, the Infrastructure mapper — not in a command or controller
+- Put the rule on the type that owns it — a state enum's semantic boolean, a model's `structuredAffordances`, the `Internal/` mapper — not in a command or controller
 - Maintain existing behavior
 - Add tests for new behavior
 - Follow existing code patterns

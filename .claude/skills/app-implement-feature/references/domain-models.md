@@ -87,14 +87,13 @@ public protocol PaymentProcessor: Sendable {
     func refund(transactionId: String, amount: Decimal) async throws -> RefundResult
 }
 
+// CRUD for an aggregate: XxxRepository. Anything more than CRUD takes a role noun.
 @Mockable
-public protocol Repository: Sendable {
-    associatedtype Entity
-    associatedtype ID
-
-    func findById(_ id: ID) async throws -> Entity?
-    func save(_ entity: Entity) async throws
-    func delete(_ id: ID) async throws
+public protocol OrderRepository: Sendable {
+    func all() async throws -> [Order]
+    func fetch(id: OrderId) async throws -> Order
+    func save(_ order: Order) async throws
+    func delete(id: OrderId) async throws
 }
 ```
 
@@ -196,30 +195,36 @@ public enum OrderStatus: Int, Comparable, Sendable, CaseIterable {
 
 ## Actors for Thread Safety
 
-Use actors for stateful domain services:
+Use actors for stateful domain objects (named for what they are, never `XxxManager`):
 
 ```swift
-public actor OrderManager {
-    private let repository: any OrderRepository
+public actor OrderBook {
+    private let orders: any OrderRepository
     private var cachedOrders: [OrderId: Order] = [:]
 
-    public init(repository: any OrderRepository) {
-        self.repository = repository
+    public init(orders: any OrderRepository) {
+        self.orders = orders
     }
 
     public func getOrder(_ id: OrderId) async throws -> Order {
         if let cached = cachedOrders[id] {
             return cached
         }
-        let order = try await repository.fetch(id: id)
+        let order = try await orders.fetch(id: id)
         cachedOrders[id] = order
         return order
+    }
+
+    public func all() async throws -> [Order] {
+        let all = try await orders.all()
+        for order in all { cachedOrders[order.id] = order }
+        return all
     }
 
     public func updateStatus(_ id: OrderId, to status: OrderStatus) async throws {
         var order = try await getOrder(id)
         order = order.withStatus(status)
-        try await repository.save(order)
+        try await orders.save(order)
         cachedOrders[id] = order
     }
 

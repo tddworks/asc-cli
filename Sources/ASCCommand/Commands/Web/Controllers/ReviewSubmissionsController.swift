@@ -2,8 +2,7 @@ import Foundation
 import Hummingbird
 import HummingbirdWebSocket
 import ASCPlugin
-import Domain
-import Infrastructure
+import ASCKit
 
 /// /api/v1/apps/{appId}/review-submissions — App Store review submissions.
 ///

@@ -1,13 +1,13 @@
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite("AppWallSubmit")
 struct AppWallSubmitTests {
 
     @Test func `submit with all flags returns PR details`() async throws {
-        let mockRepo = MockAppWallRepository()
+        let mockRepo = MockAppWall()
         given(mockRepo).submit(app: .any).willReturn(
             AppWallSubmission(
                 prNumber: 42,
@@ -32,7 +32,7 @@ struct AppWallSubmitTests {
     }
 
     @Test func `submit with just app-id works`() async throws {
-        let mockRepo = MockAppWallRepository()
+        let mockRepo = MockAppWall()
         given(mockRepo).submit(app: .any).willReturn(
             AppWallSubmission(
                 prNumber: 20,
@@ -51,7 +51,7 @@ struct AppWallSubmitTests {
     }
 
     @Test func `submit with app-id and developer works`() async throws {
-        let mockRepo = MockAppWallRepository()
+        let mockRepo = MockAppWall()
         given(mockRepo).submit(app: .any).willReturn(
             AppWallSubmission(
                 prNumber: 15,
@@ -71,7 +71,7 @@ struct AppWallSubmitTests {
     }
 
     @Test func `submit without any app source throws validation error`() async throws {
-        let mockRepo = MockAppWallRepository()
+        let mockRepo = MockAppWall()
 
         var cmd = try AppWallSubmit.parse([
             "--developer", "tddworks",
@@ -84,7 +84,7 @@ struct AppWallSubmitTests {
     }
 
     @Test func `submit with specific app URLs passes apps array`() async throws {
-        let mockRepo = MockAppWallRepository()
+        let mockRepo = MockAppWall()
         given(mockRepo).submit(app: .any).willReturn(
             AppWallSubmission(
                 prNumber: 10,
@@ -105,7 +105,7 @@ struct AppWallSubmitTests {
     }
 
     @Test func `submit with developer-id alone works`() async throws {
-        let mockRepo = MockAppWallRepository()
+        let mockRepo = MockAppWall()
         given(mockRepo).submit(app: .any).willReturn(
             AppWallSubmission(
                 prNumber: 7,

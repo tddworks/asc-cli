@@ -2,7 +2,7 @@ import Foundation
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite("AppShotsThemes")
 struct AppShotsThemesTests {
@@ -28,7 +28,7 @@ struct AppShotsThemesTests {
     // MARK: - List
 
     @Test func `list themes returns all themes with affordances`() async throws {
-        let mockRepo = MockThemeRepository()
+        let mockRepo = MockThemes()
         given(mockRepo).listThemes().willReturn([
             makeTheme(id: "space", name: "Space"),
             makeTheme(id: "neon", name: "Neon"),
@@ -43,7 +43,7 @@ struct AppShotsThemesTests {
     }
 
     @Test func `list themes table format shows name and icon`() async throws {
-        let mockRepo = MockThemeRepository()
+        let mockRepo = MockThemes()
         given(mockRepo).listThemes().willReturn([
             makeTheme(id: "space", name: "Space"),
         ])
@@ -56,7 +56,7 @@ struct AppShotsThemesTests {
     // MARK: - Get
 
     @Test func `get theme returns specific theme with AI hints`() async throws {
-        let mockRepo = MockThemeRepository()
+        let mockRepo = MockThemes()
         given(mockRepo).getTheme(id: .value("space")).willReturn(makeTheme())
 
         let cmd = try AppShotsThemesGet.parse(["--id", "space", "--pretty"])
@@ -68,7 +68,7 @@ struct AppShotsThemesTests {
     }
 
     @Test func `get theme returns error when not found`() async throws {
-        let mockRepo = MockThemeRepository()
+        let mockRepo = MockThemes()
         given(mockRepo).getTheme(id: .value("nonexistent")).willReturn(nil)
 
         let cmd = try AppShotsThemesGet.parse(["--id", "nonexistent"])
@@ -81,7 +81,7 @@ struct AppShotsThemesTests {
     }
 
     @Test func `get theme with context flag outputs buildContext string`() async throws {
-        let mockRepo = MockThemeRepository()
+        let mockRepo = MockThemes()
         given(mockRepo).getTheme(id: .value("space")).willReturn(makeTheme())
 
         let cmd = try AppShotsThemesGet.parse(["--id", "space", "--context"])
@@ -94,7 +94,7 @@ struct AppShotsThemesTests {
     // MARK: - Apply
 
     @Test func `apply renders template then composes with theme`() async throws {
-        let mockThemeRepo = MockThemeRepository()
+        let mockThemeRepo = MockThemes()
         given(mockThemeRepo).compose(themeId: .value("space"), html: .any, canvasWidth: .any, canvasHeight: .any)
             .willReturn("<div>themed output</div>")
 
@@ -114,7 +114,7 @@ struct AppShotsThemesTests {
     }
 
     @Test func `apply with preview image renders HTML to PNG and writes file`() async throws {
-        let mockThemeRepo = MockThemeRepository()
+        let mockThemeRepo = MockThemes()
         given(mockThemeRepo).compose(themeId: .value("space"), html: .any, canvasWidth: .any, canvasHeight: .any)
             .willReturn("<div>themed output</div>")
 
@@ -147,7 +147,7 @@ struct AppShotsThemesTests {
     }
 
     @Test func `apply defaults to html output when no preview flag`() async throws {
-        let mockThemeRepo = MockThemeRepository()
+        let mockThemeRepo = MockThemes()
         given(mockThemeRepo).compose(themeId: .value("space"), html: .any, canvasWidth: .any, canvasHeight: .any)
             .willReturn("<div>themed</div>")
 
@@ -168,7 +168,7 @@ struct AppShotsThemesTests {
     // MARK: - Design (separate subcommand)
 
     @Test func `design outputs ThemeDesign JSON from AI`() async throws {
-        let mockThemeRepo = MockThemeRepository()
+        let mockThemeRepo = MockThemes()
         let design = ThemeDesign(
             palette: GalleryPalette(id: "space", name: "Space",
                                      background: "linear-gradient(135deg, #0f172a, #7c3aed)",
@@ -218,7 +218,7 @@ struct AppShotsThemesTests {
     }
 
     @Test func `apply fails when template not found`() async throws {
-        let mockThemeRepo = MockThemeRepository()
+        let mockThemeRepo = MockThemes()
         let mockTemplateRepo = MockTemplateRepository()
         given(mockTemplateRepo).getTemplate(id: .value("nope")).willReturn(nil)
 

@@ -1,7 +1,7 @@
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite
 struct SimulatorsListTests {
@@ -11,7 +11,7 @@ struct SimulatorsListTests {
     }
 
     @Test func `listed simulators show id name state runtime and affordances`() async throws {
-        let mockRepo = MockSimulatorRepository()
+        let mockRepo = MockSimulators()
         given(mockRepo).listSimulators(filter: .any).willReturn([
             Simulator(
                 id: "ABCD-1234",
@@ -45,7 +45,7 @@ struct SimulatorsListTests {
     }
 
     @Test func `booted simulator shows shutdown affordances`() async throws {
-        let mockRepo = MockSimulatorRepository()
+        let mockRepo = MockSimulators()
         given(mockRepo).listSimulators(filter: .any).willReturn([
             Simulator(
                 id: "EFGH-5678",
@@ -79,7 +79,7 @@ struct SimulatorsListTests {
     }
 
     @Test func `booted filter passes correct filter to repository`() async throws {
-        let mockRepo = MockSimulatorRepository()
+        let mockRepo = MockSimulators()
         given(mockRepo).listSimulators(filter: .value(.booted)).willReturn([])
 
         let cmd = try SimulatorsList.parse(["--booted", "--pretty"])
@@ -95,7 +95,7 @@ struct SimulatorsListTests {
     }
 
     @Test func `table output includes all row fields`() async throws {
-        let mockRepo = MockSimulatorRepository()
+        let mockRepo = MockSimulators()
         given(mockRepo).listSimulators(filter: .any).willReturn([
             Simulator(
                 id: "sim-1",
@@ -115,7 +115,7 @@ struct SimulatorsListTests {
     }
 
     @Test func `default filter is available not booted`() async throws {
-        let mockRepo = MockSimulatorRepository()
+        let mockRepo = MockSimulators()
         given(mockRepo).listSimulators(filter: .value(.available)).willReturn([])
 
         let cmd = try SimulatorsList.parse(["--pretty"])
@@ -125,7 +125,7 @@ struct SimulatorsListTests {
     }
 
     @Test func `markdown output works`() async throws {
-        let mockRepo = MockSimulatorRepository()
+        let mockRepo = MockSimulators()
         given(mockRepo).listSimulators(filter: .any).willReturn([
             Simulator(id: "s-1", name: "iPhone 16", state: SimulatorState.booted, runtime: "com.apple.CoreSimulator.SimRuntime.iOS-18-2"),
         ])

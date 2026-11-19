@@ -5,8 +5,7 @@ import Mockable
 import NIOCore
 import Testing
 @testable import ASCCommand
-@testable import Domain
-@testable import Infrastructure
+@testable import ASCKit
 
 @Suite
 struct CustomProductPagePlacementRoutesTests {
