@@ -49,7 +49,7 @@ final class IrisSubmissionsURLProtocolStub: URLProtocol, @unchecked Sendable {
 }
 
 @Suite(.serialized)
-struct IrisSDKInAppPurchaseSubmissionsTests {
+struct IrisSDKInAppPurchaseSubmissionRepositoryTests {
 
     @Test func `submitInAppPurchase posts JSON-API body with submitWithNextAppStoreVersion attribute`() async throws {
         let captured = CapturedBody()
@@ -63,7 +63,7 @@ struct IrisSDKInAppPurchaseSubmissionsTests {
         }
 
         let client = IrisClient(session: IrisSubmissionsURLProtocolStub.makeSession())
-        let repo = IrisSDKInAppPurchaseSubmissions(client: client)
+        let repo = IrisSDKInAppPurchaseSubmissionRepository(client: client)
         _ = try await repo.submitInAppPurchase(
             session: IrisSession(cookies: "myacinfo=ABC"),
             iapId: "iap-7",
@@ -92,7 +92,7 @@ struct IrisSDKInAppPurchaseSubmissionsTests {
         }
 
         let client = IrisClient(session: IrisSubmissionsURLProtocolStub.makeSession())
-        let repo = IrisSDKInAppPurchaseSubmissions(client: client)
+        let repo = IrisSDKInAppPurchaseSubmissionRepository(client: client)
         let submission = try await repo.submitInAppPurchase(
             session: IrisSession(cookies: "myacinfo=ABC"),
             iapId: "iap-7",
@@ -117,7 +117,7 @@ struct IrisSDKInAppPurchaseSubmissionsTests {
         }
 
         let client = IrisClient(session: IrisSubmissionsURLProtocolStub.makeSession())
-        let repo = IrisSDKInAppPurchaseSubmissions(client: client)
+        let repo = IrisSDKInAppPurchaseSubmissionRepository(client: client)
         _ = try await repo.submitInAppPurchase(
             session: IrisSession(cookies: "myacinfo=ABC"),
             iapId: "iap-7",
@@ -141,7 +141,7 @@ struct IrisSDKInAppPurchaseSubmissionsTests {
         }
 
         let client = IrisClient(session: IrisSubmissionsURLProtocolStub.makeSession())
-        let repo = IrisSDKInAppPurchaseSubmissions(client: client)
+        let repo = IrisSDKInAppPurchaseSubmissionRepository(client: client)
         try await repo.deleteSubmission(
             session: IrisSession(cookies: "myacinfo=ABC"),
             submissionId: "iap-7"

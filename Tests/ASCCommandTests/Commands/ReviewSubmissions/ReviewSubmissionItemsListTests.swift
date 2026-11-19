@@ -7,7 +7,7 @@ import Testing
 struct ReviewSubmissionItemsListTests {
 
     @Test func `listed items show id, submissionId, state, linked resource, and affordances`() async throws {
-        let mockRepo = MockReviewSubmissions()
+        let mockRepo = MockSubmissionRepository()
         given(mockRepo).listSubmissionItems(submissionId: .value("sub-1")).willReturn([
             ReviewSubmissionItem(
                 id: "item-1",
@@ -43,7 +43,7 @@ struct ReviewSubmissionItemsListTests {
     }
 
     @Test func `items filtered by state returns only matching items`() async throws {
-        let mockRepo = MockReviewSubmissions()
+        let mockRepo = MockSubmissionRepository()
         given(mockRepo).listSubmissionItems(submissionId: .value("sub-1")).willReturn([
             ReviewSubmissionItem(id: "i-1", submissionId: "sub-1", state: .rejected,
                                  linkedResourceId: "v-9", linkedResourceType: .appStoreVersion),

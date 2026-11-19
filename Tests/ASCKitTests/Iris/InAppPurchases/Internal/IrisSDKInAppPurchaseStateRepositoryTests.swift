@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import ASCKit
 
-/// Private URLProtocol subclass — see `IrisSDKInAppPurchaseSubmissionsTests`
+/// Private URLProtocol subclass — see `IrisSDKInAppPurchaseSubmissionRepositoryTests`
 /// for why we don't share `URLProtocolStub` between iris suites.
 final class IrisStateURLProtocolStub: URLProtocol, @unchecked Sendable {
     nonisolated(unsafe) static var handler: (@Sendable (URLRequest) -> (HTTPURLResponse, Data))?

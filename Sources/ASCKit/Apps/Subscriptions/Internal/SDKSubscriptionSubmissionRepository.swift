@@ -1,6 +1,6 @@
 @preconcurrency import AppStoreConnect_Swift_SDK
 
-public struct SDKSubscriptionSubmissions: SubscriptionSubmissions, @unchecked Sendable {
+public struct SDKSubscriptionSubmissionRepository: SubscriptionSubmissionRepository, @unchecked Sendable {
     private let client: any APIClient
 
     public init(client: any APIClient) {

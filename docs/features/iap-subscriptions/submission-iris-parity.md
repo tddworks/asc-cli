@@ -11,7 +11,7 @@
 | Auth | Team API key (`AuthKey_*.p8`) | Browser cookie session (iris) |
 | First-time IAP submission | Tends to fail (no flag to express "attach to next version") | Works with `submitWithNextAppStoreVersion: true` |
 
-`InAppPurchaseSubmissionCreateRequest` in `appstoreconnect-swift-sdk` exposes only `data.type` + `data.relationships.inAppPurchaseV2` — there's no `attributes` field on the create request at all. Our existing `SDKInAppPurchaseSubmissions.submitInAppPurchase` is built on this shape.
+`InAppPurchaseSubmissionCreateRequest` in `appstoreconnect-swift-sdk` exposes only `data.type` + `data.relationships.inAppPurchaseV2` — there's no `attributes` field on the create request at all. Our existing `SDKInAppPurchaseSubmissionRepository.submitInAppPurchase` is built on this shape.
 
 The iris request shape Apple's web UI sends (verified via DevTools curl):
 
@@ -71,7 +71,7 @@ Returns the submission resource with a `_links.viewIAP → /api/v1/iap/:iapId` s
 ### Domain protocol
 
 ```swift
-public protocol IrisInAppPurchaseSubmissions: Sendable {
+public protocol IrisInAppPurchaseSubmissionRepository: Sendable {
     func submitInAppPurchase(
         session: IrisSession,
         iapId: String,
@@ -80,7 +80,7 @@ public protocol IrisInAppPurchaseSubmissions: Sendable {
 }
 ```
 
-Distinct from `InAppPurchaseSubmissions` (public SDK) so the two auth surfaces don't tangle.
+Distinct from `InAppPurchaseSubmissionRepository` (public SDK) so the two auth surfaces don't tangle.
 
 ### Discoverability
 

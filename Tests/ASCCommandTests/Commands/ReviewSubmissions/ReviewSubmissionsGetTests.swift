@@ -7,7 +7,7 @@ import Testing
 struct ReviewSubmissionsGetTests {
 
     @Test func `get submission shows id, appId, state, and affordances`() async throws {
-        let mockRepo = MockReviewSubmissions()
+        let mockRepo = MockSubmissionRepository()
         given(mockRepo).getSubmission(id: .value("sub-1")).willReturn(
             ReviewSubmission(id: "sub-1", appId: "app-42", platform: .iOS, state: .unresolvedIssues)
         )

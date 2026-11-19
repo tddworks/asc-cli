@@ -80,7 +80,7 @@ enum RESTRoutes {
         }
         if let productVersionRepo = try? ClientProvider.makeProductVersionRepository() {
             ProductVersionsController(repo: productVersionRepo).addRoutes(to: v1)
-            if let submissionRepo = try? ClientProvider.makeReviewSubmissions(),
+            if let submissionRepo = try? ClientProvider.makeSubmissionRepository(),
                let versionRepo = try? ClientProvider.makeVersionRepository(),
                let iapRepo = try? ClientProvider.makeInAppPurchaseRepository(),
                let groupRepo = try? ClientProvider.makeSubscriptionGroupRepository(),
@@ -140,18 +140,18 @@ enum RESTRoutes {
         if let subReviewRepo = try? ClientProvider.makeSubscriptionReviewRepository() {
             SubscriptionReviewController(repo: subReviewRepo).addRoutes(to: v1)
         }
-        if let iapSubmissionRepo = try? ClientProvider.makeInAppPurchaseSubmissions() {
+        if let iapSubmissionRepo = try? ClientProvider.makeInAppPurchaseSubmissionRepository() {
             IAPSubmissionController(repo: iapSubmissionRepo).addRoutes(to: v1)
         }
         IrisIAPSubmissionsController(
             cookieProvider: ClientProvider.makeIrisCookieProvider(),
-            repo: ClientProvider.makeIrisInAppPurchaseSubmissions()
+            repo: ClientProvider.makeIrisInAppPurchaseSubmissionRepository()
         ).addRoutes(to: v1)
         IrisResolutionCenterController(
             cookieProvider: ClientProvider.makeIrisCookieProvider(),
             repo: ClientProvider.makeIrisResolutionCenterRepository()
         ).addRoutes(to: v1)
-        if let subSubmissionRepo = try? ClientProvider.makeSubscriptionSubmissions() {
+        if let subSubmissionRepo = try? ClientProvider.makeSubscriptionSubmissionRepository() {
             SubscriptionSubmissionController(repo: subSubmissionRepo).addRoutes(to: v1)
         }
 
@@ -207,7 +207,7 @@ enum RESTRoutes {
 
         // Review submissions
         if let submissions = try? ReviewSubmissionsController(
-            submissionRepo: ClientProvider.makeReviewSubmissions()
+            submissionRepo: ClientProvider.makeSubmissionRepository()
         ) { submissions.addRoutes(to: v1) }
 
         // Auth — manages the credential store the rest of the controllers consume.

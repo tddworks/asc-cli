@@ -45,9 +45,9 @@ public struct ClientFactory: Sendable {
         return SDKAppCategoryRepository(client: provider)
     }
 
-    public func makeReviewSubmissions(authProvider: any AuthProvider) throws -> any ReviewSubmissions {
+    public func makeSubmissionRepository(authProvider: any AuthProvider) throws -> any SubmissionRepository {
         let provider = try makeProvider(authProvider: authProvider)
-        return OpenAPIReviewSubmissions(client: provider)
+        return OpenAPISubmissionRepository(client: provider)
     }
 
     public func makeBundleIDRepository(authProvider: any AuthProvider) throws -> any BundleIDRepository {
@@ -135,9 +135,9 @@ public struct ClientFactory: Sendable {
         return SDKSubscriptionGroupLocalizationRepository(client: provider)
     }
 
-    public func makeInAppPurchaseSubmissions(authProvider: any AuthProvider) throws -> any InAppPurchaseSubmissions {
+    public func makeInAppPurchaseSubmissionRepository(authProvider: any AuthProvider) throws -> any InAppPurchaseSubmissionRepository {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKInAppPurchaseSubmissions(client: provider)
+        return SDKInAppPurchaseSubmissionRepository(client: provider)
     }
 
     public func makeProductVersionRepository(authProvider: any AuthProvider) throws -> any ProductVersionRepository {
@@ -155,9 +155,9 @@ public struct ClientFactory: Sendable {
         return SDKSubscriptionPriceRepository(client: provider)
     }
 
-    public func makeSubscriptionSubmissions(authProvider: any AuthProvider) throws -> any SubscriptionSubmissions {
+    public func makeSubscriptionSubmissionRepository(authProvider: any AuthProvider) throws -> any SubscriptionSubmissionRepository {
         let provider = try makeProvider(authProvider: authProvider)
-        return SDKSubscriptionSubmissions(client: provider)
+        return SDKSubscriptionSubmissionRepository(client: provider)
     }
 
     public func makeSubscriptionIntroductoryOfferRepository(authProvider: any AuthProvider) throws -> any SubscriptionIntroductoryOfferRepository {
@@ -357,8 +357,8 @@ public struct ClientFactory: Sendable {
         IrisSDKAppBundleRepository()
     }
 
-    public func makeIrisInAppPurchaseSubmissions() -> any IrisInAppPurchaseSubmissions {
-        IrisSDKInAppPurchaseSubmissions()
+    public func makeIrisInAppPurchaseSubmissionRepository() -> any IrisInAppPurchaseSubmissionRepository {
+        IrisSDKInAppPurchaseSubmissionRepository()
     }
 
     public func makeIrisResolutionCenterRepository() -> any IrisResolutionCenterRepository {

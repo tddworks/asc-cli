@@ -3,7 +3,7 @@ import Mockable
 
 /// Repository for reading Resolution Center data via the iris private API.
 ///
-/// Separate from `ReviewSubmissions` (public SDK, key-auth) so the two auth
+/// Separate from `SubmissionRepository` (public SDK, key-auth) so the two auth
 /// surfaces don't tangle: `asc review-submissions *` keeps zero-iris
 /// dependency, while this path is reachable only when iris cookies are
 /// available.

@@ -110,7 +110,7 @@ See [command-affordances.md](references/command-affordances.md) for:
 
 ### 4. Repository protocol — primitives only, but allow composition in adapters
 
-`XxxRepository` is for CRUD over an aggregate only. A protocol whose job is a workflow (sign in, submit for review, boot, download) takes a role noun instead: `IrisSignIn`, `ReviewSubmissions`, `Simulators`, `Reports`.
+`XxxRepository` is for CRUD over an aggregate only — a state change like `submit` is an update. A protocol that runs something outside asc-cli (sign in, boot, install, download) takes a role noun instead: `IrisSignIn`, `Simulators`, `Reports`. A workflow over aggregates (find the draft, add the item, submit) is a domain operation on the model, built from repository primitives — `version.submitForReview(to:)`, `SubmissionPlan.submit(repo:)` — never a repository method.
 
 ```swift
 @Mockable

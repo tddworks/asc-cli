@@ -3,7 +3,7 @@ import Testing
 @testable import ASCKit
 
 @Suite
-struct SDKSubscriptionSubmissionsTests {
+struct SDKSubscriptionSubmissionRepositoryTests {
 
     @Test func `submitSubscription injects subscriptionId into result`() async throws {
         let stub = StubAPIClient()
@@ -15,7 +15,7 @@ struct SDKSubscriptionSubmissionsTests {
             links: .init(this: "")
         ))
 
-        let repo = SDKSubscriptionSubmissions(client: stub)
+        let repo = SDKSubscriptionSubmissionRepository(client: stub)
         let result = try await repo.submitSubscription(subscriptionId: "sub-abc")
 
         #expect(result.id == "submit-1")
@@ -24,7 +24,7 @@ struct SDKSubscriptionSubmissionsTests {
 
     @Test func `deleteSubmission performs void request via manual DELETE`() async throws {
         let stub = StubAPIClient()
-        let repo = SDKSubscriptionSubmissions(client: stub)
+        let repo = SDKSubscriptionSubmissionRepository(client: stub)
         try await repo.deleteSubmission(submissionId: "sub-1")
         #expect(stub.voidRequestCalled == true)
     }

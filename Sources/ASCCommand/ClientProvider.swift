@@ -50,10 +50,10 @@ struct ClientProvider {
         return try factory.makeAppCategoryRepository(authProvider: authProvider)
     }
 
-    static func makeReviewSubmissions() throws -> any ReviewSubmissions {
+    static func makeSubmissionRepository() throws -> any SubmissionRepository {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeReviewSubmissions(authProvider: authProvider)
+        return try factory.makeSubmissionRepository(authProvider: authProvider)
     }
 
     static func makeBundleIDRepository() throws -> any BundleIDRepository {
@@ -146,10 +146,10 @@ struct ClientProvider {
         return try factory.makeSubscriptionGroupLocalizationRepository(authProvider: authProvider)
     }
 
-    static func makeInAppPurchaseSubmissions() throws -> any InAppPurchaseSubmissions {
+    static func makeInAppPurchaseSubmissionRepository() throws -> any InAppPurchaseSubmissionRepository {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeInAppPurchaseSubmissions(authProvider: authProvider)
+        return try factory.makeInAppPurchaseSubmissionRepository(authProvider: authProvider)
     }
 
     static func makeProductVersionRepository() throws -> any ProductVersionRepository {
@@ -170,10 +170,10 @@ struct ClientProvider {
         return try factory.makeSubscriptionPriceRepository(authProvider: authProvider)
     }
 
-    static func makeSubscriptionSubmissions() throws -> any SubscriptionSubmissions {
+    static func makeSubscriptionSubmissionRepository() throws -> any SubscriptionSubmissionRepository {
         let authProvider = CompositeAuthProvider()
         let factory = ClientFactory()
-        return try factory.makeSubscriptionSubmissions(authProvider: authProvider)
+        return try factory.makeSubscriptionSubmissionRepository(authProvider: authProvider)
     }
 
     static func makeSubscriptionPromotionalOfferRepository() throws -> any SubscriptionPromotionalOfferRepository {
@@ -436,8 +436,8 @@ struct ClientProvider {
         ClientFactory().makeIrisAppBundleRepository()
     }
 
-    static func makeIrisInAppPurchaseSubmissions() -> any IrisInAppPurchaseSubmissions {
-        ClientFactory().makeIrisInAppPurchaseSubmissions()
+    static func makeIrisInAppPurchaseSubmissionRepository() -> any IrisInAppPurchaseSubmissionRepository {
+        ClientFactory().makeIrisInAppPurchaseSubmissionRepository()
     }
 
     static func makeIrisResolutionCenterRepository() -> any IrisResolutionCenterRepository {

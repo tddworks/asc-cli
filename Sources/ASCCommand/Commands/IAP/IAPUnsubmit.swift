@@ -13,11 +13,11 @@ struct IAPUnsubmit: AsyncParsableCommand {
     var submissionId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchaseSubmissions()
+        let repo = try ClientProvider.makeInAppPurchaseSubmissionRepository()
         try await execute(repo: repo)
     }
 
-    func execute(repo: any InAppPurchaseSubmissions) async throws {
+    func execute(repo: any InAppPurchaseSubmissionRepository) async throws {
         try await repo.deleteSubmission(submissionId: submissionId)
     }
 }

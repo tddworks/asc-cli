@@ -18,13 +18,13 @@ struct IrisIAPSubmissionsDelete: AsyncParsableCommand {
 
     func run() async throws {
         let cookieProvider = ClientProvider.makeIrisCookieProvider()
-        let repo = ClientProvider.makeIrisInAppPurchaseSubmissions()
+        let repo = ClientProvider.makeIrisInAppPurchaseSubmissionRepository()
         try await execute(cookieProvider: cookieProvider, repo: repo)
     }
 
     func execute(
         cookieProvider: any IrisCookieProvider,
-        repo: any IrisInAppPurchaseSubmissions
+        repo: any IrisInAppPurchaseSubmissionRepository
     ) async throws {
         let session = try cookieProvider.resolveSession()
         try await repo.deleteSubmission(session: session, submissionId: submissionId)

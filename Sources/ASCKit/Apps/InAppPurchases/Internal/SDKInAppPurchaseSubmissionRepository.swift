@@ -1,6 +1,6 @@
 @preconcurrency import AppStoreConnect_Swift_SDK
 
-public struct SDKInAppPurchaseSubmissions: InAppPurchaseSubmissions, @unchecked Sendable {
+public struct SDKInAppPurchaseSubmissionRepository: InAppPurchaseSubmissionRepository, @unchecked Sendable {
     private let client: any APIClient
 
     public init(client: any APIClient) {

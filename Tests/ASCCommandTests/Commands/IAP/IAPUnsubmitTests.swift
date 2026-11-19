@@ -7,7 +7,7 @@ import Testing
 struct IAPUnsubmitTests {
 
     @Test func `unsubmit deletes submission by id`() async throws {
-        let mockRepo = MockInAppPurchaseSubmissions()
+        let mockRepo = MockInAppPurchaseSubmissionRepository()
         given(mockRepo).deleteSubmission(submissionId: .any).willReturn(())
 
         let cmd = try IAPUnsubmit.parse(["--submission-id", "sub-1"])

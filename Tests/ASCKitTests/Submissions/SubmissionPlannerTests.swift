@@ -118,7 +118,7 @@ struct SubmissionPlannerTests {
             PlannedReviewItem(kind: .appStoreVersion, versionId: "v-1", productId: "app-1", name: "1.0"),
             PlannedReviewItem(kind: .inAppPurchaseVersion, versionId: "iv-1", productId: "iap-1", name: "Lifetime"),
         ])
-        let repo = MockReviewSubmissions()
+        let repo = MockSubmissionRepository()
         given(repo).createSubmission(appId: .any, platform: .any).willReturn(
             MockRepositoryFactory.makeReviewSubmission(id: "sub-1", appId: "app-1", state: .readyForReview)
         )
@@ -141,7 +141,7 @@ struct SubmissionPlannerTests {
             PlannedReviewItem(kind: .appStoreVersion, versionId: "v-1", productId: "app-1", name: "1.0"),
             PlannedReviewItem(kind: .inAppPurchaseVersion, versionId: "iv-1", productId: "iap-1", name: "Lifetime"),
         ])
-        let repo = MockReviewSubmissions()
+        let repo = MockSubmissionRepository()
         given(repo).createSubmission(appId: .any, platform: .any).willReturn(
             MockRepositoryFactory.makeReviewSubmission(id: "sub-1", state: .readyForReview)
         )

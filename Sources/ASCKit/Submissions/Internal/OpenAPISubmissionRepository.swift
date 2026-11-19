@@ -1,6 +1,6 @@
 @preconcurrency import AppStoreConnect_Swift_SDK
 
-public struct OpenAPIReviewSubmissions: ReviewSubmissions, @unchecked Sendable {
+public struct OpenAPISubmissionRepository: SubmissionRepository, @unchecked Sendable {
     private let client: any APIClient
 
     public init(client: any APIClient) {

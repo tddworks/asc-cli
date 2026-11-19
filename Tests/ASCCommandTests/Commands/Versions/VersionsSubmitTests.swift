@@ -7,7 +7,7 @@ import Testing
 struct VersionsSubmitTests {
 
     @Test func `submitted version returns submission in waitingForReview state`() async throws {
-        let mockRepo = MockReviewSubmissions()
+        let mockRepo = MockSubmissionRepository()
         given(mockRepo).submitVersion(versionId: .any).willReturn(
             ReviewSubmission(
                 id: "sub-1",
@@ -71,7 +71,7 @@ struct VersionsSubmitTests {
 
     @Test func `a dry run lists what would go to review with the app version and submits nothing`() async throws {
         let (iaps, versions) = readyLifetimeIAP()
-        let submissions = MockReviewSubmissions()
+        let submissions = MockSubmissionRepository()
 
         let cmd = try VersionsSubmit.parse(["--version-id", "v-1", "--with-products", "--dry-run", "--pretty"])
         let output = try await cmd.executeWithProducts(
@@ -108,7 +108,7 @@ struct VersionsSubmitTests {
 
     @Test func `with products the app version and ready products are submitted together`() async throws {
         let (iaps, versions) = readyLifetimeIAP()
-        let submissions = MockReviewSubmissions()
+        let submissions = MockSubmissionRepository()
         given(submissions).createSubmission(appId: .any, platform: .any).willReturn(
             ReviewSubmission(id: "sub-1", appId: "app-1", platform: .iOS, state: .readyForReview)
         )

@@ -296,7 +296,7 @@ struct RESTRoutesTests {
     // MARK: - Review Submissions
 
     @Test func `review submissions list returns JSON with _links`() async throws {
-        let mockRepo = MockReviewSubmissions()
+        let mockRepo = MockSubmissionRepository()
         given(mockRepo).listSubmissions(appId: .any, states: .any, limit: .any).willReturn([
             ReviewSubmission(id: "sub-1", appId: "42", platform: .iOS, state: .waitingForReview),
         ])
@@ -312,7 +312,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `review submissions get returns JSON with _links`() async throws {
-        let mockRepo = MockReviewSubmissions()
+        let mockRepo = MockSubmissionRepository()
         given(mockRepo).getSubmission(id: .value("sub-1")).willReturn(
             ReviewSubmission(id: "sub-1", appId: "42", platform: .iOS, state: .unresolvedIssues)
         )
@@ -326,7 +326,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `review submission items list returns JSON with _links for parent and version`() async throws {
-        let mockRepo = MockReviewSubmissions()
+        let mockRepo = MockSubmissionRepository()
         given(mockRepo).listSubmissionItems(submissionId: .value("sub-1")).willReturn([
             ReviewSubmissionItem(id: "item-1", submissionId: "sub-1", state: .rejected,
                                  linkedResourceId: "v-9", linkedResourceType: .appStoreVersion),
@@ -1006,7 +1006,7 @@ struct RESTRoutesTests {
         let mockCookieProvider = MockIrisCookieProvider()
         given(mockCookieProvider).resolveSession().willReturn(IrisSession(cookies: "myacinfo=test"))
 
-        let mockRepo = MockIrisInAppPurchaseSubmissions()
+        let mockRepo = MockIrisInAppPurchaseSubmissionRepository()
         given(mockRepo).submitInAppPurchase(
             session: .any, iapId: .any, submitWithNextAppStoreVersion: .any
         ).willReturn(
@@ -1061,7 +1061,7 @@ struct RESTRoutesTests {
     }
 
     @Test func `unresolved submission REST links to the iris resolution-center endpoint`() async throws {
-        let mockRepo = MockReviewSubmissions()
+        let mockRepo = MockSubmissionRepository()
         given(mockRepo).getSubmission(id: .value("sub-1")).willReturn(
             ReviewSubmission(id: "sub-1", appId: "app-1", platform: .macOS, state: .unresolvedIssues)
         )
@@ -1181,7 +1181,7 @@ struct RESTRoutesTests {
     // MARK: - Building a review submission
 
     @Test func `a draft submission links to adding items and submitting, and a new item links to removing it`() async throws {
-        let mockRepo = MockReviewSubmissions()
+        let mockRepo = MockSubmissionRepository()
         given(mockRepo).createSubmission(appId: .any, platform: .any).willReturn(
             ReviewSubmission(id: "sub-1", appId: "app-1", platform: .iOS, state: .readyForReview)
         )
@@ -1222,7 +1222,7 @@ struct RESTRoutesTests {
                                         subscriptionRepo: MockSubscriptionRepository(), productVersionRepo: productVersions)
 
         let output = try await VersionsSubmit.parse(["--version-id", "v-1", "--dry-run"]).executeWithProducts(
-            submissionRepo: MockReviewSubmissions(), versionRepo: versionRepo, planner: planner, affordanceMode: .rest
+            submissionRepo: MockSubmissionRepository(), versionRepo: versionRepo, planner: planner, affordanceMode: .rest
         ).replacingOccurrences(of: "\\/", with: "/")
 
         #expect(output.contains("\"_links\""))

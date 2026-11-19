@@ -1,12 +1,12 @@
 import Foundation
 
-/// Implements `IrisInAppPurchaseSubmissions` via the iris private API.
+/// Implements `IrisInAppPurchaseSubmissionRepository` via the iris private API.
 ///
-/// The user-visible difference from `SDKInAppPurchaseSubmissions` (public SDK)
+/// The user-visible difference from `SDKInAppPurchaseSubmissionRepository` (public SDK)
 /// is `attributes.submitWithNextAppStoreVersion` — the only place it is accepted is
 /// `POST /iris/v1/inAppPurchaseSubmissions`. The public ASC SDK's
 /// `InAppPurchaseSubmissionCreateRequest` lacks an `attributes` field entirely.
-public struct IrisSDKInAppPurchaseSubmissions: IrisInAppPurchaseSubmissions, @unchecked Sendable {
+public struct IrisSDKInAppPurchaseSubmissionRepository: IrisInAppPurchaseSubmissionRepository, @unchecked Sendable {
     private let client: any IrisAPI
 
     public init(client: any IrisAPI = IrisClient()) {

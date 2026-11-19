@@ -13,11 +13,11 @@ struct IAPSubmit: AsyncParsableCommand {
     var iapId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeInAppPurchaseSubmissions()
+        let repo = try ClientProvider.makeInAppPurchaseSubmissionRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any InAppPurchaseSubmissions) async throws -> String {
+    func execute(repo: any InAppPurchaseSubmissionRepository) async throws -> String {
         let submission = try await repo.submitInAppPurchase(iapId: iapId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

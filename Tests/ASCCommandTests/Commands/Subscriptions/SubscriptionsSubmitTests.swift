@@ -7,7 +7,7 @@ import Testing
 struct SubscriptionsSubmitTests {
 
     @Test func `submitted subscription includes id, subscriptionId and affordances`() async throws {
-        let mockRepo = MockSubscriptionSubmissions()
+        let mockRepo = MockSubscriptionSubmissionRepository()
         given(mockRepo).submitSubscription(subscriptionId: .any)
             .willReturn(SubscriptionSubmission(id: "submit-1", subscriptionId: "sub-1"))
 

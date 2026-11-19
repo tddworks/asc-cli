@@ -12,7 +12,7 @@ import HummingbirdWebSocket
 /// IrisAPIError stack from the repository.
 struct IrisIAPSubmissionsController: Sendable {
     let cookieProvider: any IrisCookieProvider
-    let repo: any IrisInAppPurchaseSubmissions
+    let repo: any IrisInAppPurchaseSubmissionRepository
 
     func addRoutes(to group: RouterGroup<BasicWebSocketRequestContext>) {
         group.post("/iris/iap/:iapId/submissions") { request, context -> Response in

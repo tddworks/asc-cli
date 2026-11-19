@@ -25,13 +25,13 @@ struct IrisIAPSubmissionsCreate: AsyncParsableCommand {
 
     func run() async throws {
         let cookieProvider = ClientProvider.makeIrisCookieProvider()
-        let repo = ClientProvider.makeIrisInAppPurchaseSubmissions()
+        let repo = ClientProvider.makeIrisInAppPurchaseSubmissionRepository()
         print(try await execute(cookieProvider: cookieProvider, repo: repo))
     }
 
     func execute(
         cookieProvider: any IrisCookieProvider,
-        repo: any IrisInAppPurchaseSubmissions,
+        repo: any IrisInAppPurchaseSubmissionRepository,
         affordanceMode: AffordanceMode = .cli
     ) async throws -> String {
         let session = try cookieProvider.resolveSession()

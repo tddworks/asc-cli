@@ -33,16 +33,16 @@ struct VersionsSubmit: AsyncParsableCommand {
                 productVersionRepo: try ClientProvider.makeProductVersionRepository()
             )
             print(try await executeWithProducts(
-                submissionRepo: try ClientProvider.makeReviewSubmissions(),
+                submissionRepo: try ClientProvider.makeSubmissionRepository(),
                 versionRepo: try ClientProvider.makeVersionRepository(),
                 planner: planner
             ))
         } else {
-            print(try await execute(repo: try ClientProvider.makeReviewSubmissions()))
+            print(try await execute(repo: try ClientProvider.makeSubmissionRepository()))
         }
     }
 
-    func execute(repo: any ReviewSubmissions) async throws -> String {
+    func execute(repo: any SubmissionRepository) async throws -> String {
         let submission = try await repo.submitVersion(versionId: versionId)
 
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
@@ -54,7 +54,7 @@ struct VersionsSubmit: AsyncParsableCommand {
     }
 
     func executeWithProducts(
-        submissionRepo: any ReviewSubmissions,
+        submissionRepo: any SubmissionRepository,
         versionRepo: any VersionRepository,
         planner: SubmissionPlanner,
         affordanceMode: AffordanceMode = .cli

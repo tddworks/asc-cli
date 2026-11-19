@@ -13,11 +13,11 @@ struct SubscriptionsSubmit: AsyncParsableCommand {
     var subscriptionId: String
 
     func run() async throws {
-        let repo = try ClientProvider.makeSubscriptionSubmissions()
+        let repo = try ClientProvider.makeSubscriptionSubmissionRepository()
         print(try await execute(repo: repo))
     }
 
-    func execute(repo: any SubscriptionSubmissions) async throws -> String {
+    func execute(repo: any SubscriptionSubmissionRepository) async throws -> String {
         let submission = try await repo.submitSubscription(subscriptionId: subscriptionId)
         let formatter = OutputFormatter(format: globals.outputFormat, pretty: globals.pretty)
         return try formatter.formatAgentItems(

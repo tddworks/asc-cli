@@ -15,7 +15,7 @@ public struct SubmissionPlan: Sendable, Equatable {
     /// Opens (or reuses) the app's draft, adds the items in order and submits it.
     /// Stops at the first item Apple refuses, before anything is submitted — the
     /// items added so far stay in the draft.
-    public func submit(repo: some ReviewSubmissions) async throws -> ReviewSubmission {
+    public func submit(repo: some SubmissionRepository) async throws -> ReviewSubmission {
         let draft = try await repo.createSubmission(appId: appId, platform: platform)
         for item in items {
             _ = try await repo.addItem(submissionId: draft.id, target: item.target)
