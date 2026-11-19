@@ -54,6 +54,16 @@ struct IrisSDKComplianceRepositoryTests {
         ])
     }
 
+    @Test func `should list a new app's requirements when Apple has no declarations for it`() async throws {
+        // Seen live on a new app: the declarations call answers `{}`, with no `data`.
+        let repo = IrisSDKComplianceRepository(api: iris(requirements: unanswered, forms: "{}"), accounts: signedInTo(team: "team-uuid"))
+
+        let rows = try await repo.listRequirements(session: session, appId: "1234567890")
+
+        #expect(rows.map(\.status) == [.missingInfo, .missingInfo])
+        #expect(rows.map(\.declaration) == [nil, nil])
+    }
+
     @Test func `should attach each declaration to the requirement it answers`() async throws {
         let requirements = #"""
         { "data": [

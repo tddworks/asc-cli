@@ -531,6 +531,8 @@ The iris repositories reach Apple through the `@Mockable IrisAPI` role, played b
 - **Law 1's owner is `ComplianceStatus(wireValue:)`**: Apple already sends `PENDING_COLLECT` for an unanswered requirement.
 - **The answer a form holds is its first field**, the Yes/No it opens with; only a Yes opens more fields.
 - **`declare` is one loop for every answer**: post the draft to `…/metadata`, fill each field Apple newly asks for (by the key in its label), repeat until Apple asks for nothing new, then save exactly those fields. Any field Apple won't take a change to stops it (law 5a). A No ends after its first pick.
+- **An app with no declarations gets `{}` from the declarations call**, not `{"data": []}` (seen live on a new app); it reads as no declarations.
+- **Verified live** (2026-11-19, on a test app): list on a new app (both Missing Info), a first No on each form (`POST`, → Active), a change to an Active one (`PUT`, same declaration id, new LAST UPDATED), and the refusal on a Pending Verification row before anything is sent. A Yes was not sent live: it would put placeholder evidence in front of Apple.
 - **REST statuses**: 404 no such requirement on the app; 409 not declarable now, read-only, or a form asc doesn't understand; 422 evidence missing, mismatched or of a type the field refuses; 403 the role can't edit; 401 no team.
 
 ## 7 · Open questions

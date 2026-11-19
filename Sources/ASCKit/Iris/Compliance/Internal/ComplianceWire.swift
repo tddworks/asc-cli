@@ -104,6 +104,14 @@ struct ComplianceSaveRequest: Encodable {
 
 struct ComplianceFormsResponse: Decodable {
     let data: [ComplianceFormResource]
+
+    /// An app with no declarations yet is answered `{}`, with no `data` (seen live).
+    init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        data = try c.decodeIfPresent([ComplianceFormResource].self, forKey: .data) ?? []
+    }
+
+    private enum CodingKeys: String, CodingKey { case data }
 }
 
 struct ComplianceFormResponse: Decodable {
