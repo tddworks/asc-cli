@@ -7,60 +7,6 @@ public struct OpenAPISubmissionRepository: SubmissionRepository, @unchecked Send
         self.client = client
     }
 
-    public func submitVersion(versionId: String) async throws -> ASCKit.ReviewSubmission {
-        // Step 1: Fetch the version to extract appId and platform
-        let versionReq = APIEndpoint.v1.appStoreVersions.id(versionId).get(
-            parameters: .init(include: [.app])
-        )
-        let versionResp = try await client.request(versionReq)
-        guard
-            let appId = versionResp.data.relationships?.app?.data?.id,
-            let sdkPlatform = versionResp.data.attributes?.platform,
-            let platform = ASCKit.AppStorePlatform(rawValue: sdkPlatform.rawValue)
-        else {
-            throw APIError.unknown("Failed to extract appId and platform from version \(versionId)")
-        }
-
-        // Step 2: Check for an existing open submission (UNRESOLVED_ISSUES or READY_FOR_REVIEW)
-        let filterPlatform = APIEndpoint.V1.ReviewSubmissions.GetParameters.FilterPlatform(rawValue: sdkPlatform.rawValue)
-        let listReq = APIEndpoint.v1.reviewSubmissions.get(parameters: .init(
-            filterPlatform: filterPlatform.map { [$0] },
-            filterState: [.unresolvedIssues, .readyForReview],
-            filterApp: [appId]
-        ))
-        let listResp = try await client.request(listReq)
-        if let existing = listResp.data.first {
-            // A refused submit leaves its draft open and empty, so it may not contain this version yet.
-            let items = try await listSubmissionItems(submissionId: existing.id)
-            if !items.contains(where: { $0.linkedResourceId == versionId }) {
-                _ = try await addItem(submissionId: existing.id, target: .appStoreVersion(versionId))
-            }
-            return try await patchSubmitted(id: existing.id, appId: appId, platform: platform)
-        }
-
-        // Step 3: Create new review submission
-        let submissionResp = try await explainingRefusal {
-            try await client.request(APIEndpoint.v1.reviewSubmissions.post(
-                ReviewSubmissionCreateRequest(
-                    data: .init(
-                        type: .reviewSubmissions,
-                        attributes: .init(platform: sdkPlatform),
-                        relationships: .init(
-                            app: .init(data: .init(type: .apps, id: appId))
-                        )
-                    )
-                )
-            ))
-        }
-        let submissionId = submissionResp.data.id
-
-        // Step 4: Add the version as a review submission item
-        _ = try await addItem(submissionId: submissionId, target: .appStoreVersion(versionId))
-
-        // Step 5: Submit for review
-        return try await patchSubmitted(id: submissionId, appId: appId, platform: platform)
-    }
-
     public func createSubmission(appId: String, platform: ASCKit.AppStorePlatform) async throws -> ASCKit.ReviewSubmission {
         guard let sdkPlatform = AppStoreConnect_Swift_SDK.Platform(rawValue: platform.rawValue) else {
             throw APIError.unknown("Unsupported review submission platform \(platform.rawValue)")
@@ -73,13 +19,15 @@ public struct OpenAPISubmissionRepository: SubmissionRepository, @unchecked Send
         if let open = listResp.data.first {
             return mapListedSubmission(open, appId: appId)
         }
-        let created = try await client.request(APIEndpoint.v1.reviewSubmissions.post(
-            ReviewSubmissionCreateRequest(data: .init(
-                type: .reviewSubmissions,
-                attributes: .init(platform: sdkPlatform),
-                relationships: .init(app: .init(data: .init(type: .apps, id: appId)))
+        let created = try await explainingRefusal {
+            try await client.request(APIEndpoint.v1.reviewSubmissions.post(
+                ReviewSubmissionCreateRequest(data: .init(
+                    type: .reviewSubmissions,
+                    attributes: .init(platform: sdkPlatform),
+                    relationships: .init(app: .init(data: .init(type: .apps, id: appId)))
+                ))
             ))
-        ))
+        }
         return mapListedSubmission(created.data, appId: appId)
     }
 
@@ -223,24 +171,6 @@ public struct OpenAPISubmissionRepository: SubmissionRepository, @unchecked Send
             state: state,
             submittedDate: sdkSubmission.attributes?.submittedDate
         )
-    }
-
-    private func patchSubmitted(
-        id: String,
-        appId: String,
-        platform: ASCKit.AppStorePlatform
-    ) async throws -> ASCKit.ReviewSubmission {
-        let submitReq = APIEndpoint.v1.reviewSubmissions.id(id).patch(
-            ReviewSubmissionUpdateRequest(
-                data: .init(
-                    type: .reviewSubmissions,
-                    id: id,
-                    attributes: .init(isSubmitted: true)
-                )
-            )
-        )
-        let finalResp = try await explainingRefusal { try await client.request(submitReq) }
-        return mapSubmission(finalResp.data, appId: appId, platform: platform)
     }
 
     private func mapSubmission(

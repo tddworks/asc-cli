@@ -6,161 +6,6 @@ import Testing
 @Suite
 struct SDKSubmissionRepositoryTests {
 
-    @Test func `submitVersion injects appId from version relationship`() async throws {
-        let stub = SequencedStubAPIClient()
-
-        // Step 1: version response with app relationship
-        stub.enqueue(AppStoreVersionResponse(
-            data: AppStoreVersion(
-                type: .appStoreVersions,
-                id: "v-1",
-                attributes: .init(platform: .ios, versionString: "1.0.0"),
-                relationships: .init(
-                    app: .init(data: .init(type: .apps, id: "app-42"))
-                )
-            ),
-            links: .init(this: "")
-        ))
-
-        // Step 2: no existing open submissions
-        stub.enqueue(ReviewSubmissionsResponse(data: [], links: .init(this: "")))
-
-        // Step 3: create submission response
-        stub.enqueue(ReviewSubmissionResponse(
-            data: ReviewSubmission(
-                type: .reviewSubmissions,
-                id: "sub-99",
-                attributes: .init(state: .waitingForReview)
-            ),
-            links: .init(this: "")
-        ))
-
-        // Step 4: add item response
-        stub.enqueue(ReviewSubmissionItemResponse(
-            data: ReviewSubmissionItem(
-                type: .reviewSubmissionItems,
-                id: "item-1"
-            ),
-            links: .init(this: "")
-        ))
-
-        // Step 5: patch (submitted) response
-        stub.enqueue(ReviewSubmissionResponse(
-            data: ReviewSubmission(
-                type: .reviewSubmissions,
-                id: "sub-99",
-                attributes: .init(state: .waitingForReview)
-            ),
-            links: .init(this: "")
-        ))
-
-        let repo = OpenAPISubmissionRepository(client: stub)
-        let result = try await repo.submitVersion(versionId: "v-1")
-
-        #expect(result.id == "sub-99")
-        #expect(result.appId == "app-42")
-        #expect(result.platform == .iOS)
-        #expect(result.state == .waitingForReview)
-    }
-
-    @Test func `submitVersion maps state correctly`() async throws {
-        let stub = SequencedStubAPIClient()
-
-        stub.enqueue(AppStoreVersionResponse(
-            data: AppStoreVersion(
-                type: .appStoreVersions,
-                id: "v-2",
-                attributes: .init(platform: .macOs, versionString: "2.0.0"),
-                relationships: .init(
-                    app: .init(data: .init(type: .apps, id: "app-7"))
-                )
-            ),
-            links: .init(this: "")
-        ))
-        stub.enqueue(ReviewSubmissionsResponse(data: [], links: .init(this: "")))
-        stub.enqueue(ReviewSubmissionResponse(
-            data: ReviewSubmission(
-                type: .reviewSubmissions,
-                id: "sub-77",
-                attributes: .init(state: .inReview)
-            ),
-            links: .init(this: "")
-        ))
-        stub.enqueue(ReviewSubmissionItemResponse(
-            data: ReviewSubmissionItem(type: .reviewSubmissionItems, id: "item-2"),
-            links: .init(this: "")
-        ))
-        stub.enqueue(ReviewSubmissionResponse(
-            data: ReviewSubmission(
-                type: .reviewSubmissions,
-                id: "sub-77",
-                attributes: .init(state: .inReview)
-            ),
-            links: .init(this: "")
-        ))
-
-        let repo = OpenAPISubmissionRepository(client: stub)
-        let result = try await repo.submitVersion(versionId: "v-2")
-
-        #expect(result.platform == .macOS)
-        #expect(result.state == .inReview)
-        #expect(result.isPending == true)
-    }
-
-    @Test func `should resubmit an open draft that already contains the version`() async throws {
-        let stub = SequencedStubAPIClient()
-
-        // Step 1: version response
-        stub.enqueue(AppStoreVersionResponse(
-            data: AppStoreVersion(
-                type: .appStoreVersions,
-                id: "v-3",
-                attributes: .init(platform: .ios, versionString: "1.0.0"),
-                relationships: .init(
-                    app: .init(data: .init(type: .apps, id: "app-42"))
-                )
-            ),
-            links: .init(this: "")
-        ))
-
-        // Step 2: existing submission with UNRESOLVED_ISSUES
-        stub.enqueue(ReviewSubmissionsResponse(
-            data: [ReviewSubmission(
-                type: .reviewSubmissions,
-                id: "sub-existing",
-                attributes: .init(state: .unresolvedIssues)
-            )],
-            links: .init(this: "")
-        ))
-
-        // Step 3: the draft already contains this version, so no item is added
-        stub.enqueue(ReviewSubmissionItemsResponse(
-            data: [ReviewSubmissionItem(
-                type: .reviewSubmissionItems,
-                id: "item-1",
-                relationships: .init(appStoreVersion: .init(data: .init(type: .appStoreVersions, id: "v-3")))
-            )],
-            links: .init(this: "")
-        ))
-
-        // Step 4: patch (resubmit) response — skips create + add item
-        stub.enqueue(ReviewSubmissionResponse(
-            data: ReviewSubmission(
-                type: .reviewSubmissions,
-                id: "sub-existing",
-                attributes: .init(state: .waitingForReview)
-            ),
-            links: .init(this: "")
-        ))
-
-        let repo = OpenAPISubmissionRepository(client: stub)
-        let result = try await repo.submitVersion(versionId: "v-3")
-
-        #expect(result.id == "sub-existing")
-        #expect(result.appId == "app-42")
-        #expect(result.state == .waitingForReview)
-    }
-
     @Test func `listSubmissions maps sdk submissions and injects appId from param`() async throws {
         let stub = SequencedStubAPIClient()
         stub.enqueue(ReviewSubmissionsResponse(
@@ -382,6 +227,22 @@ struct SDKSubmissionRepositoryTests {
         #expect(post?.body == #"{"data":{"attributes":{"platform":"IOS"},"relationships":{"app":{"data":{"id":"app-1","type":"apps"}}},"type":"reviewSubmissions"}}"#)
     }
 
+    @Test func `should list each reason Apple gave when it refuses to open a draft`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(ReviewSubmissionsResponse(data: [], links: .init(this: "")))
+        stub.errorsByRequest["POST /v1/reviewSubmissions"] = appVersionNotReviewable()
+
+        await #expect {
+            _ = try await OpenAPISubmissionRepository(client: stub).createSubmission(appId: "app-1", platform: .iOS)
+        } throws: { error in
+            String(describing: error) == """
+            Apple refused the review submission: This resource cannot be reviewed, please check associated errors to see why.
+              - A screenshot for one of the following types is required but was not provided: APP_IPAD_PRO_3GEN_129
+              - App is not eligible for submission until pricing has been set.
+            """
+        }
+    }
+
     @Test func `adding each kind of version sends it as the item's relationship`() async throws {
         let cases: [(ReviewItemTarget, String, ASCKit.ReviewSubmissionItemLinkedResource)] = [
             (.appStoreVersion("v-1"), #""appStoreVersion":{"data":{"id":"v-1","type":"appStoreVersions"}}"#, .appStoreVersion),
@@ -500,105 +361,6 @@ struct SDKSubmissionRepositoryTests {
             _ = try await repo.addItem(submissionId: "sub-1", target: .appStoreVersion("v-1"))
         } throws: { error in
             !(error is ReviewSubmissionError) && String(describing: error).contains("UNEXPECTED_ERROR")
-        }
-    }
-
-    // MARK: - submitVersion with an open draft, and Apple's refusals
-
-    /// Answers every request `submitVersion` makes for version v-1 of app-1.
-    private func submitVersionStub(
-        openDrafts: [AppStoreConnect_Swift_SDK.ReviewSubmission] = [],
-        itemsInDraft: [AppStoreConnect_Swift_SDK.ReviewSubmissionItem] = []
-    ) -> StubAPIClient {
-        let stub = StubAPIClient()
-        stub.willReturn(AppStoreVersionResponse(
-            data: AppStoreVersion(
-                type: .appStoreVersions, id: "v-1",
-                attributes: .init(platform: .ios, versionString: "1.0.0"),
-                relationships: .init(app: .init(data: .init(type: .apps, id: "app-1")))
-            ),
-            links: .init(this: "")
-        ))
-        stub.willReturn(ReviewSubmissionsResponse(data: openDrafts, links: .init(this: "")))
-        stub.willReturn(ReviewSubmissionItemsResponse(data: itemsInDraft, links: .init(this: "")))
-        stub.willReturn(ReviewSubmissionItemResponse(
-            data: ReviewSubmissionItem(type: .reviewSubmissionItems, id: "item-new"),
-            links: .init(this: "")
-        ))
-        stub.willReturn(ReviewSubmissionResponse(
-            data: ReviewSubmission(type: .reviewSubmissions, id: "sub-1", attributes: .init(state: .waitingForReview)),
-            links: .init(this: "")
-        ))
-        return stub
-    }
-
-    private var openDraft: AppStoreConnect_Swift_SDK.ReviewSubmission {
-        ReviewSubmission(type: .reviewSubmissions, id: "sub-1", attributes: .init(state: .readyForReview))
-    }
-
-    @Test func `should add the version before submitting when the open draft is empty`() async throws {
-        let stub = submitVersionStub(openDrafts: [openDraft], itemsInDraft: [])
-
-        let submission = try await OpenAPISubmissionRepository(client: stub).submitVersion(versionId: "v-1")
-
-        #expect(stub.requests.filter { $0.method != "GET" }.map { "\($0.method) \($0.path)" } == [
-            "POST /v1/reviewSubmissionItems",
-            "PATCH /v1/reviewSubmissions/sub-1",
-        ])
-        let addItem = stub.requests.first { $0.method == "POST" }
-        #expect(addItem?.body == #"{"data":{"relationships":{"appStoreVersion":{"data":{"id":"v-1","type":"appStoreVersions"}},"reviewSubmission":{"data":{"id":"sub-1","type":"reviewSubmissions"}}},"type":"reviewSubmissionItems"}}"#)
-        #expect(submission.state == .waitingForReview)
-    }
-
-    @Test func `should submit without adding the version again when the open draft already contains it`() async throws {
-        let stub = submitVersionStub(openDrafts: [openDraft], itemsInDraft: [
-            ReviewSubmissionItem(
-                type: .reviewSubmissionItems, id: "item-1",
-                relationships: .init(appStoreVersion: .init(data: .init(type: .appStoreVersions, id: "v-1")))
-            ),
-        ])
-
-        let submission = try await OpenAPISubmissionRepository(client: stub).submitVersion(versionId: "v-1")
-
-        #expect(stub.requests.filter { $0.method != "GET" }.map { "\($0.method) \($0.path)" } == [
-            "PATCH /v1/reviewSubmissions/sub-1",
-        ])
-        #expect(submission.state == .waitingForReview)
-    }
-
-    @Test func `should add the version when the open draft only contains other items`() async throws {
-        let stub = submitVersionStub(openDrafts: [openDraft], itemsInDraft: [
-            ReviewSubmissionItem(
-                type: .reviewSubmissionItems, id: "item-1",
-                relationships: .init(inAppPurchaseVersion: .init(data: .init(type: .inAppPurchaseVersions, id: "iap-v-1")))
-            ),
-        ])
-
-        _ = try await OpenAPISubmissionRepository(client: stub).submitVersion(versionId: "v-1")
-
-        #expect(stub.requests.filter { $0.method != "GET" }.map { "\($0.method) \($0.path)" } == [
-            "POST /v1/reviewSubmissionItems",
-            "PATCH /v1/reviewSubmissions/sub-1",
-        ])
-    }
-
-    @Test(arguments: [
-        "POST /v1/reviewSubmissions",
-        "POST /v1/reviewSubmissionItems",
-        "PATCH /v1/reviewSubmissions/sub-1",
-    ])
-    func `should list each reason Apple gave when it refuses to submit a version`(refusedRequest: String) async throws {
-        let stub = submitVersionStub()
-        stub.errorsByRequest[refusedRequest] = appVersionNotReviewable()
-
-        await #expect {
-            _ = try await OpenAPISubmissionRepository(client: stub).submitVersion(versionId: "v-1")
-        } throws: { error in
-            String(describing: error) == """
-            Apple refused the review submission: This resource cannot be reviewed, please check associated errors to see why.
-              - A screenshot for one of the following types is required but was not provided: APP_IPAD_PRO_3GEN_129
-              - App is not eligible for submission until pricing has been set.
-            """
         }
     }
 }

@@ -18,10 +18,16 @@ struct VersionSubmissionController: Sendable {
             let withProducts = query["with-products"].map { $0 == "true" } ?? false
             let dryRun = query["dry-run"].map { $0 == "true" } ?? false
 
-            guard withProducts || dryRun else {
-                return try restFormat(try await self.submissionRepo.submitVersion(versionId: versionId))
-            }
             let version = try await self.versionRepo.getVersion(id: versionId)
+            guard withProducts || dryRun else {
+                do {
+                    return try restFormat(try await version.submitForReview(to: self.submissionRepo))
+                } catch let error as ReviewSubmissionError {
+                    // Refused here, before anything reaches Apple: the version can't be edited.
+                    guard case .versionNotEditable = error else { throw error }
+                    return jsonError(error.description, status: .unprocessableContent)
+                }
+            }
             let plan = try await self.planner.plan(for: version)
             if dryRun { return try restFormat(plan.items) }
             return try restFormat(try await plan.submit(repo: self.submissionRepo))
