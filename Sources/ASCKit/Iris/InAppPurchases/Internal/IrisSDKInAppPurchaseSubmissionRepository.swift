@@ -7,9 +7,9 @@ import Foundation
 /// `POST /iris/v1/inAppPurchaseSubmissions`. The public ASC SDK's
 /// `InAppPurchaseSubmissionCreateRequest` lacks an `attributes` field entirely.
 public struct IrisSDKInAppPurchaseSubmissionRepository: IrisInAppPurchaseSubmissionRepository, @unchecked Sendable {
-    private let client: IrisClient
+    private let client: any IrisAPI
 
-    public init(client: IrisClient = IrisClient()) {
+    public init(client: any IrisAPI = IrisClient()) {
         self.client = client
     }
 

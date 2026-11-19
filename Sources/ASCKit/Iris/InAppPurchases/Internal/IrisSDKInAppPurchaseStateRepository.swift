@@ -5,9 +5,9 @@ import Foundation
 /// `submitWithNextAppStoreVersion` as an attribute on each IAP — the public SDK
 /// does not, which is why this lives behind the iris cookie surface.
 public struct IrisSDKInAppPurchaseStateRepository: IrisInAppPurchaseStateRepository, @unchecked Sendable {
-    private let client: IrisClient
+    private let client: any IrisAPI
 
-    public init(client: IrisClient = IrisClient()) {
+    public init(client: any IrisAPI = IrisClient()) {
         self.client = client
     }
 

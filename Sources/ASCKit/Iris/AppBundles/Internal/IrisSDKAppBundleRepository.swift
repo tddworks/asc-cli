@@ -2,9 +2,9 @@ import Foundation
 
 /// Implements `IrisAppBundleRepository` via the iris private API.
 public struct IrisSDKAppBundleRepository: IrisAppBundleRepository, @unchecked Sendable {
-    private let client: IrisClient
+    private let client: any IrisAPI
 
-    public init(client: IrisClient = IrisClient()) {
+    public init(client: any IrisAPI = IrisClient()) {
         self.client = client
     }
 

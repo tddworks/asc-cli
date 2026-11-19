@@ -2,14 +2,14 @@ import Foundation
 
 /// HTTP client for the iris private API. Only the `URLSession` call lives here;
 /// the request is `IrisRequest`'s and what the reply means is `IrisResponse`'s.
-public struct IrisClient: Sendable {
+public struct IrisClient: IrisAPI {
     private let session: URLSession
 
     public init(session: URLSession = .shared) {
         self.session = session
     }
 
-    public func get(path: String, queryItems: [URLQueryItem] = [], cookies: String) async throws -> (Data, HTTPURLResponse) {
+    public func get(path: String, queryItems: [URLQueryItem], cookies: String) async throws -> (Data, HTTPURLResponse) {
         try await perform(IrisRequest.get(path: path, queryItems: queryItems, cookies: cookies))
     }
 

@@ -9,9 +9,9 @@ import Foundation
 /// user-visible operation. The endpoint shapes are undocumented; this mapper
 /// is the absorption layer if Apple shifts a field.
 public struct IrisSDKResolutionCenterRepository: IrisResolutionCenterRepository, @unchecked Sendable {
-    private let client: IrisClient
+    private let client: any IrisAPI
 
-    public init(client: IrisClient = IrisClient()) {
+    public init(client: any IrisAPI = IrisClient()) {
         self.client = client
     }
 
