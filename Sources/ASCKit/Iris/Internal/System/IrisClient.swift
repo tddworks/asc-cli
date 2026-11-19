@@ -27,6 +27,18 @@ public struct IrisClient: IrisAPI {
         try await perform(IrisRequest.delete(path: path, cookies: cookies))
     }
 
+    public func complianceGet(path: String, queryItems: [URLQueryItem], cookies: String) async throws -> (Data, HTTPURLResponse) {
+        try await perform(IrisRequest.compliance(method: "GET", path: path, queryItems: queryItems, body: nil, cookies: cookies))
+    }
+
+    public func compliancePost(path: String, body: Data, cookies: String) async throws -> (Data, HTTPURLResponse) {
+        try await perform(IrisRequest.compliance(method: "POST", path: path, queryItems: [], body: body, cookies: cookies))
+    }
+
+    public func compliancePut(path: String, body: Data, cookies: String) async throws -> (Data, HTTPURLResponse) {
+        try await perform(IrisRequest.compliance(method: "PUT", path: path, queryItems: [], body: body, cookies: cookies))
+    }
+
     private func perform(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
         let (data, response) = try await session.data(for: request)
         return try IrisResponse.accepted(data: data, response: response)
