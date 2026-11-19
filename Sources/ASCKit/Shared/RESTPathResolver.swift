@@ -29,12 +29,22 @@ public final class RESTPathResolver: @unchecked Sendable {
         /// action it wins over the parent, so `update --image-id X --library-id L` addresses
         /// `/asset-images/X` rather than the library's collection.
         public let resourceParam: String?
+        /// The flag naming a child that lives *under* its parent and is addressed by both
+        /// (e.g. `requirement-id` under `app-id`: the same requirement id names a row on every
+        /// app). An action on it resolves to `/{parentSegment}/{parent}/{segment}/{child}/{action}`.
+        public let nestedResourceParam: String?
 
         public init(parentParam: String, parentSegment: String, segment: String, resourceParam: String? = nil) {
+            self.init(parentParam: parentParam, parentSegment: parentSegment, segment: segment,
+                      resourceParam: resourceParam, nestedResourceParam: nil)
+        }
+
+        public init(parentParam: String, parentSegment: String, segment: String, resourceParam: String?, nestedResourceParam: String?) {
             self.parentParam = parentParam
             self.parentSegment = parentSegment
             self.segment = segment
             self.resourceParam = resourceParam
+            self.nestedResourceParam = nestedResourceParam
         }
     }
 
@@ -52,11 +62,22 @@ public final class RESTPathResolver: @unchecked Sendable {
     public static func registerRoute(
         command: String, parentParam: String, parentSegment: String, segment: String, resourceParam: String? = nil
     ) {
+        register(command: command, route: Route(parentParam: parentParam, parentSegment: parentSegment, segment: segment, resourceParam: resourceParam))
+    }
+
+    /// Registers a child addressed under its parent by both ids — see `Route.nestedResourceParam`.
+    public static func registerRoute(
+        command: String, parentParam: String, parentSegment: String, segment: String, nestedResourceParam: String
+    ) {
+        register(command: command, route: Route(parentParam: parentParam, parentSegment: parentSegment, segment: segment,
+                                               resourceParam: nil, nestedResourceParam: nestedResourceParam))
+    }
+
+    private static func register(command: String, route: Route) {
         lock.lock()
         defer { lock.unlock() }
-        let route = Route(parentParam: parentParam, parentSegment: parentSegment, segment: segment, resourceParam: resourceParam)
         var existing = routes[command] ?? []
-        if let index = existing.firstIndex(where: { $0.parentParam == parentParam }) {
+        if let index = existing.firstIndex(where: { $0.parentParam == route.parentParam }) {
             existing[index] = route
         } else {
             existing.append(route)
@@ -85,6 +106,17 @@ public final class RESTPathResolver: @unchecked Sendable {
         // `add` attaches an existing resource to a parent's collection (e.g. an item to a
         // review submission), so it resolves like `create`: POST to the collection.
         if action != "list", action != "create", action != "add" {
+            // A child addressed under its parent by both ids.
+            for route in currentRoutes[command] ?? [] {
+                if let childParam = route.nestedResourceParam, let childId = params[childParam],
+                   let parentId = params[route.parentParam] {
+                    let child = "\(base)/\(route.parentSegment)/\(parentId)/\(route.segment)/\(childId)"
+                    switch action {
+                    case "get", "update", "delete", "remove": return child
+                    default: return "\(child)/\(action)"
+                    }
+                }
+            }
             // Action on this resource by its own id (e.g. `versions get --version-id v-1`).
             if let ownId = params["\(singularize(command))-id"] {
                 return resourcePath(base: base, segment: command, id: ownId, action: action)
@@ -203,6 +235,7 @@ public final class RESTPathResolver: @unchecked Sendable {
         _ = _gameCenterRoutes
         _ = _assetLibraryRoutes
         _ = _screenshotImportRoutes
+        _ = _complianceRoutes
 
         initialized = true
     }
