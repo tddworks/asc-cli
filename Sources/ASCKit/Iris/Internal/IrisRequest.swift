@@ -33,6 +33,26 @@ enum IrisRequest {
         return request
     }
 
+    static let complianceBaseURL = "https://appstoreconnect.apple.com/ppm/compliancerequirements/v1"
+
+    /// A request to the App Compliance service (`ppm/compliancerequirements/v1`): plain JSON,
+    /// the same session cookies and browser headers as iris.
+    static func compliance(method: String, path: String, queryItems: [URLQueryItem], body: Data?, cookies: String) -> URLRequest {
+        var components = URLComponents(string: "\(complianceBaseURL)/\(path)")!
+        if !queryItems.isEmpty {
+            components.queryItems = queryItems
+        }
+        var request = URLRequest(url: components.url!)
+        request.httpMethod = method
+        request.httpBody = body
+        request.setValue("application/json", forHTTPHeaderField: "accept")
+        request.setValue("application/json", forHTTPHeaderField: "content-type")
+        request.setValue(cookies, forHTTPHeaderField: "cookie")
+        request.setValue(userAgent, forHTTPHeaderField: "user-agent")
+        request.setValue("[asc-ui]", forHTTPHeaderField: "x-csrf-itc")
+        return request
+    }
+
     private static func iris(url: URL, method: String, cookies: String) -> URLRequest {
         var request = URLRequest(url: url)
         request.httpMethod = method

@@ -88,6 +88,8 @@ extension MyModel: AffordanceProviding {
 
 Every `registerRoute(...)` call must be reachable from `RESTPathResolver.ensureInitialized()`. Add `_ = _yourRoutes` there. Forgetting this means `_links` silently resolves to `[:]` because the route table is empty when the protocol's `apiLinks` derivation runs in tests / fresh process state.
 
+A child that is addressed under its parent by **both** ids (an App Compliance requirement id is the same on every app, so its row is `/iris/apps/:appId/compliance-requirements/:requirementId`) registers with `registerRoute(command:parentParam:parentSegment:segment:nestedResourceParam:)`.
+
 ### 3. Every domain model must
 
 ```swift
@@ -173,6 +175,8 @@ public func getAvailability(iapId: String) async throws -> ASCKit.InAppPurchaseA
     )
 }
 ```
+
+**Fixtures are captured responses, never shapes guessed at** — including the empty case. Private services (iris, `ppm`) leave out empty values: an App Compliance app with no declarations answered `{}`, not `{"data": []}`, and a guessed `{"data": []}` fixture let that past every test. Record the captured shape in the feature's design doc and copy fixtures from there.
 
 **Test these with `StubAPIClient.willReturn(_:)` once per response type.** The stub keys responses by `String(describing: T.self)`, so each `willReturn` for a different response type queues up the next call's return value. Adding a regression test that returns 175 entries proves pagination works.
 

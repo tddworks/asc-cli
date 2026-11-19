@@ -50,6 +50,39 @@ struct IrisRequestTests {
 }
 
 @Suite
+struct IrisComplianceRequestTests {
+    @Test func `should ask the compliance service for JSON with the session cookies`() {
+        let request = IrisRequest.compliance(
+            method: "GET", path: "accounts/team-1/requirements",
+            queryItems: [URLQueryItem(name: "entity_id", value: "1234567890")], body: nil, cookies: "myacinfo=abc"
+        )
+
+        #expect(request.url?.absoluteString
+            == "https://appstoreconnect.apple.com/ppm/compliancerequirements/v1/accounts/team-1/requirements?entity_id=1234567890")
+        #expect(request.httpMethod == "GET")
+        #expect(request.value(forHTTPHeaderField: "accept") == "application/json")
+        #expect(request.value(forHTTPHeaderField: "content-type") == "application/json")
+        #expect(request.value(forHTTPHeaderField: "cookie") == "myacinfo=abc")
+        #expect(request.value(forHTTPHeaderField: "x-csrf-itc") == "[asc-ui]")
+        #expect(request.value(forHTTPHeaderField: "user-agent") == IrisRequest.userAgent)
+        #expect(request.httpBody == nil)
+    }
+
+    @Test func `should send a declaration as the body of a save`() {
+        let body = Data(#"{"fields":[]}"#.utf8)
+
+        let request = IrisRequest.compliance(
+            method: "PUT", path: "accounts/team-1/entities/1234567890/forms/form-1", queryItems: [], body: body, cookies: "c"
+        )
+
+        #expect(request.url?.absoluteString
+            == "https://appstoreconnect.apple.com/ppm/compliancerequirements/v1/accounts/team-1/entities/1234567890/forms/form-1")
+        #expect(request.httpMethod == "PUT")
+        #expect(request.httpBody == body)
+    }
+}
+
+@Suite
 struct IrisResponseTests {
     private let url = URL(string: "https://appstoreconnect.apple.com/iris/v1/apps")!
 

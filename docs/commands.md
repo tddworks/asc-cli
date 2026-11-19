@@ -4311,6 +4311,38 @@ asc iris resolution-center get --submission-id <submission-id> [--plain-text] [-
 | `--plain-text` |  |  | Convert HTML message bodies to plain text |
 | `--out` |  |  | Directory to download attachments into (created if missing) |
 
+### asc iris app-compliance list
+
+List every App Compliance requirement for an app, answered or not
+
+```
+asc iris app-compliance list --app-id <app-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--app-id` | yes |  | App ID |
+
+### asc iris app-compliance declare
+
+Answer an App Compliance requirement
+
+```
+asc iris app-compliance declare --app-id <app-id> --requirement-id <requirement-id> --answer <answer> [--proof <proof>] [--report <report>] [--filing-type <filing-type>] [--filing-name <filing-name>] [--filing-number <filing-number>] [--third-party-authorization <third-party-authorization>]
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--app-id` | yes |  | App ID |
+| `--requirement-id` | yes |  | Requirement ID, from `asc iris app-compliance list` |
+| `--answer` | yes |  | yes or no One of: yes, no. |
+| `--proof` |  |  | Security Assessment: the proof of a completed assessment (file) |
+| `--report` |  |  | Security Assessment: the assessment report (file) |
+| `--filing-type` |  |  | AIGC: llm or algorithm One of: algorithm, llm. |
+| `--filing-name` |  |  | AIGC: the LLM or algorithm name, as filed |
+| `--filing-number` |  |  | AIGC: the filing number |
+| `--third-party-authorization` |  |  | AIGC: the authorization or usage agreement for third-party technology (file) |
+
 ### asc iris auth login
 
 Sign in with Apple ID + password via SRP. Prompts for the 2FA code separately.

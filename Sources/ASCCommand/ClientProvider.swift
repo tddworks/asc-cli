@@ -444,6 +444,10 @@ struct ClientProvider {
         ClientFactory().makeIrisResolutionCenterRepository()
     }
 
+    static func makeIrisComplianceRepository() -> any IrisComplianceRepository {
+        ClientFactory().makeIrisComplianceRepository()
+    }
+
     static func makeIrisCookieProvider() -> any IrisCookieProvider {
         ClientFactory().makeIrisCookieProvider()
     }
