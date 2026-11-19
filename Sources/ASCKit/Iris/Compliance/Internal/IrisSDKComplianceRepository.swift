@@ -15,17 +15,26 @@ public struct IrisSDKComplianceRepository: IrisComplianceRepository {
         self.accounts = accounts
     }
 
+    /// The page's own call: every requirement, answered or not, with its status, date and
+    /// the declaration that answers it. The declarations themselves aren't read.
     public func listRequirements(session: IrisSession, appId: String) async throws -> [ComplianceRequirement] {
         let team = try await teamId(for: session)
-        let (requirementsData, _) = try await api.complianceGet(
+        let (data, _) = try await api.complianceGet(
             path: "accounts/\(team)/requirements", queryItems: [URLQueryItem(name: "entity_id", value: appId)], cookies: session.cookies
         )
-        let (formsData, _) = try await api.complianceGet(
-            path: "accounts/\(team)/entities/\(appId)/forms", queryItems: [], cookies: session.cookies
-        )
-        let requirements = try JSONDecoder().decode(ComplianceRequirementsResponse.self, from: requirementsData).data
-        let forms = try JSONDecoder().decode(ComplianceFormsResponse.self, from: formsData).data
-        return Self.rows(requirements: requirements, forms: forms, appId: appId)
+        return try JSONDecoder().decode(ComplianceRequirementsResponse.self, from: data).data.map { requirement in
+            ComplianceRequirement(
+                id: requirement.id,
+                appId: appId,
+                kind: ComplianceKind(formName: requirement.formName),
+                regions: requirement.countries ?? [],
+                isRequired: requirement.isRequired ?? false,
+                status: ComplianceStatus(wireValue: requirement.status),
+                updatedAt: requirement.lastUpdatedDate,
+                requiredActions: (requirement.requiredActions ?? []).map(ComplianceRequiredAction.init(wireValue:)),
+                declarationId: requirement.formId
+            )
+        }
     }
 
     /// Saves `answer` the way the App Compliance page does: post the draft to Apple's form,
@@ -58,10 +67,10 @@ public struct IrisSDKComplianceRepository: IrisComplianceRepository {
 
         let body = try Self.encoder.encode(ComplianceSaveRequest(
             accountId: team, entityId: requirement.appId, requirementId: requirement.id,
-            formId: requirement.declaration?.id, fields: fields
+            formId: requirement.declarationId, fields: fields
         ))
         do {
-            if let formId = requirement.declaration?.id {
+            if let formId = requirement.declarationId {
                 _ = try await api.compliancePut(path: "\(entity)/forms/\(formId)", body: body, cookies: session.cookies)
             } else {
                 _ = try await api.compliancePost(path: "\(entity)/forms", body: body, cookies: session.cookies)
@@ -113,41 +122,6 @@ public struct IrisSDKComplianceRepository: IrisComplianceRepository {
         encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
         return encoder
     }()
-
-    /// Every requirement is a row, answered or not, with the form whose `requirementId` is
-    /// its id (law 7). A form no requirement lists is still a row, but one that can't be
-    /// declared: there is no requirement to save it against (law 4).
-    static func rows(requirements: [ComplianceRequirementResource], forms: [ComplianceFormResource], appId: String) -> [ComplianceRequirement] {
-        let formsByRequirement = Dictionary(forms.map { ($0.requirementId, $0) }, uniquingKeysWith: { first, _ in first })
-        let listed = requirements.map { requirement in
-            ComplianceRequirement(
-                id: requirement.id,
-                appId: appId,
-                kind: ComplianceKind(formName: requirement.formName),
-                regions: requirement.countries ?? [],
-                isRequired: requirement.isRequired ?? false,
-                status: ComplianceStatus(wireValue: requirement.status),
-                updatedAt: requirement.lastUpdatedDate,
-                requiredActions: (requirement.requiredActions ?? []).map(ComplianceRequiredAction.init(wireValue:)),
-                declaration: formsByRequirement[requirement.id].map { ComplianceDeclaration(id: $0.id, answer: $0.answer) }
-            )
-        }
-        let listedIds = Set(requirements.map(\.id))
-        let orphans = forms.filter { !listedIds.contains($0.requirementId) }.map { form in
-            ComplianceRequirement(
-                id: form.requirementId,
-                appId: appId,
-                kind: .unrecognized(formName: form.formName),
-                regions: [],
-                isRequired: false,
-                status: form.status.map(ComplianceStatus.init(wireValue:)) ?? .unrecognized(wireValue: ""),
-                updatedAt: nil,
-                requiredActions: [],
-                declaration: ComplianceDeclaration(id: form.id, answer: form.answer)
-            )
-        }
-        return listed + orphans
-    }
 
     private func teamId(for session: IrisSession) async throws -> String {
         guard let team = try await accounts.fetchSession(cookies: session.cookies).teamId, !team.isEmpty else {

@@ -12,12 +12,12 @@ import Testing
 struct IrisAppComplianceRoutesTests {
     private let missing = ComplianceRequirement(
         id: "req-1", appId: "1234567890", kind: .securityAssessment, regions: ["CHN"], isRequired: true,
-        status: .missingInfo, updatedAt: nil, requiredActions: [], declaration: nil
+        status: .missingInfo, updatedAt: nil, requiredActions: [], declarationId: nil
     )
     private let declaredNo = ComplianceRequirement(
         id: "req-1", appId: "1234567890", kind: .securityAssessment, regions: ["CHN"], isRequired: true,
         status: .active, updatedAt: "2026-11-19T00:00:00.000Z", requiredActions: [],
-        declaration: ComplianceDeclaration(id: "form-1", answer: .no)
+        declarationId: "form-1"
     )
 
     private func call(_ method: HTTPRequest.Method, _ uri: String, body: String? = nil) async throws -> (HTTPResponse.Status, String) {

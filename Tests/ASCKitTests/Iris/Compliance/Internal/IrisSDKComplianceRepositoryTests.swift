@@ -3,7 +3,8 @@ import Mockable
 import Testing
 @testable import ASCKit
 
-/// Fixtures are the captured responses in docs/features/app-compliance/design.md, ids replaced.
+/// Fixtures are captured responses (docs/features/app-compliance/design.md, and live on
+/// 2026-11-19), ids replaced — never a shape guessed at.
 @Suite
 struct IrisSDKComplianceRepositoryTests {
     private let session = IrisSession(cookies: "myacinfo=a")
@@ -19,53 +20,40 @@ struct IrisSDKComplianceRepositoryTests {
         return accounts
     }
 
-    private func iris(requirements: String, forms: String) -> MockIrisAPI {
+    /// Apple's App Compliance service, answering only the page's own call: the requirements.
+    private func iris(requirements: String) -> MockIrisAPI {
         let api = MockIrisAPI()
         given(api).complianceGet(
             path: .value("accounts/team-uuid/requirements"),
             queryItems: .value([URLQueryItem(name: "entity_id", value: "1234567890")]),
             cookies: .value("myacinfo=a")
         ).willReturn(ok(requirements))
-        given(api).complianceGet(
-            path: .value("accounts/team-uuid/entities/1234567890/forms"), queryItems: .value([]), cookies: .value("myacinfo=a")
-        ).willReturn(ok(forms))
         return api
     }
 
-    private let unanswered = #"""
-    { "data": [
-      { "id": "req-1", "formName": "SECURITYASF395E", "entityId": "1234567890", "entityType": "APP",
-        "status": "PENDING_COLLECT", "isRequired": true, "countries": [ "CHN" ] },
-      { "id": "req-2", "formName": "AIGENERATEFD1DE", "entityId": "1234567890", "entityType": "APP",
-        "status": "PENDING_COLLECT", "isRequired": true, "countries": [ "CHN" ] }
-    ] }
-    """#
-
-    @Test func `should list every requirement nobody has answered as Missing Info`() async throws {
-        let repo = IrisSDKComplianceRepository(api: iris(requirements: unanswered, forms: #"{ "data": [] }"#), accounts: signedInTo(team: "team-uuid"))
+    @Test func `should list every requirement of a new app as Missing Info, as the page does`() async throws {
+        // Captured live on a new app.
+        let repo = IrisSDKComplianceRepository(api: iris(requirements: #"""
+        { "data": [
+          { "id": "req-1", "formName": "SECURITYASF395E", "entityId": "1234567890", "status": "PENDING_COLLECT",
+            "isRequired": true, "entityType": "APP", "countries": [ "CHN" ] },
+          { "id": "req-2", "formName": "AIGENERATEFD1DE", "entityId": "1234567890", "status": "PENDING_COLLECT",
+            "isRequired": true, "entityType": "APP", "countries": [ "CHN" ] }
+        ] }
+        """#), accounts: signedInTo(team: "team-uuid"))
 
         let rows = try await repo.listRequirements(session: session, appId: "1234567890")
 
         #expect(rows == [
             ComplianceRequirement(id: "req-1", appId: "1234567890", kind: .securityAssessment, regions: ["CHN"], isRequired: true,
-                                  status: .missingInfo, updatedAt: nil, requiredActions: [], declaration: nil),
+                                  status: .missingInfo, updatedAt: nil, requiredActions: [], declarationId: nil),
             ComplianceRequirement(id: "req-2", appId: "1234567890", kind: .aiGeneratedContent, regions: ["CHN"], isRequired: true,
-                                  status: .missingInfo, updatedAt: nil, requiredActions: [], declaration: nil),
+                                  status: .missingInfo, updatedAt: nil, requiredActions: [], declarationId: nil),
         ])
     }
 
-    @Test func `should list a new app's requirements when Apple has no declarations for it`() async throws {
-        // Seen live on a new app: the declarations call answers `{}`, with no `data`.
-        let repo = IrisSDKComplianceRepository(api: iris(requirements: unanswered, forms: "{}"), accounts: signedInTo(team: "team-uuid"))
-
-        let rows = try await repo.listRequirements(session: session, appId: "1234567890")
-
-        #expect(rows.map(\.status) == [.missingInfo, .missingInfo])
-        #expect(rows.map(\.declaration) == [nil, nil])
-    }
-
-    @Test func `should attach each declaration to the requirement it answers`() async throws {
-        let requirements = #"""
+    @Test func `should carry the declaration each answered requirement names, with its date and what Apple still needs`() async throws {
+        let repo = IrisSDKComplianceRepository(api: iris(requirements: #"""
         { "data": [
           { "id": "req-1", "formName": "SECURITYASF395E", "entityId": "1234567890", "entityType": "APP",
             "status": "COLLECTED_VERIFY_PENDING", "isRequired": true, "countries": [ "CHN" ], "formId": "form-1",
@@ -75,41 +63,25 @@ struct IrisSDKComplianceRepositoryTests {
             "status": "COLLECTED_VERIFY_NOT_NECESSARY", "isRequired": true, "countries": [ "CHN" ], "formId": "form-2",
             "dateSigned": "2026-01-03T00:00:00.000Z", "lastUpdatedDate": "2026-01-03T00:00:00.000Z" }
         ] }
-        """#
-        let forms = #"""
-        { "data": [
-          { "id": "form-2", "requirementId": "req-2", "formName": "AIGENERATEFD1DE",
-            "fields": [ { "id": "aigc-offers", "sValue": "NO", "verificationStatus": "FIELD_VERIFY_NOT_NECESSARY" } ],
-            "status": "COLLECTED_VERIFY_NOT_NECESSARY", "createdAt": "1790000000000", "updatedAt": "1790000000000" },
-          { "id": "form-1", "requirementId": "req-1", "formName": "SECURITYASF395E",
-            "fields": [
-              { "id": "field-1", "sValue": "YES", "verificationStatus": "FIELD_VERIFY_NOT_NECESSARY" },
-              { "id": "field-2", "verificationStatus": "FIELD_VERIFY_PENDING",
-                "fileContent": { "fileId": "file-1", "fileName": "proof.png", "fileType": "image/png", "fileSizeBytes": "34188" } }
-            ],
-            "status": "COLLECTED_VERIFY_PENDING", "createdAt": "1790000000000", "updatedAt": "1790000000000" }
-        ] }
-        """#
-        let repo = IrisSDKComplianceRepository(api: iris(requirements: requirements, forms: forms), accounts: signedInTo(team: "team-uuid"))
+        """#), accounts: signedInTo(team: "team-uuid"))
 
         let rows = try await repo.listRequirements(session: session, appId: "1234567890")
 
         #expect(rows == [
             ComplianceRequirement(id: "req-1", appId: "1234567890", kind: .securityAssessment, regions: ["CHN"], isRequired: true,
                                   status: .pendingVerification, updatedAt: "2026-01-02T00:00:00.000Z",
-                                  requiredActions: [.appBinarySubmission], declaration: ComplianceDeclaration(id: "form-1", answer: .yes)),
+                                  requiredActions: [.appBinarySubmission], declarationId: "form-1"),
             ComplianceRequirement(id: "req-2", appId: "1234567890", kind: .aiGeneratedContent, regions: ["CHN"], isRequired: true,
                                   status: .active, updatedAt: "2026-01-03T00:00:00.000Z",
-                                  requiredActions: [], declaration: ComplianceDeclaration(id: "form-2", answer: .no)),
+                                  requiredActions: [], declarationId: "form-2"),
         ])
     }
 
     @Test func `should keep a compliance and a status it doesn't know`() async throws {
-        let requirements = #"""
+        let repo = IrisSDKComplianceRepository(api: iris(requirements: #"""
         { "data": [ { "id": "req-9", "formName": "MEDICALDEV0001", "entityId": "1234567890", "entityType": "APP",
                       "status": "COLLECTED_VERIFY_REJECTED", "isRequired": false, "countries": [ "CHN", "HKG" ] } ] }
-        """#
-        let repo = IrisSDKComplianceRepository(api: iris(requirements: requirements, forms: #"{ "data": [] }"#), accounts: signedInTo(team: "team-uuid"))
+        """#), accounts: signedInTo(team: "team-uuid"))
 
         let rows = try await repo.listRequirements(session: session, appId: "1234567890")
 
@@ -117,25 +89,15 @@ struct IrisSDKComplianceRepositoryTests {
             ComplianceRequirement(id: "req-9", appId: "1234567890", kind: .unrecognized(formName: "MEDICALDEV0001"),
                                   regions: ["CHN", "HKG"], isRequired: false,
                                   status: .unrecognized(wireValue: "COLLECTED_VERIFY_REJECTED"),
-                                  updatedAt: nil, requiredActions: [], declaration: nil),
+                                  updatedAt: nil, requiredActions: [], declarationId: nil),
         ])
     }
 
-    @Test func `should keep a declaration no requirement lists, as a row it won't declare`() async throws {
-        let forms = #"""
-        { "data": [ { "id": "form-7", "requirementId": "req-7", "formName": "SECURITYASF395E",
-                      "fields": [ { "id": "field-1", "sValue": "NO" } ], "status": "COLLECTED_VERIFY_NOT_NECESSARY" } ] }
-        """#
-        let repo = IrisSDKComplianceRepository(api: iris(requirements: #"{ "data": [] }"#, forms: forms), accounts: signedInTo(team: "team-uuid"))
+    @Test func `should read a list Apple leaves out as empty, as the service does with every empty value`() async throws {
+        // The service omits what is empty: a new app's declarations came back `{}` (live).
+        let repo = IrisSDKComplianceRepository(api: iris(requirements: "{}"), accounts: signedInTo(team: "team-uuid"))
 
-        let rows = try await repo.listRequirements(session: session, appId: "1234567890")
-
-        #expect(rows == [
-            ComplianceRequirement(id: "req-7", appId: "1234567890", kind: .unrecognized(formName: "SECURITYASF395E"),
-                                  regions: [], isRequired: false, status: .active, updatedAt: nil, requiredActions: [],
-                                  declaration: ComplianceDeclaration(id: "form-7", answer: .no)),
-        ])
-        #expect(rows[0].isDeclarable == false)
+        #expect(try await repo.listRequirements(session: session, appId: "1234567890") == [])
     }
 
     @Test func `should refuse to list when the session names no team`() async {
@@ -202,20 +164,18 @@ struct IrisSDKComplianceDeclareTests {
         }
         given(api).complianceGet(path: .value("accounts/team-uuid/requirements"), queryItems: .any, cookies: .any)
             .willReturn(reply(200, savedRow(status: "COLLECTED_VERIFY_NOT_NECESSARY", formId: formId)))
-        given(api).complianceGet(path: .value(forms), queryItems: .any, cookies: .any)
-            .willReturn(reply(200, "{ \"data\": [ \(saved.dropFirst(10).dropLast(2)) ] }"))
         return api
     }
 
-    private func requirement(declaration: ComplianceDeclaration? = nil, status: ComplianceStatus = .missingInfo) -> ComplianceRequirement {
+    private func requirement(declarationId: String? = nil, status: ComplianceStatus = .missingInfo) -> ComplianceRequirement {
         ComplianceRequirement(id: "req-1", appId: "1234567890", kind: .securityAssessment, regions: ["CHN"], isRequired: true,
-                              status: status, updatedAt: nil, requiredActions: [], declaration: declaration)
+                              status: status, updatedAt: nil, requiredActions: [], declarationId: declarationId)
     }
 
     private let answeredNo = ComplianceRequirement(
         id: "req-1", appId: "1234567890", kind: .securityAssessment, regions: ["CHN"], isRequired: true,
         status: .active, updatedAt: "2026-11-19T00:00:00.000Z", requiredActions: [],
-        declaration: ComplianceDeclaration(id: "form-1", answer: .no)
+        declarationId: "form-1"
     )
 
     @Test func `should answer No for the first time and show the requirement active`() async throws {
@@ -254,7 +214,7 @@ struct IrisSDKComplianceDeclareTests {
         let api = apple()
 
         let row = try await IrisSDKComplianceRepository(api: api, accounts: accounts())
-            .declare(session: session, requirement: requirement(declaration: ComplianceDeclaration(id: "form-1", answer: .no), status: .active),
+            .declare(session: session, requirement: requirement(declarationId: "form-1", status: .active),
                      answer: .notOffered)
 
         #expect(row == answeredNo)

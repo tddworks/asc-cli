@@ -3,8 +3,17 @@ import Foundation
 // The App Compliance service's JSON (`ppm/compliancerequirements/v1`), as captured in
 // docs/features/app-compliance/design.md. Only what the domain reads is decoded.
 
+/// The service leaves out what is empty (a new app's declarations came back `{}`), so a
+/// missing list reads as an empty one.
 struct ComplianceRequirementsResponse: Decodable {
     let data: [ComplianceRequirementResource]
+
+    init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        data = try c.decodeIfPresent([ComplianceRequirementResource].self, forKey: .data) ?? []
+    }
+
+    private enum CodingKeys: String, CodingKey { case data }
 }
 
 struct ComplianceRequirementResource: Decodable {
@@ -100,52 +109,4 @@ struct ComplianceSaveRequest: Encodable {
     let requirementId: String
     let formId: String?
     let fields: [ComplianceDraftField]
-}
-
-struct ComplianceFormsResponse: Decodable {
-    let data: [ComplianceFormResource]
-
-    /// An app with no declarations yet is answered `{}`, with no `data` (seen live).
-    init(from decoder: any Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        data = try c.decodeIfPresent([ComplianceFormResource].self, forKey: .data) ?? []
-    }
-
-    private enum CodingKeys: String, CodingKey { case data }
-}
-
-struct ComplianceFormResponse: Decodable {
-    let data: ComplianceFormResource
-}
-
-/// A declaration, which Apple calls a form.
-struct ComplianceFormResource: Decodable {
-    let id: String
-    let requirementId: String
-    let formName: String
-    let fields: [ComplianceFieldValue]
-    let status: String?
-}
-
-/// One answered field. A `RADIO` or `TEXT` holds `sValue`; a `FILE` holds `fileContent`.
-struct ComplianceFieldValue: Codable, Equatable {
-    let id: String
-    let sValue: String?
-
-    init(id: String, sValue: String) {
-        self.id = id
-        self.sValue = sValue
-    }
-}
-
-extension ComplianceFormResource {
-    /// The answer to the form's first question, the Yes/No every form opens with.
-    /// Only a Yes opens further fields, so a form with more than that one is a Yes.
-    var answer: ComplianceDeclaration.Answer {
-        switch fields.first?.sValue {
-        case "YES": .yes
-        case "NO": .no
-        default: fields.count > 1 ? .yes : .no
-        }
-    }
 }

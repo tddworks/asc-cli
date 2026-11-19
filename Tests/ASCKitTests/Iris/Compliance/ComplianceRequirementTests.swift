@@ -10,13 +10,13 @@ struct ComplianceRequirementTests {
     private func requirement(
         _ kind: ComplianceKind = .securityAssessment,
         status: ComplianceStatus,
-        declaration: ComplianceDeclaration? = nil,
+        declarationId: String? = nil,
         requiredActions: [ComplianceRequiredAction] = []
     ) -> ComplianceRequirement {
         ComplianceRequirement(
             id: "req-1", appId: "1234567890", kind: kind, regions: ["CHN"], isRequired: true,
-            status: status, updatedAt: declaration == nil ? nil : "2026-11-17T00:00:00.000Z",
-            requiredActions: requiredActions, declaration: declaration
+            status: status, updatedAt: declarationId == nil ? nil : "2026-11-17T00:00:00.000Z",
+            requiredActions: requiredActions, declarationId: declarationId
         )
     }
 
@@ -28,14 +28,12 @@ struct ComplianceRequirementTests {
     }
 
     @Test func `should offer to change an active declaration and to resubmit a failed one`() {
-        let answered = ComplianceDeclaration(id: "form-1", answer: .no)
-        #expect(requirement(status: .active, declaration: answered).affordances["declare"] != nil)
-        #expect(requirement(status: .verificationFailed, declaration: answered).affordances["declare"] != nil)
+        #expect(requirement(status: .active, declarationId: "form-1").affordances["declare"] != nil)
+        #expect(requirement(status: .verificationFailed, declarationId: "form-1").affordances["declare"] != nil)
     }
 
     @Test func `should not offer to declare while Apple is verifying the answer`() {
-        let yes = ComplianceDeclaration(id: "form-1", answer: .yes)
-        #expect(requirement(status: .pendingVerification, declaration: yes).affordances["declare"] == nil)
+        #expect(requirement(status: .pendingVerification, declarationId: "form-1").affordances["declare"] == nil)
     }
 
     @Test func `should not offer to declare a kind it doesn't know`() {
@@ -57,7 +55,7 @@ struct ComplianceRequirementTests {
     // MARK: - declare (law 5, refused by the model before anything is sent)
 
     @Test func `should send a No to Apple through the repository`() async throws {
-        let declared = requirement(status: .active, declaration: ComplianceDeclaration(id: "form-1", answer: .no))
+        let declared = requirement(status: .active, declarationId: "form-1")
         let repo = MockIrisComplianceRepository()
         given(repo).declare(session: .any, requirement: .any, answer: .value(.notOffered)).willReturn(declared)
 
@@ -68,7 +66,7 @@ struct ComplianceRequirementTests {
         let repo = MockIrisComplianceRepository()
 
         await #expect(throws: ComplianceError.notDeclarable(kind: .securityAssessment, status: .pendingVerification)) {
-            try await requirement(status: .pendingVerification, declaration: ComplianceDeclaration(id: "form-1", answer: .yes))
+            try await requirement(status: .pendingVerification, declarationId: "form-1")
                 .declare(.notOffered, session: session, repo: repo)
         }
         verify(repo).declare(session: .any, requirement: .any, answer: .any).called(0)
@@ -84,12 +82,11 @@ struct ComplianceRequirementTests {
     // MARK: - what it writes
 
     @Test func `should write a requirement the way the App Compliance page reads`() throws {
-        let row = requirement(status: .pendingVerification, declaration: ComplianceDeclaration(id: "form-1", answer: .yes),
-                              requiredActions: [.appBinarySubmission])
+        let row = requirement(status: .pendingVerification, declarationId: "form-1", requiredActions: [.appBinarySubmission])
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
 
-        #expect(String(decoding: try encoder.encode(row), as: UTF8.self) == #"{"appId":"1234567890","declaration":{"answer":"YES","id":"form-1"},"id":"req-1","isRequired":true,"kind":"SECURITY_ASSESSMENT","name":"Security Assessment","regions":["CHN"],"requiredActions":["APP_BINARY_SUBMISSION"],"status":"PENDING_VERIFICATION","updatedAt":"2026-11-17T00:00:00.000Z"}"#)
+        #expect(String(decoding: try encoder.encode(row), as: UTF8.self) == #"{"appId":"1234567890","declarationId":"form-1","id":"req-1","isRequired":true,"kind":"SECURITY_ASSESSMENT","name":"Security Assessment","regions":["CHN"],"requiredActions":["APP_BINARY_SUBMISSION"],"status":"PENDING_VERIFICATION","updatedAt":"2026-11-17T00:00:00.000Z"}"#)
     }
 
     @Test func `should leave out the declaration and date of a requirement nobody has answered`() throws {

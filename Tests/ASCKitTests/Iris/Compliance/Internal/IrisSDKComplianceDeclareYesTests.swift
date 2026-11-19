@@ -74,13 +74,13 @@ struct IrisSDKComplianceDeclareYesTests {
             .willProduce { _, body, _ in self.ok(form(CapturedForms.draft(of: body))) }
         given(api).compliancePost(path: .value("\(entity)/forms"), body: .any, cookies: .any)
             .willReturn(ok(#"{ "data": { "id": "form-9", "requirementId": "\#(requirementId)", "formName": "X", "fields": [], "status": "COLLECTED_VERIFY_PENDING" } }"#))
-        given(api).complianceGet(path: .any, queryItems: .any, cookies: .any).willReturn(ok(#"{ "data": [] }"#))
+        given(api).complianceGet(path: .any, queryItems: .any, cookies: .any).willReturn(ok("{}"))
         return api
     }
 
     private func requirement(_ id: String, _ kind: ComplianceKind) -> ComplianceRequirement {
         ComplianceRequirement(id: id, appId: "1234567890", kind: kind, regions: ["CHN"], isRequired: true,
-                              status: .missingInfo, updatedAt: nil, requiredActions: [], declaration: nil)
+                              status: .missingInfo, updatedAt: nil, requiredActions: [], declarationId: nil)
     }
 
     private func savedBody(_ api: MockIrisAPI, requirementId: String, fields: String) {

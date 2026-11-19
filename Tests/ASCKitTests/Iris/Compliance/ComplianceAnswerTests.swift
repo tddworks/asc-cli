@@ -80,7 +80,7 @@ struct ComplianceAnswerTests {
 
     @Test func `should refuse evidence made for another compliance, sending nothing`() async {
         let aigc = ComplianceRequirement(id: "req-2", appId: "1234567890", kind: .aiGeneratedContent, regions: ["CHN"], isRequired: true,
-                                         status: .missingInfo, updatedAt: nil, requiredActions: [], declaration: nil)
+                                         status: .missingInfo, updatedAt: nil, requiredActions: [], declarationId: nil)
         let repo = MockIrisComplianceRepository()
 
         await #expect(throws: ComplianceError.evidenceMismatch(kind: .aiGeneratedContent)) {

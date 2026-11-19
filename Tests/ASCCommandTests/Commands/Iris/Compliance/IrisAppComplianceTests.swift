@@ -14,17 +14,17 @@ struct IrisAppComplianceTests {
 
     private let missing = ComplianceRequirement(
         id: "req-1", appId: "1234567890", kind: .securityAssessment, regions: ["CHN"], isRequired: true,
-        status: .missingInfo, updatedAt: nil, requiredActions: [], declaration: nil
+        status: .missingInfo, updatedAt: nil, requiredActions: [], declarationId: nil
     )
     private let pending = ComplianceRequirement(
         id: "req-2", appId: "1234567890", kind: .aiGeneratedContent, regions: ["CHN"], isRequired: true,
         status: .pendingVerification, updatedAt: "2026-11-17T00:00:00.000Z", requiredActions: [.appBinarySubmission],
-        declaration: ComplianceDeclaration(id: "form-2", answer: .yes)
+        declarationId: "form-2"
     )
     private var declaredNo: ComplianceRequirement {
         ComplianceRequirement(id: "req-1", appId: "1234567890", kind: .securityAssessment, regions: ["CHN"], isRequired: true,
                               status: .active, updatedAt: "2026-11-19T00:00:00.000Z", requiredActions: [],
-                              declaration: ComplianceDeclaration(id: "form-1", answer: .no))
+                              declarationId: "form-1")
     }
 
     private func repo() -> MockIrisComplianceRepository {
@@ -65,10 +65,7 @@ struct IrisAppComplianceTests {
                 "listRequirements" : "asc iris app-compliance list --app-id 1234567890"
               },
               "appId" : "1234567890",
-              "declaration" : {
-                "answer" : "YES",
-                "id" : "form-2"
-              },
+              "declarationId" : "form-2",
               "id" : "req-2",
               "isRequired" : true,
               "kind" : "AI_GENERATED_CONTENT",
@@ -95,7 +92,7 @@ struct IrisAppComplianceTests {
         let json = try #require(try JSONSerialization.jsonObject(with: Data(output.utf8)) as? [String: Any])
         let row = try #require((json["data"] as? [[String: Any]])?.first)
         #expect(row["status"] as? String == "ACTIVE")
-        #expect((row["declaration"] as? [String: Any])?["answer"] as? String == "NO")
+        #expect(row["declarationId"] as? String == "form-1")
     }
 
     @Test func `should refuse to declare while Apple is verifying the answer`() async throws {
@@ -155,7 +152,7 @@ struct IrisAppComplianceTests {
 
     @Test func `should declare an AIGC Yes from its filing and third-party agreement`() async throws {
         let aigc = ComplianceRequirement(id: "req-3", appId: "1234567890", kind: .aiGeneratedContent, regions: ["CHN"], isRequired: true,
-                                         status: .missingInfo, updatedAt: nil, requiredActions: [], declaration: nil)
+                                         status: .missingInfo, updatedAt: nil, requiredActions: [], declarationId: nil)
         let yes = ComplianceAnswer.offered(.aiGeneratedContent(
             filing: .largeLanguageModel(name: "Example Model", filingNumber: "Example-0000"),
             thirdParty: .used(authorization: ComplianceFile(name: "agreement.pdf", data: Data("A".utf8)))

@@ -1,5 +1,5 @@
-/// One row on an app's App Compliance page: a compliance that applies to the app in
-/// a region, and the declaration that answers it. Apple's requirement id names the
+/// One row on an app's App Compliance page: a compliance that applies to the app in a
+/// region, as the page draws it from Apple's requirements alone. Apple's requirement id names the
 /// compliance for the whole account, so a row is the id **and** its app (law 2).
 public struct ComplianceRequirement: Sendable, Equatable, Identifiable, Codable {
     public let id: String
@@ -13,13 +13,13 @@ public struct ComplianceRequirement: Sendable, Equatable, Identifiable, Codable 
     /// LAST UPDATED, as Apple's ISO 8601 `lastUpdatedDate`; nil = never answered.
     public let updatedAt: String?
     public let requiredActions: [ComplianceRequiredAction]
-    /// nil = never answered.
-    public let declaration: ComplianceDeclaration?
+    /// The declaration that answers it (Apple's `formId`): what a change updates. nil = never answered.
+    public let declarationId: String?
 
     public init(
         id: String, appId: String, kind: ComplianceKind, regions: [String], isRequired: Bool,
         status: ComplianceStatus, updatedAt: String?, requiredActions: [ComplianceRequiredAction],
-        declaration: ComplianceDeclaration?
+        declarationId: String?
     ) {
         self.id = id
         self.appId = appId
@@ -29,7 +29,7 @@ public struct ComplianceRequirement: Sendable, Equatable, Identifiable, Codable 
         self.status = status
         self.updatedAt = updatedAt
         self.requiredActions = requiredActions
-        self.declaration = declaration
+        self.declarationId = declarationId
     }
 
     /// A first answer (Missing Info), a change (Active) or a resubmission (Verification
@@ -47,7 +47,7 @@ public struct ComplianceRequirement: Sendable, Equatable, Identifiable, Codable 
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, appId, kind, name, regions, isRequired, status, updatedAt, requiredActions, declaration
+        case id, appId, kind, name, regions, isRequired, status, updatedAt, requiredActions, declarationId
     }
 
     public init(from decoder: any Decoder) throws {
@@ -61,7 +61,7 @@ public struct ComplianceRequirement: Sendable, Equatable, Identifiable, Codable 
             status: try c.decode(ComplianceStatus.self, forKey: .status),
             updatedAt: try c.decodeIfPresent(String.self, forKey: .updatedAt),
             requiredActions: try c.decode([ComplianceRequiredAction].self, forKey: .requiredActions),
-            declaration: try c.decodeIfPresent(ComplianceDeclaration.self, forKey: .declaration)
+            declarationId: try c.decodeIfPresent(String.self, forKey: .declarationId)
         )
     }
 
@@ -76,7 +76,7 @@ public struct ComplianceRequirement: Sendable, Equatable, Identifiable, Codable 
         try c.encode(status, forKey: .status)
         try c.encodeIfPresent(updatedAt, forKey: .updatedAt)
         try c.encode(requiredActions, forKey: .requiredActions)
-        try c.encodeIfPresent(declaration, forKey: .declaration)
+        try c.encodeIfPresent(declarationId, forKey: .declarationId)
     }
 }
 
@@ -94,9 +94,8 @@ extension ComplianceRequirement: AffordanceProviding {
 }
 
 extension ComplianceRequirement: Presentable {
-    public static var tableHeaders: [String] { ["Requirement ID", "Compliance", "Regions", "Status", "Answer", "Last Updated"] }
+    public static var tableHeaders: [String] { ["Requirement ID", "Compliance", "Regions", "Last Updated", "Status"] }
     public var tableRow: [String] {
-        [id, kind.displayName, regions.joined(separator: ", "), status.displayName,
-         declaration?.answer.rawValue ?? "-", updatedAt ?? "-"]
+        [id, kind.displayName, regions.joined(separator: ", "), updatedAt ?? "-", status.displayName]
     }
 }

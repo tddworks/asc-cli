@@ -130,6 +130,8 @@ GET https://appstoreconnect.apple.com/ppm/compliancerequirements/v1/accounts/{ac
 ```
 
 - **Only answered requirements come back.** A declaration joins its requirement on `requirementId` = requirement `id`.
+- **With none, it answers `{}`** (captured live on two new apps), not `{"data": []}`: the service leaves out what is empty, here and in every other response (no `formId`, dates or `requiredActions` until they apply).
+- **The page doesn't call it to draw the table** (captured in the browser): only when a row's Add Info / Edit / View dialog opens.
 - Timestamps are epoch milliseconds, encoded as strings.
 - The second captured declaration was `AIGENERATEFD1DE`, with the same shape. The spelling is the same in both calls.
 
@@ -440,13 +442,14 @@ ComplianceRequirement                  one row on the App Compliance page (aggre
  ├─ isRequired : Bool
  ├─ updatedAt  : Date?                 `lastUpdatedDate`; nil = never answered, shown "-"
  ├─ requiredActions : [RequiredAction] e.g. .appBinarySubmission; unknown values kept raw
- ├─ declaration : ComplianceDeclaration?   nil ⇒ never answered
- │   ├─ id        : String             Apple's form id (`formId` on the requirement); what an update targets (assumed, Open question 2)
- │   └─ answer    : ComplianceAnswer   .notOffered | .offered(Evidence) — EVIDENCE ONLY ON YES
+ ├─ declarationId : String?            the requirement's `formId`: the declaration a change updates; nil ⇒ never answered
  └─ status     : ComplianceStatus      mapped from the requirement's `status`
+
+ComplianceAnswer                       what `declare` sends (not part of the row)
+ └─ .notOffered | .offered(Evidence)   EVIDENCE ONLY ON YES
 ```
 
-The adapter makes the two reads and joins them: every requirement is a row, and its declaration is the form whose `id` is the requirement's `formId` (equivalently, whose `requirementId` is the requirement's `id`). A form with no matching requirement is kept as its own row with `.unrecognized` kind (law 4), never dropped. A list that doesn't need the answer itself can skip the declarations call.
+**The row is what the page draws, from the page's own call.** The requirements response alone carries everything the table shows (name, regions, last updated, status) and the `formId` a change needs, so `list` makes that one call, as the page does. The declarations themselves (the stored answer, its files) aren't read for the list: the page doesn't show them in the table either, and reading them doubled the requests and was the call that answered `{}`. They belong to a future `get` of one requirement, which is what the page's dialog does.
 
 There is no `AppCompliance` wrapper type. It would just be the plural of `ComplianceRequirement`, with no rule of its own yet. It earns a type if Open question 6 ("may this app ship in region X?") gets answered, because that rule belongs to the collection.
 
@@ -508,7 +511,7 @@ The iris repositories reach Apple through the `@Mockable IrisAPI` role, played b
 | 5 | You're offered `declare` only for a recognized kind that isn't awaiting verification: Missing Info (a first answer), Active (a change) and Verification Failed (a resubmission, assumed) | `ComplianceRequirement.structuredAffordances` |
 | 5a | `declare` saves only if the requirement's metadata says its fields are `editable`; otherwise it refuses without writing. Apple's own answer decides, so a wrong guess about a status never writes to a read-only declaration | adapter (`declare` reads metadata first) |
 | 6 | The account in the URL is the team's `publicProviderId`, never the numeric `providerID` | adapter (account resolution) |
-| 7 | Every requirement is a row whether or not it was answered; a declaration attaches to the requirement whose `id` is its `requirementId` | adapter (the join) |
+| 7 | Every requirement is a row whether or not it was answered, and names the declaration that answers it (`formId`) | adapter (the requirements mapper) |
 | 8 | A declaration names each field by the id the requirement's metadata gives, read for the chosen answers before every save; an id is never hard-coded or guessed. The adapter finds which constraint is which by the field key in its `label` loc key (`algorithmname2`), and walks the tree one pick at a time | adapter (`declare` reads metadata first) |
 | 9 | A file is offered for a `FILE` field only if its extension is in that field's `allowedFileTypes` | `ComplianceAnswer` evidence types, from the metadata |
 | 10 | A save sends only the fields the metadata asks for under the chosen answers; a field from an abandoned branch (a file chosen before switching to No) is dropped | adapter (`declare` builds the body from the metadata) |
@@ -517,7 +520,7 @@ The iris repositories reach Apple through the `@Mockable IrisAPI` role, played b
 
 0. ~~**Capture**~~ Done. Every call the page makes is captured; nothing blocks slices 1–6. Also the AIGC Yes metadata, `metadata` for an answered requirement, and the Verification Failed status. The reads, and their responses after a Yes, are captured.
 1. **Public face** (`Sources/ASCKit/Iris/Compliance/`): `ComplianceKind`, `ComplianceStatus`, `ComplianceAnswer` (No only), `ComplianceRequirement` + affordances, `@Mockable IrisComplianceRepository` (CRUD over requirements and declarations, so it keeps the `Repository` name; `requirement.declare(…)` is the workflow, on the model). *Pinned: laws 1, 3 (No), 4, 5.*
-2. **Read** (`Sources/ASCKit/Iris/Compliance/Internal/`, through `IrisAPI`): the ppm base on `IrisRequest`; account resolution; `listRequirements(session:appId:)` reading both captured fixtures (placeholder IDs) and joining them, tested on `MockIrisAPI`. *Pinned: laws 2, 6, 7; epoch-ms dates; `entity_id` query; unknown `formName` survives; an orphan declaration survives.*
+2. **Read** (`Sources/ASCKit/Iris/Compliance/Internal/`, through `IrisAPI`): the ppm base on `IrisRequest`; account resolution; `listRequirements(session:appId:)` from the page's one call (captured fixtures, placeholder IDs), tested on `MockIrisAPI`. *Pinned: laws 2, 6, 7; `entity_id` query; unknown `formName` and status survive; a missing list reads as empty.*
 3. **`asc iris app-compliance list` + REST** `GET /api/v1/iris/apps/:appId/compliance-requirements`. *Pinned: full JSON snapshot; `_links.declare` only on eligible rows.*
 4. **`declare --answer no` + REST** (reads the requirement's metadata for the question's id, then saves; *pinned: law 8*) `POST /api/v1/iris/apps/:appId/compliance-requirements/:requirementId/declare` (the app is in the path because a requirement id alone names no row). A first answer is a `POST …/forms`; a change to an Active one is a `PUT …/forms/{formId}` (the requirement's `formId`). A pending one is never offered `declare`.
 5. **Yes with evidence**: per-kind evidence types and file flags; files read from disk and sent base64 in `fileContent.fileData`. *Pinned: laws 9, 10.* The body is captured (AIGC Yes with a file).
@@ -526,12 +529,12 @@ The iris repositories reach Apple through the `@Mockable IrisAPI` role, played b
 
 ## 6a · What the build settled
 
-- **The declaration the list reads holds only the answer.** `ComplianceDeclaration` is `{ id, answer: YES | NO }`; a Yes's evidence stays with Apple, since naming its stored fields would need the metadata for every row. The evidence types (`ComplianceEvidence`) are what a Yes *sends*.
+- **`list` makes only the page's own call** (requirements) and the row carries `declarationId` from `formId`. An earlier build also read the declarations and joined them (with orphan declarations as rows); it was dropped once the browser showed the page doesn't, and a new app's `{}` broke it. The evidence types (`ComplianceEvidence`) are only what a Yes *sends*.
 - **The account is asked of olympus on every call**, not read from a saved `teamId`, so a browser-cookie or `ASC_IRIS_COOKIES` session works the same as `asc iris auth login`. No `publicProviderId` → `ComplianceError.teamUnknown`.
 - **Law 1's owner is `ComplianceStatus(wireValue:)`**: Apple already sends `PENDING_COLLECT` for an unanswered requirement.
 - **The answer a form holds is its first field**, the Yes/No it opens with; only a Yes opens more fields.
 - **`declare` is one loop for every answer**: post the draft to `…/metadata`, fill each field Apple newly asks for (by the key in its label), repeat until Apple asks for nothing new, then save exactly those fields. Any field Apple won't take a change to stops it (law 5a). A No ends after its first pick.
-- **An app with no declarations gets `{}` from the declarations call**, not `{"data": []}` (seen live on a new app); it reads as no declarations.
+- **The service leaves out what is empty** (`{}` for no declarations, seen live on two new apps), so every response reads a missing list as empty. **Fixtures are captures**, never a shape guessed at: the guessed `{"data": []}` is how the `{}` slipped past the tests.
 - **Verified live** (2026-11-19, on a test app): list on a new app (both Missing Info), a first No on each form (`POST`, → Active), a change to an Active one (`PUT`, same declaration id, new LAST UPDATED), and the refusal on a Pending Verification row before anything is sent. A Yes was not sent live: it would put placeholder evidence in front of Apple.
 - **REST statuses**: 404 no such requirement on the app; 409 not declarable now, read-only, or a form asc doesn't understand; 422 evidence missing, mismatched or of a type the field refuses; 403 the role can't edit; 401 no team.
 
