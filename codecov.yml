@@ -43,9 +43,6 @@ ignore:
   - "Sources/ASCKit/Web/**/*"
 
 
-  # Plugin marketplace — wraps PluginLoader (filesystem) + URLSession download + unzip
-  - "Sources/ASCKit/Plugins/Internal/PluginMarketRepository.swift"
-
   # Simulator stream — HTTP server, subprocess management, AXe shell integration
   - "Sources/Infrastructure/Simulators/DeviceStreamServer.swift"
   - "Sources/Infrastructure/Simulators/AXeStreamManager.swift"

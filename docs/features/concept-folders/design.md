@@ -4,7 +4,7 @@ description: The source layout reworked from layers (Domain/, Infrastructure/) t
 
 # Concept folders, not layers
 
-**Status: steps 1–3 BUILT** (one `ASCKit` module, concept folders; docs and skills follow; one composition root, held by a test); steps 4–5 not built. asc-cli is split by layer: `Sources/Domain/`
+**Status: steps 1–4 BUILT** (one `ASCKit` module, concept folders; docs and skills follow; one composition root, held by a test; every adapter's decisions tested, only the bare call in `Internal/System/`); step 5 not built. asc-cli is split by layer: `Sources/Domain/`
 and `Sources/Infrastructure/` are two modules that mirror each other folder
 for folder. Every concept therefore lives in two places, and every change to
 one touches both trees. The goal, stated as a test:
@@ -116,7 +116,7 @@ safety net; any step that moves a rule writes its test first.
 | 1 | **one module, concept folders** ✓ | `Domain` + `Infrastructure` targets, `DomainTests` + `InfrastructureTests` | `git mv` into `Sources/ASCKit/<Concept>/` and `<Concept>/Internal/`; `ScreenshotPlans` → `Screenshots/Internal/`; `Client` + infra `Shared` → `Shared/Internal/`; one `ASCKit` target, one `ASCKitTests`; `import Domain`/`Infrastructure` → `import ASCKit`; `Domain.X` → `ASCKit.X`. Library users and `examples/blitz-screenshots` change two imports to one (CHANGELOG line, `docs/library.md`) | — (move only; 787+ tests stay green) |
 | 2 | **docs and skills follow** ✓ | `CLAUDE.md`, `docs/design.md`, `implement-feature` / `fix-bug` / `improvement` skills describe `Domain → Infrastructure` (16 files) | describe concept folders; link this doc | — |
 | 3 | **one composition root** ✓ | 22 uses of 12 `Internal/` types in 14 `ASCCommand` files outside `ClientProvider`; `RESTRoutes` wires its own `ClientFactory` | `ClientProvider` gains `makeAuthStorage`, `makeEnvironmentAuthProvider`, `makeXcodeBuildRunner`, `makeProjectConfigStorage`; commands and `RESTRoutes` ask it for the public protocol | "should build every concept's Internal implementation only in the composition root" |
-| 4 | **`Internal/System/` per adapter** (one commit each) | seven untested adapters mix decisions with I/O; `codecov.yml` lists each file | each adapter's decisions become a tested value or orchestrator in `Internal/`; only the call stays, ≤100 lines, in `Internal/System/`; the per-file ignores become one `**/Internal/System/**` rule. The SDK adapters stay as they are | per adapter, its decisions: e.g. "should add the given variables on top of the inherited environment" |
+| 4 | **`Internal/System/` per adapter** ✓ (one commit each) | seven untested adapters mix decisions with I/O; `codecov.yml` lists each file | each adapter's decisions become a tested value or orchestrator in `Internal/`; only the call stays, ≤100 lines, in `Internal/System/`; the per-file ignores become one `**/Internal/System/**` rule. The SDK adapters stay as they are | per adapter, its decisions: e.g. "should add the given variables on top of the inherited environment" |
 | 5 | **names for roles** (several PRs) | 75 `XxxRepository` protocols, `XxxProvider`s | plural collection nouns (`Apps`, `Builds`), role nouns for the rest | per rename — none; behaviour unchanged |
 
 Step 1 removes most of §1's cost on its own; 3 and 4 make the fence real; 5 is
@@ -137,3 +137,8 @@ cosmetic and can wait.
   mount routes on it?
 - **`MOCKING` in release builds** — the `ASCKit` target defines it
   unconditionally (inherited from `Domain`), so mocks ship in `asc`.
+- **`IdmsaAPIClient`'s wire** — 46% covered; its own HTTP tests miss most of
+  sign-in-complete and verify. Its URLProtocol tests are the right tool there:
+  they pin the bytes Apple expects.
+- **The other iris repositories' tests** still drive a real `IrisClient` through
+  `URLProtocol` stubs; they can move onto `MockIrisAPI` as they are touched.
