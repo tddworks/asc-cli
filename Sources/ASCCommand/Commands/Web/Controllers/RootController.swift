@@ -1,7 +1,6 @@
-import Domain
+import ASCKit
 import Hummingbird
 import ASCPlugin
-import Infrastructure
 
 /// GET /api/v1 — HATEOAS entry point listing all available resources.
 struct RootController: Sendable {

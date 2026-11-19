@@ -1,7 +1,7 @@
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 private func makeScore(
     id: String = "mod-1",

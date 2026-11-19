@@ -1,7 +1,6 @@
-import Domain
+import ASCKit
 import Hummingbird
 import HummingbirdWebSocket
-import Infrastructure
 
 /// Review versions of in-app purchases, subscriptions and subscription groups.
 /// A submittable version is sent to review by adding it to a review submission.

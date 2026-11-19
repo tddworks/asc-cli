@@ -6,7 +6,7 @@ let package = Package(
     platforms: [.macOS(.v14)],
     products: [
         .executable(name: "asc", targets: ["ASCCommand"]),
-        .library(name: "ASCKit", targets: ["Domain", "Infrastructure"]),
+        .library(name: "ASCKit", targets: ["ASCKit"]),
         .library(name: "ASCPlugin", targets: ["ASCPlugin"]),
     ],
     dependencies: [
@@ -30,32 +30,25 @@ let package = Package(
             ]
         ),
         .target(
-            name: "Domain",
+            name: "ASCKit",
             dependencies: [
+                "ASCPlugin",
                 .product(name: "Mockable", package: "Mockable"),
                 .product(name: "Mustache", package: "swift-mustache"),
-            ],
-            resources: [.copy("Screenshots/Gallery/Resources")],
-            swiftSettings: [.define("MOCKING")]
-        ),
-        .target(
-            name: "Infrastructure",
-            dependencies: [
-                "Domain",
-                "ASCPlugin",
                 .product(name: "AppStoreConnect-Swift-SDK", package: "appstoreconnect-swift-sdk"),
                 .product(name: "SweetCookieKit", package: "sweetcookiekit"),
                 .product(name: "Hummingbird", package: "hummingbird"),
                 .product(name: "HummingbirdTLS", package: "hummingbird"),
                 .product(name: "HummingbirdWebSocket", package: "hummingbird-websocket"),
                 .product(name: "SRP", package: "swift-srp"),
-            ]
+            ],
+            resources: [.copy("Screenshots/Gallery/Resources")],
+            swiftSettings: [.define("MOCKING")]
         ),
         .executableTarget(
             name: "ASCCommand",
             dependencies: [
-                "Domain",
-                "Infrastructure",
+                "ASCKit",
                 "ASCPlugin",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "TauTUI", package: "TauTUI"),
@@ -63,18 +56,9 @@ let package = Package(
             resources: [.copy("Resources/mockups")]
         ),
         .testTarget(
-            name: "DomainTests",
+            name: "ASCKitTests",
             dependencies: [
-                "Domain",
-                .product(name: "Mockable", package: "Mockable"),
-            ],
-            swiftSettings: [.define("MOCKING")]
-        ),
-        .testTarget(
-            name: "InfrastructureTests",
-            dependencies: [
-                "Infrastructure",
-                "Domain",
+                "ASCKit",
                 .product(name: "Mockable", package: "Mockable"),
             ],
             swiftSettings: [.define("MOCKING")]
@@ -83,7 +67,7 @@ let package = Package(
             name: "ASCCommandTests",
             dependencies: [
                 "ASCCommand",
-                "Domain",
+                "ASCKit",
                 .product(name: "Mockable", package: "Mockable"),
                 .product(name: "HummingbirdTesting", package: "hummingbird"),
                 .product(name: "HummingbirdWebSocket", package: "hummingbird-websocket"),

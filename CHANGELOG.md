@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Breaking (library):** the `ASCKit` product is one module, `ASCKit`; replace `import Domain` and `import Infrastructure` with `import ASCKit`. The CLI is unchanged. → [design](docs/features/concept-folders/design.md)
+
 ---
 
 ## [0.18.9] - 2026-11-08

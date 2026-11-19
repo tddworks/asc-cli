@@ -1,6 +1,6 @@
 import ArgumentParser
 import CoreGraphics
-import Domain
+import ASCKit
 import Foundation
 import ImageIO
 

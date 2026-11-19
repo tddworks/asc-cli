@@ -1,6 +1,5 @@
 import ArgumentParser
-import Domain
-import Infrastructure
+import ASCKit
 
 struct AuthUse: AsyncParsableCommand {
     static let configuration = CommandConfiguration(

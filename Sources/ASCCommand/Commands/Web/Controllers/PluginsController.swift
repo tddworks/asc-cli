@@ -1,9 +1,8 @@
 import ASCPlugin
-import Domain
+import ASCKit
 import Foundation
 import Hummingbird
 import HummingbirdWebSocket
-import Infrastructure
 
 /// /api/v1/plugins — Plugin routes.
 ///

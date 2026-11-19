@@ -1,6 +1,5 @@
 import ArgumentParser
-import Domain
-import Infrastructure
+import ASCKit
 
 struct FinanceReportsDownload: AsyncParsableCommand {
     static let configuration = CommandConfiguration(

@@ -1,7 +1,7 @@
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite("PluginsUpdate — apply an update to one plugin")
 struct PluginsUpdateTests {

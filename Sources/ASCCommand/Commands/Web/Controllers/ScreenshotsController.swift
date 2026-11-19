@@ -1,7 +1,6 @@
-import Domain
+import ASCKit
 import Hummingbird
 import HummingbirdWebSocket
-import Infrastructure
 
 /// Routes that return `AppScreenshot` resources.
 struct ScreenshotsController: Sendable {

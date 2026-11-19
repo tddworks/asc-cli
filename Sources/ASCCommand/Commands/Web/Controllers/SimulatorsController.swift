@@ -1,7 +1,7 @@
 import Hummingbird
 import HummingbirdWebSocket
 import ASCPlugin
-import Domain
+import ASCKit
 
 /// /api/v1/simulators — Simulator routes.
 struct SimulatorsController: Sendable {

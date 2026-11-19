@@ -1,7 +1,6 @@
 import ArgumentParser
-import Domain
+import ASCKit
 import Foundation
-import Infrastructure
 
 struct AppShotsTemplatesCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(

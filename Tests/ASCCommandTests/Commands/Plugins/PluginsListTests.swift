@@ -1,7 +1,7 @@
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite("PluginsList — list installed dylib plugins")
 struct PluginsListTests {

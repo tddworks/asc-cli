@@ -1,7 +1,7 @@
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 @Suite
 struct IrisStatusTests {
@@ -9,7 +9,7 @@ struct IrisStatusTests {
     @Test func `status shows source and cookie count with affordances`() async throws {
         let mockCookieProvider = MockIrisCookieProvider()
         given(mockCookieProvider).resolveStatus().willReturn(
-            Domain.IrisStatus(source: .browser, cookieCount: 5)
+            ASCKit.IrisStatus(source: .browser, cookieCount: 5)
         )
 
         let cmd = try ASCCommand.IrisStatus.parse(["--pretty"])
@@ -35,7 +35,7 @@ struct IrisStatusTests {
     @Test func `status shows environment source`() async throws {
         let mockCookieProvider = MockIrisCookieProvider()
         given(mockCookieProvider).resolveStatus().willReturn(
-            Domain.IrisStatus(source: .environment, cookieCount: 3)
+            ASCKit.IrisStatus(source: .environment, cookieCount: 3)
         )
 
         let cmd = try ASCCommand.IrisStatus.parse(["--pretty"])

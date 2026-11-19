@@ -1,4 +1,4 @@
-import Domain
+import ASCKit
 import Foundation
 
 /// Non-blocking auto-update checker called on every `asc` command.

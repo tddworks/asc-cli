@@ -1,5 +1,5 @@
 import ArgumentParser
-import Domain
+import ASCKit
 
 /// `asc iris iap-submissions create --iap-id <id>` — submits an IAP via the iris
 /// private API. The default `--with-next-version` (i.e. `submitWithNextAppStoreVersion: true`)

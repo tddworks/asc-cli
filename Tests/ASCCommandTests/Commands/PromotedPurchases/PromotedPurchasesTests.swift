@@ -1,7 +1,7 @@
 import Mockable
 import Testing
 @testable import ASCCommand
-@testable import Domain
+@testable import ASCKit
 
 private func makePromoted(id: String = "pp-1", appId: String = "app-1") -> PromotedPurchase {
     PromotedPurchase(id: id, appId: appId, isVisibleForAllUsers: true, isEnabled: true,
