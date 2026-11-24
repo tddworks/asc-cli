@@ -4343,6 +4343,44 @@ asc iris app-compliance declare --app-id <app-id> --requirement-id <requirement-
 | `--filing-number` |  |  | AIGC: the filing number |
 | `--third-party-authorization` |  |  | AIGC: the authorization or usage agreement for third-party technology (file) |
 
+### asc iris app-privacy get
+
+Show what an app's privacy label declares and whether it is published
+
+```
+asc iris app-privacy get --app-id <app-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--app-id` | yes |  | App ID |
+
+### asc iris app-privacy declare
+
+Replace an app's privacy label (it stays a draft until `publish`)
+
+```
+asc iris app-privacy declare --app-id <app-id> [--not-collected] [--file <file>]
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--app-id` | yes |  | App ID |
+| `--not-collected` |  |  | The app collects no data |
+| `--file` |  |  | A JSON file of the data the app collects |
+
+### asc iris app-privacy publish
+
+Publish an app's declared privacy label so it no longer blocks review
+
+```
+asc iris app-privacy publish --app-id <app-id>
+```
+
+| Flag | Required | Default | Description |
+|---|---|---|---|
+| `--app-id` | yes |  | App ID |
+
 ### asc iris auth login
 
 Sign in with Apple ID + password via SRP. Prompts for the 2FA code separately.

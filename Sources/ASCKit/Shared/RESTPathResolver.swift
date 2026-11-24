@@ -236,6 +236,7 @@ public final class RESTPathResolver: @unchecked Sendable {
         _ = _assetLibraryRoutes
         _ = _screenshotImportRoutes
         _ = _complianceRoutes
+        _ = _appPrivacyRoutes
 
         initialized = true
     }

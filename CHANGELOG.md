@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `asc iris app-privacy get`, `declare` and `publish` show, replace and publish an app's App Privacy label (Data Not Collected or the data it collects), so a submission is no longer refused over unpublished data usages; over CLI and REST. → [docs](docs/features/app-privacy/README.md)
+
 ---
 
 ## [0.19.0] - 2026-11-19

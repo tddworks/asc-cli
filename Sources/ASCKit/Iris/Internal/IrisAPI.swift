@@ -10,6 +10,7 @@ public protocol IrisAPI: Sendable {
     /// Fetch an absolute URL with the session cookies. Callers validate the host first.
     func download(absoluteURL: URL, cookies: String) async throws -> (Data, HTTPURLResponse)
     func delete(path: String, cookies: String) async throws -> (Data, HTTPURLResponse)
+    func patch(path: String, body: Data, cookies: String) async throws -> (Data, HTTPURLResponse)
 
     // The App Compliance service, `ppm/compliancerequirements/v1`, with the same session.
     func complianceGet(path: String, queryItems: [URLQueryItem], cookies: String) async throws -> (Data, HTTPURLResponse)

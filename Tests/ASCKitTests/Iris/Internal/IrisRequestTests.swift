@@ -38,6 +38,15 @@ struct IrisRequestTests {
         #expect(request.httpMethod == "DELETE")
     }
 
+    @Test func `should send the body when patching iris`() {
+        let request = IrisRequest.patch(path: "appDataUsagesPublishState/1234567890", body: Data("{}".utf8), cookies: "c")
+
+        #expect(request.url?.absoluteString == "https://appstoreconnect.apple.com/iris/v1/appDataUsagesPublishState/1234567890")
+        #expect(request.httpMethod == "PATCH")
+        #expect(request.httpBody == Data("{}".utf8))
+        #expect(request.value(forHTTPHeaderField: "x-csrf-itc") == "[asc-ui]")
+    }
+
     @Test func `should fetch a download with only the session cookies`() {
         let request = IrisRequest.download(absoluteURL: URL(string: "https://example.apple.com/a.png")!, cookies: "c")
 
