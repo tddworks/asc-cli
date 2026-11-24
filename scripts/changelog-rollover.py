@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Keep CHANGELOG.md to [Unreleased] + the current minor version.
 
-Every released section whose minor is older than the newest release is moved,
-unchanged, into docs/changelog/<major.minor>.md, together with its reference
-link. CHANGELOG.md ends with an "Older releases" line linking every archive.
+Every released section whose minor is older than the newest release is moved
+into docs/changelog/<major.minor>.md, together with its reference link. Its text
+is unchanged except root-relative links (`docs/…`), which gain `../../` so they
+still resolve from docs/changelog/. CHANGELOG.md ends with an "Older releases" line linking every archive.
 Safe to run repeatedly; a no-op when there is nothing to move.
 
 Usage: scripts/changelog-rollover.py [CHANGELOG.md]
@@ -19,6 +20,8 @@ MISNUMBERED = {"0.1.74": "0.17"}
 SECTION = re.compile(r"^## \[([^\]]+)\]")
 LINK = re.compile(r"^\[([^\]]+)\]: \S+")
 OLDER = "## Older releases"
+# A link written from the repo root (`docs/…`, `LICENSE`), as CHANGELOG.md writes them.
+ROOT_LINK = re.compile(r"\]\((?!https?:|mailto:|#|\.\./|/)([^)\s]+)\)")
 
 
 def minor(version):
@@ -48,6 +51,11 @@ def split(text):
         elif not sections:
             header.append(line)
     return header, sections, links
+
+
+def from_archive(lines):
+    """A section's lines as read from docs/changelog/: root-relative links gain ../../."""
+    return [ROOT_LINK.sub(r"](../../\1)", line) for line in lines]
 
 
 def strip(lines):
@@ -92,7 +100,7 @@ def main():
             "Archived unchanged from [CHANGELOG.md](../../CHANGELOG.md), which holds the current releases.",
             "",
         ]
-        for _, lines in secs + old_secs:
+        for _, lines in [(v, from_archive(l)) for v, l in secs] + old_secs:
             body += strip(lines) + ["", "---", ""]
         body = strip(body) + [""]
         all_links = moved_links.get(m, []) + old_links
