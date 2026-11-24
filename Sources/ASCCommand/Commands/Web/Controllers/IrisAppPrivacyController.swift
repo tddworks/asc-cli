@@ -25,8 +25,9 @@ struct IrisAppPrivacyController: Sendable {
             guard let declaration = try? JSONDecoder().decode(PrivacyDeclaration.self, from: Data(buffer: bytes)) else {
                 return jsonError(#"Send either {"notCollected": true} or {"collectedData": [...]}"#)
             }
-            let session = try self.cookieProvider.resolveSession()
             return try await self.answering {
+                try declaration.validate()  // refused before signing in or reaching Apple (law 6)
+                let session = try self.cookieProvider.resolveSession()
                 let privacy = try await self.repo.fetchPrivacy(session: session, appId: appId)
                 return try restFormat(try await privacy.declare(declaration, session: session, repo: self.repo))
             }
@@ -49,7 +50,7 @@ struct IrisAppPrivacyController: Sendable {
         } catch let error as AppPrivacyError {
             switch error {
             case .nothingDeclared: return jsonError(error.description, status: .conflict)
-            case .noDataTypes, .noPurposes, .unknownCategory, .unknownPurpose, .duplicateCategory:
+            case .noDataTypes, .noPurposes, .unknownCategory, .unknownPurpose, .duplicateCategory, .duplicatePurpose:
                 return jsonError(error.description, status: .unprocessableContent)
             }
         }

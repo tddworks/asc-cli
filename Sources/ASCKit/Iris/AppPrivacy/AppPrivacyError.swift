@@ -9,6 +9,7 @@ public enum AppPrivacyError: Error, Equatable, Sendable, CustomStringConvertible
     case unknownCategory(String)
     case unknownPurpose(String)
     case duplicateCategory(String)
+    case duplicatePurpose(category: String, purpose: String)
 
     public var description: String {
         switch self {
@@ -24,6 +25,8 @@ public enum AppPrivacyError: Error, Equatable, Sendable, CustomStringConvertible
             "\(purpose) isn't a purpose App Privacy knows: APP_FUNCTIONALITY, ANALYTICS, PRODUCT_PERSONALIZATION, DEVELOPERS_ADVERTISING, THIRD_PARTY_ADVERTISING or OTHER_PURPOSES."
         case .duplicateCategory(let category):
             "\(category) is declared twice; list each data type once with all its purposes."
+        case .duplicatePurpose(let category, let purpose):
+            "\(category) lists \(purpose) twice; list each purpose once."
         }
     }
 

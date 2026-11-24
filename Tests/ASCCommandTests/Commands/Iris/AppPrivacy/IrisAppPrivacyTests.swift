@@ -117,6 +117,21 @@ struct IrisAppPrivacyTests {
         """)
     }
 
+    @Test func `should refuse a data type it doesn't know before reaching Apple`() async throws {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("privacy-\(UUID().uuidString).json")
+        try Data(#"{"collectedData":[{"category":"EMAIL","purposes":["ANALYTICS"],"isLinkedToYou":true,"isUsedToTrackYou":false}]}"#.utf8).write(to: file)
+        defer { try? FileManager.default.removeItem(at: file) }
+        let cookies = cookies()
+        let repo = repo(showing: unanswered)
+        let cmd = try IrisAppPrivacyDeclare.parse(["--app-id", "1234567890", "--file", file.path])
+
+        await #expect(throws: AppPrivacyError.unknownCategory("EMAIL")) {
+            try await cmd.execute(cookieProvider: cookies, repo: repo)
+        }
+        verify(cookies).resolveSession().called(0)
+        verify(repo).fetchPrivacy(session: .any, appId: .any).called(0)
+    }
+
     @Test func `should refuse to be told both that nothing is collected and what is`() {
         #expect(throws: (any Error).self) {
             try IrisAppPrivacyDeclare.parse(["--app-id", "1234567890", "--not-collected", "--file", "privacy.json"])

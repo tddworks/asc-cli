@@ -53,6 +53,12 @@ struct PrivacyDeclarationTests {
         }
     }
 
+    @Test func `should refuse the same purpose listed twice for a data type`() {
+        #expect(throws: AppPrivacyError.duplicatePurpose(category: "CRASH_DATA", purpose: "ANALYTICS")) {
+            try PrivacyDeclaration.collected([collected("CRASH_DATA", ["ANALYTICS", "ANALYTICS"])]).validate()
+        }
+    }
+
     // MARK: - the file and REST body
 
     @Test func `should read a not-collected declaration from JSON`() throws {

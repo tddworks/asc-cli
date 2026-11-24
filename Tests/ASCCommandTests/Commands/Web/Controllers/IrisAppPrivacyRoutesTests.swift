@@ -70,6 +70,23 @@ struct IrisAppPrivacyRoutesTests {
         #expect(status == .unprocessableContent)
     }
 
+    @Test func `should refuse a data type App Privacy doesn't know without reaching Apple`() async throws {
+        let cookies = MockIrisCookieProvider()
+        given(cookies).resolveSession().willReturn(IrisSession(cookies: "myacinfo=a"))
+        let repo = MockIrisAppPrivacyRepository()
+        given(repo).fetchPrivacy(session: .any, appId: .any).willReturn(unanswered)
+        let router = Router(context: BasicWebSocketRequestContext.self)
+        IrisAppPrivacyController(cookieProvider: cookies, repo: repo).addRoutes(to: router.group("/api/v1"))
+
+        let status = try await Application(router: router).test(.router) { client in
+            try await client.execute(uri: "/api/v1/iris/apps/1234567890/app-privacy/declare", method: .post,
+                                     body: ByteBuffer(string: #"{"collectedData":[{"category":"EMAIL","purposes":["ANALYTICS"],"isLinkedToYou":true,"isUsedToTrackYou":false}]}"#)) { $0.status }
+        }
+
+        #expect(status == .unprocessableContent)
+        verify(repo).fetchPrivacy(session: .any, appId: .any).called(0)
+    }
+
     @Test func `should publish over REST`() async throws {
         let (status, body) = try await call(.post, "/api/v1/iris/apps/1234567890/app-privacy/publish", showing: notCollected)
 

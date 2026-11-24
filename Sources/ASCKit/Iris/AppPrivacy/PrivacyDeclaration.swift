@@ -22,8 +22,12 @@ public enum PrivacyDeclaration: Sendable, Equatable {
             guard item.category.isRecognized else { throw AppPrivacyError.unknownCategory(item.category.rawValue) }
             guard seen.insert(item.category).inserted else { throw AppPrivacyError.duplicateCategory(item.category.rawValue) }
             guard !item.purposes.isEmpty else { throw AppPrivacyError.noPurposes(category: item.category.rawValue) }
-            if let unknown = item.purposes.first(where: { !$0.isRecognized }) {
-                throw AppPrivacyError.unknownPurpose(unknown.rawValue)
+            var purposes: Set<DataPurpose> = []
+            for purpose in item.purposes {
+                guard purpose.isRecognized else { throw AppPrivacyError.unknownPurpose(purpose.rawValue) }
+                guard purposes.insert(purpose).inserted else {
+                    throw AppPrivacyError.duplicatePurpose(category: item.category.rawValue, purpose: purpose.rawValue)
+                }
             }
         }
     }

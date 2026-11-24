@@ -37,6 +37,7 @@ struct IrisAppPrivacyDeclare: AsyncParsableCommand {
 
     func execute(cookieProvider: any IrisCookieProvider, repo: any IrisAppPrivacyRepository, affordanceMode: AffordanceMode = .cli) async throws -> String {
         let declaration = try declaration()
+        try declaration.validate()  // refused before signing in or reaching Apple (law 6)
         let session = try cookieProvider.resolveSession()
         let declared = try await repo.fetchPrivacy(session: session, appId: appId).declare(declaration, session: session, repo: repo)
         return try OutputFormatter(format: globals.outputFormat, pretty: globals.pretty).formatAgentItems([declared], affordanceMode: affordanceMode)
