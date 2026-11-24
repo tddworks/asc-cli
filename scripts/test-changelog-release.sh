@@ -64,6 +64,21 @@ PY
         [ -f "docs/changelog/$MAJOR.$MINOR.md" ] && fail "patch release archived the current minor"
     fi
 
+    # Archived links still resolve from docs/changelog/ (checked against the real repo)
+    local broken; broken=$(python3 - "$ROOT" <<'PY'
+import re, sys
+from pathlib import Path
+root = Path(sys.argv[1])
+for path in sorted(Path("docs/changelog").glob("*.md")):
+    for target in re.findall(r"\]\(([^)\s]+)\)", path.read_text()):
+        if re.match(r"^(https?:|mailto:|#)", target):
+            continue
+        if not (root / "docs" / "changelog" / target.split("#")[0]).exists():
+            print(f"{path}: {target}")
+PY
+)
+    [ -z "$broken" ] || fail "archived links don't resolve from docs/changelog/: $(head -3 <<< "$broken" | tr '\n' ' ')"
+
     # Nothing lost: every release heading still exists, plus the new one
     local headings_after; headings_after=$(cat CHANGELOG.md docs/changelog/*.md | grep -c '^## \[')
     [ "$headings_after" = $((headings_before + 1)) ] || fail "release headings $headings_before → $headings_after (expected +1)"

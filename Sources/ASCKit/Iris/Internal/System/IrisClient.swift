@@ -27,6 +27,10 @@ public struct IrisClient: IrisAPI {
         try await perform(IrisRequest.delete(path: path, cookies: cookies))
     }
 
+    public func patch(path: String, body: Data, cookies: String) async throws -> (Data, HTTPURLResponse) {
+        try await perform(IrisRequest.patch(path: path, body: body, cookies: cookies))
+    }
+
     public func complianceGet(path: String, queryItems: [URLQueryItem], cookies: String) async throws -> (Data, HTTPURLResponse) {
         try await perform(IrisRequest.compliance(method: "GET", path: path, queryItems: queryItems, body: nil, cookies: cookies))
     }

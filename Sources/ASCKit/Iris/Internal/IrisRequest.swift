@@ -20,6 +20,12 @@ enum IrisRequest {
         return request
     }
 
+    static func patch(path: String, body: Data, cookies: String) -> URLRequest {
+        var request = iris(url: URL(string: "\(baseURL)/\(path)")!, method: "PATCH", cookies: cookies)
+        request.httpBody = body
+        return request
+    }
+
     static func delete(path: String, cookies: String) -> URLRequest {
         iris(url: URL(string: "\(baseURL)/\(path)")!, method: "DELETE", cookies: cookies)
     }
