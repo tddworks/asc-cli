@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.19.2] - 2026-11-28
+
 ### Fixed
 - `asc age-rating get` and `update` show and answer the Shared Location and Dating and Relationships questions (`--shared-location`, `--dating-and-relationships`), over CLI and REST. → [docs](docs/features/age-rating/README.md)
 
@@ -35,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [0.18](docs/changelog/0.18.md) · [0.17](docs/changelog/0.17.md) · [0.16](docs/changelog/0.16.md) · [0.1](docs/changelog/0.1.md)
 
-[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.19.1...HEAD
+[Unreleased]: https://github.com/tddworks/asc-cli/compare/v0.19.2...HEAD
+[0.19.2]: https://github.com/tddworks/asc-cli/compare/v0.19.1...v0.19.2
 [0.19.1]: https://github.com/tddworks/asc-cli/compare/v0.19.0...v0.19.1
 [0.19.0]: https://github.com/tddworks/asc-cli/compare/v0.18.9...v0.19.0
