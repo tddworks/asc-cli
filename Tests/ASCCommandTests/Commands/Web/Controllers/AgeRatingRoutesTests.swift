@@ -40,4 +40,32 @@ struct AgeRatingRoutesTests {
         #expect(declaration["isSocialMediaAgeRestricted"] as? Bool == true)
         #expect(declaration["developerAgeRatingInfoUrl"] as? String == "https://example.com/age")
     }
+
+    @Test func `should save the shared location and dating answers over REST`() async throws {
+        let repo = MockAgeRatingDeclarationRepository()
+        given(repo).updateDeclaration(id: .value("decl-1"), update: .any).willProduce { id, update in
+            AgeRatingDeclaration(
+                id: id,
+                appInfoId: "info-1",
+                isSharedLocation: update.isSharedLocation,
+                isDatingAndRelationships: update.isDatingAndRelationships
+            )
+        }
+        let router = Router(context: BasicWebSocketRequestContext.self)
+        AgeRatingController(repo: repo).addRoutes(to: router.group("/api/v1"))
+
+        let body = #"{"isSharedLocation":false,"isDatingAndRelationships":true}"#
+        let response = try await Application(router: router).test(.router) { client in
+            try await client.execute(
+                uri: "/api/v1/age-rating/decl-1",
+                method: .patch,
+                body: ByteBuffer(string: body)
+            ) { String(buffer: $0.body) }
+        }
+
+        let json = try #require(try JSONSerialization.jsonObject(with: Data(response.utf8)) as? [String: Any])
+        let declaration = try #require((json["data"] as? [[String: Any]])?.first)
+        #expect(declaration["isSharedLocation"] as? Bool == false)
+        #expect(declaration["isDatingAndRelationships"] as? Bool == true)
+    }
 }

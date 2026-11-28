@@ -79,6 +79,8 @@ The PATCH body uses the JSON field names from the response (e.g. `{"isGambling":
 - `--kids-age-band` values are `FIVE_AND_UNDER`, `SIX_TO_EIGHT`, `NINE_TO_ELEVEN`.
 - `ageRatingOverride` maps to Apple's non-deprecated `ageRatingOverrideV2` field.
 - Apple refuses review submissions until `socialMedia` is answered: `--social-media <bool>`, and `--social-media-age-restricted <bool>` when it's `true`. `asc versions check-readiness` reports unanswered questions. REST body keys are `isSocialMedia` and `isSocialMediaAgeRestricted`.
+- `--shared-location <bool>` and `--dating-and-relationships <bool>` answer the Shared Location and Dating and Relationships questions (REST body keys `isSharedLocation`, `isDatingAndRelationships`). The SDK doesn't model them yet, so asc reads and writes them itself.
+- A new app ("Set Up Age Ratings" on the web) has no saved questionnaire: Apple refuses the first `update` unless it answers every question at once, and names each missing attribute in a 409 `ENTITY_ERROR.ATTRIBUTE.REQUIRED`.
 - `--developer-age-rating-info-url` links your own age rating information (REST body key `developerAgeRatingInfoUrl`).
 - Known issue: the SDK always sends `kidsAgeBand` and `developerAgeRatingInfoUrl`, as `null` when unset, so check both after an update if your app uses them.
 

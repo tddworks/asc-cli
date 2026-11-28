@@ -38,6 +38,8 @@ struct AgeRatingController: Sendable {
             update.isUserGeneratedContent = json["isUserGeneratedContent"] as? Bool
             update.isSocialMedia = json["isSocialMedia"] as? Bool
             update.isSocialMediaAgeRestricted = json["isSocialMediaAgeRestricted"] as? Bool
+            update.isSharedLocation = json["isSharedLocation"] as? Bool
+            update.isDatingAndRelationships = json["isDatingAndRelationships"] as? Bool
             update.alcoholTobaccoOrDrugUseOrReferences = (json["alcoholTobaccoOrDrugUseOrReferences"] as? String).flatMap(ContentIntensity.init(rawValue:))
             update.contests = (json["contests"] as? String).flatMap(ContentIntensity.init(rawValue:))
             update.gamblingSimulated = (json["gamblingSimulated"] as? String).flatMap(ContentIntensity.init(rawValue:))

@@ -85,6 +85,12 @@ struct AgeRatingUpdate: AsyncParsableCommand {
     @Option(name: .long, help: "Social media features are age restricted (true/false)")
     var socialMediaAgeRestricted: Bool?
 
+    @Option(name: .long, help: "Shares the user's location with other users (true/false)")
+    var sharedLocation: Bool?
+
+    @Option(name: .long, help: "Contains dating or relationship features (true/false)")
+    var datingAndRelationships: Bool?
+
     // Intensity flags (NONE/INFREQUENT_OR_MILD/FREQUENT_OR_INTENSE/INFREQUENT/FREQUENT)
     @Option(name: .long, help: "Alcohol, tobacco or drug use intensity")
     var alcoholTobaccoDrugs: ContentIntensity?
@@ -159,6 +165,8 @@ struct AgeRatingUpdate: AsyncParsableCommand {
         update.isUserGeneratedContent = userGeneratedContent
         update.isSocialMedia = socialMedia
         update.isSocialMediaAgeRestricted = socialMediaAgeRestricted
+        update.isSharedLocation = sharedLocation
+        update.isDatingAndRelationships = datingAndRelationships
         update.alcoholTobaccoOrDrugUseOrReferences = alcoholTobaccoDrugs
         update.contests = contests
         update.gamblingSimulated = gamblingSimulated
