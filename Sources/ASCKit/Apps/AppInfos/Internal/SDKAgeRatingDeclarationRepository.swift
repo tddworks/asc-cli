@@ -9,30 +9,37 @@ public struct SDKAgeRatingDeclarationRepository: AgeRatingDeclarationRepository,
     }
 
     public func getDeclaration(appInfoId: String) async throws -> ASCKit.AgeRatingDeclaration {
-        let request = APIEndpoint.v1.appInfos.id(appInfoId).ageRatingDeclaration.get()
-        let response = try await client.request(request)
-        return mapDeclaration(response.data, appInfoId: appInfoId)
+        let sdk = APIEndpoint.v1.appInfos.id(appInfoId).ageRatingDeclaration.get()
+        let document = try await client.request(Request<AgeRatingDeclarationDocument>(
+            path: sdk.path, method: "GET", query: sdk.query, id: "appInfos_ageRatingDeclaration_getToOneRelated"
+        ))
+        return mapDeclaration(document, appInfoId: appInfoId)
     }
 
     public func updateDeclaration(id: String, update: ASCKit.AgeRatingDeclarationUpdate) async throws -> ASCKit.AgeRatingDeclaration {
-        let body = AgeRatingDeclarationUpdateRequest(
-            data: .init(
-                type: .ageRatingDeclarations,
-                id: id,
-                attributes: mapUpdateAttributes(update)
+        let body = AgeRatingDeclarationUpdateBody(data: .init(
+            id: id,
+            attributes: .init(
+                sdk: mapUpdateAttributes(update),
+                unmodeled: UnmodeledAnswers(
+                    sharedLocation: update.isSharedLocation,
+                    datingAndRelationships: update.isDatingAndRelationships
+                )
             )
-        )
-        let request = APIEndpoint.v1.ageRatingDeclarations.id(id).patch(body)
-        let response = try await client.request(request)
-        return mapDeclaration(response.data, appInfoId: "")
+        ))
+        let document = try await client.request(Request<AgeRatingDeclarationDocument>(
+            path: "/v1/ageRatingDeclarations/\(id)", method: "PATCH", body: body, id: "ageRatingDeclarations_updateInstance"
+        ))
+        return mapDeclaration(document, appInfoId: "")
     }
 
     // MARK: - Mappers
 
     private func mapDeclaration(
-        _ sdk: AppStoreConnect_Swift_SDK.AgeRatingDeclaration,
+        _ document: AgeRatingDeclarationDocument,
         appInfoId: String
     ) -> ASCKit.AgeRatingDeclaration {
+        let sdk = document.response.data
         let a = sdk.attributes
         return ASCKit.AgeRatingDeclaration(
             id: sdk.id,
@@ -48,6 +55,8 @@ public struct SDKAgeRatingDeclarationRepository: AgeRatingDeclarationRepository,
             isUserGeneratedContent: a?.isUserGeneratedContent,
             isSocialMedia: a?.isSocialMedia,
             isSocialMediaAgeRestricted: a?.isSocialMediaAgeRestricted,
+            isSharedLocation: document.sharedLocation,
+            isDatingAndRelationships: document.datingAndRelationships,
             alcoholTobaccoOrDrugUseOrReferences: mapIntensity(a?.alcoholTobaccoOrDrugUseOrReferences),
             contests: mapIntensity(a?.contests),
             gamblingSimulated: mapIntensity(a?.gamblingSimulated),

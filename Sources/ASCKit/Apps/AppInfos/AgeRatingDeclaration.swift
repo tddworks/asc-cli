@@ -46,6 +46,8 @@ public struct AgeRatingDeclaration: Sendable, Equatable, Identifiable {
     public let isUserGeneratedContent: Bool?
     public let isSocialMedia: Bool?
     public let isSocialMediaAgeRestricted: Bool?
+    public let isSharedLocation: Bool?
+    public let isDatingAndRelationships: Bool?
 
     // Content intensity ratings
     public let alcoholTobaccoOrDrugUseOrReferences: ContentIntensity?
@@ -84,6 +86,8 @@ public struct AgeRatingDeclaration: Sendable, Equatable, Identifiable {
         isUserGeneratedContent: Bool? = nil,
         isSocialMedia: Bool? = nil,
         isSocialMediaAgeRestricted: Bool? = nil,
+        isSharedLocation: Bool? = nil,
+        isDatingAndRelationships: Bool? = nil,
         alcoholTobaccoOrDrugUseOrReferences: ContentIntensity? = nil,
         contests: ContentIntensity? = nil,
         gamblingSimulated: ContentIntensity? = nil,
@@ -116,6 +120,8 @@ public struct AgeRatingDeclaration: Sendable, Equatable, Identifiable {
         self.isUserGeneratedContent = isUserGeneratedContent
         self.isSocialMedia = isSocialMedia
         self.isSocialMediaAgeRestricted = isSocialMediaAgeRestricted
+        self.isSharedLocation = isSharedLocation
+        self.isDatingAndRelationships = isDatingAndRelationships
         self.alcoholTobaccoOrDrugUseOrReferences = alcoholTobaccoOrDrugUseOrReferences
         self.contests = contests
         self.gamblingSimulated = gamblingSimulated
@@ -189,6 +195,7 @@ extension AgeRatingDeclaration: Codable {
         case isMessagingAndChat, isParentalControls, isAgeAssurance
         case isUnrestrictedWebAccess, isUserGeneratedContent
         case isSocialMedia, isSocialMediaAgeRestricted
+        case isSharedLocation, isDatingAndRelationships
         case alcoholTobaccoOrDrugUseOrReferences, contests, gamblingSimulated
         case gunsOrOtherWeapons, medicalOrTreatmentInformation, profanityOrCrudeHumor
         case sexualContentGraphicAndNudity, sexualContentOrNudity, horrorOrFearThemes
@@ -213,6 +220,8 @@ extension AgeRatingDeclaration: Codable {
         isUserGeneratedContent = try c.decodeIfPresent(Bool.self, forKey: .isUserGeneratedContent)
         isSocialMedia = try c.decodeIfPresent(Bool.self, forKey: .isSocialMedia)
         isSocialMediaAgeRestricted = try c.decodeIfPresent(Bool.self, forKey: .isSocialMediaAgeRestricted)
+        isSharedLocation = try c.decodeIfPresent(Bool.self, forKey: .isSharedLocation)
+        isDatingAndRelationships = try c.decodeIfPresent(Bool.self, forKey: .isDatingAndRelationships)
         alcoholTobaccoOrDrugUseOrReferences = try c.decodeIfPresent(ContentIntensity.self, forKey: .alcoholTobaccoOrDrugUseOrReferences)
         contests = try c.decodeIfPresent(ContentIntensity.self, forKey: .contests)
         gamblingSimulated = try c.decodeIfPresent(ContentIntensity.self, forKey: .gamblingSimulated)
@@ -248,6 +257,8 @@ extension AgeRatingDeclaration: Codable {
         try c.encodeIfPresent(isUserGeneratedContent, forKey: .isUserGeneratedContent)
         try c.encodeIfPresent(isSocialMedia, forKey: .isSocialMedia)
         try c.encodeIfPresent(isSocialMediaAgeRestricted, forKey: .isSocialMediaAgeRestricted)
+        try c.encodeIfPresent(isSharedLocation, forKey: .isSharedLocation)
+        try c.encodeIfPresent(isDatingAndRelationships, forKey: .isDatingAndRelationships)
         try c.encodeIfPresent(alcoholTobaccoOrDrugUseOrReferences, forKey: .alcoholTobaccoOrDrugUseOrReferences)
         try c.encodeIfPresent(contests, forKey: .contests)
         try c.encodeIfPresent(gamblingSimulated, forKey: .gamblingSimulated)
@@ -300,6 +311,8 @@ public struct AgeRatingDeclarationUpdate: Sendable {
     public var isUserGeneratedContent: Bool?
     public var isSocialMedia: Bool?
     public var isSocialMediaAgeRestricted: Bool?
+    public var isSharedLocation: Bool?
+    public var isDatingAndRelationships: Bool?
     public var alcoholTobaccoOrDrugUseOrReferences: ContentIntensity?
     public var contests: ContentIntensity?
     public var gamblingSimulated: ContentIntensity?

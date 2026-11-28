@@ -230,4 +230,43 @@ struct SDKAgeRatingDeclarationRepositoryTests {
         #expect(attributes["socialMediaAgeRestricted"] as? Bool == true)
         #expect(attributes["developerAgeRatingInfoUrl"] as? String == "https://example.com/age")
     }
+
+    // MARK: - Questions the SDK doesn't model yet (sharedLocation, datingAndRelationships)
+
+    @Test func `should show the shared location and dating answers App Store Connect sends`() async throws {
+        let json = #"{"data":{"type":"ageRatingDeclarations","id":"decl-1","attributes":{"socialMedia":false,"sharedLocation":false,"datingAndRelationships":true}},"links":{"self":""}}"#
+        let stub = StubAPIClient()
+        stub.willReturn(try JSONDecoder().decode(AgeRatingDeclarationDocument.self, from: Data(json.utf8)))
+
+        let result = try await SDKAgeRatingDeclarationRepository(client: stub).getDeclaration(appInfoId: "info-1")
+
+        #expect(result.isSocialMedia == false)
+        #expect(result.isSharedLocation == false)
+        #expect(result.isDatingAndRelationships == true)
+    }
+
+    @Test func `should send the shared location and dating answers to App Store Connect`() async throws {
+        let stub = StubAPIClient()
+        stub.willReturn(AgeRatingDeclarationResponse(
+            data: AgeRatingDeclaration(type: .ageRatingDeclarations, id: "decl-1"),
+            links: .init(this: "")
+        ))
+        var update = ASCKit.AgeRatingDeclarationUpdate()
+        update.isSocialMedia = false
+        update.isSharedLocation = false
+        update.isDatingAndRelationships = true
+
+        _ = try await SDKAgeRatingDeclarationRepository(client: stub).updateDeclaration(id: "decl-1", update: update)
+
+        let body = try #require(stub.requests.first?.body)
+        #expect(body == #"{"data":{"attributes":{"datingAndRelationships":true,"developerAgeRatingInfoUrl":null,"kidsAgeBand":null,"sharedLocation":false,"socialMedia":false},"id":"decl-1","type":"ageRatingDeclarations"}}"#)
+    }
+}
+
+private extension StubAPIClient {
+    /// Fixtures are written with the SDK's response type; the repository decodes its own
+    /// document so it can also read the attributes the SDK lacks.
+    func willReturn(_ response: AgeRatingDeclarationResponse) {
+        willReturn(AgeRatingDeclarationDocument(response))
+    }
 }

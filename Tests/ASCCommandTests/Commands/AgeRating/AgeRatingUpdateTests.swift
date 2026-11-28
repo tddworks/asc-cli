@@ -176,4 +176,41 @@ struct AgeRatingUpdateTests {
         }
         """)
     }
+    @Test func `should save and show the shared location and dating answers`() async throws {
+        let mockRepo = MockAgeRatingDeclarationRepository()
+        given(mockRepo).updateDeclaration(id: .any, update: .any)
+            .willProduce { id, update in
+                AgeRatingDeclaration(
+                    id: id,
+                    appInfoId: "info-42",
+                    isSharedLocation: update.isSharedLocation,
+                    isDatingAndRelationships: update.isDatingAndRelationships
+                )
+            }
+
+        let cmd = try AgeRatingUpdate.parse([
+            "--declaration-id", "decl-1",
+            "--shared-location", "false",
+            "--dating-and-relationships", "true",
+            "--pretty",
+        ])
+        let output = try await cmd.execute(repo: mockRepo)
+
+        #expect(output == """
+        {
+          "data" : [
+            {
+              "affordances" : {
+                "getAgeRating" : "asc age-rating get --app-info-id info-42",
+                "update" : "asc age-rating update --declaration-id decl-1"
+              },
+              "appInfoId" : "info-42",
+              "id" : "decl-1",
+              "isDatingAndRelationships" : true,
+              "isSharedLocation" : false
+            }
+          ]
+        }
+        """)
+    }
 }

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `asc age-rating get` and `update` show and answer the Shared Location and Dating and Relationships questions (`--shared-location`, `--dating-and-relationships`), over CLI and REST. → [docs](docs/features/age-rating/README.md)
+
 ---
 
 ## [0.19.1] - 2026-11-24
